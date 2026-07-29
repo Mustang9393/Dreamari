@@ -28,7 +28,7 @@ export function Navbar() {
           ))}
         </ul>
 
-        <Button variant="nav" href="#get-started">
+        <Button variant="nav" href="/flow">
           Get started free
         </Button>
       </div>

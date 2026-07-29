@@ -35,7 +35,7 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row">
-            <Button variant="cta-solid" href="#explore">
+            <Button variant="cta-solid" href="/flow">
               Start exploring
             </Button>
             <Button variant="cta-outline" href="#trailer">
