@@ -18,7 +18,8 @@
       "Bash(npx eslint *)",
       "Bash(npm run *)",
       "Bash(ls -la /Users/chandump/package-lock.json 2>&1; cat /Users/chandump/dreamari/next.config.ts)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
