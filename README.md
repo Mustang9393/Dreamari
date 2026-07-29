@@ -4,6 +4,7 @@ Dev handoff build of sections from the Dreamari_UIKIT Figma file, extracted
 frame by frame:
 - Hero/landing section ([node 211:619](https://www.figma.com/design/d8j3JbtVojSgVOqsjGpcZM/Dreamari_UIKIT?node-id=211-619)) — route: `/`
 - Academic journey onboarding card ([node 346:35363](https://www.figma.com/design/d8j3JbtVojSgVOqsjGpcZM/Dreamari_UIKIT?node-id=346-35363)) — route: `/onboarding`
+- 11-step career onboarding flow (content from the [Desktop 01–11](https://www.figma.com/design/d8j3JbtVojSgVOqsjGpcZM/Dreamari_UIKIT?node-id=205-279) frames, restyled with the `346:35363` card language) — route: `/flow`
 
 Next.js (App Router) + TypeScript + Tailwind CSS v4.
 
@@ -38,6 +39,27 @@ src/
       AcademicJourneyCard.tsx  Interactive card (client component) — GPA select, subject chips, computed summary
       SubjectChip.tsx          Reusable toggle chip with selection-order badge
       OnboardingParticles.tsx  Decorative ambient glow dots
+    flow/
+      FlowContainer.tsx    Client component — owns step index + all answer state, renders the active step
+      FlowProgress.tsx     Top "STEP X OF 11" pill + progress track
+      FlowCard.tsx         Shared white rounded card shell every step renders into
+      FlowButton.tsx       Full-width gold/orange gradient CTA (steps 1–8, 11)
+      FlowActions.tsx      Previous/Next button pair (steps 9–10)
+      Chip.tsx             Toggle chip with selection-order badge (steps 4, 5, 7)
+      PathOption.tsx       Selectable icon/title/sub row, single-select (steps 2, 8)
+      SelectionRow.tsx     Icon/title/sub row with a check indicator, single-select (steps 9, 10)
+      RadioPillGroup.tsx   Labeled 3-option segmented pill row (step 6)
+      LabeledInput.tsx     Labeled text field (step 3)
+      LabeledSelect.tsx    Labeled native select with chevron (steps 3, 4)
+      icons.tsx            Small inline-SVG icon set (book, briefcase, home, compass, sun/moon, …)
+      types.ts             FlowState shape, initial demo answers, per-step aurora accent colors
+      steps/                One component per Figma frame (WelcomeStep, ChoosePathStep, …, CongratulationsStep)
+      aurora/
+        AuroraBackground.tsx   Canvas dot-matrix aurora — per-step color mood + select/CTA pulse animations
+        pulse.ts                dispatchAuroraPulse()/onAuroraPulse() — a tiny window-CustomEvent bus
+      theme/
+        ThemeProvider.tsx       Light/dark context, toggles a `.dark` class on <html>, persists to localStorage
+        ThemeToggle.tsx         Fixed sun/moon button
     ui/
       Button.tsx        Shared button primitive (variants: nav, cta-solid, cta-outline)
   lib/
@@ -92,3 +114,26 @@ Figma's native code export uses absolute pixel positioning against one fixed can
 - **GPA range field**: Figma showed a static-looking dropdown field with one value. Implemented as a real `<select>` with a sensible set of GPA bands, not just a decorative box.
 - **Subject selection + order badges**: the design shows two subjects pre-selected with order badges "1" and "3" (a gap at 2), and the summary panel below references a third subject ("Science") that has no corresponding chip in the visible set. Both read as inconsistencies in the design file rather than intentional — the order badges likely refer to a longer subject list than the 8 chips shown. Implemented cleanly instead: selection order is derived live from an array of selected subjects (no gaps possible), the summary panel text is fully computed from whatever's actually selected, and the initial demo state (Technology, Business) reflects that fix.
 - **Progress bar percentage**: hardcoded at 56% to match the Figma snapshot — `OnboardingProgress` takes `label`/`percent` as props, so wire it to real onboarding-flow progress state.
+
+### Career flow (`/flow`, Desktop 01–11 frames)
+
+- **Source frames**: node IDs `205:279`, `205:332`, `205:400`, `205:471`, `205:559`, `205:633`, `205:713`, `205:784`, `205:858`, `205:939`, `205:1023` — 11 steps in sequence (numbered 01–11 in the Figma file; there's no separate "05" *number* missing, `205:559` is step 5 "Confidence Check").
+- **No mascot / speech bubble** — each frame in Figma pairs a left-column mascot illustration + speech bubble with a right-column card. Per instruction, only the card content was built; the mascot column is left for a follow-up pass. The ambient background *was* later built (see "Aurora background" below), just not from Figma's mascot-panel background — it's a new canvas effect.
+- **One accent color on the cards, not seven**: the Figma frames each carry their own signature accent (red for "Choose your path", orange for "About You", emerald for "Confidence Check", teal / teal-700 for "Work Style" / "Future Values", blue for the rest). Card content instead uses the single amber/gold accent already established for the onboarding card (`346:35363`) across all 11 steps, so the flow reads as one consistent product surface. Those per-step Figma accents weren't thrown away, though — they live on in the aurora background (see below).
+
+### Aurora background + light/dark mode
+
+A canvas-based animated "dot matrix" background sits behind every step, deliberately subtle — it's ambient texture, not a competing visual, so the card and its content stay the clear focus:
+
+- **Per-step color mood**: each step has its own accent hex in `STEP_AURORA_ACCENTS` (`types.ts`) — reusing the exact per-frame accents from the source Figma file (red/orange/amber/emerald/teal/teal-700/blue) that the card content itself no longer uses. The background smoothly cross-fades to the new step's color over about a second and a half, rather than snapping.
+- **Selection pulse**: every selectable control (`Chip`, `PathOption`, `SelectionRow`, `RadioPillGroup`, and the "Previous" button) dispatches a small, localized ripple from the click point via `dispatchAuroraPulse("select", event)` — a soft, fast (~700ms) ring.
+- **CTA pulse**: `FlowButton` and the "Next"/primary button in `FlowActions` dispatch a bigger, slower (~1300ms) pulse that sweeps the *whole* canvas (both a traveling ring and a uniform brightness lift), reflecting a "you just made a real commitment" action versus a quick toggle.
+- **The event bus is decoupled on purpose**: `pulse.ts` dispatches a plain `window` `CustomEvent` rather than threading a ref or context through 11 step files and a dozen shared components — any component can fire a pulse without knowing whether `AuroraBackground` is even mounted.
+- **Respects `prefers-reduced-motion`**: if the user's OS requests reduced motion, the canvas renders one static frame and never starts its animation loop.
+- **Light/dark mode**: `ThemeProvider` toggles a `.dark` class on `<html>` (Tailwind v4's `@custom-variant dark (&:where(.dark, .dark *))` in `globals.css` wires that class to every `dark:` utility used across the flow), persists the choice to `localStorage`, and a tiny inline script in `layout.tsx` applies the stored/system preference *before* first paint to avoid a flash of the wrong theme. `<html>` carries `suppressHydrationWarning` because that pre-paint script is expected to make the server-rendered class list differ from the client's on first hydration — that mismatch is intentional, not a bug.
+  - Light mode: pale, low-opacity dots on a near-white canvas — a soft pastel wash.
+  - Dark mode: the same dot field rendered brighter and more saturated against a near-black canvas — this is where the "aurora borealis" read is strongest. Cards switch to a translucent frosted-glass panel (`dark:bg-slate-900/80` + `backdrop-blur-xl`) so the aurora shows through faintly behind the content without hurting legibility.
+- **Icons are hand-built, not downloaded**: the Figma frames use ~15 simple outline icons (book, briefcase, home, compass, piggy-bank, …) from a generic icon library, each re-exported as a color-baked SVG per instance (a different file for "gray unselected" vs "white on colored circle"). Rather than pull down a dozen near-duplicate assets, they're implemented once each in `icons.tsx` using `currentColor`, so one icon definition adapts to any background.
+- **Cross-step data flow**: fields answered in earlier steps feed later ones for real — the "So far" summary on the Academic Journey step reads the path chosen in step 2 and the grade level from step 3, not static demo text.
+- **Navigation matches the design exactly**: steps 1–8 and 11 show only a single forward "Continue" button (no way back), while steps 9–10 show Previous/Next — that asymmetry is in the Figma file itself, not an oversight, so it's preserved as-is.
+- **Step 11's "See my matches" button** restarts the demo flow (there's no matches/results page yet to route to).
