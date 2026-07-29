@@ -21,6 +21,25 @@
   --color-ink-100: #edeff3;
   --color-ink-200: #b9cbec;
   --color-ink-900: #151a24;
+
+  /* Amber accent + neutrals — extracted from Figma (Dreamari_UIKIT, node 346:35363) */
+  --color-amber-600: #d97706;
+  --color-amber-400: #fbbf24;
+  --color-amber-100: #fef3c7;
+  --color-gold-400: #ffcf04;
+  --color-orange-500: #f37c11;
+
+  --color-slate-900: #1e2a3f;
+  --color-slate-500: #8a93a3;
+  --color-slate-600: #5b6472;
+  --color-surface-tertiary: #fafbfc;
+  --color-border-subtle: #f5f6f8;
+
+  /* Slightly darker navy pair this frame's background gradient uses —
+     distinct enough from brand-950/900 to keep as its own pair rather
+     than force a mismatch. */
+  --color-navy-975: #08205a;
+  --color-navy-700: #1144c0;
 }
 
 @theme inline {
@@ -48,6 +67,21 @@
   --color-ink-100: var(--color-ink-100);
   --color-ink-200: var(--color-ink-200);
   --color-ink-900: var(--color-ink-900);
+
+  --color-amber-600: var(--color-amber-600);
+  --color-amber-400: var(--color-amber-400);
+  --color-amber-100: var(--color-amber-100);
+  --color-gold-400: var(--color-gold-400);
+  --color-orange-500: var(--color-orange-500);
+
+  --color-slate-900: var(--color-slate-900);
+  --color-slate-500: var(--color-slate-500);
+  --color-slate-600: var(--color-slate-600);
+  --color-surface-tertiary: var(--color-surface-tertiary);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-navy-975: var(--color-navy-975);
+  --color-navy-700: var(--color-navy-700);
 }
 
 body {

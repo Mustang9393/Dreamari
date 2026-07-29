@@ -23,7 +23,8 @@
       "Bash(rm -rf /tmp/dreamari-handoff-pkg)",
       "Bash(cp -R src/components/* /private/tmp/claude-501/-Users-chandump-dreamari/bf15b9ec-9c03-400e-91c5-f93c96f58d22/scratchpad/dreamari-hero-handoff/components/)",
       "Bash(zip -r dreamari-hero-handoff.zip dreamari-hero-handoff -x \".*\")",
-      "Bash(mkdir -p ~/.claude/skills/figma-to-code *)"
+      "Bash(mkdir -p ~/.claude/skills/figma-to-code *)",
+      "Bash(curl -s \"http://localhost:3845/assets/d4057ad766c0ed5bb25250e344bb44fa9b4d3952.svg\")"
     ]
   }
 }
