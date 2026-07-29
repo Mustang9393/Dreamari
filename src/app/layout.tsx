@@ -24,7 +24,9 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("dreamari-theme");if(t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.classList.add("dark")}}catch(e){}`,
+            // Defaults to dark unless the user has explicitly chosen light before (and
+            // that choice was saved) — not driven by system preference.
+            __html: `try{var t=localStorage.getItem("dreamari-theme");if(t!=="light"){document.documentElement.classList.add("dark")}}catch(e){}`,
           }}
         />
       </head>

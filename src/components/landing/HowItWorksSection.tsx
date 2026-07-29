@@ -13,8 +13,8 @@ const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 // vanishes the instant scrolling begins. FADE_END: fully faded out by here,
 // handing the screen over to the winding road/step content, centered and
 // filling the whole viewport.
-const HEADING_HOLD = 0.05;
-const HEADING_FADE_END = 0.19;
+const HEADING_HOLD = 0.03;
+const HEADING_FADE_END = 0.12;
 
 const STEPS = [
   {
@@ -192,7 +192,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
     // Generous top/bottom margins — the road shrinks (nodeSize/fonts below) to make
     // room for this rather than stretching edge-to-edge, so content never sits flush
     // against the frame border on any viewport.
-    const nodeYFracs = [0.14, 0.315, 0.5, 0.685, 0.86];
+    const nodeYFracs = [0.19, 0.345, 0.5, 0.655, 0.81];
 
     const nodes = nodeYFracs.map((yf, i) => ({
       x: w * nodeXFracs[i],
@@ -203,16 +203,16 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
     const roadPath = orthogonalPath(nodes, cornerR);
 
     // Scaled down further to leave room for the wider top/bottom margins above.
-    const nodeSize = Math.min(72, Math.max(52, w * 0.045));
+    const nodeSize = Math.min(66, Math.max(48, w * 0.041));
     const nr = nodeSize / 2;
     const iconSize = Math.round(nodeSize * 0.44);
-    const maxLabelW = Math.min((0.5 - spread) * w - nr - 20 - 12, 320);
-    const labelGap = nr + 18;
+    const maxLabelW = Math.min((0.5 - spread) * w - nr - 20 - 12, 300);
+    const labelGap = nr + 16;
 
-    const nameFontSize = Math.min(40, Math.max(23, w * 0.025)) + 3;
+    const nameFontSize = Math.min(36, Math.max(21, w * 0.022)) + 3;
     const descFontSize = Math.round(nameFontSize * 0.4);
     const numFontSize = 10;
-    const roadW = Math.min(34, Math.max(14, w * 0.019));
+    const roadW = Math.min(30, Math.max(13, w * 0.017));
 
     return (
       <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
@@ -475,7 +475,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
   // Generous top/bottom margins, matching the desktop layout — the timeline shrinks
   // (nodeR/fonts below) to make room rather than running edge-to-edge.
-  const mobileYFracs = [0.15, 0.325, 0.5, 0.675, 0.85];
+  const mobileYFracs = [0.19, 0.345, 0.5, 0.655, 0.81];
   const mobileNodes = mobileYFracs.map((yf) => ({ x: nodeCx, y: effectiveHeadingH + (h - effectiveHeadingH) * yf }));
   const mobilePathD = mobileNodes.map((n, i) => (i === 0 ? `M${n.x},${n.y}` : `L${n.x},${n.y}`)).join(" ");
 
