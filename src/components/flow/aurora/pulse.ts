@@ -1,3 +1,5 @@
+import { playFeedback } from "./feedback";
+
 export type AuroraPulseKind = "select" | "cta";
 
 export type AuroraPulseDetail = {
@@ -14,6 +16,7 @@ export function dispatchAuroraPulse(kind: AuroraPulseKind, origin?: { clientX: n
   const x = origin?.clientX ?? window.innerWidth / 2;
   const y = origin?.clientY ?? window.innerHeight / 2;
 
+  playFeedback(kind);
   window.dispatchEvent(new CustomEvent<AuroraPulseDetail>(EVENT_NAME, { detail: { kind, x, y } }));
 }
 
