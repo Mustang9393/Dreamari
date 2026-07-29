@@ -35,7 +35,7 @@ export function HeroSection() {
 
           <h1
             className="max-w-4xl font-extrabold tracking-tight text-white uppercase"
-            style={{ fontSize: "clamp(2rem, 3.6vw + 2.6vh, 4.75rem)", lineHeight: 0.95 }}
+            style={{ fontSize: "clamp(1.875rem, 3.45vw + 2.5vh, 4.625rem)", lineHeight: 0.95 }}
           >
             Discover your{" "}
             <span className="bg-gradient-to-r from-brand-400 from-[26%] to-brand-200 to-[62.5%] bg-clip-text text-transparent">

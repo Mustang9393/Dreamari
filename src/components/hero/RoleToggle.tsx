@@ -26,7 +26,7 @@ export function RoleToggle() {
             role="tab"
             aria-selected={isActive}
             onClick={() => setRole(option.value)}
-            className={`rounded-full px-11 py-3 text-base font-bold transition-colors duration-150 ${
+            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-150 sm:px-5 sm:py-2 sm:text-sm ${
               isActive
                 ? "bg-gradient-to-r from-brand-500 to-accent-navy text-white"
                 : "text-accent-deep"

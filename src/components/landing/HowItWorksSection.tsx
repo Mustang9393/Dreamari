@@ -141,24 +141,8 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  useEffect(() => {
-    if (pathRef.current) setPathLength(pathRef.current.getTotalLength());
-  }, [vp]);
-
   const { w, h } = vp;
-  const isMobile = w < 640;
-
-  if (w === 0 || h === 0) return null;
-
   const safeProgress = isNaN(scrollProgress) ? 0 : scrollProgress;
-  const dashOffset = Math.max(0, pathLength * (1 - Math.min(1, safeProgress)));
-  const active = THRESHOLDS.map((t) => scrollProgress >= t);
-
-  // Reminds the user this section keeps responding to scroll — visible for nearly the
-  // whole journey through the 5 steps, fading out only right at the very end once
-  // Connect is reached, since at that point continuing to scroll just carries them past
-  // this section rather than revealing anything new within it.
-  const nudgeOpacity = Math.max(0, Math.min(1, (0.95 - safeProgress) / 0.08));
 
   const headingFade =
     safeProgress <= HEADING_HOLD
@@ -177,6 +161,30 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   const spaceFade = headingFade <= SPACE_RECLAIM_THRESHOLD ? headingFade / SPACE_RECLAIM_THRESHOLD : 1;
   const effectiveHeadingH = headingH * spaceFade;
   const contentH = h - headingH;
+
+  // Depends on effectiveHeadingH too, not just vp: the road's node positions (and so
+  // its true total length) shift as the heading reserves less space during the first
+  // ~19% of scroll, then hold steady for the rest of the journey. Measuring only on
+  // resize locked in whatever length the path happened to have at that moment — usually
+  // shorter than its final, settled shape — so the dash pattern that was supposed to
+  // reveal the *entire* road fell permanently short of the last step by that
+  // difference, regardless of scroll progress.
+  useEffect(() => {
+    if (pathRef.current) setPathLength(pathRef.current.getTotalLength());
+  }, [vp, effectiveHeadingH]);
+
+  const isMobile = w < 640;
+
+  if (w === 0 || h === 0) return null;
+
+  const dashOffset = Math.max(0, pathLength * (1 - Math.min(1, safeProgress)));
+  const active = THRESHOLDS.map((t) => scrollProgress >= t);
+
+  // Reminds the user this section keeps responding to scroll — visible for nearly the
+  // whole journey through the 5 steps, fading out only right at the very end once
+  // Connect is reached, since at that point continuing to scroll just carries them past
+  // this section rather than revealing anything new within it.
+  const nudgeOpacity = Math.max(0, Math.min(1, (0.95 - safeProgress) / 0.08));
 
   if (!isMobile) {
     const spread = 0.17;
@@ -537,12 +545,15 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             <stop offset="75%" stopColor="#00C0E8" />
             <stop offset="100%" stopColor="#FFCC00" />
           </linearGradient>
-          {/* Explicit (generous) filter region: this path is a dead-straight vertical
-              line, so its bounding box is only as wide as the stroke itself — the
-              default region (a percentage of that near-zero-width box) isn't remotely
-              big enough to contain a stdDeviation-4 blur, which was clipping the glow
-              path down to invisible. */}
-          <filter id="mglow" x="-300%" y="-2%" width="700%" height="104%">
+          {/* filterUnits="userSpaceOnUse" with explicit pixel bounds covering the whole
+              canvas, not the default objectBoundingBox percentages: this path is a
+              dead-straight vertical line, so its own bounding box is only as wide as
+              the stroke itself, and a *percentage* of that near-zero-width box is
+              nowhere near enough room for a stdDeviation-4 blur — different browsers'
+              SVG engines resolve that edge case inconsistently (worked in one, clipped
+              the glow to invisible in another). Absolute coordinates in the same units
+              as the viewBox sidestep that ambiguity entirely. */}
+          <filter id="mglow" filterUnits="userSpaceOnUse" x={-w} y={-50} width={w * 3} height={h + 100}>
             <feGaussianBlur stdDeviation="4" result="b" />
             <feMerge>
               <feMergeNode in="b" />
