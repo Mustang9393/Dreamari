@@ -91,3 +91,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
 }
+
+/* Lets the browser smoothly interpolate --step-accent itself (not just
+   snap), so every color/border/background bound to it via var() crossfades
+   along with the aurora background instead of jumping between steps. */
+@property --step-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1f5ff0;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -15,7 +15,7 @@ export function FlowActions({ nextLabel, onBack, onNext }: FlowActionsProps) {
           dispatchAuroraPulse("select", event);
           onBack();
         }}
-        className="rounded-lg border border-amber-400 bg-white px-4.5 py-2 text-base font-semibold text-amber-600 dark:border-amber-400/60 dark:bg-white/5 dark:text-amber-300"
+        className="rounded-lg border border-[var(--step-accent)] bg-white px-4.5 py-2 text-base font-semibold text-[color:var(--step-accent)] dark:border-[color-mix(in_srgb,var(--step-accent)_65%,black)] dark:bg-white/5 dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]"
       >
         Previous
       </button>
@@ -25,7 +25,7 @@ export function FlowActions({ nextLabel, onBack, onNext }: FlowActionsProps) {
           dispatchAuroraPulse("cta", event);
           onNext();
         }}
-        className="rounded-lg bg-amber-600 px-4.5 py-2 text-base font-semibold text-white"
+        className="rounded-lg bg-[var(--step-accent)] px-4.5 py-2 text-base font-semibold text-white"
       >
         {nextLabel}
       </button>

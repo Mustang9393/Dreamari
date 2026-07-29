@@ -24,7 +24,7 @@ export function WorkStyleStep({
   return (
     <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-amber-600 dark:text-amber-300">WORKPLACE PREFERENCE</p>
+        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">WORKPLACE PREFERENCE</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Where do you work best?</p>
       </div>
 
@@ -49,7 +49,7 @@ export function WorkStyleStep({
         <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
           {energy} energy • {teamStyle} • {interaction} interaction
         </p>
-        <p className="text-xs font-bold text-amber-600 dark:text-amber-300">Sounds like a great fit for you! ✨</p>
+        <p className="text-xs font-bold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">Sounds like a great fit for you! ✨</p>
       </div>
 
       <div className="flex w-full flex-col gap-3">

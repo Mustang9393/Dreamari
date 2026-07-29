@@ -16,7 +16,7 @@ export function FutureValuesStep({ values, onToggleValue, onNext }: FutureValues
   return (
     <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-amber-600 dark:text-amber-300">CORE MOTIVATORS</p>
+        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CORE MOTIVATORS</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">What matters most in your future career?</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Select up to 3 core values</p>
       </div>
