@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DECOS } from "./ClayDecorations";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
+import { ScrollHint } from "./ScrollHint";
 
 const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 
@@ -153,47 +154,79 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   const dashOffset = Math.max(0, pathLength * (1 - Math.min(1, safeProgress)));
   const active = THRESHOLDS.map((t) => scrollProgress >= t);
 
+  // Reminds the user this section keeps responding to scroll — visible for nearly the
+  // whole journey through the 5 steps, fading out only right at the very end once
+  // Connect is reached, since at that point continuing to scroll just carries them past
+  // this section rather than revealing anything new within it.
+  const nudgeOpacity = Math.max(0, Math.min(1, (0.95 - safeProgress) / 0.08));
+
   const headingFade =
     safeProgress <= HEADING_HOLD
       ? 1
       : Math.max(0, 1 - (safeProgress - HEADING_HOLD) / (HEADING_FADE_END - HEADING_HOLD));
 
-  const headingH = Math.max(80, Math.min(h * 0.15, 120));
-  const effectiveHeadingH = headingH * headingFade;
+  const headingH = Math.max(70, Math.min(h * 0.13, 105));
+
+  // The space reserved for the heading (which pushes the road/step nodes down) has to
+  // shrink *later* than the heading's own opacity fade, not at the same rate — otherwise
+  // nodes start sliding up into that space while the heading is still legible, and the two
+  // visibly overlap for a stretch of the scroll. Full space stays reserved until the
+  // heading is already more than half-faded (past SPACE_RECLAIM_THRESHOLD opacity), then
+  // both finish shrinking to 0 together.
+  const SPACE_RECLAIM_THRESHOLD = 0.45;
+  const spaceFade = headingFade <= SPACE_RECLAIM_THRESHOLD ? headingFade / SPACE_RECLAIM_THRESHOLD : 1;
+  const effectiveHeadingH = headingH * spaceFade;
   const contentH = h - headingH;
 
   if (!isMobile) {
     const spread = 0.17;
     const nodeXFracs = [0.5, 0.5 + spread, 0.5 - spread, 0.5 + spread, 0.5];
-    const nodeYFracs = [0.1, 0.29, 0.5, 0.71, 0.9];
+    // Generous top/bottom margins — the road shrinks (nodeSize/fonts below) to make
+    // room for this rather than stretching edge-to-edge, so content never sits flush
+    // against the frame border on any viewport.
+    const nodeYFracs = [0.14, 0.315, 0.5, 0.685, 0.86];
 
     const nodes = nodeYFracs.map((yf, i) => ({
       x: w * nodeXFracs[i],
       y: effectiveHeadingH + (h - effectiveHeadingH) * yf,
     }));
 
-    const cornerR = Math.min(Math.max(w * 0.03, 28), 48);
+    const cornerR = Math.min(Math.max(w * 0.03, 26), 44);
     const roadPath = orthogonalPath(nodes, cornerR);
 
-    const nodeSize = Math.min(90, Math.max(64, w * 0.055));
+    // Scaled down further to leave room for the wider top/bottom margins above.
+    const nodeSize = Math.min(72, Math.max(52, w * 0.045));
     const nr = nodeSize / 2;
     const iconSize = Math.round(nodeSize * 0.44);
-    const maxLabelW = Math.min((0.5 - spread) * w - nr - 20 - 12, 360);
-    const labelGap = nr + 22;
+    const maxLabelW = Math.min((0.5 - spread) * w - nr - 20 - 12, 320);
+    const labelGap = nr + 18;
 
-    const nameFontSize = Math.min(52, Math.max(30, w * 0.031)) + 4;
+    const nameFontSize = Math.min(40, Math.max(23, w * 0.025)) + 3;
     const descFontSize = Math.round(nameFontSize * 0.4);
-    const numFontSize = 11;
-    const roadW = Math.min(42, Math.max(18, w * 0.024));
+    const numFontSize = 10;
+    const roadW = Math.min(34, Math.max(14, w * 0.019));
 
     return (
-      <div style={{ width: "100vw", height: "100vh", position: "relative", overflow: "hidden" }}>
+      <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
         <div
           style={{
             position: "absolute",
             inset: 0,
             background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)",
+          }}
+        />
+        {/* Solid-er near the very top edge specifically: this is where the hero's cloud
+            mascot overflows down into — the base 0.55 overlay above is too translucent
+            to hide it cleanly, ghosting it through instead of properly occluding it. */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "20vh",
+            background: "linear-gradient(to bottom, rgba(4,9,28,0.97) 0%, rgba(4,9,28,0) 100%)",
           }}
         />
 
@@ -232,7 +265,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             style={{
               fontFamily: "'FavoritExtraBoldC','Montserrat',sans-serif",
               fontWeight: 800,
-              fontSize: Math.min(56, w * 0.037),
+              fontSize: Math.min(48, w * 0.033),
               letterSpacing: -1.5,
               color: "white",
               textTransform: "uppercase",
@@ -418,6 +451,8 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             </div>
           );
         })}
+
+        <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
       </div>
     );
   }
@@ -426,21 +461,35 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   const nodeR = 22;
   const nodeCx = w / 2;
   const sideGap = nodeR + 14;
-  const labelHalfW = Math.floor(nodeCx - sideGap - 10);
+  // Breathing room from the screen edges — labels were sitting uncomfortably close to
+  // the left/right border on narrow phones.
+  const labelHalfW = Math.floor(nodeCx - sideGap - 18);
 
-  const mobileYFracs = [0.11, 0.29, 0.5, 0.71, 0.89];
-  const mobileNodes = mobileYFracs.map((yf) => ({ x: nodeCx, y: headingH + contentH * yf }));
+  // Generous top/bottom margins, matching the desktop layout — the timeline shrinks
+  // (nodeR/fonts below) to make room rather than running edge-to-edge.
+  const mobileYFracs = [0.15, 0.325, 0.5, 0.675, 0.85];
+  const mobileNodes = mobileYFracs.map((yf) => ({ x: nodeCx, y: effectiveHeadingH + (h - effectiveHeadingH) * yf }));
   const mobilePathD = mobileNodes.map((n, i) => (i === 0 ? `M${n.x},${n.y}` : `L${n.x},${n.y}`)).join(" ");
 
-  const mobileNameSize = Math.min(24, Math.max(17, w * 0.06));
+  const mobileNameSize = Math.min(23, Math.max(17, w * 0.058));
   const mobileDescSize = Math.round(mobileNameSize * 0.42);
   const mobileNumSize = 9;
   const mobileIconSize = Math.round(nodeR * 0.86);
 
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative", overflow: "hidden" }}>
+    <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)" }} />
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "20vh",
+          background: "linear-gradient(to bottom, rgba(4,9,28,0.97) 0%, rgba(4,9,28,0) 100%)",
+        }}
+      />
 
       <div
         style={{
@@ -467,7 +516,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           style={{
             fontFamily: "'FavoritExtraBoldC','Montserrat',sans-serif",
             fontWeight: 800,
-            fontSize: Math.min(30, w * 0.082),
+            fontSize: Math.min(26, w * 0.072),
             letterSpacing: -1,
             color: "white",
             textTransform: "uppercase",
@@ -488,7 +537,12 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             <stop offset="75%" stopColor="#00C0E8" />
             <stop offset="100%" stopColor="#FFCC00" />
           </linearGradient>
-          <filter id="mglow">
+          {/* Explicit (generous) filter region: this path is a dead-straight vertical
+              line, so its bounding box is only as wide as the stroke itself — the
+              default region (a percentage of that near-zero-width box) isn't remotely
+              big enough to contain a stdDeviation-4 blur, which was clipping the glow
+              path down to invisible. */}
+          <filter id="mglow" x="-300%" y="-2%" width="700%" height="104%">
             <feGaussianBlur stdDeviation="4" result="b" />
             <feMerge>
               <feMergeNode in="b" />
@@ -581,6 +635,8 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           </div>
         );
       })}
+
+      <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
     </div>
   );
 }
