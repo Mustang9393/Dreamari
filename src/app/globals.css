@@ -3,8 +3,14 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark, not white: every current page (/, /flow, /onboarding) is dark-themed at the
+     content level, but iOS Safari's overscroll "bounce" at the top/bottom of the page
+     reveals whatever's behind the document — the raw <body> background — regardless of
+     what any fixed/absolute element renders on top of it. A white bounce-reveal read as
+     a broken layout; matching it to the app's own dark tone fixes that without needing
+     per-page overrides. */
+  --background: #030712;
+  --foreground: #edeff3;
 
   /* Brand palette — extracted from Figma (Dreamari_UIKIT, node 211:619) */
   --color-brand-950: #0a1e4c;
