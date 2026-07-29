@@ -124,12 +124,18 @@ function orthogonalPath(nodes: { x: number; y: number }[], r: number): string {
 type HowItWorksSectionProps = { scrollProgress: number };
 
 export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
-  const [vp, setVp] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  // Starts at 0,0 (not window.innerWidth/innerHeight) because this component's initial
+  // render also happens on the server during prerendering, where `window` doesn't exist —
+  // reading it directly in a useState initializer crashes the production build. The real
+  // size is synced in on mount below; the section is below the fold anyway, so the brief
+  // instant before that effect runs isn't visible.
+  const [vp, setVp] = useState({ w: 0, h: 0 });
   const pathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState(3000);
 
   useEffect(() => {
     const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
+    update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
@@ -140,6 +146,8 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
   const { w, h } = vp;
   const isMobile = w < 640;
+
+  if (w === 0 || h === 0) return null;
 
   const safeProgress = isNaN(scrollProgress) ? 0 : scrollProgress;
   const dashOffset = Math.max(0, pathLength * (1 - Math.min(1, safeProgress)));

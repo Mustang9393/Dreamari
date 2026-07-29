@@ -67,9 +67,18 @@ export function Confetti({ colors, active }: ConfettiProps) {
     let rafId = 0;
     const gravity = 0.16;
     const drag = 0.985;
+    // All the tuning above assumes ~60fps (a fixed amount of physics per callback). If the
+    // tab is under heavy load and frames arrive slower, that used to mean the whole burst
+    // just played out in slow motion in real time. Scaling every increment by elapsed time
+    // (in 60fps-equivalent units) keeps it playing at the same real-world speed regardless
+    // of frame rate — a callback 3x slower than expected does 3x the physics in one step.
+    let lastTime = performance.now();
 
-    function draw() {
+    function draw(now: number) {
       if (!ctx) return;
+      const steps = Math.min(3, (now - lastTime) / (1000 / 60));
+      lastTime = now;
+
       ctx.clearRect(0, 0, width, height);
 
       let anyAlive = false;
@@ -77,12 +86,12 @@ export function Confetti({ colors, active }: ConfettiProps) {
         if (p.life <= 0) continue;
         anyAlive = true;
 
-        p.vx *= drag;
-        p.vy = p.vy * drag + gravity;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rotation += p.spin;
-        p.life -= 0.006;
+        p.vx *= Math.pow(drag, steps);
+        p.vy = p.vy * Math.pow(drag, steps) + gravity * steps;
+        p.x += p.vx * steps;
+        p.y += p.vy * steps;
+        p.rotation += p.spin * steps;
+        p.life -= 0.006 * steps;
 
         ctx.save();
         ctx.translate(p.x, p.y);

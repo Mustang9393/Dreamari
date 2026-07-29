@@ -97,9 +97,16 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   const blobsRef = useRef<Blob[]>([]);
   const finaleRef = useRef(finale);
   const pointerRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
+  // Accumulated step-glow blobs are static (fixed anchors, don't move) — they're painted
+  // once into this offscreen canvas and just blitted with a single drawImage per frame,
+  // instead of re-running up to 11 full-canvas gradient fills every frame. Marked dirty
+  // whenever the blob list, theme, or canvas size changes.
+  const blobLayerRef = useRef<HTMLCanvasElement | null>(null);
+  const blobLayerDirtyRef = useRef(true);
 
   useEffect(() => {
     themeRef.current = theme;
+    blobLayerDirtyRef.current = true;
   }, [theme]);
 
   useEffect(() => {
@@ -115,6 +122,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       const [ax, ay] = ANCHORS[i % ANCHORS.length];
       return { hex, x: ax, y: ay };
     });
+    blobLayerDirtyRef.current = true;
   }, [visitedAccents]);
 
   useEffect(() => {
@@ -182,6 +190,42 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (!blobLayerRef.current) blobLayerRef.current = document.createElement("canvas");
+      blobLayerRef.current.width = canvas.width;
+      blobLayerRef.current.height = canvas.height;
+      blobLayerDirtyRef.current = true;
+    }
+
+    // Repaints the static per-step glow blobs into the offscreen cache. Only called when
+    // something that actually changes their appearance changes (list, theme, size) — not
+    // every frame — since these blobs never move on their own.
+    function redrawBlobLayer(isDark: boolean) {
+      const layer = blobLayerRef.current;
+      if (!layer) return;
+      const layerCtx = layer.getContext("2d");
+      if (!layerCtx) return;
+
+      layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      layerCtx.clearRect(0, 0, width, height);
+
+      const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
+      const blobAlpha = isDark ? 0.16 : 0.28;
+
+      layerCtx.save();
+      layerCtx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+      for (const blob of blobsRef.current) {
+        const [br, bg, bb] = hexToRgb(blob.hex);
+        const cx = blob.x * width;
+        const cy = blob.y * height;
+        const gradient = layerCtx.createRadialGradient(cx, cy, 0, cx, cy, blobRadius);
+        gradient.addColorStop(0, `rgba(${br}, ${bg}, ${bb}, ${blobAlpha})`);
+        gradient.addColorStop(1, isDark ? `rgba(${br}, ${bg}, ${bb}, 0)` : "rgba(255, 255, 255, 0)");
+        layerCtx.fillStyle = gradient;
+        layerCtx.fillRect(0, 0, width, height);
+      }
+      layerCtx.restore();
+      blobLayerDirtyRef.current = false;
     }
 
     resize();
@@ -211,54 +255,75 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
 
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
       const blobs = blobsRef.current;
-      const blobAlpha = isDark ? 0.16 : 0.28;
 
-      ctx.save();
-      ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
-      for (const blob of blobs) {
-        const [br, bg, bb] = hexToRgb(blob.hex);
-        const cx = blob.x * width;
-        const cy = blob.y * height;
-        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, blobRadius);
-        if (isDark) {
-          gradient.addColorStop(0, `rgba(${br}, ${bg}, ${bb}, ${blobAlpha})`);
-          gradient.addColorStop(1, `rgba(${br}, ${bg}, ${bb}, 0)`);
-        } else {
-          // Multiply-blend a pale tint of the color into the page instead of an additive
-          // glow — additive glow on white is invisible; multiply reliably tints it.
-          gradient.addColorStop(0, `rgba(${br}, ${bg}, ${bb}, ${blobAlpha})`);
-          gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-        }
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
+      if (blobLayerDirtyRef.current) redrawBlobLayer(isDark);
+      if (blobLayerRef.current) {
+        // The cached layer is already fully rendered in device pixels — draw it 1:1
+        // (identity transform) rather than through the CSS-pixel dpr transform, which
+        // would otherwise scale it again and place it wrong.
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.drawImage(blobLayerRef.current, 0, 0);
+        ctx.restore();
       }
 
+      // Skipped on the finale step: the per-step blobs (now just a cheap cached blit,
+      // above) stay visible, but there's no need to also pay for 6 more full-canvas
+      // rainbow gradient fills on top of them every single frame — replace them outright
+      // with a smaller, cheaper set of moving rainbow washes instead of layering both.
       const finaleBlobs: { cx: number; cy: number; rgb: [number, number, number] }[] = [];
       if (isFinale) {
         const sweep = (t * 12) % 360;
-        for (let i = 0; i < 6; i++) {
-          const hue = (sweep + i * 60) % 360;
+        const FINALE_BLOB_COUNT = 4;
+        ctx.save();
+        ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+        for (let i = 0; i < FINALE_BLOB_COUNT; i++) {
+          const hue = (sweep + i * (360 / FINALE_BLOB_COUNT)) % 360;
           const rgb = hslToRgb(hue, 0.75, isDark ? 0.55 : 0.5);
-          const cx = width * (0.15 + 0.14 * i);
+          const cx = width * (0.18 + 0.21 * i);
           const cy = height * (0.3 + 0.1 * Math.sin(t * 0.3 + i));
           finaleBlobs.push({ cx, cy, rgb });
           const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, blobRadius * 0.85);
           const alpha = isDark ? 0.15 : 0.24;
-          if (isDark) {
-            gradient.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`);
-            gradient.addColorStop(1, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)`);
-          } else {
-            gradient.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`);
-            gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-          }
+          gradient.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`);
+          gradient.addColorStop(1, isDark ? `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)` : "rgba(255, 255, 255, 0)");
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, width, height);
         }
+        ctx.restore();
       }
-      ctx.restore();
 
       const ripples = ripplesRef.current.filter((r) => now - r.start < r.duration);
       ripplesRef.current = ripples;
+
+      // A soft radial glow behind the dots for each active ripple — expands outward in
+      // step with the dot ring and feathers to nothing well before the edge, so the pulse
+      // reads as an actual wave of light, not just the dot grid reacting on its own. One
+      // gradient fill per active ripple (typically 0-2 at a time), not per dot, so it's
+      // cheap even alongside everything else on screen.
+      if (ripples.length > 0) {
+        const [cr, cg, cb] = current;
+        ctx.save();
+        ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+        for (const ripple of ripples) {
+          const elapsed = now - ripple.start;
+          const rawProgress = Math.min(1, elapsed / ripple.duration);
+          const eased = easeOutCubic(rawProgress);
+          const isCta = ripple.kind === "cta";
+          const glowRadius = eased * ripple.maxRadius * (isCta ? 1.0 : 0.85);
+          const glowAlphaBase = isCta ? (isDark ? 0.24 : 0.18) : isDark ? 0.13 : 0.1;
+          const glowAlpha = glowAlphaBase * (1 - eased);
+          if (glowAlpha <= 0.003 || glowRadius <= 1) continue;
+
+          const gradient = ctx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
+          gradient.addColorStop(0, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${glowAlpha.toFixed(3)})`);
+          gradient.addColorStop(0.7, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${(glowAlpha * 0.35).toFixed(3)})`);
+          gradient.addColorStop(1, isDark ? `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, 0)` : "rgba(255, 255, 255, 0)");
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+        }
+        ctx.restore();
+      }
 
       // Idle state stays subtle — brightness is mostly earned by an actual interaction (a
       // ripple) or by sitting inside one of the accumulated color washes. Light mode still
@@ -304,11 +369,16 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
 
           let alpha = baseAmbient + n * bandIntensity;
 
-          // Sample the color washes at this dot so it brightens wherever a glow sits underneath.
-          for (const blob of blobs) {
-            const dx = x - blob.x * width;
-            const dy = y - blob.y * height;
-            alpha += gaussian(Math.hypot(dx, dy), blobRadius * 0.6) * washCoupling * 0.12;
+          // Sample the color washes at this dot so it brightens wherever a glow sits
+          // underneath. Skipped on the finale step — the rainbow wash already dominates
+          // there, so coupling against the older per-step blobs too would just be extra
+          // per-dot math (11 blobs × every dot × every frame) for no visible difference.
+          if (!isFinale) {
+            for (const blob of blobs) {
+              const dx = x - blob.x * width;
+              const dy = y - blob.y * height;
+              alpha += gaussian(Math.hypot(dx, dy), blobRadius * 0.6) * washCoupling * 0.12;
+            }
           }
           for (const fb of finaleBlobs) {
             const dx = x - fb.cx;

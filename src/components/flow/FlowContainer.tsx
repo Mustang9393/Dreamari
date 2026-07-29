@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AuroraBackground } from "./aurora/AuroraBackground";
 import { Confetti } from "./aurora/Confetti";
 import { FlowProgress } from "./FlowProgress";
+import { HomeButton } from "./HomeButton";
 import { StepTransition } from "./StepTransition";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { ThemeToggle } from "./theme/ThemeToggle";
@@ -107,6 +108,7 @@ export function FlowContainer() {
     <ThemeProvider>
       <AuroraBackground accent={STEP_AURORA_ACCENTS[step - 1]} visitedAccents={visitedAccents} finale={isFinale} />
       <Confetti colors={STEP_AURORA_ACCENTS} active={isFinale} />
+      <HomeButton />
       <ThemeToggle />
       <section
         style={accentVar}
