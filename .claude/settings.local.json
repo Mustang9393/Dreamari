@@ -10,7 +10,15 @@
       "mcp__Figma__get_screenshot",
       "mcp__Figma__get_variable_defs",
       "mcp__Figma__get_design_context",
-      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)"
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(curl -sL \"http://localhost:3845/assets/f41c2d1ef316a95babd504403af503afc3790d42.svg\" -o public/images/dreamari-logo.svg)",
+      "Bash(curl -sL \"http://localhost:3845/assets/534ac81638f7d8c9f7efbba2e61c6e4d07724dbb.png\" -o public/images/hero-cloud-mascot.png)",
+      "Bash(file public/images/*)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(npm run *)",
+      "Bash(ls -la /Users/chandump/package-lock.json 2>&1; cat /Users/chandump/dreamari/next.config.ts)",
+      "Bash(git add *)"
     ]
   }
 }
