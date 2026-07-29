@@ -22,7 +22,8 @@
       "Bash(git commit -m ' *)",
       "Bash(rm -rf /tmp/dreamari-handoff-pkg)",
       "Bash(cp -R src/components/* /private/tmp/claude-501/-Users-chandump-dreamari/bf15b9ec-9c03-400e-91c5-f93c96f58d22/scratchpad/dreamari-hero-handoff/components/)",
-      "Bash(zip -r dreamari-hero-handoff.zip dreamari-hero-handoff -x \".*\")"
+      "Bash(zip -r dreamari-hero-handoff.zip dreamari-hero-handoff -x \".*\")",
+      "Bash(mkdir -p ~/.claude/skills/figma-to-code *)"
     ]
   }
 }
