@@ -258,8 +258,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
       {/* Real content: normal document flow, one viewport-tall block per chapter. This is
           what makes the words actually scroll up through the frame on their own, rather
-          than sitting fixed while only opacity changes underneath a sticky viewport. */}
-      <div style={{ position: "relative", zIndex: 3 }}>
+          than sitting fixed while only opacity changes underneath a sticky viewport.
+          pointerEvents: none because position:sticky always creates its own stacking
+          context — the CTA's z-index above only ranks it *within* that sticky layer, not
+          against this div's z-index:3, so with default pointer-events this (empty, purely
+          textual) box was sitting on top in hit-testing and swallowing clicks meant for
+          the "Start building" button underneath it. Nothing in here is interactive, so
+          just letting clicks fall through is simpler than fighting stacking contexts. */}
+      <div style={{ position: "relative", zIndex: 3, pointerEvents: "none" }}>
         {STEPS.map((step, i) => {
           const t = proximity(safeProgress, centerOf(i, STEPS.length));
           const isLeft = step.side === "left";
