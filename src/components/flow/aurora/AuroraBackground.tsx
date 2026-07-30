@@ -149,6 +149,9 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   // theme, or canvas size changes.
   const blobLayersRef = useRef<HTMLCanvasElement[]>([]);
   const blobLayerDirtyRef = useRef(true);
+  // Ripple glow is composited through this isolated, initially-transparent layer instead
+  // of drawing straight onto the main canvas — see the draw() loop for why.
+  const rippleLayerRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     themeRef.current = theme;
@@ -244,6 +247,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       canvas.height = Math.round(height * dpr);
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
       blobLayerDirtyRef.current = true;
+
+      if (!rippleLayerRef.current) rippleLayerRef.current = document.createElement("canvas");
+      rippleLayerRef.current.width = canvas.width;
+      rippleLayerRef.current.height = canvas.height;
     }
 
     // Rebakes each accumulated step-glow blob into its own small offscreen canvas at max
@@ -382,46 +389,65 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       // reads as an actual wave of light, not just the dot grid reacting on its own. One
       // gradient fill per active ripple (typically 0-2 at a time), not per dot, so it's
       // cheap even alongside everything else on screen.
+      //
+      // Drawn onto rippleLayer (an isolated, transparent-by-default offscreen canvas) and
+      // composited onto the main canvas afterward, rather than drawing directly onto ctx —
+      // the top-edge fade a few lines down needs `destination-out` to erase gradually
+      // instead of a hard ctx.clip() cutoff, but destination-out erases whatever's already
+      // painted on WHICHEVER canvas it targets. Applied straight to ctx, that included the
+      // base background fill and dot grid from earlier this same frame, not just this
+      // glow — punching a real transparent hole through to whatever sits behind the
+      // <canvas> element in the DOM (a solid black patch in light mode, since the page
+      // background behind it isn't the light fill this canvas paints). Isolating the glow
+      // on its own layer means the erase only ever touches this glow's own pixels.
       if (ripples.length > 0) {
-        const [cr, cg, cb] = current;
-        ctx.save();
-        ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
-        for (const ripple of ripples) {
-          const elapsed = now - ripple.start;
-          const rawProgress = Math.min(1, elapsed / ripple.duration);
-          const eased = easeOutCubic(rawProgress);
-          const isCta = ripple.kind === "cta";
-          const glowRadius = eased * ripple.maxRadius * (isCta ? 1.0 : 0.85);
-          const glowAlphaBase = isCta ? (isDark ? 0.24 : 0.18) : isDark ? 0.13 : 0.1;
-          const glowAlpha = glowAlphaBase * (1 - eased);
-          if (glowAlpha <= 0.003 || glowRadius <= 1) continue;
+        const rippleLayer = rippleLayerRef.current;
+        const rippleCtx = rippleLayer?.getContext("2d");
+        if (rippleLayer && rippleCtx) {
+          rippleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          rippleCtx.clearRect(0, 0, width, height);
 
-          const gradient = ctx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
-          gradient.addColorStop(0, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${glowAlpha.toFixed(3)})`);
-          gradient.addColorStop(0.7, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${(glowAlpha * 0.35).toFixed(3)})`);
-          gradient.addColorStop(1, isDark ? `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, 0)` : "rgba(255, 255, 255, 0)");
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, width, height);
-        }
-        ctx.restore();
+          const [cr, cg, cb] = current;
+          rippleCtx.save();
+          for (const ripple of ripples) {
+            const elapsed = now - ripple.start;
+            const rawProgress = Math.min(1, elapsed / ripple.duration);
+            const eased = easeOutCubic(rawProgress);
+            const isCta = ripple.kind === "cta";
+            const glowRadius = eased * ripple.maxRadius * (isCta ? 1.0 : 0.85);
+            const glowAlphaBase = isCta ? (isDark ? 0.24 : 0.18) : isDark ? 0.13 : 0.1;
+            const glowAlpha = glowAlphaBase * (1 - eased);
+            if (glowAlpha <= 0.003 || glowRadius <= 1) continue;
 
-        // Keep the glow wash anchored to the aurora band rather than letting a big CTA
-        // pulse bloom all the way to the top frame (where FlowProgress sits) — but a hard
-        // ctx.clip() rectangle here sliced the glow off abruptly instead of letting it
-        // fade, which is exactly the "hard cutoff" this was meant to avoid. A
-        // destination-out gradient erases it gradually instead: fully gone by fadeTop,
-        // untouched by fadeBottom, so whatever remains above the band tapers away
-        // organically like the rest of the wash does.
-        const fadeBottom = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
-        const fadeTop = Math.max(0, fadeBottom - BAND_EDGE_FADE * 3);
-        if (fadeBottom > 0) {
+            const gradient = rippleCtx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
+            gradient.addColorStop(0, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${glowAlpha.toFixed(3)})`);
+            gradient.addColorStop(0.7, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${(glowAlpha * 0.35).toFixed(3)})`);
+            gradient.addColorStop(1, isDark ? `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, 0)` : "rgba(255, 255, 255, 0)");
+            rippleCtx.fillStyle = gradient;
+            rippleCtx.fillRect(0, 0, width, height);
+          }
+          rippleCtx.restore();
+
+          // Keep the glow wash anchored to the aurora band rather than letting a big CTA
+          // pulse bloom all the way to the top frame (where FlowProgress sits) — fades it
+          // out gradually (fully gone by fadeTop, untouched by fadeBottom) instead of a
+          // hard cutoff, safely now that it only erases this isolated layer.
+          const fadeBottom = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
+          const fadeTop = Math.max(0, fadeBottom - BAND_EDGE_FADE * 3);
+          if (fadeBottom > 0) {
+            rippleCtx.save();
+            rippleCtx.globalCompositeOperation = "destination-out";
+            const mask = rippleCtx.createLinearGradient(0, fadeTop, 0, fadeBottom);
+            mask.addColorStop(0, "rgba(0,0,0,1)");
+            mask.addColorStop(1, "rgba(0,0,0,0)");
+            rippleCtx.fillStyle = mask;
+            rippleCtx.fillRect(0, 0, width, fadeBottom);
+            rippleCtx.restore();
+          }
+
           ctx.save();
-          ctx.globalCompositeOperation = "destination-out";
-          const mask = ctx.createLinearGradient(0, fadeTop, 0, fadeBottom);
-          mask.addColorStop(0, "rgba(0,0,0,1)");
-          mask.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = mask;
-          ctx.fillRect(0, 0, width, fadeBottom);
+          ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+          ctx.drawImage(rippleLayer, 0, 0, width, height);
           ctx.restore();
         }
       }

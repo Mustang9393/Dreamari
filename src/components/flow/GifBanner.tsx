@@ -62,18 +62,20 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
   if (failed) return null;
 
   return (
-    // Height is the fixed dimension (responsive via the sm: breakpoint); width is derived
-    // from it via the gif's own aspect-ratio (set once it loads) instead of the other way
-    // around — sized to a fixed *width* instead, a wide card would force a short, wide box
-    // that "contain" can only fill by shrinking the image down to a sliver in the middle
-    // with big empty bars on either side. Deriving width from height means the box always
-    // matches the gif's own shape, so nothing needs to crop *or* pillarbox to fit it.
-    // max-w-full guards the rare case (a wide-ratio gif on a very narrow phone) where the
-    // derived width would otherwise overflow the card.
+    // Width is the fixed dimension now (100% of the card, edge to edge — matching the
+    // reference: it never gets narrower than the card just to avoid growing tall, and
+    // never pillarboxes). Height is derived from that width via the gif's own loaded
+    // aspect-ratio, uncapped — a square or portrait gif genuinely does end up taller here,
+    // and on a short step that can mean a small scroll to reach the CTA, which is an
+    // accepted, occasional trade-off (confirmed against the reference itself, which has
+    // the same behavior) rather than something to fix by shrinking or cropping the gif.
+    // maxHeight is just a sanity ceiling for a pathological (e.g. very tall portrait) gif,
+    // not a normal constraint — none of our current gifs come close to hitting it.
     <div
-      className="relative h-[92px] w-auto max-w-full shrink-0 self-center overflow-hidden rounded-xl sm:h-[112px]"
+      className="relative w-full shrink-0 self-center overflow-hidden rounded-xl"
       style={{
         aspectRatio: ratio,
+        maxHeight: 420,
         background: "var(--step-accent)",
         // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
         // headline. A loud glow plus full-saturation footage competed with the actual
@@ -90,9 +92,9 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
         crossOrigin="anonymous"
         onLoad={handleLoad}
         onError={() => setFailed(true)}
-        // object-contain, not object-cover: the box now matches the gif's own aspect ratio
+        // object-contain, not object-cover: the box matches the gif's own aspect ratio
         // (once loaded), so nothing needs cropping — this is just a safety net for the
-        // brief moment before the real ratio is known, or the rare overflow-clamped case
+        // brief moment before the real ratio is known, or the rare maxHeight-clamped case
         // above, rather than the thing doing the fitting day-to-day.
         className={`absolute inset-0 size-full object-contain saturate-[0.65] brightness-[0.88] ${
           focus === "bottom" ? "object-bottom" : "object-center"

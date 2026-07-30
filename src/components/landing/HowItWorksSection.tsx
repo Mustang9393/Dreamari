@@ -140,8 +140,15 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           scrolled down near the bottom. A position:sticky element still reserves its own
           box in normal flow; a negative margin equal to its own height cancels that
           reservation out, so the wrapper's real height comes purely from the chapter
-          content below while this still sticks for as long as that content scrolls. */}
-      <div style={{ position: "sticky", top: 0, height: "100dvh", marginBottom: "-100dvh", overflow: "hidden", pointerEvents: "none" }}>
+          content below while this still sticks for as long as that content scrolls.
+          100vh, not 100dvh: this height feeds directly into the scroll-progress math in
+          HowItWorksScroller (both the chapter blocks below and this element resize with
+          it), and dvh live-updates as a mobile browser's address bar hides/shows *during*
+          the scroll gesture itself — that moved the "finish line" while the user was
+          mid-scroll, which is what made progress crawl for a long stretch and then jump
+          once the chrome animation settled. vh is pinned to a single fixed reference
+          regardless of chrome state, so the scroll math stays stable throughout. */}
+      <div style={{ position: "sticky", top: 0, height: "100vh", marginBottom: "-100vh", overflow: "hidden", pointerEvents: "none" }}>
         <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "rgba(4,9,28,0.55)" }} />
         <div
           style={{
@@ -279,7 +286,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
               key={step.key}
               style={{
                 position: "relative",
-                minHeight: "100dvh",
+                // 100vh, not 100dvh — see the sticky layer above for why: this height
+                // directly defines how much the user has to scroll per chapter, and dvh
+                // changing live as the address bar animates mid-scroll was what made the
+                // section feel like it "scrolled forever" before catching up.
+                minHeight: "100vh",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
