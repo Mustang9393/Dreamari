@@ -23,7 +23,7 @@ export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
       <GifBanner gifId="Q81NcsY6YxK7jxnr4v" alt="Success kid celebration" focus="center" />
 
       <div className="flex w-full flex-col items-center gap-2 text-center">
-        <p className="text-[28px] leading-9 font-extrabold text-slate-900 dark:text-white">You did it!</p>
+        <p className="text-2xl leading-8 font-extrabold text-slate-900 dark:text-white">You did it!</p>
         <p className="text-base leading-[22px] font-bold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">Your unique path is ready.</p>
         <p className="text-sm leading-5 font-medium text-slate-600 dark:text-slate-300">
           Based on your interests, strengths, values, and preferences, here are paths made for you.

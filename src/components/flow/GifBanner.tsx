@@ -42,30 +42,38 @@ function averageColorFromImage(img: HTMLImageElement): [number, number, number] 
   }
 }
 
+// Placeholder aspect ratio before the real gif has loaded — close to the middle of what
+// our actual gifs run (square through ~16:9-ish), so there's no jarring resize once the
+// true ratio swaps in.
+const DEFAULT_RATIO = 1.4;
+
 export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
+  const [ratio, setRatio] = useState(DEFAULT_RATIO);
   const [failed, setFailed] = useState(false);
 
   function handleLoad(event: SyntheticEvent<HTMLImageElement>) {
-    const rgb = averageColorFromImage(event.currentTarget);
+    const img = event.currentTarget;
+    const rgb = averageColorFromImage(img);
     if (rgb) setGlowColor(`rgb(${rgb[0] | 0}, ${rgb[1] | 0}, ${rgb[2] | 0})`);
+    if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
   }
 
   if (failed) return null;
 
   return (
-    // Capped at max-w-md and centered (self-center overrides the parent FlowCard's
-    // items-start), not full card width: the desktop card runs ~816px wide, and every one
-    // of these gifs is only ever fetched at Giphy's 200w rendition — stretched that wide it
-    // was both visibly blurry (4x upscale) and forced into a much more aggressive
-    // object-cover crop than a narrower box needs. Height is a fixed pixel value, not an
-    // aspect ratio tied to width — the desktop card is much wider than the mobile one, and
-    // an aspect-ratio-driven height scaled right up with it (over 300px tall), which is both
-    // way too visually dominant and tall enough to force scrolling to reach the CTA even on
-    // a normal laptop screen.
+    // Height is the fixed dimension (responsive via the sm: breakpoint); width is derived
+    // from it via the gif's own aspect-ratio (set once it loads) instead of the other way
+    // around — sized to a fixed *width* instead, a wide card would force a short, wide box
+    // that "contain" can only fill by shrinking the image down to a sliver in the middle
+    // with big empty bars on either side. Deriving width from height means the box always
+    // matches the gif's own shape, so nothing needs to crop *or* pillarbox to fit it.
+    // max-w-full guards the rare case (a wide-ratio gif on a very narrow phone) where the
+    // derived width would otherwise overflow the card.
     <div
-      className="relative h-[92px] w-full max-w-md shrink-0 self-center overflow-hidden rounded-xl sm:h-[104px]"
+      className="relative h-[92px] w-auto max-w-full shrink-0 self-center overflow-hidden rounded-xl sm:h-[112px]"
       style={{
+        aspectRatio: ratio,
         background: "var(--step-accent)",
         // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
         // headline. A loud glow plus full-saturation footage competed with the actual
@@ -82,9 +90,11 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
         crossOrigin="anonymous"
         onLoad={handleLoad}
         onError={() => setFailed(true)}
-        // Desaturated and dimmed slightly so the gif reads as a supporting visual rather than
-        // competing with the card's own headline for attention.
-        className={`absolute inset-0 size-full object-cover saturate-[0.65] brightness-[0.88] ${
+        // object-contain, not object-cover: the box now matches the gif's own aspect ratio
+        // (once loaded), so nothing needs cropping — this is just a safety net for the
+        // brief moment before the real ratio is known, or the rare overflow-clamped case
+        // above, rather than the thing doing the fitting day-to-day.
+        className={`absolute inset-0 size-full object-contain saturate-[0.65] brightness-[0.88] ${
           focus === "bottom" ? "object-bottom" : "object-center"
         }`}
       />
