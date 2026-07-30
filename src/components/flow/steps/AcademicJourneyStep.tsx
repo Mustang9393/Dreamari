@@ -3,9 +3,22 @@ import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { LabeledSelect } from "../LabeledSelect";
 
-const GPA_RANGES = ["3.5 - 4.0 (A- / A)", "3.0 - 3.49 (B / B+)", "2.5 - 2.99 (C+ / B-)", "Below 2.5"];
+const GPA_RANGES = ["Prefer not to say", "3.8 - 4.0", "3.5 - 3.7", "3.2 - 3.4", "2.8 - 3.1", "2.5 - 2.7", "Below 2.5"];
 
-const SUBJECTS = ["Art", "Science", "Math", "English", "History", "Technology", "Music", "Sports", "Business"];
+const SUBJECTS = [
+  "Mathematics",
+  "Science",
+  "English/Literature",
+  "History",
+  "Art",
+  "Music",
+  "Computer Science",
+  "Foreign Languages",
+  "Business",
+  "Psychology",
+  "Physical Education",
+  "Drama/Theater",
+];
 
 type AcademicJourneyStepProps = {
   path: string;
@@ -30,13 +43,13 @@ export function AcademicJourneyStep({
     <FlowCard>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">ACADEMIC PATH</p>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Academic journey</p>
+        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Your Academic Journey</p>
       </div>
 
-      <LabeledSelect label="GPA Range" value={gpaRange} options={GPA_RANGES} onChange={onChangeGpaRange} />
+      <LabeledSelect label="What's your GPA range?" value={gpaRange} options={GPA_RANGES} onChange={onChangeGpaRange} />
 
       <div className="flex w-full flex-col gap-3">
-        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Subjects that excite you</p>
+        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">What subjects make you excited to learn? (Pick up to 3)</p>
         <div className="flex flex-wrap gap-2">
           {SUBJECTS.map((subject) => {
             const index = subjects.indexOf(subject);
@@ -65,9 +78,6 @@ export function AcademicJourneyStep({
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">
-          Based on Holland&apos;s RIASEC framework (Johns Hopkins University)
-        </p>
       </div>
     </FlowCard>
   );

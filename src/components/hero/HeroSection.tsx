@@ -37,9 +37,9 @@ export function HeroSection() {
             className="max-w-4xl font-extrabold tracking-tight text-white uppercase"
             style={{ fontSize: "clamp(1.875rem, 3.45vw + 2.5vh, 4.625rem)", lineHeight: 0.95 }}
           >
-            Discover your{" "}
+            Discover Your{" "}
             <span className="bg-gradient-to-r from-brand-400 from-[26%] to-brand-200 to-[62.5%] bg-clip-text text-transparent">
-              dream career.
+              Dream Career
             </span>
           </h1>
 
@@ -53,7 +53,7 @@ export function HeroSection() {
 
           <div className="flex flex-col items-center gap-4 sm:flex-row">
             <Button variant="cta-solid" href="/flow">
-              Start building
+              Start my journey
             </Button>
           </div>
         </div>

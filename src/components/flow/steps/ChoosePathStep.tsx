@@ -6,9 +6,9 @@ import { BookIcon, BriefcaseIcon, GraduationCapIcon } from "../icons";
 import type { FlowState } from "../types";
 
 const PATHS: { key: FlowState["path"]; title: string; sub: string; icon: ReactNode }[] = [
-  { key: "High School", title: "High School", sub: "Exploring colleges & early paths", icon: <BookIcon /> },
-  { key: "University", title: "University", sub: "Internships, majors & grad plans", icon: <GraduationCapIcon /> },
-  { key: "Job Seeker", title: "Job Seeker", sub: "Career transition & skills matching", icon: <BriefcaseIcon /> },
+  { key: "High School", title: "High School", sub: "Find your best fit major", icon: <BookIcon /> },
+  { key: "University", title: "University", sub: "Explore internships and roles", icon: <GraduationCapIcon /> },
+  { key: "Job Seeker", title: "Job Seekers", sub: "Launch your next career move", icon: <BriefcaseIcon /> },
 ];
 
 type ChoosePathStepProps = {
@@ -22,7 +22,8 @@ export function ChoosePathStep({ path, onChange, onNext }: ChoosePathStepProps) 
     <FlowCard>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">JOURNEY STAGE</p>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Choose your path</p>
+        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Choose Your Path</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Where are you starting your journey?</p>
       </div>
       <div className="flex w-full flex-col gap-3.5">
         {PATHS.map((option) => (

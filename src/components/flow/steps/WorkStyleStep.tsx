@@ -32,7 +32,7 @@ export function WorkStyleStep({
         <RadioPillGroup label="Energy" options={["Early bird", "Night owl", "Flexible"]} value={energy} onChange={onChangeEnergy} />
         <RadioPillGroup
           label="Team Style"
-          options={["Solo focus", "Small team", "Big crew"]}
+          options={["Solo", "Small team", "Big team"]}
           value={teamStyle}
           onChange={onChangeTeamStyle}
         />
@@ -56,7 +56,7 @@ export function WorkStyleStep({
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">Based on workplace preference research (Gallup, 2023)</p>
+        <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">Based on work style and environment data from ONET (U.S. Department of Labor)</p>
       </div>
     </FlowCard>
   );

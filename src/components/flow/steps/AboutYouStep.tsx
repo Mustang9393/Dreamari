@@ -28,13 +28,14 @@ export function AboutYouStep({
     <FlowCard>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">BASIC INFO</p>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Tell me about yourself</p>
+        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Tell Me About Yourself</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">So I Can Find Your Perfect Matches</p>
       </div>
       <div className="flex w-full flex-col gap-5">
-        <LabeledInput label="Full Name" value={fullName} onChange={onChangeFullName} />
-        <LabeledInput label="School / Workplace" value={schoolWorkplace} onChange={onChangeSchoolWorkplace} />
+        <LabeledInput label="What's your full name?" value={fullName} onChange={onChangeFullName} />
+        <LabeledInput label="What's your school or workplace?" value={schoolWorkplace} onChange={onChangeSchoolWorkplace} />
         <LabeledSelect
-          label="Grade Level / Stage"
+          label="What grade or stage are you in?"
           value={gradeLevel}
           options={GRADE_LEVELS}
           onChange={onChangeGradeLevel}

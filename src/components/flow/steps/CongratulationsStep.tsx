@@ -5,9 +5,9 @@ import { SelectionRow } from "../SelectionRow";
 import { ArrowLeftRightIcon, BriefcaseIcon, GraduationCapIcon } from "../icons";
 
 const PATHWAYS = [
-  { title: "College Path", sub: "Degree-first, on a campus", icon: <GraduationCapIcon /> },
-  { title: "Trades Path", sub: "Hands-on skills, faster to earn", icon: <BriefcaseIcon /> },
-  { title: "Hybrid Path Both", sub: "A mix of both worlds", icon: <ArrowLeftRightIcon /> },
+  { title: "College", sub: "Majors & degrees", icon: <GraduationCapIcon /> },
+  { title: "Trades", sub: "Skilled careers", icon: <BriefcaseIcon /> },
+  { title: "Both", sub: "Explore everything", icon: <ArrowLeftRightIcon /> },
 ];
 
 type CongratulationsStepProps = {
@@ -20,11 +20,8 @@ export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
   return (
     <FlowCard>
       <div className="flex w-full flex-col items-center gap-2 text-center">
-        <p className="text-2xl leading-8 font-extrabold text-slate-900 dark:text-white">You did it!</p>
-        <p className="text-base leading-[22px] font-bold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">Your unique path is ready.</p>
-        <p className="text-sm leading-5 font-medium text-slate-600 dark:text-slate-300">
-          Based on your interests, strengths, values, and preferences, here are paths made for you.
-        </p>
+        <p className="text-2xl leading-8 font-extrabold text-slate-900 dark:text-white">Congratulations!</p>
+        <p className="text-sm leading-5 font-medium text-slate-600 dark:text-slate-300">Your profile is ready. Let&apos;s find your path.</p>
       </div>
 
       <div className="flex w-full flex-col gap-3">
@@ -44,7 +41,7 @@ export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
       </div>
 
       <FlowButton onClick={onRestart}>
-        See my matches →
+        See Matches →
       </FlowButton>
     </FlowCard>
   );

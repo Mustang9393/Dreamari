@@ -6,7 +6,7 @@ import { HandIcon, LightbulbIcon, PiggyBankIcon, ScaleIcon } from "../icons";
 const OPTIONS = [
   { title: "Cost matters a lot", sub: "I need the most affordable path possible", icon: <PiggyBankIcon /> },
   { title: "Somewhat important", sub: "I want good value but can invest a bit", icon: <ScaleIcon /> },
-  { title: "Not a major concern", sub: "I am focused on the best fit regardless of cost", icon: <HandIcon /> },
+  { title: "Not a concern", sub: "I am focused on the best fit regardless of cost", icon: <HandIcon /> },
 ];
 
 type FinancialStepProps = {
@@ -20,10 +20,8 @@ export function FinancialStep({ financial, onChange, onBack, onNext }: Financial
   return (
     <FlowCard>
       <div className="flex w-full flex-col gap-2">
-        <p className="w-full text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">Let&apos;s talk about cost.</p>
-        <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">
-          Your personal constraints direct Dreamy towards paths that respect your budget.
-        </p>
+        <p className="w-full text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">What Feels Right Financially?</p>
+        <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">Pick one</p>
       </div>
 
       <div className="flex w-full flex-col gap-3">

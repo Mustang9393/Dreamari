@@ -24,12 +24,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       </div>
       <div className="flex w-full flex-col items-center gap-3 text-center">
         <p className="text-xl leading-[27px] font-bold tracking-[-0.4px] text-slate-900 dark:text-white">
-          Hey there!
-          <br />
-          I&apos;m Dreamy, your career guide.
+          Hi, I&apos;m Dreamy. 👋
         </p>
         <p className="text-[13px] font-semibold text-slate-600 dark:text-slate-300">
-          Let&apos;s figure out what lights you up, it only takes 5 minutes.
+          I am your virtual friend who is going to help you find your dream career!
         </p>
       </div>
       <FlowButton onClick={onNext}>
