@@ -344,7 +344,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       const cols = Math.ceil(width / SPACING) + 2;
       const rows = Math.ceil(height / ROW_SPACING) + 1;
 
-      for (let j = 0; j < rows; j++) {
+      // Dot/hex grid is dark-mode only — in light mode it read as visible clutter over a
+      // white background rather than a subtle texture. The glow (blobs, ripples, computed
+      // above this point) carries the light-mode look on its own.
+      if (isDark) for (let j = 0; j < rows; j++) {
         const y = j * ROW_SPACING;
         const v = y / (height || 1);
         const rowOffset = j % 2 === 0 ? 0 : SPACING / 2;
