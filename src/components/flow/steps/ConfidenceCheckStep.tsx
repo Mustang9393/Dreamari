@@ -17,9 +17,9 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onNext }: Con
   return (
     <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">SELF EFFICACY</p>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are you naturally good at?</p>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Select up to 3 strengths</p>
+        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CONFIDENCE CHECK</p>
+        <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are you most confident doing?</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pick up to 3 strengths you already have</p>
       </div>
 
       <GifBanner gifId="111ebonMs90YLu" alt="Thumbs up" />
@@ -52,7 +52,7 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onNext }: Con
           Continue →
         </FlowButton>
         <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">
-          Grounded in Bandura&apos;s Self-Efficacy Theory (Stanford University)
+          Based on Self-Efficacy Theory — Albert Bandura, Stanford University
         </p>
       </div>
     </FlowCard>

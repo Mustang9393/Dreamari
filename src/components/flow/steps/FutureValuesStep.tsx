@@ -17,12 +17,12 @@ export function FutureValuesStep({ values, onToggleValue, onNext }: FutureValues
   return (
     <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CORE MOTIVATORS</p>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">What matters most in your future career?</p>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Select up to 3 core values</p>
+        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE VALUES</p>
+        <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are the three most important things for your future?</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pick up to 3</p>
       </div>
 
-      <GifBanner gifId="HhjAJf9wTiui8U4Foy" alt="The power of the mind is something crazy" />
+      <GifBanner gifId="l3nFh9xbJtZYc6UhO" alt="SpongeBob: Welcome to the future" />
 
       <div className="flex flex-wrap gap-2">
         {VALUES.map((value) => {
@@ -55,7 +55,7 @@ export function FutureValuesStep({ values, onToggleValue, onNext }: FutureValues
           Continue →
         </FlowButton>
         <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">
-          Aligned with Schwartz&apos;s Theory of Basic Values (Hebrew University)
+          Based on Work Values Theory and Harvard University Career Services Self-Assessment Framework
         </p>
       </div>
     </FlowCard>
