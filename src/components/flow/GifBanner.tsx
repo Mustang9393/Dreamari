@@ -52,14 +52,17 @@ export function GifBanner({ gifId, alt = "" }: GifBannerProps) {
   return (
     // Same fixed-width, fixed-aspect box on every card — matches how chips/buttons/dropdowns
     // all span the full card width, instead of each gif rendering at its own natural size
-    // and reading as randomly placed. Height budget (aspect-[3/1] at full card width) is
+    // and reading as randomly placed. Height budget (aspect-[2.7/1] at full card width) is
     // tight enough to never force scrolling to reach the CTA on mobile.
     <div
-      className="relative aspect-[2.35/1] w-full shrink-0 overflow-hidden rounded-xl"
+      className="relative aspect-[2.7/1] w-full shrink-0 overflow-hidden rounded-xl"
       style={{
         background: "var(--step-accent)",
+        // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
+        // headline. A loud glow plus full-saturation footage competed with the actual
+        // question/answers for attention, which should always win.
         boxShadow: glowColor
-          ? `0 0 24px 3px color-mix(in srgb, ${glowColor} 45%, var(--step-accent) 55%)`
+          ? `0 0 14px 1px color-mix(in srgb, ${glowColor} 35%, var(--step-accent) 65%)`
           : undefined,
       }}
     >
@@ -73,7 +76,15 @@ export function GifBanner({ gifId, alt = "" }: GifBannerProps) {
         // Captions on meme gifs are almost always burned in near the bottom of the frame —
         // biasing the crop down (rather than centering it) keeps those readable, trading
         // away background/headroom at the top instead, which is rarely the part that matters.
-        className="absolute inset-0 size-full object-cover object-bottom"
+        // Desaturated and dimmed slightly so the gif reads as a supporting visual rather than
+        // competing with the card's own headline for attention.
+        className="absolute inset-0 size-full object-cover object-bottom saturate-[0.65] brightness-[0.88]"
+      />
+      {/* Bottom scrim — mutes any burned-in caption text specifically (the loudest part of
+          most meme gifs) without touching the visual above it. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 100%)" }}
       />
     </div>
   );
