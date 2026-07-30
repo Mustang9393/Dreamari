@@ -6,7 +6,7 @@ import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } fro
 import { ScrollHint } from "./ScrollHint";
 import { Stars } from "./Stars";
 
-const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
+export const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 
 // Scroll progress (0–1) at which each phase of the heading transition happens.
 // HOLD: the heading stays fully visible and un-faded until this point — a
