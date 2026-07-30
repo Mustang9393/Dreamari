@@ -1,6 +1,7 @@
 import { Chip } from "../Chip";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { GifBanner } from "../GifBanner";
 
 const SKILLS = ["Problem Solving", "Communication", "Creativity", "Leadership", "Teamwork", "Analysis", "Organization", "Adaptability"];
 
@@ -20,6 +21,8 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onNext }: Con
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are you naturally good at?</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Select up to 3 strengths</p>
       </div>
+
+      <GifBanner gifId="111ebonMs90YLu" alt="Thumbs up" />
 
       <div className="flex flex-wrap gap-2">
         {SKILLS.map((skill) => {

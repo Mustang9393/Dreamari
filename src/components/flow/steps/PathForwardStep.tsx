@@ -1,5 +1,6 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { GifBanner } from "../GifBanner";
 import { PathOption } from "../PathOption";
 import { BookIcon } from "../icons";
 
@@ -22,6 +23,8 @@ export function PathForwardStep({ pathForward, onChange, onNext }: PathForwardSt
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE HORIZONS</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">How much time do you want to invest in further study?</p>
       </div>
+
+      <GifBanner gifId="26ufmAlKt4ne2JDnq" alt="High five, let's go" />
 
       <div className="flex w-full flex-col gap-3.5">
         {OPTIONS.map((option, index) => (

@@ -206,6 +206,17 @@ body {
   }
 }
 
+/* ── Landing page: How It Works starfield twinkle ── */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 /* ── Landing page: "How It Works" clay-scenery bob ── */
 @keyframes deco-float {
   0%,

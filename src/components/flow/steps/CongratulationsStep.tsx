@@ -1,6 +1,7 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { ArrowLeftRightIcon, BriefcaseIcon, GraduationCapIcon, StarIcon } from "../icons";
+import { GifBanner } from "../GifBanner";
+import { ArrowLeftRightIcon, BriefcaseIcon, GraduationCapIcon } from "../icons";
 
 const PATHWAYS = [
   { title: "College Path", icon: <GraduationCapIcon /> },
@@ -15,11 +16,7 @@ type CongratulationsStepProps = {
 export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
   return (
     <FlowCard>
-      <div className="flex w-full items-start justify-center">
-        <span className="flex items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--step-accent)_14%,white)] p-4 dark:bg-[color-mix(in_srgb,var(--step-accent)_20%,black)]">
-          <StarIcon className="size-8 text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]" />
-        </span>
-      </div>
+      <GifBanner gifId="Q81NcsY6YxK7jxnr4v" alt="Success kid celebration" />
 
       <div className="flex w-full flex-col items-center gap-2 text-center">
         <p className="text-[28px] leading-9 font-extrabold text-slate-900 dark:text-white">You did it!</p>

@@ -1,6 +1,7 @@
 import { Chip } from "../Chip";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { GifBanner } from "../GifBanner";
 
 const VALUES = ["Income", "Impact", "Creativity", "Stability", "Flexibility", "Recognition"];
 
@@ -20,6 +21,8 @@ export function FutureValuesStep({ values, onToggleValue, onNext }: FutureValues
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">What matters most in your future career?</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Select up to 3 core values</p>
       </div>
+
+      <GifBanner gifId="HhjAJf9wTiui8U4Foy" alt="The power of the mind is something crazy" />
 
       <div className="flex flex-wrap gap-2">
         {VALUES.map((value) => {

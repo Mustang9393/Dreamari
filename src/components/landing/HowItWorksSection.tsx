@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DECOS } from "./ClayDecorations";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
 import { ScrollHint } from "./ScrollHint";
+import { Stars } from "./Stars";
 
 const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 
@@ -224,6 +225,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)",
           }}
         />
+        <Stars />
         {/* Solid-er near the very top edge specifically: this is where the hero's cloud
             mascot overflows down into — the base 0.55 overlay above is too translucent
             to hide it cleanly, ghosting it through instead of properly occluding it. */}
@@ -488,6 +490,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
     <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)" }} />
+      <Stars count={18} />
       <div
         style={{
           position: "absolute",

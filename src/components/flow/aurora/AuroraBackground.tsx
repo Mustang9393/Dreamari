@@ -26,6 +26,10 @@ type Blob = {
   hex: string;
   x: number; // 0..1, fraction of canvas
   y: number; // 0..1
+  // Slow independent twinkle, like the blob is a distant star breathing in brightness —
+  // unrelated to clicks/ripples, just a constant gentle ambient pulse.
+  phase: number;
+  speed: number;
 };
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -87,6 +91,46 @@ const BASE_RADIUS = 0.7;
 const PEAK_RADIUS = 1.3;
 const BLOB_RADIUS_FACTOR = 0.42;
 
+// The hex-lattice dot-matrix no longer washes the whole viewport — it lives in a bottom
+// "curtain" band, like an aurora borealis sitting near the horizon, and brightens/pulses
+// upward in response to clicks rather than filling the screen uniformly.
+const BAND_FRACTION = 0.42; // fraction of viewport height the band occupies, at its deepest
+const BAND_EDGE_FADE = 130; // px of soft fade above the band's (undulating) top edge
+
+// Slowly twinkling starfield spanning the full canvas, independent of the bottom band and
+// of click reactions — a constant, gentle "night sky" backdrop.
+const STAR_COUNT = 70;
+
+type Star = {
+  x: number; // 0..1 fraction of canvas
+  y: number; // 0..1
+  radius: number;
+  phase: number;
+  speed: number;
+  baseAlpha: number;
+};
+
+function makeStars(count: number): Star[] {
+  const stars: Star[] = [];
+  for (let i = 0; i < count; i++) {
+    // Deterministic pseudo-random spread (no Math.random dependency on remount timing
+    // mattering) — simple hash off the index is enough for a static star field.
+    const h1 = Math.sin(i * 12.9898) * 43758.5453;
+    const h2 = Math.sin(i * 78.233) * 12543.231;
+    const h3 = Math.sin(i * 37.719) * 91231.876;
+    const frac = (n: number) => n - Math.floor(n);
+    stars.push({
+      x: frac(h1),
+      y: frac(h2),
+      radius: 0.6 + frac(h3) * 1.3,
+      phase: frac(h1 * h2) * Math.PI * 2,
+      speed: 0.25 + frac(h2 * h3) * 0.35,
+      baseAlpha: 0.35 + frac(h3 * h1) * 0.5,
+    });
+  }
+  return stars;
+}
+
 export function AuroraBackground({ accent, visitedAccents, finale = false }: AuroraBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
@@ -97,11 +141,13 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   const blobsRef = useRef<Blob[]>([]);
   const finaleRef = useRef(finale);
   const pointerRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
-  // Accumulated step-glow blobs are static (fixed anchors, don't move) — they're painted
-  // once into this offscreen canvas and just blitted with a single drawImage per frame,
-  // instead of re-running up to 11 full-canvas gradient fills every frame. Marked dirty
-  // whenever the blob list, theme, or canvas size changes.
-  const blobLayerRef = useRef<HTMLCanvasElement | null>(null);
+  const starsRef = useRef<Star[]>(makeStars(STAR_COUNT));
+  // Each accumulated step-glow blob is baked once (at max brightness) into its own small
+  // offscreen canvas — position never changes, only brightness (the twinkle) does — so every
+  // frame just needs a cheap drawImage + globalAlpha per blob instead of re-running a
+  // gradient fill across the whole canvas for each one. Rebaked whenever the blob list,
+  // theme, or canvas size changes.
+  const blobLayersRef = useRef<HTMLCanvasElement[]>([]);
   const blobLayerDirtyRef = useRef(true);
 
   useEffect(() => {
@@ -120,19 +166,26 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   useEffect(() => {
     blobsRef.current = visitedAccents.map((hex, i) => {
       const [ax, ay] = ANCHORS[i % ANCHORS.length];
-      return { hex, x: ax, y: ay };
+      const h1 = Math.sin(i * 91.345) * 47821.63;
+      const h2 = Math.sin(i * 51.917) * 30245.11;
+      const frac = (n: number) => n - Math.floor(n);
+      return { hex, x: ax, y: ay, phase: frac(h1) * Math.PI * 2, speed: 0.12 + frac(h2) * 0.18 };
     });
     blobLayerDirtyRef.current = true;
   }, [visitedAccents]);
 
   useEffect(() => {
-    return onAuroraPulse(({ kind, x, y }) => {
+    return onAuroraPulse(({ kind, x }) => {
       const isCta = kind === "cta";
       const now = performance.now();
+      // The aurora now lives at the bottom of the screen, so every pulse originates from
+      // the bottom edge and travels upward — a reaction from the glow itself, not a ripple
+      // planted wherever the click happened to land.
+      const bottomY = canvasRef.current?.clientHeight ?? window.innerHeight;
       ripplesRef.current.push({
         kind,
         x,
-        y,
+        y: bottomY,
         start: now,
         duration: isCta ? 1700 : 700,
         maxRadius: isCta ? Math.hypot(window.innerWidth, window.innerHeight) : 190,
@@ -144,7 +197,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
         ripplesRef.current.push({
           kind,
           x,
-          y,
+          y: bottomY,
           start: now + 220,
           duration: 1700,
           maxRadius: Math.hypot(window.innerWidth, window.innerHeight),
@@ -190,41 +243,35 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      if (!blobLayerRef.current) blobLayerRef.current = document.createElement("canvas");
-      blobLayerRef.current.width = canvas.width;
-      blobLayerRef.current.height = canvas.height;
       blobLayerDirtyRef.current = true;
     }
 
-    // Repaints the static per-step glow blobs into the offscreen cache. Only called when
-    // something that actually changes their appearance changes (list, theme, size) — not
-    // every frame — since these blobs never move on their own.
-    function redrawBlobLayer(isDark: boolean) {
-      const layer = blobLayerRef.current;
-      if (!layer) return;
-      const layerCtx = layer.getContext("2d");
-      if (!layerCtx) return;
-
-      layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      layerCtx.clearRect(0, 0, width, height);
-
+    // Rebakes each accumulated step-glow blob into its own small offscreen canvas at max
+    // brightness. Only called when something that changes their appearance changes (list,
+    // theme, size) — not every frame — the per-frame twinkle is applied afterward as a
+    // cheap globalAlpha multiplier on the (already-rendered) blit, not a gradient recompute.
+    function redrawBlobLayers(isDark: boolean) {
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
       const blobAlpha = isDark ? 0.16 : 0.28;
+      const size = Math.max(1, Math.ceil(blobRadius * 2 * dpr));
 
-      layerCtx.save();
-      layerCtx.globalCompositeOperation = isDark ? "lighter" : "multiply";
-      for (const blob of blobsRef.current) {
+      blobLayersRef.current = blobsRef.current.map((blob) => {
+        const layer = document.createElement("canvas");
+        layer.width = size;
+        layer.height = size;
+        const layerCtx = layer.getContext("2d");
+        if (!layerCtx) return layer;
         const [br, bg, bb] = hexToRgb(blob.hex);
-        const cx = blob.x * width;
-        const cy = blob.y * height;
-        const gradient = layerCtx.createRadialGradient(cx, cy, 0, cx, cy, blobRadius);
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = blobRadius * dpr;
+        const gradient = layerCtx.createRadialGradient(cx, cy, 0, cx, cy, r);
         gradient.addColorStop(0, `rgba(${br}, ${bg}, ${bb}, ${blobAlpha})`);
         gradient.addColorStop(1, isDark ? `rgba(${br}, ${bg}, ${bb}, 0)` : "rgba(255, 255, 255, 0)");
         layerCtx.fillStyle = gradient;
-        layerCtx.fillRect(0, 0, width, height);
-      }
-      layerCtx.restore();
+        layerCtx.fillRect(0, 0, size, size);
+        return layer;
+      });
       blobLayerDirtyRef.current = false;
     }
 
@@ -253,17 +300,51 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       ctx.fillStyle = isDark ? "#070912" : "#f3f4f8";
       ctx.fillRect(0, 0, width, height);
 
+      // Constant, slow-twinkling starfield across the whole canvas — independent of clicks
+      // and of the bottom aurora band, just a gentle night-sky backdrop. Dimmed to near-
+      // nothing in light mode, since visible stars don't make sense against a daytime wash.
+      const starAlphaScale = isDark ? 1 : 0.3;
+      if (starAlphaScale > 0.02) {
+        ctx.save();
+        for (const star of starsRef.current) {
+          const twinkle = 0.5 + 0.5 * Math.sin(t * star.speed + star.phase);
+          const alpha = star.baseAlpha * (0.25 + twinkle * 0.75) * starAlphaScale;
+          const sx = star.x * width;
+          const sy = star.y * height;
+          ctx.beginPath();
+          ctx.arc(sx, sy, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${alpha.toFixed(3)})` : `rgba(170, 182, 205, ${alpha.toFixed(3)})`;
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
       const blobs = blobsRef.current;
+      // Where the bottom aurora-borealis band begins (its deepest/lowest extent) — dots and
+      // ripple glow are otherwise confined below here, per column, with an organic undulating
+      // top edge (see edgeWaveAt below) rather than a hard horizontal line.
+      const bandBaseTop = height * (1 - BAND_FRACTION);
 
-      if (blobLayerDirtyRef.current) redrawBlobLayer(isDark);
-      if (blobLayerRef.current) {
-        // The cached layer is already fully rendered in device pixels — draw it 1:1
-        // (identity transform) rather than through the CSS-pixel dpr transform, which
-        // would otherwise scale it again and place it wrong.
+      if (blobLayerDirtyRef.current) redrawBlobLayers(isDark);
+      {
+        // Baked layers are already rendered in device pixels — draw 1:1 (identity transform)
+        // rather than through the CSS-pixel dpr transform, which would scale them again.
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(blobLayerRef.current, 0, 0);
+        ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+        for (let idx = 0; idx < blobs.length; idx++) {
+          const blob = blobs[idx];
+          const layer = blobLayersRef.current[idx];
+          if (!layer) continue;
+          // Slow independent breathing per blob — never fully off, so it reads as a dimming
+          // star rather than a flicker/pop.
+          const twinkle = 0.5 + 0.5 * Math.sin(t * blob.speed + blob.phase);
+          ctx.globalAlpha = 0.4 + twinkle * 0.6;
+          const cx = blob.x * width * dpr;
+          const cy = blob.y * height * dpr;
+          ctx.drawImage(layer, cx - layer.width / 2, cy - layer.height / 2);
+        }
         ctx.restore();
       }
 
@@ -304,6 +385,13 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       if (ripples.length > 0) {
         const [cr, cg, cb] = current;
         ctx.save();
+        // Keep the glow wash anchored to the aurora band (with generous fade padding above
+        // it) rather than letting a big CTA pulse bloom over the whole screen — every
+        // reaction, small or large, should read as the same bottom curtain brightening.
+        const clipTop = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
+        ctx.beginPath();
+        ctx.rect(0, clipTop, width, height - clipTop);
+        ctx.clip();
         ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
         for (const ripple of ripples) {
           const elapsed = now - ripple.start;
@@ -353,6 +441,13 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
           const x = i * SPACING + rowOffset;
           if (x < -SPACING || x > width + SPACING) continue;
           const u = x / (width || 1);
+
+          // Organic, slowly drifting top edge for the aurora band — two low-frequency waves
+          // keyed to column index so it undulates like a curtain rather than a straight cutoff.
+          const edgeWave = Math.sin(i * 0.12 + t * 0.05) * 30 + Math.sin(i * 0.05 - t * 0.03) * 45;
+          const bandTop = bandBaseTop + edgeWave;
+          if (y < bandTop - BAND_EDGE_FADE) continue;
+          const bandFade = Math.min(1, Math.max(0, (y - (bandTop - BAND_EDGE_FADE)) / BAND_EDGE_FADE));
 
           // Organic undulation: two overlapping wave directions keyed to lattice indices (not
           // raw pixel coordinates), so the whole mesh flows like a loose sheet rather than
@@ -412,7 +507,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
             alpha += gaussian(pd, 80) * (isDark ? 0.06 : 0.1);
           }
 
-          alpha = Math.min(maxAlpha, alpha);
+          alpha = Math.min(maxAlpha, alpha) * bandFade;
           const radius = BASE_RADIUS + (PEAK_RADIUS - BASE_RADIUS) * n;
 
           let fillR = dotR;
