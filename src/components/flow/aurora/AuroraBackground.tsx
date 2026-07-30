@@ -385,13 +385,6 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       if (ripples.length > 0) {
         const [cr, cg, cb] = current;
         ctx.save();
-        // Keep the glow wash anchored to the aurora band (with generous fade padding above
-        // it) rather than letting a big CTA pulse bloom over the whole screen — every
-        // reaction, small or large, should read as the same bottom curtain brightening.
-        const clipTop = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
-        ctx.beginPath();
-        ctx.rect(0, clipTop, width, height - clipTop);
-        ctx.clip();
         ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
         for (const ripple of ripples) {
           const elapsed = now - ripple.start;
@@ -411,6 +404,26 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
           ctx.fillRect(0, 0, width, height);
         }
         ctx.restore();
+
+        // Keep the glow wash anchored to the aurora band rather than letting a big CTA
+        // pulse bloom all the way to the top frame (where FlowProgress sits) — but a hard
+        // ctx.clip() rectangle here sliced the glow off abruptly instead of letting it
+        // fade, which is exactly the "hard cutoff" this was meant to avoid. A
+        // destination-out gradient erases it gradually instead: fully gone by fadeTop,
+        // untouched by fadeBottom, so whatever remains above the band tapers away
+        // organically like the rest of the wash does.
+        const fadeBottom = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
+        const fadeTop = Math.max(0, fadeBottom - BAND_EDGE_FADE * 3);
+        if (fadeBottom > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = "destination-out";
+          const mask = ctx.createLinearGradient(0, fadeTop, 0, fadeBottom);
+          mask.addColorStop(0, "rgba(0,0,0,1)");
+          mask.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = mask;
+          ctx.fillRect(0, 0, width, fadeBottom);
+          ctx.restore();
+        }
       }
 
       // Idle state stays subtle — brightness is mostly earned by an actual interaction (a

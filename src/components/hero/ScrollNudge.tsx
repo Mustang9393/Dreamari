@@ -18,5 +18,9 @@ export function ScrollNudge() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  return <ScrollHint opacity={opacity} className="absolute inset-x-0 bottom-0 pb-1" />;
+  function scrollToNext() {
+    window.scrollBy({ top: window.innerHeight * 0.95, behavior: "smooth" });
+  }
+
+  return <ScrollHint opacity={opacity} onClick={scrollToNext} className="absolute inset-x-0 bottom-0 pb-1" />;
 }
