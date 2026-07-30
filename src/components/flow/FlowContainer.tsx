@@ -112,7 +112,7 @@ export function FlowContainer() {
       <ThemeToggle />
       <section
         style={accentVar}
-        className="relative z-10 flex min-h-screen w-full flex-col items-center gap-10 px-6 py-12 sm:px-10 lg:px-16"
+        className="relative z-10 flex min-h-dvh w-full flex-col items-center gap-2 px-6 py-2 sm:gap-10 sm:px-10 sm:py-12 lg:px-16"
       >
         <FlowProgress step={step} />
 

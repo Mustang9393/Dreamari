@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { SelectionRow } from "../SelectionRow";
 import { ArrowLeftRightIcon, BriefcaseIcon, GraduationCapIcon, StarIcon } from "../icons";
 
 const PATHWAYS = [
-  { title: "College Path", icon: <GraduationCapIcon /> },
-  { title: "Trades Path", icon: <BriefcaseIcon /> },
-  { title: "Hybrid Path Both", icon: <ArrowLeftRightIcon /> },
+  { title: "College Path", sub: "Degree-first, on a campus", icon: <GraduationCapIcon /> },
+  { title: "Trades Path", sub: "Hands-on skills, faster to earn", icon: <BriefcaseIcon /> },
+  { title: "Hybrid Path Both", sub: "A mix of both worlds", icon: <ArrowLeftRightIcon /> },
 ];
 
 type CongratulationsStepProps = {
@@ -13,6 +15,8 @@ type CongratulationsStepProps = {
 };
 
 export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
+  const [selected, setSelected] = useState(0);
+
   return (
     <FlowCard>
       <div className="flex w-full items-start justify-center">
@@ -29,13 +33,20 @@ export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
         </p>
       </div>
 
-      <div className="flex w-full flex-col gap-2">
-        {PATHWAYS.map((pathway) => (
-          <div key={pathway.title} className="flex w-full items-center gap-3 rounded-xl bg-surface-tertiary p-3 dark:bg-white/5">
-            <span className="size-5 text-slate-900 dark:text-white">{pathway.icon}</span>
-            <p className="text-[15px] font-semibold text-slate-900 dark:text-white">{pathway.title}</p>
-          </div>
-        ))}
+      <div className="flex w-full flex-col gap-3">
+        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Pick where to start</p>
+        <div className="flex w-full flex-col gap-2.5">
+          {PATHWAYS.map((pathway, index) => (
+            <SelectionRow
+              key={pathway.title}
+              icon={pathway.icon}
+              title={pathway.title}
+              sub={pathway.sub}
+              selected={selected === index}
+              onClick={() => setSelected(index)}
+            />
+          ))}
+        </div>
       </div>
 
       <FlowButton onClick={onRestart}>
