@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
-import { ScrollHint } from "./ScrollHint";
 import { Stars } from "./Stars";
 import { Button } from "@/components/ui/Button";
 
@@ -112,33 +111,18 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   if (w === 0 || h === 0) return null;
 
   const isMobile = w < 640;
-  const buildCenter = centerOf(0, STEPS.length);
-
-  // A brief "Start building" CTA that pulses in for the same lock-in window as the BUILD
-  // chapter itself, then fades back out as the user keeps scrolling toward MATCH — it
-  // shares the hold+falloff shape so it appears/disappears in sync with BUILD being the
-  // one legible word on screen, rather than lingering after focus has moved on.
-  const buildCtaOpacity = proximity(safeProgress, buildCenter);
-
-  // Reminds the user this section keeps responding to scroll — visible for most of the
-  // journey, but suppressed while the BUILD CTA above is showing, since they share the
-  // same fixed slot and would otherwise overlap.
-  const nudgeFadeIn = Math.max(0, Math.min(1, safeProgress / 0.06));
-  const nudgeFadeOut = Math.max(0, Math.min(1, (1 - safeProgress) / 0.06));
-  const nudgeOpacityBase = Math.min(nudgeFadeIn, nudgeFadeOut);
-  const nudgeOpacity = nudgeOpacityBase * (1 - buildCtaOpacity);
-
-  const scrollToNext = () => {
-    window.scrollBy({ top: window.innerHeight * 0.95, behavior: "smooth" });
-  };
 
   // Rail geometry: a slim vertical track near the left edge, inset from the top/bottom by
   // a generous fixed margin so it never sits flush against the frame.
   const railInset = Math.max(32, Math.min(80, w * 0.06));
   const railTop = Math.max(90, h * 0.15);
   const railBottom = Math.max(96, h * 0.14);
-  const sidePad = isMobile ? 36 : Math.max(120, railInset + 110);
-  const railClear = isMobile ? 0 : railInset + 48;
+  const sidePad = isMobile ? 28 : Math.max(120, railInset + 110);
+  // Clearance reserved specifically for the rail's own footprint (track + dot/puck glow),
+  // on *both* mobile and desktop — mobile previously had none at all (just sidePad), which
+  // wasn't enough room: the rail's glow bled into the first few characters of every
+  // left-aligned word (BUILD, PLAY, CONNECT).
+  const railClear = isMobile ? railInset + 24 : railInset + 48;
 
   return (
     <div style={{ position: "relative" }}>
@@ -261,11 +245,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           />
         </div>
 
-        {/* Bottom CTA/hint slot, well clear of the frame edge. BUILD's own pulse and the
-            persistent scroll hint share this one slot but are mutually exclusive via
-            their opacity math above, so only one is ever actually interactive. */}
-        <ScrollHint opacity={nudgeOpacity} onClick={scrollToNext} className="absolute inset-x-0 bottom-10 z-10 sm:bottom-14" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14" style={{ opacity: buildCtaOpacity }}>
+        {/* Bottom CTA slot, well clear of the frame edge. "Start building" stays visible
+            for the entire section now — it used to only pulse in during BUILD's own
+            lock-in window, but per feedback it should be a persistent way forward rather
+            than something that comes and goes. */}
+        <div className="absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14">
           <Button variant="cta-outline" href="/flow" className="pointer-events-auto">
             Start building →
           </Button>
