@@ -53,10 +53,7 @@ export function HeroSection() {
 
           <div className="flex flex-col items-center gap-4 sm:flex-row">
             <Button variant="cta-solid" href="/flow">
-              Start exploring
-            </Button>
-            <Button variant="cta-outline" href="#trailer">
-              Watch trailer
+              Start building
             </Button>
           </div>
         </div>
