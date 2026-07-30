@@ -22,7 +22,7 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onNext }: Con
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pick up to 3 strengths you already have</p>
       </div>
 
-      <GifBanner gifId="vn3xyd1kJS5ZN3C3F7" alt="Cristiano Ronaldo celebrating a goal" focus="center" />
+      <GifBanner gifId="LXUtcBDr6RhT90B44Y" alt="Cristiano Ronaldo with a confident smirk" focus="center" />
 
       <div className="flex flex-wrap gap-2">
         {SKILLS.map((skill) => {

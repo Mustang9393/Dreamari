@@ -16,46 +16,17 @@ type GifBannerProps = {
   focus?: "bottom" | "center";
 };
 
-function averageColorFromImage(img: HTMLImageElement): [number, number, number] | null {
-  try {
-    const canvas = document.createElement("canvas");
-    const size = 24;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    ctx.drawImage(img, 0, 0, size, size);
-    const { data } = ctx.getImageData(0, 0, size, size);
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    const pixels = data.length / 4;
-    for (let i = 0; i < data.length; i += 4) {
-      r += data[i];
-      g += data[i + 1];
-      b += data[i + 2];
-    }
-    return [r / pixels, g / pixels, b / pixels];
-  } catch {
-    // Canvas is tainted (CORS) or the image failed to decode — fine, just skip the tint.
-    return null;
-  }
-}
-
 // Placeholder aspect ratio before the real gif has loaded — close to the middle of what
 // our actual gifs run (square through ~16:9-ish), so there's no jarring resize once the
 // true ratio swaps in.
 const DEFAULT_RATIO = 1.4;
 
 export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps) {
-  const [glowColor, setGlowColor] = useState<string | null>(null);
   const [ratio, setRatio] = useState(DEFAULT_RATIO);
   const [failed, setFailed] = useState(false);
 
   function handleLoad(event: SyntheticEvent<HTMLImageElement>) {
     const img = event.currentTarget;
-    const rgb = averageColorFromImage(img);
-    if (rgb) setGlowColor(`rgb(${rgb[0] | 0}, ${rgb[1] | 0}, ${rgb[2] | 0})`);
     if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
   }
 
@@ -71,32 +42,29 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
     // the same behavior) rather than something to fix by shrinking or cropping the gif.
     // maxHeight is just a sanity ceiling for a pathological (e.g. very tall portrait) gif,
     // not a normal constraint — none of our current gifs come close to hitting it.
+    //
+    // No glow/tint here anymore — a colored box-shadow mixing the gif's own dominant color
+    // with the step's accent color read as an unwanted colored halo around the container
+    // (especially obvious on green-accented steps). Plain, uncolored container; the gif
+    // itself is the whole visual.
     <div
-      className="relative w-full shrink-0 self-center overflow-hidden rounded-xl"
-      style={{
-        aspectRatio: ratio,
-        maxHeight: 420,
-        background: "var(--step-accent)",
-        // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
-        // headline. A loud glow plus full-saturation footage competed with the actual
-        // question/answers for attention, which should always win.
-        boxShadow: glowColor
-          ? `0 0 14px 1px color-mix(in srgb, ${glowColor} 35%, var(--step-accent) 65%)`
-          : undefined,
-      }}
+      className="relative w-full shrink-0 self-center overflow-hidden rounded-xl bg-black/5 dark:bg-white/5"
+      style={{ aspectRatio: ratio, maxHeight: 420 }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`https://media.giphy.com/media/${gifId}/200w.gif`}
         alt={alt}
-        crossOrigin="anonymous"
         onLoad={handleLoad}
         onError={() => setFailed(true)}
-        // object-contain, not object-cover: the box matches the gif's own aspect ratio
-        // (once loaded), so nothing needs cropping — this is just a safety net for the
-        // brief moment before the real ratio is known, or the rare maxHeight-clamped case
-        // above, rather than the thing doing the fitting day-to-day.
-        className={`absolute inset-0 size-full object-contain saturate-[0.65] brightness-[0.88] ${
+        // object-cover, not object-contain: the box's aspect-ratio is set to the gif's own
+        // loaded ratio, so in principle they match exactly and neither crop nor letterbox
+        // would be needed — but CSS aspect-ratio and the image's actual decoded pixels
+        // don't always agree to the sub-pixel (rounding in the layout box vs. the image's
+        // own dimensions), and object-contain left a persistent hairline of the container
+        // background showing through on whichever side rounded short. object-cover
+        // guarantees full coverage — the crop needed to close that gap is negligible.
+        className={`absolute inset-0 size-full object-cover saturate-[0.65] brightness-[0.88] ${
           focus === "bottom" ? "object-bottom" : "object-center"
         }`}
       />
