@@ -1,22 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { DECOS } from "./ClayDecorations";
+import { useEffect, useState } from "react";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
 import { ScrollHint } from "./ScrollHint";
 import { Stars } from "./Stars";
 import { Button } from "@/components/ui/Button";
 
+// Each chapter's "center" point along overall scroll progress (0–1) — used both as the
+// proximity-falloff anchor for that chapter's word block and as the fixed dot position on
+// the side rail.
 export const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 
-// Scroll progress (0–1) at which each phase of the heading transition happens.
-// HOLD: the heading stays fully visible and un-faded until this point — a
-// deliberate pause before it starts disappearing, so it doesn't feel like it
-// vanishes the instant scrolling begins. FADE_END: fully faded out by here,
-// handing the screen over to the winding road/step content, centered and
-// filling the whole viewport.
-const HEADING_HOLD = 0.03;
-const HEADING_FADE_END = 0.12;
+// How far (in progress units) a chapter stays legible around its own threshold before
+// fading toward the dim baseline — roughly half the ~0.24 gap between thresholds, so
+// neighboring chapters hand off smoothly without much simultaneous double-visibility.
+const FALLOFF = 0.16;
 
 const STEPS = [
   {
@@ -25,15 +23,9 @@ const STEPS = [
     label: "BUILD",
     side: "left" as const,
     desc: "Know yourself first.",
-    gradFrom: "#4a82ff",
-    gradTo: "#a0c4ff",
-    borderColor: "#4a82ff",
-    glowActive: "rgba(74,130,255,0.7)",
-    glowDim: "rgba(74,130,255,0.18)",
-    bgActive: "radial-gradient(circle at 40% 35%, rgba(42,79,176,1) 0%, rgba(12,26,68,1) 100%)",
-    bgDim: "radial-gradient(circle at 40% 35%, rgba(22,44,110,0.9) 0%, rgba(8,14,44,0.95) 100%)",
+    color: "#4a82ff",
+    sizeScale: 1,
     Icon: IconAssessment,
-    iconColor: "#CFE0FF",
   },
   {
     num: "02",
@@ -41,15 +33,9 @@ const STEPS = [
     label: "MATCH",
     side: "right" as const,
     desc: "Find your perfect fit.",
-    gradFrom: "#FF6058",
-    gradTo: "#ffb8b8",
-    borderColor: "rgba(232,85,107,0.7)",
-    glowActive: "rgba(232,85,107,0.65)",
-    glowDim: "rgba(232,85,107,0.14)",
-    bgActive: "radial-gradient(circle at 40% 35%, rgba(90,22,52,1) 0%, rgba(38,12,30,1) 100%)",
-    bgDim: "radial-gradient(circle at 40% 35%, rgba(30,12,24,0.95) 0%, rgba(10,8,18,0.95) 100%)",
+    color: "#FF6058",
+    sizeScale: 1,
     Icon: IconTarget,
-    iconColor: "#FF8098",
   },
   {
     num: "03",
@@ -57,15 +43,9 @@ const STEPS = [
     label: "PLAY",
     side: "left" as const,
     desc: "Live the role.",
-    gradFrom: "#B79CFF",
-    gradTo: "#ddd0ff",
-    borderColor: "rgba(150,110,255,0.7)",
-    glowActive: "rgba(150,110,255,0.65)",
-    glowDim: "rgba(150,110,255,0.14)",
-    bgActive: "radial-gradient(circle at 40% 35%, rgba(52,26,90,1) 0%, rgba(18,10,42,1) 100%)",
-    bgDim: "radial-gradient(circle at 40% 35%, rgba(24,14,46,0.95) 0%, rgba(8,6,20,0.95) 100%)",
+    color: "#B79CFF",
+    sizeScale: 1.15,
     Icon: IconGamepad,
-    iconColor: "#B79CFF",
   },
   {
     num: "04",
@@ -73,15 +53,9 @@ const STEPS = [
     label: "EXPLORE",
     side: "right" as const,
     desc: "Go deeper, everywhere.",
-    gradFrom: "#00C0E8",
-    gradTo: "#80e4f4",
-    borderColor: "rgba(45,200,210,0.7)",
-    glowActive: "rgba(45,200,210,0.6)",
-    glowDim: "rgba(45,200,210,0.12)",
-    bgActive: "radial-gradient(circle at 40% 35%, rgba(10,60,68,1) 0%, rgba(6,20,40,1) 100%)",
-    bgDim: "radial-gradient(circle at 40% 35%, rgba(8,22,34,0.95) 0%, rgba(4,8,18,0.95) 100%)",
+    color: "#00C0E8",
+    sizeScale: 0.78,
     Icon: IconCompass,
-    iconColor: "#4FD9E3",
   },
   {
     num: "05",
@@ -89,39 +63,17 @@ const STEPS = [
     label: "CONNECT",
     side: "left" as const,
     desc: "Meet the pros.",
-    gradFrom: "#FFCC00",
-    gradTo: "#ffe780",
-    borderColor: "rgba(247,176,30,0.7)",
-    glowActive: "rgba(247,176,30,0.65)",
-    glowDim: "rgba(247,176,30,0.14)",
-    bgActive: "radial-gradient(circle at 40% 35%, rgba(70,52,8,1) 0%, rgba(28,20,4,1) 100%)",
-    bgDim: "radial-gradient(circle at 40% 35%, rgba(24,18,6,0.95) 0%, rgba(8,6,4,0.95) 100%)",
+    color: "#FFCC00",
+    sizeScale: 0.76,
     Icon: IconNetwork,
-    iconColor: "#F5C24B",
   },
 ];
 
-// Generates a grid-aligned SVG path with rounded 90° corners: each segment
-// goes vertical → horizontal → vertical, like a road turning at junctions.
-function orthogonalPath(nodes: { x: number; y: number }[], r: number): string {
-  let d = `M${nodes[0].x.toFixed(1)},${nodes[0].y.toFixed(1)}`;
-  for (let i = 1; i < nodes.length; i++) {
-    const p = nodes[i - 1];
-    const c = nodes[i];
-    const midY = (p.y + c.y) / 2;
-    if (c.x > p.x) {
-      d += ` L${p.x.toFixed(1)},${(midY - r).toFixed(1)}`;
-      d += ` A${r},${r} 0 0,1 ${(p.x + r).toFixed(1)},${midY.toFixed(1)}`;
-      d += ` L${(c.x - r).toFixed(1)},${midY.toFixed(1)}`;
-      d += ` A${r},${r} 0 0,1 ${c.x.toFixed(1)},${(midY + r).toFixed(1)}`;
-    } else {
-      d += ` L${p.x.toFixed(1)},${(midY - r).toFixed(1)}`;
-      d += ` A${r},${r} 0 0,0 ${(p.x - r).toFixed(1)},${midY.toFixed(1)}`;
-      d += ` L${(c.x + r).toFixed(1)},${midY.toFixed(1)}`;
-      d += ` A${r},${r} 0 0,0 ${c.x.toFixed(1)},${(midY + r).toFixed(1)}`;
-    }
-  }
-  return d;
+// Continuous falloff around a chapter's own threshold — 1 right at the threshold, ramping
+// down to 0 by FALLOFF away. Replaces a hard active/inactive toggle with the same
+// "brightens as it nears center, dims as it leaves" feel the reference concept used.
+function proximity(progress: number, center: number): number {
+  return Math.max(0, 1 - Math.abs(progress - center) / FALLOFF);
 }
 
 type HowItWorksSectionProps = { scrollProgress: number };
@@ -133,8 +85,6 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   // size is synced in on mount below; the section is below the fold anyway, so the brief
   // instant before that effect runs isn't visible.
   const [vp, setVp] = useState({ w: 0, h: 0 });
-  const pathRef = useRef<SVGPathElement>(null);
-  const [pathLength, setPathLength] = useState(3000);
 
   useEffect(() => {
     const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
@@ -144,43 +94,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   }, []);
 
   const { w, h } = vp;
-  const safeProgress = isNaN(scrollProgress) ? 0 : scrollProgress;
-
-  const headingFade =
-    safeProgress <= HEADING_HOLD
-      ? 1
-      : Math.max(0, 1 - (safeProgress - HEADING_HOLD) / (HEADING_FADE_END - HEADING_HOLD));
-
-  const headingH = Math.max(70, Math.min(h * 0.13, 105));
-
-  // The space reserved for the heading (which pushes the road/step nodes down) has to
-  // shrink *later* than the heading's own opacity fade, not at the same rate — otherwise
-  // nodes start sliding up into that space while the heading is still legible, and the two
-  // visibly overlap for a stretch of the scroll. Full space stays reserved until the
-  // heading is already more than half-faded (past SPACE_RECLAIM_THRESHOLD opacity), then
-  // both finish shrinking to 0 together.
-  const SPACE_RECLAIM_THRESHOLD = 0.45;
-  const spaceFade = headingFade <= SPACE_RECLAIM_THRESHOLD ? headingFade / SPACE_RECLAIM_THRESHOLD : 1;
-  const effectiveHeadingH = headingH * spaceFade;
-  const contentH = h - headingH;
-
-  // Depends on effectiveHeadingH too, not just vp: the road's node positions (and so
-  // its true total length) shift as the heading reserves less space during the first
-  // ~19% of scroll, then hold steady for the rest of the journey. Measuring only on
-  // resize locked in whatever length the path happened to have at that moment — usually
-  // shorter than its final, settled shape — so the dash pattern that was supposed to
-  // reveal the *entire* road fell permanently short of the last step by that
-  // difference, regardless of scroll progress.
-  useEffect(() => {
-    if (pathRef.current) setPathLength(pathRef.current.getTotalLength());
-  }, [vp, effectiveHeadingH]);
-
-  const isMobile = w < 640;
+  const safeProgress = isNaN(scrollProgress) ? 0 : Math.min(1, Math.max(0, scrollProgress));
 
   if (w === 0 || h === 0) return null;
 
-  const dashOffset = Math.max(0, pathLength * (1 - Math.min(1, safeProgress)));
-  const active = THRESHOLDS.map((t) => scrollProgress >= t);
+  const isMobile = w < 640;
 
   // Reminds the user this section keeps responding to scroll — visible for nearly the
   // whole journey through the 5 steps, fading out only right at the very end once
@@ -193,318 +111,34 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   // further, so this is the moment to hand the user a direct way forward instead.
   const exploreCtaOpacity = Math.max(0, Math.min(1, (safeProgress - 0.97) / 0.03));
 
-  if (!isMobile) {
-    const spread = 0.17;
-    const nodeXFracs = [0.5, 0.5 + spread, 0.5 - spread, 0.5 + spread, 0.5];
-    // Generous top/bottom margins — the road shrinks (nodeSize/fonts below) to make
-    // room for this rather than stretching edge-to-edge, so content never sits flush
-    // against the frame border on any viewport.
-    const nodeYFracs = [0.19, 0.345, 0.5, 0.655, 0.81];
+  // Rail geometry: a slim vertical track near the left edge, inset from the top/bottom by
+  // a fixed margin so it never sits flush against the frame.
+  const railInset = Math.max(24, Math.min(72, w * 0.05));
+  const railTop = Math.max(70, h * 0.12);
+  const railBottom = Math.max(56, h * 0.09);
+  const railHeight = h - railTop - railBottom;
 
-    const nodes = nodeYFracs.map((yf, i) => ({
-      x: w * nodeXFracs[i],
-      y: effectiveHeadingH + (h - effectiveHeadingH) * yf,
-    }));
-
-    const cornerR = Math.min(Math.max(w * 0.03, 26), 44);
-    const roadPath = orthogonalPath(nodes, cornerR);
-
-    // Scaled down further to leave room for the wider top/bottom margins above.
-    const nodeSize = Math.min(66, Math.max(48, w * 0.041));
-    const nr = nodeSize / 2;
-    const iconSize = Math.round(nodeSize * 0.44);
-    const maxLabelW = Math.min((0.5 - spread) * w - nr - 20 - 12, 300);
-    const labelGap = nr + 16;
-
-    const nameFontSize = Math.min(36, Math.max(21, w * 0.022)) + 3;
-    const descFontSize = Math.round(nameFontSize * 0.4);
-    const numFontSize = 10;
-    const roadW = Math.min(30, Math.max(13, w * 0.017));
-
-    return (
-      <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)",
-          }}
-        />
-        <Stars />
-        {/* Solid-er near the very top edge specifically: this is where the hero's cloud
-            mascot overflows down into — the base 0.55 overlay above is too translucent
-            to hide it cleanly, ghosting it through instead of properly occluding it. */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "20vh",
-            background: "linear-gradient(to bottom, rgba(4,9,28,0.97) 0%, rgba(4,9,28,0) 100%)",
-          }}
-        />
-
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: headingH,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            opacity: headingFade,
-            transform: `translateY(${-(1 - headingFade) * 28}px) scale(${0.88 + 0.12 * headingFade})`,
-            transformOrigin: "top center",
-            pointerEvents: headingFade < 0.05 ? "none" : "auto",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "Montserrat, sans-serif",
-              fontWeight: 700,
-              fontSize: numFontSize + 1,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: "rgba(127,168,255,0.65)",
-              margin: 0,
-            }}
-          >
-            Your path. Your pace. Your future.
-          </p>
-          <p
-            style={{
-              fontFamily: "'FavoritExtraBoldC','Montserrat',sans-serif",
-              fontWeight: 800,
-              fontSize: Math.min(48, w * 0.033),
-              letterSpacing: -1.5,
-              color: "white",
-              textTransform: "uppercase",
-              lineHeight: 1,
-              margin: 0,
-            }}
-          >
-            How It Works
-          </p>
-        </div>
-
-        {DECOS.map((d, i) => {
-          const decoW = 46;
-          const decoH = 52;
-          return (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: d.xf * w - decoW * 0.5,
-                top: effectiveHeadingH + d.yf * contentH - decoH * 0.5,
-                zIndex: 1,
-                opacity: 0.72,
-                animation: `deco-float ${2.8 + i * 0.35}s ease-in-out infinite`,
-                animationDelay: `${d.delay}s`,
-                pointerEvents: "none",
-              }}
-            >
-              <d.el />
-            </div>
-          );
-        })}
-
-        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 2, overflow: "visible" }} viewBox={`0 0 ${w} ${h}`}>
-          <defs>
-            <linearGradient id="rg" gradientUnits="userSpaceOnUse" x1={nodes[0].x} y1={nodes[0].y} x2={nodes[4].x} y2={nodes[4].y}>
-              <stop offset="0%" stopColor="#1F5FF0" />
-              <stop offset="25%" stopColor="#FF6058" />
-              <stop offset="50%" stopColor="#CB30E0" />
-              <stop offset="75%" stopColor="#00C0E8" />
-              <stop offset="100%" stopColor="#FFCC00" />
-            </linearGradient>
-            <filter id="haloBlur" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="10" />
-            </filter>
-            <filter id="roadGlow">
-              <feGaussianBlur stdDeviation="2.5" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <path d={roadPath} stroke="rgba(60,100,255,0.09)" strokeWidth={roadW * 3.0} strokeLinecap="butt" strokeLinejoin="round" fill="none" filter="url(#haloBlur)" />
-          <path d={roadPath} stroke="rgba(255,255,255,0.13)" strokeWidth={roadW + 4} strokeLinecap="butt" strokeLinejoin="round" fill="none" />
-          <path d={roadPath} stroke="#03091a" strokeWidth={roadW} strokeLinecap="butt" strokeLinejoin="round" fill="none" />
-          <path d={roadPath} stroke="#080f24" strokeWidth={roadW * 0.74} strokeLinecap="butt" strokeLinejoin="round" fill="none" />
-          <path
-            ref={pathRef}
-            d={roadPath}
-            stroke="url(#rg)"
-            strokeWidth={roadW * 0.44}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            strokeDasharray={pathLength}
-            strokeDashoffset={dashOffset}
-            filter="url(#roadGlow)"
-          />
-          <path
-            d={roadPath}
-            stroke="rgba(255,255,255,0.14)"
-            strokeWidth={3}
-            fill="none"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-            strokeDasharray={`${Math.round(w * 0.018)} ${Math.round(w * 0.022)}`}
-            strokeDashoffset={dashOffset}
-          />
-        </svg>
-
-        {STEPS.map((step, i) => {
-          const node = nodes[i];
-          const isActive = active[i];
-          const isLeft = step.side === "left";
-          const labelLeft = isLeft ? node.x - nr - labelGap - maxLabelW : node.x + nr + labelGap;
-
-          return (
-            <div key={step.key}>
-              <div
-                style={{
-                  position: "absolute",
-                  left: node.x - nr,
-                  top: node.y - nr,
-                  width: nodeSize,
-                  height: nodeSize,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: `2px solid ${isActive ? step.borderColor : "rgba(100,120,160,0.22)"}`,
-                  background: isActive ? step.bgActive : step.bgDim,
-                  filter: isActive
-                    ? `drop-shadow(0 0 ${Math.round(nodeSize * 0.26)}px ${step.glowActive}) drop-shadow(0 0 ${Math.round(nodeSize * 0.12)}px ${step.glowActive})`
-                    : `drop-shadow(0 0 6px ${step.glowDim})`,
-                  transform: isActive ? "scale(1.13)" : "scale(1)",
-                  transition: "all 0.55s cubic-bezier(0.34,1.56,0.64,1)",
-                  zIndex: 4,
-                }}
-              >
-                <div style={{ opacity: isActive ? 1 : 0.35, transition: "opacity 0.5s ease" }}>
-                  <step.Icon c={step.iconColor} size={iconSize} />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  position: "absolute",
-                  left: labelLeft,
-                  top: node.y,
-                  width: maxLabelW,
-                  textAlign: isLeft ? "right" : "left",
-                  transform: isActive ? "translateY(-50%) translateX(0px)" : `translateY(-50%) translateX(${isLeft ? "12px" : "-12px"}) scale(0.94)`,
-                  opacity: isActive ? 1 : 0.38,
-                  transition: "all 0.65s cubic-bezier(0.34,1.2,0.64,1)",
-                  zIndex: 5,
-                  pointerEvents: "none",
-                }}
-              >
-                <p
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    fontWeight: 700,
-                    fontSize: numFontSize,
-                    letterSpacing: 4,
-                    textTransform: "uppercase",
-                    color: isActive ? step.gradFrom : "rgba(127,168,255,0.4)",
-                    margin: "0 0 6px 0",
-                    transition: "color 0.5s ease",
-                  }}
-                >
-                  {step.num}
-                </p>
-
-                <p
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    fontWeight: 800,
-                    fontSize: nameFontSize,
-                    lineHeight: 1.0,
-                    letterSpacing: Math.min(-1.5, -nameFontSize * 0.034),
-                    textTransform: "uppercase",
-                    margin: "0 0 12px 0",
-                    ...(isActive
-                      ? {
-                          backgroundImage: `linear-gradient(135deg, ${step.gradFrom}, ${step.gradTo})`,
-                          WebkitBackgroundClip: "text",
-                          backgroundClip: "text",
-                          color: "transparent",
-                          filter: `drop-shadow(0 0 18px ${step.gradFrom}55)`,
-                        }
-                      : { color: "rgba(190,210,255,0.28)" }),
-                    transition: "all 0.55s ease",
-                  }}
-                >
-                  {step.label}
-                </p>
-
-                <p
-                  style={{
-                    fontFamily: "Montserrat, sans-serif",
-                    fontWeight: 700,
-                    fontSize: descFontSize,
-                    lineHeight: 1.55,
-                    color: isActive ? "#e8f2ff" : "rgba(157,176,208,0.35)",
-                    margin: 0,
-                    transition: "color 0.5s ease",
-                  }}
-                >
-                  {step.desc}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-
-        <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center"
-          style={{ opacity: exploreCtaOpacity }}
-        >
-          <Button variant="cta-solid" href="/flow" className="pointer-events-auto">
-            Start exploring →
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Mobile: centered vertical timeline ──
-  const nodeR = 22;
-  const nodeCx = w / 2;
-  const sideGap = nodeR + 14;
-  // Breathing room from the screen edges — labels were sitting uncomfortably close to
-  // the left/right border on narrow phones.
-  const labelHalfW = Math.floor(nodeCx - sideGap - 18);
-
-  // Generous top/bottom margins, matching the desktop layout — the timeline shrinks
-  // (nodeR/fonts below) to make room rather than running edge-to-edge.
-  const mobileYFracs = [0.19, 0.345, 0.5, 0.655, 0.81];
-  const mobileNodes = mobileYFracs.map((yf) => ({ x: nodeCx, y: effectiveHeadingH + (h - effectiveHeadingH) * yf }));
-  const mobilePathD = mobileNodes.map((n, i) => (i === 0 ? `M${n.x},${n.y}` : `L${n.x},${n.y}`)).join(" ");
-
-  const mobileNameSize = Math.min(23, Math.max(17, w * 0.058));
-  const mobileDescSize = Math.round(mobileNameSize * 0.42);
-  const mobileNumSize = 9;
-  const mobileIconSize = Math.round(nodeR * 0.86);
+  // Last chapter sits noticeably higher than even spacing would put it — its own
+  // description row needs to clear the "Start exploring" CTA that appears in the same
+  // bottom-anchored slot exactly when Connect becomes active, and the two were colliding.
+  const yFracs = [0.13, 0.31, 0.49, 0.65, 0.76];
+  const sidePad = isMobile ? 28 : Math.max(90, railInset + 90);
+  const railClear = isMobile ? 0 : railInset + 40;
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)" }} />
-      <Stars count={18} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)",
+        }}
+      />
+      <Stars count={isMobile ? 18 : 26} />
+      {/* Solid-er near the very top edge specifically: this is where the hero's cloud
+          mascot overflows down into — the base 0.55 overlay above is too translucent
+          to hide it cleanly, ghosting it through instead of properly occluding it. */}
       <div
         style={{
           position: "absolute",
@@ -516,159 +150,166 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
         }}
       />
 
+      {/* Small, permanent corner labels — replaces the old big fading "How It Works"
+          heading. Nothing to fade or reclaim space for, so the chapters below get the
+          full frame immediately instead of waiting on a heading transition. */}
       <div
         style={{
           position: "absolute",
-          top: 0,
+          top: isMobile ? 22 : 34,
           left: 0,
           right: 0,
-          height: headingH,
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 5,
-          opacity: headingFade,
-          transform: `translateY(${-(1 - headingFade) * 28}px) scale(${0.88 + 0.12 * headingFade})`,
-          transformOrigin: "top center",
-          pointerEvents: headingFade < 0.05 ? "none" : "auto",
+          justifyContent: "space-between",
+          padding: `0 ${isMobile ? 20 : 44}px`,
+          zIndex: 6,
+          pointerEvents: "none",
         }}
       >
-        <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: "rgba(127,168,255,0.65)", margin: 0 }}>
-          Your path. Your pace. Your future.
-        </p>
-        <p
-          style={{
-            fontFamily: "'FavoritExtraBoldC','Montserrat',sans-serif",
-            fontWeight: 800,
-            fontSize: Math.min(26, w * 0.072),
-            letterSpacing: -1,
-            color: "white",
-            textTransform: "uppercase",
-            lineHeight: 1,
-            margin: 0,
-          }}
-        >
-          How It Works
-        </p>
+        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: isMobile ? 9 : 12, letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>
+          HOW DREAMARI WORKS
+        </div>
+        {!isMobile && (
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>
+            FIVE CHAPTERS
+          </div>
+        )}
       </div>
 
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} viewBox={`0 0 ${w} ${h}`}>
-        <defs>
-          <linearGradient id="rgm" gradientUnits="userSpaceOnUse" x1={mobileNodes[0].x} y1={mobileNodes[0].y} x2={mobileNodes[4].x} y2={mobileNodes[4].y}>
-            <stop offset="0%" stopColor="#1F5FF0" />
-            <stop offset="25%" stopColor="#FF6058" />
-            <stop offset="50%" stopColor="#CB30E0" />
-            <stop offset="75%" stopColor="#00C0E8" />
-            <stop offset="100%" stopColor="#FFCC00" />
-          </linearGradient>
-          {/* filterUnits="userSpaceOnUse" with explicit pixel bounds covering the whole
-              canvas, not the default objectBoundingBox percentages: this path is a
-              dead-straight vertical line, so its own bounding box is only as wide as
-              the stroke itself, and a *percentage* of that near-zero-width box is
-              nowhere near enough room for a stdDeviation-4 blur — different browsers'
-              SVG engines resolve that edge case inconsistently (worked in one, clipped
-              the glow to invisible in another). Absolute coordinates in the same units
-              as the viewBox sidestep that ambiguity entirely. */}
-          <filter id="mglow" filterUnits="userSpaceOnUse" x={-w} y={-50} width={w * 3} height={h + 100}>
-            <feGaussianBlur stdDeviation="4" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <path d={mobilePathD} stroke="#03091a" strokeWidth={12} strokeLinecap="round" fill="none" />
-        <path d={mobilePathD} stroke="#070f26" strokeWidth={8} strokeLinecap="round" fill="none" />
-        <path ref={pathRef} d={mobilePathD} stroke="url(#rgm)" strokeWidth={5} strokeLinecap="round" fill="none" strokeDasharray={pathLength} strokeDashoffset={dashOffset} filter="url(#mglow)" />
-      </svg>
+      {/* Side progress rail: a fixed track with one dot per chapter (colored, static) and a
+          gradient fill + glowing puck that slides along it as overall scroll progress
+          advances — mirrors the reference concept, just tucked closer to the edge on
+          mobile so it doesn't eat into the (much narrower) content column. */}
+      <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5 }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.08)", borderRadius: 999 }} />
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "100%",
+            height: `${safeProgress * 100}%`,
+            borderRadius: 999,
+            background: `linear-gradient(${STEPS.map((s) => s.color).join(",")})`,
+            boxShadow: `0 0 16px ${STEPS[0].color}99`,
+          }}
+        />
+        {STEPS.map((step) => (
+          <div
+            key={step.key}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: `${THRESHOLDS[STEPS.indexOf(step)] * 100}%`,
+              width: isMobile ? 6 : 9,
+              height: isMobile ? 6 : 9,
+              borderRadius: "50%",
+              background: step.color,
+              transform: "translate(-50%,-50%)",
+              boxShadow: `0 0 10px ${step.color}`,
+            }}
+          />
+        ))}
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: `${safeProgress * 100}%`,
+            width: isMobile ? 11 : 16,
+            height: isMobile ? 11 : 16,
+            borderRadius: "50%",
+            background: "#fff",
+            transform: "translate(-50%,-50%)",
+            boxShadow: "0 0 22px 4px rgba(255,255,255,0.55)",
+          }}
+        />
+      </div>
 
       {STEPS.map((step, i) => {
-        const node = mobileNodes[i];
-        const isActive = active[i];
-        const nodeDiam = nodeR * 2;
+        const t = proximity(safeProgress, THRESHOLDS[i]);
         const isLeft = step.side === "left";
-        const labelLeft = isLeft ? nodeCx - sideGap - labelHalfW : nodeCx + sideGap;
+        // Smaller settle-in slide on mobile — the full ±40px reads fine as a subtle detail
+        // on a spacious desktop canvas, but on a narrow viewport it was enough to push an
+        // inactive word's already-edge-anchored text half off-screen.
+        const slideDist = isMobile ? 12 : 40;
+        const dir = isLeft ? -slideDist : slideDist;
+        const nameFontSize = (isMobile ? Math.min(52, w * 0.16) : Math.min(190, w * 0.1)) * step.sizeScale;
+        const descFontSize = isMobile ? 15 : 22;
+        const numFontSize = isMobile ? 11 : 15;
+        const iconSize = isMobile ? 34 : 50;
 
         return (
-          <div key={step.key}>
+          <div
+            key={step.key}
+            style={{
+              position: "absolute",
+              top: `${yFracs[i] * 100}%`,
+              left: 0,
+              right: 0,
+              transform: `translateY(-50%) translateX(${(1 - t) * dir}px) scale(${0.95 + 0.05 * t})`,
+              opacity: 0.18 + 0.82 * t,
+              paddingLeft: isLeft ? railClear + sidePad : sidePad,
+              paddingRight: isLeft ? sidePad : railClear + sidePad,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: isLeft ? "flex-start" : "flex-end",
+              textAlign: isLeft ? "left" : "right",
+              zIndex: 4,
+              willChange: "transform, opacity",
+            }}
+          >
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: numFontSize, letterSpacing: "0.4em", color: step.color, margin: 0, marginBottom: isMobile ? 4 : 10 }}>
+              {step.num}
+            </p>
+            <p
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 900,
+                fontSize: nameFontSize,
+                lineHeight: 0.86,
+                letterSpacing: "-0.04em",
+                color: step.color,
+                textShadow: `0 0 ${isMobile ? 24 : 50}px ${step.color}66`,
+                margin: 0,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {step.label}
+            </p>
             <div
               style={{
-                position: "absolute",
-                left: node.x - nodeR,
-                top: node.y - nodeR,
-                width: nodeDiam,
-                height: nodeDiam,
-                borderRadius: "50%",
                 display: "flex",
+                flexDirection: isLeft ? "row" : "row-reverse",
                 alignItems: "center",
-                justifyContent: "center",
-                border: `1.5px solid ${isActive ? step.borderColor : "rgba(100,120,160,0.22)"}`,
-                background: isActive ? step.bgActive : step.bgDim,
-                filter: isActive ? `drop-shadow(0 0 10px ${step.glowActive})` : `drop-shadow(0 0 4px ${step.glowDim})`,
-                transform: isActive ? "scale(1.12)" : "scale(1)",
-                transition: "all 0.55s cubic-bezier(0.34,1.56,0.64,1)",
-                zIndex: 3,
+                gap: isMobile ? 10 : 16,
+                marginTop: isMobile ? 12 : 22,
+                opacity: t > 0.55 ? Math.min(1, (t - 0.55) / 0.45) : 0,
               }}
             >
-              <div style={{ opacity: isActive ? 1 : 0.35, transition: "opacity 0.5s ease" }}>
-                <step.Icon c={step.iconColor} size={mobileIconSize} />
-              </div>
-            </div>
-
-            <div
-              style={{
-                position: "absolute",
-                left: labelLeft,
-                top: node.y,
-                width: labelHalfW,
-                textAlign: isLeft ? "right" : "left",
-                transform: isActive ? "translateY(-50%)" : `translateY(-50%) translateX(${isLeft ? "6px" : "-6px"})`,
-                opacity: isActive ? 1 : 0.38,
-                transition: "all 0.55s cubic-bezier(0.34,1.2,0.64,1)",
-                zIndex: 4,
-                pointerEvents: "none",
-              }}
-            >
-              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: mobileNumSize, letterSpacing: 3, textTransform: "uppercase", color: isActive ? step.gradFrom : "rgba(127,168,255,0.4)", margin: "0 0 3px 0", transition: "color 0.5s ease" }}>
-                {step.num}
-              </p>
-              <p
+              <span
                 style={{
-                  fontFamily: "Montserrat, sans-serif",
-                  fontWeight: 800,
-                  fontSize: mobileNameSize,
-                  lineHeight: 1.0,
-                  letterSpacing: -0.8,
-                  textTransform: "uppercase",
-                  margin: "0 0 5px 0",
-                  ...(isActive
-                    ? {
-                        backgroundImage: `linear-gradient(135deg, ${step.gradFrom}, ${step.gradTo})`,
-                        WebkitBackgroundClip: "text",
-                        backgroundClip: "text",
-                        color: "transparent",
-                        filter: `drop-shadow(0 0 12px ${step.gradFrom}55)`,
-                      }
-                    : { color: "rgba(190,210,255,0.28)" }),
-                  transition: "all 0.55s ease",
+                  width: iconSize,
+                  height: iconSize,
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: step.color,
+                  background: `${step.color}22`,
+                  boxShadow: `0 0 18px ${step.color}55, inset 0 0 0 1px ${step.color}66`,
                 }}
               >
-                {step.label}
-              </p>
-              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: mobileDescSize, lineHeight: 1.5, color: isActive ? "#e8f2ff" : "rgba(157,176,208,0.35)", margin: 0, transition: "color 0.5s ease" }}>
-                {step.desc}
-              </p>
+                <step.Icon c={step.color} size={Math.round(iconSize * 0.46)} />
+              </span>
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: descFontSize, color: "rgba(255,255,255,0.82)" }}>{step.desc}</span>
             </div>
           </div>
         );
       })}
 
       <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center"
-        style={{ opacity: exploreCtaOpacity }}
-      >
+      <div className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center" style={{ opacity: exploreCtaOpacity }}>
         <Button variant="cta-solid" href="/flow" className="pointer-events-auto">
           Start exploring →
         </Button>
