@@ -20,7 +20,7 @@ export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
 
   return (
     <FlowCard>
-      <GifBanner gifId="Q81NcsY6YxK7jxnr4v" alt="Success kid celebration" />
+      <GifBanner gifId="Q81NcsY6YxK7jxnr4v" alt="Success kid celebration" focus="center" />
 
       <div className="flex w-full flex-col items-center gap-2 text-center">
         <p className="text-[28px] leading-9 font-extrabold text-slate-900 dark:text-white">You did it!</p>

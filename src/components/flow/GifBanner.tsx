@@ -10,6 +10,10 @@ type GifBannerProps = {
    * more reliable path for a small, fixed set of cards like these. */
   gifId: string;
   alt?: string;
+  /** Where to bias the crop. Most meme gifs burn their caption in near the bottom, so that's
+   * the default — but caption-free ones with a centered subject (a face, a gesture) need
+   * "center" instead, or the crop cuts the subject off entirely. */
+  focus?: "bottom" | "center";
 };
 
 function averageColorFromImage(img: HTMLImageElement): [number, number, number] | null {
@@ -38,7 +42,7 @@ function averageColorFromImage(img: HTMLImageElement): [number, number, number] 
   }
 }
 
-export function GifBanner({ gifId, alt = "" }: GifBannerProps) {
+export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps) {
   const [glowColor, setGlowColor] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -50,12 +54,14 @@ export function GifBanner({ gifId, alt = "" }: GifBannerProps) {
   if (failed) return null;
 
   return (
-    // Same fixed-width, fixed-aspect box on every card — matches how chips/buttons/dropdowns
-    // all span the full card width, instead of each gif rendering at its own natural size
-    // and reading as randomly placed. Height budget (aspect-[2.7/1] at full card width) is
-    // tight enough to never force scrolling to reach the CTA on mobile.
+    // Same fixed-width box on every card — matches how chips/buttons/dropdowns all span the
+    // full card width, instead of each gif rendering at its own natural size and reading as
+    // randomly placed. Height is a fixed pixel value, not an aspect ratio tied to width — the
+    // desktop card is much wider than the mobile one, and an aspect-ratio-driven height scaled
+    // right up with it (over 300px tall), which is both way too visually dominant and tall
+    // enough to force scrolling to reach the CTA even on a normal laptop screen.
     <div
-      className="relative aspect-[2.7/1] w-full shrink-0 overflow-hidden rounded-xl"
+      className="relative h-[104px] w-full shrink-0 overflow-hidden rounded-xl sm:h-[124px]"
       style={{
         background: "var(--step-accent)",
         // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
@@ -73,19 +79,22 @@ export function GifBanner({ gifId, alt = "" }: GifBannerProps) {
         crossOrigin="anonymous"
         onLoad={handleLoad}
         onError={() => setFailed(true)}
-        // Captions on meme gifs are almost always burned in near the bottom of the frame —
-        // biasing the crop down (rather than centering it) keeps those readable, trading
-        // away background/headroom at the top instead, which is rarely the part that matters.
         // Desaturated and dimmed slightly so the gif reads as a supporting visual rather than
         // competing with the card's own headline for attention.
-        className="absolute inset-0 size-full object-cover object-bottom saturate-[0.65] brightness-[0.88]"
+        className={`absolute inset-0 size-full object-cover saturate-[0.65] brightness-[0.88] ${
+          focus === "bottom" ? "object-bottom" : "object-center"
+        }`}
       />
       {/* Bottom scrim — mutes any burned-in caption text specifically (the loudest part of
-          most meme gifs) without touching the visual above it. */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
-        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 100%)" }}
-      />
+          most meme gifs) without touching the visual above it. Skipped for centered/caption-
+          free gifs, where there's no caption to mute and it would just needlessly darken the
+          subject's lower half. */}
+      {focus === "bottom" && (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+          style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 100%)" }}
+        />
+      )}
     </div>
   );
 }
