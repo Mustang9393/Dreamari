@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DECOS } from "./ClayDecorations";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
 import { ScrollHint } from "./ScrollHint";
+import { Button } from "@/components/ui/Button";
 
 export const THRESHOLDS = [0.02, 0.26, 0.5, 0.74, 0.97];
 
@@ -185,6 +186,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   // Connect is reached, since at that point continuing to scroll just carries them past
   // this section rather than revealing anything new within it.
   const nudgeOpacity = Math.max(0, Math.min(1, (0.95 - safeProgress) / 0.08));
+
+  // Fades in right as Connect (the last node, threshold 0.97) arrives, taking over the same
+  // bottom slot the scroll nudge just vacated — there's nothing left to reveal by scrolling
+  // further, so this is the moment to hand the user a direct way forward instead.
+  const exploreCtaOpacity = Math.max(0, Math.min(1, (safeProgress - 0.97) / 0.03));
 
   if (!isMobile) {
     const spread = 0.17;
@@ -461,6 +467,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
         })}
 
         <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center"
+          style={{ opacity: exploreCtaOpacity }}
+        >
+          <Button variant="cta-solid" href="/flow" className="pointer-events-auto">
+            Start exploring →
+          </Button>
+        </div>
       </div>
     );
   }
@@ -648,6 +662,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
       })}
 
       <ScrollHint opacity={nudgeOpacity} className="absolute inset-x-0 bottom-5 z-10" />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center"
+        style={{ opacity: exploreCtaOpacity }}
+      >
+        <Button variant="cta-solid" href="/flow" className="pointer-events-auto">
+          Start exploring →
+        </Button>
+      </div>
     </div>
   );
 }
