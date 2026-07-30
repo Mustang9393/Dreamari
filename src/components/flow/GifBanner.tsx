@@ -54,14 +54,17 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
   if (failed) return null;
 
   return (
-    // Same fixed-width box on every card — matches how chips/buttons/dropdowns all span the
-    // full card width, instead of each gif rendering at its own natural size and reading as
-    // randomly placed. Height is a fixed pixel value, not an aspect ratio tied to width — the
-    // desktop card is much wider than the mobile one, and an aspect-ratio-driven height scaled
-    // right up with it (over 300px tall), which is both way too visually dominant and tall
-    // enough to force scrolling to reach the CTA even on a normal laptop screen.
+    // Capped at max-w-md and centered (self-center overrides the parent FlowCard's
+    // items-start), not full card width: the desktop card runs ~816px wide, and every one
+    // of these gifs is only ever fetched at Giphy's 200w rendition — stretched that wide it
+    // was both visibly blurry (4x upscale) and forced into a much more aggressive
+    // object-cover crop than a narrower box needs. Height is a fixed pixel value, not an
+    // aspect ratio tied to width — the desktop card is much wider than the mobile one, and
+    // an aspect-ratio-driven height scaled right up with it (over 300px tall), which is both
+    // way too visually dominant and tall enough to force scrolling to reach the CTA even on
+    // a normal laptop screen.
     <div
-      className="relative h-[104px] w-full shrink-0 overflow-hidden rounded-xl sm:h-[124px]"
+      className="relative h-[92px] w-full max-w-md shrink-0 self-center overflow-hidden rounded-xl sm:h-[104px]"
       style={{
         background: "var(--step-accent)",
         // Deliberately soft, not a bright halo — the gif is a supporting visual, not the
