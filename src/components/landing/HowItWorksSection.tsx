@@ -113,27 +113,20 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
   const isMobile = w < 640;
   const buildCenter = centerOf(0, STEPS.length);
-  const connectCenter = centerOf(STEPS.length - 1, STEPS.length);
 
-  // Reused for a brief "Start building" CTA that pulses in for the same lock-in window
-  // as the BUILD chapter itself, then fades back out as the user keeps scrolling toward
-  // MATCH — it shares the hold+falloff shape so it appears/disappears in sync with BUILD
-  // being the one legible word on screen, rather than lingering after focus has moved on.
+  // A brief "Start building" CTA that pulses in for the same lock-in window as the BUILD
+  // chapter itself, then fades back out as the user keeps scrolling toward MATCH — it
+  // shares the hold+falloff shape so it appears/disappears in sync with BUILD being the
+  // one legible word on screen, rather than lingering after focus has moved on.
   const buildCtaOpacity = proximity(safeProgress, buildCenter);
 
-  // Fades in as Connect (the last chapter) locks into its own centered moment — there's
-  // nothing left to reveal by scrolling further, so this is the moment to hand the user a
-  // direct way forward instead.
-  const exploreCtaOpacity = proximity(safeProgress, connectCenter);
-
   // Reminds the user this section keeps responding to scroll — visible for most of the
-  // journey, but suppressed whenever either bottom-slot CTA above is showing (BUILD's own
-  // pulse, or the final Connect one), since all three share the same fixed slot and would
-  // otherwise overlap.
+  // journey, but suppressed while the BUILD CTA above is showing, since they share the
+  // same fixed slot and would otherwise overlap.
   const nudgeFadeIn = Math.max(0, Math.min(1, safeProgress / 0.06));
   const nudgeFadeOut = Math.max(0, Math.min(1, (1 - safeProgress) / 0.06));
   const nudgeOpacityBase = Math.min(nudgeFadeIn, nudgeFadeOut);
-  const nudgeOpacity = nudgeOpacityBase * (1 - Math.max(buildCtaOpacity, exploreCtaOpacity));
+  const nudgeOpacity = nudgeOpacityBase * (1 - buildCtaOpacity);
 
   const scrollToNext = () => {
     window.scrollBy({ top: window.innerHeight * 0.95, behavior: "smooth" });
@@ -149,34 +142,34 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Sticky background layer: pinned behind the scrolling chapters for the whole
-          journey, without adding its own flow height — a position:sticky element still
-          reserves its own box in normal flow, so a negative margin equal to its own
-          height cancels that reservation out. The wrapper's real height then comes
-          purely from the chapter content below, while this still sticks to the viewport
-          for as long as that content keeps scrolling past it. Must come before the real
-          content in DOM order so its un-collapsed flow position starts at the very top —
-          otherwise it would only "arrive" once scrolled down near the bottom. */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100dvh",
-          marginBottom: "-100dvh",
-          zIndex: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-        }}
-      >
-        <div style={{ position: "absolute", inset: 0, background: "rgba(4,9,28,0.55)" }} />
+      {/* Single sticky layer for everything that needs to stay pinned to the viewport
+          while the chapters scroll past underneath: background, the progress rail, and
+          the bottom CTA/hint slot. Earlier this was three separate sticky elements (each
+          using the sticky + negative-margin trick below) — mobile Safari has a history of
+          mishandling stacked sticky siblings that each rely on a canceling negative
+          margin, and consolidating to one sticky element removes that risk entirely
+          without changing anything visually. Internal stacking (rail/CTA above the
+          chapter words, background below them) is done with explicit z-index on the
+          pieces inside, since this element itself doesn't establish a new stacking
+          context. Must come before the real content in DOM order so its un-collapsed
+          flow position starts at the very top — otherwise it would only "arrive" once
+          scrolled down near the bottom. A position:sticky element still reserves its own
+          box in normal flow; a negative margin equal to its own height cancels that
+          reservation out, so the wrapper's real height comes purely from the chapter
+          content below while this still sticks for as long as that content scrolls. */}
+      <div style={{ position: "sticky", top: 0, height: "100dvh", marginBottom: "-100dvh", overflow: "hidden", pointerEvents: "none" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "rgba(4,9,28,0.55)" }} />
         <div
           style={{
             position: "absolute",
             inset: 0,
+            zIndex: 0,
             background: "radial-gradient(ellipse 70% 30% at 50% 100%, rgba(90,50,170,0.18) 0%, transparent 70%)",
           }}
         />
-        <Stars count={isMobile ? 18 : 26} />
+        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+          <Stars count={isMobile ? 18 : 26} />
+        </div>
         {/* Solid near the very top edge specifically: this is where the hero's cloud
             mascot overflows down into (up to ~18vh, per HeroIllustration's own
             CLOUD_SIZE / VISIBLE_FRACTION math) — a plain linear fade from solid to
@@ -192,6 +185,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             left: 0,
             right: 0,
             height: "34vh",
+            zIndex: 0,
             background: "linear-gradient(to bottom, rgba(4,9,28,1) 0%, rgba(4,9,28,1) 65%, rgba(4,9,28,0) 100%)",
           }}
         />
@@ -203,6 +197,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             top: isMobile ? 28 : 48,
             left: 0,
             right: 0,
+            zIndex: 0,
             display: "flex",
             justifyContent: "space-between",
             padding: `0 ${isMobile ? 28 : 64}px`,
@@ -217,13 +212,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Sticky rail layer: same trick, in front of the scrolling chapters. Only this
-          (the path graphic) needs to stay pinned to the viewport — the chapter words
-          themselves are real document-flow content and scroll normally underneath it. */}
-      <div style={{ position: "sticky", top: 0, height: "100dvh", marginBottom: "-100dvh", zIndex: 5, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3 }}>
+        {/* Progress rail — the one piece that actually needs to be pinned, per its own
+            "path graphic" purpose: a fixed track with a colored dot per chapter and a
+            glowing puck sliding along it as scroll progress advances. */}
+        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5 }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.08)", borderRadius: 999 }} />
           <div
             style={{
@@ -267,24 +260,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             }}
           />
         </div>
-      </div>
 
-      {/* Sticky bottom-slot layer: pinned CTAs/scroll-hint, same trick. */}
-      <div style={{ position: "sticky", top: 0, height: "100dvh", marginBottom: "-100dvh", zIndex: 6, pointerEvents: "none" }}>
-        {/* Kept well clear of the frame edge (not flush against it) so it reads as a
-            deliberately placed element rather than something clipped by the viewport.
-            BUILD's own pulse, the persistent scroll hint, and the final Connect CTA all
-            share this one slot but are mutually exclusive via their opacity math above,
-            so only one is ever actually interactive at a time. */}
-        <ScrollHint opacity={nudgeOpacity} onClick={scrollToNext} className="absolute inset-x-0 bottom-10 sm:bottom-14" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center sm:bottom-14" style={{ opacity: buildCtaOpacity }}>
+        {/* Bottom CTA/hint slot, well clear of the frame edge. BUILD's own pulse and the
+            persistent scroll hint share this one slot but are mutually exclusive via
+            their opacity math above, so only one is ever actually interactive. */}
+        <ScrollHint opacity={nudgeOpacity} onClick={scrollToNext} className="absolute inset-x-0 bottom-10 z-10 sm:bottom-14" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14" style={{ opacity: buildCtaOpacity }}>
           <Button variant="cta-outline" href="/flow" className="pointer-events-auto">
             Start building →
-          </Button>
-        </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center sm:bottom-14" style={{ opacity: exploreCtaOpacity }}>
-          <Button variant="cta-solid" href="/flow" className="pointer-events-auto">
-            Start exploring →
           </Button>
         </div>
       </div>

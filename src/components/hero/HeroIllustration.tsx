@@ -24,7 +24,12 @@ export function HeroIllustration() {
     // disappearing effect. Fading opacity on top of it as well made the cloud go
     // translucent well before the wall visually reached it, which read as murky
     // double-fading rather than one clean effect.
-    <div className="relative w-full shrink-0" style={{ height: `calc(${CLOUD_SIZE} * ${VISIBLE_FRACTION})` }}>
+    // overflow-x-clip only (not overflow-hidden): the cloud can run slightly wider than
+    // this slot on narrow/tall phone aspect ratios (its size is driven by vh, this
+    // slot's width by the viewport), so horizontal clipping keeps that from causing a
+    // page-wide horizontal scrollbar — but overflow-y must stay visible, since the
+    // cloud hanging below this slot into "How It Works" is the intended effect.
+    <div className="relative w-full shrink-0 overflow-x-clip" style={{ height: `calc(${CLOUD_SIZE} * ${VISIBLE_FRACTION})` }}>
       {/* left-1/2 + -translate-x-1/2, not inset-x-0 + mx-auto: this slot sits inside the
           hero's padded content column, which is narrower than the full viewport on
           small screens, so it's narrower than CLOUD_SIZE there — auto-margin centering

@@ -4,12 +4,15 @@ import { HeroSection } from "@/components/hero/HeroSection";
 
 export default function Home() {
   return (
-    // overflow-x-clip, not overflow-x-hidden: setting only one overflow axis to `hidden`
-    // makes CSS's paired-axis rule implicitly set the *other* axis to `auto`, turning
-    // this element into a scroll container — which breaks `position: sticky` for every
-    // descendant (its containing block stops being the real viewport). `clip` prevents
-    // horizontal overflow without ever establishing a scroll container.
-    <main className="relative overflow-x-clip">
+    // No overflow value set here at all (not even overflow-x-clip): any non-visible
+    // overflow on either axis risks becoming the "nearest scrolling ancestor" that
+    // position:sticky descendants (HowItWorksScroller's rail) compute against instead of
+    // the real viewport — and unlike Chromium, mobile Safari has been unreliable about
+    // keeping sticky descendants working through that in practice, which is what caused
+    // How It Works to freeze on the first chapter there. The one thing that actually
+    // needs horizontal clipping (HeroIllustration's cloud, which can run slightly wider
+    // than its slot on narrow/tall phone aspect ratios) clips itself locally instead.
+    <main className="relative">
       <AnimatedBackground />
       <HeroSection />
       <HowItWorksScroller />
