@@ -26,6 +26,21 @@ export function HeroSection() {
     >
       <GradientBlobs />
 
+      {/* Forces this section's own bottom edge to a known, exact color instead of
+          trusting wherever the radial gradient above naturally falls off to at that
+          point — an ellipse centered at 85%/35% doesn't necessarily reach its own
+          100% stop color right at the box's bottom edge (it varies with viewport
+          aspect ratio), so without this the actual rendered bottom-edge color could
+          be visibly brighter than the shade "How It Works" starts its own top mask
+          from, reading as a hard seam between the two sections. z-[1]: above the
+          background/blobs, below the actual nav/copy/button content (z-10), so it
+          darkens what's behind those without dimming the content itself. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[32%]"
+        style={{ background: "linear-gradient(to bottom, transparent 0%, #0a1e4c 100%)" }}
+        aria-hidden
+      />
+
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col items-center">
         <Navbar />
 

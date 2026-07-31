@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
 import { Stars } from "./Stars";
 import { Button } from "@/components/ui/Button";
@@ -8,11 +8,40 @@ import { Button } from "@/components/ui/Button";
 // A chapter stays at full brightness within HOLD of its own "centered in the viewport"
 // moment — a deliberate plateau, not just a single instant of peak — giving the user a
 // "brief moment to lock in" on each word before it starts fading. Past that hold, it
-// ramps down to the dim baseline over FALLOFF. Together these are narrow enough relative
-// to the 0.25 gap between chapter centers (see CENTER_OF below) that only one chapter is
-// ever legible at a time, with a brief crossfade as one hands off to the next.
-const HOLD = 0.05;
-const FALLOFF = 0.09;
+// ramps down to the dim baseline over FALLOFF. FALLOFF is now deliberately wide relative
+// to the 0.25 gap between chapter centers (see centerOf below) — 2*(HOLD+FALLOFF) > 0.25
+// means adjacent chapters' windows overlap, so the next chapter is already faintly (and
+// blurrily, see the filter below) visible near the bottom of the frame before the
+// current one has even finished its own hold, instead of a dead gap between them.
+const HOLD = 0.035;
+const FALLOFF = 0.16;
+
+// Each chapter block is shorter than a full viewport (see the render below) so two
+// adjacent chapters' text can share the same 100vh window at once — but centerOf's
+// simple i/(N-1) mapping only lines up with a chapter's block actually being centered
+// in the viewport at that exact progress value when the blocks are a FULL viewport
+// tall. With shorter blocks, chapter 0 would end up sitting above true center right
+// as progress hits 0 (nothing has "pushed" it down into place yet, since progress
+// can't go negative to compensate) — which is exactly the "starts from the top"
+// symptom. A leading spacer before chapter 0 — and, to keep the (still just i/(N-1))
+// centerOf math correct for every chapter after it, a matching trailing spacer after
+// the last one — restores the same geometry a full-height chapter would have had, so
+// chapter 0 is genuinely centered (not just "at full opacity") right when it arrives,
+// and the last chapter still reaches true center exactly at progress 1. Derivation:
+// solving for both endpoints to land exactly on progress 0 and 1 gives spacer height
+// = 50% * (1 - chapter height %) on each side.
+//
+// Mobile/tablet get a shorter value than desktop — less scroll distance between one
+// chapter locking in and the next, which is also what packs them visually closer
+// together (per feedback that the gap between blocks read as too long on those sizes).
+// A function of viewport width, not a plain constant, since it needs to vary by
+// breakpoint; called with the same `w` the component already tracks.
+function chapterHeightVh(w: number): number {
+  return w < 1024 ? 42 : 62;
+}
+function edgeSpacerVh(w: number): number {
+  return 50 * (1 - chapterHeightVh(w) / 100);
+}
 
 const STEPS = [
   {
@@ -21,7 +50,6 @@ const STEPS = [
     side: "left" as const,
     desc: "By taking a personality, skill, and academic assessment.",
     color: "#4a82ff",
-    sizeScale: 1,
     Icon: IconAssessment,
   },
   {
@@ -30,7 +58,6 @@ const STEPS = [
     side: "right" as const,
     desc: "With the right career, college major, and schools.",
     color: "#FF6058",
-    sizeScale: 1,
     Icon: IconTarget,
   },
   {
@@ -39,7 +66,6 @@ const STEPS = [
     side: "left" as const,
     desc: "Day-in-the-life college major and career games you actually want to open.",
     color: "#B79CFF",
-    sizeScale: 1.15,
     Icon: IconGamepad,
   },
   {
@@ -48,7 +74,6 @@ const STEPS = [
     side: "right" as const,
     desc: "Careers, companies, and pathways with depth.",
     color: "#00C0E8",
-    sizeScale: 0.78,
     Icon: IconCompass,
   },
   {
@@ -57,20 +82,42 @@ const STEPS = [
     side: "left" as const,
     desc: "With professionals in the industry you're interested in.",
     color: "#FFCC00",
-    sizeScale: 0.76,
     Icon: IconNetwork,
   },
 ];
 
-// Each chapter below renders as a real, normal-flow block one viewport tall — the user
-// scrolls the page and the words genuinely travel up through the frame, the same way any
-// other page content would, instead of sitting fixed in place while only their opacity
-// changes. Given N equal-height (one-viewport-tall) chapters stacked in a wrapper of
-// overall scroll fraction 0–1, chapter i sits exactly centered in the viewport at
-// progress = i / (N-1) — chapter 0 already fills the screen at progress 0, chapter N-1 at
-// progress 1, with the rest evenly between. This is what actually drives the "lock in and
-// glow" brightness below; it doesn't control position, only how lit each word looks while
-// it scrolls through.
+// One shared scale for every chapter title, instead of the old per-word sizeScale
+// (BUILD/MATCH at 1, PLAY at 1.15, EXPLORE/CONNECT down at ~0.77) — that made the
+// titles visibly different sizes, which read as inconsistent rather than deliberate.
+// Sized to the *longest* labels (EXPLORE, CONNECT, 7 characters) so every title shares
+// one size without any of them overflowing past the frame or crowding the rail/edges —
+// the same value those two already used safely.
+const CHAPTER_TITLE_SCALE = 0.76;
+
+// The finale ("You're ready to light up") is a second phase after the five chapters,
+// sharing the same sticky-pinned viewport. It needs its own fixed scroll distance (in
+// vh) rather than a slice of the chapters' own 0..1 range — otherwise adding or
+// resizing the finale would compress or stretch the five chapters' already-tuned
+// spacing. chaptersScrollVh is exactly the distance (in vh) between chapterProgress 0
+// and 1 given the functions above (derived the same way edgeSpacerVh was: total
+// chapter+spacer content height minus one viewport height, since that's how much the
+// page actually scrolls while progress goes from its first to last value).
+function chaptersScrollVh(w: number): number {
+  return 2 * edgeSpacerVh(w) + STEPS.length * chapterHeightVh(w) - 100;
+}
+// FINALE_SCROLL_VH is how much additional scrolling pops the finale in; FINALE_HOLD_VH
+// is extra room after that so the finale sits fully visible for a while before the user
+// hits the true bottom of the page, instead of the reveal finishing right as scrolling
+// runs out.
+const FINALE_SCROLL_VH = 80;
+const FINALE_HOLD_VH = 100;
+
+// Each chapter below renders as a real, normal-flow block — the user scrolls the page
+// and the words genuinely travel up through the frame, instead of sitting fixed in
+// place while only their opacity changes. Chapter i sits exactly centered in the
+// viewport at progress = i / (count-1) — chapter 0 (BUILD) is already centered and at
+// full focus the instant the section arrives (its own sticky background/rail engaging
+// *is* the reveal), the last chapter reaches full focus at progress 1 and holds there.
 function centerOf(index: number, count: number): number {
   return count > 1 ? index / (count - 1) : 0;
 }
@@ -83,9 +130,9 @@ function proximity(progress: number, center: number): number {
   return Math.max(0, 1 - (d - HOLD) / FALLOFF);
 }
 
-type HowItWorksSectionProps = { scrollProgress: number };
+type HowItWorksSectionProps = { scrollOffsetPx: number };
 
-export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
+export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
   // Starts at 0,0 (not window.innerWidth/innerHeight) because this component's initial
   // render also happens on the server during prerendering, where `window` doesn't exist —
   // reading it directly in a useState initializer crashes the production build. The real
@@ -101,7 +148,26 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
   }, []);
 
   const { w, h } = vp;
-  const safeProgress = isNaN(scrollProgress) ? 0 : Math.min(1, Math.max(0, scrollProgress));
+
+  // chapterProgress drives the five chapters + rail exactly as before (0..1 across
+  // chaptersScrollVh(w) of scrolling). financeProgress picks up where that leaves off,
+  // 0..1 across the next FINALE_SCROLL_VH — both derived from the same raw px offset so
+  // one phase's math can't stretch or compress the other's. `h || 1` guards the very
+  // first render (before the vp effect above has synced real dimensions in), where
+  // dividing by a real 0 would produce NaN.
+  const chaptersScrollPx = (chaptersScrollVh(w) / 100) * (h || 1);
+  const financeScrollPx = (FINALE_SCROLL_VH / 100) * (h || 1);
+  const safeOffset = isNaN(scrollOffsetPx) ? 0 : Math.max(0, scrollOffsetPx);
+  const safeProgress = Math.min(1, safeOffset / chaptersScrollPx);
+  const financeProgress = Math.max(0, Math.min(1, (safeOffset - chaptersScrollPx) / financeScrollPx));
+
+  // Used purely to key-remount the finale title below right as it re-enters view — that
+  // restarts its rainbow→brand-blue color-settle animation fresh each time, instead of
+  // it having already finished playing (as a plain CSS animation tied to mount would)
+  // long before the user scrolls that far. Derived straight from financeProgress rather
+  // than tracked in its own state, since it only needs to flip at the same 0-boundary
+  // financeProgress itself already crosses.
+  const finaleEntering = financeProgress > 0;
 
   if (w === 0 || h === 0) return null;
 
@@ -156,14 +222,13 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
         <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
           <Stars count={isMobile ? 18 : 26} />
         </div>
-        {/* Solid near the very top edge specifically: this is where the hero's cloud
-            mascot overflows down into (up to ~18vh, per HeroIllustration's own
-            CLOUD_SIZE / VISIBLE_FRACTION math) — a plain linear fade from solid to
-            transparent starting at y:0 was thinning out to near-nothing by exactly the
-            depth the cloud still reaches, letting it ghost through. Holding fully solid
-            through ~22vh (past the cloud's max overflow, with margin) and only then
-            fading out over the next 12vh guarantees full coverage where it matters, with
-            the softening still reading as organic rather than a hard cut. */}
+        {/* Bridges the color handoff from the hero section's own background (an opaque
+            gradient whose bottom edge is #0a1e4c) into this section's own darker tone —
+            starting the mask at that exact color (rather than jumping straight to this
+            section's rgba(4,9,28,1)) means the seam between the two sections blends
+            instead of reading as a hard cut. Dreamy fades out on her own well before
+            this point now (see HeroIllustration's scroll-linked opacity), so this no
+            longer also needs to hide a lingering cloud fragment — just the color join. */}
         <div
           style={{
             position: "absolute",
@@ -172,11 +237,13 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             right: 0,
             height: "34vh",
             zIndex: 0,
-            background: "linear-gradient(to bottom, rgba(4,9,28,1) 0%, rgba(4,9,28,1) 65%, rgba(4,9,28,0) 100%)",
+            background: "linear-gradient(to bottom, #0a1e4c 0%, rgba(4,9,28,1) 40%, rgba(4,9,28,0) 100%)",
           }}
         />
 
-        {/* Small, permanent corner labels. */}
+        {/* Small, permanent corner labels — fade out with the rest of the chapter chrome
+            once the finale starts popping in, since "FIVE CHAPTERS" no longer applies
+            to what's on screen at that point. */}
         <div
           style={{
             position: "absolute",
@@ -187,6 +254,7 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             display: "flex",
             justifyContent: "space-between",
             padding: `0 ${isMobile ? 28 : 64}px`,
+            opacity: 1 - financeProgress,
           }}
         >
           <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: isMobile ? 9 : 12, letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>
@@ -201,8 +269,10 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
 
         {/* Progress rail — the one piece that actually needs to be pinned, per its own
             "path graphic" purpose: a fixed track with a colored dot per chapter and a
-            glowing puck sliding along it as scroll progress advances. */}
-        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5 }}>
+            glowing puck sliding along it as scroll progress advances. Fades out once the
+            finale starts popping in — the vertical rail's job is done once all five
+            chapters are behind you, and the finale has its own horizontal version of it. */}
+        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5, opacity: 1 - financeProgress }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.08)", borderRadius: 999 }} />
           <div
             style={{
@@ -248,11 +318,152 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
         </div>
 
         {/* Bottom CTA slot, well clear of the frame edge. "Start building" stays visible
-            for the entire section now — it used to only pulse in during BUILD's own
-            lock-in window, but per feedback it should be a persistent way forward rather
-            than something that comes and goes. */}
-        <div className="absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14">
+            for the entire five-chapter section now — it used to only pulse in during
+            BUILD's own lock-in window, but per feedback it should be a persistent way
+            forward rather than something that comes and goes. Fades out once the finale
+            pops in, which carries its own, more prominent version of this same CTA. */}
+        <div
+          className="absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14"
+          style={{ opacity: 1 - financeProgress, pointerEvents: financeProgress > 0 ? "none" : "auto" }}
+        >
           <Button variant="cta-outline" href="/flow" className="pointer-events-auto">
+            Start building →
+          </Button>
+        </div>
+
+        {/* The finale: pops in once the five chapters are behind you, taking over the
+            whole sticky frame. The reveal is a single pop (scale + fade), not a
+            replay of each chapter's own progressive fill — the horizontal path below
+            is shown fully lit from the start, since "all five, unlocked" is the point
+            being made, not another progress bar. */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 20,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: isMobile ? 28 : 40,
+            padding: isMobile ? "0 24px" : "0 64px",
+            textAlign: "center",
+            opacity: financeProgress,
+            transform: `scale(${0.85 + 0.15 * financeProgress})`,
+            pointerEvents: financeProgress > 0.6 ? "auto" : "none",
+            willChange: "opacity, transform",
+          }}
+        >
+          {/* Horizontal path: each chapter's own icon/color, fully lit, joined by a
+              gradient line echoing the vertical rail it replaces. A slow pulse on each
+              circle's glow keeps the "fully unlocked" state feeling alive rather than
+              static. */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 14 : 30 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: isMobile ? 22 : 32,
+                right: isMobile ? 22 : 32,
+                top: "50%",
+                height: 3,
+                transform: "translateY(-50%)",
+                borderRadius: 999,
+                background: `linear-gradient(90deg, ${STEPS.map((s) => s.color).join(",")})`,
+                zIndex: 0,
+              }}
+            />
+            {STEPS.map((step, i) => {
+              const size = isMobile ? 44 : 68;
+              return (
+                <div
+                  key={step.key}
+                  className="animate-[finale-pulse_2.6s_ease-in-out_infinite]"
+                  style={
+                    {
+                      position: "relative",
+                      zIndex: 1,
+                      width: size,
+                      height: size,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      // Opaque (not the translucent `${color}26` used elsewhere on this
+                      // page) so the connecting line behind it is fully hidden under each
+                      // node instead of visibly striking through — the line should only
+                      // read as connecting the circles, not passing through them.
+                      background: `color-mix(in srgb, ${step.color} 16%, rgb(4,9,28) 84%)`,
+                      border: `2px solid ${step.color}`,
+                      animationDelay: `${i * 0.18}s`,
+                      "--pulse-glow": `${step.color}88`,
+                    } as CSSProperties
+                  }
+                >
+                  <step.Icon c={step.color} size={Math.round(size * 0.42)} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Eyebrow/title/subtext read as one tight cluster (12-16px apart) — the larger
+              gap on the outer flex container is for the bigger jumps between this
+              cluster, the circle path above, and the CTA below. */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+            <div
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                fontSize: isMobile ? 11 : 13,
+                letterSpacing: "0.3em",
+                color: "var(--color-brand-300)",
+              }}
+            >
+              CAMPAIGN COMPLETE
+            </div>
+
+            {/* One gradient text, animated: the colors inside it wash left-to-right and
+                settle into solid brand blue, rather than two separate layers
+                crossfading — the gradient itself is wider than the text box (250%) with
+                the five chapter colors packed into its first stretch and brand blue
+                filling the rest, so animating background-position slides the visible
+                window from "all five colors" to "solid blue" in one continuous motion.
+                Replays via `key` each time the finale re-enters view. */}
+            <p
+              key={finaleEntering ? "title-wash-active" : "title-wash-idle"}
+              className="animate-[finale-title-wash_2.6s_ease-in-out_forwards]"
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 900,
+                fontSize: isMobile ? 42 : Math.min(96, w * 0.075),
+                lineHeight: 0.98,
+                letterSpacing: "-0.03em",
+                margin: 0,
+                maxWidth: isMobile ? "100%" : "18ch",
+                backgroundImage: `linear-gradient(90deg, ${STEPS[0].color} 0%, ${STEPS[1].color} 10%, ${STEPS[2].color} 20%, ${STEPS[3].color} 30%, ${STEPS[4].color} 40%, var(--color-brand-400) 55%, var(--color-brand-400) 100%)`,
+                backgroundSize: "250% 100%",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              YOU&apos;RE READY.
+            </p>
+
+            <p
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 600,
+                fontSize: isMobile ? 15 : 20,
+                color: "rgba(255,255,255,0.82)",
+                margin: 0,
+                maxWidth: isMobile ? "88vw" : "40ch",
+              }}
+            >
+              Five stages down. Time to meet the pros for real.
+            </p>
+          </div>
+
+          <Button variant="cta-solid" href="/flow" className="pointer-events-auto px-10 py-4 text-lg">
             Start building →
           </Button>
         </div>
@@ -268,10 +479,11 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           the "Start building" button underneath it. Nothing in here is interactive, so
           just letting clicks fall through is simpler than fighting stacking contexts. */}
       <div style={{ position: "relative", zIndex: 3, pointerEvents: "none" }}>
+        <div style={{ height: `${edgeSpacerVh(w)}vh` }} />
         {STEPS.map((step, i) => {
           const t = proximity(safeProgress, centerOf(i, STEPS.length));
           const isLeft = step.side === "left";
-          const nameFontSize = (isMobile ? Math.min(52, w * 0.16) : Math.min(190, w * 0.1)) * step.sizeScale;
+          const nameFontSize = (isMobile ? Math.min(52, w * 0.16) : Math.min(190, w * 0.1)) * CHAPTER_TITLE_SCALE;
           const descFontSize = isMobile ? 15 : 22;
           const iconSize = isMobile ? 34 : 50;
 
@@ -280,11 +492,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
               key={step.key}
               style={{
                 position: "relative",
-                // 100vh, not 100dvh — see the sticky layer above for why: this height
-                // directly defines how much the user has to scroll per chapter, and dvh
-                // changing live as the address bar animates mid-scroll was what made the
-                // section feel like it "scrolled forever" before catching up.
-                minHeight: "100vh",
+                // Shorter than a full viewport (was 100vh) so two adjacent chapters'
+                // text can both sit inside the same 100vh-tall viewport at once — the
+                // next chapter's title now peeks in blurred near the bottom of the
+                // frame before the current one has even left its own hold, instead of
+                // there being nothing else on screen to anticipate. Also directly
+                // shortens the scroll distance between chapters. dvh isn't used here
+                // for the same reason as the sticky layer above avoids it.
+                minHeight: `${chapterHeightVh(w)}vh`,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
@@ -292,18 +507,15 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
                 textAlign: isLeft ? "left" : "right",
                 paddingLeft: isLeft ? railClear + sidePad : sidePad,
                 paddingRight: isLeft ? sidePad : railClear + sidePad,
-                // Bottom padding well beyond the top: the sticky scroll-hint/CTA slot
-                // lives in the same fixed strip near the viewport bottom regardless of
-                // which chapter is showing, so centering content in the *full* viewport
-                // let a chapter with a longer description (PLAY, MATCH) bleed into that
-                // slot. Weighting the padding toward the bottom shifts the visual center
-                // up just enough to clear it, on every chapter, without needing a
-                // per-chapter special case.
-                paddingTop: isMobile ? 50 : 70,
-                paddingBottom: isMobile ? 110 : 150,
+                paddingTop: isMobile ? 60 : 83,
+                paddingBottom: isMobile ? 60 : 83,
                 opacity: 0.05 + 0.95 * t,
                 transform: `scale(${0.95 + 0.05 * t})`,
-                willChange: "opacity, transform",
+                // Blurred while out of its own hold window, sharpening to 0 right as it
+                // locks in — this is what makes an upcoming chapter read as "coming
+                // into focus" rather than just fading up already-sharp.
+                filter: `blur(${(1 - t) * 8}px)`,
+                willChange: "opacity, transform, filter",
               }}
             >
               <p
@@ -328,7 +540,10 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
                   alignItems: "center",
                   gap: isMobile ? 10 : 16,
                   marginTop: isMobile ? 12 : 22,
-                  opacity: t > 0.55 ? Math.min(1, (t - 0.55) / 0.45) : 0,
+                  // Stays hidden until the title is essentially fully locked in (not
+                  // just "mostly faded up," per feedback that it should reveal only
+                  // once the title itself is in focus), then ramps in quickly.
+                  opacity: t > 0.8 ? Math.min(1, (t - 0.8) / 0.2) : 0,
                 }}
               >
                 <span
@@ -354,6 +569,14 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
             </div>
           );
         })}
+        <div style={{ height: `${edgeSpacerVh(w)}vh` }} />
+        {/* Real scroll room for the finale phase — FINALE_SCROLL_VH of it drives the
+            pop-in (financeProgress above), the remaining FINALE_HOLD_VH just lets the
+            fully-revealed finale sit on screen for a while before the user reaches the
+            true bottom of the page, rather than the reveal finishing right as scrolling
+            runs out. No content of its own: the finale itself renders in the sticky
+            layer above, not here. */}
+        <div style={{ height: `${FINALE_SCROLL_VH + FINALE_HOLD_VH}vh` }} />
       </div>
     </div>
   );

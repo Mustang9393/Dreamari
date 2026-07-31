@@ -118,6 +118,29 @@ body {
   }
 }
 
+/* ── Landing page: How It Works finale title color wash (rainbow → brand blue) ── */
+@keyframes finale-title-wash {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+/* ── Landing page: How It Works finale circle pulse ── */
+@keyframes finale-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 22px var(--pulse-glow, rgba(255, 255, 255, 0.5));
+  }
+  50% {
+    transform: scale(1.07);
+    box-shadow: 0 0 36px 6px var(--pulse-glow, rgba(255, 255, 255, 0.7));
+  }
+}
+
 /* ── Landing page: cloud float ── */
 @keyframes cloud-float {
   0%,
