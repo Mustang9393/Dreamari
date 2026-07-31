@@ -49,7 +49,7 @@ export function CongratulationsStep({ onBack, onSeeMatches }: CongratulationsSte
         </div>
       </div>
 
-      <FlowButton onClick={() => onSeeMatches(PATHWAYS[selected].title)}>
+      <FlowButton onClick={() => onSeeMatches(PATHWAYS[selected].title)} className="mt-2 sm:mt-3">
         See Matches →
       </FlowButton>
     </FlowCard>

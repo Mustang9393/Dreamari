@@ -1,4 +1,5 @@
 import { dispatchAuroraPulse } from "./aurora/pulse";
+import { CheckIcon } from "./icons";
 
 type RadioPillGroupProps = {
   label: string;
@@ -27,13 +28,14 @@ export function RadioPillGroup({ label, options, value, onChange }: RadioPillGro
                 onChange(option);
               }}
               aria-pressed={selected}
-              className={`flex-1 rounded-full border px-3 py-2 text-center text-sm font-bold whitespace-nowrap transition-colors sm:py-2.5 ${
+              className={`flex flex-1 items-center justify-center gap-1 rounded-full border px-2 py-1.5 text-center text-[13px] font-bold whitespace-nowrap transition-colors sm:gap-1.5 sm:px-3 sm:py-2.5 sm:text-sm ${
                 selected
-                  ? "border-[var(--step-accent)] bg-[color-mix(in_srgb,var(--step-accent)_14%,white)] text-[color:var(--step-accent)] dark:border-[color-mix(in_srgb,var(--step-accent)_65%,black)] dark:bg-[color-mix(in_srgb,var(--step-accent)_20%,black)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]"
+                  ? "border-[var(--step-accent)] bg-[var(--step-accent)] text-white"
                   : "border-border-subtle bg-surface-tertiary text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
               }`}
             >
               {option}
+              {selected && <CheckIcon className="size-3.5 shrink-0" />}
             </button>
           );
         })}

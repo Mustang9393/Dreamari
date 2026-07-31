@@ -1,8 +1,8 @@
-import { Chip } from "../Chip";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { BackButton } from "../BackButton";
 import { GifBanner } from "../GifBanner";
+import { GridOption } from "../GridOption";
+import { StepHeader } from "../StepHeader";
 
 const SKILLS = ["Problem Solving", "Communication", "Creativity", "Leadership", "Teamwork", "Analysis", "Organization", "Adaptability"];
 
@@ -17,46 +17,32 @@ type ConfidenceCheckStepProps = {
 
 export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNext }: ConfidenceCheckStepProps) {
   return (
-    <FlowCard>
-      <div className="flex w-full flex-col gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <BackButton onClick={onBack} />
-          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CONFIDENCE CHECK</p>
-        </div>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are you most confident doing?</p>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pick up to 3 strengths you already have</p>
-      </div>
+    <FlowCard
+      header={
+        <StepHeader
+          eyebrow="CONFIDENCE CHECK"
+          title="What are you most confident doing?"
+          subtitle="Pick up to 3 strengths you already have"
+          onBack={onBack}
+        />
+      }
+    >
+      <GifBanner gifId="G1X87RbwxK2EgZQbAd" alt="Cristiano Ronaldo looking confident" focus="center" maxHeight={190} />
 
-      <GifBanner gifId="G1X87RbwxK2EgZQbAd" alt="Cristiano Ronaldo looking confident" focus="center" />
-
-      <div className="flex flex-wrap gap-2">
+      <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
         {SKILLS.map((skill) => {
           const index = strengths.indexOf(skill);
           const selected = index !== -1;
           const disabled = !selected && strengths.length >= MAX_STRENGTHS;
-          return (
-            <Chip
-              key={skill}
-              label={skill}
-              selected={selected}
-              order={selected ? index + 1 : null}
-              onClick={() => !disabled && onToggleStrength(skill)}
-            />
-          );
+          return <GridOption key={skill} label={skill} selected={selected} disabled={disabled} onClick={() => onToggleStrength(skill)} />;
         })}
       </div>
 
-      {strengths.length > 0 && (
-        <div className="w-full rounded-xl bg-[color-mix(in_srgb,var(--step-accent)_14%,white)] p-3.5 dark:bg-[color-mix(in_srgb,var(--step-accent)_20%,black)]">
-          <p className="text-sm font-semibold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">Nice ✨ {strengths[0]} is a superpower in almost every field!</p>
-        </div>
-      )}
-
-      <div className="flex w-full flex-col gap-3.5">
+      <div className="mt-2 flex w-full flex-col gap-3.5 sm:mt-3">
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[11px] text-slate-400/70 dark:text-slate-500/70">
+        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">
           Based on Self-Efficacy Theory — Albert Bandura, Stanford University
         </p>
       </div>

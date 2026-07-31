@@ -1,4 +1,4 @@
-export const TOTAL_STEPS = 11;
+export const TOTAL_STEPS = 12;
 
 // One ambient mood per screen (background only — cards/buttons stay on the
 // single amber accent). Reassigned from the original Figma set, all still
@@ -7,19 +7,23 @@ export const TOTAL_STEPS = 11;
 // closest thing to yellow already in the palette — for SpongeBob). Welcome
 // and Congratulations are pinned to blue as deliberate start/end bookends;
 // everything else is spread across the remaining colors so the back half of
-// the flow doesn't read as one repeated blue block anymore.
+// the flow doesn't read as one repeated blue block anymore. Spend Your Days
+// (step 6, inserted after Confidence Check to match the reference app, which
+// has this step and we previously didn't) reuses Academic Journey's teal —
+// both are "interest exploration" steps and aren't adjacent in the sequence.
 export const STEP_AURORA_ACCENTS: string[] = [
   "#1f5ff0", // 1 Welcome — blue bookend
   "#10b981", // 2 Choose Path
   "#ea580c", // 3 About You
   "#0f766e", // 4 Academic Journey
   "#dc2626", // 5 Confidence Check — red, matches its Ronaldo gif
-  "#0d9488", // 6 Work Style
-  "#d97706", // 7 Future Values — amber, closest to yellow, matches its SpongeBob gif
-  "#ea580c", // 8 Path Forward
-  "#10b981", // 9 Financial
-  "#0d9488", // 10 Location
-  "#1f5ff0", // 11 Congratulations — blue bookend
+  "#0f766e", // 6 Spend Your Days — teal, reused from Academic Journey
+  "#0d9488", // 7 Work Style
+  "#d97706", // 8 Future Values — amber, closest to yellow, matches its SpongeBob gif
+  "#ea580c", // 9 Path Forward
+  "#10b981", // 10 Financial
+  "#0d9488", // 11 Location
+  "#1f5ff0", // 12 Congratulations — blue bookend
 ];
 
 type StepGradient = { from: string; to: string };
@@ -31,7 +35,7 @@ type StepGradient = { from: string; to: string };
 // equals STEP_AURORA_ACCENTS' own amber (#d97706), but its button and progress-bar
 // gradients use their own distinct, slightly brighter stops.
 export const STEP_GRADIENT_OVERRIDES: Partial<Record<number, { button: StepGradient; progress: StepGradient }>> = {
-  7: {
+  8: {
     button: { from: "#ffcf04", to: "#f37c11" },
     progress: { from: "#fbbf24", to: "#f37a10" },
   },
@@ -45,6 +49,7 @@ export type FlowState = {
   gpaRange: string;
   subjects: string[];
   strengths: string[];
+  activities: string[];
   energy: string;
   teamStyle: string;
   interaction: string;
@@ -62,9 +67,10 @@ export const INITIAL_FLOW_STATE: FlowState = {
   gpaRange: "3.8 - 4.0",
   subjects: ["Computer Science", "Science", "Business"],
   strengths: ["Problem Solving", "Creativity", "Teamwork"],
-  energy: "Flexible",
+  activities: ["Build things", "Be creative", "Lead others"],
+  energy: "Balanced",
   teamStyle: "Small team",
-  interaction: "Hybrid",
+  interaction: "Some talking",
   values: ["Income", "Impact", "Creativity"],
   pathForward: 1,
   financial: 0,

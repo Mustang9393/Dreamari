@@ -14,6 +14,10 @@ type GifBannerProps = {
    * the default — but caption-free ones with a centered subject (a face, a gesture) need
    * "center" instead, or the crop cuts the subject off entirely. */
   focus?: "bottom" | "center";
+  /** Overrides the default 420px sanity ceiling — used to match a specific gif's height to
+   * the reference (e.g. the Confidence Check step's Ronaldo gif, a wide banner-style crop
+   * that should read much shorter than a typical square/portrait meme gif). */
+  maxHeight?: number;
 };
 
 // Placeholder aspect ratio before the real gif has loaded — close to the middle of what
@@ -21,7 +25,7 @@ type GifBannerProps = {
 // true ratio swaps in.
 const DEFAULT_RATIO = 1.4;
 
-export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps) {
+export function GifBanner({ gifId, alt = "", focus = "bottom", maxHeight = 420 }: GifBannerProps) {
   const [ratio, setRatio] = useState(DEFAULT_RATIO);
   const [failed, setFailed] = useState(false);
 
@@ -49,7 +53,7 @@ export function GifBanner({ gifId, alt = "", focus = "bottom" }: GifBannerProps)
     // itself is the whole visual.
     <div
       className="relative w-full shrink-0 self-center overflow-hidden rounded-xl bg-black/5 dark:bg-white/5"
-      style={{ aspectRatio: ratio, maxHeight: 420 }}
+      style={{ aspectRatio: ratio, maxHeight }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

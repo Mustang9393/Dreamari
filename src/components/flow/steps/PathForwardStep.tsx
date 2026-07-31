@@ -1,13 +1,12 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { BackButton } from "../BackButton";
 import { PathOption } from "../PathOption";
-import { BookIcon } from "../icons";
+import { StepHeader } from "../StepHeader";
 
 const OPTIONS = [
-  { title: "2–4 years", sub: "Associate degree, trade certification, or apprenticeship" },
-  { title: "4 years", sub: "Bachelor's degree at a college or university" },
-  { title: "6+ years", sub: "Graduate school, medical, law, or doctoral program" },
+  { title: "2–4 years", sub: "Trade school, community college, or associate degree", emoji: "⚡" },
+  { title: "4 years", sub: "Traditional 4-year university or bachelor's degree", emoji: "🎓" },
+  { title: "6+ years", sub: "Graduate or professional school (law, medicine, etc.)", emoji: "🔬" },
 ];
 
 type PathForwardStepProps = {
@@ -19,20 +18,21 @@ type PathForwardStepProps = {
 
 export function PathForwardStep({ pathForward, onChange, onBack, onNext }: PathForwardStepProps) {
   return (
-    <FlowCard>
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <BackButton onClick={onBack} />
-          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE HORIZONS</p>
-        </div>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">How much time do you want to invest in further study?</p>
-      </div>
-
-      <div className="flex w-full flex-col gap-3.5">
+    <FlowCard
+      header={
+        <StepHeader
+          eyebrow="FUTURE HORIZONS"
+          title="Design Your Path Forward"
+          subtitle="How long are you thinking about studying after high school?"
+          onBack={onBack}
+        />
+      }
+    >
+      <div className="flex w-full flex-col gap-2 sm:gap-3.5">
         {OPTIONS.map((option, index) => (
           <PathOption
             key={option.title}
-            icon={<BookIcon />}
+            icon={<span className="text-lg">{option.emoji}</span>}
             title={option.title}
             sub={option.sub}
             selected={pathForward === index}
@@ -41,7 +41,7 @@ export function PathForwardStep({ pathForward, onChange, onBack, onNext }: PathF
         ))}
       </div>
 
-      <FlowButton onClick={onNext}>
+      <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
         Complete Build Phase →
       </FlowButton>
     </FlowCard>

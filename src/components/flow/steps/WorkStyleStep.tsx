@@ -1,7 +1,33 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { BackButton } from "../BackButton";
 import { RadioPillGroup } from "../RadioPillGroup";
+import { StepHeader } from "../StepHeader";
+
+// Populates in question order (energy, then team style, then interaction), not
+// selection order, so the numbering reads as "your three answers, in the order we
+// asked" rather than shuffling as the user changes their mind. Lays the numbered rows
+// out horizontally on mobile/tablet (a wide, short strip below the pills) and switches
+// to a vertical stack only at the desktop breakpoint, where it sits as its own column
+// beside the pills instead of below them.
+function SetupPanel({ energy, teamStyle, interaction }: { energy: string; teamStyle: string; interaction: string }) {
+  const rows = [energy, teamStyle, interaction].filter(Boolean);
+
+  return (
+    <div className="flex w-full flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 lg:w-[240px] lg:shrink-0 dark:border-white/10 dark:bg-white/5">
+      <p className="text-xs font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Your setup</p>
+      <ol className="flex flex-row flex-wrap gap-x-4 gap-y-2 lg:flex-col lg:gap-2">
+        {rows.map((row, index) => (
+          <li key={row} className="flex items-center gap-2.5">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--step-accent)] text-[11px] font-bold text-white">
+              {index + 1}
+            </span>
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{row}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 type WorkStyleStepProps = {
   energy: string;
@@ -25,44 +51,32 @@ export function WorkStyleStep({
   onNext,
 }: WorkStyleStepProps) {
   return (
-    <FlowCard>
-      <div className="flex w-full flex-col gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <BackButton onClick={onBack} />
-          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">WORKPLACE PREFERENCE</p>
+    <FlowCard header={<StepHeader eyebrow="WORKPLACE PREFERENCE" title="Where do you work best?" subtitle="Pick one from each row." onBack={onBack} />}>
+      <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="flex w-full flex-col gap-4">
+          <RadioPillGroup label="Your Energy" options={["Fast pace", "Calm", "Balanced"]} value={energy} onChange={onChangeEnergy} />
+          <RadioPillGroup
+            label="Your Team Style"
+            options={["Solo", "Small team", "Big team"]}
+            value={teamStyle}
+            onChange={onChangeTeamStyle}
+          />
+          <RadioPillGroup
+            label="Your Interaction Style"
+            options={["Talk a lot", "Some talking", "Mostly solo"]}
+            value={interaction}
+            onChange={onChangeInteraction}
+          />
         </div>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Where do you work best?</p>
+
+        <SetupPanel energy={energy} teamStyle={teamStyle} interaction={interaction} />
       </div>
 
-      <div className="flex w-full flex-col gap-4">
-        <RadioPillGroup label="Energy" options={["Early bird", "Night owl", "Flexible"]} value={energy} onChange={onChangeEnergy} />
-        <RadioPillGroup
-          label="Team Style"
-          options={["Solo", "Small team", "Big team"]}
-          value={teamStyle}
-          onChange={onChangeTeamStyle}
-        />
-        <RadioPillGroup
-          label="Interaction"
-          options={["In-person", "Remote", "Hybrid"]}
-          value={interaction}
-          onChange={onChangeInteraction}
-        />
-      </div>
-
-      <div className="flex w-full flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-tertiary p-4 dark:border-white/10 dark:bg-white/5">
-        <p className="text-xs font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Your setup</p>
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-          {energy} energy • {teamStyle} • {interaction} interaction
-        </p>
-        <p className="text-xs font-bold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">Sounds like a great fit for you! ✨</p>
-      </div>
-
-      <div className="flex w-full flex-col gap-3">
+      <div className="mt-2 flex w-full flex-col gap-3 sm:mt-3">
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[11px] text-slate-400/70 dark:text-slate-500/70">Based on work style and environment data from ONET (U.S. Department of Labor)</p>
+        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">Based on work style and environment data from O*NET (U.S. Department of Labor)</p>
       </div>
     </FlowCard>
   );

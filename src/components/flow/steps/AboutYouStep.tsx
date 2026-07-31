@@ -1,6 +1,6 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { BackButton } from "../BackButton";
+import { StepHeader } from "../StepHeader";
 import { LabeledInput } from "../LabeledInput";
 import { LabeledSelect } from "../LabeledSelect";
 
@@ -28,16 +28,10 @@ export function AboutYouStep({
   onNext,
 }: AboutYouStepProps) {
   return (
-    <FlowCard>
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <BackButton onClick={onBack} />
-          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">BASIC INFO</p>
-        </div>
-        <p className="text-[22px] font-bold text-slate-900 dark:text-white">Tell Me About Yourself</p>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">So I Can Find Your Perfect Matches</p>
-      </div>
-      <div className="flex w-full flex-col gap-5">
+    <FlowCard
+      header={<StepHeader eyebrow="BASIC INFO" title="Tell Me About Yourself" subtitle="So I Can Find Your Perfect Matches" onBack={onBack} />}
+    >
+      <div className="flex w-full flex-col gap-3.5 sm:gap-5">
         <LabeledInput label="What's your full name?" value={fullName} onChange={onChangeFullName} />
         <LabeledInput label="What's your school or workplace?" value={schoolWorkplace} onChange={onChangeSchoolWorkplace} />
         <LabeledSelect
@@ -48,7 +42,7 @@ export function AboutYouStep({
           highlighted
         />
       </div>
-      <FlowButton onClick={onNext}>
+      <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
         Continue →
       </FlowButton>
     </FlowCard>

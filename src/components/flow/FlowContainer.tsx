@@ -19,6 +19,7 @@ import { ChoosePathStep } from "./steps/ChoosePathStep";
 import { AboutYouStep } from "./steps/AboutYouStep";
 import { AcademicJourneyStep } from "./steps/AcademicJourneyStep";
 import { ConfidenceCheckStep } from "./steps/ConfidenceCheckStep";
+import { SpendYourDaysStep } from "./steps/SpendYourDaysStep";
 import { WorkStyleStep } from "./steps/WorkStyleStep";
 import { FutureValuesStep } from "./steps/FutureValuesStep";
 import { PathForwardStep } from "./steps/PathForwardStep";
@@ -27,7 +28,7 @@ import { LocationStep } from "./steps/LocationStep";
 import { CongratulationsStep } from "./steps/CongratulationsStep";
 
 const MATCH_LOADING_MS = 1800;
-// Match phase isn't one of the 11 Build steps, so it isn't in STEP_AURORA_ACCENTS —
+// Match phase isn't one of the 12 Build steps, so it isn't in STEP_AURORA_ACCENTS —
 // reuses the same blue as the Welcome/Congratulations bookends for a consistent brand
 // accent rather than introducing a new color.
 const MATCH_ACCENT = "#1f5ff0";
@@ -115,6 +116,15 @@ export function FlowContainer() {
     );
   else if (step === 6)
     content = (
+      <SpendYourDaysStep
+        activities={state.activities}
+        onToggleActivity={(activity) => patch({ activities: toggleInList(state.activities, activity) })}
+        onBack={back}
+        onNext={next}
+      />
+    );
+  else if (step === 7)
+    content = (
       <WorkStyleStep
         energy={state.energy}
         teamStyle={state.teamStyle}
@@ -126,7 +136,7 @@ export function FlowContainer() {
         onNext={next}
       />
     );
-  else if (step === 7)
+  else if (step === 8)
     content = (
       <FutureValuesStep
         values={state.values}
@@ -135,13 +145,13 @@ export function FlowContainer() {
         onNext={next}
       />
     );
-  else if (step === 8)
-    content = <PathForwardStep pathForward={state.pathForward} onChange={(pathForward) => patch({ pathForward })} onBack={back} onNext={next} />;
   else if (step === 9)
-    content = <FinancialStep financial={state.financial} onChange={(financial) => patch({ financial })} onBack={back} onNext={next} />;
+    content = <PathForwardStep pathForward={state.pathForward} onChange={(pathForward) => patch({ pathForward })} onBack={back} onNext={next} />;
   else if (step === 10)
+    content = <FinancialStep financial={state.financial} onChange={(financial) => patch({ financial })} onBack={back} onNext={next} />;
+  else if (step === 11)
     content = <LocationStep location={state.location} onChange={(location) => patch({ location })} onBack={back} onNext={next} />;
-  else if (step === 11) content = <CongratulationsStep onBack={back} onSeeMatches={seeMatches} />;
+  else if (step === 12) content = <CongratulationsStep onBack={back} onSeeMatches={seeMatches} />;
 
   return (
     <ThemeProvider>

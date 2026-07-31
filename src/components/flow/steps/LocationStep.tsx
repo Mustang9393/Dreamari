@@ -1,7 +1,7 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
-import { BackButton } from "../BackButton";
 import { SelectionRow } from "../SelectionRow";
+import { StepHeader } from "../StepHeader";
 import { CompassIcon, GlobeIcon, HomeIcon, MapIcon } from "../icons";
 
 const OPTIONS = [
@@ -23,16 +23,8 @@ type LocationStepProps = {
 
 export function LocationStep({ location, onChange, onBack, onNext }: LocationStepProps) {
   return (
-    <FlowCard>
-      <div className="flex w-full flex-col gap-2">
-        <div className="flex items-center gap-1.5">
-          <BackButton onClick={onBack} />
-          <p className="flex-1 text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">Location Flexibility</p>
-        </div>
-        <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">Choose what fits you best</p>
-      </div>
-
-      <div className="flex w-full flex-col gap-3">
+    <FlowCard header={<StepHeader eyebrow="LOCATION PREFERENCE" title="Location Flexibility" subtitle="Choose what fits you best" onBack={onBack} />}>
+      <div className="flex w-full flex-col gap-2 sm:gap-3">
         {OPTIONS.map((option, index) => (
           <SelectionRow
             key={option.title}
@@ -45,8 +37,8 @@ export function LocationStep({ location, onChange, onBack, onNext }: LocationSte
         ))}
       </div>
 
-      <FlowButton onClick={onNext}>
-        See my results →
+      <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
+        Finish →
       </FlowButton>
     </FlowCard>
   );
