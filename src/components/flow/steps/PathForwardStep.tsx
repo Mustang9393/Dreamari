@@ -32,7 +32,7 @@ export function PathForwardStep({ pathForward, onChange, onBack, onNext }: PathF
         {OPTIONS.map((option, index) => (
           <PathOption
             key={option.title}
-            icon={<span className="text-lg">{option.emoji}</span>}
+            icon={option.emoji}
             title={option.title}
             sub={option.sub}
             selected={pathForward === index}

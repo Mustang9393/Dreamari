@@ -30,20 +30,25 @@ function tone(ctx: AudioContext, freq: number, startTime: number, duration: numb
   osc.stop(startTime + duration + 0.02);
 }
 
+// Peak gains bumped well up from their original 0.07-0.13 — those read as basically
+// silent on a phone's own speaker at normal system volume (as opposed to headphones or
+// a quiet room), which is almost certainly why "no sound" was reported despite the
+// audio graph itself running correctly.
+
 // Bright, quick upward two-note chime — a small "yes" for every like.
 export function playLikeSound() {
   const ctx = getAudioContext();
   if (!ctx) return;
   const now = ctx.currentTime;
-  tone(ctx, 660, now, 0.08, 0.09);
-  tone(ctx, 990, now + 0.05, 0.14, 0.11);
+  tone(ctx, 660, now, 0.08, 0.24);
+  tone(ctx, 990, now + 0.05, 0.14, 0.28);
 }
 
 // Soft, low single tap — neutral/dismissive, not a "failure" sound, just a beat.
 export function playPassSound() {
   const ctx = getAudioContext();
   if (!ctx) return;
-  tone(ctx, 260, ctx.currentTime, 0.11, 0.07, "triangle");
+  tone(ctx, 260, ctx.currentTime, 0.11, 0.2, "triangle");
 }
 
 // Short descending two-note — undoing a like/pass, something coming back off the list.
@@ -51,8 +56,8 @@ export function playRemovedSound() {
   const ctx = getAudioContext();
   if (!ctx) return;
   const now = ctx.currentTime;
-  tone(ctx, 520, now, 0.07, 0.08);
-  tone(ctx, 360, now + 0.05, 0.12, 0.08);
+  tone(ctx, 520, now, 0.07, 0.22);
+  tone(ctx, 360, now + 0.05, 0.12, 0.22);
 }
 
 // Triumphant three-note ascending arpeggio — reserved for the "Path Saved!" moment,
@@ -61,7 +66,7 @@ export function playSavedSound() {
   const ctx = getAudioContext();
   if (!ctx) return;
   const now = ctx.currentTime;
-  tone(ctx, 523, now, 0.1, 0.1);
-  tone(ctx, 659, now + 0.09, 0.1, 0.11);
-  tone(ctx, 784, now + 0.18, 0.22, 0.13);
+  tone(ctx, 523, now, 0.1, 0.26);
+  tone(ctx, 659, now + 0.09, 0.1, 0.28);
+  tone(ctx, 784, now + 0.18, 0.22, 0.32);
 }

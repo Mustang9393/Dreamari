@@ -4,18 +4,21 @@ import type { MatchCardKey, MatchPath } from "./types";
 // per type, same canvas as the screens in node 630:38908) — Figma's own gradient
 // inserts a darkened-tint middle stop that reads as muddy rather than a clean glow, so
 // only its top (near-black) and bottom (saturated hue) stops are used; see types.ts.
-// Tags/emoji copied exactly. Replit's five real card types don't share the same names
-// as Figma's, so each is paired with the Figma type it's closest to in meaning
-// (Workstyle -> "Work Style", Future Fit -> "Pathway"). "Earning Potential" has no good
-// thematic match (nearest unused type, "Daily Work", has Build/Test/Improve tags that
-// don't fit a pay-range card), so its tags are left empty rather than showing a
-// mismatched set.
-export const MATCH_CARD_META: Record<MatchCardKey, { label: string; emoji: string; tags: string[]; gradient: readonly [string, string] }> = {
-  classes: { label: "Classes", emoji: "🏫", tags: ["Algorithms", "Data", "Projects"], gradient: ["rgb(2, 4, 9)", "rgb(234, 68, 89)"] },
-  workstyle: { label: "Workstyle", emoji: "👥", tags: ["Focused", "Team-based", "Flexible"], gradient: ["rgb(2, 4, 9)", "rgb(255, 246, 160)"] },
-  skills: { label: "Skills", emoji: "⚙️", tags: ["Logic", "Systems", "Communication"], gradient: ["rgb(2, 4, 9)", "rgb(10, 181, 255)"] },
-  earning: { label: "Earning Potential", emoji: "💰", tags: [], gradient: ["rgb(2, 4, 9)", "rgb(154, 57, 251)"] },
-  future: { label: "Future Fit", emoji: "🧭", tags: ["Explore", "Practice", "Specialize"], gradient: ["rgb(2, 4, 9)", "rgb(1, 190, 88)"] },
+// Emoji copied exactly. The card component no longer has a tags row at all in the
+// updated Figma (node 630:38953's own children are just the graphic area and the
+// description box) — dropped here to match.
+//
+// workstyle/skills were re-tuned away from Figma's own pale pastel-yellow and bright
+// cyan — both read as washed out and off-brand next to the rest of the app. Replaced
+// with our own accent palette instead (see STEP_AURORA_ACCENTS in ../types.ts): amber
+// #d97706 (same amber used for Future Values/Academic Journey) for workstyle, and brand
+// blue #1f5ff0 (same blue as the Welcome/Congratulations bookends) for skills.
+export const MATCH_CARD_META: Record<MatchCardKey, { label: string; emoji: string; gradient: readonly [string, string] }> = {
+  classes: { label: "Classes", emoji: "🏫", gradient: ["rgb(2, 4, 9)", "rgb(234, 68, 89)"] },
+  workstyle: { label: "Workstyle", emoji: "👥", gradient: ["rgb(2, 4, 9)", "rgb(217, 119, 6)"] },
+  skills: { label: "Skills", emoji: "⚙️", gradient: ["rgb(2, 4, 9)", "rgb(31, 95, 240)"] },
+  earning: { label: "Earning Potential", emoji: "💰", gradient: ["rgb(2, 4, 9)", "rgb(154, 57, 251)"] },
+  future: { label: "Future Fit", emoji: "🧭", gradient: ["rgb(2, 4, 9)", "rgb(1, 190, 88)"] },
 };
 
 const CARD_ORDER: MatchCardKey[] = ["classes", "workstyle", "skills", "earning", "future"];

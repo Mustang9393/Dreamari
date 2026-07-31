@@ -3,7 +3,6 @@ export type MatchCardKey = "classes" | "workstyle" | "skills" | "earning" | "fut
 export type MatchCardMeta = {
   label: string;
   emoji: string;
-  tags: string[];
   // [top, bottom] for a 2-stop gradient — near-black (dark mode) or white (light mode)
   // fading directly to the full saturated hue at the card's bottom edge. Figma's own
   // spec (node 616:xxxxx per type) inserts a third, darkened-tint stop in between, but

@@ -107,6 +107,20 @@ body {
   initial-value: #1f5ff0;
 }
 
+/* ── Match Experience: swipe-gesture tutorial hint ── */
+@keyframes swipe-hint-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-34px) rotate(-6deg);
+  }
+  70% {
+    transform: translateX(34px) rotate(6deg);
+  }
+}
+
 @keyframes step-in {
   from {
     opacity: 0;

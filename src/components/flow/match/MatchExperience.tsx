@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MatchActionButtons } from "./MatchActionButtons";
-import { MatchCard } from "./MatchCard";
+import { MatchDeck, type MatchDeckHandle } from "./MatchDeck";
 import { MatchProgressPanel } from "./MatchProgressPanel";
 import { MatchToast } from "./MatchToast";
 import { PathSavedModal } from "./PathSavedModal";
@@ -27,6 +27,7 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pendingPathSaved, setPendingPathSaved] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deckRef = useRef<MatchDeckHandle>(null);
 
   useEffect(() => {
     return () => {
@@ -62,7 +63,12 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
     }
   }
 
-  function handleSwipe(direction: SwipeDirection) {
+  // Called only once the deck's own fling-off animation has actually finished (see
+  // MatchDeck's onSwipeComplete) — whether that swipe came from a drag release or a
+  // Pass/Like button click, both go through the same animated exit first, so the state
+  // update (and the toast appearing) always lines up with the new card actually being
+  // revealed rather than jumping ahead of what's on screen.
+  function handleSwipeComplete(direction: SwipeDirection) {
     if (direction === "like") {
       setLiked((keys) => [...keys, card.key]);
       playLikeSound();
@@ -76,7 +82,6 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
       setCardIndex((i) => i + 1);
       return;
     }
-    // Liked-count check needs the just-recorded like, not the pre-swipe state.
     const likedCount = direction === "like" ? liked.length + 1 : liked.length;
     if (likedCount >= SAVE_THRESHOLD) {
       setPendingPathSaved(true);
@@ -96,36 +101,28 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
     playRemovedSound();
   }
 
-  const progressPanel = <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />;
-  const deck = (
-    <div className="flex w-full flex-col items-center gap-6 sm:w-[380px]">
-      <MatchCard card={card} />
-      <MatchActionButtons onPass={() => handleSwipe("pass")} onLike={() => handleSwipe("like")} />
-    </div>
-  );
-
   return (
-    <div className="flex w-full max-w-4xl flex-col items-center gap-6">
-      {/* Desktop: two columns — title/progress on the left, card deck on the right. */}
-      <div className="hidden w-full items-center justify-center gap-16 lg:flex">
-        <div className="flex w-[460px] flex-col gap-10">
-          <div className="flex flex-col gap-4">
-            <span className="text-[15px] font-semibold text-[#1f5ff0]">MATCH EXPERIENCE</span>
-            <h1 className="text-[44px] leading-[52px] font-extrabold tracking-[-1px] text-slate-900 dark:text-white">{path.title}</h1>
-          </div>
-          {progressPanel}
-        </div>
-        {deck}
+    // One responsive column, matching the updated Figma layout exactly — desktop is no
+    // longer a two-column "title/progress beside the card deck" split, it's the same
+    // stacked structure as mobile (eyebrow → title → progress → deck → buttons), just
+    // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+      <div className="flex w-full flex-col gap-1">
+        <span className="text-sm font-semibold text-[#1f5ff0] lg:text-[15px]">MATCH EXPERIENCE</span>
+        <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
+          {path.title}
+        </h1>
+        <p className="text-xs text-slate-600 lg:hidden dark:text-[#b3ccff]">Swipe right on what fits you, left on what doesn&apos;t.</p>
       </div>
 
-      {/* Mobile: stacked — progress panel, title, card deck. */}
-      <div className="flex w-full max-w-md flex-col items-center gap-4 lg:hidden">
-        {progressPanel}
-        <div className="flex w-full flex-col items-center gap-2 text-center">
-          <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 dark:text-white">{path.title}</h1>
-          <p className="text-xs text-slate-600 dark:text-[#b3ccff]">Swipe right on what fits you, left on what doesn&apos;t.</p>
-        </div>
-        {deck}
+      <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />
+
+      <div className="w-full sm:w-[380px] lg:w-full">
+        <MatchDeck ref={deckRef} cards={path.cards.slice(cardIndex)} onSwipeComplete={handleSwipeComplete} />
+      </div>
+
+      <div className="w-full sm:w-[380px] lg:w-full">
+        <MatchActionButtons onPass={() => deckRef.current?.swipe("pass")} onLike={() => deckRef.current?.swipe("like")} />
       </div>
 
       {toast && <MatchToast label={toast.label} direction={toast.direction} onUndo={handleUndo} />}

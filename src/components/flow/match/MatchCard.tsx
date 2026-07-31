@@ -32,19 +32,6 @@ export function MatchCard({ card }: MatchCardProps) {
       />
 
       <div className="relative flex flex-1 flex-col gap-5">
-        {card.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {card.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-white/20 dark:bg-white/10 dark:text-[#b0b6c2]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
         <div className="flex h-32 w-full flex-1 flex-col items-center justify-center gap-2 rounded-xl">
           <span className="text-[64px] leading-none">{card.emoji}</span>
           <p className="text-center text-[30px] leading-[38px] font-extrabold tracking-[-0.5px] text-slate-900 sm:text-[44px] sm:leading-[52px] sm:tracking-[-1px] dark:text-white">

@@ -32,14 +32,18 @@ function tone(ctx: AudioContext, freq: number, startTime: number, duration: numb
   osc.stop(startTime + duration + 0.02);
 }
 
+// Peak gains bumped well up from their original 0.08-0.12 — those read as basically
+// silent on a phone's own speaker at normal system volume (as opposed to headphones or
+// a quiet room), which is almost certainly why "no sound" was reported despite the
+// audio graph itself running correctly.
 function playSelectSound(ctx: AudioContext) {
-  tone(ctx, 720, ctx.currentTime, 0.08, 0.08);
+  tone(ctx, 720, ctx.currentTime, 0.08, 0.22);
 }
 
 function playCtaSound(ctx: AudioContext) {
   const now = ctx.currentTime;
-  tone(ctx, 540, now, 0.09, 0.1);
-  tone(ctx, 810, now + 0.06, 0.16, 0.12);
+  tone(ctx, 540, now, 0.09, 0.26);
+  tone(ctx, 810, now + 0.06, 0.16, 0.3);
 }
 
 function vibrate(pattern: number | number[]) {
