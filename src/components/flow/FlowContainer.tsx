@@ -9,7 +9,7 @@ import { HomeButton } from "./HomeButton";
 import { StepTransition } from "./StepTransition";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { ThemeToggle } from "./theme/ThemeToggle";
-import { INITIAL_FLOW_STATE, STEP_AURORA_ACCENTS, TOTAL_STEPS, type FlowState } from "./types";
+import { INITIAL_FLOW_STATE, STEP_AURORA_ACCENTS, STEP_GRADIENT_OVERRIDES, TOTAL_STEPS, type FlowState } from "./types";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { ChoosePathStep } from "./steps/ChoosePathStep";
 import { AboutYouStep } from "./steps/AboutYouStep";
@@ -43,7 +43,16 @@ export function FlowContainer() {
 
   const isFinale = step === TOTAL_STEPS;
   const visitedAccents = useMemo(() => STEP_AURORA_ACCENTS.slice(0, step), [step]);
-  const accentVar = { "--step-accent": STEP_AURORA_ACCENTS[step - 1] } as CSSProperties;
+  const accent = STEP_AURORA_ACCENTS[step - 1];
+  const gradientOverride = STEP_GRADIENT_OVERRIDES[step];
+  const derivedTo = `color-mix(in srgb, ${accent} 65%, black)`;
+  const accentVar = {
+    "--step-accent": accent,
+    "--step-button-from": gradientOverride?.button.from ?? accent,
+    "--step-button-to": gradientOverride?.button.to ?? derivedTo,
+    "--step-progress-from": gradientOverride?.progress.from ?? accent,
+    "--step-progress-to": gradientOverride?.progress.to ?? derivedTo,
+  } as CSSProperties;
 
   let content: ReactNode = null;
   if (step === 1) content = <WelcomeStep onNext={next} />;

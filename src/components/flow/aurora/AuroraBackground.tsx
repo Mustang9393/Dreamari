@@ -60,6 +60,46 @@ function gaussian(distance: number, width: number): number {
   return Math.exp(-(distance * distance) / (2 * width * width));
 }
 
+// Light-mode base wash, matched exactly to the Figma reference (node 588:35961):
+// linear-gradient(242.096deg, rgba(127, 168, 255, 0.4) 64.584%, rgb(238, 244, 255) 116.1%).
+// The first stop's alpha is pre-blended over white into an opaque equivalent — the canvas
+// fill has to stay fully opaque every frame (it's what erases the previous frame's dots/
+// ripples), so a literal rgba here would leave a ghosting trail instead of a clean wash.
+const LIGHT_WASH_ANGLE_DEG = 242.096;
+const LIGHT_WASH_STOP_1 = { offsetPercent: 64.584, color: "rgb(204, 220, 255)" };
+const LIGHT_WASH_STOP_2 = { offsetPercent: 116.1, color: "rgb(238, 244, 255)" };
+
+// Reproduces the standard CSS angled-gradient box geometry (0deg = up, clockwise) so stop
+// percentages line up the same way they do in the Figma/CSS source, including stops past
+// 100% (the gradient line is extended past the box's own 100% point rather than clamped,
+// so the box's far edge shows the same partial, not-fully-resolved blend CSS would render).
+function createAngledGradient(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  angleDeg: number,
+  stops: { offsetPercent: number; color: string }[],
+): CanvasGradient {
+  const angleRad = (angleDeg * Math.PI) / 180;
+  const dirX = Math.sin(angleRad);
+  const dirY = -Math.cos(angleRad);
+  const lineLength = Math.abs(width * dirX) + Math.abs(height * dirY);
+  const cx = width / 2;
+  const cy = height / 2;
+  const half = lineLength / 2;
+  const x0 = cx - dirX * half;
+  const y0 = cy - dirY * half;
+  const maxPercent = Math.max(100, ...stops.map((s) => s.offsetPercent));
+  const extendedLength = lineLength * (maxPercent / 100);
+  const x1 = x0 + dirX * extendedLength;
+  const y1 = y0 + dirY * extendedLength;
+  const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+  for (const stop of stops) {
+    gradient.addColorStop(Math.min(1, Math.max(0, stop.offsetPercent / maxPercent)), stop.color);
+  }
+  return gradient;
+}
+
 // Ease-out cubic — fast start, gentle settle. Used for ripple expansion and fade so
 // motion reads as a smooth push, never a mechanical linear sweep or a bounce.
 function easeOutCubic(x: number): number {
@@ -152,6 +192,9 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   // Ripple glow is composited through this isolated, initially-transparent layer instead
   // of drawing straight onto the main canvas — see the draw() loop for why.
   const rippleLayerRef = useRef<HTMLCanvasElement | null>(null);
+  // Cached rather than rebuilt every frame — a CanvasGradient is just a paint definition
+  // bound to fixed coordinates, so it's safe to reuse across frames until the canvas resizes.
+  const lightWashGradientRef = useRef<CanvasGradient | null>(null);
 
   useEffect(() => {
     themeRef.current = theme;
@@ -251,6 +294,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       if (!rippleLayerRef.current) rippleLayerRef.current = document.createElement("canvas");
       rippleLayerRef.current.width = canvas.width;
       rippleLayerRef.current.height = canvas.height;
+
+      lightWashGradientRef.current = ctx
+        ? createAngledGradient(ctx, width, height, LIGHT_WASH_ANGLE_DEG, [LIGHT_WASH_STOP_1, LIGHT_WASH_STOP_2])
+        : null;
     }
 
     // Rebakes each accumulated step-glow blob into its own small offscreen canvas at max
@@ -304,7 +351,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       // the same low alpha that glows nicely on near-black washes out to nothing on white
       // (translucent color over white desaturates fast), so light mode gets higher alpha
       // and a slightly deepened dot color to compensate, not just "the same numbers, inverted."
-      ctx.fillStyle = isDark ? "#070912" : "#f3f4f8";
+      ctx.fillStyle = isDark ? "#070912" : lightWashGradientRef.current ?? "#f3f4f8";
       ctx.fillRect(0, 0, width, height);
 
       // Constant, slow-twinkling starfield across the whole canvas — independent of clicks
@@ -333,13 +380,16 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       // top edge (see edgeWaveAt below) rather than a hard horizontal line.
       const bandBaseTop = height * (1 - BAND_FRACTION);
 
-      if (blobLayerDirtyRef.current) redrawBlobLayers(isDark);
-      {
+      // Accumulated per-step blobs are a dark-mode-only effect — light mode uses the exact
+      // Figma wash as its base and stays on that same wash through the whole flow, so it
+      // doesn't get visually busier/more colorful with every step visited.
+      if (isDark) {
+        if (blobLayerDirtyRef.current) redrawBlobLayers(isDark);
         // Baked layers are already rendered in device pixels — draw 1:1 (identity transform)
         // rather than through the CSS-pixel dpr transform, which would scale them again.
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+        ctx.globalCompositeOperation = "lighter";
         for (let idx = 0; idx < blobs.length; idx++) {
           const blob = blobs[idx];
           const layer = blobLayersRef.current[idx];

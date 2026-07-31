@@ -23,7 +23,7 @@ export function FlowProgress({ step }: FlowProgressProps) {
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-navy-975/80 dark:bg-black/30">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[var(--step-accent)] to-[color-mix(in_srgb,var(--step-accent)_65%,black)] transition-[width] duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-[var(--step-progress-from)] to-[var(--step-progress-to)] transition-[width] duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>

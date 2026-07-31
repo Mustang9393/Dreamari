@@ -22,6 +22,21 @@ export const STEP_AURORA_ACCENTS: string[] = [
   "#1f5ff0", // 11 Congratulations — blue bookend
 ];
 
+type StepGradient = { from: string; to: string };
+
+// Explicit CTA-button/progress-fill gradient stops for steps where the Figma source uses
+// specific colors that don't match the generic "accent → darkened accent" derivation
+// every other step uses. Keyed by step number (1-based). Matched exactly to Figma node
+// 588:35961 (Academic Journey / "Build" chapter, amber) — its eyebrow/text color already
+// equals STEP_AURORA_ACCENTS' own amber (#d97706), but its button and progress-bar
+// gradients use their own distinct, slightly brighter stops.
+export const STEP_GRADIENT_OVERRIDES: Partial<Record<number, { button: StepGradient; progress: StepGradient }>> = {
+  7: {
+    button: { from: "#ffcf04", to: "#f37c11" },
+    progress: { from: "#fbbf24", to: "#f37a10" },
+  },
+};
+
 export type FlowState = {
   path: "High School" | "University" | "Job Seeker";
   fullName: string;
