@@ -1,5 +1,4 @@
 import { Chip } from "../Chip";
-import { CitationNote } from "../CitationNote";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { BackButton } from "../BackButton";
@@ -20,12 +19,9 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
   return (
     <FlowCard>
       <div className="flex w-full flex-col gap-1.5">
-        <div className="flex w-full items-center justify-between gap-1.5">
-          <div className="flex items-center gap-1.5">
-            <BackButton onClick={onBack} />
-            <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CONFIDENCE CHECK</p>
-          </div>
-          <CitationNote citation="Based on Self-Efficacy Theory — Albert Bandura, Stanford University" />
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">CONFIDENCE CHECK</p>
         </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are you most confident doing?</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pick up to 3 strengths you already have</p>
@@ -60,6 +56,9 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
+        <p className="w-full text-center text-[11px] text-slate-400/70 dark:text-slate-500/70">
+          Based on Self-Efficacy Theory — Albert Bandura, Stanford University
+        </p>
       </div>
     </FlowCard>
   );

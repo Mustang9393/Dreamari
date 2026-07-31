@@ -2,7 +2,7 @@ import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { BackButton } from "../BackButton";
 import { SelectionRow } from "../SelectionRow";
-import { HandIcon, LightbulbIcon, PiggyBankIcon, ScaleIcon } from "../icons";
+import { HandIcon, PiggyBankIcon, ScaleIcon } from "../icons";
 
 const OPTIONS = [
   { title: "Cost matters a lot", sub: "I need the most affordable path possible", icon: <PiggyBankIcon /> },
@@ -41,16 +41,12 @@ export function FinancialStep({ financial, onChange, onBack, onNext }: Financial
         ))}
       </div>
 
-      <div className="h-px w-full bg-border-subtle dark:bg-white/10" />
-
-      <div className="flex w-full items-start gap-2">
-        <LightbulbIcon className="mt-0.5 size-4 shrink-0 text-slate-500 dark:text-slate-400" />
-        <p className="flex-1 text-[11px] text-slate-500 dark:text-slate-400">Financial fit improves completion rates by 40 percent (NCES, 2022).</p>
+      <div className="flex w-full flex-col gap-3.5">
+        <FlowButton onClick={onNext}>
+          Next →
+        </FlowButton>
+        <p className="w-full text-center text-[11px] text-slate-400/70 dark:text-slate-500/70">Financial fit improves completion rates by 40 percent (NCES, 2022).</p>
       </div>
-
-      <FlowButton onClick={onNext}>
-        Next →
-      </FlowButton>
     </FlowCard>
   );
 }

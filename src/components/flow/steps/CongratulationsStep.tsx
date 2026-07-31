@@ -13,10 +13,10 @@ const PATHWAYS = [
 
 type CongratulationsStepProps = {
   onBack: () => void;
-  onRestart: () => void;
+  onSeeMatches: (pathway: string) => void;
 };
 
-export function CongratulationsStep({ onBack, onRestart }: CongratulationsStepProps) {
+export function CongratulationsStep({ onBack, onSeeMatches }: CongratulationsStepProps) {
   const [selected, setSelected] = useState(0);
 
   return (
@@ -49,7 +49,7 @@ export function CongratulationsStep({ onBack, onRestart }: CongratulationsStepPr
         </div>
       </div>
 
-      <FlowButton onClick={onRestart}>
+      <FlowButton onClick={() => onSeeMatches(PATHWAYS[selected].title)}>
         See Matches →
       </FlowButton>
     </FlowCard>

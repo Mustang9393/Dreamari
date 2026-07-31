@@ -16,7 +16,6 @@ const FALLOFF = 0.09;
 
 const STEPS = [
   {
-    num: "01",
     key: "build",
     label: "BUILD",
     side: "left" as const,
@@ -26,7 +25,6 @@ const STEPS = [
     Icon: IconAssessment,
   },
   {
-    num: "02",
     key: "match",
     label: "MATCH",
     side: "right" as const,
@@ -36,7 +34,6 @@ const STEPS = [
     Icon: IconTarget,
   },
   {
-    num: "03",
     key: "play",
     label: "PLAY",
     side: "left" as const,
@@ -46,7 +43,6 @@ const STEPS = [
     Icon: IconGamepad,
   },
   {
-    num: "04",
     key: "explore",
     label: "EXPLORE",
     side: "right" as const,
@@ -56,7 +52,6 @@ const STEPS = [
     Icon: IconCompass,
   },
   {
-    num: "05",
     key: "connect",
     label: "CONNECT",
     side: "left" as const,
@@ -278,7 +273,6 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
           const isLeft = step.side === "left";
           const nameFontSize = (isMobile ? Math.min(52, w * 0.16) : Math.min(190, w * 0.1)) * step.sizeScale;
           const descFontSize = isMobile ? 15 : 22;
-          const numFontSize = isMobile ? 11 : 15;
           const iconSize = isMobile ? 34 : 50;
 
           return (
@@ -312,9 +306,6 @@ export function HowItWorksSection({ scrollProgress }: HowItWorksSectionProps) {
                 willChange: "opacity, transform",
               }}
             >
-              <p style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: numFontSize, letterSpacing: "0.4em", color: step.color, margin: 0, marginBottom: isMobile ? 4 : 10 }}>
-                {step.num}
-              </p>
               <p
                 style={{
                   fontFamily: "Montserrat, sans-serif",
