@@ -24,9 +24,11 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            // Defaults to dark unless the user has explicitly chosen light before (and
-            // that choice was saved) — not driven by system preference.
-            __html: `try{var t=localStorage.getItem("dreamari-theme");if(t!=="light"){document.documentElement.classList.add("dark")}}catch(e){}`,
+            // Defaults to dark everywhere except the build flow ("/flow"), which defaults
+            // to light — unless the user has explicitly toggled a preference before (and
+            // that choice was saved), which always wins regardless of route. Not driven
+            // by system preference.
+            __html: `try{var t=localStorage.getItem("dreamari-theme");var isBuild=location.pathname.startsWith("/flow");if(t==="dark"||(!t&&!isBuild)){document.documentElement.classList.add("dark")}}catch(e){}`,
           }}
         />
       </head>

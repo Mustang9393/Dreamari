@@ -1,5 +1,6 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { BackButton } from "../BackButton";
 import { PathOption } from "../PathOption";
 import { BookIcon } from "../icons";
 
@@ -18,9 +19,12 @@ type PathForwardStepProps = {
 
 export function PathForwardStep({ pathForward, onChange, onBack, onNext }: PathForwardStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE HORIZONS</p>
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE HORIZONS</p>
+        </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">How much time do you want to invest in further study?</p>
       </div>
 

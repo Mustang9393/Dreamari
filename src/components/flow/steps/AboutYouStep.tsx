@@ -1,5 +1,6 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { BackButton } from "../BackButton";
 import { LabeledInput } from "../LabeledInput";
 import { LabeledSelect } from "../LabeledSelect";
 
@@ -27,9 +28,12 @@ export function AboutYouStep({
   onNext,
 }: AboutYouStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">BASIC INFO</p>
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">BASIC INFO</p>
+        </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Tell Me About Yourself</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">So I Can Find Your Perfect Matches</p>
       </div>

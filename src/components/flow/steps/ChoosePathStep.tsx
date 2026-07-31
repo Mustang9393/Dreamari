@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BackButton } from "../BackButton";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { PathOption } from "../PathOption";
@@ -20,9 +21,12 @@ type ChoosePathStepProps = {
 
 export function ChoosePathStep({ path, onChange, onBack, onNext }: ChoosePathStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">JOURNEY STAGE</p>
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">JOURNEY STAGE</p>
+        </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Choose Your Path</p>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Where are you starting your journey?</p>
       </div>

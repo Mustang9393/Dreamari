@@ -1,6 +1,7 @@
 import { Chip } from "../Chip";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { BackButton } from "../BackButton";
 import { LabeledSelect } from "../LabeledSelect";
 
 const GPA_RANGES = ["Prefer not to say", "3.8 - 4.0", "3.5 - 3.7", "3.2 - 3.4", "2.8 - 3.1", "2.5 - 2.7", "Below 2.5"];
@@ -42,9 +43,12 @@ export function AcademicJourneyStep({
   onNext,
 }: AcademicJourneyStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">ACADEMIC PATH</p>
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">ACADEMIC PATH</p>
+        </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Your Academic Journey</p>
       </div>
 

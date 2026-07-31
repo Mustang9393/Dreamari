@@ -1,5 +1,6 @@
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { BackButton } from "../BackButton";
 import { SelectionRow } from "../SelectionRow";
 import { HandIcon, LightbulbIcon, PiggyBankIcon, ScaleIcon } from "../icons";
 
@@ -18,9 +19,12 @@ type FinancialStepProps = {
 
 export function FinancialStep({ financial, onChange, onBack, onNext }: FinancialStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex w-full flex-col gap-2">
-        <p className="w-full text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">What Feels Right Financially?</p>
+        <div className="flex items-center gap-1.5">
+          <BackButton onClick={onBack} />
+          <p className="flex-1 text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">What Feels Right Financially?</p>
+        </div>
         <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">Pick one</p>
       </div>
 

@@ -1,5 +1,7 @@
+import { CitationNote } from "../CitationNote";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
+import { BackButton } from "../BackButton";
 import { RadioPillGroup } from "../RadioPillGroup";
 
 type WorkStyleStepProps = {
@@ -24,9 +26,15 @@ export function WorkStyleStep({
   onNext,
 }: WorkStyleStepProps) {
   return (
-    <FlowCard onBack={onBack}>
+    <FlowCard>
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">WORKPLACE PREFERENCE</p>
+        <div className="flex w-full items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <BackButton onClick={onBack} />
+            <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">WORKPLACE PREFERENCE</p>
+          </div>
+          <CitationNote citation="Based on work style and environment data from ONET (U.S. Department of Labor)" />
+        </div>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Where do you work best?</p>
       </div>
 
@@ -58,7 +66,6 @@ export function WorkStyleStep({
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[11px] text-slate-500 dark:text-slate-400">Based on work style and environment data from ONET (U.S. Department of Labor)</p>
       </div>
     </FlowCard>
   );
