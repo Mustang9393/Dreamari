@@ -19,7 +19,7 @@ type FutureValuesStepProps = {
 export function FutureValuesStep({ values, onToggleValue, onBack, onNext }: FutureValuesStepProps) {
   return (
     <FlowCard>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex w-full flex-col gap-1.5">
         <div className="flex w-full items-center justify-between gap-1.5">
           <div className="flex items-center gap-1.5">
             <BackButton onClick={onBack} />
