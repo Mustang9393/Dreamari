@@ -1,4 +1,4 @@
-import { FlowActions } from "../FlowActions";
+import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { SelectionRow } from "../SelectionRow";
 import { HandIcon, LightbulbIcon, PiggyBankIcon, ScaleIcon } from "../icons";
@@ -18,7 +18,7 @@ type FinancialStepProps = {
 
 export function FinancialStep({ financial, onChange, onBack, onNext }: FinancialStepProps) {
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex w-full flex-col gap-2">
         <p className="w-full text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">What Feels Right Financially?</p>
         <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">Pick one</p>
@@ -44,7 +44,9 @@ export function FinancialStep({ financial, onChange, onBack, onNext }: Financial
         <p className="flex-1 text-[11px] text-slate-500 dark:text-slate-400">Financial fit improves completion rates by 40 percent (NCES, 2022).</p>
       </div>
 
-      <FlowActions nextLabel="Next" onBack={onBack} onNext={onNext} />
+      <FlowButton onClick={onNext}>
+        Next →
+      </FlowButton>
     </FlowCard>
   );
 }

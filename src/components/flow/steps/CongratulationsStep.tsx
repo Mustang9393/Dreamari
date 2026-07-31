@@ -11,14 +11,15 @@ const PATHWAYS = [
 ];
 
 type CongratulationsStepProps = {
+  onBack: () => void;
   onRestart: () => void;
 };
 
-export function CongratulationsStep({ onRestart }: CongratulationsStepProps) {
+export function CongratulationsStep({ onBack, onRestart }: CongratulationsStepProps) {
   const [selected, setSelected] = useState(0);
 
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex w-full flex-col items-center gap-2 text-center">
         <p className="text-2xl leading-8 font-extrabold text-slate-900 dark:text-white">Congratulations!</p>
         <p className="text-sm leading-5 font-medium text-slate-600 dark:text-slate-300">Your profile is ready. Let&apos;s find your path.</p>

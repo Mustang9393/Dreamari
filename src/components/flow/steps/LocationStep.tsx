@@ -1,4 +1,4 @@
-import { FlowActions } from "../FlowActions";
+import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { SelectionRow } from "../SelectionRow";
 import { CompassIcon, GlobeIcon, HomeIcon, MapIcon } from "../icons";
@@ -22,7 +22,7 @@ type LocationStepProps = {
 
 export function LocationStep({ location, onChange, onBack, onNext }: LocationStepProps) {
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex w-full flex-col gap-2">
         <p className="w-full text-2xl leading-[32px] font-bold text-slate-900 dark:text-white">Location Flexibility</p>
         <p className="w-full text-sm font-medium text-slate-600 dark:text-slate-300">Choose what fits you best</p>
@@ -41,7 +41,9 @@ export function LocationStep({ location, onChange, onBack, onNext }: LocationSte
         ))}
       </div>
 
-      <FlowActions nextLabel="See my results" onBack={onBack} onNext={onNext} />
+      <FlowButton onClick={onNext}>
+        See my results →
+      </FlowButton>
     </FlowCard>
   );
 }

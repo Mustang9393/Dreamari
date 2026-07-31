@@ -14,12 +14,13 @@ const PATHS: { key: FlowState["path"]; title: string; sub: string; icon: ReactNo
 type ChoosePathStepProps = {
   path: FlowState["path"];
   onChange: (path: FlowState["path"]) => void;
+  onBack: () => void;
   onNext: () => void;
 };
 
-export function ChoosePathStep({ path, onChange, onNext }: ChoosePathStepProps) {
+export function ChoosePathStep({ path, onChange, onBack, onNext }: ChoosePathStepProps) {
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">JOURNEY STAGE</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Choose Your Path</p>

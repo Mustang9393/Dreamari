@@ -27,6 +27,7 @@ type AcademicJourneyStepProps = {
   subjects: string[];
   onChangeGpaRange: (value: string) => void;
   onToggleSubject: (subject: string) => void;
+  onBack: () => void;
   onNext: () => void;
 };
 
@@ -37,10 +38,11 @@ export function AcademicJourneyStep({
   subjects,
   onChangeGpaRange,
   onToggleSubject,
+  onBack,
   onNext,
 }: AcademicJourneyStepProps) {
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">ACADEMIC PATH</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">Your Academic Journey</p>
@@ -74,11 +76,9 @@ export function AcademicJourneyStep({
         </p>
       </div>
 
-      <div className="flex w-full flex-col gap-3.5">
-        <FlowButton onClick={onNext}>
-          Continue →
-        </FlowButton>
-      </div>
+      <FlowButton onClick={onNext}>
+        Continue →
+      </FlowButton>
     </FlowCard>
   );
 }

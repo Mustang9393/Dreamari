@@ -47,7 +47,7 @@ export function FlowContainer() {
 
   let content: ReactNode = null;
   if (step === 1) content = <WelcomeStep onNext={next} />;
-  else if (step === 2) content = <ChoosePathStep path={state.path} onChange={(path) => patch({ path })} onNext={next} />;
+  else if (step === 2) content = <ChoosePathStep path={state.path} onChange={(path) => patch({ path })} onBack={back} onNext={next} />;
   else if (step === 3)
     content = (
       <AboutYouStep
@@ -57,6 +57,7 @@ export function FlowContainer() {
         onChangeFullName={(fullName) => patch({ fullName })}
         onChangeSchoolWorkplace={(schoolWorkplace) => patch({ schoolWorkplace })}
         onChangeGradeLevel={(gradeLevel) => patch({ gradeLevel })}
+        onBack={back}
         onNext={next}
       />
     );
@@ -69,6 +70,7 @@ export function FlowContainer() {
         subjects={state.subjects}
         onChangeGpaRange={(gpaRange) => patch({ gpaRange })}
         onToggleSubject={(subject) => patch({ subjects: toggleInList(state.subjects, subject) })}
+        onBack={back}
         onNext={next}
       />
     );
@@ -77,6 +79,7 @@ export function FlowContainer() {
       <ConfidenceCheckStep
         strengths={state.strengths}
         onToggleStrength={(strength) => patch({ strengths: toggleInList(state.strengths, strength) })}
+        onBack={back}
         onNext={next}
       />
     );
@@ -89,20 +92,26 @@ export function FlowContainer() {
         onChangeEnergy={(energy) => patch({ energy })}
         onChangeTeamStyle={(teamStyle) => patch({ teamStyle })}
         onChangeInteraction={(interaction) => patch({ interaction })}
+        onBack={back}
         onNext={next}
       />
     );
   else if (step === 7)
     content = (
-      <FutureValuesStep values={state.values} onToggleValue={(value) => patch({ values: toggleInList(state.values, value) })} onNext={next} />
+      <FutureValuesStep
+        values={state.values}
+        onToggleValue={(value) => patch({ values: toggleInList(state.values, value) })}
+        onBack={back}
+        onNext={next}
+      />
     );
   else if (step === 8)
-    content = <PathForwardStep pathForward={state.pathForward} onChange={(pathForward) => patch({ pathForward })} onNext={next} />;
+    content = <PathForwardStep pathForward={state.pathForward} onChange={(pathForward) => patch({ pathForward })} onBack={back} onNext={next} />;
   else if (step === 9)
     content = <FinancialStep financial={state.financial} onChange={(financial) => patch({ financial })} onBack={back} onNext={next} />;
   else if (step === 10)
     content = <LocationStep location={state.location} onChange={(location) => patch({ location })} onBack={back} onNext={next} />;
-  else if (step === 11) content = <CongratulationsStep onRestart={restart} />;
+  else if (step === 11) content = <CongratulationsStep onBack={back} onRestart={restart} />;
 
   return (
     <ThemeProvider>

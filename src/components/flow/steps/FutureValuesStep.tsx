@@ -10,12 +10,13 @@ const MAX_VALUES = 3;
 type FutureValuesStepProps = {
   values: string[];
   onToggleValue: (value: string) => void;
+  onBack: () => void;
   onNext: () => void;
 };
 
-export function FutureValuesStep({ values, onToggleValue, onNext }: FutureValuesStepProps) {
+export function FutureValuesStep({ values, onToggleValue, onBack, onNext }: FutureValuesStepProps) {
   return (
-    <FlowCard>
+    <FlowCard onBack={onBack}>
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-bold tracking-[0.8px] text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">FUTURE VALUES</p>
         <p className="text-[22px] font-bold text-slate-900 dark:text-white">What are the three most important things for your future?</p>
