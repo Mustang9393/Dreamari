@@ -18,7 +18,7 @@ type MatchCardProps = {
 export function MatchCard({ card }: MatchCardProps) {
   const [top, bottom] = card.gradient;
   return (
-    <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm sm:h-[494px] dark:border-white/20 dark:bg-[#071634] dark:shadow-none">
+    <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[var(--radius-match-card)] border border-slate-200 bg-white p-6 shadow-sm sm:h-[494px] dark:border-white/20 dark:bg-[var(--color-match-card-bg-dark)] dark:shadow-none">
       {/* Two fully-opaque background layers (never a transparent stop) toggled by
           theme, each positioned as a child against the padding box rather than
           painted as the card's own background-image — that combination is what
@@ -33,8 +33,8 @@ export function MatchCard({ card }: MatchCardProps) {
 
       <div className="relative flex flex-1 flex-col gap-5">
         <div className="flex h-32 w-full flex-1 flex-col items-center justify-center gap-2 rounded-xl">
-          <span className="text-[64px] leading-none">{card.emoji}</span>
-          <p className="text-center text-[30px] leading-[38px] font-extrabold tracking-[-0.5px] text-slate-900 sm:text-[44px] sm:leading-[52px] sm:tracking-[-1px] dark:text-white">
+          <span className="text-[length:var(--font-size-match-card-emoji)] leading-none">{card.emoji}</span>
+          <p className="text-center text-[length:var(--font-size-match-card-title)] leading-[38px] font-extrabold tracking-[-0.5px] text-slate-900 sm:text-[length:var(--font-size-match-card-title-lg)] sm:leading-[52px] sm:tracking-[-1px] dark:text-white">
             {card.label}
           </p>
         </div>
@@ -43,7 +43,7 @@ export function MatchCard({ card }: MatchCardProps) {
             against the card's own colored gradient underneath it — translucent white
             instead lets that tint show through softly, the same "frosted" idea as the
             dark-mode version's translucent white-on-navy. */}
-        <div className="flex items-center justify-center rounded-[15px] border border-white/70 bg-white/60 p-4 backdrop-blur-sm dark:border-white/30 dark:bg-white/[0.13]">
+        <div className="flex items-center justify-center rounded-[var(--radius-match-card-inner)] border border-white/70 bg-white/60 p-4 backdrop-blur-sm dark:border-white/30 dark:bg-white/[0.13]">
           <p className="flex-1 text-[15px] leading-[1.5] font-semibold text-slate-800 dark:text-white">{card.body}</p>
         </div>
       </div>

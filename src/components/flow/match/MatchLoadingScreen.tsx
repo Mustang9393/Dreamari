@@ -17,9 +17,9 @@ export function MatchLoadingScreen() {
         />
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="size-2 animate-bounce rounded-full bg-[#1f5ff0] [animation-delay:-0.3s]" />
-        <span className="size-2 animate-bounce rounded-full bg-[#1f5ff0] [animation-delay:-0.15s]" />
-        <span className="size-2 animate-bounce rounded-full bg-[#1f5ff0]" />
+        <span className="size-2 animate-bounce rounded-full bg-[var(--color-brand-600)] [animation-delay:-0.3s]" />
+        <span className="size-2 animate-bounce rounded-full bg-[var(--color-brand-600)] [animation-delay:-0.15s]" />
+        <span className="size-2 animate-bounce rounded-full bg-[var(--color-brand-600)]" />
       </div>
       <p className="text-lg font-bold text-slate-900 dark:text-white">Finding your matches...</p>
       <p className="max-w-xs text-sm font-medium text-slate-600 dark:text-slate-400">Lining up careers and majors that fit everything you just told me.</p>

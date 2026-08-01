@@ -26,7 +26,7 @@ export function PathOption({ icon, title, sub, selected, onClick }: PathOptionPr
     >
       <span
         className={`flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-12 ${
-          selected ? "bg-[var(--step-accent)] text-white" : "bg-[#e2e8f0] text-slate-500 dark:bg-white/10 dark:text-slate-400"
+          selected ? "bg-[var(--step-accent)] text-white" : "bg-slate-200 text-slate-500 dark:bg-white/10 dark:text-slate-400"
         }`}
       >
         {/* flex + centered, not just a fixed box — an SVG icon (size-full, fills and

@@ -108,11 +108,11 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
     // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
     <div className="flex w-full max-w-[460px] flex-col items-center gap-6 text-center lg:items-start lg:text-left">
       <div className="flex w-full flex-col gap-1">
-        <span className="text-sm font-semibold text-[#1f5ff0] lg:text-[15px]">MATCH EXPERIENCE</span>
+        <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCH EXPERIENCE</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
           {path.title}
         </h1>
-        <p className="text-xs text-slate-600 lg:hidden dark:text-[#b3ccff]">Swipe right on what fits you, left on what doesn&apos;t.</p>
+        <p className="text-xs text-slate-600 lg:hidden dark:text-[var(--color-match-subtitle-dark)]">Swipe right on what fits you, left on what doesn&apos;t.</p>
       </div>
 
       <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />

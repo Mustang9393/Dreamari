@@ -14,7 +14,7 @@ export function MatchActionButtons({ onPass, onLike }: MatchActionButtonsProps) 
       <button
         type="button"
         onClick={onPass}
-        className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-base font-semibold text-slate-600 transition-transform hover:scale-[1.02] active:scale-[0.98] dark:border-[#404759] dark:bg-[rgba(23,28,46,0.6)] dark:text-white"
+        className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-base font-semibold text-slate-600 transition-transform hover:scale-[1.02] active:scale-[0.98] dark:border-[var(--color-match-border-dark)] dark:bg-[color-mix(in_srgb,var(--color-match-toast-bg-dark)_60%,transparent)] dark:text-white"
       >
         <XIcon className="size-5" />
         Pass
@@ -22,7 +22,7 @@ export function MatchActionButtons({ onPass, onLike }: MatchActionButtonsProps) 
       <button
         type="button"
         onClick={onLike}
-        className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#2e73f5] text-base font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        className="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-match-accent-dark)] text-base font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
       >
         <HeartIcon className="size-5 fill-current" />
         Like

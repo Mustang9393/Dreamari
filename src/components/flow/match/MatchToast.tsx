@@ -11,10 +11,10 @@ type MatchToastProps = {
 // notification, not page content, so it doesn't follow the light/dark toggle.
 export function MatchToast({ label, direction, onUndo }: MatchToastProps) {
   return (
-    <div className="fixed bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#171c2e] px-5 py-3 text-sm font-medium text-white shadow-lg">
+    <div className="fixed bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[var(--color-match-toast-bg-dark)] px-5 py-3 text-sm font-medium text-white shadow-lg">
       <span>{label} {direction === "like" ? "liked" : "passed"}</span>
       <span className="text-white/30">|</span>
-      <button type="button" onClick={onUndo} className="font-semibold text-[#5b9bff] hover:opacity-80">
+      <button type="button" onClick={onUndo} className="font-semibold text-[var(--color-match-toast-link-dark)] hover:opacity-80">
         Undo
       </button>
     </div>

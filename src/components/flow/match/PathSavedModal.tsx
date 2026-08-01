@@ -12,7 +12,7 @@ type PathSavedModalProps = {
 export function PathSavedModal({ pathTitle, liked, passed, onContinue }: PathSavedModalProps) {
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-6">
-      <div className="w-full max-w-sm rounded-3xl border border-emerald-500/30 bg-white p-8 text-center dark:bg-[#0b1230]">
+      <div className="w-full max-w-sm rounded-3xl border border-emerald-500/30 bg-white p-8 text-center dark:bg-[var(--color-match-modal-bg-dark)]">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-600">
           <CheckIcon className="size-8 text-white" />
         </div>
@@ -31,7 +31,7 @@ export function PathSavedModal({ pathTitle, liked, passed, onContinue }: PathSav
         <button
           type="button"
           onClick={onContinue}
-          className="mt-6 h-[52px] w-full rounded-xl bg-[#1f5ff0] text-base font-bold text-white transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="mt-6 h-[52px] w-full rounded-xl bg-[var(--color-brand-600)] text-base font-bold text-white transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           Continue Journey
         </button>

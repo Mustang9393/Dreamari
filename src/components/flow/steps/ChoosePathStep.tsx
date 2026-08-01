@@ -8,9 +8,9 @@ import type { FlowState } from "../types";
 // (graduation-cap/blue for High School, briefcase/emerald for University, target/violet
 // for Job Seekers) rather than our previous Book/GraduationCap/Briefcase mapping.
 const PATHS: { key: FlowState["path"]; title: string; sub: string; icon: ReactNode; color: string }[] = [
-  { key: "High School", title: "High School", sub: "Find your best fit major", icon: <GraduationCapIcon />, color: "#60A5FA" },
-  { key: "University", title: "University", sub: "Explore internships and roles", icon: <BriefcaseIcon />, color: "#34D399" },
-  { key: "Job Seeker", title: "Job Seekers", sub: "Launch your next career move", icon: <TargetIcon />, color: "#A78BFA" },
+  { key: "High School", title: "High School", sub: "Find your best fit major", icon: <GraduationCapIcon />, color: "var(--color-path-high-school)" },
+  { key: "University", title: "University", sub: "Explore internships and roles", icon: <BriefcaseIcon />, color: "var(--color-path-university)" },
+  { key: "Job Seeker", title: "Job Seekers", sub: "Launch your next career move", icon: <TargetIcon />, color: "var(--color-path-job-seeker)" },
 ];
 
 type ChoosePathStepProps = {

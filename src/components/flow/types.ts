@@ -36,8 +36,12 @@ type StepGradient = { from: string; to: string };
 // gradients use their own distinct, slightly brighter stops.
 export const STEP_GRADIENT_OVERRIDES: Partial<Record<number, { button: StepGradient; progress: StepGradient }>> = {
   8: {
-    button: { from: "#ffcf04", to: "#f37c11" },
-    progress: { from: "#fbbf24", to: "#f37a10" },
+    // from/to here match globals.css --color-gold-400/--color-orange-500/--color-amber-400
+    // exactly; referenced via var() rather than repeating the same hex a second time.
+    // progress.to (#f37a10) has no other use in the app, so it's kept as a literal rather
+    // than inventing a single-use primitive for it.
+    button: { from: "var(--color-gold-400)", to: "var(--color-orange-500)" },
+    progress: { from: "var(--color-amber-400)", to: "#f37a10" },
   },
 };
 

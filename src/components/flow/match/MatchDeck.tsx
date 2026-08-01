@@ -193,7 +193,7 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
         .reverse()}
 
       <div
-        className="relative touch-pan-y"
+        className="relative select-none"
         style={{
           zIndex: 10,
           transform: `translateX(${offsetX}px) rotate(${rotation}deg)`,
@@ -204,6 +204,13 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
           // redundant motion on top of already being off-screen.
           opacity: exitDirection && !isMobile ? 0 : 1,
           transition: dragging || resetInstantly ? "none" : `transform ${EXIT_DURATION_MS}ms ease-out, opacity ${EXIT_DURATION_MS}ms ease-out`,
+          // `none`, not `pan-y` — with pan-y, a real human swipe (never perfectly
+          // horizontal) frequently gets claimed by the browser's own vertical-scroll
+          // gesture recognizer before our JS sees more than one pointermove, which is
+          // what made this feel completely unresponsive on real phones. The deck's own
+          // region doesn't need native scrolling, so it's safe to take over entirely.
+          touchAction: "none",
+          WebkitTouchCallout: "none",
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

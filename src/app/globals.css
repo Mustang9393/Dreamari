@@ -48,6 +48,64 @@
      than force a mismatch. */
   --color-navy-975: #08205a;
   --color-navy-700: #1144c0;
+
+  /* Corrected aliases — --color-amber-100/--color-navy-975 above are kept
+     exactly as-is (still used by the older /onboarding route) but are
+     misnamed relative to their actual position on the standard amber/navy
+     scale (Figma's own tokens call these amber/50 and navy/900). New code
+     under src/components/flow should reach for these two instead. */
+  --color-amber-50: var(--color-amber-100);
+  --color-navy-900: var(--color-navy-975);
+
+  /* Match card category-accent colors (matchData.ts MATCH_CARD_META) — blue
+     and amber already exist above (brand-600, amber-600); only red/purple/
+     green were previously inlined as raw rgb() with no token at all. */
+  --color-category-red: #ea4459;
+  --color-category-purple: #9a39fb;
+  --color-category-green: #01be58;
+  /* The near-black top stop shared by all 5 match card gradients. */
+  --color-match-card-top: rgb(2, 4, 9);
+
+  /* MatchCard's own one-off sizing — not on the shared radius/font-size
+     scale anything else in the flow uses, kept as their own named tokens
+     rather than forced onto the shared scale. */
+  --radius-match-card: 20px;
+  --radius-match-card-inner: 15px;
+  --font-size-match-card-emoji: 64px;
+  --font-size-match-card-title: 30px;
+  --font-size-match-card-title-lg: 44px;
+  --color-match-card-bg-dark: #071634;
+
+  /* Match Experience's own dark-mode accent palette — distinct from the
+     Build flow's rotating --step-accent, and previously scattered as raw
+     hex repeated across 6 files (MatchActionButtons, MatchProgressPanel,
+     MatchExperience, MatchToast, PathSavedModal) rather than shared. */
+  --color-match-accent-dark: #2e73f5;
+  --color-match-border-dark: #404759;
+  --color-match-text-muted-dark: #99a6b8;
+  --color-match-subtitle-dark: #b3ccff;
+  --color-match-success-dark: #33c78c;
+  --color-match-toast-bg-dark: #171c2e;
+  --color-match-toast-link-dark: #5b9bff;
+  --color-match-modal-bg-dark: #0b1230;
+
+  /* MatchBackdrop's static 3-stop dark gradient. */
+  --color-match-backdrop-1: #040b21;
+  --color-match-backdrop-2: #081540;
+  --color-match-backdrop-3: #020714;
+
+  /* AuroraBackground canvas fill colors (set via ctx.fillStyle in JS, not
+     CSS — kept here anyway so both places that need "the app's ambient
+     background color" read from one named value instead of two separate
+     raw hex literals that happen to currently match). */
+  --color-aurora-canvas-dark: #070912;
+  --color-aurora-canvas-light: #f3f4f8;
+
+  /* ChoosePathStep's 3 path-accent colors (High School / University / Job
+     Seeker) — previously inlined per-option with no shared name. */
+  --color-path-high-school: #60a5fa;
+  --color-path-university: #34d399;
+  --color-path-job-seeker: #a78bfa;
 }
 
 @theme inline {

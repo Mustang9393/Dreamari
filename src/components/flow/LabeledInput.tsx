@@ -16,7 +16,7 @@ export function LabeledInput({ label, value, onChange }: LabeledInputProps) {
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-white px-4 text-base font-semibold text-slate-900 focus:border-[var(--step-accent)] focus:outline-none sm:h-13 dark:border-white/10 dark:bg-white/5 dark:text-white"
+        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-base font-semibold text-slate-900 focus:border-[var(--step-accent)] focus:outline-none sm:h-13 dark:border-white/10 dark:bg-white/5 dark:text-white"
       />
     </label>
   );

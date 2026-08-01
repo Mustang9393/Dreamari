@@ -15,7 +15,13 @@ const STARS: { x: number; y: number; size: number; opacity: number }[] = [
 export function MatchBackdrop() {
   return (
     <div className="pointer-events-none fixed inset-0 -z-10">
-      <div className="absolute inset-0 hidden dark:block" style={{ backgroundImage: "linear-gradient(180deg, #040b21 0%, #081540 50%, #020714 100%)" }}>
+      <div
+        className="absolute inset-0 hidden dark:block"
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg, var(--color-match-backdrop-1) 0%, var(--color-match-backdrop-2) 50%, var(--color-match-backdrop-3) 100%)",
+        }}
+      >
         {STARS.map((star, index) => (
           <span
             key={index}

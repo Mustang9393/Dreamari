@@ -11,7 +11,7 @@ type LabeledSelectProps = {
 export function LabeledSelect({ label, value, options, onChange, highlighted = false }: LabeledSelectProps) {
   const borderClasses = highlighted
     ? "border-2 border-[var(--step-accent)] dark:border-[color-mix(in_srgb,var(--step-accent)_70%,black)]"
-    : "border border-[#e2e8f0] dark:border-white/10";
+    : "border border-slate-200 dark:border-white/10";
 
   return (
     <label className="flex w-full flex-col gap-1.5 sm:gap-2">

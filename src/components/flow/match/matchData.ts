@@ -10,15 +10,17 @@ import type { MatchCardKey, MatchPath } from "./types";
 //
 // workstyle/skills were re-tuned away from Figma's own pale pastel-yellow and bright
 // cyan — both read as washed out and off-brand next to the rest of the app. Replaced
-// with our own accent palette instead (see STEP_AURORA_ACCENTS in ../types.ts): amber
-// #d97706 (same amber used for Future Values/Academic Journey) for workstyle, and brand
-// blue #1f5ff0 (same blue as the Welcome/Congratulations bookends) for skills.
+// with our own accent palette instead: amber (same amber used for Future Values/
+// Academic Journey) for workstyle, and brand blue (same blue as the Welcome/
+// Congratulations bookends) for skills — all 5 stops now reference the shared color
+// tokens in globals.css (--color-match-card-top, --color-category-*, --color-amber-600,
+// --color-brand-600) instead of inlined rgb()/hex.
 export const MATCH_CARD_META: Record<MatchCardKey, { label: string; emoji: string; gradient: readonly [string, string] }> = {
-  classes: { label: "Classes", emoji: "🏫", gradient: ["rgb(2, 4, 9)", "rgb(234, 68, 89)"] },
-  workstyle: { label: "Workstyle", emoji: "👥", gradient: ["rgb(2, 4, 9)", "rgb(217, 119, 6)"] },
-  skills: { label: "Skills", emoji: "⚙️", gradient: ["rgb(2, 4, 9)", "rgb(31, 95, 240)"] },
-  earning: { label: "Earning Potential", emoji: "💰", gradient: ["rgb(2, 4, 9)", "rgb(154, 57, 251)"] },
-  future: { label: "Future Fit", emoji: "🧭", gradient: ["rgb(2, 4, 9)", "rgb(1, 190, 88)"] },
+  classes: { label: "Classes", emoji: "🏫", gradient: ["var(--color-match-card-top)", "var(--color-category-red)"] },
+  workstyle: { label: "Workstyle", emoji: "👥", gradient: ["var(--color-match-card-top)", "var(--color-amber-600)"] },
+  skills: { label: "Skills", emoji: "⚙️", gradient: ["var(--color-match-card-top)", "var(--color-brand-600)"] },
+  earning: { label: "Earning Potential", emoji: "💰", gradient: ["var(--color-match-card-top)", "var(--color-category-purple)"] },
+  future: { label: "Future Fit", emoji: "🧭", gradient: ["var(--color-match-card-top)", "var(--color-category-green)"] },
 };
 
 const CARD_ORDER: MatchCardKey[] = ["classes", "workstyle", "skills", "earning", "future"];

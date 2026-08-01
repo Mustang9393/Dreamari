@@ -351,6 +351,9 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
       // the same low alpha that glows nicely on near-black washes out to nothing on white
       // (translucent color over white desaturates fast), so light mode gets higher alpha
       // and a slightly deepened dot color to compensate, not just "the same numbers, inverted."
+      // Mirrors --color-aurora-canvas-dark/light in globals.css — kept as literals here
+      // rather than a getComputedStyle() read since this runs every animation frame;
+      // update both places together if this ever changes.
       ctx.fillStyle = isDark ? "#070912" : lightWashGradientRef.current ?? "#f3f4f8";
       ctx.fillRect(0, 0, width, height);
 

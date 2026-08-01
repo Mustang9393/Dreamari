@@ -31,7 +31,7 @@ const MATCH_LOADING_MS = 1800;
 // Match phase isn't one of the 12 Build steps, so it isn't in STEP_AURORA_ACCENTS —
 // reuses the same blue as the Welcome/Congratulations bookends for a consistent brand
 // accent rather than introducing a new color.
-const MATCH_ACCENT = "#1f5ff0";
+const MATCH_ACCENT = "var(--color-brand-600)";
 
 function toggleInList(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
