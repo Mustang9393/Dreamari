@@ -223,21 +223,29 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           <Stars count={isMobile ? 18 : 26} />
         </div>
         {/* Bridges the color handoff from the hero section's own background (an opaque
-            gradient whose bottom edge is #0a1e4c) into this section's own darker tone —
-            starting the mask at that exact color (rather than jumping straight to this
-            section's rgba(4,9,28,1)) means the seam between the two sections blends
-            instead of reading as a hard cut. Dreamy fades out on her own well before
-            this point now (see HeroIllustration's scroll-linked opacity), so this no
-            longer also needs to hide a lingering cloud fragment — just the color join. */}
+            gradient whose bottom edge is #0a1e4c) into this section's own darker tone.
+            A single color (#0a1e4c) fading its own alpha out, eased rather than linear,
+            with NO intermediate opaque stop of a different color — the previous version
+            routed through a fully-opaque rgba(4,9,28,1) plateau at 40%, which is a
+            completely different hue from both the hero's blue and whatever's ultimately
+            revealed underneath, and broke the fade's monotonicity (blue -> black ->
+            fades away) in a way that read as a hard seam rather than one continuous
+            motion. Alpha-only easing lets the natural blend-as-it-fades handle the hue
+            transition on its own. Tall (58vh, up from 34vh) so the whole handoff spans
+            a long, gradual scroll distance instead of being compressed into a short one.
+            Dreamy fades out on her own well before this point now (see HeroIllustration's
+            scroll-linked opacity), so this no longer also needs to hide a lingering cloud
+            fragment — just the color join. */}
         <div
           style={{
             position: "absolute",
             top: 0,
             left: 0,
             right: 0,
-            height: "34vh",
+            height: "58vh",
             zIndex: 0,
-            background: "linear-gradient(to bottom, #0a1e4c 0%, rgba(4,9,28,1) 40%, rgba(4,9,28,0) 100%)",
+            background:
+              "linear-gradient(to bottom, rgba(10,30,76,1) 0%, rgba(10,30,76,0.86) 18%, rgba(10,30,76,0.62) 36%, rgba(10,30,76,0.38) 54%, rgba(10,30,76,0.18) 74%, rgba(10,30,76,0.06) 88%, rgba(10,30,76,0) 100%)",
           }}
         />
 
@@ -483,8 +491,20 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
         {STEPS.map((step, i) => {
           const t = proximity(safeProgress, centerOf(i, STEPS.length));
           const isLeft = step.side === "left";
-          const nameFontSize = (isMobile ? Math.min(52, w * 0.16) : Math.min(190, w * 0.1)) * CHAPTER_TITLE_SCALE;
-          const descFontSize = isMobile ? 15 : 22;
+          // Desktop: sized directly off the actual available width (not a flat 190px
+          // cap) so it scales properly with the viewport instead of leaving a lot of
+          // unused horizontal room at wider sizes. 5.19 is "CONNECT"/"EXPLORE" (the two
+          // longest labels, 7 chars, Montserrat weight 900) measured width-per-1px-of-
+          // font-size via canvas.measureText — filling 85% of the available width gives
+          // "as big as possible" while still leaving a real margin against the rail and
+          // the outer edge, not crowding either.
+          const availableTitleWidth = w - railClear - 2 * sidePad;
+          const nameFontSize = isMobile
+            ? Math.min(52, w * 0.16) * CHAPTER_TITLE_SCALE
+            : Math.max(90, Math.min(260, (availableTitleWidth * 0.85) / 5.19));
+          // Scales with viewport width too (was a flat 22px) so it grows alongside the
+          // now much bigger titles instead of looking undersized next to them.
+          const descFontSize = isMobile ? 15 : Math.max(22, Math.min(30, w * 0.017));
           const iconSize = isMobile ? 34 : 50;
 
           return (

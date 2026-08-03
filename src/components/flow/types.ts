@@ -26,6 +26,11 @@ export const STEP_AURORA_ACCENTS: string[] = [
   "#1f5ff0", // 12 Congratulations — blue bookend
 ];
 
+// The Match Experience's own 5 category colors (matchData.ts MATCH_CARD_META / globals.css
+// --color-category-*), duplicated here as literal hex rather than a var() reference —
+// Confetti needs real hex to build particle colors, not a CSS custom property string.
+export const MATCH_CATEGORY_COLORS = ["#ea4459", "#1f5ff0", "#d97706", "#9a39fb", "#01be58"];
+
 type StepGradient = { from: string; to: string };
 
 // Explicit CTA-button/progress-fill gradient stops for steps where the Figma source uses

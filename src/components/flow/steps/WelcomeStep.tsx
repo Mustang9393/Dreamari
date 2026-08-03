@@ -23,10 +23,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         />
       </div>
       <div className="flex w-full flex-col items-center gap-3 text-center">
-        <p className="text-xl leading-[27px] font-bold tracking-[-0.4px] text-slate-900 dark:text-white">
+        <p className="text-2xl leading-8 font-extrabold tracking-[-0.4px] text-slate-900 dark:text-white">
           Hi, I&apos;m Dreamy. 👋
         </p>
-        <p className="text-[13px] font-semibold text-slate-600 dark:text-slate-300">
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
           I am your virtual friend who is going to help you find your dream career!
         </p>
       </div>

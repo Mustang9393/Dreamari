@@ -27,13 +27,17 @@ const SUBJECTS = [
 // its own column beside the GPA/subjects content instead of below it.
 function SoFarPanel({ path, gradeLevel, subjects }: { path: string; gradeLevel: string; subjects: string[] }) {
   return (
-    <div className="flex w-full flex-col gap-1 rounded-xl border border-border-subtle bg-surface-tertiary p-3 sm:gap-1.5 sm:p-4 lg:w-[240px] lg:shrink-0 dark:border-white/10 dark:bg-white/5">
+    // lg:h-full + the parent row switching to items-stretch is what makes this actually
+    // fill the column's height instead of sitting as a short box pinned to the top with
+    // empty space below it; lg:justify-center then centers its own content vertically
+    // within that full-height box, and items-center/text-center centers it horizontally.
+    <div className="flex w-full flex-col items-center gap-1 rounded-xl border border-border-subtle bg-surface-tertiary p-3 text-center sm:gap-1.5 sm:p-4 lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center lg:gap-3 dark:border-white/10 dark:bg-white/5">
       <p className="text-[10px] font-bold tracking-[1.4px] text-slate-600 uppercase sm:text-xs dark:text-slate-400">So far</p>
       <p className="text-xs font-semibold text-slate-600 sm:text-sm dark:text-slate-300">
         {path} • {gradeLevel}
       </p>
       {subjects.length > 0 && (
-        <ol className="flex flex-row flex-wrap gap-x-3 gap-y-0.5 lg:flex-col lg:gap-1">
+        <ol className="flex flex-row flex-wrap justify-center gap-x-3 gap-y-0.5 lg:flex-col lg:items-center lg:gap-1.5">
           {subjects.map((subject, index) => (
             <li
               key={subject}
@@ -71,7 +75,7 @@ export function AcademicJourneyStep({
 }: AcademicJourneyStepProps) {
   return (
     <FlowCard header={<StepHeader eyebrow="ACADEMIC PATH" title="Your Academic Journey" onBack={onBack} />}>
-      <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-start">
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-stretch">
         <div className="flex w-full flex-col gap-4">
           <LabeledSelect label="What's your GPA range?" value={gpaRange} options={GPA_RANGES} onChange={onChangeGpaRange} />
 

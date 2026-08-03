@@ -27,25 +27,40 @@ export function FutureValuesStep({ values, onToggleValue, onBack, onNext }: Futu
         />
       }
     >
-      <GifBanner gifId="l3nFh9xbJtZYc6UhO" alt="SpongeBob: Welcome to the future" />
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-stretch">
+        <div className="flex w-full flex-col gap-4">
+          <GifBanner gifId="l3nFh9xbJtZYc6UhO" alt="SpongeBob: Welcome to the future" dimCaption={false} />
 
-      <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
-        {VALUES.map((value) => {
-          const index = values.indexOf(value);
-          const selected = index !== -1;
-          const disabled = !selected && values.length >= MAX_VALUES;
-          return <GridOption key={value} label={value} selected={selected} disabled={disabled} onClick={() => onToggleValue(value)} />;
-        })}
-      </div>
-
-      {values.length > 0 && (
-        <div className="flex w-full flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-tertiary p-4 dark:border-white/10 dark:bg-white/5">
-          <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your priorities</p>
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {values.map((value, index) => `${index + 1}. ${value}`).join(" • ")}
-          </p>
+          <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {VALUES.map((value) => {
+              const index = values.indexOf(value);
+              const selected = index !== -1;
+              const disabled = !selected && values.length >= MAX_VALUES;
+              return <GridOption key={value} label={value} selected={selected} disabled={disabled} onClick={() => onToggleValue(value)} />;
+            })}
+          </div>
         </div>
-      )}
+
+        {/* lg:h-full (with the parent row switched to items-stretch) + lg:justify-center
+            makes this a real right-side column spanning the full card height instead of
+            a short box that just hugs its own content, matching AcademicJourneyStep's
+            and WorkStyleStep's own setup panels. */}
+        {values.length > 0 && (
+          <div className="flex w-full flex-col items-center gap-1.5 rounded-xl border border-border-subtle bg-surface-tertiary p-4 text-center lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center dark:border-white/10 dark:bg-white/5">
+            <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your priorities</p>
+            <ol className="flex flex-row flex-wrap justify-center gap-x-3 gap-y-0.5 lg:flex-col lg:items-center lg:gap-1.5">
+              {values.map((value, index) => (
+                <li
+                  key={value}
+                  className="text-sm font-bold text-[color:var(--step-accent)] dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]"
+                >
+                  {index + 1}. {value}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
 
       <div className="mt-2 flex w-full flex-col gap-3.5 sm:mt-3">
         <FlowButton onClick={onNext}>

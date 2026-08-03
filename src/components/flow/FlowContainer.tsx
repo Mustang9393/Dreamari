@@ -13,7 +13,7 @@ import { MATCH_PATHS } from "./match/matchData";
 import { StepTransition } from "./StepTransition";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { ThemeToggle } from "./theme/ThemeToggle";
-import { INITIAL_FLOW_STATE, STEP_AURORA_ACCENTS, STEP_GRADIENT_OVERRIDES, TOTAL_STEPS, type FlowState } from "./types";
+import { INITIAL_FLOW_STATE, MATCH_CATEGORY_COLORS, STEP_AURORA_ACCENTS, STEP_GRADIENT_OVERRIDES, TOTAL_STEPS, type FlowState } from "./types";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { ChoosePathStep } from "./steps/ChoosePathStep";
 import { AboutYouStep } from "./steps/AboutYouStep";
@@ -43,6 +43,10 @@ export function FlowContainer() {
   const [step, setStep] = useState(1);
   const [state, setState] = useState<FlowState>(INITIAL_FLOW_STATE);
   const [phase, setPhase] = useState<Phase>("build");
+  // True for exactly as long as MatchExperience's "Path Saved!" celebration is on
+  // screen — swaps the plain static MatchBackdrop for the same colorful, interactive
+  // AuroraBackground + confetti treatment the Build finale gets.
+  const [matchCelebrating, setMatchCelebrating] = useState(false);
 
   const next = () => setStep((current) => Math.min(current + 1, TOTAL_STEPS));
   const back = () => setStep((current) => Math.max(current - 1, 1));
@@ -155,9 +159,9 @@ export function FlowContainer() {
 
   return (
     <ThemeProvider>
-      <AuroraBackground accent={accent} visitedAccents={phase === "build" ? visitedAccents : []} finale={isFinale} />
-      {phase !== "build" && <MatchBackdrop />}
-      <Confetti colors={STEP_AURORA_ACCENTS} active={isFinale} />
+      <AuroraBackground accent={accent} visitedAccents={phase === "build" ? visitedAccents : []} finale={isFinale || matchCelebrating} />
+      {phase !== "build" && !matchCelebrating && <MatchBackdrop />}
+      <Confetti colors={matchCelebrating ? MATCH_CATEGORY_COLORS : STEP_AURORA_ACCENTS} active={isFinale || matchCelebrating} />
       <HomeButton />
       <ThemeToggle />
       <section
@@ -175,7 +179,7 @@ export function FlowContainer() {
           )}
           {phase === "match" && (
             <StepTransition key="match-experience">
-              <MatchExperience paths={MATCH_PATHS} onComplete={restart} />
+              <MatchExperience paths={MATCH_PATHS} onComplete={restart} onCelebrationChange={setMatchCelebrating} />
             </StepTransition>
           )}
         </div>

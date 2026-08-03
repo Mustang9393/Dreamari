@@ -11,8 +11,12 @@ type PathSavedModalProps = {
 // dynamic path name in the subtext and the liked/passed tally.
 export function PathSavedModal({ pathTitle, liked, passed, onContinue }: PathSavedModalProps) {
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-6">
-      <div className="w-full max-w-sm rounded-3xl border border-emerald-500/30 bg-white p-8 text-center dark:bg-[var(--color-match-modal-bg-dark)]">
+    // Was a flat bg-black/50 — that fully hid the colorful AuroraBackground+confetti
+    // celebration now rendered behind this (see FlowContainer's matchCelebrating). A
+    // light blur instead of a dark scrim keeps the card readable while letting the
+    // color/motion show through around it.
+    <div className="fixed inset-0 z-40 flex items-center justify-center px-6 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-3xl border border-emerald-500/30 bg-white/95 p-8 text-center shadow-2xl dark:bg-[color-mix(in_srgb,var(--color-match-modal-bg-dark)_92%,transparent)]">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-600">
           <CheckIcon className="size-8 text-white" />
         </div>

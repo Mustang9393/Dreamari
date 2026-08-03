@@ -36,8 +36,8 @@ export function HeroSection() {
           background/blobs, below the actual nav/copy/button content (z-10), so it
           darkens what's behind those without dimming the content itself. */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[32%]"
-        style={{ background: "linear-gradient(to bottom, transparent 0%, #0a1e4c 100%)" }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[48%]"
+        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(10,30,76,0.4) 55%, #0a1e4c 100%)" }}
         aria-hidden
       />
 
@@ -62,8 +62,11 @@ export function HeroSection() {
             className="max-w-2xl leading-relaxed text-ink-100"
             style={{ fontSize: "clamp(0.9rem, 0.5vw + 1.1vh, 1.25rem)" }}
           >
-            Step into real careers through guided simulations. Build the skills, earn the proof, and picture
-            yourself in the room. <span className="font-bold">One clear step at a time.</span>
+            Step into real careers through guided simulations.
+            <br />
+            Build the skills, earn the proof, and picture yourself in the room.
+            <br />
+            <span className="font-bold">One clear step at a time.</span>
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row">

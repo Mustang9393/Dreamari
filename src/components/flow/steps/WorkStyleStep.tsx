@@ -13,9 +13,12 @@ function SetupPanel({ energy, teamStyle, interaction }: { energy: string; teamSt
   const rows = [energy, teamStyle, interaction].filter(Boolean);
 
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 lg:w-[240px] lg:shrink-0 dark:border-white/10 dark:bg-white/5">
+    // lg:h-full (with the parent row switched to items-stretch) + lg:justify-center is
+    // what makes this a real right-side column spanning the full card height instead of
+    // a short box that just hugs its own content.
+    <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 text-center lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center dark:border-white/10 dark:bg-white/5">
       <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your setup</p>
-      <ol className="flex flex-row flex-wrap gap-x-4 gap-y-2 lg:flex-col lg:gap-2">
+      <ol className="flex flex-row flex-wrap justify-center gap-x-4 gap-y-2 lg:flex-col lg:items-center lg:gap-2.5">
         {rows.map((row, index) => (
           <li key={row} className="flex items-center gap-2.5">
             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--step-accent)] text-[11px] font-bold text-white">
@@ -52,7 +55,7 @@ export function WorkStyleStep({
 }: WorkStyleStepProps) {
   return (
     <FlowCard header={<StepHeader eyebrow="WORKPLACE PREFERENCE" title="Where do you work best?" subtitle="Pick one from each row." onBack={onBack} />}>
-      <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start">
+      <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-stretch">
         <div className="flex w-full flex-col gap-4">
           <RadioPillGroup label="Your Energy" options={["Fast pace", "Calm", "Balanced"]} value={energy} onChange={onChangeEnergy} />
           <RadioPillGroup

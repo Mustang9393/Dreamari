@@ -15,11 +15,16 @@ const TOAST_DURATION_MS = 3000;
 type MatchExperienceProps = {
   paths: MatchPath[];
   onComplete: () => void;
+  /** Fires whenever the "Path Saved!" celebration opens/closes — lets FlowContainer swap
+   * in the same colorful, interactive AuroraBackground + confetti treatment the Build
+   * finale uses instead of the plain static MatchBackdrop, for exactly as long as the
+   * celebration is on screen. */
+  onCelebrationChange?: (active: boolean) => void;
 };
 
 type ToastState = { key: MatchCardKey; label: string; direction: SwipeDirection };
 
-export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
+export function MatchExperience({ paths, onComplete, onCelebrationChange }: MatchExperienceProps) {
   const [pathIndex, setPathIndex] = useState(0);
   const [cardIndex, setCardIndex] = useState(0);
   const [liked, setLiked] = useState<MatchCardKey[]>([]);
@@ -30,9 +35,15 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
   const deckRef = useRef<MatchDeckHandle>(null);
 
   useEffect(() => {
+    onCelebrationChange?.(pendingPathSaved);
+  }, [pendingPathSaved, onCelebrationChange]);
+
+  useEffect(() => {
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      onCelebrationChange?.(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function showToast(next: ToastState) {
@@ -106,7 +117,7 @@ export function MatchExperience({ paths, onComplete }: MatchExperienceProps) {
     // longer a two-column "title/progress beside the card deck" split, it's the same
     // stacked structure as mobile (eyebrow → title → progress → deck → buttons), just
     // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
-    <div className="flex w-full max-w-[460px] flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-4 text-center lg:items-start lg:text-left">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCH EXPERIENCE</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">

@@ -18,6 +18,11 @@ type GifBannerProps = {
    * the reference (e.g. the Confidence Check step's Ronaldo gif, a wide banner-style crop
    * that should read much shorter than a typical square/portrait meme gif). */
   maxHeight?: number;
+  /** Set false to skip the bottom scrim entirely — for a gif whose own burned-in caption
+   * is already low-contrast, darkening it further makes it harder to read rather than
+   * easier (the SpongeBob "Welcome to the future" gif is the current case). Defaults to
+   * true, preserving the scrim everywhere else it was already helping (e.g. Ronaldo). */
+  dimCaption?: boolean;
 };
 
 // Placeholder aspect ratio before the real gif has loaded — close to the middle of what
@@ -25,7 +30,7 @@ type GifBannerProps = {
 // true ratio swaps in.
 const DEFAULT_RATIO = 1.4;
 
-export function GifBanner({ gifId, alt = "", focus = "bottom", maxHeight = 420 }: GifBannerProps) {
+export function GifBanner({ gifId, alt = "", focus = "bottom", maxHeight = 420, dimCaption = true }: GifBannerProps) {
   const [ratio, setRatio] = useState(DEFAULT_RATIO);
   const [failed, setFailed] = useState(false);
 
@@ -76,7 +81,7 @@ export function GifBanner({ gifId, alt = "", focus = "bottom", maxHeight = 420 }
           most meme gifs) without touching the visual above it. Skipped for centered/caption-
           free gifs, where there's no caption to mute and it would just needlessly darken the
           subject's lower half. */}
-      {focus === "bottom" && (
+      {focus === "bottom" && dimCaption && (
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
           style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 100%)" }}

@@ -23,7 +23,7 @@ function messageFor(liked: number): string {
 export function MatchProgressPanel({ liked, total, percent }: MatchProgressPanelProps) {
   const saved = liked >= SAVE_THRESHOLD;
   return (
-    <div className="w-full rounded-[22px] border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+    <div className="w-full rounded-[22px] border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
       <div className="flex w-full items-start justify-between text-[11px] font-semibold tracking-[0.88px]">
         <span className="text-slate-600 dark:text-[var(--color-match-text-muted-dark)]">OVERALL PROGRESS</span>
         <span className={`font-bold ${saved ? "text-emerald-700 dark:text-[var(--color-match-success-dark)]" : "text-slate-900 dark:text-white"}`}>{liked} OF {total} LIKED</span>
