@@ -123,7 +123,12 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     // longer a two-column "title/progress beside the card deck" split, it's the same
     // stacked structure as mobile (eyebrow → title → progress → deck → buttons), just
     // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
-    <div className="flex w-full max-w-[460px] flex-col items-center gap-3 text-center lg:items-start lg:text-left">
+    // xl/2xl growth (same idea as the Build flow's FlowCard/FlowProgress): this column
+    // used to hard-cap at 460px at every viewport size, which on a large monitor read as
+    // a narrow strip adrift in empty background — modest, not dramatic, growth since
+    // --match-card-height stays fixed at 370px and too much extra width would start
+    // reading as a flat banner rather than a card.
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-3 text-center lg:items-start lg:text-left xl:max-w-[520px] 2xl:max-w-[580px]">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCH EXPERIENCE</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
