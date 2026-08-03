@@ -125,12 +125,16 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
     // xl/2xl growth (same idea as the Build flow's FlowCard/FlowProgress): this column
     // used to hard-cap at 460px at every viewport size, which on a large monitor read as
-    // a narrow strip adrift in empty background — modest, not dramatic, growth since
-    // --match-card-height stays fixed at 370px and too much extra width would start
-    // reading as a flat banner rather than a card.
-    <div className="flex w-full max-w-[460px] flex-col items-center gap-3 text-center lg:items-start lg:text-left xl:max-w-[520px] 2xl:max-w-[580px]">
+    // a narrow strip adrift in empty background.
+    // gap-[var(--match-block-gap)]: a viewport-height-based clamp (see globals.css), not
+    // a fixed gap-3 — grows the space between these blocks on a tall screen instead of
+    // sitting at one small value forever, while its own floor keeps it from ever reading
+    // as cramped on a short one. --match-card-height (used inside MatchDeck/MatchCard) is
+    // the same kind of clamp, so a tall screen also gets a more portrait-proportioned
+    // card instead of just more empty space around a fixed-size one.
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-[var(--match-block-gap)] text-center lg:items-start lg:text-left xl:max-w-[520px] 2xl:max-w-[580px]">
       <div className="flex w-full flex-col gap-1">
-        <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCH EXPERIENCE</span>
+        <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCHES</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
           {path.title}
         </h1>

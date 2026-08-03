@@ -90,10 +90,19 @@
   --font-size-match-card-title: 30px;
   --font-size-match-card-title-lg: 40px;
   --font-size-match-card-body: 17px;
-  /* Was a plain 494px directly on the card. Pulled into a token; kept at the original
-     494 per feedback that the shrunk version felt off — see the surrounding layout
-     trims instead for how "no scroll to reach the CTAs" is achieved without this. */
-  --match-card-height: 370px;
+  /* clamp(floor, viewport-relative preferred, ceiling): scales with the actual viewport
+     height instead of a single fixed number, so a tall screen gets a more portrait-
+     proportioned card (up toward the ceiling) while a short one shrinks the card down
+     toward the floor to avoid needing a scroll — 370px (this token's old flat value,
+     tuned against feedback that a shrunk-further version felt off) is kept as that floor
+     so short screens never get less than what was already validated as comfortable.
+     dvh (not vh): accounts for mobile browser chrome the way vh alone doesn't. */
+  --match-card-height: clamp(370px, 42dvh, 560px);
+  /* Same clamp idea, for the vertical gap between the progress panel / card deck / CTA
+     rows specifically (not the tighter eyebrow-title-subtitle stack above them, which
+     stays fixed) — grows on tall screens instead of sitting at one fixed small value
+     forever, but the 12px floor means it never reads as cramped even as height shrinks. */
+  --match-block-gap: clamp(12px, 2.5dvh, 32px);
   --color-match-card-bg-dark: #071634;
 
   /* Match Experience's own dark-mode accent palette — distinct from the
