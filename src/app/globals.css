@@ -96,18 +96,26 @@
      card claims the rest of the viewport's height — on any viewport shape (tall, short,
      narrow, or wide), whichever dimension is more constrained wins, and the card and
      everything inside it shrinks or grows together, never independently. */
-  --match-card-size: min(380px, calc(100dvh - 224px));
+  /* /1.2 wraps the whole min(): scales the final result down uniformly by ~1.2x
+     regardless of which branch (width ceiling vs. height budget) was binding, so this
+     stays "proportionately smaller everywhere" rather than only shrinking the cases
+     where the width ceiling happened to be the constraint. Every font size, padding, and
+     gap below is a calc() fraction of this SAME value, so they all shrink right along
+     with it automatically — no separate per-property adjustment needed. */
+  --match-card-size: calc(min(380px, calc(100dvh - 224px)) / 1.2);
   @media (min-width: 1280px) {
-    --match-card-size: min(440px, calc(100dvh - 224px));
+    --match-card-size: calc(min(440px, calc(100dvh - 224px)) / 1.2);
   }
   @media (min-width: 1536px) {
-    --match-card-size: min(500px, calc(100dvh - 224px));
+    --match-card-size: calc(min(500px, calc(100dvh - 224px)) / 1.2);
   }
   --radius-match-card: 20px;
   --radius-match-card-inner: 15px;
   --font-size-match-card-emoji: calc(var(--match-card-size) * 0.17);
   --font-size-match-card-title: calc(var(--match-card-size) * 0.078);
-  --font-size-match-card-body: calc(var(--match-card-size) * 0.045);
+  /* Reduced from 0.045 — the description text was reading as too big at every size,
+     since it's a calc() fraction of --match-card-size, not a per-breakpoint value. */
+  --font-size-match-card-body: calc(var(--match-card-size) * 0.032);
   --match-card-padding: calc(var(--match-card-size) * 0.055);
   --match-card-gap: calc(var(--match-card-size) * 0.032);
   --match-card-inner-gap: calc(var(--match-card-size) * 0.022);
@@ -118,8 +126,9 @@
   /* max(), not a plain calc(): a floor on the gap between the progress panel / card deck
      / CTA row so it never reads as cramped even when --match-card-size shrinks all the
      way down on a short viewport — this gap specifically should never get tight, even
-     if the card itself has to. */
-  --match-block-gap: max(16px, calc(var(--match-card-size) * 0.035));
+     if the card itself has to. + 4px on top of that per direct feedback that it still
+     read as too tight. */
+  --match-block-gap: calc(max(16px, calc(var(--match-card-size) * 0.035)) + 4px);
   --color-match-card-bg-dark: #071634;
 
   /* Match Experience's own dark-mode accent palette — distinct from the

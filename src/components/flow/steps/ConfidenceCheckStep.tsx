@@ -31,8 +31,10 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
   return (
     // relative (not overflow-hidden) so DreamyCorner's absolute, negative-offset position
     // resolves against this wrapper instead of FlowCard's own overflow-hidden root, which
-    // would otherwise clip it — see the note in FlowCard.tsx.
-    <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
+    // would otherwise clip it — see the note in FlowCard.tsx. Width must match FlowCard's
+    // own rule exactly (see its comment) so DreamyCorner's right-anchored position lines
+    // up with the actual card underneath it.
+    <div className="relative w-full max-w-2xl lg:w-[min(50vw,896px)] lg:max-w-none">
       <DreamyCorner message={getReaffirmingMessage(strengths)} />
       <FlowCard
         header={

@@ -38,7 +38,7 @@ export function AboutYouStep({
     // vertical-centering slack that would otherwise stack on top of that for this exact
     // step (see the step===3 check there) — so the top gap stays fixed at ~4px instead of
     // growing on taller viewports.
-    <div className="flex w-full max-w-2xl flex-col items-center gap-1 -mt-1 sm:-mt-7 lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
+    <div className="flex w-full max-w-2xl flex-col items-center gap-1 -mt-1 sm:-mt-7 lg:w-[min(50vw,896px)] lg:max-w-none">
       {/* Dreamy pinned to the row's left edge (== the card's left edge, same width as
           FlowCard below), bubble as flex-1 stretching to fill the rest of the row over to
           the card's right edge — rather than a small bubble+mascot pair floating in the

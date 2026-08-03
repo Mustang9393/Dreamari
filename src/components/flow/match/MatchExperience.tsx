@@ -133,7 +133,15 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     <div className="flex w-full max-w-[var(--match-column-max-width)] flex-col items-center gap-[var(--match-block-gap)] text-center">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCHES</span>
-        <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
+        {/* whitespace-nowrap + a font-size that's a calc() fraction of --match-card-size
+            (not a fixed 44px) — the fixed size wrapped a longer path title once the
+            column itself got narrower (see --match-card-size's own reductions above);
+            scaling with the actual column width instead means whichever title comes
+            through stays on one line without needing per-title tuning. */}
+        <h1
+          className="overflow-hidden text-ellipsis whitespace-nowrap font-extrabold tracking-[-0.02em] text-slate-900 dark:text-white"
+          style={{ fontSize: "calc(var(--match-card-size) * 0.085)", lineHeight: 1.15 }}
+        >
           {path.title}
         </h1>
       </div>
