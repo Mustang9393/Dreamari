@@ -10,6 +10,10 @@ type AuroraBackgroundProps = {
   visitedAccents: string[];
   /** True on the final step: swaps the dominant wash for a slow-drifting full-spectrum gradient. */
   finale?: boolean;
+  /** True for the Match Experience's own "Path Saved!" celebration specifically (not the
+   * Build finale) — layers in occasional subtle white flashes across the whole canvas,
+   * like a lit-up cloud catching distant lightning. */
+  lightning?: boolean;
 };
 
 type Ripple = {
@@ -171,7 +175,7 @@ function makeStars(count: number): Star[] {
   return stars;
 }
 
-export function AuroraBackground({ accent, visitedAccents, finale = false }: AuroraBackgroundProps) {
+export function AuroraBackground({ accent, visitedAccents, finale = false, lightning = false }: AuroraBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
   const themeRef = useRef(theme);
@@ -180,6 +184,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   const ripplesRef = useRef<Ripple[]>([]);
   const blobsRef = useRef<Blob[]>([]);
   const finaleRef = useRef(finale);
+  const lightningRef = useRef(lightning);
   const pointerRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
   const starsRef = useRef<Star[]>(makeStars(STAR_COUNT));
   // Each accumulated step-glow blob is baked once (at max brightness) into its own small
@@ -208,6 +213,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
   useEffect(() => {
     finaleRef.current = finale;
   }, [finale]);
+
+  useEffect(() => {
+    lightningRef.current = lightning;
+  }, [lightning]);
 
   useEffect(() => {
     blobsRef.current = visitedAccents.map((hex, i) => {
@@ -334,6 +343,13 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
 
     let rafId = 0;
     const startTime = performance.now();
+    // Lightning flash scheduling — plain closure variables (like width/height above),
+    // not refs, since they're only ever touched from inside this same effect's draw loop.
+    let nextFlashAt = 0;
+    let flashStartedAt: number | null = null;
+    let flashX = 0;
+    let flashY = 0;
+    let flashRadius = 0;
 
     function draw(now: number) {
       if (!ctx) return;
@@ -618,6 +634,43 @@ export function AuroraBackground({ accent, visitedAccents, finale = false }: Aur
           ctx.fillStyle = `rgba(${fillR | 0}, ${fillG | 0}, ${fillB | 0}, ${alpha.toFixed(3)})`;
           ctx.fill();
         }
+      }
+
+      // Subtle "cloud lit up by distant lightning" flash — a soft, localized brightening
+      // patch at a random spot each time (not a uniform full-screen wash, which read as
+      // way too flash-bang), with a soft radial falloff so it looks like part of the
+      // existing color/glow just brightened a little, not a foreign white overlay. Fast
+      // rise then a slower decay (real lightning brightens quicker than it fades), at
+      // long randomized intervals so it never feels mechanical or frequent.
+      if (lightningRef.current) {
+        if (nextFlashAt === 0) nextFlashAt = now + 2600 + Math.random() * 3400;
+        if (flashStartedAt === null && now >= nextFlashAt) {
+          flashStartedAt = now;
+          flashX = width * (0.2 + Math.random() * 0.6);
+          flashY = height * (0.1 + Math.random() * 0.5);
+          flashRadius = Math.min(width, height) * (0.16 + Math.random() * 0.12);
+        }
+
+        if (flashStartedAt !== null) {
+          const FLASH_DURATION = 340;
+          const elapsed = now - flashStartedAt;
+          if (elapsed >= FLASH_DURATION) {
+            flashStartedAt = null;
+            nextFlashAt = now + 3400 + Math.random() * 4600;
+          } else {
+            const flashT = elapsed / FLASH_DURATION;
+            const intensity = flashT < 0.25 ? flashT / 0.25 : 1 - (flashT - 0.25) / 0.75;
+            const peakAlpha = (isDark ? 0.14 : 0.07) * intensity;
+            const flashGradient = ctx.createRadialGradient(flashX, flashY, 0, flashX, flashY, flashRadius);
+            flashGradient.addColorStop(0, `rgba(255, 255, 255, ${peakAlpha.toFixed(3)})`);
+            flashGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+            ctx.fillStyle = flashGradient;
+            ctx.fillRect(0, 0, width, height);
+          }
+        }
+      } else {
+        nextFlashAt = 0;
+        flashStartedAt = null;
       }
 
       if (!reducedMotion) rafId = requestAnimationFrame(draw);

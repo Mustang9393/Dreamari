@@ -5,7 +5,7 @@ import { MatchActionButtons } from "./MatchActionButtons";
 import { MatchDeck, type MatchDeckHandle } from "./MatchDeck";
 import { MatchProgressPanel } from "./MatchProgressPanel";
 import { MatchToast } from "./MatchToast";
-import { PathSavedModal } from "./PathSavedModal";
+import { PathSavedScreen } from "./PathSavedScreen";
 import { playLikeSound, playPassSound, playRemovedSound, playSavedSound } from "./sounds";
 import type { MatchCardKey, MatchPath, SwipeDirection } from "./types";
 
@@ -112,12 +112,18 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     playRemovedSound();
   }
 
+  // A real full-screen takeover, not a modal layered on top of the still-rendered deck —
+  // see PathSavedScreen's own comment for why (crisp confetti/lightning behind it).
+  if (pendingPathSaved) {
+    return <PathSavedScreen pathTitle={path.title} liked={liked.length} passed={passed.length} onContinue={goToNextPath} />;
+  }
+
   return (
     // One responsive column, matching the updated Figma layout exactly — desktop is no
     // longer a two-column "title/progress beside the card deck" split, it's the same
     // stacked structure as mobile (eyebrow → title → progress → deck → buttons), just
     // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
-    <div className="flex w-full max-w-[460px] flex-col items-center gap-4 text-center lg:items-start lg:text-left">
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-3 text-center lg:items-start lg:text-left">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCH EXPERIENCE</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
@@ -126,7 +132,12 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
         <p className="text-xs text-slate-600 lg:hidden dark:text-[var(--color-match-subtitle-dark)]">Swipe right on what fits you, left on what doesn&apos;t.</p>
       </div>
 
-      <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />
+      {/* Same sm:w-[380px] lg:w-full wrapper as the deck/buttons below — MatchProgressPanel
+          used to just be "w-full" against this column's own 460px max-width, running
+          wider than the deck/buttons at the sm: tier instead of matching them. */}
+      <div className="w-full sm:w-[380px] lg:w-full">
+        <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />
+      </div>
 
       <div className="w-full sm:w-[380px] lg:w-full">
         <MatchDeck ref={deckRef} cards={path.cards.slice(cardIndex)} onSwipeComplete={handleSwipeComplete} />
@@ -137,7 +148,6 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
       </div>
 
       {toast && <MatchToast label={toast.label} direction={toast.direction} onUndo={handleUndo} />}
-      {pendingPathSaved && <PathSavedModal pathTitle={path.title} liked={liked.length} passed={passed.length} onContinue={goToNextPath} />}
     </div>
   );
 }

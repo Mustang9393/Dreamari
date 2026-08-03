@@ -23,18 +23,18 @@ function messageFor(liked: number): string {
 export function MatchProgressPanel({ liked, total, percent }: MatchProgressPanelProps) {
   const saved = liked >= SAVE_THRESHOLD;
   return (
-    <div className="w-full rounded-[22px] border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+    <div className="w-full rounded-[22px] border border-slate-200 bg-white px-6 py-2 shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
       <div className="flex w-full items-start justify-between text-[11px] font-semibold tracking-[0.88px]">
         <span className="text-slate-600 dark:text-[var(--color-match-text-muted-dark)]">OVERALL PROGRESS</span>
         <span className={`font-bold ${saved ? "text-emerald-700 dark:text-[var(--color-match-success-dark)]" : "text-slate-900 dark:text-white"}`}>{liked} OF {total} LIKED</span>
       </div>
-      <div className="mt-3 flex w-full items-center gap-3">
+      <div className="mt-2 flex w-full items-center gap-3">
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/5">
           <div className="h-full rounded-full bg-[var(--color-match-accent-dark)] transition-[width] duration-300" style={{ width: `${percent}%` }} />
         </div>
         <span className="text-[12px] font-bold text-blue-700 dark:text-[var(--color-match-accent-dark)]">{percent}%</span>
       </div>
-      <div className="mt-3 flex items-center gap-1.5 text-[13px]">
+      <div className="mt-2 flex items-center gap-1.5 text-[13px]">
         <span aria-hidden className="size-1.5 rounded-full bg-slate-400 dark:bg-[var(--color-match-text-muted-dark)]" />
         <span className="text-slate-600 dark:text-[var(--color-match-text-muted-dark)]">{messageFor(liked)}</span>
       </div>

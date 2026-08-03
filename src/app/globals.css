@@ -72,23 +72,23 @@
   --radius-match-card: 20px;
   --radius-match-card-inner: 15px;
   --font-size-match-card-emoji: 64px;
-  /* Bumped once (30/44 -> 34/50) to move toward the Figma spec's own proportions, then
-     the desktop one (title-lg) pulled back down slightly (50 -> 42) alongside
-     --match-card-height shrinking, so the CTAs below the deck fit without scrolling on
-     shorter viewports — a taller title on a shorter card would've felt cramped. */
-  --font-size-match-card-title: 34px;
-  --font-size-match-card-title-lg: 42px;
+  /* Bumped (30/44 -> 34/50) to move toward the Figma spec's own proportions, where the
+     title reads bigger than the emoji above it rather than smaller. Kept at this size —
+     the "fit one viewport" fix now comes entirely from trimming space *around* the deck
+     (section padding, panel spacing) rather than shrinking the card/title back down. */
+  --font-size-match-card-title: 30px;
+  --font-size-match-card-title-lg: 40px;
   --font-size-match-card-body: 17px;
-  /* Was a plain 494px on the card itself — pulled into a token and reduced (494 -> 384)
-     specifically so the Match Experience's CTAs sit within one viewport on shorter
-     desktop/tablet screens instead of requiring a scroll to reach them. */
-  --match-card-height: 364px;
+  /* Was a plain 494px directly on the card. Pulled into a token; kept at the original
+     494 per feedback that the shrunk version felt off — see the surrounding layout
+     trims instead for how "no scroll to reach the CTAs" is achieved without this. */
+  --match-card-height: 370px;
   --color-match-card-bg-dark: #071634;
 
   /* Match Experience's own dark-mode accent palette — distinct from the
      Build flow's rotating --step-accent, and previously scattered as raw
      hex repeated across 6 files (MatchActionButtons, MatchProgressPanel,
-     MatchExperience, MatchToast, PathSavedModal) rather than shared. */
+     MatchExperience, MatchToast, PathSavedScreen) rather than shared. */
   --color-match-accent-dark: #2e73f5;
   --color-match-border-dark: #404759;
   --color-match-text-muted-dark: #99a6b8;

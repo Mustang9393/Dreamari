@@ -156,15 +156,15 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
   const rotation = Math.max(-MAX_ROTATION_DEG, Math.min(MAX_ROTATION_DEG, (offsetX / 280) * MAX_ROTATION_DEG));
 
   return (
-    // Scaled down as one whole unit (not just the peek cards) — with the fan's rotated
-    // corners reaching slightly outside the card's own rectangle, the fix for that
-    // reaching into the progress panel above / buttons below is to make the whole deck
-    // a bit smaller than the column it sits in, not to add margin around it (which
-    // would just move the same card closer to its neighbors' text instead). The reserved
-    // layout space (for the progress panel/buttons above and below) is unchanged; only
-    // the deck's own rendered size shrinks within it, which is what actually opens up
-    // real breathing room on both sides.
-    <div className="relative w-full" style={{ transform: "scale(0.9)" }}>
+    // Scaled down vertically only (not a uniform scale) — with the fan's rotated corners
+    // reaching slightly outside the card's own rectangle, the fix for that reaching into
+    // the progress panel above / buttons below is to make the whole deck a bit shorter
+    // than the column it sits in, not to add margin around it (which would just move the
+    // same card closer to its neighbors' text instead). A uniform scale() did this but
+    // also shrank the card's width, insetting its left/right edges relative to the full-
+    // width progress panel/buttons above and below it — scaleY alone keeps the width (and
+    // so the edge alignment) untouched while still buying the same vertical clearance.
+    <div className="relative w-full" style={{ transform: "scaleY(0.9)" }}>
       {/* Peek cards — the real next cards in the deck, just barely fanned (±7deg,
           symmetric) rather than heavily rotated, and each a little smaller than the one
           in front to sell "further back" — enough to read as "a stack of cards" at a

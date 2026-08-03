@@ -31,14 +31,14 @@ export function MatchCard({ card }: MatchCardProps) {
         aria-hidden
       />
 
-      <div className="relative flex flex-1 flex-col gap-5">
+      <div className="relative flex flex-1 flex-col gap-3">
         {/* flex-[1.6] / flex-1 below approximates the Figma spec's own graphic-area to
             body-box height ratio (~1.6:1) instead of the body box just shrink-wrapping
             its own content — that's what was making it read as a small label rather
             than a real, generously-sized box. */}
         <div className="flex w-full flex-[1.6] flex-col items-center justify-center gap-2 rounded-xl">
           <span className="text-[length:var(--font-size-match-card-emoji)] leading-none">{card.emoji}</span>
-          <p className="text-center text-[length:var(--font-size-match-card-title)] leading-[38px] font-extrabold tracking-[-0.5px] text-slate-900 sm:text-[length:var(--font-size-match-card-title-lg)] sm:leading-[44px] sm:tracking-[-1px] dark:text-white">
+          <p className="text-center text-[length:var(--font-size-match-card-title)] leading-[34px] font-extrabold tracking-[-0.5px] text-slate-900 sm:text-[length:var(--font-size-match-card-title-lg)] sm:leading-[44px] sm:tracking-[-1px] dark:text-white">
             {card.label}
           </p>
         </div>
@@ -46,10 +46,11 @@ export function MatchCard({ card }: MatchCardProps) {
         {/* A flat opaque gray box here read as a mismatched, slapped-on rectangle
             against the card's own colored gradient underneath it — translucent white
             instead lets that tint show through softly, the same "frosted" idea as the
-            dark-mode version's translucent white-on-navy. Generous py (up from a flat
-            p-4) plus flex-1 is what makes this read as a real, sizeable box rather than
-            a snug-fit label, matching the Figma spec's own much taller proportions. */}
-        <div className="flex flex-1 items-center justify-center rounded-[var(--radius-match-card-inner)] border border-white/70 bg-white/60 px-4 py-6 backdrop-blur-sm dark:border-white/30 dark:bg-white/[0.13]">
+            dark-mode version's translucent white-on-navy. flex-1 (not padding) is what
+            makes this read as a real, sizeable box — py trimmed down from an earlier,
+            more generous pass so a shorter --match-card-height still has comfortable
+            room for the CTAs below without scrolling. */}
+        <div className="flex flex-1 items-center justify-center rounded-[var(--radius-match-card-inner)] border border-white/70 bg-white/60 px-4 py-3 backdrop-blur-sm sm:py-4 dark:border-white/30 dark:bg-white/[0.13]">
           <p className="flex-1 text-center text-[length:var(--font-size-match-card-body)] leading-[1.5] font-semibold text-slate-800 dark:text-white">{card.body}</p>
         </div>
       </div>

@@ -159,14 +159,25 @@ export function FlowContainer() {
 
   return (
     <ThemeProvider>
-      <AuroraBackground accent={accent} visitedAccents={phase === "build" ? visitedAccents : []} finale={isFinale || matchCelebrating} />
+      <AuroraBackground
+        accent={accent}
+        visitedAccents={phase === "build" ? visitedAccents : []}
+        finale={isFinale || matchCelebrating}
+        lightning={matchCelebrating}
+      />
       {phase !== "build" && !matchCelebrating && <MatchBackdrop />}
       <Confetti colors={matchCelebrating ? MATCH_CATEGORY_COLORS : STEP_AURORA_ACCENTS} active={isFinale || matchCelebrating} />
       <HomeButton />
       <ThemeToggle />
       <section
         style={accentVar}
-        className="relative z-10 flex min-h-dvh w-full flex-col items-center gap-2 px-6 py-2 sm:gap-8 sm:px-10 sm:py-8 lg:px-16"
+        // Match/loading phases get less vertical padding than build (sm:py-4 vs sm:py-8)
+        // — build steps need the room since FlowProgress sits above them, but match has
+        // no progress bar there and the extra padding was just eating into the room the
+        // deck + CTAs need to fit one viewport without scrolling.
+        className={`relative z-10 flex min-h-dvh w-full flex-col items-center gap-2 px-6 py-2 sm:gap-8 sm:px-10 lg:px-16 ${
+          phase === "build" ? "sm:py-8" : "sm:py-2"
+        }`}
       >
         {phase === "build" && <FlowProgress step={step} />}
 
