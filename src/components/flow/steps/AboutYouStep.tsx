@@ -33,11 +33,12 @@ export function AboutYouStep({
     // Dreamy sits in normal document flow here (not absolutely positioned) — a fixed,
     // small gap between him and the card, between the progress bar above (rendered by
     // FlowContainer) and this step's own card, matching how the reference app places him.
-    // sm:-mt-6 trims the section's own shared gap-8 (32px) down to ~8px specifically for
-    // this row — FlowContainer also drops the vertical-centering slack that would
-    // otherwise stack on top of that for this exact step (see the step===3 check there) —
-    // so the top gap stays fixed at ~8px instead of growing on taller viewports.
-    <div className="flex w-full max-w-2xl flex-col items-center gap-2 sm:-mt-6 lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
+    // -mt-1 sm:-mt-7 trims the section's own shared gap (gap-2 mobile / sm:gap-8 desktop)
+    // down to ~4px specifically for this row — FlowContainer also drops the
+    // vertical-centering slack that would otherwise stack on top of that for this exact
+    // step (see the step===3 check there) — so the top gap stays fixed at ~4px instead of
+    // growing on taller viewports.
+    <div className="flex w-full max-w-2xl flex-col items-center gap-1 -mt-1 sm:-mt-7 lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
       {/* Dreamy pinned to the row's left edge (== the card's left edge, same width as
           FlowCard below), bubble as flex-1 stretching to fill the rest of the row over to
           the card's right edge — rather than a small bubble+mascot pair floating in the
