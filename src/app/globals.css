@@ -2,6 +2,17 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@layer base {
+  /* text-wrap: pretty avoids orphans (1-2 words alone on the last line) whenever text
+     reflows at a narrower width — most of this app's "headings" are actually styled <p>
+     tags (see StepHeader, hero copy, etc.), not semantic h1-h6, so this needs to cover
+     both to have any real effect. Pure layout hint, no visual side effects where it's
+     unsupported. */
+  h1, h2, h3, h4, h5, h6, p {
+    text-wrap: pretty;
+  }
+}
+
 :root {
   /* Dark, not white: every current page (/, /flow, /onboarding) is dark-themed at the
      content level, but iOS Safari's overscroll "bounce" at the top/bottom of the page
