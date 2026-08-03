@@ -27,7 +27,7 @@ export function GridOption({ label, selected, disabled, onClick }: GridOptionPro
         selected ? "border-[var(--step-accent)] bg-[var(--step-accent)]" : "border-border-subtle bg-surface-tertiary dark:border-white/10 dark:bg-white/5"
       }`}
     >
-      <span className={`text-[13px] font-bold sm:text-base ${selected ? "text-white" : "text-slate-700 dark:text-slate-300"}`}>{label}</span>
+      <span className={`text-[13px] font-bold sm:text-sm ${selected ? "text-white" : "text-slate-700 dark:text-slate-300"}`}>{label}</span>
       <span
         className={`flex size-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors sm:size-5 ${
           selected ? "border-white bg-white text-[color:var(--step-accent)]" : "border-slate-300 dark:border-white/20"
