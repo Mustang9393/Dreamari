@@ -57,6 +57,10 @@ export type FlowState = {
   gradeLevel: string;
   gpaRange: string;
   subjects: string[];
+  // Which of the currently-selected `subjects` the user also flagged as coming easily to
+  // them — a second, optional follow-up question that only appears once `subjects` is
+  // non-empty (see AcademicJourneyStep), not a fixed/independent list of its own.
+  easySubjects: string[];
   strengths: string[];
   activities: string[];
   energy: string;
@@ -75,6 +79,7 @@ export const INITIAL_FLOW_STATE: FlowState = {
   gradeLevel: "11th Grade",
   gpaRange: "3.8 - 4.0",
   subjects: ["Computer Science", "Science", "Business"],
+  easySubjects: [],
   strengths: ["Problem Solving", "Creativity", "Teamwork"],
   activities: ["Build things", "Be creative", "Lead others"],
   energy: "Balanced",

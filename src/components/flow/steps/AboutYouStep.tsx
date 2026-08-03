@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { StepHeader } from "../StepHeader";
@@ -28,23 +29,31 @@ export function AboutYouStep({
   onNext,
 }: AboutYouStepProps) {
   return (
-    <FlowCard
-      header={<StepHeader eyebrow="BASIC INFO" title="Tell Me About Yourself" subtitle="So I Can Find Your Perfect Matches" onBack={onBack} />}
-    >
-      <div className="flex w-full flex-col gap-3.5 sm:gap-5">
-        <LabeledInput label="What's your full name?" value={fullName} onChange={onChangeFullName} />
-        <LabeledInput label="What's your school or workplace?" value={schoolWorkplace} onChange={onChangeSchoolWorkplace} />
-        <LabeledSelect
-          label="What grade or stage are you in?"
-          value={gradeLevel}
-          options={GRADE_LEVELS}
-          onChange={onChangeGradeLevel}
-          highlighted
-        />
+    // Dreamy sits in normal document flow here (not absolutely positioned) — a fixed,
+    // ordinary gap between him and the card, between the progress bar above (rendered by
+    // FlowContainer) and this step's own card, matching how the reference app places him.
+    <div className="flex w-full max-w-2xl flex-col items-center gap-4 lg:max-w-4xl">
+      <div className="relative aspect-square w-16 shrink-0 sm:w-20">
+        <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="80px" className="object-contain" priority />
       </div>
-      <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
-        Continue →
-      </FlowButton>
-    </FlowCard>
+      <FlowCard
+        header={<StepHeader eyebrow="BASIC INFO" title="Tell Me About Yourself" subtitle="So I Can Find Your Perfect Matches" onBack={onBack} />}
+      >
+        <div className="flex w-full flex-col gap-3.5 sm:gap-5">
+          <LabeledInput label="What's your full name?" value={fullName} onChange={onChangeFullName} />
+          <LabeledInput label="What's your school or workplace?" value={schoolWorkplace} onChange={onChangeSchoolWorkplace} />
+          <LabeledSelect
+            label="What grade or stage are you in?"
+            value={gradeLevel}
+            options={GRADE_LEVELS}
+            onChange={onChangeGradeLevel}
+            highlighted
+          />
+        </div>
+        <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
+          Continue →
+        </FlowButton>
+      </FlowCard>
+    </div>
   );
 }

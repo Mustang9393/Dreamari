@@ -99,12 +99,12 @@ export function FlowContainer() {
   else if (step === 4)
     content = (
       <AcademicJourneyStep
-        path={state.path}
-        gradeLevel={state.gradeLevel}
         gpaRange={state.gpaRange}
         subjects={state.subjects}
+        easySubjects={state.easySubjects}
         onChangeGpaRange={(gpaRange) => patch({ gpaRange })}
         onToggleSubject={(subject) => patch({ subjects: toggleInList(state.subjects, subject) })}
+        onToggleEasySubject={(subject) => patch({ easySubjects: toggleInList(state.easySubjects, subject) })}
         onBack={back}
         onNext={next}
       />
