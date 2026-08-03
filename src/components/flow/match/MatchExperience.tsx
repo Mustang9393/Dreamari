@@ -119,40 +119,34 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
   }
 
   return (
-    // One responsive column, matching the updated Figma layout exactly — desktop is no
-    // longer a two-column "title/progress beside the card deck" split, it's the same
-    // stacked structure as mobile (eyebrow → title → progress → deck → buttons), just
-    // wider and bigger everywhere via sm:/lg: variants instead of a different shape.
-    // xl/2xl growth (same idea as the Build flow's FlowCard/FlowProgress): this column
-    // used to hard-cap at 460px at every viewport size, which on a large monitor read as
-    // a narrow strip adrift in empty background.
-    // gap-[var(--match-block-gap)]: a viewport-height-based clamp (see globals.css), not
-    // a fixed gap-3 — grows the space between these blocks on a tall screen instead of
-    // sitting at one small value forever, while its own floor keeps it from ever reading
-    // as cramped on a short one. --match-card-height (used inside MatchDeck/MatchCard) is
-    // the same kind of clamp, so a tall screen also gets a more portrait-proportioned
-    // card instead of just more empty space around a fixed-size one.
-    <div className="flex w-full max-w-[460px] flex-col items-center gap-[var(--match-block-gap)] text-center lg:items-start lg:text-left xl:max-w-[520px] 2xl:max-w-[580px]">
+    // One responsive column, the same stacked structure at every size (eyebrow → title →
+    // progress → deck → buttons), matching Figma's own centered layout (node 740:37755).
+    // max-w-[var(--match-column-max-width)]: this column is exactly as wide as the card
+    // is tall (see --match-card-size in globals.css — the card is square), so all three
+    // blocks below share the card's own left/right edges by construction, at every
+    // viewport size, without a separate width rule to keep in sync.
+    // gap-[var(--match-block-gap)]: same proportional-to-card-size system, not a fixed
+    // gap-3 — grows or shrinks right along with the card instead of staying flat.
+    // No subtitle line here — the swipe gesture is taught by MatchDeck's own animated
+    // tutorial hint instead (shown on every viewport now, not just mobile), rather than a
+    // text explanation duplicating it.
+    <div className="flex w-full max-w-[var(--match-column-max-width)] flex-col items-center gap-[var(--match-block-gap)] text-center">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCHES</span>
         <h1 className="text-[22px] leading-7 font-bold tracking-[-0.3px] text-slate-900 lg:text-[44px] lg:leading-[52px] lg:font-extrabold lg:tracking-[-1px] dark:text-white">
           {path.title}
         </h1>
-        <p className="text-xs text-slate-600 lg:hidden dark:text-[var(--color-match-subtitle-dark)]">Swipe right on what fits you, left on what doesn&apos;t.</p>
       </div>
 
-      {/* Same sm:w-[380px] lg:w-full wrapper as the deck/buttons below — MatchProgressPanel
-          used to just be "w-full" against this column's own 460px max-width, running
-          wider than the deck/buttons at the sm: tier instead of matching them. */}
-      <div className="w-full sm:w-[380px] lg:w-full">
+      <div className="w-full">
         <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />
       </div>
 
-      <div className="w-full sm:w-[380px] lg:w-full">
+      <div className="w-full">
         <MatchDeck ref={deckRef} cards={path.cards.slice(cardIndex)} onSwipeComplete={handleSwipeComplete} />
       </div>
 
-      <div className="w-full sm:w-[380px] lg:w-full">
+      <div className="w-full">
         <MatchActionButtons onPass={() => deckRef.current?.swipe("pass")} onLike={() => deckRef.current?.swipe("like")} />
       </div>
 

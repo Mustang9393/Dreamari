@@ -156,15 +156,14 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
   const rotation = Math.max(-MAX_ROTATION_DEG, Math.min(MAX_ROTATION_DEG, (offsetX / 280) * MAX_ROTATION_DEG));
 
   return (
-    // Scaled down vertically only (not a uniform scale) — with the fan's rotated corners
-    // reaching slightly outside the card's own rectangle, the fix for that reaching into
-    // the progress panel above / buttons below is to make the whole deck a bit shorter
-    // than the column it sits in, not to add margin around it (which would just move the
-    // same card closer to its neighbors' text instead). A uniform scale() did this but
-    // also shrank the card's width, insetting its left/right edges relative to the full-
-    // width progress panel/buttons above and below it — scaleY alone keeps the width (and
-    // so the edge alignment) untouched while still buying the same vertical clearance.
-    <div className="relative w-full" style={{ transform: "scaleY(0.9)" }}>
+    // No scaleY squeeze here (an earlier version had one, to buy clearance for the fanned
+    // peek cards' rotated corners) — that would now un-square the card MatchCard renders
+    // (100% width, 90% height), which is exactly the "wide/landscape-looking" problem
+    // this whole sizing system was rebuilt to fix (see --match-card-size in globals.css).
+    // The proportional --match-block-gap between this deck and its neighbors (the
+    // progress panel above, the CTA row below) is what supplies the fan's clearance now
+    // instead.
+    <div className="relative w-full">
       {/* Peek cards — the real next cards in the deck, just barely fanned (±7deg,
           symmetric) rather than heavily rotated, and each a little smaller than the one
           in front to sell "further back" — enough to read as "a stack of cards" at a
@@ -229,17 +228,21 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
           <MatchCard card={top} />
         </div>
 
-        {/* Mobile-only, one-time "swipe to choose" hint — sits on top of the card
-            itself (not blocking it: pointer-events-none) and fades/dismisses on its
-            own after ~1.6s, or immediately once the user actually starts dragging. */}
+        {/* One-time "swipe to choose" hint, on every viewport (not just mobile) — this is
+            now the only way the swipe gesture is taught at all, since the separate
+            "Swipe right on what fits you..." text line was dropped as a duplicate
+            explanation. Sits on top of the card itself (not blocking it:
+            pointer-events-none) and fades/dismisses on its own after ~1.6s, or
+            immediately once the user actually starts dragging. Icon/text sized off
+            --match-card-size (not a fixed size-10/text-sm) so it scales with the card
+            instead of looking oversized on a small card or undersized on a large one. */}
         {showTutorial && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[20px] bg-black/40 sm:hidden"
-          >
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[20px] bg-black/40">
             <div className="flex flex-col items-center gap-2 text-white" style={{ animation: "swipe-hint-drift 1.4s ease-in-out 1" }}>
-              <ArrowLeftRightIcon className="size-10" />
-              <span className="text-sm font-bold">Swipe to choose</span>
+              <ArrowLeftRightIcon className="size-[calc(var(--match-card-size)*0.12)]" />
+              <span className="font-bold" style={{ fontSize: "var(--font-size-match-card-body)" }}>
+                Swipe to choose
+              </span>
             </div>
           </div>
         )}
