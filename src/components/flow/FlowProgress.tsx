@@ -16,12 +16,13 @@ export function FlowProgress({ step }: FlowProgressProps) {
     // clear on both sides, comfortably past both buttons, on any viewport.
     // Width rule here must match FlowCard's exactly — this bar used to cap out at
     // max-w-xl (576px) while the card grew past it to 896px, so the two never actually
-    // lined up in width at any viewport past ~sm. At lg+ both now use an explicit ~50%
-    // of the viewport (min(50vw, 896px)) instead of a chain of ever-larger fixed
-    // breakpoint caps; lg:max-w-none clears the max-w-2xl ceiling so that explicit width
-    // is what governs. The -9rem clearance calc only matters below lg, where the
-    // section's own side padding is thin enough for HomeButton/ThemeToggle to get close.
-    <div className="mx-auto flex w-[calc(100%-9rem)] max-w-2xl flex-col gap-3 rounded-2xl bg-[color-mix(in_srgb,var(--step-accent)_12%,white)] px-4 py-2 pb-3 transition-colors duration-700 sm:px-5 lg:w-[min(50vw,896px)] lg:max-w-none dark:border dark:border-white/10 dark:bg-white/10 dark:backdrop-blur">
+    // lined up in width at any viewport past ~sm. At lg+ both now reference the same
+    // --flow-content-width token (see globals.css) instead of each having their own
+    // chain of ever-larger fixed breakpoint caps; lg:max-w-none clears the max-w-2xl
+    // ceiling so that token-driven width is what governs. The -9rem clearance calc only
+    // matters below lg, where the section's own side padding is thin enough for
+    // HomeButton/ThemeToggle to get close.
+    <div className="mx-auto flex w-[calc(100%-9rem)] max-w-2xl flex-col gap-3 rounded-2xl bg-[color-mix(in_srgb,var(--step-accent)_12%,white)] px-4 py-2 pb-3 transition-colors duration-700 sm:px-5 lg:w-[var(--flow-content-width)] lg:max-w-none dark:border dark:border-white/10 dark:bg-white/10 dark:backdrop-blur">
       <div className="flex w-full items-center justify-between text-xs font-bold tracking-wider text-[color:var(--step-accent)] uppercase transition-colors duration-700 sm:text-sm dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]">
         <p>
           Step {step} of {TOTAL_STEPS}

@@ -133,15 +133,12 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     <div className="flex w-full max-w-[var(--match-column-max-width)] flex-col items-center gap-[var(--match-block-gap)] text-center">
       <div className="flex w-full flex-col gap-1">
         <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCHES</span>
-        {/* whitespace-nowrap + a font-size that's a calc() fraction of --match-card-size
-            (not a fixed 44px) — the fixed size wrapped a longer path title once the
-            column itself got narrower (see --match-card-size's own reductions above);
-            scaling with the actual column width instead means whichever title comes
-            through stays on one line without needing per-title tuning. */}
-        <h1
-          className="overflow-hidden text-ellipsis whitespace-nowrap font-extrabold tracking-[-0.02em] text-slate-900 dark:text-white"
-          style={{ fontSize: "calc(var(--match-card-size) * 0.085)", lineHeight: 1.15 }}
-        >
+        {/* whitespace-nowrap + --font-size-match-path-title (a --match-card-size
+            fraction, not a fixed 44px) — the fixed size wrapped a longer path title once
+            the column itself got narrower (see --match-card-size's own reductions in
+            globals.css); scaling with the actual column width instead means whichever
+            title comes through stays on one line without needing per-title tuning. */}
+        <h1 className="overflow-hidden text-ellipsis leading-[1.15] font-extrabold tracking-[-0.02em] whitespace-nowrap text-slate-900 text-[length:var(--font-size-match-path-title)] dark:text-white">
           {path.title}
         </h1>
       </div>

@@ -34,7 +34,7 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
     // would otherwise clip it — see the note in FlowCard.tsx. Width must match FlowCard's
     // own rule exactly (see its comment) so DreamyCorner's right-anchored position lines
     // up with the actual card underneath it.
-    <div className="relative w-full max-w-2xl lg:w-[min(50vw,896px)] lg:max-w-none">
+    <div className="relative w-full max-w-2xl lg:w-[var(--flow-content-width)] lg:max-w-none">
       <DreamyCorner message={getReaffirmingMessage(strengths)} />
       <FlowCard
         header={

@@ -23,6 +23,14 @@
   --background: #030712;
   --foreground: #edeff3;
 
+  /* Build flow's own centered-content width at lg+ (1024px and up) — FlowCard,
+     FlowProgress, and the AboutYouStep/ConfidenceCheckStep wrappers all reference this
+     SAME token rather than repeating the min(50vw, 896px) expression, so they can never
+     drift out of alignment with each other. ~50% of the viewport width, capped at 896px
+     (the card's own original lg: width) so it doesn't keep growing past what already
+     read as the right size on a very large monitor. */
+  --flow-content-width: min(50vw, 896px);
+
   /* Brand palette — extracted from Figma (Dreamari_UIKIT, node 211:619) */
   --color-brand-950: #0a1e4c;
   --color-brand-900: #0c2560;
@@ -119,6 +127,12 @@
   --match-card-padding: calc(var(--match-card-size) * 0.055);
   --match-card-gap: calc(var(--match-card-size) * 0.032);
   --match-card-inner-gap: calc(var(--match-card-size) * 0.022);
+  /* The path title above the deck (e.g. "Computer Science") — distinct from
+     --font-size-match-card-title above, which sizes the CARD's own internal title (e.g.
+     "Classes"). Also a --match-card-size fraction, with whitespace-nowrap in
+     MatchExperience.tsx, so whichever path title comes through stays on one line instead
+     of wrapping once the column narrowed (see --match-card-size's own reductions above). */
+  --font-size-match-path-title: calc(var(--match-card-size) * 0.085);
   /* The column (progress panel / card deck / CTA row) is exactly as wide as the card is
      tall — since the card is square, this keeps all three blocks' left/right edges
      aligned with the card's own, by construction, at every size. */
