@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { DreamySpeechBubble } from "./DreamySpeechBubble";
 
 type DreamyCornerProps = {
   message: string;
@@ -12,6 +13,10 @@ type DreamyCornerProps = {
 // actually wraps to. Requires the wrapper this renders inside to be position: relative
 // (not FlowCard's own root — that has overflow-hidden, which would clip this).
 //
+// items-center (not items-end): the bubble and mascot share one vertical center line, so
+// the bubble's tail (also vertically centered, see DreamySpeechBubble) lines up with
+// Dreamy's mouth instead of sitting arbitrarily below it.
+//
 // Desktop/tablet only (sm:flex, hidden below that): a floating absolute-position mascot
 // is exactly the pattern that caused real text-overlap bugs on mobile earlier in this
 // project (small viewport, large card-relative-percentage offsets) before Dreamy was
@@ -21,11 +26,9 @@ export function DreamyCorner({ message }: DreamyCornerProps) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute -top-10 right-4 z-20 hidden items-end gap-2 sm:flex sm:-top-12 sm:right-6"
+      className="pointer-events-none absolute -top-10 right-4 z-20 hidden items-center gap-2 sm:flex sm:-top-12 sm:right-6"
     >
-      <div className="max-w-[170px] rounded-2xl rounded-br-sm bg-white px-3 py-2 text-left text-xs font-semibold text-slate-700 shadow-md dark:bg-slate-800 dark:text-slate-200">
-        {message}
-      </div>
+      <DreamySpeechBubble message={message} className="max-w-[170px] text-xs" />
       <div className="relative size-20 shrink-0 sm:size-24">
         <Image src="/images/dreamy-welcome-mascot.png" alt="" fill sizes="96px" className="object-contain" />
       </div>

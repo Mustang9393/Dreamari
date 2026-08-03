@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { DreamySpeechBubble } from "../DreamySpeechBubble";
 import { FlowButton } from "../FlowButton";
 import { FlowCard } from "../FlowCard";
 import { StepHeader } from "../StepHeader";
@@ -30,13 +31,15 @@ export function AboutYouStep({
 }: AboutYouStepProps) {
   return (
     // Dreamy sits in normal document flow here (not absolutely positioned) — a fixed,
-    // ordinary gap between him and the card, between the progress bar above (rendered by
+    // small gap between him and the card, between the progress bar above (rendered by
     // FlowContainer) and this step's own card, matching how the reference app places him.
-    <div className="flex w-full max-w-2xl flex-col items-center gap-4 lg:max-w-4xl">
-      <div className="flex items-end gap-2.5">
-        <div className="max-w-[190px] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-left text-xs font-semibold text-slate-700 shadow-md sm:text-sm dark:bg-slate-800 dark:text-slate-200">
-          Let&apos;s get to know you! 😊
-        </div>
+    // sm:-mt-5 trims the section's own shared gap-8 (32px) down to ~12px specifically for
+    // this row — FlowContainer also drops the vertical-centering slack that would
+    // otherwise stack on top of that for this exact step (see the step===3 check there) —
+    // so the top gap stays fixed at ~12px instead of growing on taller viewports.
+    <div className="flex w-full max-w-2xl flex-col items-center gap-3 lg:max-w-4xl sm:-mt-5">
+      <div className="flex items-center gap-2.5">
+        <DreamySpeechBubble message="Let's get to know you! 😊" className="max-w-[190px] text-xs sm:text-sm" />
         <div className="relative aspect-square w-20 shrink-0 sm:w-24">
           <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="96px" className="object-contain" priority />
         </div>

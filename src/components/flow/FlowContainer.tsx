@@ -181,7 +181,12 @@ export function FlowContainer() {
       >
         {phase === "build" && <FlowProgress step={step} />}
 
-        <div className="flex w-full flex-1 items-center justify-center">
+        {/* items-start (not the default items-center) only for step 3 (About You): that
+            step renders Dreamy above its card with a deliberately fixed, tight gap
+            (AboutYouStep's own sm:-mt-5) — centering this block vertically would stack
+            unpredictable extra slack from any leftover viewport height on top of that
+            fixed gap, growing it on taller screens instead of holding it at ~12px. */}
+        <div className={`flex w-full flex-1 justify-center ${step === 3 && phase === "build" ? "items-start" : "items-center"}`}>
           {phase === "build" && <StepTransition key={step}>{content}</StepTransition>}
           {phase === "loading" && (
             <StepTransition key="match-loading">
