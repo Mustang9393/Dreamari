@@ -9,6 +9,17 @@ const SKILLS = ["Problem Solving", "Communication", "Creativity", "Leadership", 
 
 const MAX_STRENGTHS = 3;
 
+// Reaffirms whatever the user has actually picked so far, rather than a single static
+// line — reads as Dreamy reacting to their choices instead of a canned prompt that never
+// changes as they select strengths.
+function getReaffirmingMessage(strengths: string[]): string {
+  if (strengths.length === 0) return "Pick a few — you've got more strengths than you think! 💪";
+  if (strengths.length === 1) return `${strengths[0]} is a real strength. Great pick! 💪`;
+  const last = strengths[strengths.length - 1];
+  const rest = strengths.slice(0, -1).join(", ");
+  return `${rest} and ${last} — that's a powerful combo! 💪`;
+}
+
 type ConfidenceCheckStepProps = {
   strengths: string[];
   onToggleStrength: (strength: string) => void;
@@ -21,8 +32,8 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
     // relative (not overflow-hidden) so DreamyCorner's absolute, negative-offset position
     // resolves against this wrapper instead of FlowCard's own overflow-hidden root, which
     // would otherwise clip it — see the note in FlowCard.tsx.
-    <div className="relative w-full max-w-2xl lg:max-w-4xl">
-      <DreamyCorner message="You've got more strengths than you think! 💪" />
+    <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
+      <DreamyCorner message={getReaffirmingMessage(strengths)} />
       <FlowCard
         header={
           <StepHeader

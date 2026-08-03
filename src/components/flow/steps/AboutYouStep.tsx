@@ -33,16 +33,23 @@ export function AboutYouStep({
     // Dreamy sits in normal document flow here (not absolutely positioned) — a fixed,
     // small gap between him and the card, between the progress bar above (rendered by
     // FlowContainer) and this step's own card, matching how the reference app places him.
-    // sm:-mt-5 trims the section's own shared gap-8 (32px) down to ~12px specifically for
+    // sm:-mt-6 trims the section's own shared gap-8 (32px) down to ~8px specifically for
     // this row — FlowContainer also drops the vertical-centering slack that would
     // otherwise stack on top of that for this exact step (see the step===3 check there) —
-    // so the top gap stays fixed at ~12px instead of growing on taller viewports.
-    <div className="flex w-full max-w-2xl flex-col items-center gap-3 lg:max-w-4xl sm:-mt-5">
-      <div className="flex items-center gap-2.5">
-        <DreamySpeechBubble message="Let's get to know you! 😊" className="max-w-[190px] text-xs sm:text-sm" />
-        <div className="relative aspect-square w-20 shrink-0 sm:w-24">
-          <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="96px" className="object-contain" priority />
+    // so the top gap stays fixed at ~8px instead of growing on taller viewports.
+    <div className="flex w-full max-w-2xl flex-col items-center gap-2 sm:-mt-6 lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
+      {/* Dreamy pinned to the row's left edge (== the card's left edge, same width as
+          FlowCard below), bubble as flex-1 stretching to fill the rest of the row over to
+          the card's right edge — rather than a small bubble+mascot pair floating in the
+          middle, this reads as one full-width intro banner sized to the card itself. */}
+      <div className="flex w-full items-center gap-4 sm:gap-5">
+        <div className="relative aspect-square w-40 shrink-0 sm:w-48">
+          <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="192px" className="object-contain" priority />
         </div>
+        <DreamySpeechBubble
+          message="I'm so glad you're here! Tell me a bit about yourself so I can start finding careers that actually fit you."
+          className="flex-1 text-xs sm:text-sm"
+        />
       </div>
       <FlowCard
         header={<StepHeader eyebrow="BASIC INFO" title="Tell Me About Yourself" subtitle="So I Can Find Your Perfect Matches" onBack={onBack} />}
