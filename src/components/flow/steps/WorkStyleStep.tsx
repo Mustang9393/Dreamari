@@ -78,7 +78,15 @@ export function WorkStyleStep({
           />
         </div>
 
-        <SetupPanel energy={energy} teamStyle={teamStyle} interaction={interaction} />
+        {/* pt-[24px] on this wrapper (not on SetupPanel itself) pushes the panel's top
+            edge down to align with the "Your Energy" pills row itself, not the "YOUR
+            ENERGY" label above it — same technique as AcademicJourneyStep's GPA-dropdown
+            alignment. The wrapper still stretches to the full row height (via the
+            parent's items-stretch), so SetupPanel's own h-full fills what's left below
+            that offset, down to the column's bottom. */}
+        <div className="w-full lg:w-[240px] lg:shrink-0 lg:pt-[24px]">
+          <SetupPanel energy={energy} teamStyle={teamStyle} interaction={interaction} />
+        </div>
       </div>
 
       <div className="mt-2 flex w-full flex-col gap-3 sm:mt-3">
