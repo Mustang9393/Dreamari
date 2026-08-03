@@ -16,18 +16,24 @@ function SetupPanel({ energy, teamStyle, interaction }: { energy: string; teamSt
     // lg:h-full (with the parent row switched to items-stretch) + lg:justify-center is
     // what makes this a real right-side column spanning the full card height instead of
     // a short box that just hugs its own content.
-    <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 text-center lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center dark:border-white/10 dark:bg-white/5">
-      <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your setup</p>
-      <ol className="flex flex-row flex-wrap justify-center gap-x-4 gap-y-2 lg:flex-col lg:items-center lg:gap-2.5">
-        {rows.map((row, index) => (
-          <li key={row} className="flex items-center gap-2.5">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--step-accent)] text-[11px] font-bold text-white">
-              {index + 1}
-            </span>
-            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{row}</span>
-          </li>
-        ))}
-      </ol>
+    <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center dark:border-white/10 dark:bg-white/5">
+      {/* This inner wrapper is the piece that's centered as a whole (via the parent's
+          items-center) — items-start/text-left inside it is what makes the label and
+          every row share one common left edge instead of each being independently
+          centered (which staggers rows of different lengths against each other). */}
+      <div className="flex flex-col items-start gap-3 text-left">
+        <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your setup</p>
+        <ol className="flex flex-row flex-wrap gap-x-4 gap-y-2 lg:flex-col lg:items-start lg:gap-2.5">
+          {rows.map((row, index) => (
+            <li key={row} className="flex items-center gap-2.5">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--step-accent)] text-[11px] font-bold text-white">
+                {index + 1}
+              </span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{row}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }

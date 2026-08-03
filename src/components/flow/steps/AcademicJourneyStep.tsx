@@ -31,23 +31,29 @@ function SoFarPanel({ path, gradeLevel, subjects }: { path: string; gradeLevel: 
     // fill the column's height instead of sitting as a short box pinned to the top with
     // empty space below it; lg:justify-center then centers its own content vertically
     // within that full-height box, and items-center/text-center centers it horizontally.
-    <div className="flex w-full flex-col items-center gap-1 rounded-xl border border-border-subtle bg-surface-tertiary p-3 text-center sm:gap-1.5 sm:p-4 lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center lg:gap-3 dark:border-white/10 dark:bg-white/5">
-      <p className="text-[10px] font-bold tracking-[1.4px] text-slate-600 uppercase sm:text-xs dark:text-slate-400">So far</p>
-      <p className="text-xs font-semibold text-slate-600 sm:text-sm dark:text-slate-300">
-        {path} • {gradeLevel}
-      </p>
-      {subjects.length > 0 && (
-        <ol className="flex flex-row flex-wrap justify-center gap-x-3 gap-y-0.5 lg:flex-col lg:items-center lg:gap-1.5">
-          {subjects.map((subject, index) => (
-            <li
-              key={subject}
-              className="text-xs font-bold text-[color:var(--step-accent)] sm:text-sm dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]"
-            >
-              {index + 1}. {subject}
-            </li>
-          ))}
-        </ol>
-      )}
+    <div className="flex w-full flex-col items-center gap-1 rounded-xl border border-border-subtle bg-surface-tertiary p-3 sm:gap-1.5 sm:p-4 lg:h-full lg:w-[240px] lg:shrink-0 lg:justify-center lg:gap-3 dark:border-white/10 dark:bg-white/5">
+      {/* This inner wrapper is the piece that's centered as a whole (via the parent's
+          items-center) — items-start/text-left inside it is what makes "So far", the
+          path/grade line, and every subject share one common left edge instead of each
+          being independently centered (which staggers lines of different lengths). */}
+      <div className="flex flex-col items-start gap-1 text-left sm:gap-1.5">
+        <p className="text-[10px] font-bold tracking-[1.4px] text-slate-600 uppercase sm:text-xs dark:text-slate-400">So far</p>
+        <p className="text-xs font-semibold text-slate-600 sm:text-sm dark:text-slate-300">
+          {path} • {gradeLevel}
+        </p>
+        {subjects.length > 0 && (
+          <ol className="flex flex-row flex-wrap gap-x-3 gap-y-0.5 lg:flex-col lg:items-start lg:gap-1.5">
+            {subjects.map((subject, index) => (
+              <li
+                key={subject}
+                className="text-xs font-bold text-[color:var(--step-accent)] sm:text-sm dark:text-[color-mix(in_srgb,var(--step-accent)_70%,white)]"
+              >
+                {index + 1}. {subject}
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </div>
   );
 }
@@ -91,7 +97,14 @@ export function AcademicJourneyStep({
           </div>
         </div>
 
-        <SoFarPanel path={path} gradeLevel={gradeLevel} subjects={subjects} />
+        {/* pt-[26px] on this wrapper (not on SoFarPanel itself) pushes the panel's top
+            edge down to align with the GPA dropdown field's own top, not the "What's
+            your GPA range?" label above it — the wrapper itself still stretches to the
+            full row height (via the parent's items-stretch), so SoFarPanel's own h-full
+            fills exactly what's left below that offset, down to the column's bottom. */}
+        <div className="w-full lg:w-[240px] lg:shrink-0 lg:pt-[24px]">
+          <SoFarPanel path={path} gradeLevel={gradeLevel} subjects={subjects} />
+        </div>
       </div>
 
       <FlowButton onClick={onNext} className="mt-2 sm:mt-3">
