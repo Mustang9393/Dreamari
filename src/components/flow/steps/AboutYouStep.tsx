@@ -33,8 +33,13 @@ export function AboutYouStep({
     // ordinary gap between him and the card, between the progress bar above (rendered by
     // FlowContainer) and this step's own card, matching how the reference app places him.
     <div className="flex w-full max-w-2xl flex-col items-center gap-4 lg:max-w-4xl">
-      <div className="relative aspect-square w-16 shrink-0 sm:w-20">
-        <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="80px" className="object-contain" priority />
+      <div className="flex items-end gap-2.5">
+        <div className="max-w-[190px] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-left text-xs font-semibold text-slate-700 shadow-md sm:text-sm dark:bg-slate-800 dark:text-slate-200">
+          Let&apos;s get to know you! 😊
+        </div>
+        <div className="relative aspect-square w-20 shrink-0 sm:w-24">
+          <Image src="/images/dreamy-welcome-mascot.png" alt="Dreamy" fill sizes="96px" className="object-contain" priority />
+        </div>
       </div>
       <FlowCard
         header={<StepHeader eyebrow="BASIC INFO" title="Tell Me About Yourself" subtitle="So I Can Find Your Perfect Matches" onBack={onBack} />}

@@ -4,12 +4,13 @@ type DreamyCornerProps = {
   message: string;
 };
 
-// Floats Dreamy + a small speech bubble above the FlowCard's own top-right corner, like
-// he's peeking over it from outside — requires the FlowCard this renders inside to have
-// position: relative (it does) so the absolute positioning below resolves against the
-// card itself, not the page. Anchored well above the header's own top edge (-top-16/20)
-// specifically so it can never overlap the eyebrow/title text, which starts flush at the
-// card's actual top edge — there's no viewport width at which this dips into it.
+// A "sticker" pinned across the FlowCard's top-right corner — half sitting on the
+// background above the card, half overlapping the header banner below it — rather than
+// floating entirely above the card like a tooltip. Deliberately NOT trying to align to
+// the header's own box model; it just needs to clear the eyebrow/title text, which are
+// left-aligned, so sitting at the right edge leaves it clear at any width the header
+// actually wraps to. Requires the wrapper this renders inside to be position: relative
+// (not FlowCard's own root — that has overflow-hidden, which would clip this).
 //
 // Desktop/tablet only (sm:flex, hidden below that): a floating absolute-position mascot
 // is exactly the pattern that caused real text-overlap bugs on mobile earlier in this
@@ -20,13 +21,13 @@ export function DreamyCorner({ message }: DreamyCornerProps) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute -top-20 right-6 z-20 hidden items-end gap-2 sm:flex"
+      className="pointer-events-none absolute -top-10 right-4 z-20 hidden items-end gap-2 sm:flex sm:-top-12 sm:right-6"
     >
-      <div className="max-w-[160px] rounded-2xl rounded-br-sm bg-white px-3 py-2 text-left text-xs font-semibold text-slate-700 shadow-md dark:bg-slate-800 dark:text-slate-200">
+      <div className="max-w-[170px] rounded-2xl rounded-br-sm bg-white px-3 py-2 text-left text-xs font-semibold text-slate-700 shadow-md dark:bg-slate-800 dark:text-slate-200">
         {message}
       </div>
-      <div className="relative size-16 shrink-0">
-        <Image src="/images/dreamy-welcome-mascot.png" alt="" fill sizes="64px" className="object-contain" />
+      <div className="relative size-20 shrink-0 sm:size-24">
+        <Image src="/images/dreamy-welcome-mascot.png" alt="" fill sizes="96px" className="object-contain" />
       </div>
     </div>
   );
