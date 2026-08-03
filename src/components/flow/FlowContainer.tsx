@@ -175,29 +175,40 @@ export function FlowContainer() {
         // — build steps need the room since FlowProgress sits above them, but match has
         // no progress bar there and the extra padding was just eating into the room the
         // deck + CTAs need to fit one viewport without scrolling.
-        className={`relative z-10 flex min-h-dvh w-full flex-col items-center gap-2 px-6 py-2 sm:gap-8 sm:px-10 lg:px-16 ${
+        className={`relative z-10 flex min-h-dvh w-full flex-col items-center px-6 py-2 sm:px-10 lg:px-16 ${
           phase === "build" ? "sm:py-8" : "sm:py-2"
         }`}
       >
-        {phase === "build" && <FlowProgress step={step} />}
-
-        {/* items-start (not the default items-center) only for step 3 (About You): that
-            step renders Dreamy above its card with a deliberately fixed, tight gap
+        {/* FlowProgress and the card live in ONE flex-1 column here (not FlowProgress as
+            a separate top-anchored sibling) so the pair centers as a single unit on tall
+            viewports — previously FlowProgress sat pinned right under the section's own
+            top padding while only the card centered in the leftover space below it, which
+            on a large monitor read as "progress bar stuck to the top, card floating alone
+            in the middle" instead of one cohesive composition.
+            justify-start (not the default justify-center) only for step 3 (About You):
+            that step renders Dreamy above its card with a deliberately fixed, tight gap
             (AboutYouStep's own sm:-mt-5) — centering this block vertically would stack
             unpredictable extra slack from any leftover viewport height on top of that
             fixed gap, growing it on taller screens instead of holding it at ~12px. */}
-        <div className={`flex w-full flex-1 justify-center ${step === 3 && phase === "build" ? "items-start" : "items-center"}`}>
-          {phase === "build" && <StepTransition key={step}>{content}</StepTransition>}
-          {phase === "loading" && (
-            <StepTransition key="match-loading">
-              <MatchLoadingScreen />
-            </StepTransition>
-          )}
-          {phase === "match" && (
-            <StepTransition key="match-experience">
-              <MatchExperience paths={MATCH_PATHS} onComplete={restart} onCelebrationChange={setMatchCelebrating} />
-            </StepTransition>
-          )}
+        <div
+          className={`flex w-full flex-1 flex-col items-center gap-2 sm:gap-8 ${
+            step === 3 && phase === "build" ? "justify-start" : "justify-center"
+          }`}
+        >
+          {phase === "build" && <FlowProgress step={step} />}
+          <div className="flex w-full items-center justify-center">
+            {phase === "build" && <StepTransition key={step}>{content}</StepTransition>}
+            {phase === "loading" && (
+              <StepTransition key="match-loading">
+                <MatchLoadingScreen />
+              </StepTransition>
+            )}
+            {phase === "match" && (
+              <StepTransition key="match-experience">
+                <MatchExperience paths={MATCH_PATHS} onComplete={restart} onCelebrationChange={setMatchCelebrating} />
+              </StepTransition>
+            )}
+          </div>
         </div>
       </section>
     </ThemeProvider>
