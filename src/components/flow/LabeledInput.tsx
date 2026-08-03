@@ -7,7 +7,7 @@ type LabeledInputProps = {
 export function LabeledInput({ label, value, onChange }: LabeledInputProps) {
   return (
     <label className="flex w-full flex-col gap-1.5 sm:gap-2">
-      <span className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">{label}</span>
+      <span className="text-xs font-bold tracking-wider text-slate-600 uppercase dark:text-slate-400">{label}</span>
       {/* Font size here stays at 16px (text-base) even on mobile, unlike most other text
           in this redesign — anything smaller makes iOS Safari auto-zoom the page when
           this field is focused, which is a worse experience than a slightly taller

@@ -28,7 +28,7 @@ const SUBJECTS = [
 function SoFarPanel({ path, gradeLevel, subjects }: { path: string; gradeLevel: string; subjects: string[] }) {
   return (
     <div className="flex w-full flex-col gap-1 rounded-xl border border-border-subtle bg-surface-tertiary p-3 sm:gap-1.5 sm:p-4 lg:w-[240px] lg:shrink-0 dark:border-white/10 dark:bg-white/5">
-      <p className="text-[10px] font-bold tracking-[1.4px] text-slate-500 uppercase sm:text-xs dark:text-slate-400">So far</p>
+      <p className="text-[10px] font-bold tracking-[1.4px] text-slate-600 uppercase sm:text-xs dark:text-slate-400">So far</p>
       <p className="text-xs font-semibold text-slate-600 sm:text-sm dark:text-slate-300">
         {path} • {gradeLevel}
       </p>
@@ -76,7 +76,7 @@ export function AcademicJourneyStep({
           <LabeledSelect label="What's your GPA range?" value={gpaRange} options={GPA_RANGES} onChange={onChangeGpaRange} />
 
           <div className="flex w-full flex-col gap-2 sm:gap-3">
-            <p className="text-[10px] leading-tight font-bold tracking-[1.4px] text-slate-500 uppercase sm:text-[11px] dark:text-slate-400">
+            <p className="text-[10px] leading-tight font-bold tracking-[1.4px] text-slate-600 uppercase sm:text-[11px] dark:text-slate-400">
               What subjects make you excited to learn? (Pick up to 3)
             </p>
             <div className="grid w-full grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2">

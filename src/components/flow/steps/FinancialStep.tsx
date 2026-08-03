@@ -37,7 +37,7 @@ export function FinancialStep({ financial, onChange, onBack, onNext }: Financial
         <FlowButton onClick={onNext}>
           Next →
         </FlowButton>
-        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">Financial fit improves completion rates by 40 percent (NCES, 2022).</p>
+        <p className="w-full text-center text-[10px] leading-tight text-slate-600 dark:text-slate-400">Financial fit improves completion rates by 40 percent (NCES, 2022).</p>
       </div>
     </FlowCard>
   );

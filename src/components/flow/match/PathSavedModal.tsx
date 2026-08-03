@@ -21,11 +21,11 @@ export function PathSavedModal({ pathTitle, liked, passed, onContinue }: PathSav
         <div className="mt-5 flex items-center justify-center gap-8">
           <div>
             <p className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">{liked}</p>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Liked</p>
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Liked</p>
           </div>
           <div>
             <p className="text-2xl font-extrabold text-slate-700 dark:text-white">{passed}</p>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Passed</p>
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Passed</p>
           </div>
         </div>
         <button

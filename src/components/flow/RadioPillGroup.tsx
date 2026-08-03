@@ -11,7 +11,7 @@ type RadioPillGroupProps = {
 export function RadioPillGroup({ label, options, value, onChange }: RadioPillGroupProps) {
   return (
     <div className="flex w-full flex-col gap-2">
-      <p className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">{label}</p>
+      <p className="text-xs font-bold tracking-wider text-slate-600 uppercase dark:text-slate-400">{label}</p>
       {/* flex-1 on each pill, not each sized to its own label — 3 short labels left-
           clustered with a wide empty gap on the right, rather than reading as one
           deliberate row of options spanning the same width as everything else on the

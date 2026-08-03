@@ -14,7 +14,7 @@ function SetupPanel({ energy, teamStyle, interaction }: { energy: string; teamSt
 
   return (
     <div className="flex w-full flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-tertiary p-4 lg:w-[240px] lg:shrink-0 dark:border-white/10 dark:bg-white/5">
-      <p className="text-xs font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Your setup</p>
+      <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your setup</p>
       <ol className="flex flex-row flex-wrap gap-x-4 gap-y-2 lg:flex-col lg:gap-2">
         {rows.map((row, index) => (
           <li key={row} className="flex items-center gap-2.5">
@@ -76,7 +76,7 @@ export function WorkStyleStep({
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">Based on work style and environment data from O*NET (U.S. Department of Labor)</p>
+        <p className="w-full text-center text-[10px] leading-tight text-slate-600 dark:text-slate-400">Based on work style and environment data from O*NET (U.S. Department of Labor)</p>
       </div>
     </FlowCard>
   );

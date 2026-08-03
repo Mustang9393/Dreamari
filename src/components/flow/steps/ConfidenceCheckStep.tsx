@@ -42,7 +42,7 @@ export function ConfidenceCheckStep({ strengths, onToggleStrength, onBack, onNex
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">
+        <p className="w-full text-center text-[10px] leading-tight text-slate-600 dark:text-slate-400">
           Based on Self-Efficacy Theory — Albert Bandura, Stanford University
         </p>
       </div>

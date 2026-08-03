@@ -34,7 +34,7 @@ export function CongratulationsStep({ onBack, onSeeMatches }: CongratulationsSte
       </div>
 
       <div className="flex w-full flex-col gap-3">
-        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Pick where to start</p>
+        <p className="text-[11px] font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Pick where to start</p>
         <div className="flex w-full flex-col gap-2.5">
           {PATHWAYS.map((pathway, index) => (
             <SelectionRow

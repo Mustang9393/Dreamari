@@ -40,7 +40,7 @@ export function FutureValuesStep({ values, onToggleValue, onBack, onNext }: Futu
 
       {values.length > 0 && (
         <div className="flex w-full flex-col gap-1.5 rounded-xl border border-border-subtle bg-surface-tertiary p-4 dark:border-white/10 dark:bg-white/5">
-          <p className="text-xs font-bold tracking-[1.4px] text-slate-500 uppercase dark:text-slate-400">Your priorities</p>
+          <p className="text-xs font-bold tracking-[1.4px] text-slate-600 uppercase dark:text-slate-400">Your priorities</p>
           <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
             {values.map((value, index) => `${index + 1}. ${value}`).join(" • ")}
           </p>
@@ -51,7 +51,7 @@ export function FutureValuesStep({ values, onToggleValue, onBack, onNext }: Futu
         <FlowButton onClick={onNext}>
           Continue →
         </FlowButton>
-        <p className="w-full text-center text-[10px] leading-tight text-slate-400/70 dark:text-slate-500/70">
+        <p className="w-full text-center text-[10px] leading-tight text-slate-600 dark:text-slate-400">
           Based on Work Values Theory and Harvard University Career Services Self-Assessment Framework
         </p>
       </div>

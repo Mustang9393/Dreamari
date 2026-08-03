@@ -46,7 +46,7 @@ export function ChoosePathStep({ onChange, onNext }: ChoosePathStepProps) {
           />
         </div>
         <p className="text-xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">Choose Your Path</p>
-        <p className="mt-1 text-sm text-slate-500 sm:mt-2 sm:text-[15px] dark:text-slate-400">Where are you starting your journey?</p>
+        <p className="mt-1 text-sm text-slate-600 sm:mt-2 sm:text-[15px] dark:text-slate-400">Where are you starting your journey?</p>
       </div>
 
       {/* Stacked full-width tiles on mobile — each big enough to read comfortably and
@@ -77,7 +77,7 @@ export function ChoosePathStep({ onChange, onNext }: ChoosePathStepProps) {
             </span>
             <span className="relative z-10 flex flex-1 flex-col gap-0.5 sm:flex-none sm:items-center sm:gap-0">
               <h3 className="text-base font-bold text-slate-900 sm:mb-1 sm:text-base dark:text-white">{item.title}</h3>
-              <p className="text-sm text-slate-500 sm:mb-4 dark:text-slate-400">{item.sub}</p>
+              <p className="text-sm text-slate-600 sm:mb-4 dark:text-slate-400">{item.sub}</p>
               <span className="flex items-center gap-1 text-sm font-semibold text-[color:var(--path-color)] dark:text-[color-mix(in_srgb,var(--path-color)_75%,white)]">
                 Select
                 <ChevronRightIcon className="size-4" />

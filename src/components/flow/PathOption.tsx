@@ -37,7 +37,7 @@ export function PathOption({ icon, title, sub, selected, onClick }: PathOptionPr
       </span>
       <span className="flex flex-col gap-0.5 sm:gap-1">
         <span className="text-sm font-bold text-slate-900 sm:text-lg dark:text-white">{title}</span>
-        <span className="text-xs font-semibold text-slate-500 sm:text-sm dark:text-slate-400">{sub}</span>
+        <span className="text-xs font-semibold text-slate-600 sm:text-sm dark:text-slate-400">{sub}</span>
       </span>
     </button>
   );
