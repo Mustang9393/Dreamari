@@ -89,20 +89,44 @@
      (section padding, panel spacing) rather than shrinking the card/title back down. */
   --font-size-match-card-title: 30px;
   --font-size-match-card-title-lg: 40px;
+  /* Body copy now also scales down on mobile (-sm), same "smaller base, larger sm:"
+     pattern as the title above it — the card itself now gets a real fixed height on
+     mobile too (see --match-card-height's own comment), and this fixed 17px body text
+     didn't shrink to match a genuinely small mobile/short-viewport card, so it started
+     overflowing its own translucent box and getting clipped by the card's outer
+     overflow-hidden border. */
+  --font-size-match-card-body-sm: 14px;
   --font-size-match-card-body: 17px;
   /* clamp(floor, viewport-relative preferred, ceiling): scales with the actual viewport
-     height instead of a single fixed number, so a tall screen gets a more portrait-
+     HEIGHT instead of a single fixed number, so a tall screen gets a more portrait-
      proportioned card (up toward the ceiling) while a short one shrinks the card down
-     toward the floor to avoid needing a scroll — 370px (this token's old flat value,
-     tuned against feedback that a shrunk-further version felt off) is kept as that floor
-     so short screens never get less than what was already validated as comfortable.
-     dvh (not vh): accounts for mobile browser chrome the way vh alone doesn't. */
-  --match-card-height: clamp(370px, 42dvh, 560px);
+     toward the floor to avoid needing a scroll. dvh (not vh): accounts for mobile
+     browser chrome the way vh alone doesn't.
+     Tiered by height, deliberately NOT by width (a min-width media query was tried
+     first and was wrong): a landscape phone has desktop-like WIDTH but phone-like
+     SHORT height, so gating on width alone gave it the tall-screen tier's 370px floor
+     with nowhere near 370px of actual height to spend — this is what a real Galaxy S23
+     test in landscape caught. This base tier is for genuinely short viewports; the two
+     taller tiers below layer on top of it as height increases, regardless of width. */
+  --match-card-height: clamp(190px, 34dvh, 400px);
   /* Same clamp idea, for the vertical gap between the progress panel / card deck / CTA
      rows specifically (not the tighter eyebrow-title-subtitle stack above them, which
      stays fixed) — grows on tall screens instead of sitting at one fixed small value
      forever, but the 12px floor means it never reads as cramped even as height shrinks. */
   --match-block-gap: clamp(12px, 2.5dvh, 32px);
+  /* A phone in portrait (e.g. a Galaxy S23 at 360x780) lands here — tall enough for a
+     real portrait-proportioned card, without assuming the desktop-sized chrome the next
+     tier up is tuned against. */
+  @media (min-height: 600px) {
+    --match-card-height: clamp(260px, 38dvh, 480px);
+  }
+  /* The original floor/ceiling this token launched with — sized against a desktop/
+     tablet card column's own (larger) surrounding chrome, so it only kicks in once
+     there's enough height to actually fit that chrome plus this floor without a
+     scroll. */
+  @media (min-height: 820px) {
+    --match-card-height: clamp(370px, 42dvh, 560px);
+  }
   --color-match-card-bg-dark: #071634;
 
   /* Match Experience's own dark-mode accent palette — distinct from the

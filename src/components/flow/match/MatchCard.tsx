@@ -18,7 +18,7 @@ type MatchCardProps = {
 export function MatchCard({ card }: MatchCardProps) {
   const [top, bottom] = card.gradient;
   return (
-    <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[var(--radius-match-card)] border border-white/20 bg-[var(--color-match-card-bg-dark)] p-6 shadow-none sm:h-[var(--match-card-height)]">
+    <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[var(--radius-match-card)] border border-white/20 bg-[var(--color-match-card-bg-dark)] p-6 shadow-none h-[var(--match-card-height)]">
       {/* A fully-opaque background layer (never a transparent stop), positioned as a
           child against the padding box rather than painted as the card's own
           background-image — that's what keeps it from ever bleeding under/behind the
@@ -45,7 +45,9 @@ export function MatchCard({ card }: MatchCardProps) {
             --match-card-height still has comfortable room for the CTAs below without
             scrolling. */}
         <div className="flex flex-1 items-center justify-center rounded-[var(--radius-match-card-inner)] border border-white/30 bg-white/[0.13] px-4 py-3 backdrop-blur-sm sm:py-4">
-          <p className="flex-1 text-center text-[length:var(--font-size-match-card-body)] leading-[1.5] font-semibold text-white">{card.body}</p>
+          <p className="flex-1 text-center text-[length:var(--font-size-match-card-body-sm)] leading-[1.4] font-semibold text-white sm:text-[length:var(--font-size-match-card-body)] sm:leading-[1.5]">
+            {card.body}
+          </p>
         </div>
       </div>
     </div>
