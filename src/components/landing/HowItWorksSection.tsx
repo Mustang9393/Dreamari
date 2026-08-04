@@ -33,11 +33,13 @@ const FALLOFF = 0.16;
 //
 // Mobile/tablet get a shorter value than desktop — less scroll distance between one
 // chapter locking in and the next, which is also what packs them visually closer
-// together (per feedback that the gap between blocks read as too long on those sizes).
+// together. Dropped further (42 -> 28) per feedback that mobile still had way too much
+// dead space/scrolling — the whole section (5 chapters + finale) should take roughly 3
+// scroll gestures to get through, not 4-5.
 // A function of viewport width, not a plain constant, since it needs to vary by
 // breakpoint; called with the same `w` the component already tracks.
 function chapterHeightVh(w: number): number {
-  return w < 1024 ? 42 : 62;
+  return w < 1024 ? 28 : 62;
 }
 function edgeSpacerVh(w: number): number {
   return 50 * (1 - chapterHeightVh(w) / 100);
@@ -86,6 +88,14 @@ const STEPS = [
   },
 ];
 
+// The vertical progress rail (below) used to fill/dot itself with each chapter's own
+// STEPS color — multi-colored, same as the chapter words themselves — which read as two
+// competing colorful things fighting for attention at once. This is the rail's own
+// palette instead: a light-to-dark blue ramp off the same brand tokens the homepage
+// hero uses, so the rail reads as "one calm progress indicator" while the chapter words
+// stay the ones carrying color.
+const RAIL_HUES = ["var(--color-brand-200)", "var(--color-brand-300)", "var(--color-brand-400)", "var(--color-brand-500)", "var(--color-brand-600)"];
+
 // One shared scale for every chapter title, instead of the old per-word sizeScale
 // (BUILD/MATCH at 1, PLAY at 1.15, EXPLORE/CONNECT down at ~0.77) — that made the
 // titles visibly different sizes, which read as inconsistent rather than deliberate.
@@ -108,9 +118,16 @@ function chaptersScrollVh(w: number): number {
 // FINALE_SCROLL_VH is how much additional scrolling pops the finale in; FINALE_HOLD_VH
 // is extra room after that so the finale sits fully visible for a while before the user
 // hits the true bottom of the page, instead of the reveal finishing right as scrolling
-// runs out.
-const FINALE_SCROLL_VH = 80;
-const FINALE_HOLD_VH = 100;
+// runs out. Both smaller on mobile (was a flat 80/100 for every width) — same "roughly 3
+// scroll gestures total" goal as chapterHeightVh above; the finale doesn't need as much
+// hold room on a phone since there's no separate desktop-vs-mobile layout shift to wait
+// out.
+function finaleScrollVh(w: number): number {
+  return w < 1024 ? 50 : 80;
+}
+function finaleHoldVh(w: number): number {
+  return w < 1024 ? 50 : 100;
+}
 
 // Each chapter below renders as a real, normal-flow block — the user scrolls the page
 // and the words genuinely travel up through the frame, instead of sitting fixed in
@@ -156,7 +173,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
   // first render (before the vp effect above has synced real dimensions in), where
   // dividing by a real 0 would produce NaN.
   const chaptersScrollPx = (chaptersScrollVh(w) / 100) * (h || 1);
-  const financeScrollPx = (FINALE_SCROLL_VH / 100) * (h || 1);
+  const financeScrollPx = (finaleScrollVh(w) / 100) * (h || 1);
   const safeOffset = isNaN(scrollOffsetPx) ? 0 : Math.max(0, scrollOffsetPx);
   const safeProgress = Math.min(1, safeOffset / chaptersScrollPx);
   const financeProgress = Math.max(0, Math.min(1, (safeOffset - chaptersScrollPx) / financeScrollPx));
@@ -290,8 +307,8 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
               width: "100%",
               height: `${safeProgress * 100}%`,
               borderRadius: 999,
-              background: `linear-gradient(${STEPS.map((s) => s.color).join(",")})`,
-              boxShadow: `0 0 16px ${STEPS[0].color}99`,
+              background: `linear-gradient(${RAIL_HUES.join(",")})`,
+              boxShadow: `0 0 16px color-mix(in srgb, ${RAIL_HUES[0]} 60%, transparent)`,
             }}
           />
           {STEPS.map((step, i) => (
@@ -304,9 +321,9 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                 width: isMobile ? 6 : 9,
                 height: isMobile ? 6 : 9,
                 borderRadius: "50%",
-                background: step.color,
+                background: RAIL_HUES[i],
                 transform: "translate(-50%,-50%)",
-                boxShadow: `0 0 10px ${step.color}`,
+                boxShadow: `0 0 10px ${RAIL_HUES[i]}`,
               }}
             />
           ))}
@@ -529,7 +546,13 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                 paddingRight: isLeft ? sidePad : railClear + sidePad,
                 paddingTop: isMobile ? 60 : 83,
                 paddingBottom: isMobile ? 60 : 83,
-                opacity: 0.05 + 0.95 * t,
+                // (1 - financeProgress) on top of the chapter's own proximity fade: safeProgress
+                // clamps at 1 once the chapters phase ends, so the LAST chapter (CONNECT,
+                // centered exactly at progress 1) sits at d=0 forever afterward — its own
+                // proximity() never falls off, so without this it stayed at full opacity
+                // and rendered on top of the finale ("YOU'RE READY") reveal that follows,
+                // instead of the two being mutually exclusive.
+                opacity: (0.05 + 0.95 * t) * (1 - financeProgress),
                 transform: `scale(${0.95 + 0.05 * t})`,
                 // Blurred while out of its own hold window, sharpening to 0 right as it
                 // locks in — this is what makes an upcoming chapter read as "coming
@@ -590,13 +613,13 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           );
         })}
         <div style={{ height: `${edgeSpacerVh(w)}vh` }} />
-        {/* Real scroll room for the finale phase — FINALE_SCROLL_VH of it drives the
-            pop-in (financeProgress above), the remaining FINALE_HOLD_VH just lets the
+        {/* Real scroll room for the finale phase — finaleScrollVh(w) of it drives the
+            pop-in (financeProgress above), the remaining finaleHoldVh(w) just lets the
             fully-revealed finale sit on screen for a while before the user reaches the
             true bottom of the page, rather than the reveal finishing right as scrolling
             runs out. No content of its own: the finale itself renders in the sticky
             layer above, not here. */}
-        <div style={{ height: `${FINALE_SCROLL_VH + FINALE_HOLD_VH}vh` }} />
+        <div style={{ height: `${finaleScrollVh(w) + finaleHoldVh(w)}vh` }} />
       </div>
     </div>
   );

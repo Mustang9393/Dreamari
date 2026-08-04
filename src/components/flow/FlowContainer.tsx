@@ -195,7 +195,10 @@ export function FlowContainer() {
             step === 3 && phase === "build" ? "justify-start" : "justify-center"
           }`}
         >
-          {phase === "build" && <FlowProgress step={step} />}
+          {/* Not on step 1 (Welcome/"Hi, I'm Dreamy") — that screen is the intro, before
+              the user has actually started answering anything, so a progress bar there
+              reads as premature rather than informative. */}
+          {phase === "build" && step !== 1 && <FlowProgress step={step} />}
           <div className="flex w-full items-center justify-center">
             {phase === "build" && <StepTransition key={step}>{content}</StepTransition>}
             {phase === "loading" && (
