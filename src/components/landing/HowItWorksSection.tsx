@@ -203,18 +203,20 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
   if (w === 0 || h === 0) return null;
 
   const isMobile = w < 640;
+  const isTablet = w >= 640 && w < 1024;
 
   // Rail geometry: a slim vertical track near the left edge, inset from the top/bottom by
   // a generous fixed margin so it never sits flush against the frame.
   const railInset = Math.max(32, Math.min(80, w * 0.06));
   const railTop = Math.max(90, h * 0.15);
   const railBottom = Math.max(96, h * 0.14);
-  const sidePad = isMobile ? 28 : Math.max(120, railInset + 110);
+  const sidePad = isMobile ? 28 : isTablet ? 32 : Math.max(120, railInset + 110);
   // Clearance reserved specifically for the rail's own footprint (track + dot/puck glow),
   // on *both* mobile and desktop — mobile previously had none at all (just sidePad), which
   // wasn't enough room: the rail's glow bled into the first few characters of every
   // left-aligned word (BUILD, PLAY, CONNECT).
-  const railClear = isMobile ? railInset + 24 : railInset + 48;
+  const railClear = isMobile ? railInset + 24 : isTablet ? railInset + 32 : railInset + 48;
+  const leftContentInset = railClear + sidePad;
 
   return (
     <div style={{ position: "relative" }}>
@@ -529,14 +531,22 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           // font-size via canvas.measureText — filling 85% of the available width gives
           // "as big as possible" while still leaving a real margin against the rail and
           // the outer edge, not crowding either.
-          const availableTitleWidth = w - railClear - 2 * sidePad;
+          const availableTitleWidth = w - leftContentInset - sidePad;
           const nameFontSize = isMobile
             ? Math.min(52, w * 0.16) * CHAPTER_TITLE_SCALE
-            : Math.max(90, Math.min(260, (availableTitleWidth * 0.85) / 5.19));
+            : isTablet
+              ? Math.max(68, Math.min(112, (availableTitleWidth * 0.92) / 5.19))
+              : Math.max(90, Math.min(260, (availableTitleWidth * 0.85) / 5.19));
           // Scales with viewport width too (was a flat 22px) so it grows alongside the
           // now much bigger titles instead of looking undersized next to them.
           const descFontSize = isMobile ? 15 : Math.max(22, Math.min(30, w * 0.017));
           const iconSize = isMobile ? 34 : 50;
+          const contentGap = isMobile ? 10 : 16;
+          const descMaxWidth = isMobile
+            ? Math.max(160, availableTitleWidth - iconSize - contentGap)
+            : isTablet
+              ? Math.min(w * 0.42, availableTitleWidth - iconSize - contentGap)
+              : "34vw";
 
           return (
             <div
@@ -557,15 +567,15 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                 justifyContent: "center",
                 alignItems: isLeft ? "flex-start" : "flex-end",
                 textAlign: isLeft ? "left" : "right",
-                paddingLeft: isLeft ? railClear + sidePad : sidePad,
-                paddingRight: isLeft ? sidePad : railClear + sidePad,
+                paddingLeft: isLeft ? leftContentInset : sidePad,
+                paddingRight: sidePad,
                 paddingTop: isMobile ? 60 : 83,
                 paddingBottom: isMobile ? 60 : 83,
-                // On mobile/tablet this element is a real document snap target. Center
-                // alignment maps exactly to the same geometry as centerOf(), and
-                // scroll-snap-stop prevents a momentum swipe from skipping a chapter.
-                scrollSnapAlign: w < 1024 ? "center" : undefined,
-                scrollSnapStop: w < 1024 ? "always" : undefined,
+                // Every breakpoint uses the same real document snap target. Center
+                // alignment maps exactly to the same geometry as centerOf(), while the
+                // gesture controller prevents momentum from skipping a chapter.
+                scrollSnapAlign: "center",
+                scrollSnapStop: "always",
                 // safeProgress clamps at 1 with CONNECT centered, so its own proximity
                 // remains 1. The separate exit phase now fades and lifts it completely
                 // before finaleProgress is permitted to start.
@@ -598,7 +608,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                   display: "flex",
                   flexDirection: isLeft ? "row" : "row-reverse",
                   alignItems: "center",
-                  gap: isMobile ? 10 : 16,
+                  gap: contentGap,
                   marginTop: isMobile ? 12 : 22,
                   // Stays hidden until the title is essentially fully locked in (not
                   // just "mostly faded up," per feedback that it should reveal only
@@ -622,7 +632,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                 >
                   <step.Icon c={step.color} size={Math.round(iconSize * 0.46)} />
                 </span>
-                <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: descFontSize, color: "rgba(255,255,255,0.82)", maxWidth: isMobile ? "72vw" : "34vw" }}>
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: descFontSize, color: "rgba(255,255,255,0.82)", maxWidth: descMaxWidth }}>
                   {step.desc}
                 </span>
               </div>
@@ -639,8 +649,8 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           data-how-it-works-snap-target="end"
           style={{
             height: `${connectExitVh(w) + finaleScrollVh(w)}vh`,
-            scrollSnapAlign: w < 1024 ? "end" : undefined,
-            scrollSnapStop: w < 1024 ? "always" : undefined,
+            scrollSnapAlign: "end",
+            scrollSnapStop: "always",
           }}
         />
         <div style={{ height: `${finaleHoldVh(w)}vh` }} />

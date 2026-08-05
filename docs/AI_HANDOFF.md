@@ -34,6 +34,13 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   remain at the hero instead of jumping to BUILD. Desktop remains free-scrolling.
 - Responsive How It Works validation passed across BUILD → MATCH → PLAY → EXPLORE →
   CONNECT → finale, one gesture per state, with no skipped Explore/Connect stages.
+- Extended the same one-gesture stage snapping to desktop wheel/trackpad input. At
+  1280×800 the verified sequence is BUILD → MATCH → PLAY → EXPLORE → CONNECT → finale,
+  with consecutive gestures and no swallowed intermediate stage.
+- Added tablet-specific content geometry instead of inheriting desktop minimums. At the
+  compact 687×787 breakpoint the rail ends at x=44, content begins at x=105, CONNECT
+  ends at x=584, and right-aligned stages keep a 32px outer margin. Titles,
+  descriptions, icons and the progress rail no longer overlap.
 
 ## Remaining external check
 

@@ -41,7 +41,7 @@ export function HowItWorksScroller() {
 
     function sectionCanTakeGesture(direction: 1 | -1) {
       const el = wrapperRef.current;
-      if (!el || !isTouchLayout()) return false;
+      if (!el) return false;
       const bounds = el.getBoundingClientRect();
       return direction > 0
         ? bounds.top <= window.innerHeight && bounds.bottom > 0
@@ -56,12 +56,16 @@ export function HowItWorksScroller() {
       const destination = offsets[nextIndex];
 
       activeSnapIndexRef.current = nextIndex;
+      // Native CSS snapping may already have landed exactly on this target before the
+      // scroll-settle fallback runs. Register the stage, but do not lock: no new smooth
+      // scroll means there would be no follow-up scroll event to release that lock.
+      if (Math.abs(destination - window.scrollY) < 8) return true;
       snapLockRef.current = true;
       window.scrollTo({ top: Math.max(0, destination), behavior: "smooth" });
       window.clearTimeout(snapUnlockTimer);
       snapUnlockTimer = window.setTimeout(() => {
         snapLockRef.current = false;
-      }, 1600);
+      }, 900);
       return true;
     }
 
@@ -87,12 +91,11 @@ export function HowItWorksScroller() {
       if (bounds.top >= window.innerHeight * 0.95) activeSnapIndexRef.current = -1;
 
       // Document-level snapping is enabled only while the How It Works sequence is
-      // entering/inside the viewport on phone and tablet widths. Leaving it permanently
-      // enabled makes a fresh page load choose BUILD as the nearest mandatory target and
-      // skip the hero. Turning it on as the section approaches gives the intended first
-      // gesture → BUILD behavior without changing normal scrolling elsewhere.
+      // entering/inside the viewport. Leaving it permanently enabled makes a fresh page
+      // load choose BUILD as the nearest mandatory target and skip the hero. Turning it
+      // on as the section approaches gives the intended first gesture → BUILD behavior
+      // without changing normal scrolling elsewhere.
       const snapActive =
-        isTouchLayout() &&
         bounds.top <= window.innerHeight * 0.75 &&
         bounds.bottom >= window.innerHeight * 0.25;
       if (snapActive) document.documentElement.dataset.howItWorksSnap = "true";
