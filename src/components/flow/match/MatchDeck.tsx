@@ -157,9 +157,8 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
 
   return (
     // No scaleY squeeze here (an earlier version had one, to buy clearance for the fanned
-    // peek cards' rotated corners) — that would now un-square the card MatchCard renders
-    // (100% width, 90% height), which is exactly the "wide/landscape-looking" problem
-    // this whole sizing system was rebuilt to fix (see --match-card-size in globals.css).
+    // peek cards' rotated corners) — that would independently distort the deliberate
+    // width/height relationship MatchCard already derives from the shared sizing tokens.
     // The proportional --match-block-gap between this deck and its neighbors (the
     // progress panel above, the CTA row below) is what supplies the fan's clearance now
     // instead.

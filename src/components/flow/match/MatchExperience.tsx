@@ -60,7 +60,6 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
   const path = paths[pathIndex];
   const card = path.cards[cardIndex];
   const cardTotal = path.cards.length;
-  const percent = Math.round(((cardIndex + 1) / cardTotal) * 100);
 
   function goToNextPath() {
     setPendingPathSaved(false);
@@ -119,10 +118,11 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
   }
 
   return (
-    // One responsive column, the same stacked structure at every size (eyebrow → title →
-    // progress → deck → buttons), matching Figma's own centered layout (node 740:37755).
+    // One responsive column, the same stacked structure at every size (title → progress
+    // → deck → buttons). The redundant MATCHES eyebrow was removed so the path title is
+    // the immediate context and its recovered height can belong to the decision card.
     // max-w-[var(--match-column-max-width)]: this column is exactly as wide as the card
-    // is tall (see --match-card-size in globals.css — the card is square), so all three
+    // is wide (see --match-card-size in globals.css), so all three
     // blocks below share the card's own left/right edges by construction, at every
     // viewport size, without a separate width rule to keep in sync.
     // gap-[var(--match-block-gap)]: same proportional-to-card-size system, not a fixed
@@ -130,21 +130,20 @@ export function MatchExperience({ paths, onComplete, onCelebrationChange }: Matc
     // No subtitle line here — the swipe gesture is taught by MatchDeck's own animated
     // tutorial hint instead (shown on every viewport now, not just mobile), rather than a
     // text explanation duplicating it.
-    <div className="flex w-full max-w-[var(--match-column-max-width)] flex-col items-center gap-[var(--match-block-gap)] text-center">
-      <div className="flex w-full flex-col gap-1">
-        <span className="text-sm font-semibold text-[var(--color-brand-600)] lg:text-[15px]">MATCHES</span>
+    <div className="relative flex w-full max-w-[var(--match-column-max-width)] flex-col items-center gap-[var(--match-block-gap)] text-center">
+      <div className="flex w-full flex-col">
         {/* whitespace-nowrap + --font-size-match-path-title (a --match-card-size
             fraction, not a fixed 44px) — the fixed size wrapped a longer path title once
             the column itself got narrower (see --match-card-size's own reductions in
             globals.css); scaling with the actual column width instead means whichever
             title comes through stays on one line without needing per-title tuning. */}
-        <h1 className="overflow-hidden text-ellipsis leading-[1.15] font-extrabold tracking-[-0.02em] whitespace-nowrap text-slate-900 text-[length:var(--font-size-match-path-title)] dark:text-white">
+        <h1 className="overflow-hidden text-ellipsis leading-[1.2] font-bold tracking-[-0.01em] whitespace-nowrap text-[length:var(--font-size-match-path-title)] text-[var(--color-text-secondary)]">
           {path.title}
         </h1>
       </div>
 
       <div className="w-full">
-        <MatchProgressPanel liked={liked.length} total={cardTotal} percent={percent} />
+        <MatchProgressPanel liked={liked.length} current={cardIndex + 1} total={cardTotal} />
       </div>
 
       <div className="w-full">

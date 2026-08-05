@@ -152,6 +152,47 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Accepted light/dark evidence is under `work/home-theme-qa/`; `design-qa.md` remains
   `final result: passed`.
 
+## 2026-08-05 Match readability and homepage scroll recovery
+
+- Match-card description text now uses a responsive `clamp(13px, 4% of card size, 16px)`
+  value. Browser checks measured 13px at 390×844 and 14.67px at 1280×800; the longest
+  approved copy fits its reserved panel with no clipping or page overflow.
+- How It Works now enters an explicit upward-exit state when the user scrolls or swipes
+  above BUILD. Mandatory snap is disabled during that exit instead of repeatedly pulling
+  the page back to the first chapter, and normal snapping resumes on downward re-entry.
+- Browser-tested the full return path from the focused sequence to the hero at 390×844
+  and 1280×800. `npm run tokens:check` and ESLint pass. The production build is otherwise
+  clean but could not finish in the restricted environment because `next/font` could not
+  reach Google Fonts to download Montserrat.
+- Match hierarchy keeps the percentage in its original position beside the bar and
+  separates liked-card status plus the save threshold onto the supporting row. The
+  temporary `Card N of 5` label has been removed. Progress and toast feedback expose
+  appropriate ARIA semantics.
+- The card-size formula now includes a `100vw - 48px` guard outside the desktop/height
+  reduction. At 320×700 the card width remains 272px, the progress panel stays on one row,
+  and the page has no horizontal overflow. Audit evidence and notes are saved under
+  `work/match-hierarchy-audit/`.
+- Match feedback is positioned relative to the decision column above its 52px action
+  row. At 320×700 the Undo toast overlays only the card's decorative lower edge and no
+  longer blocks either action; the complete three-Like/two-Pass path reaches Path Saved.
+- The `MATCHES` eyebrow is removed from all Match decision screens. `Computer Science`
+  and the progress panel shift upward, while `--match-card-height` adds the recovered
+  22–28px to the card only. At 320×700 the front card is 272×294; at 390×844 it is
+  316.7×338.8; at 1280×800 it is 366.7×392.3. The 20px gaps above and below the deck are
+  unchanged and all three viewports remain free of page overflow.
+- Match title hierarchy is now intentional rather than equal: the path header scales at
+  `0.068 × card width`, weight 700, semantic `text.secondary`; the active card title
+  remains `0.078 × card width`, weight 800, white. Measured pairs are 18.5/21.2px at
+  320px, 21.5/24.7px at 390px, and 24.9/28.6px at 1280px.
+- Match progress support copy uses bounded single-line states: `3 more likes to save`,
+  `2 more likes to save`, `1 more like to save`, then `Path saved!`. Both sides are
+  `white-space: nowrap`; at 320×700, `4 liked` measures 45.9px and `Path saved!` 69.3px
+  inside the 272px panel with no wrapping or page overflow.
+- Match feedback is now a compact 32px-high chip using 12px type and 8×14px padding
+  instead of the prior 44px/14px treatment. At 320×700, `Skills liked | Undo` measures
+  144.7px wide and the worst-case `Earning Potential liked | Undo` measures 220.2px;
+  both stay inside the viewport and above, not over, the 52px actions.
+
 ## Recommended next step
 
 - Review the open local `v2` student home preview and its responsive rails/interactions.

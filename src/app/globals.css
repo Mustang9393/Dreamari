@@ -66,8 +66,8 @@ html[data-how-it-works-snap="true"] {
   /* MatchCard's own one-off sizing — not on the shared radius/font-size scale anything
      else in the flow uses, kept as their own named tokens rather than forced onto the
      shared scale.
-     This card is deliberately SQUARE (width == height, via --match-card-size below) and
-     every other dimension here — both font sizes, the card's own padding, and the gaps
+     --match-card-size is the card width and the continuous scale driver for every other
+     internal dimension — both font sizes, the card's own padding, and the gaps
      around it — is a fixed proportion of that ONE driving value, via calc(). Earlier
      versions scaled width off viewport WIDTH (Tailwind breakpoints) and height off
      viewport HEIGHT (a dvh clamp) as two independent rules; on a real 13" MacBook Air's
@@ -76,32 +76,40 @@ html[data-how-it-works-snap="true"] {
      every dimension from one size value also means text/padding/gaps scale continuously
      and consistently as the card resizes, instead of jumping between a handful of
      hand-picked numbers at arbitrary breakpoints.
-     min(width-ceiling, height-budget): width-ceiling grows at xl/2xl so the card can
+     min(width-ceiling, height-budget, viewport-width-budget): width-ceiling grows at xl/2xl so the card can
      still get bigger on a spacious desktop monitor; height-budget reserves just enough
-     room for the title/progress/buttons chrome above and below it (~224px) so the square
-     card claims the rest of the viewport's height — on any viewport shape (tall, short,
-     narrow, or wide), whichever dimension is more constrained wins, and the card and
-     everything inside it shrinks or grows together, never independently. */
+     room for the title/progress/buttons chrome above and below it (~224px); and the
+     final 100vw - 48px guard
+     protects compact phones where available width is tighter than both. On any viewport
+     shape, whichever dimension is most constrained wins. */
   /* /1.2 wraps the whole min(): scales the final result down uniformly by ~1.2x
-     regardless of which branch (width ceiling vs. height budget) was binding, so this
-     stays "proportionately smaller everywhere" rather than only shrinking the cases
+     regardless of whether the desktop ceiling or height budget was binding. The compact
+     phone width guard remains outside that reduction so it matches the column's actual
+     24px side insets rather than being made unnecessarily smaller. This stays
+     "proportionately smaller everywhere" rather than only shrinking the cases
      where the width ceiling happened to be the constraint. Every font size, padding, and
      gap below is a calc() fraction of this SAME value, so they all shrink right along
      with it automatically — no separate per-property adjustment needed. */
-  --match-card-size: calc(min(380px, calc(100dvh - 224px)) / 1.2);
+  --match-card-size: min(calc(min(380px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
   @media (min-width: 1280px) {
-    --match-card-size: calc(min(440px, calc(100dvh - 224px)) / 1.2);
+    --match-card-size: min(calc(min(440px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
   }
   @media (min-width: 1536px) {
-    --match-card-size: calc(min(500px, calc(100dvh - 224px)) / 1.2);
+    --match-card-size: min(calc(min(500px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
   }
+  /* Removing the MATCHES eyebrow recovers roughly one line plus its former gap. Give
+     that space to the decision surface itself: the card becomes deliberately taller,
+     while its width, all surrounding block gaps, and action placement remain unchanged. */
+  --match-card-height: calc(var(--match-card-size) + clamp(22px, calc(var(--match-card-size) * 0.07), 28px));
   --radius-match-card: var(--dimension-radius-lg);
   --radius-match-card-inner: var(--dimension-radius-match-inner);
   --font-size-match-card-emoji: calc(var(--match-card-size) * 0.17);
   --font-size-match-card-title: calc(var(--match-card-size) * 0.078);
-  /* Reduced from 0.045 — the description text was reading as too big at every size,
-     since it's a calc() fraction of --match-card-size, not a per-breakpoint value. */
-  --font-size-match-card-body: calc(var(--match-card-size) * 0.032);
+  /* Keep the description comfortably readable without letting it overwhelm the card.
+     The fluid middle value still follows the card's width scale, while the floor protects
+     phones/short laptop windows from dropping into 10–12px text and the ceiling keeps
+     long descriptions from overflowing on large displays. */
+  --font-size-match-card-body: clamp(13px, calc(var(--match-card-size) * 0.04), 16px);
   --match-card-padding: calc(var(--match-card-size) * 0.055);
   --match-card-gap: calc(var(--match-card-size) * 0.032);
   --match-card-inner-gap: calc(var(--match-card-size) * 0.022);
@@ -110,10 +118,12 @@ html[data-how-it-works-snap="true"] {
      "Classes"). Also a --match-card-size fraction, with whitespace-nowrap in
      MatchExperience.tsx, so whichever path title comes through stays on one line instead
      of wrapping once the column narrowed (see --match-card-size's own reductions above). */
-  --font-size-match-path-title: calc(var(--match-card-size) * 0.085);
-  /* The column (progress panel / card deck / CTA row) is exactly as wide as the card is
-     tall — since the card is square, this keeps all three blocks' left/right edges
-     aligned with the card's own, by construction, at every size. */
+  /* The path is persistent context; the card title is the active decision dimension.
+     Keep the path one clear step smaller so Classes / Workstyle / Skills owns the
+     strongest title treatment inside the student's current task. */
+  --font-size-match-path-title: calc(var(--match-card-size) * 0.068);
+  /* The column (progress panel / card deck / CTA row) is exactly as wide as the card,
+     keeping all three blocks' left/right edges aligned at every size. */
   --match-column-max-width: var(--match-card-size);
   /* max(), not a plain calc(): a floor on the gap between the progress panel / card deck
      / CTA row so it never reads as cramped even when --match-card-size shrinks all the

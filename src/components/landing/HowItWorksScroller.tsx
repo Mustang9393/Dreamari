@@ -10,6 +10,10 @@ export function HowItWorksScroller() {
   const lastScrollYRef = useRef(0);
   const scrollDirectionRef = useRef<1 | -1>(1);
   const touchStartRef = useRef<{ clientY: number } | null>(null);
+  // Mandatory document snapping must temporarily stand down when the user moves up
+  // from BUILD. Otherwise BUILD remains the nearest snap target and pulls the page
+  // straight back into this section before the hero can re-enter the viewport.
+  const exitingUpRef = useRef(false);
   // Raw px scrolled past this wrapper's own top edge — NOT normalized to 0..1 here.
   // HowItWorksSection now holds three back-to-back phases (the five chapters, CONNECT's
   // exit, then the finale), each with its own scroll distance in vh, so a single
@@ -96,6 +100,7 @@ export function HowItWorksScroller() {
       // on as the section approaches gives the intended first gesture → BUILD behavior
       // without changing normal scrolling elsewhere.
       const snapActive =
+        !exitingUpRef.current &&
         bounds.top <= window.innerHeight * 0.75 &&
         bounds.bottom >= window.innerHeight * 0.25;
       if (snapActive) document.documentElement.dataset.howItWorksSnap = "true";
@@ -119,6 +124,14 @@ export function HowItWorksScroller() {
       if (Math.abs(event.deltaY) < 8) return;
       const direction: 1 | -1 = event.deltaY > 0 ? 1 : -1;
       if (!sectionCanTakeGesture(direction)) return;
+      if (direction < 0 && activeSnapIndexRef.current <= 0) {
+        exitingUpRef.current = true;
+        activeSnapIndexRef.current = -1;
+        snapLockRef.current = false;
+        delete document.documentElement.dataset.howItWorksSnap;
+        return;
+      }
+      if (direction > 0) exitingUpRef.current = false;
       if (snapLockRef.current) {
         event.preventDefault();
         return;
@@ -138,6 +151,14 @@ export function HowItWorksScroller() {
       const delta = start.clientY - event.changedTouches[0].clientY;
       if (Math.abs(delta) < 32) return;
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      if (direction < 0 && activeSnapIndexRef.current <= 0) {
+        exitingUpRef.current = true;
+        activeSnapIndexRef.current = -1;
+        snapLockRef.current = false;
+        delete document.documentElement.dataset.howItWorksSnap;
+        return;
+      }
+      if (direction > 0) exitingUpRef.current = false;
       if (sectionCanTakeGesture(direction)) snapOneStage(direction);
     }
 

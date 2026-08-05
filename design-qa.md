@@ -50,6 +50,37 @@
 
 ## Validation
 
+### Match no-eyebrow refinement
+
+- Comparison target: the previously accepted Match decision layout, modified by the
+  explicit requirement to remove `MATCHES`, move the title/progress upward, and spend the
+  recovered height on the card without changing the gaps around its stack.
+- Before evidence: `work/match-hierarchy-audit/01-current-desktop.jpg` and
+  `work/match-hierarchy-audit/02-current-mobile.jpg`.
+- Accepted implementation evidence: `work/match-hierarchy-audit/09-no-eyebrow-elongated-mobile.jpg`,
+  `10-no-eyebrow-elongated-desktop.jpg`, and `11-no-eyebrow-elongated-compact.jpg`.
+- Geometry passed: the progress-to-card and card-to-actions gaps remain 20px at 320×700,
+  390×844, and 1280×800. The cards gained 22–25.7px of height, body copy stays contained,
+  and no tested viewport has horizontal or vertical document overflow.
+- Follow-up progress refinement removes `Card N of 5` and restores the percentage beside
+  the bar. Evidence at 320×700 and 1280×800 is
+  `work/match-hierarchy-audit/12-percentage-restored-compact.jpg` and
+  `13-percentage-restored-desktop.jpg`; the percentage column does not wrap or alter the
+  preserved 20px deck gaps.
+- Title-hierarchy comparison is recorded in
+  `work/match-hierarchy-audit/14-title-hierarchy-before.jpg` and
+  `15-title-hierarchy-after.jpg`. The final path/card title relationship is 700/800,
+  semantic-secondary/full-white, and approximately 0.87:1 in size. It stays distinct at
+  320, 390, and 1280px with no wrapping or overflow.
+- Saved-progress copy is constrained to one line with shortened state-specific wording.
+  `work/match-hierarchy-audit/16-saved-progress-single-line.jpg` confirms `4 liked` and
+  `Path saved!` share one row at 320×700 with no text widow or page overflow.
+- Toast comparison is recorded in `work/match-hierarchy-audit/16-toast-before.jpg` and
+  `17-toast-after.jpg`. Compact-phone feedback dropped from 208×44px to 145×32px in the
+  captured state. The 220px longest-label case also remains within the 320px viewport,
+  above the CTA row, with zero button intersection.
+- No P0, P1, or P2 mismatch remains for this refinement.
+
 - Browser-rendered evidence captured at desktop, tablet and mobile widths.
 - Primary interactions tested: Career Report home link, Explore tab, mobile tab state and URL, quick-action scroll, daily challenge success/disabled feedback, streak acknowledgement, rail Next/Previous state, mobile rail scroll/snap, hero arrows/dots, and hero crossfade state.
 - Browser layout measurements: `scrollWidth === innerWidth` at 390, 768 and 1440 px.

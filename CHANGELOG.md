@@ -102,6 +102,9 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ### How It Works experience
 
+- Fixed the upward exit from the snapped sequence: scrolling above BUILD now temporarily
+  releases mandatory document snapping so students can reliably return to the hero on
+  desktop, tablet, and mobile.
 - Added one-gesture stage snapping across desktop, tablet, and mobile while preserving
   the blurred incoming-stage transition.
 - Separated CONNECT's exit from the finale so `YOU'RE READY` appears only after CONNECT
@@ -119,6 +122,27 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ### Validation
 
+- Increased Match-card description copy to a fluid, bounded 13–16px range. Verified the
+  longest card copy at 390×844 and 1280×800 with no text or horizontal overflow.
+- Clarified Match information hierarchy by keeping completion percentage beside its bar,
+  separating liked progress and the save threshold onto the supporting row, and removing
+  the intermediate `Card N of 5` label. Added progress and live-status semantics.
+- Added a compact-phone width constraint so Match cards stay within the 320px viewport
+  instead of letting their scale driver exceed the available horizontal space.
+- Anchored reversible Match feedback above the action row so the toast never obscures
+  Pass or Like on compact phones; the message is also exposed as a polite live status.
+- Removed the `MATCHES` eyebrow from every Match decision screen, moved the path title
+  and progress panel into the recovered space, and added that height to the card without
+  changing the established progress-to-stack or stack-to-actions gaps.
+- Separated stable path context from the active decision title: `Computer Science` now
+  uses a smaller semantic-secondary 700 treatment, while Classes, Workstyle, Skills and
+  the remaining card titles retain the larger full-contrast 800 treatment.
+- Shortened every Match save-status message and made the supporting row non-wrapping:
+  `N more likes to save` progresses to `Path saved!`, keeping states such as `4 liked`
+  and `Path saved!` together on one line at compact widths.
+- Reduced Match toast feedback from 44px/14px to a compact 32px/12px chip with tighter
+  padding and spacing. Undo remains visible and keyboard-focused, while even the longest
+  message stays within a 320px viewport and never overlaps Pass or Like.
 - Passed token validation, ESLint, TypeScript, and the Next.js production build.
 - Browser-tested the full BUILD → MATCH → PLAY → EXPLORE → CONNECT → finale sequence at
   390×844, 687×787, 768×1024, and 1280×800 without console errors.

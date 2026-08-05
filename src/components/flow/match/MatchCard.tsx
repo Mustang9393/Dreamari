@@ -16,18 +16,17 @@ type MatchCardProps = {
 // top, color revealed near the bottom" rhythm still comes through from the stop
 // position alone.
 //
-// Square (w == h, both var(--match-card-size)) and every size below (fonts, padding,
-// gaps) is a calc() fraction of that same variable — no sm:/lg: breakpoint variants
-// anywhere in this file. That's deliberate: a fixed set of breakpoint-specific numbers is
-// exactly what let width and height drift out of sync before (see --match-card-size's
-// own comment in globals.css), and it's what made text sizes jump discretely between
-// screens instead of scaling with the card. Everything here scales continuously instead.
+// Width and every internal size below (fonts, padding, gaps) use --match-card-size as one
+// continuous scale driver — no sm:/lg: breakpoint variants anywhere in this file. The
+// card height has its own derived --match-card-height token so the space recovered from
+// removing the eyebrow extends the card vertically without widening it or changing the
+// established gaps around the deck.
 export function MatchCard({ card }: MatchCardProps) {
   const [top, bottom] = card.gradient;
   return (
     <div
       className="relative flex w-full flex-col overflow-hidden rounded-[var(--radius-match-card)] border border-white/20 bg-[var(--color-match-card-bg-dark)] shadow-none"
-      style={{ height: "var(--match-card-size)", padding: "var(--match-card-padding)", gap: "var(--match-card-gap)" }}
+      style={{ height: "var(--match-card-height)", padding: "var(--match-card-padding)", gap: "var(--match-card-gap)" }}
     >
       {/* A fully-opaque background layer (never a transparent stop), positioned as a
           child against the padding box rather than painted as the card's own
