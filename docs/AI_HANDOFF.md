@@ -6,8 +6,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-05
 - Active branch: `v2`
-- Main branch: untouched
-- Objective: synchronize `v2` to `main`, replace the stale token export with the agreed five-file DTCG system, validate it, and prove no frontend regression before handoff.
+- Main branch: promotion explicitly authorized for this release
+- Objective: promote the verified `v2` design-token and responsive How It Works work to
+  `main`, with release notes and the shared AI handoff kept current.
 
 ## Completed
 
@@ -41,6 +42,8 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   compact 687×787 breakpoint the rail ends at x=44, content begins at x=105, CONNECT
   ends at x=584, and right-aligned stages keep a 32px outer margin. Titles,
   descriptions, icons and the progress rail no longer overlap.
+- Added `CHANGELOG.md` covering the design-token migration, responsive How It Works
+  interaction, collaboration workflow, and validation performed for the main release.
 
 ## Remaining external check
 
@@ -48,8 +51,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Recommended next step
 
-- Review the responsive How It Works sequence on the `v2` preview deployment. Do not
-  merge or push this work to `main` until the user explicitly authorizes it.
+- Verify the new `main` Vercel deployment after promotion. The remaining external task is
+  still to compare this reference token set with the production app repository's
+  canonical `packages/ui/tokens` before production adoption.
 
 ## Shared rule
 
