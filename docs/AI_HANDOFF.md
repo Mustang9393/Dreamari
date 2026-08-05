@@ -24,6 +24,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - `npm run lint`, `npx tsc --noEmit`, and `npm run build` passed.
 - Browser verification passed with no console/framework errors. Local production matched deployed `main` on homepage and opening Build flow at 1280×633 and 390×844; observed screenshot differences were limited to expected animation timing.
 - Light/dark semantic switching and the Welcome → Choose Your Path interaction passed.
+- Reworked the responsive How It Works scroll sequence on `v2`: phone/tablet gestures
+  advance exactly one snap stage at a time, focused stages remain parked until the next
+  gesture, and the upcoming stage remains visible as a blurred handoff.
+- Added a dedicated CONNECT exit interval before the finale. Browser measurements at
+  390×844 and 768×1024 confirmed the finale is 0% opaque at the CONNECT snap, then
+  CONNECT is 0% opaque at the fully revealed finale snap.
+- Scoped document snapping to the active How It Works viewport so fresh homepage loads
+  remain at the hero instead of jumping to BUILD. Desktop remains free-scrolling.
+- Responsive How It Works validation passed across BUILD → MATCH → PLAY → EXPLORE →
+  CONNECT → finale, one gesture per state, with no skipped Explore/Connect stages.
 
 ## Remaining external check
 
@@ -31,7 +41,8 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Recommended next step
 
-- Use `v2` for stakeholder/dev review. Do not merge or push this work to `main` until the user explicitly authorizes it.
+- Review the responsive How It Works sequence on the `v2` preview deployment. Do not
+  merge or push this work to `main` until the user explicitly authorizes it.
 
 ## Shared rule
 

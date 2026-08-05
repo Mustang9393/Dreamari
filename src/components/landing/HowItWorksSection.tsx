@@ -32,15 +32,16 @@ const FALLOFF = 0.16;
 // solving for both endpoints to land exactly on progress 0 and 1 gives spacer height
 // = 50% * (1 - chapter height %) on each side.
 //
-// Mobile/tablet get a shorter value than desktop — less scroll distance between one
-// chapter locking in and the next, which is also what packs them visually closer
-// together. Dropped further (42 -> 28) per feedback that mobile still had way too much
-// dead space/scrolling — the whole section (5 chapters + finale) should take roughly 3
-// scroll gestures to get through, not 4-5.
+// Mobile/tablet use deliberate half-screen-ish intervals. Combined with the document
+// scroll-snap targets on each chapter below, one gesture advances to one focused stage
+// and leaves it parked there until the next gesture. The next stage still begins inside
+// the viewport while the current one leaves, preserving the existing blurred handoff.
 // A function of viewport width, not a plain constant, since it needs to vary by
 // breakpoint; called with the same `w` the component already tracks.
 function chapterHeightVh(w: number): number {
-  return w < 1024 ? 28 : 62;
+  if (w < 640) return 44;
+  if (w < 1024) return 52;
+  return 62;
 }
 function edgeSpacerVh(w: number): number {
   return 50 * (1 - chapterHeightVh(w) / 100);
@@ -116,6 +117,15 @@ const CHAPTER_TITLE_SCALE = 0.76;
 function chaptersScrollVh(w: number): number {
   return 2 * edgeSpacerVh(w) + STEPS.length * chapterHeightVh(w) - 100;
 }
+// CONNECT must have a complete exit phase of its own before the finale is allowed to
+// enter. Previously finaleProgress started at the exact moment CONNECT reached its
+// centered snap point, so "YOU'RE READY" appeared on top of it. This distance lets the
+// last chapter travel out, fade and blur fully before the finale begins at opacity 0.
+function connectExitVh(w: number): number {
+  if (w < 640) return 38;
+  if (w < 1024) return 44;
+  return 54;
+}
 // FINALE_SCROLL_VH is how much additional scrolling pops the finale in; FINALE_HOLD_VH
 // is extra room after that so the finale sits fully visible for a while before the user
 // hits the true bottom of the page, instead of the reveal finishing right as scrolling
@@ -167,25 +177,28 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
 
   const { w, h } = vp;
 
-  // chapterProgress drives the five chapters + rail exactly as before (0..1 across
-  // chaptersScrollVh(w) of scrolling). financeProgress picks up where that leaves off,
-  // 0..1 across the next FINALE_SCROLL_VH — both derived from the same raw px offset so
-  // one phase's math can't stretch or compress the other's. `h || 1` guards the very
+  // chapterProgress drives the five chapters + rail (0..1 across chaptersScrollVh(w)).
+  // connectExitProgress then gets a dedicated 0..1 phase where CONNECT and the chapter
+  // chrome leave completely. Only after that reaches 1 can finaleProgress begin. All
+  // three are derived from the same raw px offset so their ranges cannot overlap.
+  // `h || 1` guards the very
   // first render (before the vp effect above has synced real dimensions in), where
   // dividing by a real 0 would produce NaN.
   const chaptersScrollPx = (chaptersScrollVh(w) / 100) * (h || 1);
-  const financeScrollPx = (finaleScrollVh(w) / 100) * (h || 1);
+  const connectExitScrollPx = (connectExitVh(w) / 100) * (h || 1);
+  const finaleScrollPx = (finaleScrollVh(w) / 100) * (h || 1);
   const safeOffset = isNaN(scrollOffsetPx) ? 0 : Math.max(0, scrollOffsetPx);
   const safeProgress = Math.min(1, safeOffset / chaptersScrollPx);
-  const financeProgress = Math.max(0, Math.min(1, (safeOffset - chaptersScrollPx) / financeScrollPx));
+  const connectExitProgress = Math.max(0, Math.min(1, (safeOffset - chaptersScrollPx) / connectExitScrollPx));
+  const finaleProgress = Math.max(0, Math.min(1, (safeOffset - chaptersScrollPx - connectExitScrollPx) / finaleScrollPx));
 
   // Used purely to key-remount the finale title below right as it re-enters view — that
   // restarts its rainbow→brand-blue color-settle animation fresh each time, instead of
   // it having already finished playing (as a plain CSS animation tied to mount would)
-  // long before the user scrolls that far. Derived straight from financeProgress rather
+  // long before the user scrolls that far. Derived straight from finaleProgress rather
   // than tracked in its own state, since it only needs to flip at the same 0-boundary
-  // financeProgress itself already crosses.
-  const finaleEntering = financeProgress > 0;
+  // finaleProgress itself already crosses.
+  const finaleEntering = finaleProgress > 0;
 
   if (w === 0 || h === 0) return null;
 
@@ -280,7 +293,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
             display: "flex",
             justifyContent: "space-between",
             padding: `0 ${isMobile ? 28 : 64}px`,
-            opacity: 1 - financeProgress,
+            opacity: 1 - connectExitProgress,
           }}
         >
           <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: isMobile ? 9 : 12, letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>
@@ -298,7 +311,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
             glowing puck sliding along it as scroll progress advances. Fades out once the
             finale starts popping in — the vertical rail's job is done once all five
             chapters are behind you, and the finale has its own horizontal version of it. */}
-        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5, opacity: 1 - financeProgress }}>
+        <div style={{ position: "absolute", left: railInset, top: railTop, bottom: railBottom, width: 3, zIndex: 5, opacity: 1 - connectExitProgress }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.08)", borderRadius: 999 }} />
           <div
             style={{
@@ -350,7 +363,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
             pops in, which carries its own, more prominent version of this same CTA. */}
         <div
           className="absolute inset-x-0 bottom-10 z-10 flex justify-center sm:bottom-14"
-          style={{ opacity: 1 - financeProgress, pointerEvents: financeProgress > 0 ? "none" : "auto" }}
+          style={{ opacity: 1 - connectExitProgress, pointerEvents: connectExitProgress > 0 ? "none" : "auto" }}
         >
           <Button variant="cta-outline" href="/flow" className="pointer-events-auto">
             Start building →
@@ -374,9 +387,9 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
             gap: isMobile ? 28 : 40,
             padding: isMobile ? "0 24px" : "0 64px",
             textAlign: "center",
-            opacity: financeProgress,
-            transform: `scale(${0.85 + 0.15 * financeProgress})`,
-            pointerEvents: financeProgress > 0.6 ? "auto" : "none",
+            opacity: finaleProgress,
+            transform: `scale(${0.85 + 0.15 * finaleProgress})`,
+            pointerEvents: finaleProgress > 0.6 ? "auto" : "none",
             willChange: "opacity, transform",
           }}
         >
@@ -528,6 +541,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           return (
             <div
               key={step.key}
+              data-how-it-works-snap-target="center"
               style={{
                 position: "relative",
                 // Shorter than a full viewport (was 100vh) so two adjacent chapters'
@@ -547,18 +561,20 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
                 paddingRight: isLeft ? sidePad : railClear + sidePad,
                 paddingTop: isMobile ? 60 : 83,
                 paddingBottom: isMobile ? 60 : 83,
-                // (1 - financeProgress) on top of the chapter's own proximity fade: safeProgress
-                // clamps at 1 once the chapters phase ends, so the LAST chapter (CONNECT,
-                // centered exactly at progress 1) sits at d=0 forever afterward — its own
-                // proximity() never falls off, so without this it stayed at full opacity
-                // and rendered on top of the finale ("YOU'RE READY") reveal that follows,
-                // instead of the two being mutually exclusive.
-                opacity: (0.05 + 0.95 * t) * (1 - financeProgress),
-                transform: `scale(${0.95 + 0.05 * t})`,
+                // On mobile/tablet this element is a real document snap target. Center
+                // alignment maps exactly to the same geometry as centerOf(), and
+                // scroll-snap-stop prevents a momentum swipe from skipping a chapter.
+                scrollSnapAlign: w < 1024 ? "center" : undefined,
+                scrollSnapStop: w < 1024 ? "always" : undefined,
+                // safeProgress clamps at 1 with CONNECT centered, so its own proximity
+                // remains 1. The separate exit phase now fades and lifts it completely
+                // before finaleProgress is permitted to start.
+                opacity: (0.05 + 0.95 * t) * (1 - connectExitProgress),
+                transform: `translateY(${-10 * connectExitProgress}vh) scale(${0.95 + 0.05 * t})`,
                 // Blurred while out of its own hold window, sharpening to 0 right as it
                 // locks in — this is what makes an upcoming chapter read as "coming
                 // into focus" rather than just fading up already-sharp.
-                filter: `blur(${(1 - t) * 8}px)`,
+                filter: `blur(${(1 - t) * 8 + connectExitProgress * 8}px)`,
                 willChange: "opacity, transform, filter",
               }}
             >
@@ -614,13 +630,20 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           );
         })}
         <div style={{ height: `${edgeSpacerVh(w)}vh` }} />
-        {/* Real scroll room for the finale phase — finaleScrollVh(w) of it drives the
-            pop-in (financeProgress above), the remaining finaleHoldVh(w) just lets the
-            fully-revealed finale sit on screen for a while before the user reaches the
-            true bottom of the page, rather than the reveal finishing right as scrolling
-            runs out. No content of its own: the finale itself renders in the sticky
-            layer above, not here. */}
-        <div style={{ height: `${finaleScrollVh(w) + finaleHoldVh(w)}vh` }} />
+        {/* One transition runway covers CONNECT's full exit and the finale's full entry.
+            Its end is the next mobile/tablet snap target after CONNECT, so a single
+            gesture visibly carries the blurred handoff through both phases and parks on
+            a fully revealed "YOU'RE READY" state. The hold below keeps that state on
+            screen before the page ends. */}
+        <div
+          data-how-it-works-snap-target="end"
+          style={{
+            height: `${connectExitVh(w) + finaleScrollVh(w)}vh`,
+            scrollSnapAlign: w < 1024 ? "end" : undefined,
+            scrollSnapStop: w < 1024 ? "always" : undefined,
+          }}
+        />
+        <div style={{ height: `${finaleHoldVh(w)}vh` }} />
       </div>
     </div>
   );

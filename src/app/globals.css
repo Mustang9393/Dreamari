@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "./design-tokens.generated.css";
 
+/* On touch-sized layouts, each How It Works chapter supplies its own snap target.
+   Keeping the snap behavior on the document scroller preserves the real, overlapping
+   movement between stages while guaranteeing a stable focused state after each swipe. */
+@media (max-width: 1023px) {
+  html[data-how-it-works-snap="true"] {
+    scroll-snap-type: y mandatory;
+  }
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
