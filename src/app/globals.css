@@ -171,6 +171,32 @@ body {
   font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
 }
 
+.career-report {
+  --background: var(--color-surface-page);
+  --foreground: var(--color-text-primary);
+}
+
+@media print {
+  .career-report header,
+  .career-report nav,
+  .career-report button,
+  .career-report a[href="/flow"],
+  .career-report a[href="/"] {
+    display: none !important;
+  }
+
+  .career-report {
+    background: var(--color-white) !important;
+    color: var(--color-neutral-900) !important;
+  }
+
+  .career-report section,
+  .career-report article,
+  .career-report aside {
+    break-inside: avoid;
+  }
+}
+
 /* Lets the browser smoothly interpolate --step-accent itself (not just
    snap), so every color/border/background bound to it via var() crossfades
    along with the aurora background instead of jumping between steps. */

@@ -6,9 +6,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-05
 - Active branch: `v2`
-- Main branch: promotion explicitly authorized for this release
-- Objective: promote the verified `v2` design-token and responsive How It Works work to
-  `main`, with release notes and the shared AI handoff kept current.
+- Main branch: promotion explicitly authorized for this Career Report release
+- Objective: remove the cloud mark from the temporary report header, revalidate the
+  Career Report, push `v2`, and promote the verified commit to `main`.
 
 ## Completed
 
@@ -44,6 +44,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   descriptions, icons and the progress rail no longer overlap.
 - Added `CHANGELOG.md` covering the design-token migration, responsive How It Works
   interaction, collaboration workflow, and validation performed for the main release.
+- Added `/career-report` as a responsive frontend-reference route using the Dreamari token
+  system, dark/light modes, sticky active-section navigation, report-version controls,
+  download/share actions, and the approved Replit report copy.
+- Connected successful completion of the sole Match path to
+  `/career-report?from=match`. There is deliberately no visible skip-to-report shortcut;
+  `/career-report` remains directly addressable only for design review.
+- Added a short post-Match preparation state and four optimised Dreamy expression assets
+  from the user-supplied ZIP packs.
+- Career Report validation passed at 390×844, 768×1024, and 1280×800 with no horizontal
+  overflow or browser console errors. ESLint, TypeScript, `npm run tokens:check`, and the
+  final production build all pass.
+- Removed the Dreamy cloud mark from the temporary Career Report header. The remaining
+  wordmark/header is intentionally minimal until the new navigation/header/footer system
+  is designed and implemented.
+- Removed the Career Report's avoidable page-local color literals and mapped its surfaces,
+  text, borders, feedback states, shadows, and accents to the generated semantic tokens.
+  Future visual work must follow the same token-first rule.
 
 ## Remaining external check
 
@@ -51,10 +68,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Recommended next step
 
-- Verify the new `main` Vercel deployment after promotion. The remaining external task is
-  still to compare this reference token set with the production app repository's
-  canonical `packages/ui/tokens` before production adoption.
+- Verify the Career Report on the new `main` Vercel deployment. The temporary header is
+  expected to be replaced when the new navigation/header/footer system is designed.
+- The external production task remains to compare this reference token set with the app
+  repository's canonical `packages/ui/tokens` before production adoption.
 
 ## Shared rule
 
 Only one AI edits at a time. The active AI pulls the authorized branch, reads this file, completes and validates its scoped work, updates this file, commits, and pushes. Neither AI pushes or merges `main` without explicit user authorization.
+
+The DTCG token collections and generated artifacts are the visual source of truth for all
+future UI. Reuse semantic tokens and shared components whenever a matching foundation
+exists; do not introduce page-local palettes or duplicate design constants. Run
+`npm run tokens:check` before every release, and treat any visual/token drift as a defect.

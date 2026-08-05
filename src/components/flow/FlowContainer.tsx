@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { AuroraBackground } from "./aurora/AuroraBackground";
 import { Confetti } from "./aurora/Confetti";
 import { FlowProgress } from "./FlowProgress";
@@ -40,6 +41,7 @@ function toggleInList(list: string[], value: string): string[] {
 type Phase = "build" | "loading" | "match";
 
 export function FlowContainer() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [state, setState] = useState<FlowState>(INITIAL_FLOW_STATE);
   const [phase, setPhase] = useState<Phase>("build");
@@ -50,11 +52,6 @@ export function FlowContainer() {
 
   const next = () => setStep((current) => Math.min(current + 1, TOTAL_STEPS));
   const back = () => setStep((current) => Math.max(current - 1, 1));
-  const restart = () => {
-    setState(INITIAL_FLOW_STATE);
-    setStep(1);
-    setPhase("build");
-  };
   const seeMatches = () => setPhase("loading");
 
   useEffect(() => {
@@ -208,7 +205,11 @@ export function FlowContainer() {
             )}
             {phase === "match" && (
               <StepTransition key="match-experience">
-                <MatchExperience paths={MATCH_PATHS} onComplete={restart} onCelebrationChange={setMatchCelebrating} />
+                <MatchExperience
+                  paths={MATCH_PATHS}
+                  onComplete={() => router.push("/career-report?from=match")}
+                  onCelebrationChange={setMatchCelebrating}
+                />
               </StepTransition>
             )}
           </div>

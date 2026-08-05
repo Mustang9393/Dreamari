@@ -4,6 +4,24 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ## 2026-08-05
 
+### Career report experience
+
+- Added the responsive `/career-report` frontend reference and connected successful
+  Match completion to its branded preparation state.
+- Reorganised the approved Replit report content into an at-a-glance direction summary,
+  a single recommended next move, and progressively deeper profile, career, plan,
+  education, certification, version-history, and conclusion sections.
+- Added sticky section navigation with responsive active-section tracking, current versus
+  baseline report controls, light/dark themes, print-based download, and share feedback.
+- Added four optimised Dreamy expression assets from the supplied source packs for
+  preparation, exploration, insight, planning, and celebration moments.
+- Kept the temporary Career Report header intentionally minimal and removed the Dreamy
+  cloud mark so the next navigation/header/footer system can replace it cleanly.
+- Mapped Career Report surfaces, text, borders, feedback states, shadows, and accents to
+  the shared generated semantic tokens instead of maintaining a page-local color palette.
+- Verified the report at 390×844, 768×1024, and 1280×800 with no horizontal overflow or
+  browser console errors; ESLint, TypeScript, token validation, and production build pass.
+
 ### Design system
 
 - Replaced the flattened prototype token export with five W3C DTCG 2025.10 collections:
