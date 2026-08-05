@@ -38,17 +38,22 @@
 6. The final focused comparison (`work/home-card-design-qa-final.png`) shows matching 427 × 336 dimensions and internal geometry. Desktop controls were measured moving `scrollLeft` from `0 → 113 → 0`; mobile moved one 336 px card step while document `scrollWidth` remained equal to the 390 px viewport. No P0/P1/P2 issue remains.
 7. The follow-up hero audit at 100% found a P1 structural mismatch: the implementation was an inset, rounded 608 px panel with an eyebrow, tall icon actions, left-aligned dots and hover-paused autoplay; the source is a shorter full-bleed stage with compact text-only actions and centered pagination.
 8. Fix: rebuilt the hero at 520 px desktop/470 px mobile, generated the restrained campus panorama, removed the shell and eyebrow, matched the CTA/progress hierarchy, centered pagination, reduced Quick Actions to 72 px, enabled uninterrupted 5.5-second autoplay, and blended card images into their body surface. Browser verification observed the active story advance from UX Researcher to Mars while the page remained open.
+9. Token/theme audit found a P1 architecture gap: the UIKIT-accurate dark page consumed 21 palette primitives directly, had no launchpad component-token contract, and could not meaningfully respond to the existing light semantic mode.
+10. Fix: added mode-parity semantic roles for navigation, home cards, feature surfaces, on-media text and elevation; added documented `component.home-*` contracts; updated token generation to emit component aliases in both modes; and migrated `/home` so it consumes no palette primitives directly. The validator now passes 501 DTCG tokens.
+11. Light-mode visual QA (`work/home-theme-qa/02-desktop-light.png` and `work/home-theme-qa/04-desktop-light-cards.png`) confirms a warm off-white shell, white career cards, readable dark copy, soft branded feature panels, retained cinematic media contrast and preserved category accents. Dark-mode regression evidence is `work/home-theme-qa/01-desktop-dark.png` and `work/home-theme-qa/05-desktop-dark-cards.png`.
+12. Added visible, accessible View All plus chevron controls to Continue Your Journey, Recommended for You, Popular with Explorers This Week and Mystery Unlocks. Each control sets the Explore tab, writes a category-specific deep link and moves to the relevant rail.
 
 ## Residual test gap
 
 - The connected Figma account still lacks edit access, so the connector could not return the node's code/export package. The public canvas did expose node `793:36808` at 100%, allowing an exact 427 × 336 focused visual comparison. Source imagery remains visually equivalent in direction rather than byte-identical because the home uses the approved generated Dreamari career art set.
+- The in-app browser's forced 390 px screenshot output visually cropped the mobile capture despite reporting the correct DOM viewport. Responsive DOM measurements remained valid: `innerWidth`, document `scrollWidth`, header, hero, Quick Action grid and card-rail bounds all reflowed to 390 px with no page overflow. Desktop light/dark screenshots are the accepted visual evidence for the theme pass.
 
 ## Validation
 
 - Browser-rendered evidence captured at desktop, tablet and mobile widths.
 - Primary interactions tested: Career Report home link, Explore tab, mobile tab state and URL, quick-action scroll, daily challenge success/disabled feedback, streak acknowledgement, rail Next/Previous state, mobile rail scroll/snap, hero arrows/dots, and hero crossfade state.
 - Browser layout measurements: `scrollWidth === innerWidth` at 390, 768 and 1440 px.
-- ESLint, TypeScript, token validation and production build pass.
+- ESLint, TypeScript, all 501 token validations and production build pass.
 - Current browser checks showed no framework error overlay or broken asset requests.
 
 final result: passed

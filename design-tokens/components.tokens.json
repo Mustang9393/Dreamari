@@ -94,6 +94,68 @@
       "padding-inline": { "$type": "dimension", "$value": "{dimension.spacing.20}", "$description": "Toast horizontal padding." },
       "padding-block": { "$type": "dimension", "$value": "{dimension.spacing.12}", "$description": "Toast vertical padding." }
     },
+    "home-shell": {
+      "$description": "Student launchpad application shell.",
+      "background": { "$type": "color", "$value": "{color.surface.page}", "$description": "Mode-aware launchpad page background." },
+      "text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Primary launchpad content color." }
+    },
+    "home-navigation": {
+      "$description": "Desktop header and mobile tab-bar foundations for the student launchpad.",
+      "background": { "$type": "color", "$value": "{color.surface.navigation}", "$description": "Mode-aware navigation background." },
+      "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Navigation divider color." },
+      "text": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Inactive navigation label color." },
+      "active-background": { "$type": "color", "$value": "{color.action.primary}", "$description": "Active desktop navigation background." },
+      "active-text": { "$type": "color", "$value": "{color.text.on-media}", "$description": "Active navigation label on the brand action." },
+      "hover-background": { "$type": "color", "$value": "{color.surface.subtle}", "$description": "Inactive desktop-navigation hover surface." },
+      "reward": { "$type": "color", "$value": "{color.category.workstyle}", "$description": "XP and reward accent." }
+    },
+    "home-card": {
+      "$description": "Career card used throughout launchpad content rails.",
+      "background": { "$type": "color", "$value": "{color.surface.home-card}", "$description": "Mode-aware card body and image-fade surface." },
+      "text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Career-card title color." },
+      "description": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Career-card description color." },
+      "metadata": { "$type": "color", "$value": "{color.text.muted}", "$description": "Career-card tags and secondary metadata." },
+      "media-metadata": { "$type": "color", "$value": "{color.text.on-media}", "$description": "Duration text placed over card imagery." },
+      "media-label-background": { "$type": "color", "$value": "{color.surface.media-overlay}", "$description": "Contrast-protecting background behind card duration metadata." },
+      "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Light-mode definition and dark-mode separation for career cards." },
+      "shadow-color": { "$type": "color", "$value": "{color.elevation.card}", "$description": "Mode-aware career-card shadow color." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.sm}", "$description": "Career-card radius matching the approved UIKIT component." }
+    },
+    "home-rail": {
+      "$description": "Horizontal launchpad content rail and its controls.",
+      "fade": { "$type": "color", "$value": "{color.surface.page}", "$description": "Rail-edge fade into the application background." },
+      "control-background": { "$type": "color", "$value": "{color.surface.navigation}", "$description": "Carousel-control button surface." },
+      "control-text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Carousel-control icon color." },
+      "view-all": { "$type": "color", "$value": "{color.text.brand}", "$description": "View All action label and chevron color." }
+    },
+    "home-quick-action": {
+      "$description": "Compact launchpad shortcut tile.",
+      "text": { "$type": "color", "$value": "{color.text.on-media}", "$description": "Quick Action label on its saturated category surface." },
+      "border": { "$type": "color", "$value": "{color.text.on-media}", "$description": "Low-opacity Quick Action edge color." },
+      "shadow-color": { "$type": "color", "$value": "{color.elevation.card}", "$description": "Mode-aware Quick Action shadow color." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.lg}", "$description": "Quick Action tile radius." },
+      "height": { "$type": "dimension", "$value": "{dimension.control-height.xl}", "$description": "Quick Action base control height; implementation adds compact vertical breathing room." }
+    },
+    "home-hero": {
+      "$description": "Full-bleed cinematic featured-story carousel.",
+      "text": { "$type": "color", "$value": "{color.text.on-media}", "$description": "Hero heading and primary metadata over imagery." },
+      "description": { "$type": "color", "$value": "{color.text.on-media-secondary}", "$description": "Hero description over imagery." },
+      "metadata": { "$type": "color", "$value": "{color.text.on-media-muted}", "$description": "Hero progress and scene metadata over imagery." },
+      "overlay": { "$type": "color", "$value": "{color.surface.media-overlay}", "$description": "Hero media overlay foundation." },
+      "control-background": { "$type": "color", "$value": "{color.surface.media-overlay}", "$description": "Hero arrow-control background foundation." },
+      "shadow-color": { "$type": "color", "$value": "{color.elevation.overlay}", "$description": "Hero floating-control shadow color." }
+    },
+    "home-feature": {
+      "$description": "Daily Challenge feature panel.",
+      "background-start": { "$type": "color", "$value": "{color.surface.feature}", "$description": "Mode-aware feature gradient start." },
+      "background-end": { "$type": "color", "$value": "{color.surface.feature-strong}", "$description": "Mode-aware feature gradient end." },
+      "border": { "$type": "color", "$value": "{color.action.secondary}", "$description": "Feature-panel branded border." },
+      "text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Feature-panel heading color." },
+      "description": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Feature-panel body copy." },
+      "accent": { "$type": "color", "$value": "{color.text.brand}", "$description": "Feature eyebrow and highlighted term accent." },
+      "reward": { "$type": "color", "$value": "{color.category.workstyle}", "$description": "Feature XP reward color." },
+      "shadow-color": { "$type": "color", "$value": "{color.elevation.card}", "$description": "Mode-aware feature-panel shadow color." }
+    },
     "speech-bubble": {
       "$description": "Dreamy speech-bubble foundation. Placement remains contextual implementation behavior.",
       "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Speech-bubble background." },

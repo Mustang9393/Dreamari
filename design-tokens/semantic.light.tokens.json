@@ -9,12 +9,21 @@
       "secondary": { "$value": "{color.neutral.600}", "$description": "Body copy and secondary labels on light surfaces." },
       "muted": { "$value": "{color.neutral.600}", "$description": "Muted readable text; intentionally uses neutral 600 to meet normal-text contrast." },
       "inverse": { "$value": "{color.white}", "$description": "Text displayed on dark or saturated surfaces." },
+      "on-media": { "$value": "{color.white}", "$description": "High-emphasis text placed over cinematic imagery or saturated media." },
+      "on-media-secondary": { "$value": "{color.neutral.200}", "$description": "Supporting text placed over cinematic imagery or saturated media." },
+      "on-media-muted": { "$value": "{color.neutral.300}", "$description": "Low-emphasis metadata placed over cinematic imagery or saturated media." },
+      "on-warning": { "$value": "{color.neutral.900}", "$description": "Readable compact text placed on amber or yellow warning and reward surfaces." },
       "brand": { "$value": "{color.brand.600}", "$description": "Brand-emphasis text." }
     },
     "surface": {
       "page": { "$value": "{color.aurora.canvas-light}", "$description": "Default light-mode application background." },
       "card": { "$value": "{color.white}", "$description": "Primary card surface." },
       "subtle": { "$value": "{color.neutral.50}", "$description": "Subtle nested panel or option surface." },
+      "navigation": { "$value": "{color.white}", "$description": "Primary application navigation surface in light mode." },
+      "home-card": { "$value": "{color.white}", "$description": "Career-discovery card body surface in light mode." },
+      "feature": { "$value": "{color.brand.100}", "$description": "Soft branded feature-panel surface in light mode." },
+      "feature-strong": { "$value": "{color.brand.200}", "$description": "Stronger endpoint for feature-panel gradients in light mode." },
+      "media-overlay": { "$value": "{color.black}", "$description": "Absolute overlay foundation used to protect text over media." },
       "brand": { "$value": "{color.brand.950}", "$description": "Dark branded landing surface." },
       "match-card": { "$value": "{color.match.card-background}", "$description": "Always-dark Match card surface." },
       "match-toast": { "$value": "{color.match.toast-background}", "$description": "Always-dark Match toast surface." }
@@ -34,6 +43,10 @@
       "success": { "$value": "{color.green.700}", "$description": "Accessible success text and indicator on light surfaces." },
       "success-dark-surface": { "$value": "{color.match.success}", "$description": "Success indicator on the dark Match surface." },
       "danger": { "$value": "{color.red.600}", "$description": "Danger and destructive-state color." }
+    },
+    "elevation": {
+      "card": { "$value": "{color.shadow.blue-10}", "$description": "Mode-aware shadow color for elevated cards and controls." },
+      "overlay": { "$value": "{color.shadow.black-40}", "$description": "Shadow color for controls floating above cinematic media." }
     },
     "category": {
       "classes": { "$value": "{color.red.500}", "$description": "Match Classes category." },

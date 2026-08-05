@@ -135,6 +135,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - The production app repository's `packages/ui/tokens` was not available here. Before adopting these paths in production, compare them against that canonical collection and run `packages/ui/scripts/validate-tokens.mjs`; production wins on any conflict.
 
+## 2026-08-05 launchpad token and theme alignment
+
+- `/home` is now wrapped in the shared `ThemeProvider` and exposes a semantic header theme
+  control. Dark remains the default outside Build; the user's saved `dreamari-theme`
+  preference continues to win across routes.
+- The launchpad component contains no direct primitive color references. It consumes
+  `color.action`, `color.category`, `color.feedback` and generated `component.home-*`
+  contracts for its shell, navigation, cards, rails, Quick Actions, hero and feature panel.
+- `build-tokens.mjs` now merges `components.tokens.json` into both light and dark outputs,
+  which makes preserved component aliases available to web consumers without flattening
+  the source JSON. The dependency-free validator passes 501 tokens across all five files.
+- Every browsable rail has a View All plus chevron action. Deep links use
+  `/home?tab=explore&category=journey|recommended|popular|mystery` and restore the relevant
+  collection when reopened.
+- Accepted light/dark evidence is under `work/home-theme-qa/`; `design-qa.md` remains
+  `final result: passed`.
+
 ## Recommended next step
 
 - Review the open local `v2` student home preview and its responsive rails/interactions.

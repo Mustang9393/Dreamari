@@ -6,6 +6,20 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ### Student home and launchpad
 
+- Completed the launchpad token-alignment pass. `/home` now consumes semantic action and
+  category roles plus dedicated `component.home-*` contracts; it no longer references
+  palette primitives directly.
+- Extended the DTCG generator so component aliases are emitted into the generated CSS for
+  both modes. Added documented mode-parity roles for launchpad navigation, career cards,
+  cinematic text, feature panels and elevation; validation now covers 501 tokens.
+- Added a complete light launchpad mode with a warm off-white shell, white career cards,
+  mode-aware navigation, readable metadata, soft branded feature panels and the cinematic
+  hero intentionally retained as a dark media surface. The shared theme control persists
+  the student's choice.
+- Added accessible View All plus chevron controls to every browsable career rail. Each
+  action activates Explore, records a category deep link and scrolls to the corresponding
+  collection.
+
 - Added the responsive `/home` student launchpad based on the approved desktop and
   mobile UIKIT references, with a cinematic featured simulation, quick actions,
   continuation cards, personalised recommendations, daily challenge, popular careers,

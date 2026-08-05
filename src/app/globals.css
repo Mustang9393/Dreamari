@@ -186,6 +186,14 @@ body {
   display: none;
 }
 
+.home-quick-action {
+  background: linear-gradient(
+    100deg,
+    var(--home-action-accent),
+    color-mix(in srgb, var(--home-action-accent) 76%, var(--color-surface-brand))
+  );
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dreamari-card-rail {
     scroll-behavior: auto;

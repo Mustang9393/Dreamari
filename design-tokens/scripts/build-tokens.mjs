@@ -15,9 +15,10 @@ const primitiveLight = collectTokens(readTokenFile(FILES.primitivesLight));
 const primitiveDark = collectTokens(readTokenFile(FILES.primitivesDark));
 const semanticLight = collectTokens(readTokenFile(FILES.semanticLight));
 const semanticDark = collectTokens(readTokenFile(FILES.semanticDark));
+const components = collectTokens(readTokenFile(FILES.components));
 
-const light = mergeTokenMaps(primitiveLight, semanticLight);
-const dark = mergeTokenMaps(primitiveDark, semanticDark);
+const light = mergeTokenMaps(primitiveLight, semanticLight, components);
+const dark = mergeTokenMaps(primitiveDark, semanticDark, components);
 
 function colorVariables(tokens) {
   return [...tokens]
