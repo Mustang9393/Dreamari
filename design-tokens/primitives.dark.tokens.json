@@ -1,0 +1,194 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Dreamari primitive tokens for dark mode. Palette and foundation paths intentionally match light mode so semantic aliases remain stable while mode files can evolve independently.",
+  "$extensions": { "com.dreamari.collection": "primitives", "com.dreamari.mode": "dark" },
+  "color": {
+    "$type": "color",
+    "white": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" }, "$description": "Absolute white." },
+    "black": { "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "hex": "#000000" }, "$description": "Absolute black." },
+    "brand": {
+      "$description": "Dreamari brand-blue palette extracted from the approved UI kit and existing implementation.",
+      "100": { "$value": { "colorSpace": "srgb", "components": [0.933333, 0.956863, 1], "hex": "#eef4ff" }, "$description": "Lightest brand-blue surface." },
+      "200": { "$value": { "colorSpace": "srgb", "components": [0.85098, 0.901961, 1], "hex": "#d9e6ff" }, "$description": "Light brand-blue tint." },
+      "300": { "$value": { "colorSpace": "srgb", "components": [0.498039, 0.658824, 1], "hex": "#7fa8ff" }, "$description": "Soft brand-blue accent." },
+      "400": { "$value": { "colorSpace": "srgb", "components": [0.290196, 0.509804, 1], "hex": "#4a82ff" }, "$description": "Bright brand blue." },
+      "500": { "$value": { "colorSpace": "srgb", "components": [0.184314, 0.419608, 0.94902], "hex": "#2f6bf2" }, "$description": "Primary interactive blue." },
+      "600": { "$value": { "colorSpace": "srgb", "components": [0.121569, 0.372549, 0.941176], "hex": "#1f5ff0" }, "$description": "Core Dreamari brand blue and default step accent." },
+      "700": { "$value": { "colorSpace": "srgb", "components": [0.078431, 0.235294, 0.588235], "hex": "#143c96" }, "$description": "Deep brand blue." },
+      "900": { "$value": { "colorSpace": "srgb", "components": [0.047059, 0.145098, 0.376471], "hex": "#0c2560" }, "$description": "Dark brand background." },
+      "950": { "$value": { "colorSpace": "srgb", "components": [0.039216, 0.117647, 0.298039], "hex": "#0a1e4c" }, "$description": "Deepest brand background." }
+    },
+    "accent": {
+      "deep": { "$value": { "colorSpace": "srgb", "components": [0.058824, 0.298039, 0.819608], "hex": "#0f4cd1" }, "$description": "Deep blue landing-page CTA accent." },
+      "navy": { "$value": { "colorSpace": "srgb", "components": [0.121569, 0.254902, 0.560784], "hex": "#1f418f" }, "$description": "Navy role-toggle accent." }
+    },
+    "ink": {
+      "100": { "$value": { "colorSpace": "srgb", "components": [0.929412, 0.937255, 0.952941], "hex": "#edeff3" }, "$description": "Primary text on branded dark landing surfaces." },
+      "150": { "$value": { "colorSpace": "srgb", "components": [0.917647, 0.945098, 1], "hex": "#eaf1ff" }, "$description": "Outlined landing CTA text." },
+      "200": { "$value": { "colorSpace": "srgb", "components": [0.72549, 0.796078, 0.92549], "hex": "#b9cbec" }, "$description": "Secondary text on branded dark landing surfaces." },
+      "900": { "$value": { "colorSpace": "srgb", "components": [0.082353, 0.101961, 0.141176], "hex": "#151a24" }, "$description": "Deep ink neutral." }
+    },
+    "neutral": {
+      "$description": "Neutral scale used by text, borders, and surfaces. Untuned Tailwind values are retained exactly to avoid visual regression.",
+      "50": { "$value": { "colorSpace": "srgb", "components": [0.980392, 0.984314, 0.992157], "hex": "#fafbfc" }, "$description": "Subtle neutral surface." },
+      "75": { "$value": { "colorSpace": "srgb", "components": [0.960784, 0.964706, 0.972549], "hex": "#f5f6f8" }, "$description": "Subtle neutral border." },
+      "100": { "$value": { "colorSpace": "srgb", "components": [0.945098, 0.960784, 0.976471], "hex": "#f1f5f9" }, "$description": "Tailwind slate 100 compatibility value." },
+      "200": { "$value": { "colorSpace": "srgb", "components": [0.886275, 0.909804, 0.941176], "hex": "#e2e8f0" }, "$description": "Tailwind slate 200 compatibility value." },
+      "300": { "$value": { "colorSpace": "srgb", "components": [0.792157, 0.835294, 0.886275], "hex": "#cad5e2" }, "$description": "Tailwind slate 300 compatibility value." },
+      "400": { "$value": { "colorSpace": "srgb", "components": [0.564706, 0.631373, 0.72549], "hex": "#90a1b9" }, "$description": "Tailwind slate 400 compatibility value." },
+      "500": { "$value": { "colorSpace": "srgb", "components": [0.541176, 0.576471, 0.639216], "hex": "#8a93a3" }, "$description": "Dreamari muted neutral." },
+      "600": { "$value": { "colorSpace": "srgb", "components": [0.356863, 0.392157, 0.447059], "hex": "#5b6472" }, "$description": "Accessible secondary text on light surfaces." },
+      "700": { "$value": { "colorSpace": "srgb", "components": [0.192157, 0.254902, 0.345098], "hex": "#314158" }, "$description": "Tailwind slate 700 compatibility value." },
+      "800": { "$value": { "colorSpace": "srgb", "components": [0.113725, 0.160784, 0.239216], "hex": "#1d293d" }, "$description": "Tailwind slate 800 compatibility value." },
+      "900": { "$value": { "colorSpace": "srgb", "components": [0.117647, 0.164706, 0.247059], "hex": "#1e2a3f" }, "$description": "Primary heading neutral." },
+      "950": { "$value": { "colorSpace": "srgb", "components": [0.011765, 0.027451, 0.070588], "hex": "#030712" }, "$description": "Near-black application background." }
+    },
+    "amber": {
+      "50": { "$value": { "colorSpace": "srgb", "components": [0.996078, 0.952941, 0.780392], "hex": "#fef3c7" }, "$description": "Pale amber surface; corrects the legacy CSS name amber-100." },
+      "400": { "$value": { "colorSpace": "srgb", "components": [0.984314, 0.74902, 0.141176], "hex": "#fbbf24" }, "$description": "Bright amber accent." },
+      "500": { "$value": { "colorSpace": "srgb", "components": [1, 0.811765, 0.015686], "hex": "#ffcf04" }, "$description": "Gold gradient start." },
+      "600": { "$value": { "colorSpace": "srgb", "components": [0.85098, 0.466667, 0.023529], "hex": "#d97706" }, "$description": "Core amber accent." },
+      "650": { "$value": { "colorSpace": "srgb", "components": [0.952941, 0.486275, 0.066667], "hex": "#f37c11" }, "$description": "Orange-gold gradient end." },
+      "675": { "$value": { "colorSpace": "srgb", "components": [0.952941, 0.478431, 0.062745], "hex": "#f37a10" }, "$description": "Progress gradient end used by the Future Values step." }
+    },
+    "green": {
+      "450": { "$value": { "colorSpace": "srgb", "components": [0.003922, 0.745098, 0.345098], "hex": "#01be58" }, "$description": "Match Future Fit category green." },
+      "500": { "$value": { "colorSpace": "srgb", "components": [0.062745, 0.72549, 0.505882], "hex": "#10b981" }, "$description": "Build-step green accent." },
+      "600": { "$value": { "colorSpace": "srgb", "components": [0, 0.6, 0.4], "hex": "#009966" }, "$description": "Accessible green." },
+      "700": { "$value": { "colorSpace": "srgb", "components": [0, 0.478431, 0.333333], "hex": "#007a55" }, "$description": "Accessible light-mode success text." }
+    },
+    "teal": {
+      "600": { "$value": { "colorSpace": "srgb", "components": [0.05098, 0.580392, 0.533333], "hex": "#0d9488" }, "$description": "Build-step teal accent." },
+      "700": { "$value": { "colorSpace": "srgb", "components": [0.058824, 0.462745, 0.431373], "hex": "#0f766e" }, "$description": "Build-step deep teal accent." }
+    },
+    "orange": { "600": { "$value": { "colorSpace": "srgb", "components": [0.917647, 0.345098, 0.047059], "hex": "#ea580c" }, "$description": "Build-step orange accent." } },
+    "red": {
+      "500": { "$value": { "colorSpace": "srgb", "components": [0.917647, 0.266667, 0.34902], "hex": "#ea4459" }, "$description": "Match category red." },
+      "600": { "$value": { "colorSpace": "srgb", "components": [0.862745, 0.14902, 0.14902], "hex": "#dc2626" }, "$description": "Build-step red accent." }
+    },
+    "purple": {
+      "400": { "$value": { "colorSpace": "srgb", "components": [0.717647, 0.611765, 1], "hex": "#b79cff" }, "$description": "Landing chapter purple." },
+      "500": { "$value": { "colorSpace": "srgb", "components": [0.603922, 0.223529, 0.984314], "hex": "#9a39fb" }, "$description": "Match category purple." }
+    },
+    "cyan": { "500": { "$value": { "colorSpace": "srgb", "components": [0, 0.752941, 0.909804], "hex": "#00c0e8" }, "$description": "Landing chapter cyan." } },
+    "yellow": { "500": { "$value": { "colorSpace": "srgb", "components": [1, 0.8, 0], "hex": "#ffcc00" }, "$description": "Landing chapter yellow." } },
+    "coral": { "500": { "$value": { "colorSpace": "srgb", "components": [1, 0.376471, 0.345098], "hex": "#ff6058" }, "$description": "Landing chapter coral." } },
+    "navy": {
+      "700": { "$value": { "colorSpace": "srgb", "components": [0.066667, 0.266667, 0.752941], "hex": "#1144c0" }, "$description": "Onboarding navy highlight." },
+      "900": { "$value": { "colorSpace": "srgb", "components": [0.031373, 0.12549, 0.352941], "hex": "#08205a" }, "$description": "Onboarding navy background; corrects the legacy CSS name navy-975." }
+    },
+    "match": {
+      "card-top": { "$value": { "colorSpace": "srgb", "components": [0.007843, 0.015686, 0.035294], "hex": "#020409" }, "$description": "Shared near-black Match card gradient start." },
+      "card-background": { "$value": { "colorSpace": "srgb", "components": [0.027451, 0.086275, 0.203922], "hex": "#071634" }, "$description": "Match card fallback background." },
+      "accent": { "$value": { "colorSpace": "srgb", "components": [0.180392, 0.45098, 0.960784], "hex": "#2e73f5" }, "$description": "Dark Match interaction accent." },
+      "border": { "$value": { "colorSpace": "srgb", "components": [0.25098, 0.278431, 0.34902], "hex": "#404759" }, "$description": "Dark Match border." },
+      "text-muted": { "$value": { "colorSpace": "srgb", "components": [0.6, 0.65098, 0.721569], "hex": "#99a6b8" }, "$description": "Dark Match secondary text." },
+      "success": { "$value": { "colorSpace": "srgb", "components": [0.2, 0.780392, 0.54902], "hex": "#33c78c" }, "$description": "Dark Match success." },
+      "toast-background": { "$value": { "colorSpace": "srgb", "components": [0.090196, 0.109804, 0.180392], "hex": "#171c2e" }, "$description": "Dark Match toast surface." },
+      "toast-link": { "$value": { "colorSpace": "srgb", "components": [0.356863, 0.607843, 1], "hex": "#5b9bff" }, "$description": "Dark Match toast action." },
+      "modal-background": { "$value": { "colorSpace": "srgb", "components": [0.043137, 0.070588, 0.188235], "hex": "#0b1230" }, "$description": "Dark Match modal surface." },
+      "backdrop-1": { "$value": { "colorSpace": "srgb", "components": [0.015686, 0.043137, 0.129412], "hex": "#040b21" }, "$description": "Match backdrop start." },
+      "backdrop-2": { "$value": { "colorSpace": "srgb", "components": [0.031373, 0.082353, 0.25098], "hex": "#081540" }, "$description": "Match backdrop midpoint." },
+      "backdrop-3": { "$value": { "colorSpace": "srgb", "components": [0.007843, 0.027451, 0.078431], "hex": "#020714" }, "$description": "Match backdrop end." }
+    },
+    "path-accent": {
+      "high-school": { "$value": { "colorSpace": "srgb", "components": [0.376471, 0.647059, 0.980392], "hex": "#60a5fa" }, "$description": "High School path accent." },
+      "university": { "$value": { "colorSpace": "srgb", "components": [0.203922, 0.827451, 0.6], "hex": "#34d399" }, "$description": "University path accent." },
+      "job-seeker": { "$value": { "colorSpace": "srgb", "components": [0.654902, 0.545098, 0.980392], "hex": "#a78bfa" }, "$description": "Job Seeker path accent." }
+    },
+    "aurora": {
+      "canvas-light": { "$value": { "colorSpace": "srgb", "components": [0.952941, 0.956863, 0.972549], "hex": "#f3f4f8" }, "$description": "Light Aurora canvas fallback." },
+      "canvas-dark": { "$value": { "colorSpace": "srgb", "components": [0.027451, 0.035294, 0.070588], "hex": "#070912" }, "$description": "Dark Aurora canvas." }
+    },
+    "shadow": {
+      "amber-12": { "$value": { "colorSpace": "srgb", "components": [0.94902, 0.690196, 0.117647], "alpha": 0.12, "hex": "#f2b01e" }, "$description": "Amber card glow at 12 percent opacity." },
+      "blue-10": { "$value": { "colorSpace": "srgb", "components": [0.392157, 0.509804, 0.784314], "alpha": 0.1, "hex": "#6482c8" }, "$description": "Blue selection-card elevation at 10 percent opacity." },
+      "black-40": { "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.4, "hex": "#000000" }, "$description": "Dark card elevation at 40 percent opacity." }
+    }
+  },
+  "dimension": {
+    "$type": "dimension",
+    "spacing": {
+      "$description": "Spacing foundations named by pixel magnitude to avoid coupling token paths to Tailwind numbering.",
+      "0": { "$value": { "value": 0, "unit": "px" }, "$description": "Zero spacing." },
+      "2": { "$value": { "value": 2, "unit": "px" }, "$description": "Hairline spacing." },
+      "4": { "$value": { "value": 4, "unit": "px" }, "$description": "Extra-small spacing." },
+      "6": { "$value": { "value": 6, "unit": "px" }, "$description": "Compact spacing." },
+      "8": { "$value": { "value": 8, "unit": "px" }, "$description": "Small spacing." },
+      "10": { "$value": { "value": 10, "unit": "px" }, "$description": "Compact control spacing." },
+      "12": { "$value": { "value": 12, "unit": "px" }, "$description": "Default compact spacing." },
+      "14": { "$value": { "value": 14, "unit": "px" }, "$description": "Intermediate spacing." },
+      "16": { "$value": { "value": 16, "unit": "px" }, "$description": "Default spacing." },
+      "20": { "$value": { "value": 20, "unit": "px" }, "$description": "Comfortable spacing." },
+      "24": { "$value": { "value": 24, "unit": "px" }, "$description": "Large spacing." },
+      "32": { "$value": { "value": 32, "unit": "px" }, "$description": "Section spacing." },
+      "36": { "$value": { "value": 36, "unit": "px" }, "$description": "Large card padding." },
+      "40": { "$value": { "value": 40, "unit": "px" }, "$description": "Extra-large spacing." }
+    },
+    "radius": {
+      "xs": { "$value": { "value": 8, "unit": "px" }, "$description": "Small control radius." },
+      "sm": { "$value": { "value": 12, "unit": "px" }, "$description": "Default control radius." },
+      "md": { "$value": { "value": 16, "unit": "px" }, "$description": "Selection and panel radius." },
+      "match-inner": { "$value": { "value": 15, "unit": "px" }, "$description": "Approved Match card inner-panel radius." },
+      "lg": { "$value": { "value": 20, "unit": "px" }, "$description": "Match card radius." },
+      "xl": { "$value": { "value": 22, "unit": "px" }, "$description": "Match progress-panel radius." },
+      "2xl": { "$value": { "value": 24, "unit": "px" }, "$description": "Flow card radius." },
+      "pill": { "$value": { "value": 9999, "unit": "px" }, "$description": "Fully rounded pill." }
+    },
+    "font-size": {
+      "caption": { "$value": { "value": 10, "unit": "px" }, "$description": "Citation and microcopy size." },
+      "micro": { "$value": { "value": 11, "unit": "px" }, "$description": "Eyebrow and compact label size." },
+      "xs": { "$value": { "value": 12, "unit": "px" }, "$description": "Extra-small text." },
+      "sm": { "$value": { "value": 13, "unit": "px" }, "$description": "Small UI text." },
+      "body-sm": { "$value": { "value": 14, "unit": "px" }, "$description": "Compact body text." },
+      "body": { "$value": { "value": 15, "unit": "px" }, "$description": "Default body text." },
+      "body-lg": { "$value": { "value": 16, "unit": "px" }, "$description": "Large body text and controls." },
+      "lg": { "$value": { "value": 18, "unit": "px" }, "$description": "Lead and compact heading text." },
+      "xl": { "$value": { "value": 20, "unit": "px" }, "$description": "Small heading text." },
+      "2xl": { "$value": { "value": 22, "unit": "px" }, "$description": "Card heading text." },
+      "3xl": { "$value": { "value": 24, "unit": "px" }, "$description": "Section heading text." },
+      "4xl": { "$value": { "value": 30, "unit": "px" }, "$description": "Page heading text." },
+      "5xl": { "$value": { "value": 44, "unit": "px" }, "$description": "Large display text." }
+    },
+    "letter-spacing": {
+      "normal": { "$value": { "value": 0, "unit": "px" }, "$description": "Default tracking." },
+      "tight": { "$value": { "value": -0.32, "unit": "px" }, "$description": "Tight display tracking at a 16px reference size." },
+      "label": { "$value": { "value": 0.8, "unit": "px" }, "$description": "Uppercase label tracking." },
+      "eyebrow": { "$value": { "value": 1.4, "unit": "px" }, "$description": "Wide eyebrow tracking." }
+    },
+    "control-height": {
+      "sm": { "$value": { "value": 44, "unit": "px" }, "$description": "Minimum accessible control height." },
+      "md": { "$value": { "value": 48, "unit": "px" }, "$description": "Mobile primary control height." },
+      "lg": { "$value": { "value": 52, "unit": "px" }, "$description": "Match action height." },
+      "xl": { "$value": { "value": 56, "unit": "px" }, "$description": "Desktop primary control height." }
+    }
+  },
+  "fontFamily": { "$type": "fontFamily", "sans": { "$value": ["Montserrat", "Arial", "Helvetica", "sans-serif"], "$description": "Dreamari UI and display font stack. Favorit may replace the display face after licensing." } },
+  "fontWeight": {
+    "$type": "fontWeight",
+    "regular": { "$value": 400, "$description": "Regular text." },
+    "medium": { "$value": 500, "$description": "Medium emphasis." },
+    "semibold": { "$value": 600, "$description": "Strong UI emphasis." },
+    "bold": { "$value": 700, "$description": "Bold labels and headings." },
+    "extrabold": { "$value": 800, "$description": "Display and major heading weight." }
+  },
+  "number": {
+    "$type": "number",
+    "line-height": {
+      "tight": { "$value": 1.1, "$description": "Tight display leading." },
+      "heading": { "$value": 1.15, "$description": "Heading leading." },
+      "body": { "$value": 1.5, "$description": "Default readable body leading." },
+      "compact": { "$value": 1.35, "$description": "Compact card-body leading." }
+    },
+    "opacity": {
+      "disabled": { "$value": 0.4, "$description": "Disabled content opacity." },
+      "muted": { "$value": 0.7, "$description": "Muted decorative content opacity." }
+    }
+  },
+  "duration": {
+    "$type": "duration",
+    "fast": { "$value": { "value": 150, "unit": "ms" }, "$description": "Fast control feedback." },
+    "normal": { "$value": { "value": 300, "unit": "ms" }, "$description": "Standard UI transition." },
+    "slow": { "$value": { "value": 700, "unit": "ms" }, "$description": "Step-theme transition." }
+  }
+}

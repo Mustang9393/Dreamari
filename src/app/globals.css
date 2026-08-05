@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./design-tokens.generated.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -20,8 +21,31 @@
      what any fixed/absolute element renders on top of it. A white bounce-reveal read as
      a broken layout; matching it to the app's own dark tone fixes that without needing
      per-page overrides. */
-  --background: #030712;
-  --foreground: #edeff3;
+  --background: var(--color-neutral-950);
+  --foreground: var(--color-ink-100);
+
+  /* Compatibility aliases keep the existing Tailwind class API stable while the
+     generated DTCG paths become the source of truth. New code should use the corrected
+     names on the right-hand side. */
+  --color-amber-100: var(--color-amber-50);
+  --color-gold-400: var(--color-amber-500);
+  --color-orange-500: var(--color-amber-650);
+  --color-slate-900: var(--color-neutral-900);
+  --color-slate-500: var(--color-neutral-500);
+  --color-slate-600: var(--color-neutral-600);
+  --color-surface-tertiary: var(--color-surface-subtle);
+  --color-navy-975: var(--color-navy-900);
+  --color-category-red: var(--color-category-classes);
+  --color-category-purple: var(--color-category-earning-potential);
+  --color-category-green: var(--color-category-future-fit);
+  --color-match-card-bg-dark: var(--color-match-card-background);
+  --color-match-accent-dark: var(--color-match-accent);
+  --color-match-border-dark: var(--color-match-border);
+  --color-match-text-muted-dark: var(--color-match-text-muted);
+  --color-match-success-dark: var(--color-match-success);
+  --color-match-toast-bg-dark: var(--color-match-toast-background);
+  --color-match-toast-link-dark: var(--color-match-toast-link);
+  --color-match-modal-bg-dark: var(--color-match-modal-background);
 
   /* Build flow's own centered-content width at lg+ (1024px and up) — FlowCard,
      FlowProgress, and the AboutYouStep/ConfidenceCheckStep wrappers all reference this
@@ -30,60 +54,6 @@
      (the card's own original lg: width) so it doesn't keep growing past what already
      read as the right size on a very large monitor. */
   --flow-content-width: min(50vw, 896px);
-
-  /* Brand palette — extracted from Figma (Dreamari_UIKIT, node 211:619) */
-  --color-brand-950: #0a1e4c;
-  --color-brand-900: #0c2560;
-  --color-brand-700: #143c96;
-  --color-brand-600: #1f5ff0;
-  --color-brand-500: #2f6bf2;
-  --color-brand-400: #4a82ff;
-  --color-brand-300: #7fa8ff;
-  --color-brand-200: #d9e6ff;
-  --color-brand-100: #eef4ff;
-
-  --color-accent-deep: #0f4cd1;
-  --color-accent-navy: #1f418f;
-
-  --color-ink-100: #edeff3;
-  --color-ink-200: #b9cbec;
-  --color-ink-900: #151a24;
-
-  /* Amber accent + neutrals — extracted from Figma (Dreamari_UIKIT, node 346:35363) */
-  --color-amber-600: #d97706;
-  --color-amber-400: #fbbf24;
-  --color-amber-100: #fef3c7;
-  --color-gold-400: #ffcf04;
-  --color-orange-500: #f37c11;
-
-  --color-slate-900: #1e2a3f;
-  --color-slate-500: #8a93a3;
-  --color-slate-600: #5b6472;
-  --color-surface-tertiary: #fafbfc;
-  --color-border-subtle: #f5f6f8;
-
-  /* Slightly darker navy pair this frame's background gradient uses —
-     distinct enough from brand-950/900 to keep as its own pair rather
-     than force a mismatch. */
-  --color-navy-975: #08205a;
-  --color-navy-700: #1144c0;
-
-  /* Corrected aliases — --color-amber-100/--color-navy-975 above are kept
-     exactly as-is (still used by the older /onboarding route) but are
-     misnamed relative to their actual position on the standard amber/navy
-     scale (Figma's own tokens call these amber/50 and navy/900). New code
-     under src/components/flow should reach for these two instead. */
-  --color-amber-50: var(--color-amber-100);
-  --color-navy-900: var(--color-navy-975);
-
-  /* Match card category-accent colors (matchData.ts MATCH_CARD_META) — blue
-     and amber already exist above (brand-600, amber-600); only red/purple/
-     green were previously inlined as raw rgb() with no token at all. */
-  --color-category-red: #ea4459;
-  --color-category-purple: #9a39fb;
-  --color-category-green: #01be58;
-  /* The near-black top stop shared by all 5 match card gradients. */
-  --color-match-card-top: rgb(2, 4, 9);
 
   /* MatchCard's own one-off sizing — not on the shared radius/font-size scale anything
      else in the flow uses, kept as their own named tokens rather than forced onto the
@@ -117,8 +87,8 @@
   @media (min-width: 1536px) {
     --match-card-size: calc(min(500px, calc(100dvh - 224px)) / 1.2);
   }
-  --radius-match-card: 20px;
-  --radius-match-card-inner: 15px;
+  --radius-match-card: var(--dimension-radius-lg);
+  --radius-match-card-inner: var(--dimension-radius-match-inner);
   --font-size-match-card-emoji: calc(var(--match-card-size) * 0.17);
   --font-size-match-card-title: calc(var(--match-card-size) * 0.078);
   /* Reduced from 0.045 — the description text was reading as too big at every size,
@@ -143,37 +113,6 @@
      if the card itself has to. + 4px on top of that per direct feedback that it still
      read as too tight. */
   --match-block-gap: calc(max(16px, calc(var(--match-card-size) * 0.035)) + 4px);
-  --color-match-card-bg-dark: #071634;
-
-  /* Match Experience's own dark-mode accent palette — distinct from the
-     Build flow's rotating --step-accent, and previously scattered as raw
-     hex repeated across 6 files (MatchActionButtons, MatchProgressPanel,
-     MatchExperience, MatchToast, PathSavedScreen) rather than shared. */
-  --color-match-accent-dark: #2e73f5;
-  --color-match-border-dark: #404759;
-  --color-match-text-muted-dark: #99a6b8;
-  --color-match-success-dark: #33c78c;
-  --color-match-toast-bg-dark: #171c2e;
-  --color-match-toast-link-dark: #5b9bff;
-  --color-match-modal-bg-dark: #0b1230;
-
-  /* MatchBackdrop's static 3-stop dark gradient. */
-  --color-match-backdrop-1: #040b21;
-  --color-match-backdrop-2: #081540;
-  --color-match-backdrop-3: #020714;
-
-  /* AuroraBackground canvas fill colors (set via ctx.fillStyle in JS, not
-     CSS — kept here anyway so both places that need "the app's ambient
-     background color" read from one named value instead of two separate
-     raw hex literals that happen to currently match). */
-  --color-aurora-canvas-dark: #070912;
-  --color-aurora-canvas-light: #f3f4f8;
-
-  /* ChoosePathStep's 3 path-accent colors (High School / University / Job
-     Seeker) — previously inlined per-option with no shared name. */
-  --color-path-high-school: #60a5fa;
-  --color-path-university: #34d399;
-  --color-path-job-seeker: #a78bfa;
 }
 
 @theme inline {

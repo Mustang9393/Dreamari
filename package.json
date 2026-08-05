@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tokens:build": "node design-tokens/scripts/build-tokens.mjs",
+    "tokens:validate": "node design-tokens/scripts/validate-tokens.mjs",
+    "tokens:check": "npm run tokens:validate && node design-tokens/scripts/build-tokens.mjs --check"
   },
   "dependencies": {
     "next": "16.2.12",

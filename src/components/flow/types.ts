@@ -1,3 +1,9 @@
+import {
+  FUTURE_VALUES_GRADIENT,
+  MATCH_CATEGORY_COLORS as GENERATED_MATCH_CATEGORY_COLORS,
+  STEP_AURORA_ACCENTS as GENERATED_STEP_AURORA_ACCENTS,
+} from "@/generated/design-tokens";
+
 export const TOTAL_STEPS = 12;
 
 // One ambient mood per screen (background only — cards/buttons stay on the
@@ -11,25 +17,12 @@ export const TOTAL_STEPS = 12;
 // (step 6, inserted after Confidence Check to match the reference app, which
 // has this step and we previously didn't) reuses Academic Journey's teal —
 // both are "interest exploration" steps and aren't adjacent in the sequence.
-export const STEP_AURORA_ACCENTS: string[] = [
-  "#1f5ff0", // 1 Welcome — blue bookend
-  "#10b981", // 2 Choose Path
-  "#ea580c", // 3 About You
-  "#0f766e", // 4 Academic Journey
-  "#dc2626", // 5 Confidence Check — red, matches its Ronaldo gif
-  "#0f766e", // 6 Spend Your Days — teal, reused from Academic Journey
-  "#0d9488", // 7 Work Style
-  "#d97706", // 8 Future Values — amber, closest to yellow, matches its SpongeBob gif
-  "#ea580c", // 9 Path Forward
-  "#10b981", // 10 Financial
-  "#0d9488", // 11 Location
-  "#1f5ff0", // 12 Congratulations — blue bookend
-];
+export const STEP_AURORA_ACCENTS: string[] = [...GENERATED_STEP_AURORA_ACCENTS];
 
 // The Match Experience's own 5 category colors (matchData.ts MATCH_CARD_META / globals.css
-// --color-category-*), duplicated here as literal hex rather than a var() reference —
-// Confetti needs real hex to build particle colors, not a CSS custom property string.
-export const MATCH_CATEGORY_COLORS = ["#ea4459", "#1f5ff0", "#d97706", "#9a39fb", "#01be58"];
+// --color-category-*). Confetti needs resolved colors rather than CSS custom-property
+// strings, so this array is generated from the same DTCG aliases as the CSS variables.
+export const MATCH_CATEGORY_COLORS: string[] = [...GENERATED_MATCH_CATEGORY_COLORS];
 
 type StepGradient = { from: string; to: string };
 
@@ -41,12 +34,7 @@ type StepGradient = { from: string; to: string };
 // gradients use their own distinct, slightly brighter stops.
 export const STEP_GRADIENT_OVERRIDES: Partial<Record<number, { button: StepGradient; progress: StepGradient }>> = {
   8: {
-    // from/to here match globals.css --color-gold-400/--color-orange-500/--color-amber-400
-    // exactly; referenced via var() rather than repeating the same hex a second time.
-    // progress.to (#f37a10) has no other use in the app, so it's kept as a literal rather
-    // than inventing a single-use primitive for it.
-    button: { from: "var(--color-gold-400)", to: "var(--color-orange-500)" },
-    progress: { from: "var(--color-amber-400)", to: "#f37a10" },
+    ...FUTURE_VALUES_GRADIENT,
   },
 };
 

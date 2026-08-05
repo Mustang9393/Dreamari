@@ -237,7 +237,7 @@ export const MatchDeck = forwardRef<MatchDeckHandle, MatchDeckProps>(function Ma
             --match-card-size (not a fixed size-10/text-sm) so it scales with the card
             instead of looking oversized on a small card or undersized on a large one. */}
         {showTutorial && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[20px] bg-black/40">
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-[var(--radius-match-card)] bg-black/40">
             <div className="flex flex-col items-center gap-2 text-white" style={{ animation: "swipe-hint-drift 1.4s ease-in-out 1" }}>
               <ArrowLeftRightIcon className="size-[calc(var(--match-card-size)*0.12)]" />
               <span className="font-bold" style={{ fontSize: "var(--font-size-match-card-body)" }}>

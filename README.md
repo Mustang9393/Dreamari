@@ -75,7 +75,7 @@ Each component is a single-responsibility, independently reusable unit — compo
 
 ## Design tokens
 
-All brand colors and gradients live as CSS custom properties in `src/app/globals.css`, registered in Tailwind's `@theme` block so they're usable as regular utility classes (`bg-brand-500`, `text-ink-200`, `from-brand-400`, etc.) instead of one-off hex values scattered through components.
+Portable design decisions live in the five W3C DTCG 2025.10 files under `design-tokens/`. `npm run tokens:build` generates the CSS custom properties and TypeScript color arrays consumed by the app; `globals.css` retains only Tailwind registration, compatibility aliases, and code-owned responsive/runtime formulas. See `design-tokens/README.md` for the file convention, alias rules, validation, and the boundary between portable tokens and decorative implementation constants.
 
 | Token | Value | Used for |
 |---|---|---|

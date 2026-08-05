@@ -4,6 +4,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { IconAssessment, IconCompass, IconGamepad, IconNetwork, IconTarget } from "./icons";
 import { Stars } from "./Stars";
 import { Button } from "@/components/ui/Button";
+import { HOW_IT_WORKS_CHAPTER_COLORS } from "@/generated/design-tokens";
 
 // A chapter stays at full brightness within HOLD of its own "centered in the viewport"
 // moment — a deliberate plateau, not just a single instant of peak — giving the user a
@@ -51,7 +52,7 @@ const STEPS = [
     label: "BUILD",
     side: "left" as const,
     desc: "By taking a personality, skill, and academic assessment.",
-    color: "#4a82ff",
+    color: HOW_IT_WORKS_CHAPTER_COLORS[0],
     Icon: IconAssessment,
   },
   {
@@ -59,7 +60,7 @@ const STEPS = [
     label: "MATCH",
     side: "right" as const,
     desc: "With the right career, college major, and schools.",
-    color: "#FF6058",
+    color: HOW_IT_WORKS_CHAPTER_COLORS[1],
     Icon: IconTarget,
   },
   {
@@ -67,7 +68,7 @@ const STEPS = [
     label: "PLAY",
     side: "left" as const,
     desc: "Day-in-the-life college major and career games you actually want to open.",
-    color: "#B79CFF",
+    color: HOW_IT_WORKS_CHAPTER_COLORS[2],
     Icon: IconGamepad,
   },
   {
@@ -75,7 +76,7 @@ const STEPS = [
     label: "EXPLORE",
     side: "right" as const,
     desc: "Careers, companies, and pathways with depth.",
-    color: "#00C0E8",
+    color: HOW_IT_WORKS_CHAPTER_COLORS[3],
     Icon: IconCompass,
   },
   {
@@ -83,7 +84,7 @@ const STEPS = [
     label: "CONNECT",
     side: "left" as const,
     desc: "With professionals in the industry you're interested in.",
-    color: "#FFCC00",
+    color: HOW_IT_WORKS_CHAPTER_COLORS[4],
     Icon: IconNetwork,
   },
 ];

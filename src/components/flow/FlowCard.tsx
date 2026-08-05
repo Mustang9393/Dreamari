@@ -21,7 +21,7 @@ export function FlowCard({ children, header }: FlowCardProps) {
     // which would clip any absolutely-positioned child anchored to it — e.g. DreamyCorner
     // floats outside this card entirely, so it anchors to a non-clipping wrapper one level
     // up instead (see ConfidenceCheckStep).
-    <div className="flex w-full max-w-2xl flex-col items-stretch overflow-hidden rounded-3xl bg-white shadow-[0_0_24px_rgba(242,176,30,0.12)] lg:w-[var(--flow-content-width)] lg:max-w-none dark:border dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_0_32px_rgba(0,0,0,0.4)] dark:backdrop-blur-xl">
+    <div className="flex w-full max-w-2xl flex-col items-stretch overflow-hidden rounded-3xl bg-white shadow-[0_0_24px_var(--color-shadow-amber-12)] lg:w-[var(--flow-content-width)] lg:max-w-none dark:border dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_0_32px_var(--color-shadow-black-40)] dark:backdrop-blur-xl">
       {header}
       <div className="flex w-full flex-col items-start gap-2.5 p-4 sm:gap-4 sm:p-9">{children}</div>
     </div>

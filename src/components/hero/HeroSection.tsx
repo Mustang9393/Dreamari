@@ -21,7 +21,7 @@ export function HeroSection() {
       // already tracks the actual current viewport correctly.
       className="relative isolate flex h-dvh flex-col px-6 pt-5 sm:px-10 sm:pt-6 lg:px-16"
       style={{
-        background: "radial-gradient(ellipse 120% 90% at 85% 35%, #143c96 0%, #0c2560 45%, #0a1e4c 100%)",
+        background: "radial-gradient(ellipse 120% 90% at 85% 35%, var(--color-brand-700) 0%, var(--color-brand-900) 45%, var(--color-brand-950) 100%)",
       }}
     >
       <GradientBlobs />
@@ -37,7 +37,7 @@ export function HeroSection() {
           darkens what's behind those without dimming the content itself. */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[48%]"
-        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(10,30,76,0.4) 55%, #0a1e4c 100%)" }}
+        style={{ background: "linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--color-brand-950) 40%, transparent) 55%, var(--color-brand-950) 100%)" }}
         aria-hidden
       />
 

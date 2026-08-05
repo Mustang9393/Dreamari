@@ -39,7 +39,7 @@ export function AcademicJourneyCard() {
             id="gpa-range"
             value={gpaRange}
             onChange={(event) => setGpaRange(event.target.value)}
-            className="w-full appearance-none rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm font-semibold text-slate-900"
+            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900"
           >
             {GPA_RANGES.map((range) => (
               <option key={range} value={range}>

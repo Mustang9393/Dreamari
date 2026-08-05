@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Dreamari component tokens. This mode-independent collection aliases semantic or foundation paths so light/dark selection happens without changing component token names.",
+  "$extensions": { "com.dreamari.collection": "components" },
+  "component": {
+    "button": {
+      "$description": "Shared button decisions. Dynamic Build-step gradients are supplied by the active step semantic token at runtime.",
+      "primary": {
+        "background": { "$type": "color", "$value": "{color.action.primary}", "$description": "Primary button background outside step-themed contexts." },
+        "text": { "$type": "color", "$value": "{color.white}", "$description": "Primary button label remains white in both modes." },
+        "typography": { "$type": "typography", "$value": "{typography.label.default}", "$description": "Primary button label style." },
+        "radius": { "$type": "dimension", "$value": "{dimension.radius.sm}", "$description": "Primary button corner radius." },
+        "height-mobile": { "$type": "dimension", "$value": "{dimension.control-height.md}", "$description": "Primary button height on mobile." },
+        "height-desktop": { "$type": "dimension", "$value": "{dimension.control-height.xl}", "$description": "Primary button height on desktop." },
+        "transition": { "$type": "duration", "$value": "{duration.fast}", "$description": "Primary button interaction transition." }
+      },
+      "secondary": {
+        "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Secondary button surface." },
+        "text": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Secondary button label." },
+        "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Secondary button border." },
+        "radius": { "$type": "dimension", "$value": "{dimension.radius.sm}", "$description": "Secondary button corner radius." },
+        "height": { "$type": "dimension", "$value": "{dimension.control-height.lg}", "$description": "Secondary and Match action height." }
+      }
+    },
+    "flow-card": {
+      "$description": "Outer card shell shared by Build steps.",
+      "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Flow card background." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.2xl}", "$description": "Flow card corner radius." },
+      "padding-mobile": { "$type": "dimension", "$value": "{dimension.spacing.16}", "$description": "Flow card mobile padding." },
+      "padding-desktop": { "$type": "dimension", "$value": "{dimension.spacing.36}", "$description": "Flow card desktop padding." },
+      "shadow": { "$type": "shadow", "$value": "{shadow.card}", "$description": "Mode-aware Flow card elevation." }
+    },
+    "step-header": {
+      "$description": "Colored header band at the top of a Build card.",
+      "text": { "$type": "color", "$value": "{color.white}", "$description": "Step header text on the active accent." },
+      "padding-mobile": { "$type": "dimension", "$value": "{dimension.spacing.12}", "$description": "Step header mobile padding." },
+      "padding-desktop": { "$type": "dimension", "$value": "{dimension.spacing.20}", "$description": "Step header desktop padding." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.2xl}", "$description": "Step header top-corner radius." }
+    },
+    "selection-item": {
+      "$description": "Shared answer-option foundation for GridOption, SelectionRow, and compatible controls.",
+      "background": { "$type": "color", "$value": "{color.surface.subtle}", "$description": "Unselected option background." },
+      "text": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Unselected option label." },
+      "border": { "$type": "color", "$value": "{color.border.subtle}", "$description": "Unselected option border." },
+      "selected-text": { "$type": "color", "$value": "{color.white}", "$description": "Selected option label; selected background is the active step accent." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.md}", "$description": "Selection item corner radius." },
+      "padding-mobile": { "$type": "dimension", "$value": "{dimension.spacing.14}", "$description": "Selection item mobile padding." },
+      "padding-desktop": { "$type": "dimension", "$value": "{dimension.spacing.16}", "$description": "Selection item desktop padding." },
+      "gap-mobile": { "$type": "dimension", "$value": "{dimension.spacing.10}", "$description": "Selection item mobile internal gap." },
+      "gap-desktop": { "$type": "dimension", "$value": "{dimension.spacing.12}", "$description": "Selection item desktop internal gap." },
+      "shadow": { "$type": "shadow", "$value": "{shadow.selection}", "$description": "Mode-aware selection-card elevation." }
+    },
+    "input": {
+      "$description": "Text input and select foundation.",
+      "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Input background." },
+      "text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Input value text." },
+      "label": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Input label text." },
+      "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Input default border." },
+      "focus-border": { "$type": "color", "$value": "{color.action.primary}", "$description": "Default input focus border outside step-themed contexts." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.sm}", "$description": "Input corner radius." },
+      "height": { "$type": "dimension", "$value": "{dimension.control-height.sm}", "$description": "Minimum input height." },
+      "padding-inline": { "$type": "dimension", "$value": "{dimension.spacing.16}", "$description": "Input horizontal padding." },
+      "typography": { "$type": "typography", "$value": "{typography.label.default}", "$description": "Input value typography." }
+    },
+    "progress": {
+      "$description": "Build progress panel foundation; fill color is the active step semantic accent.",
+      "background": { "$type": "color", "$value": "{color.surface.subtle}", "$description": "Progress panel background foundation." },
+      "text": { "$type": "color", "$value": "{color.text.brand}", "$description": "Progress label fallback color." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.md}", "$description": "Progress panel corner radius." },
+      "transition": { "$type": "duration", "$value": "{duration.slow}", "$description": "Progress theme transition." }
+    },
+    "match-card": {
+      "$description": "Always-dark card used by the Match swipe deck. Responsive square sizing remains an implementation formula documented outside the token collection.",
+      "background": { "$type": "color", "$value": "{color.surface.match-card}", "$description": "Match card fallback background." },
+      "text": { "$type": "color", "$value": "{color.white}", "$description": "Match card content color." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.lg}", "$description": "Match card outer radius." },
+      "inner-radius": { "$type": "dimension", "$value": "{dimension.radius.match-inner}", "$description": "Match card content-panel radius." }
+    },
+    "match-progress": {
+      "$description": "Progress summary above the Match deck.",
+      "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Match progress background." },
+      "text": { "$type": "color", "$value": "{color.text.secondary}", "$description": "Match progress secondary text." },
+      "accent": { "$type": "color", "$value": "{color.action.primary}", "$description": "Match progress fill and percentage." },
+      "success": { "$type": "color", "$value": "{color.feedback.success}", "$description": "Saved-path progress state." },
+      "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Match progress border." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.xl}", "$description": "Match progress-panel radius." }
+    },
+    "toast": {
+      "$description": "Always-dark Match feedback toast.",
+      "background": { "$type": "color", "$value": "{color.surface.match-toast}", "$description": "Toast background." },
+      "text": { "$type": "color", "$value": "{color.white}", "$description": "Toast message." },
+      "action": { "$type": "color", "$value": "{color.match.toast-link}", "$description": "Toast undo action." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.pill}", "$description": "Toast pill radius." },
+      "padding-inline": { "$type": "dimension", "$value": "{dimension.spacing.20}", "$description": "Toast horizontal padding." },
+      "padding-block": { "$type": "dimension", "$value": "{dimension.spacing.12}", "$description": "Toast vertical padding." }
+    },
+    "speech-bubble": {
+      "$description": "Dreamy speech-bubble foundation. Placement remains contextual implementation behavior.",
+      "background": { "$type": "color", "$value": "{color.surface.card}", "$description": "Speech-bubble background." },
+      "text": { "$type": "color", "$value": "{color.text.primary}", "$description": "Speech-bubble text." },
+      "border": { "$type": "color", "$value": "{color.border.default}", "$description": "Speech-bubble border." },
+      "radius": { "$type": "dimension", "$value": "{dimension.radius.md}", "$description": "Speech-bubble radius." },
+      "padding": { "$type": "dimension", "$value": "{dimension.spacing.16}", "$description": "Speech-bubble padding." },
+      "typography": { "$type": "typography", "$value": "{typography.body.small}", "$description": "Speech-bubble text style." }
+    }
+  }
+}

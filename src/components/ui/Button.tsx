@@ -10,7 +10,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
   "cta-solid":
     "rounded-2xl bg-gradient-to-r from-brand-400 to-accent-deep px-6 py-3 text-base font-bold text-white shadow-lg shadow-brand-950/40 sm:px-8 sm:py-4 sm:text-lg",
   "cta-outline":
-    "rounded-2xl border border-brand-300/40 bg-white/[0.06] px-6 py-3 text-base font-bold text-[#eaf1ff] sm:px-8 sm:py-4 sm:text-lg",
+    "rounded-2xl border border-brand-300/40 bg-white/[0.06] px-6 py-3 text-base font-bold text-[var(--color-ink-150)] sm:px-8 sm:py-4 sm:text-lg",
 };
 
 type ButtonProps = {
