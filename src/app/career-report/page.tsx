@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Your Dreamari career direction, pathway, education options and next-step plan.",
 };
 
-export default async function CareerReportPage({ searchParams }: { searchParams: Promise<{ from?: string | string[] }> }) {
+export default async function CareerReportPage({ searchParams }: { searchParams: Promise<{ from?: string | string[]; state?: string | string[] }> }) {
   const query = await searchParams;
-  return <CareerReportExperience prepare={query.from === "match"} />;
+  return <CareerReportExperience prepare={query.from === "match"} simulateError={query.state === "error"} />;
 }

@@ -176,16 +176,41 @@ body {
   --foreground: var(--color-text-primary);
 }
 
+.dreamari-card-rail {
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
+}
+
+.dreamari-card-rail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dreamari-card-rail {
+    scroll-behavior: auto;
+  }
+}
+
 @media print {
   .career-report header,
   .career-report nav,
   .career-report button,
+  .career-report [data-report-modal],
+  .career-report > .pointer-events-none,
   .career-report a[href="/flow"],
   .career-report a[href="/"] {
     display: none !important;
   }
 
   .career-report {
+    --color-surface-card: var(--color-white);
+    --color-surface-page: var(--color-white);
+    --color-surface-subtle: var(--color-neutral-50);
+    --color-text-primary: var(--color-neutral-900);
+    --color-text-secondary: var(--color-neutral-600);
+    --color-text-muted: var(--color-neutral-600);
+    --color-border-default: var(--color-neutral-200);
     background: var(--color-white) !important;
     color: var(--color-neutral-900) !important;
   }

@@ -33,6 +33,28 @@ export function BriefcaseIcon({ className = base }: IconProps) {
   );
 }
 
+export function DownloadIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 21h14" />
+    </svg>
+  );
+}
+
+export function ShareIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="m8.6 10.5 6.8-4" />
+      <path d="m8.6 13.5 6.8 4" />
+    </svg>
+  );
+}
+
 export function ChevronLeftIcon({ className = base }: IconProps) {
   // Bolder stroke than the other icons here on purpose — this one stands alone as a back
   // affordance (no label next to it), so it needs to read clearly at a glance.

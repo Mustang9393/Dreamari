@@ -6,9 +6,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-05
 - Active branch: `v2`
-- Main branch: promotion explicitly authorized for this Career Report release
-- Objective: remove the cloud mark from the temporary report header, revalidate the
-  Career Report, push `v2`, and promote the verified commit to `main`.
+- Main branch: do not change without a new explicit instruction
+- Objective: implement and visually verify the post-onboarding student home/launchpad on
+  `v2`, then wait for visual approval before any commit or push.
 
 ## Completed
 
@@ -61,6 +61,75 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Removed the Career Report's avoidable page-local color literals and mapped its surfaces,
   text, borders, feedback states, shadows, and accents to the generated semantic tokens.
   Future visual work must follow the same token-first rule.
+- Reworked the hero title into two deliberate lines and moved all four high-value actions
+  above the fold. Simulation/Explore are visually primary; Download/Share are grouped as
+  report utilities and repeat at the conclusion for long-scroll task completion.
+- Added accessible Download and Share dialogs with focus trapping, Escape/backdrop close,
+  focus return, print-ready Save-as-PDF guidance, copy/native/email fallbacks, and loading,
+  success, cancellation, permission, and unavailable-print error handling.
+- Replaced the generic report wait with four visible assembly stages, reduced-motion
+  timing, a Dreamy interruption state, safe retry, and preserved-Match reassurance.
+- QA routes: `/career-report?from=match` exercises assembly; add `&state=error` to exercise
+  the first-attempt failure and retry path. These states are for frontend review only.
+- Browser verification passed at 390×844, 768×1024, and 1280×800 in light/dark modes,
+  including canonical-link copy feedback, print feedback, modal keyboard dismissal and
+  focus return, assembly completion, simulated failure, retry recovery, zero horizontal
+  overflow, and no browser console errors.
+- Completed a section-by-section responsive audit and removed the Career Report's main
+  density and legibility problems. Reach, Good fit, and Safe choices now use substantial
+  cards; Strong Options uses three intentional full-width rows instead of an orphaned
+  grid item; school metadata, role descriptions, certification detail, and report-history
+  text use a more legible type scale.
+- Gave Academic Strengths, My Plan, and conclusion Dreamy assets dedicated layout space.
+  No illustration is absolutely positioned over live copy, and the report conclusion
+  keeps its approved copy unchanged inside a separate content column.
+- Final responsive browser verification passed at 320×700, 390×844, 768×1024, 1024×768,
+  and 1280×800 with no horizontal overflow or current console/framework warnings. ESLint,
+  TypeScript, `npm run tokens:check`, and the network-enabled production build pass.
+- Removed the “Report actions” label from both action groups. Download and Share are now
+  48px icon-only utility controls with accessible names and native hover titles, separated
+  from the Play and Explore CTAs by a responsive divider; both still open their complete
+  accessible dialogs.
+- Added `/home` as the post-onboarding student launchpad, using Figma desktop node
+  `790:35798` as the content/style source of truth and mobile node `745:36522` for
+  responsive behavior. Figma was used only as a visual reference; code tokens remain the
+  implementation source of truth.
+- Implemented the featured Product Manager story, four quick actions, Continue Your
+  Journey, Recommended for You, daily glossary challenge, Popular with Explorers,
+  Mystery Unlocks, and the personalised sponsored Mars challenge in the source order.
+- Added working desktop Play/Explore/Community controls and a persistent mobile
+  Home/Explore/Play/Community/Profile tab bar. The Explore tab scrolls to recommendations,
+  Play/Home returns to the featured story, challenge completion adds feedback and a
+  disabled success state, and streak acknowledgement provides live confirmation.
+- Added a Home icon beside the Career Report Dreamari wordmark and a “Go to Launchpad”
+  hero CTA. The Dreamari wordmark still links to `/`; both new entry points link to
+  `/home`.
+- Added 13 generated cinematic career images, one character and one clear work setting
+  per image, with diverse global representation. Optimised them to WebP (about 1.2 MB
+  total versus 23 MB of source PNGs).
+- Design QA is recorded in `design-qa.md`. Combined source/implementation evidence is in
+  `work/home-design-qa-desktop-final.png` and `work/home-design-qa-mobile.png`; the final
+  result is passed after correcting the initial oversized desktop hero title.
+- Student home verification passed at 390×844, 768×1024, 1280×720, and 1440×900 with no
+  horizontal overflow. Career Report → Home, tab navigation, quick actions, challenge
+  completion, streak feedback, ESLint, TypeScript, `npm run tokens:check`, and the
+  network-enabled production build pass.
+- Follow-up card fidelity pass uses UIKIT node `793:36808` as exact truth. The reusable
+  standard card now measures 427×336 with a 180px image and 156px
+  `surface-match-card` body, matching badge/duration/title/description/metadata/CTA
+  placement. Focused 1:1 evidence is `work/home-card-design-qa-final.png`.
+- All career sections now use streaming-style carousels with partial-card previews,
+  horizontal touch scrolling, snap points, edge-aware Next/Previous controls, and a
+  restrained Netflix/Prime-style hover/focus expansion. Desktop verification moved the
+  Recommended rail from `0 → 113 → 0`; mobile moved one 336px step with no page overflow.
+- The featured hero now matches the 100% Figma composition: full-bleed beneath navigation,
+  520px desktop/470px mobile height, no rounded shell or eyebrow, single-line desktop
+  title/description, CTA beside a bar-plus-percentage with its scene label below, centered
+  pagination, and compact 72px text-only Quick Actions.
+- Product Manager uses `product-manager-hero-v2.webp`, a 1915×821 restrained cinematic
+  campus panorama. The carousel advances every 5.5 seconds even while hovered, retains
+  dots/arrows and reduced-motion handling, and card images fade into the semantic
+  `surface-match-card` body instead of ending at a hard seam.
 
 ## Remaining external check
 
@@ -68,8 +137,10 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Recommended next step
 
-- Verify the Career Report on the new `main` Vercel deployment. The temporary header is
-  expected to be replaced when the new navigation/header/footer system is designed.
+- Review the open local `v2` student home preview and its responsive rails/interactions.
+  Apply any requested refinements, then commit and push only when explicitly requested.
+- The temporary header is expected to be replaced when the new navigation/header/footer
+  system is designed.
 - The external production task remains to compare this reference token set with the app
   repository's canonical `packages/ui/tokens` before production adoption.
 

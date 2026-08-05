@@ -4,10 +4,52 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ## 2026-08-05
 
+### Student home and launchpad
+
+- Added the responsive `/home` student launchpad based on the approved desktop and
+  mobile UIKIT references, with a cinematic featured simulation, quick actions,
+  continuation cards, personalised recommendations, daily challenge, popular careers,
+  mystery unlocks, and sponsored Mars challenge.
+- Added working desktop tabs and persistent mobile app navigation, responsive card rails,
+  Resume/Explore/Play routes, streak acknowledgement, and daily challenge success and XP
+  feedback.
+- Added a Home icon beside the Career Report wordmark and a visible “Go to Launchpad” CTA;
+  the Dreamari wordmark continues to open the original landing page.
+- Mapped the implementation to the generated DTCG semantic tokens instead of copying raw
+  Figma values, and reused the shared Dreamari icon components.
+- Added 13 cinematic, single-subject career assets with globally diverse characters and
+  card-compatible crops. Converted the final set to WebP, reducing it from 23 MB to about
+  1.2 MB without changing the visual direction.
+- Passed design comparison against the captured Figma desktop/mobile references and
+  responsive browser verification at 390×844, 768×1024, 1280×720, and 1440×900 with no
+  horizontal overflow. Tabs, quick actions, challenge feedback, report entry points,
+  ESLint, TypeScript, all 438 token checks, and the production build pass.
+- Rebuilt every career card against UIKIT node `793:36808`: the standard component is
+  exactly 427×336 with a 180px image, separate 156px navy information panel, match badge,
+  duration, plain dot-separated metadata, and full-width blue CTA. Wide and compact rail
+  variants preserve the same anatomy.
+- Replaced static card rows with working streaming-style carousels: partial-next-card
+  affordances, touch swipe and snap, hover/focus lift and image push-in, and accessible
+  desktop Next/Previous controls that advance by the number of visible cards.
+- Rebuilt the featured hero after a 100% Figma comparison: it is now a borderless,
+  full-bleed 520px cinematic stage with a dedicated campus panorama, source-matched
+  single-line desktop hierarchy, CTA/progress anatomy, centered pagination, and compact
+  72px text-only Quick Actions.
+- The hero now autoplays continuously every 5.5 seconds, including while hovered, with
+  700ms story crossfades, manual dots/arrows, and a reduced-motion opt-out. Career-card
+  artwork now fades softly into the token-mapped navy information panel.
+
 ### Career report experience
 
 - Added the responsive `/career-report` frontend reference and connected successful
   Match completion to its branded preparation state.
+- Rebuilt the report hero hierarchy so “Computer Science” and “Career Report” occupy two
+  deliberate lines, with simulation/exploration actions separated from report utilities.
+- Added Download and Share actions to the hero and conclusion, including accessible
+  dialogs, focus management, keyboard dismissal, loading/success/error feedback, native
+  share and email fallbacks, and a print-ready Save-as-PDF flow.
+- Replaced the generic wait screen with a four-stage report assembly sequence, a
+  reduced-motion path, a recoverable interruption state, and a successful retry flow.
 - Reorganised the approved Replit report content into an at-a-glance direction summary,
   a single recommended next move, and progressively deeper profile, career, plan,
   education, certification, version-history, and conclusion sections.
@@ -19,8 +61,17 @@ Notable changes to the Dreamari frontend reference are recorded here.
   cloud mark so the next navigation/header/footer system can replace it cleanly.
 - Mapped Career Report surfaces, text, borders, feedback states, shadows, and accents to
   the shared generated semantic tokens instead of maintaining a page-local color palette.
-- Verified the report at 390×844, 768×1024, and 1280×800 with no horizontal overflow or
-  browser console errors; ESLint, TypeScript, token validation, and production build pass.
+- Reworked the university fit guidance into substantial Reach, Good fit, and Safe choices
+  cards; removed the stretched empty panel and the orphaned Strong Options grid item.
+- Replaced the duplicated “Report actions” label and text-heavy Download/Share buttons
+  with compact, accessible icon controls separated from the Play and Explore CTAs.
+- Increased small report metadata and supporting copy to a more legible type scale,
+  balanced section headings, and tightened responsive spacing throughout the report.
+- Moved Academic Strengths, My Plan, and conclusion Dreamy illustrations into reserved
+  layout columns so mascot art never competes with or obscures report text.
+- Verified the report at 320×700, 390×844, 768×1024, 1024×768, and 1280×800 with no
+  horizontal overflow or browser console errors; ESLint, TypeScript, token validation,
+  and production build pass.
 
 ### Design system
 
