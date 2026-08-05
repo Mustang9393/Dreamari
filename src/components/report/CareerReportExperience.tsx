@@ -18,8 +18,8 @@ import {
   TargetIcon,
   XIcon,
 } from "@/components/flow/icons";
-import { ThemeProvider, useTheme } from "@/components/flow/theme/ThemeProvider";
-import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { DreamHorizon, StudentAppBottomNav, StudentAppHeader } from "@/components/student-app/StudentAppShell";
 import {
   CAREER_STAGES,
   CERTIFICATIONS,
@@ -40,12 +40,12 @@ const BUILD_PHASES = [
   "Building your next-step plan",
 ] as const;
 
-function ReportShell({ children }: { children: ReactNode }) {
+function ReportShell({ children, bottomInset = false }: { children: ReactNode; bottomInset?: boolean }) {
   return (
-    <div className="career-report min-h-dvh bg-[var(--color-surface-page)] text-[var(--color-text-primary)]">
+    <div className={`career-report relative min-h-dvh overflow-x-clip bg-[var(--color-surface-page)] text-[var(--color-text-primary)] ${bottomInset ? "pb-24 lg:pb-0" : ""}`}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-56 left-[10%] size-[38rem] rounded-full bg-brand-600/15 blur-[130px]" />
-        <div className="absolute top-[34rem] -right-60 size-[34rem] rounded-full bg-[var(--color-purple-500)]/12 blur-[140px]" />
+        <DreamHorizon />
+        <div className="absolute top-[34rem] -right-60 size-[34rem] rounded-full bg-[var(--color-action-secondary)]/10 blur-[140px]" />
       </div>
       {children}
     </div>
@@ -92,31 +92,32 @@ function PreparingReport({ onReady, simulateError = false }: { onReady: () => vo
 
   return (
     <ReportShell>
-      <main className="relative z-10 grid min-h-dvh place-items-center px-5 py-12">
-        <section className="w-full max-w-4xl overflow-hidden rounded-[2rem] border border-[var(--color-border-default)] bg-[var(--color-surface-card)] p-6 shadow-[0_28px_90px_var(--color-shadow-blue-10)] backdrop-blur sm:p-9 dark:shadow-[0_28px_100px_var(--color-shadow-black-40)]">
+      <StudentAppHeader activeTab="profile" context="Career report" />
+      <main className="relative z-10 grid min-h-[calc(100dvh-4.5rem)] place-items-center px-4 py-4 sm:px-5 sm:py-12">
+        <section className="w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-[var(--color-border-default)] bg-[var(--color-surface-card)] p-3 shadow-[0_28px_90px_var(--color-shadow-blue-10)] backdrop-blur sm:rounded-[2rem] sm:p-9 dark:shadow-[0_28px_100px_var(--color-shadow-black-40)]">
           {status === "error" ? (
-            <div className="grid gap-6 text-center sm:grid-cols-[240px_1fr] sm:items-center sm:text-left">
-              <div className="relative mx-auto h-44 w-56 sm:h-52 sm:w-60">
+            <div className="grid gap-4 text-center sm:grid-cols-[240px_1fr] sm:items-center sm:gap-6 sm:text-left">
+              <div className="relative mx-auto h-36 w-48 sm:h-52 sm:w-60">
                 <Image src="/images/dreamy-expressions/dreamy-nervous.webp" alt="Dreamy looks concerned after the report build was interrupted" fill priority sizes="240px" className="object-contain" />
               </div>
               <div role="alert">
                 <p className="text-xs font-bold tracking-[0.18em] text-[var(--color-feedback-danger)] uppercase">Report build interrupted</p>
-                <h1 className="mt-3 font-display text-3xl leading-tight font-extrabold tracking-[-0.035em] sm:text-4xl">We hit a cloud in the road</h1>
+                <h1 className="mt-3 font-display text-2xl leading-tight font-extrabold tracking-[-0.035em] sm:text-4xl">We hit a cloud in the road</h1>
                 <p className="mt-4 text-sm leading-6 text-[var(--color-text-secondary)] sm:text-base">Your Match choices are safe. Dreamy just needs another moment to finish building your report.</p>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <button type="button" onClick={retry} className="min-h-12 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-[var(--color-white)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Try again</button>
-                  <Link href="/flow" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-surface-card)] px-5 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Return to Match</Link>
+                <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
+                  <button type="button" onClick={retry} className="min-h-11 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-[var(--color-white)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:min-h-12 sm:py-3">Try again</button>
+                  <Link href="/flow" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-surface-card)] px-5 py-2.5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:min-h-12 sm:py-3">Return to Match</Link>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid gap-7 lg:grid-cols-[300px_1fr] lg:items-center">
+            <div className="grid gap-5 sm:gap-7 lg:grid-cols-[300px_1fr] lg:items-center">
               <div className="text-center lg:text-left">
-                <div className="relative mx-auto h-44 w-64 lg:mx-0 lg:h-52 lg:w-72">
+                <div className="relative mx-auto h-28 w-44 sm:h-44 sm:w-64 lg:mx-0 lg:h-52 lg:w-72">
                   <Image src="/images/dreamy-expressions/dreamy-problem-solving.webp" alt="Dreamy assembles your career report with puzzle pieces" fill priority sizes="288px" className="object-contain" />
                 </div>
                 <p className="mt-2 text-xs font-bold tracking-[0.18em] text-brand-600 uppercase dark:text-brand-300">Build + Match complete</p>
-                <h1 className="mt-3 font-display text-3xl leading-tight font-extrabold tracking-[-0.035em] sm:text-4xl">Building Your Career Report</h1>
+                <h1 className="mt-3 font-display text-2xl leading-tight font-extrabold tracking-[-0.035em] sm:text-4xl">Building Your Career Report</h1>
                 <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">Dreamy is turning your signals into a clear, useful next-step plan.</p>
               </div>
               <div>
@@ -125,7 +126,7 @@ function PreparingReport({ onReady, simulateError = false }: { onReady: () => vo
                     const complete = status === "ready" || index < phase;
                     const active = status === "building" && index === phase;
                     return (
-                      <div key={label} className={`flex min-h-14 items-center gap-3 rounded-2xl border px-4 py-3 transition-colors ${active ? "border-brand-600/30 bg-brand-600/8" : "border-[var(--color-border-default)] bg-[var(--color-surface-subtle)]"}`}>
+                      <div key={label} className={`flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 transition-colors sm:min-h-14 sm:px-4 sm:py-3 ${active ? "border-brand-600/30 bg-brand-600/8" : "max-[359px]:hidden border-[var(--color-border-default)] bg-[var(--color-surface-subtle)]"}`}>
                         <span className={`flex size-7 shrink-0 items-center justify-center rounded-full ${complete ? "bg-[var(--color-feedback-success)] text-[var(--color-white)]" : active ? "bg-brand-600 text-[var(--color-white)]" : "border border-[var(--color-border-default)] text-[var(--color-text-muted)]"}`}>
                           {complete ? <span className="size-3.5"><CheckIcon /></span> : <span className="text-[10px] font-extrabold">{index + 1}</span>}
                         </span>
@@ -135,7 +136,7 @@ function PreparingReport({ onReady, simulateError = false }: { onReady: () => vo
                     );
                   })}
                 </div>
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--color-surface-subtle)]" role="progressbar" aria-label="Career report build progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-[var(--color-surface-subtle)] sm:mt-5" role="progressbar" aria-label="Career report build progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
                   <div className="h-full rounded-full bg-gradient-to-r from-brand-600 to-[var(--color-purple-400)] transition-[width] duration-500" style={{ width: `${progress}%` }} />
                 </div>
                 <p className="mt-3 text-right text-xs font-bold text-[var(--color-text-muted)]">{status === "ready" ? "Your report is ready" : `${progress}% assembled`}</p>
@@ -217,36 +218,12 @@ function SectionHeading({ eyebrow, title, description, icon }: { eyebrow: string
 
 const panel = "rounded-[1.75rem] border border-[var(--color-border-default)] bg-[var(--color-surface-card)] shadow-[0_16px_50px_var(--color-shadow-blue-10)] dark:shadow-[0_18px_60px_var(--color-shadow-black-40)]";
 
-function ReportHeader() {
-  const { theme } = useTheme();
-  return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border-default)] bg-[var(--color-surface-page)] backdrop-blur-xl">
-      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex min-h-11 items-center rounded-xl px-1 text-lg font-extrabold tracking-[-0.02em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            Dreamari
-          </Link>
-          <Link href="/home" aria-label="Go to Dreamari home" title="Home" className="flex size-11 items-center justify-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-surface-subtle)] text-[var(--color-text-secondary)] transition-colors hover:border-brand-600/35 hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:hover:text-brand-300">
-            <span className="size-5"><HomeIcon /></span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-2 pr-12">
-          <span className="hidden text-xs font-semibold text-[var(--color-text-secondary)] sm:block dark:text-[var(--color-text-secondary)]">Career report</span>
-          <span className="rounded-full border border-[var(--color-border-default)] bg-[var(--color-surface-subtle)] px-3 py-1.5 text-[10px] font-bold tracking-wide text-[var(--color-feedback-success)] uppercase dark:border-[var(--color-feedback-success)] dark:bg-[var(--color-surface-subtle)] dark:text-[var(--color-feedback-success)]">Updated today</span>
-          <span className="sr-only">{theme} theme</span>
-        </div>
-      </div>
-      <ThemeToggle />
-    </header>
-  );
-}
-
 function ReportActions({ onDownload, onShare, compact = false }: { onDownload: () => void; onShare: () => void; compact?: boolean }) {
   return (
     <div className={compact ? "flex flex-col" : "mt-8 flex flex-col"}>
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link href="/flow" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-[var(--color-white)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Play Computer Science Games</Link>
+          <Link href="/flow" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-[var(--color-white)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"><span className="sm:hidden">Play CS Games</span><span className="hidden sm:inline">Play Computer Science Games</span></Link>
           <Link href="#career-path" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-surface-card)] px-5 py-3 text-sm font-bold transition-colors hover:bg-[var(--color-surface-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Explore</Link>
           <Link href="/home" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-brand-600/25 bg-brand-600/8 px-5 py-3 text-sm font-bold text-brand-600 transition-colors hover:bg-brand-600/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:text-brand-300"><span className="size-4"><HomeIcon /></span>Go to Launchpad</Link>
         </div>
@@ -260,6 +237,7 @@ function ReportActions({ onDownload, onShare, compact = false }: { onDownload: (
 }
 
 function CareerReport() {
+  const reportNavRef = useRef<HTMLElement>(null);
   const [version, setVersion] = useState<"current" | "snapshot">("current");
   const [activeSection, setActiveSection] = useState("overview");
   const [downloadOpen, setDownloadOpen] = useState(false);
@@ -284,7 +262,11 @@ function CareerReport() {
   }, []);
 
   useEffect(() => {
-    document.querySelector<HTMLElement>(`[data-report-nav="${activeSection}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const nav = reportNavRef.current;
+    const item = nav?.querySelector<HTMLElement>(`[data-report-nav="${activeSection}"]`);
+    if (!nav || !item) return;
+    const targetLeft = item.offsetLeft - (nav.clientWidth - item.offsetWidth) / 2;
+    nav.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
   }, [activeSection]);
 
   const closeDownload = useCallback(() => setDownloadOpen(false), []);
@@ -359,16 +341,16 @@ function CareerReport() {
   }
 
   return (
-    <ReportShell>
-      <ReportHeader />
+    <ReportShell bottomInset>
+      <StudentAppHeader activeTab="profile" context="Career report" />
       <main className="relative z-10 pb-24">
         <section id="overview" className="scroll-mt-32 px-4 pt-9 sm:px-6 sm:pt-14 lg:px-8">
-          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,.55fr)] lg:items-center">
-            <div>
+          <div className="mx-auto grid max-w-7xl gap-8 overflow-hidden rounded-[2rem] border border-[var(--color-border-default)] bg-[var(--color-surface-card)]/72 p-5 shadow-[0_24px_80px_var(--color-shadow-blue-10)] backdrop-blur sm:p-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,.55fr)] lg:items-center lg:p-10 dark:shadow-[0_28px_90px_var(--color-shadow-black-40)]">
+            <div className="relative z-10">
               <p className="inline-flex items-center gap-2 rounded-full border border-brand-600/20 bg-brand-600/8 px-3 py-2 text-[10px] font-bold tracking-[0.16em] text-brand-600 uppercase dark:border-brand-400/25 dark:bg-brand-400/10 dark:text-brand-300">
                 <span className="size-3.5"><StarIcon /></span> Dreamari Career Report
               </p>
-              <h1 className="mt-5 max-w-4xl font-display text-[clamp(2rem,6.4vw,5.75rem)] leading-[0.92] font-extrabold tracking-[-0.055em]">
+              <h1 className="mt-5 max-w-4xl font-display text-[clamp(1.5rem,6vw,4.9rem)] leading-[0.94] font-extrabold tracking-[-0.055em]">
                 <span className="block whitespace-nowrap">Computer Science</span>
                 <span className="block whitespace-nowrap text-brand-600 dark:text-brand-300">Career Report</span>
               </h1>
@@ -378,14 +360,15 @@ function CareerReport() {
               <ReportActions onDownload={openDownload} onShare={openShare} />
               <p className="mt-4 text-xs font-semibold text-[var(--color-text-muted)]">Updated today · Generated from Build + Match</p>
             </div>
-            <div className="relative mx-auto hidden h-72 w-full max-w-md lg:block">
-              <Image src="/images/dreamy-expressions/dreamy-explore.webp" alt="Dreamy exploring your Computer Science career options" fill priority sizes="400px" className="object-contain object-bottom" />
+            <div className="relative mx-auto hidden min-h-80 w-full max-w-sm items-end justify-center overflow-hidden rounded-[1.75rem] border border-[var(--color-border-default)] bg-[var(--color-surface-subtle)] px-5 pt-6 lg:flex">
+              <div className="absolute inset-x-8 top-8 h-32 rounded-full bg-[var(--color-action-primary)]/12 blur-3xl" aria-hidden="true" />
+              <div className="relative h-72 w-full"><Image src="/images/dreamy-expressions/dreamy-explore.webp" alt="Dreamy exploring your Computer Science career options" fill priority sizes="360px" className="object-contain object-bottom" /></div>
             </div>
           </div>
         </section>
 
         <div className="sticky top-18 z-30 mt-9 border-y border-[var(--color-border-default)] bg-[var(--color-surface-page)] py-3 backdrop-blur-xl">
-          <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:px-6 lg:px-8" aria-label="Career report sections">
+          <nav ref={reportNavRef} className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:px-6 lg:px-8" aria-label="Career report sections">
             {REPORT_NAV.map(([href, label]) => (
               <a key={href} href={`#${href}`} data-report-nav={href} aria-current={activeSection === href ? "location" : undefined} onClick={() => setActiveSection(href)} className={`min-h-11 shrink-0 rounded-full px-4 py-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brand-500 ${activeSection === href ? "bg-brand-600 text-[var(--color-white)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-card)]"}`}>{label}</a>
             ))}
@@ -543,6 +526,8 @@ function CareerReport() {
           </section>
         </div>
       </main>
+
+      <StudentAppBottomNav activeTab="profile" />
 
       {downloadOpen && (
         <ReportDialog title="Download your Career Report" description="We’ll open a print-ready version of the complete report. Choose “Save as PDF” in the print dialog to download it." onClose={closeDownload}>

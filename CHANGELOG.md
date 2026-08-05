@@ -6,6 +6,29 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ### Student home and launchpad
 
+- Unified `/home` and `/career-report` behind a shared post-onboarding Dreamari shell with
+  consistent desktop navigation, tablet/mobile bottom tabs, XP/profile controls, theme
+  switching, and the new restrained Dream Horizon brand signature. The marketing homepage,
+  Build, Match, and How It Works remain untouched.
+- Clarified the desktop information architecture by adding an explicit Home destination
+  instead of presenting the launchpad as an active Play tab. Career Report now appears as
+  the Profile context while preserving direct Home, Explore, Play, and Community routes.
+- Replaced the four saturated Quick Action blocks with a quieter “Your next moves” command
+  area containing task context, progress cues, and consistent icon anatomy. Added a career
+  signal panel that explains why product, research, and design recommendations appear first.
+- Gave personalised recommendations a distinct intelligence-led module rather than another
+  visually identical rail, while retaining all existing career content, View All behaviour,
+  carousels, challenges, sponsored content, light/dark modes, and career-card anatomy.
+- Added a visible pause/resume control to the featured-story carousel and eager-loaded the
+  three above-the-fold story images. Deep-linked category state is now supplied by the Home
+  route, removing the former server/client navigation-state hydration mismatch.
+- Reframed the Career Report hero as a focused Launchpad surface, reused the shared app shell,
+  and preserved its approved report content and complete download/share interactions. Compact
+  phones use an equivalent “Play CS Games” label to prevent an isolated text widow.
+- Verified both routes at 320×700, 390×844, 768×1024, and 1440×1000 in light and dark modes
+  with no horizontal overflow or browser console errors. Hero pause/resume and report modal
+  open/close behaviour pass; tokens, ESLint, TypeScript, and the production build pass.
+
 - Completed the launchpad token-alignment pass. `/home` now consumes semantic action and
   category roles plus dedicated `component.home-*` contracts; it no longer references
   palette primitives directly.
@@ -86,6 +109,15 @@ Notable changes to the Dreamari frontend reference are recorded here.
 - Verified the report at 320×700, 390×844, 768×1024, 1024×768, and 1280×800 with no
   horizontal overflow or browser console errors; ESLint, TypeScript, token validation,
   and production build pass.
+- Fixed mobile report anchors so the active tab scrolls horizontally within its rail
+  without pulling the document away from the selected section.
+- Restored the sticky app header and report-section navigation by clipping only horizontal
+  decoration overflow instead of creating a vertical overflow containing block.
+- Reworked the report-building and recovery states for compact phones: actions remain fully
+  visible at 320×700, inactive build phases collapse when space is constrained, and the
+  persistent app tab bar no longer covers retry controls before the report is ready.
+- Re-verified completed, loading, and error states at 320×700 and 390×844, including section
+  navigation and the Share dialog. Evidence is in `work/career-report-mobile-fix/`.
 
 ### Design system
 

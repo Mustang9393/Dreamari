@@ -7,8 +7,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Date: 2026-08-05
 - Active branch: `v2`
 - Main branch: do not change without a new explicit instruction
-- Objective: implement and visually verify the post-onboarding student home/launchpad on
-  `v2`, then wait for visual approval before any commit or push.
+- Objective: unify and visually verify the post-onboarding Home and Career Report on `v2`,
+  then wait for visual approval before any commit or push. Marketing, Build, Match, and How
+  It Works are explicitly outside this pass.
 
 ## Completed
 
@@ -135,6 +136,36 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - The production app repository's `packages/ui/tokens` was not available here. Before adopting these paths in production, compare them against that canonical collection and run `packages/ui/scripts/validate-tokens.mjs`; production wins on any conflict.
 
+## 2026-08-05 post-onboarding Launchpad alignment
+
+- Added `src/components/student-app/StudentAppShell.tsx` as the shared post-onboarding shell
+  for `/home` and `/career-report`. It owns the Dreamari wordmark/context, explicit Home,
+  Explore, Play and Community desktop navigation, Profile entry, XP, theme control, mobile
+  tabs, and the restrained Dream Horizon brand signature.
+- `/home` now identifies itself as Home instead of visually aliasing Home to Play. Its large
+  saturated Quick Actions are replaced by a quieter “Your next moves” command area with
+  task context, and a separate career-signal panel explains the recommendation logic.
+- Recommended for You is now an intelligence-led surface rather than another equal-weight
+  rail. Existing content, card anatomy, View All deep links, challenge, popular, mystery,
+  sponsored, light/dark, and carousel behaviour are preserved.
+- The featured-story carousel has a visible pause/resume control. All three hero images are
+  intentionally eager because they rotate above the fold. Home query state is parsed by the
+  server route and passed as stable initial state, preventing category deep-link hydration
+  mismatches without touching any onboarding flow.
+- `/career-report` now uses the same shell, bottom navigation, horizon, surface hierarchy,
+  typography and control language as the Launchpad. The approved report copy, report section
+  navigation, Dreamy moments, preparation/error states, report version controls, Download,
+  Share, Play, Explore, and Launchpad actions remain functional and unchanged in meaning.
+- Explicit boundary audit: no marketing homepage, How It Works, Build, Match, flow content,
+  or onboarding component was modified. The only route file changed is `/home/page.tsx` to
+  supply stable query state to the post-onboarding client experience.
+- Visual evidence is under `work/launchpad-v2-qa/`. Browser QA passed at 320×700, 390×844,
+  768×1024, and 1440×1000 in light/dark modes with `scrollWidth === innerWidth`. Hero pause
+  and resume state, report Share modal open/close, and route navigation pass with no current
+  console warnings or errors.
+- `npm run tokens:check` passes all 501 DTCG tokens. ESLint, `npx tsc --noEmit`, and the
+  network-enabled Next.js production build pass.
+
 ## 2026-08-05 launchpad token and theme alignment
 
 - `/home` is now wrapped in the shared `ThemeProvider` and exposes a semantic header theme
@@ -193,12 +224,31 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   144.7px wide and the worst-case `Earning Potential liked | Undo` measures 220.2px;
   both stay inside the viewport and above, not over, the 52px actions.
 
+## 2026-08-05 Career Report mobile repair
+
+- Scope remained inside Career Report and the shared post-onboarding shell. Build, Match,
+  onboarding, and the marketing homepage/How It Works were not changed.
+- Report-tab selection now centers the active tab with horizontal `scrollTo` inside the tab
+  rail. It no longer uses `scrollIntoView`, which was also moving the page vertically and
+  causing anchors to settle on the wrong section.
+- The post-onboarding roots use `overflow-x-clip` rather than `overflow-hidden`, restoring
+  sticky header and section-tab behaviour while still containing the decorative horizon.
+- The temporary report-building and error experiences omit the persistent app bottom tabs
+  and use a compact-phone layout. Build progress, Retry, and Return to Match all fit within
+  320×700 without document or horizontal overflow.
+- Browser QA covered completed section anchors, sticky navigation, Share open/close, build
+  progress, and error recovery at 320×700 and 390×844. Evidence is under
+  `work/career-report-mobile-fix/`. TypeScript, ESLint, the 501-token DTCG validator, and the
+  network-enabled Next.js production build pass.
+
 ## Recommended next step
 
-- Review the open local `v2` student home preview and its responsive rails/interactions.
-  Apply any requested refinements, then commit and push only when explicitly requested.
-- The temporary header is expected to be replaced when the new navigation/header/footer
-  system is designed.
+- Review the open local `v2` Home and Career Report previews. Apply requested refinements,
+  then commit and push only when explicitly requested.
+- If the post-onboarding direction is accepted, the next design decision is whether Explore,
+  Play, and Community should become separate route surfaces or remain category states inside
+  the reference Launchpad. Do not apply the shell to Build or Match without a new explicit
+  request.
 - The external production task remains to compare this reference token set with the app
   repository's canonical `packages/ui/tokens` before production adoption.
 

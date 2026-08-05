@@ -9,15 +9,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CompassIcon,
-  HomeIcon,
-  MoonIcon,
-  SunIcon,
   StarIcon,
   TargetIcon,
 } from "@/components/flow/icons";
-import { ThemeProvider, useTheme } from "@/components/flow/theme/ThemeProvider";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { DreamHorizon, StudentAppBottomNav, StudentAppHeader, type StudentAppTab } from "@/components/student-app/StudentAppShell";
 
-type Tab = "home" | "explore" | "play" | "community" | "profile";
 type HeroSlide = {
   title: string;
   description: string;
@@ -96,38 +93,6 @@ const mysteries: Card[] = [
   { title: "Urban Planner", description: "An unexpected place to use systems thinking", tags: ["Cities", "Systems"], image: "/images/home/urban-planner.webp", href: "/flow", action: "Explore", badge: "MYSTERY UNLOCK", badgeTone: "mystery", duration: "New" },
   { title: "Supply Chain Analyst", description: "A surprising way to combine data and logistics", tags: ["Data", "Logistics"], image: "/images/home/supply-chain-analyst.webp", href: "/flow", action: "Explore", badge: "MYSTERY UNLOCK", badgeTone: "mystery", duration: "New" },
 ];
-
-const tabItems: { id: Tab; label: string; icon: ReactNode }[] = [
-  { id: "home", label: "Home", icon: <HomeIcon /> },
-  { id: "explore", label: "Explore", icon: <CompassIcon /> },
-  { id: "play", label: "Play", icon: <TargetIcon /> },
-  { id: "community", label: "Community", icon: <StarIcon /> },
-  { id: "profile", label: "Profile", icon: <BriefcaseIcon /> },
-];
-
-function Brand() {
-  return (
-    <Link href="/" aria-label="Dreamari landing page" className="rounded-lg font-display text-lg font-extrabold tracking-[-0.04em] text-[var(--component-home-shell-text)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-action-secondary)] sm:text-xl">
-      DREAMARI
-    </Link>
-  );
-}
-
-function TabButton({ id, active, onSelect, desktop = false }: { id: Tab; active: boolean; onSelect: (tab: Tab) => void; desktop?: boolean }) {
-  const item = tabItems.find((tab) => tab.id === id)!;
-  if (desktop) {
-    return (
-      <button type="button" onClick={() => onSelect(id)} aria-current={active ? "page" : undefined} className={`min-h-10 rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)] ${active ? "bg-[var(--component-home-navigation-active-background)] text-[var(--component-home-navigation-active-text)]" : "text-[var(--component-home-navigation-text)] hover:bg-[var(--component-home-navigation-hover-background)] hover:text-[var(--component-home-shell-text)]"}`}>
-        {item.label}
-      </button>
-    );
-  }
-  return (
-    <button type="button" onClick={() => onSelect(id)} aria-current={active ? "page" : undefined} className={`flex min-h-14 min-w-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[10px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-action-secondary)] ${active ? "text-[var(--color-action-primary)]" : "text-[var(--component-home-navigation-text)]"}`}>
-      <span className="size-5">{item.icon}</span><span>{item.label}</span>
-    </button>
-  );
-}
 
 function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
@@ -217,9 +182,9 @@ function ImageRail({ cards, size = "standard", label }: { cards: Card[]; size?: 
   );
 }
 
-function QuickAction({ label, accent, onClick, href }: { label: string; accent: string; onClick?: () => void; href?: string }) {
-  const className = "home-quick-action group flex min-h-[72px] items-center justify-center rounded-[var(--component-home-quick-action-radius)] border border-[var(--component-home-quick-action-border)]/10 px-4 text-center text-[15px] font-extrabold text-[var(--component-home-quick-action-text)] shadow-[0_12px_30px_var(--component-home-quick-action-shadow-color)] transition-[transform,filter] duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]";
-  const content = <span>{label}</span>;
+function QuickAction({ label, support, accent, icon, onClick, href }: { label: string; support: string; accent: string; icon: ReactNode; onClick?: () => void; href?: string }) {
+  const className = "home-quick-action group flex min-h-[88px] items-center gap-3 rounded-[var(--component-home-quick-action-radius)] border px-4 text-left shadow-[0_12px_30px_var(--component-home-quick-action-shadow-color)] transition-[transform,border-color] duration-300 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]";
+  const content = <><span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--home-action-accent)] text-[var(--component-home-quick-action-text)]"><span className="size-4.5">{icon}</span></span><span className="min-w-0"><span className="block text-sm font-extrabold text-[var(--component-home-card-text)]">{label}</span><span className="mt-1 block truncate text-[11px] font-semibold text-[var(--component-home-card-description)]">{support}</span></span><ChevronRightIcon className="ml-auto size-4 shrink-0 text-[var(--component-home-card-metadata)] transition-transform group-hover:translate-x-0.5" /></>;
   const style = { "--home-action-accent": accent } as CSSProperties;
   return href ? <Link href={href} className={className} style={style}>{content}</Link> : <button type="button" onClick={onClick} className={className} style={style}>{content}</button>;
 }
@@ -228,31 +193,26 @@ function ViewAllAction({ label, onClick }: { label: string; onClick: () => void 
   return <button type="button" onClick={onClick} aria-label={`View all ${label}`} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-extrabold text-[var(--component-home-rail-view-all)] transition-colors hover:text-[var(--color-action-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]"><span>View all</span><ChevronRightIcon className="size-4" /></button>;
 }
 
-function StudentHomeContent() {
-  const { theme, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<Tab>(() => {
-    if (typeof window === "undefined") return "home";
-    const tab = new URLSearchParams(window.location.search).get("tab") as Tab | null;
-    return tab && tabItems.some((item) => item.id === tab) ? tab : "home";
-  });
+function StudentHomeContent({ initialTab, initialCategory }: { initialTab: StudentAppTab; initialCategory?: string }) {
+  const [activeTab, setActiveTab] = useState<StudentAppTab>(initialTab);
   const [challengeComplete, setChallengeComplete] = useState(false);
   const [streakAcknowledged, setStreakAcknowledged] = useState(false);
   const [notice, setNotice] = useState("");
   const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (heroPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => setHeroIndex((current) => (current + 1) % heroSlides.length), 5500);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [heroPaused]);
 
   useEffect(() => {
-    const category = new URLSearchParams(window.location.search).get("category");
-    const target = category ? document.getElementById(category) : null;
+    const target = initialCategory ? document.getElementById(initialCategory) : null;
     if (target) window.requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
-  }, []);
+  }, [initialCategory]);
 
-  const selectTab = useCallback((tab: Tab, category?: string) => {
+  const selectTab = useCallback((tab: StudentAppTab, category?: string) => {
     setActiveTab(tab);
     const query = new URLSearchParams();
     if (tab !== "home") query.set("tab", tab);
@@ -276,29 +236,16 @@ function StudentHomeContent() {
   }
 
   return (
-    <div className="student-home min-h-dvh bg-[var(--component-home-shell-background)] pb-24 text-[var(--component-home-shell-text)] transition-colors duration-300 sm:pb-12">
-      <header className="sticky top-0 z-50 border-b border-[var(--component-home-navigation-border)] bg-[var(--component-home-navigation-background)]/92 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:h-18 sm:px-6 lg:px-10">
-          <Brand />
-          <nav className="hidden items-center gap-2 sm:flex" aria-label="Student home sections">
-            <TabButton id="explore" active={activeTab === "explore"} onSelect={selectTab} desktop />
-            <TabButton id="play" active={activeTab === "play" || activeTab === "home"} onSelect={selectTab} desktop />
-            <TabButton id="community" active={activeTab === "community"} onSelect={selectTab} desktop />
-          </nav>
-          <div className="flex items-center gap-2.5">
-            <span className="hidden rounded-full border border-[var(--component-home-navigation-border)] bg-[var(--component-home-navigation-hover-background)] px-3 py-2 text-xs font-extrabold text-[var(--component-home-shell-text)] xs:inline-flex sm:inline-flex"><StarIcon className="mr-1.5 size-4 text-[var(--component-home-navigation-reward)]" />15,980 XP</span>
-            <button type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} title={theme === "dark" ? "Light mode" : "Dark mode"} className="flex size-10 items-center justify-center rounded-full border border-[var(--component-home-navigation-border)] bg-[var(--component-home-navigation-hover-background)] text-[var(--component-home-navigation-text)] transition-colors hover:text-[var(--component-home-shell-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]"><span className="size-4">{theme === "dark" ? <SunIcon /> : <MoonIcon />}</span></button>
-            <button type="button" onClick={() => selectTab("profile")} aria-label="Open profile" className="flex size-10 items-center justify-center rounded-full bg-[var(--component-home-navigation-active-background)] text-sm font-extrabold text-[var(--component-home-navigation-active-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]">AK</button>
-          </div>
-        </div>
-      </header>
+    <div className="student-home relative min-h-dvh overflow-x-clip bg-[var(--component-home-shell-background)] pb-24 text-[var(--component-home-shell-text)] transition-colors duration-300 lg:pb-12">
+      <StudentAppHeader activeTab={activeTab} onSelect={selectTab} context="Launchpad" />
 
-      <main>
+      <main className="relative">
+        <DreamHorizon />
         <section id="featured" className="scroll-mt-20">
           <div className="group/hero relative h-[470px] w-full overflow-hidden sm:h-[500px] lg:h-[520px]">
             {heroSlides.map((slide, index) => (
               <div key={slide.title} aria-hidden={heroIndex !== index} className={`absolute inset-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] ${heroIndex === index ? "scale-100 opacity-100" : "pointer-events-none scale-[1.035] opacity-0"}`}>
-                <Image src={slide.image} alt={heroIndex === index ? slide.imageAlt : ""} fill priority={index === 0} sizes="100vw" className="object-cover object-center" />
+                <Image src={slide.image} alt={heroIndex === index ? slide.imageAlt : ""} fill loading="eager" sizes="100vw" className="object-cover object-center" />
               </div>
             ))}
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--component-home-hero-overlay)]/88 via-[var(--component-home-hero-overlay)]/42 to-[var(--component-home-hero-overlay)]/5" />
@@ -316,8 +263,9 @@ function StudentHomeContent() {
                 </div>
               </div>
             ))}
-            <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2" aria-label={`Featured story ${heroIndex + 1} of ${heroSlides.length}`}>
+            <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2" aria-label={`Featured story ${heroIndex + 1} of ${heroSlides.length}`}>
               {heroSlides.map((slide, index) => <button key={slide.title} type="button" onClick={() => setHeroIndex(index)} aria-label={`Show ${slide.title}`} aria-current={heroIndex === index ? "true" : undefined} className={`h-1.5 rounded-full transition-[width,background-color] duration-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-action-secondary)] ${heroIndex === index ? "w-7 bg-[var(--component-home-hero-text)]" : "w-1.5 bg-[var(--component-home-hero-text)]/45 hover:bg-[var(--component-home-hero-text)]/75"}`} />)}
+              <button type="button" onClick={() => setHeroPaused((paused) => !paused)} aria-pressed={heroPaused} aria-label={heroPaused ? "Resume featured stories" : "Pause featured stories"} className="ml-2 flex size-7 items-center justify-center rounded-full border border-[var(--component-home-hero-text)]/25 bg-[var(--component-home-hero-control-background)]/45 text-[var(--component-home-hero-text)] backdrop-blur focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]"><span aria-hidden="true" className="text-[10px] font-extrabold">{heroPaused ? "▶" : "Ⅱ"}</span></button>
             </div>
             <button type="button" onClick={() => setHeroIndex((heroIndex - 1 + heroSlides.length) % heroSlides.length)} aria-label="Previous featured story" className="absolute top-1/2 left-3 z-30 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--component-home-hero-control-background)]/55 text-[var(--component-home-hero-text)] opacity-0 shadow-[0_12px_30px_var(--component-home-hero-shadow-color)] backdrop-blur transition-opacity group-hover/hero:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-[var(--color-action-secondary)] sm:flex"><ChevronLeftIcon className="size-5" /></button>
             <button type="button" onClick={() => setHeroIndex((heroIndex + 1) % heroSlides.length)} aria-label="Next featured story" className="absolute top-1/2 right-3 z-30 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--component-home-hero-control-background)]/55 text-[var(--component-home-hero-text)] opacity-0 shadow-[0_12px_30px_var(--component-home-hero-shadow-color)] backdrop-blur transition-opacity group-hover/hero:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-[var(--color-action-secondary)] sm:flex"><ChevronRightIcon className="size-5" /></button>
@@ -325,14 +273,23 @@ function StudentHomeContent() {
         </section>
 
         <div className="mx-auto max-w-[1360px] space-y-12 px-4 pt-5 sm:space-y-16 sm:px-6 sm:pt-6 lg:px-10">
-          <section>
-            <SectionTitle>Quick Actions</SectionTitle>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-              <QuickAction label="Continue" accent="var(--color-category-classes)" href="/flow" />
-              <QuickAction label={challengeComplete ? "40 XP Earned" : "Daily Challenge"} accent="var(--color-category-earning-potential)" onClick={() => document.getElementById("daily-challenge")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
-              <QuickAction label={streakAcknowledged ? "Streak Protected" : "6-Day Streak"} accent="var(--color-category-future-fit)" onClick={() => { setStreakAcknowledged(true); setNotice("Your 6-day streak is protected for today."); }} />
-              <QuickAction label="Explore" accent="var(--color-category-skills)" onClick={() => selectTab("explore", "recommended")} />
+          <section className="relative grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,.55fr)]">
+            <div className="min-w-0">
+              <SectionTitle>Your next moves</SectionTitle>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <QuickAction label="Continue your story" support="Product Manager · Scene 1 of 8" accent="var(--color-category-classes)" icon={<BriefcaseIcon />} href="/flow" />
+                <QuickAction label={challengeComplete ? "40 XP earned" : "Daily challenge"} support={challengeComplete ? "Today’s challenge is complete" : "3 words · under 3 minutes"} accent="var(--color-category-earning-potential)" icon={<TargetIcon />} onClick={() => document.getElementById("daily-challenge")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
+                <QuickAction label={streakAcknowledged ? "Streak protected" : "Protect your 6-day streak"} support="One activity keeps it going" accent="var(--color-category-future-fit)" icon={<StarIcon />} onClick={() => { setStreakAcknowledged(true); setNotice("Your 6-day streak is protected for today."); }} />
+                <QuickAction label="Explore career worlds" support="Browse paths shaped around you" accent="var(--color-category-skills)" icon={<CompassIcon />} onClick={() => selectTab("explore", "recommended")} />
+              </div>
             </div>
+            <aside className="relative overflow-hidden rounded-[var(--dimension-radius-2xl)] border border-[var(--component-home-feature-border)]/35 bg-gradient-to-br from-[var(--component-home-feature-background-start)] to-[var(--component-home-feature-background-end)] p-5 shadow-[0_18px_50px_var(--component-home-feature-shadow-color)] sm:p-6 xl:mt-10">
+              <div className="absolute -top-14 -right-12 size-36 rounded-full bg-[var(--color-action-primary)]/12 blur-3xl" aria-hidden="true" />
+              <p className="relative text-[10px] font-extrabold tracking-[0.16em] text-[var(--component-home-feature-accent)] uppercase">Your career signal</p>
+              <h2 className="relative mt-3 text-balance font-display text-xl leading-tight font-extrabold tracking-[-0.03em] sm:text-2xl">You lean toward people-centred problem solving.</h2>
+              <p className="relative mt-3 text-sm leading-6 text-[var(--component-home-feature-description)]">That is why product, research and design paths are appearing first.</p>
+              <Link href="/career-report" className="relative mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-4 py-3 text-xs font-extrabold text-[var(--component-home-navigation-active-text)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-action-secondary)]">See your career report <ChevronRightIcon className="size-4" /></Link>
+            </aside>
           </section>
 
           <section id="journey" className="scroll-mt-24">
@@ -340,8 +297,11 @@ function StudentHomeContent() {
             <ImageRail cards={journeys} size="wide" label="Continue Your Journey" />
           </section>
 
-          <section id="recommended" className="scroll-mt-24">
-            <SectionTitle action={<ViewAllAction label="Recommended for You" onClick={() => selectTab("explore", "recommended")} />}>Recommended for You</SectionTitle>
+          <section id="recommended" className="scroll-mt-24 rounded-[var(--dimension-radius-2xl)] border border-[var(--component-home-card-border)] bg-[var(--component-home-card-background)]/45 p-4 shadow-[0_18px_60px_var(--component-home-card-shadow-color)] sm:p-7 lg:p-8">
+            <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
+              <div><p className="text-[10px] font-extrabold tracking-[0.16em] text-[var(--component-home-feature-accent)] uppercase">Built from your signals</p><h2 className="mt-2 text-balance font-display text-xl leading-tight font-extrabold tracking-[-0.035em] text-[var(--component-home-shell-text)] sm:text-3xl">Recommended for You</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--component-home-card-description)]">Each recommendation connects something you have shown to a career worth testing next.</p></div>
+              <ViewAllAction label="Recommended for You" onClick={() => selectTab("explore", "recommended")} />
+            </div>
             <ImageRail cards={recommended} label="Recommended for You" />
           </section>
 
@@ -386,15 +346,13 @@ function StudentHomeContent() {
         </div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--component-home-navigation-border)] bg-[var(--component-home-navigation-background)]/95 px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-xl sm:hidden" aria-label="Student app tabs">
-        <div className="mx-auto flex max-w-md items-center justify-around">{tabItems.map((item) => <TabButton key={item.id} id={item.id} active={activeTab === item.id || (item.id === "home" && activeTab === "play")} onSelect={selectTab} />)}</div>
-      </nav>
+      <StudentAppBottomNav activeTab={activeTab} onSelect={selectTab} />
 
       {notice && <div role="status" className="fixed right-4 bottom-24 z-[60] flex max-w-sm items-center gap-3 rounded-2xl border border-[var(--component-home-card-border)] bg-[var(--component-home-card-background)] p-4 text-sm font-bold text-[var(--component-home-card-text)] shadow-[0_20px_60px_var(--component-home-card-shadow-color)] sm:bottom-6"><span className="size-5 shrink-0 text-[var(--color-feedback-success)]"><CheckIcon /></span><span>{notice}</span><button type="button" onClick={() => setNotice("")} aria-label="Dismiss message" className="ml-2 rounded-lg px-2 py-1 text-[var(--component-home-card-metadata)] hover:text-[var(--component-home-card-text)]">×</button></div>}
     </div>
   );
 }
 
-export function StudentHomeExperience() {
-  return <ThemeProvider><StudentHomeContent /></ThemeProvider>;
+export function StudentHomeExperience({ initialTab = "home", initialCategory }: { initialTab?: StudentAppTab; initialCategory?: string }) {
+  return <ThemeProvider><StudentHomeContent initialTab={initialTab} initialCategory={initialCategory} /></ThemeProvider>;
 }

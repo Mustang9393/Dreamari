@@ -197,11 +197,16 @@ body {
 }
 
 .home-quick-action {
+  border-color: color-mix(in srgb, var(--home-action-accent) 28%, var(--component-home-card-border));
   background: linear-gradient(
-    100deg,
-    var(--home-action-accent),
-    color-mix(in srgb, var(--home-action-accent) 76%, var(--color-surface-brand))
+    135deg,
+    color-mix(in srgb, var(--home-action-accent) 12%, var(--component-home-card-background)),
+    var(--component-home-card-background) 72%
   );
+}
+
+.home-quick-action:hover {
+  border-color: color-mix(in srgb, var(--home-action-accent) 55%, var(--component-home-card-border));
 }
 
 @media (prefers-reduced-motion: reduce) {
