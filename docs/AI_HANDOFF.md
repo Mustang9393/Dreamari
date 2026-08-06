@@ -4,14 +4,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-05
+- Date: 2026-08-06
 - Active branch: `v2`
 - Main branch: do not change without a new explicit instruction
-- Objective: unify and visually verify the post-onboarding Home and Career Report on `v2`,
-  then wait for visual approval before any commit or push. Marketing, Build, Match, and How
-  It Works are explicitly outside this pass.
+- Objective: apply the final approved copy to the public landing hero on `v2`, remove all
+  unapproved visible hero terms, and verify the responsive result. Build, Match, How It
+  Works, Career Report, and the post-onboarding Home are outside this copy-only pass.
 
 ## Completed
+
+- Updated the public landing hero to the final approved copy: Student / Enterprise,
+  “Discover your dream career.”, the confirmed Build/Match/Play/Explore/Connect summary,
+  “One clear step at a time.”, “Start my journey”, and the existing Scroll chevron.
+- Removed the former Explore, Missions, For schools, Get started free, Teacher, and legacy
+  supporting sentences from the visible landing hero. The visual system and route behavior
+  remain unchanged; page metadata now uses the approved summary.
+- Changed only the two How It Works CTA labels from “Start building →” to the approved
+  “Start my journey”. All other How It Works copy and behavior remain unchanged.
 
 - Preserved the former remote `v2` at `codex/v2-backup-before-token-alignment-20260805`.
 - Synchronized `v2` exactly to `main` commit `6dd1370` before token work.

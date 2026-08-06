@@ -11,7 +11,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Dreamari — Discover your dream career.",
   description:
-    "Step into real careers through guided simulations. Build the skills, earn the proof, and picture yourself in the room.",
+    "Build your profile, match with careers, play day-in-the-life work simulations, explore new paths, and connect with professionals.",
 };
 
 export default function RootLayout({

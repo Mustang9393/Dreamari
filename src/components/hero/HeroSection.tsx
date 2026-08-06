@@ -49,12 +49,12 @@ export function HeroSection() {
           <RoleToggle />
 
           <h1
-            className="max-w-4xl font-extrabold tracking-tight text-white uppercase"
+            className="max-w-4xl font-extrabold tracking-tight text-white"
             style={{ fontSize: "clamp(1.875rem, 3.45vw + 2.5vh, 4.625rem)", lineHeight: 0.95 }}
           >
-            Discover Your{" "}
+            Discover your{" "}
             <span className="bg-gradient-to-r from-brand-400 from-[26%] to-brand-200 to-[62.5%] bg-clip-text text-transparent">
-              Dream Career
+              dream career.
             </span>
           </h1>
 
@@ -62,9 +62,8 @@ export function HeroSection() {
             className="max-w-2xl leading-relaxed text-ink-100"
             style={{ fontSize: "clamp(0.9rem, 0.5vw + 1.1vh, 1.25rem)" }}
           >
-            Step into real careers through guided simulations.
-            <br />
-            Build the skills, earn the proof, and picture yourself in the room.
+            Build your profile, match with careers, play day-in-the-life work simulations,
+            explore new paths, and connect with professionals.
             <br />
             <span className="font-bold">One clear step at a time.</span>
           </p>

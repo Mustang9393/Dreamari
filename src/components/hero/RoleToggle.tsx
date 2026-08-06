@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-type Role = "student" | "teacher";
+type Role = "student" | "enterprise";
 
 const OPTIONS: { value: Role; label: string }[] = [
   { value: "student", label: "Student" },
-  { value: "teacher", label: "Teacher" },
+  { value: "enterprise", label: "Enterprise" },
 ];
 
 export function RoleToggle() {

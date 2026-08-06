@@ -2,6 +2,18 @@
 
 Notable changes to the Dreamari frontend reference are recorded here.
 
+## 2026-08-06
+
+### Approved landing-page copy
+
+- Replaced the public landing hero with the final approved student/enterprise copy and
+  removed all unapproved visible navigation and supporting language from the hero.
+- Preserved the existing Dreamari visual system, responsive layout, journey CTA, mascot,
+  and scroll interaction while correcting capitalization and punctuation exactly.
+- Updated the page description metadata to match the approved product summary.
+- Matched both How It Works CTA labels to the approved “Start my journey” wording without
+  changing any How It Works headings, descriptions, stage labels, or interactions.
+
 ## 2026-08-05
 
 ### Student home and launchpad

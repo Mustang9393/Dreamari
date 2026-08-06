@@ -358,7 +358,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           />
         </div>
 
-        {/* Bottom CTA slot, well clear of the frame edge. "Start building" stays visible
+        {/* Bottom CTA slot, well clear of the frame edge. "Start my journey" stays visible
             for the entire five-chapter section now — it used to only pulse in during
             BUILD's own lock-in window, but per feedback it should be a persistent way
             forward rather than something that comes and goes. Fades out once the finale
@@ -368,7 +368,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           style={{ opacity: 1 - connectExitProgress, pointerEvents: connectExitProgress > 0 ? "none" : "auto" }}
         >
           <Button variant="cta-outline" href="/flow" className="pointer-events-auto">
-            Start building →
+            Start my journey
           </Button>
         </div>
 
@@ -505,7 +505,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           </div>
 
           <Button variant="cta-solid" href="/flow" className="pointer-events-auto px-10 py-4 text-lg">
-            Start building →
+            Start my journey
           </Button>
         </div>
       </div>
@@ -517,7 +517,7 @@ export function HowItWorksSection({ scrollOffsetPx }: HowItWorksSectionProps) {
           context — the CTA's z-index above only ranks it *within* that sticky layer, not
           against this div's z-index:3, so with default pointer-events this (empty, purely
           textual) box was sitting on top in hit-testing and swallowing clicks meant for
-          the "Start building" button underneath it. Nothing in here is interactive, so
+          the "Start my journey" button underneath it. Nothing in here is interactive, so
           just letting clicks fall through is simpler than fighting stacking contexts. */}
       <div style={{ position: "relative", zIndex: 3, pointerEvents: "none" }}>
         <div style={{ height: `${edgeSpacerVh(w)}vh` }} />
