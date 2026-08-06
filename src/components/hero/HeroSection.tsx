@@ -43,22 +43,38 @@ export function HeroSection() {
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col items-center">
         <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center sm:gap-6">
           <ScrollNudge />
+
+          {/* Reorder mockup v2 (position/size only, no copy changes, pending approval):
+              toggle leads, on its own — a PayPal-style "Personal/Business" pattern, where
+              the mode selector sits above the headline because it's about to gate which
+              hero actually renders (per the enterprise-toggle plan). DREAMARI + the
+              headline are their own tightly-grouped inner block (own small gap) so they
+              read as one "brand → promise" unit, separated from the toggle by the outer
+              column's own (larger) gap — not a manual negative-margin adjustment fighting
+              that same gap. */}
           <RoleToggle />
 
-          <div className="mt-2 flex flex-col items-center gap-1.5 sm:mt-3 sm:gap-2">
-            <h1
-              className="max-w-4xl font-display font-extrabold tracking-[0.03em] text-white"
-              style={{ fontSize: "clamp(2.5rem, 5vw + 1.5vh, 5rem)", lineHeight: 0.9 }}
+          <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+            {/* Bumped up (was clamp(1rem,...,1.5rem)) — the Student/Enterprise toggle
+                above was rendering with a visibly taller footprint than the actual brand
+                mark (34px vs. 20px, measured), which put a secondary utility control
+                ahead of brand identity. Also trimmed the toggle's own padding down
+                (RoleToggle.tsx), but a pill BUTTON has a padding floor a single text line
+                doesn't — it still needs a real tap target — so closing the rest of the
+                gap has to come from DREAMARI's side. */}
+            <p
+              className="font-display font-extrabold tracking-[0.08em] text-brand-200 uppercase"
+              style={{ fontSize: "clamp(1.375rem, 2vw + 1vh, 2.25rem)", lineHeight: 1.1 }}
             >
               DREAMARI
-            </h1>
+            </p>
 
-            <h2
-              className="max-w-3xl bg-gradient-to-r from-brand-100 via-brand-200 to-brand-400 bg-clip-text font-bold tracking-tight text-transparent"
-              style={{ fontSize: "clamp(1.5rem, 1.6vw + 1.2vh, 2.75rem)", lineHeight: 1.12 }}
+            <h1
+              className="max-w-5xl font-extrabold tracking-tight text-white"
+              style={{ fontSize: "clamp(2.75rem, 5.5vw + 1.7vh, 5.5rem)", lineHeight: 1.02 }}
             >
               Discover your dream career.
-            </h2>
+            </h1>
           </div>
 
           <p

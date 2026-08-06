@@ -4,6 +4,16 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ## 2026-08-06
 
+### Landing hero hierarchy redesign
+
+- Rebalanced the hero so the career-promise headline is the dominant element instead of
+  DREAMARI, per UX principles (3-second clarity, familiarity-first sequencing): a first-time
+  visitor should see what the product promises before parsing an unfamiliar brand name.
+- Moved the Student/Enterprise toggle above the DREAMARI + headline group in anticipation of
+  it gating an Enterprise hero variant, and grouped DREAMARI with the headline as one tight
+  brand-to-promise unit separated from the toggle by more generous spacing.
+- No copy changed; only element order, tag, size, and spacing.
+
 ### Approved landing-page copy
 
 - Replaced the public landing hero with the final approved student/enterprise copy,
