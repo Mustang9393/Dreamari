@@ -13,6 +13,9 @@ Notable changes to the Dreamari frontend reference are recorded here.
   it gating an Enterprise hero variant, and grouped DREAMARI with the headline as one tight
   brand-to-promise unit separated from the toggle by more generous spacing.
 - No copy changed; only element order, tag, size, and spacing.
+- Follow-up refinement: tightened DREAMARI against the headline so they read as one unit,
+  and gave the toggle its own explicit margin so it reads as clearly separate from that
+  group rather than a caption sitting close above it.
 
 ### Approved landing-page copy
 

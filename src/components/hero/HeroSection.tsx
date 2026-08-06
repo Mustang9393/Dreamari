@@ -44,18 +44,21 @@ export function HeroSection() {
         <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center sm:gap-6">
           <ScrollNudge />
 
-          {/* Reorder mockup v2 (position/size only, no copy changes, pending approval):
-              toggle leads, on its own — a PayPal-style "Personal/Business" pattern, where
+          {/* Toggle leads, on its own — a PayPal-style "Personal/Business" pattern, where
               the mode selector sits above the headline because it's about to gate which
-              hero actually renders (per the enterprise-toggle plan). DREAMARI + the
-              headline are their own tightly-grouped inner block (own small gap) so they
-              read as one "brand → promise" unit, separated from the toggle by the outer
-              column's own (larger) gap — not a manual negative-margin adjustment fighting
-              that same gap. */}
-          <RoleToggle />
+              hero actually renders (per the enterprise-toggle plan). Extra margin below
+              (on top of the outer column's own gap) pushes it further from the brand group
+              than any other pair of siblings in this column, so it reads as clearly
+              separate rather than a caption sitting just above DREAMARI. */}
+          <div className="mb-2 sm:mb-3">
+            <RoleToggle />
+          </div>
 
-          <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-            {/* Bumped up (was clamp(1rem,...,1.5rem)) — the Student/Enterprise toggle
+          <div className="flex flex-col items-center gap-0 sm:gap-0.5">
+            {/* DREAMARI sits close against the headline (own near-zero gap) so the two
+                read as one "brand → promise" unit; the toggle above is separated from
+                this whole group by the larger margin above instead. Font-size stays
+                bumped (was clamp(1rem,...,1.5rem)) — the Student/Enterprise toggle
                 above was rendering with a visibly taller footprint than the actual brand
                 mark (34px vs. 20px, measured), which put a secondary utility control
                 ahead of brand identity. Also trimmed the toggle's own padding down

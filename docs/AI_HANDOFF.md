@@ -22,9 +22,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   PayPal-style "Personal/Business" pattern), because the toggle is a mode selector about to
   gate which hero variant renders (Enterprise page in progress), not a caption for the
   brand block beneath it.
-- Grouped DREAMARI and the headline into one nested block with its own small `gap-1.5
-  sm:gap-2`, separated from the toggle by the outer column's larger gap — reads as one
-  brand-to-promise unit (Gestalt proximity) instead of three ungrouped stacked lines.
+- Grouped DREAMARI and the headline into one nested block, separated from the toggle by
+  extra margin — reads as one brand-to-promise unit (Gestalt proximity) instead of three
+  ungrouped stacked lines.
 - DREAMARI is now a `<p>` kicker (was previously the dominant title) directly above the
   `<h1>` headline; kept solid, uppercase, wide-tracked, and using `font-display` (Favorit)
   exclusively — no change to which font renders where.
@@ -38,6 +38,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   `npm run build`. Browser-verified at 1280px desktop, 768×1024 tablet, and 320×700 mobile
   with no horizontal overflow or layout regressions.
 - Pushed to `v2` then to `main` with explicit user authorization (see commit hash below).
+
+### 2026-08-06 follow-up: spacing refinement
+
+- User feedback after the initial push: DREAMARI/headline read too loose against each
+  other, and the toggle read too close to that group given it's a separate control.
+- Tightened the DREAMARI-to-headline gap to near zero (`gap-0 sm:gap-0.5`) so the two read
+  as a single unit, and moved the toggle's separation from the shared outer column gap into
+  its own explicit `mb-2 sm:mb-3` wrapper, independent of the other sibling gaps in that
+  column (so ScrollNudge-to-toggle and group-to-paragraph spacing were unaffected).
+  `src/components/hero/HeroSection.tsx` only; `RoleToggle.tsx` unchanged this pass.
+- Re-ran the full validation suite (`tokens:check`, `lint`, `tsc`, `build`) and browser
+  re-verified desktop and 320×700 mobile; DREAMARI now sits tight against the headline and
+  the toggle has clearly more room below it. Pushed to `v2` then `main` with explicit
+  authorization.
 
 ## Completed
 
