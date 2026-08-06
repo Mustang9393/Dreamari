@@ -137,10 +137,8 @@ html[data-how-it-works-snap="true"] {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-montserrat);
-  /* Display heading font — see README "Fonts" section. Figma spec is
-     "Favorit Extra Bold" (licensed, not bundled). Falls back to the sans
-     family until the licensed font files are added. */
-  --font-display: var(--font-montserrat);
+  /* Licensed Dreamari display face, bundled locally through next/font/local. */
+  --font-display: var(--font-favorit-display);
 
   --color-brand-950: var(--color-brand-950);
   --color-brand-900: var(--color-brand-900);

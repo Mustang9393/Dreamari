@@ -84,7 +84,7 @@
   },
   "typography": {
     "$type": "typography",
-    "display": { "hero": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.5xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.tight}" }, "$description": "Large Dreamari display heading." } },
+    "display": { "hero": { "$value": { "fontFamily": "{fontFamily.display}", "fontSize": "{dimension.font-size.5xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.tight}" }, "$description": "Large Dreamari display heading using the licensed Favorit display face." } },
     "heading": {
       "page": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.4xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.heading}" }, "$description": "Primary page heading." },
       "section": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.3xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.heading}" }, "$description": "Section and flow heading." },

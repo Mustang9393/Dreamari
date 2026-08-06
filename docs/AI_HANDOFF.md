@@ -14,13 +14,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 ## Completed
 
 - Updated the public landing hero to the final approved copy: Student / Enterprise,
-  “Discover your dream career.”, the confirmed Build/Match/Play/Explore/Connect summary,
-  “One clear step at a time.”, “Start my journey”, and the existing Scroll chevron.
+  dominant “DREAMARI” title, smaller “Discover your dream career.” headline, the confirmed
+  Build/Match/Play/Explore/Connect summary, “One clear step at a time.”,
+  “Start my journey”, and the existing Scroll chevron.
 - Removed the former Explore, Missions, For schools, Get started free, Teacher, and legacy
   supporting sentences from the visible landing hero. The visual system and route behavior
   remain unchanged; page metadata now uses the approved summary.
 - Changed only the two How It Works CTA labels from “Start building →” to the approved
   “Start my journey”. All other How It Works copy and behavior remain unchanged.
+- Refined the landing hero hierarchy without changing copy: DREAMARI is solid white with
+  controlled uppercase tracking, while “Discover your dream career.” is one clear type
+  tier above the descriptive paragraph. The former multi-stop title gradient was removed.
+- Installed the supplied licensed `FavoritExtraBoldC.woff2` locally and made
+  `fontFamily.display` the semantic source for the hero display style. Only DREAMARI uses
+  Favorit; the secondary headline, body, controls, and application UI remain Montserrat.
+- Removed the landing page's otherwise-empty header/duplicate wordmark. Enlarged the
+  secondary promise and applied a restrained brand-blue gradient across the whole line;
+  DREAMARI remains solid white to preserve the brand → promise → explanation hierarchy.
+- Made the Student/Enterprise switch slightly more compact, added deliberate space before
+  the title group, and tightened the spacing between DREAMARI and its career promise.
 
 - Preserved the former remote `v2` at `codex/v2-backup-before-token-alignment-20260805`.
 - Synchronized `v2` exactly to `main` commit `6dd1370` before token work.

@@ -16,7 +16,7 @@ export function RoleToggle() {
     <div
       role="tablist"
       aria-label="View Dreamari as"
-      className="inline-flex rounded-full border border-brand-600 bg-brand-100 p-1"
+      className="inline-flex rounded-full border border-brand-600 bg-brand-100 p-0.5"
     >
       {OPTIONS.map((option) => {
         const isActive = option.value === role;
@@ -26,7 +26,7 @@ export function RoleToggle() {
             role="tab"
             aria-selected={isActive}
             onClick={() => setRole(option.value)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-150 sm:px-5 sm:py-2 sm:text-sm ${
+            className={`min-h-8 rounded-full px-3.5 py-1 text-[11px] font-bold transition-colors duration-150 sm:px-4 sm:py-1.5 sm:text-xs ${
               isActive
                 ? "bg-gradient-to-r from-brand-500 to-accent-navy text-white"
                 : "text-accent-deep"

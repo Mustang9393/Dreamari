@@ -86,8 +86,8 @@
     "$type": "typography",
     "display": {
       "hero": {
-        "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.5xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.tight}" },
-        "$description": "Large Dreamari display heading. Favorit may replace the font family after licensing."
+        "$value": { "fontFamily": "{fontFamily.display}", "fontSize": "{dimension.font-size.5xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.tight}" },
+        "$description": "Large Dreamari display heading using the licensed Favorit display face."
       }
     },
     "heading": {

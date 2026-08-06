@@ -163,7 +163,11 @@
       "xl": { "$value": { "value": 56, "unit": "px" }, "$description": "Desktop primary control height." }
     }
   },
-  "fontFamily": { "$type": "fontFamily", "sans": { "$value": ["Montserrat", "Arial", "Helvetica", "sans-serif"], "$description": "Dreamari UI and display font stack. Favorit may replace the display face after licensing." } },
+  "fontFamily": {
+    "$type": "fontFamily",
+    "sans": { "$value": ["Montserrat", "Arial", "Helvetica", "sans-serif"], "$description": "Dreamari interface and body font stack." },
+    "display": { "$value": ["Favorit ExtraBold C", "Montserrat", "Arial", "Helvetica", "sans-serif"], "$description": "Licensed Dreamari display face for major brand titles, with resilient fallbacks." }
+  },
   "fontWeight": {
     "$type": "fontWeight",
     "regular": { "$value": 400, "$description": "Regular text." },

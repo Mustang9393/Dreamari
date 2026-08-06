@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { GradientBlobs } from "./GradientBlobs";
 import { RoleToggle } from "./RoleToggle";
@@ -8,7 +7,7 @@ import { ScrollNudge } from "./ScrollNudge";
 export function HeroSection() {
   return (
     // A single viewport-height frame, not a document-flow block that grows with its
-    // content: nav/toggle/copy/buttons sit in a flex-1 middle section that centers
+    // content: toggle/copy/buttons sit in a flex-1 middle section that centers
     // itself in whatever room remains. No overflow-hidden here (unlike before) — the
     // cloud is deliberately allowed to extend past this section's own bottom edge, so
     // "How It Works" (the next section) can occlude the overflowing part and it reads
@@ -42,21 +41,25 @@ export function HeroSection() {
       />
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col items-center">
-        <Navbar />
-
         <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center sm:gap-6">
           <ScrollNudge />
           <RoleToggle />
 
-          <h1
-            className="max-w-4xl font-extrabold tracking-tight text-white"
-            style={{ fontSize: "clamp(1.875rem, 3.45vw + 2.5vh, 4.625rem)", lineHeight: 0.95 }}
-          >
-            Discover your{" "}
-            <span className="bg-gradient-to-r from-brand-400 from-[26%] to-brand-200 to-[62.5%] bg-clip-text text-transparent">
-              dream career.
-            </span>
-          </h1>
+          <div className="mt-2 flex flex-col items-center gap-1.5 sm:mt-3 sm:gap-2">
+            <h1
+              className="max-w-4xl font-display font-extrabold tracking-[0.03em] text-white"
+              style={{ fontSize: "clamp(2.5rem, 5vw + 1.5vh, 5rem)", lineHeight: 0.9 }}
+            >
+              DREAMARI
+            </h1>
+
+            <h2
+              className="max-w-3xl bg-gradient-to-r from-brand-100 via-brand-200 to-brand-400 bg-clip-text font-bold tracking-tight text-transparent"
+              style={{ fontSize: "clamp(1.5rem, 1.6vw + 1.2vh, 2.75rem)", lineHeight: 1.12 }}
+            >
+              Discover your dream career.
+            </h2>
+          </div>
 
           <p
             className="max-w-2xl leading-relaxed text-ink-100"

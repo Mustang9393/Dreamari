@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const favoritDisplay = localFont({
+  src: "../../public/fonts/FavoritExtraBoldC.woff2",
+  variable: "--font-favorit-display",
+  display: "swap",
+  weight: "800",
+  style: "normal",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${montserrat.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${montserrat.variable} ${favoritDisplay.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

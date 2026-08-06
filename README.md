@@ -96,8 +96,10 @@ Portable design decisions live in the five W3C DTCG 2025.10 files under `design-
 ## Fonts
 
 - **Body/UI text — Montserrat** (400/500/600/700/800), loaded via `next/font/google` in `layout.tsx`. Matches the Figma spec exactly.
-- **Display heading ("DISCOVER YOUR DREAM CAREER.") — spec'd in Figma as "Favorit Extra Bold"**, a licensed font (Colophon Foundry) that isn't available on Google Fonts and wasn't bundled with the file. It currently **falls back to Montserrat ExtraBold**, which is close but not pixel-identical (Favorit is more geometric/condensed).
-  - To swap in the real font once licensed files are available: add the `.woff2` files under `public/fonts/`, load via `next/font/local` in `layout.tsx`, and point `--font-display` in `globals.css` at the new variable. The heading in `HeroSection.tsx` already uses `font-display` conceptually — just confirm the class if you add a dedicated utility.
+- **Display title ("DREAMARI") uses the licensed Favorit ExtraBold C face**, bundled as an
+  optimized `.woff2` under `public/fonts/` and loaded through `next/font/local`. The
+  `fontFamily.display` token and `font-display` utility are the single application path.
+- **Interface, headline, body, and control typography remains Montserrat.**
 
 ## Notes on translating the Figma export
 

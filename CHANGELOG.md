@@ -6,10 +6,20 @@ Notable changes to the Dreamari frontend reference are recorded here.
 
 ### Approved landing-page copy
 
-- Replaced the public landing hero with the final approved student/enterprise copy and
-  removed all unapproved visible navigation and supporting language from the hero.
+- Replaced the public landing hero with the final approved student/enterprise copy,
+  establishing DREAMARI as the dominant title and “Discover your dream career.” as its
+  smaller supporting headline, while removing unapproved visible navigation and language.
 - Preserved the existing Dreamari visual system, responsive layout, journey CTA, mascot,
   and scroll interaction while correcting capitalization and punctuation exactly.
+- Refined the hero hierarchy with a solid-white, all-caps DREAMARI title and a larger
+  secondary career-promise headline; removed the uneven letter-by-letter title gradient.
+- Bundled the approved Favorit ExtraBold C webfont and mapped it through the DTCG display
+  family, Next.js local-font loading, and the hero title's `font-display` utility. Montserrat
+  remains the interface and reading face.
+- Removed the redundant header wordmark from the landing hero and promoted the career
+  promise with a larger, restrained blue gradient. DREAMARI remains the solid-white anchor.
+- Reduced the visual weight of the Student/Enterprise switch, increased its separation from
+  the title, and tightened the DREAMARI-to-career-promise relationship.
 - Updated the page description metadata to match the approved product summary.
 - Matched both How It Works CTA labels to the approved “Start my journey” wording without
   changing any How It Works headings, descriptions, stage labels, or interactions.
