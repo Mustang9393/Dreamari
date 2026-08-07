@@ -53,6 +53,37 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   the toggle has clearly more room below it. Pushed to `v2` then `main` with explicit
   authorization.
 
+### 2026-08-06 hero reverted to DREAMARI-dominant per UIKIT Figma reference
+
+- User directive: match the approved UIKIT Figma hero
+  (`d8j3JbtVojSgVOqsjGpcZM`, node `1036:39072`) with DREAMARI as the single largest
+  element on screen, sized appropriately and responsively — overriding the earlier
+  headline-dominant UX redesign above.
+- DREAMARI is again the dominant `<h1>` (`font-display`, `clamp(3rem, 6.5vw + 2vh, 7rem)`,
+  ~48–112px) with the career-promise headline demoted to a smaller `<h2>`
+  (`clamp(1.75rem, 2.2vw + 1.1vh, 3rem)`, ~28–48px) below it — roughly a 2.3x size ratio at
+  every viewport, matching the Figma reference's proportions. The toggle-above-brand-group
+  ordering and its extra separation margin from the earlier session are unchanged.
+- Added a partial gradient on the headline ("dream career." in `brand-100`→`brand-600`,
+  "Discover your " plain white) matching the Figma reference's two-tone treatment, using
+  existing semantic brand tokens (no new colors introduced).
+- The Figma reference's top header nav (Explore / Missions / For schools / "Get started
+  free") was intentionally NOT reproduced — those are unapproved terms already removed
+  from this hero earlier in the shared workflow. Only the toggle → DREAMARI → headline →
+  paragraph → CTA structure and sizing ratio were adopted from the reference.
+- Fixed a `ScrollNudge` overlap bug (reported after this change, but present before it
+  too, on any sufficiently short viewport): it was `absolute inset-x-0 bottom-0` inside the
+  centered flex-1 content group, pinned to that group's own bottom edge rather than the
+  viewport. On short viewports (or once DREAMARI grew taller) that edge could coincide with
+  the CTA button, visually overlapping it. Changed `ScrollNudge` to a normal in-flow last
+  child instead of an absolutely-positioned one, so it always stacks below the CTA with the
+  column's existing gap and can't overlap a sibling regardless of container height.
+  Verified no overlap at 1280×720, 1280×600, 768×1024, and 320×700.
+- Validation passed: `tokens:check` (503 tokens), `lint`, `tsc --noEmit`, `build`.
+  Browser-verified at desktop, 1280×720, 1280×600, 768×1024, and 320×700 (no horizontal
+  overflow at 320px) plus a manual click-through confirming the Scroll control still
+  advances to How It Works.
+
 ## Completed
 
 - Updated the public landing hero to the final approved copy: Student / Enterprise,

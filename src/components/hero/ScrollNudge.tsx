@@ -22,5 +22,9 @@ export function ScrollNudge() {
     window.scrollBy({ top: window.innerHeight * 0.95, behavior: "smooth" });
   }
 
-  return <ScrollHint opacity={opacity} onClick={scrollToNext} className="absolute inset-x-0 bottom-0 pb-1" />;
+  // In-flow (not absolutely positioned): it used to be pinned to the bottom edge of the
+  // centered content group, which shrinks on shorter viewports and let this collide with
+  // the CTA button above it. As a normal last flex child it just stacks below the CTA
+  // with the column's own gap, so it can never overlap a sibling regardless of height.
+  return <ScrollHint opacity={opacity} onClick={scrollToNext} />;
 }

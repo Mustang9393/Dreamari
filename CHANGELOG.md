@@ -17,6 +17,18 @@ Notable changes to the Dreamari frontend reference are recorded here.
   and gave the toggle its own explicit margin so it reads as clearly separate from that
   group rather than a caption sitting close above it.
 
+### Hero reverted to DREAMARI-dominant (UIKIT Figma reference)
+
+- Restored DREAMARI as the single largest hero element (per the approved UIKIT Figma hero,
+  node `1036:39072`), sized responsively at roughly 2.3x the career-promise headline at
+  every viewport. Added a partial two-tone gradient to the headline's "dream career."
+  using existing brand tokens, matching the reference. No unapproved header nav terms
+  (Explore/Missions/For schools/Get started free) were introduced.
+- Fixed a `ScrollNudge` overlap bug: it was pinned to the bottom edge of a resizable
+  content group instead of stacking normally, so it could collide with the CTA button on
+  short viewports. It's now a normal in-flow element after the CTA and can no longer
+  overlap it.
+
 ### Approved landing-page copy
 
 - Replaced the public landing hero with the final approved student/enterprise copy,

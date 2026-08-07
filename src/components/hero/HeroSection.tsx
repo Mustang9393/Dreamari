@@ -42,8 +42,6 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col items-center">
         <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center sm:gap-6">
-          <ScrollNudge />
-
           {/* Toggle leads, on its own — a PayPal-style "Personal/Business" pattern, where
               the mode selector sits above the headline because it's about to gate which
               hero actually renders (per the enterprise-toggle plan). Extra margin below
@@ -54,30 +52,27 @@ export function HeroSection() {
             <RoleToggle />
           </div>
 
-          <div className="flex flex-col items-center gap-0 sm:gap-0.5">
-            {/* DREAMARI sits close against the headline (own near-zero gap) so the two
-                read as one "brand → promise" unit; the toggle above is separated from
-                this whole group by the larger margin above instead. Font-size stays
-                bumped (was clamp(1rem,...,1.5rem)) — the Student/Enterprise toggle
-                above was rendering with a visibly taller footprint than the actual brand
-                mark (34px vs. 20px, measured), which put a secondary utility control
-                ahead of brand identity. Also trimmed the toggle's own padding down
-                (RoleToggle.tsx), but a pill BUTTON has a padding floor a single text line
-                doesn't — it still needs a real tap target — so closing the rest of the
-                gap has to come from DREAMARI's side. */}
-            <p
-              className="font-display font-extrabold tracking-[0.08em] text-brand-200 uppercase"
-              style={{ fontSize: "clamp(1.375rem, 2vw + 1vh, 2.25rem)", lineHeight: 1.1 }}
+          {/* Per the approved UIKIT hero reference (Figma node 1036:39072): DREAMARI is the
+              single largest element on screen, with the career-promise headline sized well
+              below it. Sizes scale with clamp(vw + vh) rather than fixed breakpoints so the
+              same ~2.3x DREAMARI-to-headline ratio holds from mobile through desktop. */}
+          <div className="flex flex-col items-center gap-2 sm:gap-3">
+            <h1
+              className="font-display font-extrabold tracking-[0.04em] text-white uppercase"
+              style={{ fontSize: "clamp(3rem, 6.5vw + 2vh, 7rem)", lineHeight: 0.95 }}
             >
               DREAMARI
-            </p>
-
-            <h1
-              className="max-w-5xl font-extrabold tracking-tight text-white"
-              style={{ fontSize: "clamp(2.75rem, 5.5vw + 1.7vh, 5.5rem)", lineHeight: 1.02 }}
-            >
-              Discover your dream career.
             </h1>
+
+            <h2
+              className="max-w-4xl font-extrabold tracking-tight"
+              style={{ fontSize: "clamp(1.75rem, 2.2vw + 1.1vh, 3rem)", lineHeight: 1.15 }}
+            >
+              <span className="text-white">Discover your </span>
+              <span className="bg-gradient-to-r from-brand-100 to-brand-600 bg-clip-text text-transparent">
+                dream career.
+              </span>
+            </h2>
           </div>
 
           <p
@@ -95,6 +90,8 @@ export function HeroSection() {
               Start my journey
             </Button>
           </div>
+
+          <ScrollNudge />
         </div>
 
         <HeroIllustration />
