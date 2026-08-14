@@ -23,7 +23,7 @@ export function ConnectChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="relative z-[1] flex w-full max-w-[520px] flex-col gap-5">
+      <div className="relative z-[1] flex flex-col gap-5" style={{ width: "clamp(260px, 60cqw, 520px)" }}>
         <div className="flex items-start gap-4">
           <div className="flex flex-none flex-col items-center gap-0.5 pt-0.5" style={{ color: "var(--c)" }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">

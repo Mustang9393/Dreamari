@@ -24,7 +24,10 @@ export function PlayChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="relative z-[1] w-full max-w-[560px] overflow-hidden" style={{ background: "var(--card)", borderRadius: "var(--radius-md-alt)" }}>
+      <div
+        className="relative z-[1] overflow-hidden"
+        style={{ width: "clamp(260px, 58cqw, 560px)", background: "var(--card)", borderRadius: "var(--radius-md-alt)" }}
+      >
         <div
           className="relative h-[clamp(88px,16cqw,180px)] overflow-hidden"
           style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--c) 30%, #0b0d16), #05070f 88%)" }}
