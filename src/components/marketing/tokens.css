@@ -94,9 +94,12 @@
   --shadow-lg: 0 16px 48px -4px #0000009e, 0 4px 16px 0 #00000047;
 
   /* ---- Type families (Primitives.Default -> font-family) ---- */
-  --font-display: var(--font-bricolage), sans-serif; /* font-family.display: Bricolage Grotesque */
-  --font-body: var(--font-montserrat), sans-serif; /* font-family.montserrat: Montserrat */
-  --font-mono: var(--font-space-mono), monospace; /* reference prototype's --font-mono: Space Mono */
+  /* Loaded via a plain <link> in page.tsx (see marketing/fonts.ts) rather than
+     next/font/google — referenced here by literal family name instead of a next/font
+     CSS variable. */
+  --font-display: "Bricolage Grotesque", sans-serif; /* font-family.display */
+  --font-body: var(--font-montserrat), sans-serif; /* font-family.montserrat: Montserrat, still loaded via next/font in layout.tsx */
+  --font-mono: "Space Mono", monospace; /* reference prototype's --font-mono */
 
   /* Reference prototype's own local accent tint used for the hero headline's "dream
      career." span — lighter than --primary itself. */

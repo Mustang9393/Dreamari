@@ -1,20 +1,10 @@
-import { Bricolage_Grotesque, Space_Mono } from "next/font/google";
-
-// Section 2 of the handoff spec names 'Bricolage Grotesque' as --font-display. The rest
-// of the app's display font (Favorit, loaded in layout.tsx) is reserved for the DREAMARI
-// wordmark this rebuild's hero no longer shows, so this is loaded separately and scoped
-// to the marketing subtree only.
-export const bricolageGrotesque = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-});
-
-// The reference prototype's --font-mono ('Space Mono'), used for eyebrows, the rail
-// labels, and other small monospace accents — distinct from Tailwind's own generic
-// `font-mono` utility, which resolves to a system stack, not this typeface.
-export const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+// Bricolage Grotesque + Space Mono are loaded via a plain <link> in page.tsx, not
+// next/font/google. next/font/google's build-time font-fetch through Turbopack failed
+// specifically on Vercel's build environment (`Module not found:
+// @vercel/turbopack-next/internal/font/google/font`) despite passing every local build —
+// an environment-only failure that silently kept production on the last successful
+// deploy while every local fix looked verified. A <link> tag has no build-time
+// resolution step at all, so it can't hit that failure mode. Referenced directly by
+// family name in tokens.css (no --font-bricolage/--font-space-mono CSS variables needed).
+export const FONT_STYLESHEET_HREF =
+  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap";
