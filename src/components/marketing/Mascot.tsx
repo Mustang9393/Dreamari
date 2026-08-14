@@ -1,0 +1,293 @@
+"use client";
+
+import Image from "next/image";
+import { type RefObject, useEffect, useRef } from "react";
+
+// Measured directly from public/images/hero-cloud-mascot.png (1200x1200): the two dark
+// starry eye ellipses sit at these percentages of the image's own bounding box. Mouth
+// starts at y=63.5%, which is why a 62%-visible crop shows the eyes but never the mouth.
+const EYE_LEFT = { left: 25.17, top: 42.17, width: 16.83, height: 19.16 };
+const EYE_RIGHT = { left: 58.17, top: 42.17, width: 16.83, height: 19.16 };
+const VISIBLE_FRACTION = 0.62;
+
+type MascotProps = {
+  heroRef: RefObject<HTMLElement | null>;
+};
+
+export function Mascot({ heroRef }: MascotProps) {
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const tiltRef = useRef<HTMLDivElement | null>(null);
+  const eyeLeftRef = useRef<HTMLDivElement | null>(null);
+  const eyeRightRef = useRef<HTMLDivElement | null>(null);
+  const canvasLeftRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRightRef = useRef<HTMLCanvasElement | null>(null);
+
+  // ---- hero exit: sinks away + fades as the page scrolls from the hero into the next
+  // section, driven straight off scroll position rather than a fixed-duration animation. ----
+  useEffect(() => {
+    const stage = stageRef.current;
+    const hero = heroRef.current;
+    if (!stage || !hero) return;
+
+    let ticking = false;
+    function update() {
+      ticking = false;
+      if (!stage || !hero) return;
+      const heroHeight = hero.offsetHeight || 1;
+      const exitDistance = heroHeight * 0.62;
+      const progress = Math.min(1, Math.max(0, window.scrollY / exitDistance));
+      stage.style.opacity = String(1 - progress);
+      stage.style.transform = `translate(-50%, 38%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+    };
+  }, [heroRef]);
+
+  // ---- iris artwork: drawn once per eye onto its canvas, a dark starry gradient with a
+  // highlight, matching the baked-in eye tone already painted into the mascot artwork so
+  // the animated iris reads as the SAME eye rather than a mismatched patch. ----
+  useEffect(() => {
+    function drawIris(canvas: HTMLCanvasElement | null) {
+      if (!canvas) return;
+      const size = 300;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const g = ctx.createRadialGradient(size * 0.5, size * 0.36, size * 0.04, size * 0.5, size * 0.5, size * 0.58);
+      g.addColorStop(0, "#2a4a80");
+      g.addColorStop(0.55, "#0e1c3f");
+      g.addColorStop(1, "#050a1c");
+      // Fills the full square, not just the inscribed circle, so a shift that outruns
+      // the overhang exposes more of this same dark tone instead of a blank corner.
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      for (let i = 0; i < 55; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const d = Math.hypot(x - size / 2, y - size / 2);
+        if (d > size * 0.48) continue;
+        ctx.globalAlpha = Math.random() * 0.8 + 0.15;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(x, y, Math.random() * 1.6 + 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#f4f8ff";
+      ctx.beginPath();
+      ctx.ellipse(size * 0.36, size * 0.34, size * 0.12, size * 0.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.save();
+      ctx.translate(size * 0.62, size * 0.58);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.moveTo(0, -size * 0.05);
+      ctx.lineTo(size * 0.014, -size * 0.014);
+      ctx.lineTo(size * 0.05, 0);
+      ctx.lineTo(size * 0.014, size * 0.014);
+      ctx.lineTo(0, size * 0.05);
+      ctx.lineTo(-size * 0.014, size * 0.014);
+      ctx.lineTo(-size * 0.05, 0);
+      ctx.lineTo(-size * 0.014, -size * 0.014);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    drawIris(canvasLeftRef.current);
+    drawIris(canvasRightRef.current);
+  }, []);
+
+  // ---- page-wide, direction-aware cursor tracking: computes the real angle from the
+  // mascot's on-screen center to the cursor so the eyes point the correct direction no
+  // matter where on the page the character sits. ----
+  useEffect(() => {
+    const wrap = tiltRef.current?.parentElement;
+    const tilt = tiltRef.current;
+    const eyeLeftEl = eyeLeftRef.current;
+    const eyeRightEl = eyeRightRef.current;
+    if (!wrap || !tilt || !eyeLeftEl || !eyeRightEl) return;
+
+    const pointerFine = window.matchMedia("(pointer:fine)").matches;
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 3;
+    let lastMouseX = mouseX;
+    let lastMouseY = mouseY;
+    let lastMoveT = performance.now();
+    let speed = 0;
+
+    function onMouseMove(e: MouseEvent) {
+      const now = performance.now();
+      const dt = Math.max(1, now - lastMoveT);
+      const d = Math.hypot(e.clientX - lastMouseX, e.clientY - lastMouseY);
+      speed = speed * 0.7 + (d / dt) * 0.3;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      lastMoveT = now;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }
+    if (pointerFine) window.addEventListener("mousemove", onMouseMove);
+
+    let curX = 0;
+    let curY = 0;
+    let curExcite = 0;
+    let blinkT = performance.now() + 1800 + Math.random() * 2500;
+    let blinking = false;
+    let blinkStart = 0;
+    let blinkDur = 190;
+    let queuedBlink = false;
+    let rafId = 0;
+
+    function tick(now: number) {
+      rafId = requestAnimationFrame(tick);
+      if (!wrap || !tilt || !eyeLeftEl || !eyeRightEl) return;
+
+      let tx = 0;
+      let ty = 0;
+      let distFactor = 0.3;
+      if (pointerFine) {
+        const r = wrap.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height * 0.42;
+        const dx = mouseX - cx;
+        const dy = mouseY - cy;
+        const reach = Math.max(280, r.width * 0.9);
+        tx = Math.max(-1, Math.min(1, dx / reach));
+        ty = Math.max(-1, Math.min(1, dy / reach));
+        const dist = Math.hypot(dx, dy);
+        distFactor = Math.max(0, 1 - dist / 900);
+      } else {
+        const t = now * 0.001;
+        tx = Math.sin(t * 0.5) * 0.8;
+        ty = Math.sin(t * 0.35) * 0.45;
+      }
+
+      curX += (tx - curX) * 0.22;
+      curY += (ty - curY) * 0.22;
+
+      const speedExcite = Math.min(1, speed * 2.2);
+      const targetExcite = Math.max(speedExcite, distFactor * 0.6);
+      curExcite += (targetExcite - curExcite) * 0.08;
+      speed *= 0.94;
+
+      const maxShift = eyeLeftEl.clientWidth * 0.34;
+      const txPx = curX * maxShift;
+      const tyPx = curY * maxShift * 0.85;
+      const eyeScale = 1 + curExcite * 0.16;
+
+      let blinkScale = 1;
+      if (!blinking && now > blinkT) {
+        blinking = true;
+        blinkStart = now;
+        blinkDur = 160 + Math.random() * 70;
+        queuedBlink = Math.random() < 0.22;
+      }
+      if (blinking) {
+        const p = (now - blinkStart) / blinkDur;
+        if (p >= 1) {
+          blinking = false;
+          if (queuedBlink) {
+            queuedBlink = false;
+            blinkT = now + 140;
+          } else {
+            blinkT = now + 2200 + Math.random() * 4200;
+          }
+        } else {
+          blinkScale = Math.max(0.04, p < 0.5 ? 1 - p * 2 : (p - 0.5) * 2);
+        }
+      }
+
+      [canvasLeftRef.current, canvasRightRef.current].forEach((c) => {
+        if (c) c.style.transform = `translate(${txPx}px, ${tyPx}px) scale(${eyeScale}) scaleY(${blinkScale / eyeScale})`;
+      });
+
+      const rotY = curX * 9;
+      const rotX = -curY * 6.5;
+      tilt.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      if (pointerFine) window.removeEventListener("mousemove", onMouseMove);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const socketBase =
+    "absolute overflow-hidden rounded-full pointer-events-none [background:radial-gradient(ellipse_at_50%_40%,#16264a_0%,#0d1730_62%,#05070f_100%)]";
+  // Canvas overhangs the round socket by comfortably more than maxShift (0.34 of the
+  // socket's own width) can ever travel — 260%/-80% leaves wide margin over that, so an
+  // off-center shift never exposes the socket's own background at the edge (this is the
+  // documented failure mode: a thin margin here reads as a "closed" or glitched eye at
+  // off-center angles, worse on real browsers than in headless testing).
+  const canvasClass = "absolute [width:260%] [height:260%] [left:-80%] [top:-80%] [transition:transform_.04s_linear]";
+
+  return (
+    <div
+      ref={stageRef}
+      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,38%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
+      style={{ ["--mascot-size" as string]: "clamp(190px, 34vw, 460px)" }}
+    >
+      {/* Kept well inside the stage box (not just a shallow -16% inset): this glow sits
+         behind a mascot that's cropped by the hero's own overflow:hidden, and a glow
+         that still has real opacity right at that hard clip boundary shows up as a
+         visible seam/line where the blur gets abruptly cut off instead of fading out
+         naturally — this stays far enough from the edge that its own falloff finishes
+         before it ever reaches the crop line. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute rounded-full blur-[24px] [background:radial-gradient(circle,rgba(47,107,242,.28),transparent_60%)]"
+        style={{ inset: "6%" }}
+      />
+      <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
+        {/* No transform-style:preserve-3d — this element's own rotateX/rotateY tilt
+            doesn't need real relative depth for its children, just a flat rotated
+            plane. Nesting the eyes' circular overflow:hidden clip inside a live 3D
+            rendering context is known to clip inconsistently on real browsers
+            (Chrome/Safari both), exposing the socket background at off-center angles —
+            a bug that doesn't reproduce in headless testing. */}
+        <div
+          ref={tiltRef}
+          className="relative h-full w-full [transition:transform_.08s_linear] [will-change:transform]"
+        >
+          <Image
+            src="/images/hero-cloud-mascot.png"
+            alt="Dreamari mascot — a friendly cloud character"
+            fill
+            sizes="460px"
+            className="pointer-events-none object-contain select-none [filter:drop-shadow(0_30px_40px_rgba(0,0,0,.45))]"
+            priority
+          />
+          <div
+            ref={eyeLeftRef}
+            className={socketBase}
+            style={{ left: `${EYE_LEFT.left}%`, top: `${EYE_LEFT.top}%`, width: `${EYE_LEFT.width}%`, height: `${EYE_LEFT.height}%` }}
+          >
+            <canvas ref={canvasLeftRef} className={canvasClass} />
+          </div>
+          <div
+            ref={eyeRightRef}
+            className={socketBase}
+            style={{ left: `${EYE_RIGHT.left}%`, top: `${EYE_RIGHT.top}%`, width: `${EYE_RIGHT.width}%`, height: `${EYE_RIGHT.height}%` }}
+          >
+            <canvas ref={canvasRightRef} className={canvasClass} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { VISIBLE_FRACTION };
