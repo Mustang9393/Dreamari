@@ -28,35 +28,44 @@ export function Hero({ view, onChangeView }: HeroProps) {
         style={{ background: "radial-gradient(circle at 50% 50%, rgba(47,107,242,.35), rgba(122,45,226,.18) 45%, transparent 70%)" }}
       />
       {/* Fades the hero's own bottom edge to the flat background color right where the
-          mascot gets cropped. Reaches full background well before this div's own
-          bottom edge (55%, not 85%) so the actual hard overflow:hidden clip line always
-          falls inside the already-fully-opaque zone — otherwise the clip can land in
-          the still-transparent part of the gradient and show a visible seam. */}
+          mascot gets cropped. Kept short and back-loaded (only the last ~15% of its own
+          height is fully opaque): the mascot's eyes sit near the BOTTOM of its visible
+          62% crop (not the middle), so a taller/earlier fade here doesn't just smooth
+          the clip line, it hides the eyes entirely on short mobile viewports where the
+          mascot is already at its 190px floor size. The seam this was fixing is handled
+          by keeping the ambient glow (Mascot.tsx) well clear of the crop edge instead. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[140px]"
-        style={{ background: "linear-gradient(180deg, transparent, var(--background) 55%)" }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[48px]"
+        style={{ background: "linear-gradient(180deg, transparent, var(--background) 88%)" }}
       />
 
       <div className="relative z-[2] mx-auto max-w-[1200px]">
-        <div className="mb-[18px] flex justify-center">
+        <div className="mb-[18px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
         <div
           className="relative z-[2] mx-auto flex max-w-[720px] flex-col items-center text-center"
           // Reserves room below the CTAs for the mascot's peeking sliver (62% of its own
           // box, since it's cropped to show only its top 62%) so the copy and the mascot
-          // can never overlap, at any hero height or viewport size.
-          style={{ paddingBottom: "calc(clamp(190px, 34vw, 460px) * .62 + 28px)" }}
+          // can never overlap, at any hero height or viewport size. Reads the same
+          // --mascot-size Mascot.tsx uses (tokens.css), so the two can't drift apart.
+          style={{ paddingBottom: "calc(var(--mascot-size) * .63 + 16px)" }}
         >
-          <h1 className="font-display text-[38px] font-extrabold sm:text-[52px]" style={{ lineHeight: 1.05, color: "var(--foreground)" }}>
+          <h1
+            className="font-display text-[38px] font-extrabold [@media(max-height:600px)]:text-[28px] sm:text-[52px]"
+            style={{ lineHeight: 1.05, color: "var(--foreground)" }}
+          >
             Discover your <span style={{ color: "var(--primary-tint)" }}>dream career.</span>
           </h1>
-          <p className="mt-3 max-w-[500px] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+          <p
+            className="mt-3 max-w-[500px] text-[16px] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
+            style={{ color: "var(--muted-foreground)" }}
+          >
             Step into real careers through guided simulations. Build the skills, earn the proof, and picture yourself
             in the room. One clear step at a time.
           </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">
               Start exploring →
             </MarketingButton>

@@ -4,11 +4,13 @@ import Image from "next/image";
 import { type RefObject, useEffect, useRef } from "react";
 
 // Measured directly from public/images/hero-cloud-mascot.png (1200x1200): the two dark
-// starry eye ellipses sit at these percentages of the image's own bounding box. Mouth
-// starts at y=63.5%, which is why a 62%-visible crop shows the eyes but never the mouth.
+// starry eye ellipses sit at these percentages of the image's own bounding box (ending
+// at 61.33%). Mouth starts at y=63.5%, so a 63%-visible crop is as generous as it can
+// get while still never showing the mouth — needed because the eyes' own bottom edge
+// sits right at the old 62% crop line with almost no margin below them.
 const EYE_LEFT = { left: 25.17, top: 42.17, width: 16.83, height: 19.16 };
 const EYE_RIGHT = { left: 58.17, top: 42.17, width: 16.83, height: 19.16 };
-const VISIBLE_FRACTION = 0.62;
+const VISIBLE_FRACTION = 0.63;
 
 type MascotProps = {
   heroRef: RefObject<HTMLElement | null>;
@@ -37,7 +39,7 @@ export function Mascot({ heroRef }: MascotProps) {
       const exitDistance = heroHeight * 0.62;
       const progress = Math.min(1, Math.max(0, window.scrollY / exitDistance));
       stage.style.opacity = String(1 - progress);
-      stage.style.transform = `translate(-50%, 38%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
+      stage.style.transform = `translate(-50%, 37%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
     }
     function onScroll() {
       if (ticking) return;
@@ -237,8 +239,10 @@ export function Mascot({ heroRef }: MascotProps) {
   return (
     <div
       ref={stageRef}
-      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,38%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
-      style={{ ["--mascot-size" as string]: "clamp(190px, 34vw, 460px)" }}
+      // --mascot-size comes from tokens.css (.marketing-v2), which also shrinks it on
+      // short viewports via media queries — not set inline here, so Hero.tsx's reserved
+      // padding (calc(var(--mascot-size) * .62 + 28px)) always matches automatically.
+      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,37%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
     >
       {/* Kept well inside the stage box (not just a shallow -16% inset): this glow sits
          behind a mascot that's cropped by the hero's own overflow:hidden, and a glow

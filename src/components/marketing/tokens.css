@@ -80,6 +80,14 @@
   --radius-2xl: 24px;
   --radius-full: 999px;
 
+  /* Hero mascot box size — single source of truth shared by Mascot.tsx (its own size)
+     and Hero.tsx (the copy column's reserved bottom padding), so they can't drift out
+     of sync. Width-driven by default; on short viewports (older/smaller phones, or any
+     landscape phone) a 34vw-floor-190px box left NO room for the headline/paragraph/
+     buttons above it to fit above the fold at all, pushing the mascot fully offscreen —
+     these overrides shrink the floor as height gets tighter instead. */
+  --mascot-size: clamp(210px, 36vw, 460px);
+
   /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
   --shadow-sm: 0 2px 8px 0 #00000073;
   --shadow-md: 0 8px 24px 0 #00000085, 0 2px 8px 0 #0000003d;
@@ -102,6 +110,21 @@
      headings, buttons, nav) — Montserrat is only used where a poster-title font is
      explicitly requested, never as running body copy. */
   font-family: var(--font-display);
+}
+
+/* See --mascot-size above: shrink the floor as viewport height gets tighter, so the
+   hero's headline/paragraph/buttons + the mascot's own peeking sliver both still fit
+   above the fold on short phones (e.g. 320x568) instead of the mascot being pushed
+   fully offscreen. */
+@media (max-height: 700px) {
+  .marketing-v2 {
+    --mascot-size: clamp(165px, 34vw, 460px);
+  }
+}
+@media (max-height: 600px) {
+  .marketing-v2 {
+    --mascot-size: clamp(130px, 30vw, 460px);
+  }
 }
 
 /* This app's shared Tailwind theme (globals.css) binds the `font-display` and
