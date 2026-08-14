@@ -67,10 +67,83 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-06
 - Active branch: `v2`
-- Main branch: do not change without a new explicit instruction
+- Main branch: pushed this session with explicit user authorization (see below)
 - Objective: apply the final approved copy to the public landing hero on `v2`, remove all
   unapproved visible hero terms, and verify the responsive result. Build, Match, How It
   Works, Career Report, and the post-onboarding Home are outside this copy-only pass.
+
+## 2026-08-06 hero hierarchy redesign (position/size only, no copy changes)
+
+- Rebalanced the landing hero's visual hierarchy so the career-promise headline ("Discover
+  your dream career.") is the largest, dominant element instead of DREAMARI. Per UX audit
+  (NN/g 3-second clarity test, semantic H1 weight, familiarity-first sequencing), a brand
+  name larger than the value proposition asks a first-time visitor to parse an unfamiliar
+  term before learning what the product does or promises.
+- Reordered the Student/Enterprise toggle above the DREAMARI + headline group (a
+  PayPal-style "Personal/Business" pattern), because the toggle is a mode selector about to
+  gate which hero variant renders (Enterprise page in progress), not a caption for the
+  brand block beneath it.
+- Grouped DREAMARI and the headline into one nested block, separated from the toggle by
+  extra margin — reads as one brand-to-promise unit (Gestalt proximity) instead of three
+  ungrouped stacked lines.
+- DREAMARI is now a `<p>` kicker (was previously the dominant title) directly above the
+  `<h1>` headline; kept solid, uppercase, wide-tracked, and using `font-display` (Favorit)
+  exclusively — no change to which font renders where.
+- Trimmed `RoleToggle.tsx` pill padding/min-height slightly; a button still needs a real tap
+  target, so DREAMARI's own font-size (`clamp(1.375rem, 2vw + 1vh, 2.25rem)`) was bumped
+  instead of shrinking the toggle further, to close most of the remaining visual-weight gap.
+- Copy is byte-for-byte unchanged from the approved list; only element order, tag, and
+  size/spacing values changed in `src/components/hero/HeroSection.tsx` and
+  `src/components/hero/RoleToggle.tsx`.
+- Validation passed: `npm run tokens:check` (503 tokens), `npm run lint`, `npx tsc --noEmit`,
+  `npm run build`. Browser-verified at 1280px desktop, 768×1024 tablet, and 320×700 mobile
+  with no horizontal overflow or layout regressions.
+- Pushed to `v2` then to `main` with explicit user authorization (see commit hash below).
+
+### 2026-08-06 follow-up: spacing refinement
+
+- User feedback after the initial push: DREAMARI/headline read too loose against each
+  other, and the toggle read too close to that group given it's a separate control.
+- Tightened the DREAMARI-to-headline gap to near zero (`gap-0 sm:gap-0.5`) so the two read
+  as a single unit, and moved the toggle's separation from the shared outer column gap into
+  its own explicit `mb-2 sm:mb-3` wrapper, independent of the other sibling gaps in that
+  column (so ScrollNudge-to-toggle and group-to-paragraph spacing were unaffected).
+  `src/components/hero/HeroSection.tsx` only; `RoleToggle.tsx` unchanged this pass.
+- Re-ran the full validation suite (`tokens:check`, `lint`, `tsc`, `build`) and browser
+  re-verified desktop and 320×700 mobile; DREAMARI now sits tight against the headline and
+  the toggle has clearly more room below it. Pushed to `v2` then `main` with explicit
+  authorization.
+
+### 2026-08-06 hero reverted to DREAMARI-dominant per UIKIT Figma reference
+
+- User directive: match the approved UIKIT Figma hero
+  (`d8j3JbtVojSgVOqsjGpcZM`, node `1036:39072`) with DREAMARI as the single largest
+  element on screen, sized appropriately and responsively — overriding the earlier
+  headline-dominant UX redesign above.
+- DREAMARI is again the dominant `<h1>` (`font-display`, `clamp(3rem, 6.5vw + 2vh, 7rem)`,
+  ~48–112px) with the career-promise headline demoted to a smaller `<h2>`
+  (`clamp(1.75rem, 2.2vw + 1.1vh, 3rem)`, ~28–48px) below it — roughly a 2.3x size ratio at
+  every viewport, matching the Figma reference's proportions. The toggle-above-brand-group
+  ordering and its extra separation margin from the earlier session are unchanged.
+- Added a partial gradient on the headline ("dream career." in `brand-100`→`brand-600`,
+  "Discover your " plain white) matching the Figma reference's two-tone treatment, using
+  existing semantic brand tokens (no new colors introduced).
+- The Figma reference's top header nav (Explore / Missions / For schools / "Get started
+  free") was intentionally NOT reproduced — those are unapproved terms already removed
+  from this hero earlier in the shared workflow. Only the toggle → DREAMARI → headline →
+  paragraph → CTA structure and sizing ratio were adopted from the reference.
+- Fixed a `ScrollNudge` overlap bug (reported after this change, but present before it
+  too, on any sufficiently short viewport): it was `absolute inset-x-0 bottom-0` inside the
+  centered flex-1 content group, pinned to that group's own bottom edge rather than the
+  viewport. On short viewports (or once DREAMARI grew taller) that edge could coincide with
+  the CTA button, visually overlapping it. Changed `ScrollNudge` to a normal in-flow last
+  child instead of an absolutely-positioned one, so it always stacks below the CTA with the
+  column's existing gap and can't overlap a sibling regardless of container height.
+  Verified no overlap at 1280×720, 1280×600, 768×1024, and 320×700.
+- Validation passed: `tokens:check` (503 tokens), `lint`, `tsc --noEmit`, `build`.
+  Browser-verified at desktop, 1280×720, 1280×600, 768×1024, and 320×700 (no horizontal
+  overflow at 320px) plus a manual click-through confirming the Scroll control still
+  advances to How It Works.
 
 ## Completed
 
@@ -325,6 +398,12 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Recommended next step
 
+- Design the Enterprise hero variant the Student/Enterprise toggle will soon gate; the
+  toggle's current position (above the DREAMARI/headline group) was chosen with this in
+  mind, but no Enterprise content exists yet.
+- A separate, not-yet-delivered ask: write inline comments on the feedback doc's "Updated
+  Copy" excerpt about sizing/positioning rationale (no copy changes) — distinct from the
+  hero redesign above and still outstanding.
 - Review the open local `v2` Home and Career Report previews. Apply requested refinements,
   then commit and push only when explicitly requested.
 - If the post-onboarding direction is accepted, the next design decision is whether Explore,
