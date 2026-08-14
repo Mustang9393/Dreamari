@@ -4,6 +4,67 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
+- Date: 2026-08-15
+- Active branch: `redesign/marketing-handoff-rebuild` (branched from `main`; `archive/pre-redesign`
+  preserves pre-rebuild `main` per the handoff brief's own instruction)
+- Main branch: not touched this session — do not merge without explicit user authorization
+- Objective: full replacement of the public marketing homepage (`src/app/page.tsx` and
+  everything under `src/components/marketing/`) per
+  `DREAMARI-CLAUDE-CODE-HANDOFF.md` and an iteratively-refined HTML reference prototype
+  supplied directly by the user (`dreamari-landing-wireframe_25.html`), plus a real Figma
+  DTCG token export (`design-tokens.zip`) supplied mid-session. This was an explicit,
+  user-directed full replace — not additive work — and does not touch `/flow`, `/home`,
+  `/career-report`, `/onboarding`, or the app's existing `design-tokens/` pipeline
+  (`design-tokens.generated.css` still builds and validates unchanged; `npm run
+  tokens:check` passes 503 tokens).
+- Deleted entirely: `src/components/hero/*` and `src/components/landing/*` (old
+  DREAMARI-dominant hero, old How It Works scroller) — confirmed no other route imported
+  from either directory before removal.
+- New `src/components/marketing/` tree: `Nav`, `Hero` + `Mascot` (canvas eye-tracking,
+  ported from the reference prototype's vanilla JS), `AudienceToggle`, `HowItWorks` +
+  `ChapterShell` + five chapter components (Build/Match/Play/Explore/Connect) with a
+  shared IntersectionObserver-driven "play once, hold, replay on rescroll" pattern,
+  `SchoolsView` (full enterprise view: hero variant, phone mock, counselor dashboard
+  mock, metrics, org grid), `FinalCTAs`, `Footer`. Tokens live in
+  `marketing/tokens.css`, scoped to a `.marketing-v2` class (not `:root`) specifically so
+  they don't collide with the app's own global DTCG token names.
+- Tokens: `tokens.css` is resolved directly from the user's `design-tokens.zip`
+  (Primitives.Default / Semantic.Dark / Semantic.Light), not hand-guessed — every value
+  has a source-path comment. Fonts: Bricolage Grotesque + Space Mono added via
+  `next/font/google` in `marketing/fonts.ts`, separate from the app's existing Favorit/
+  Montserrat load in `layout.tsx`.
+- **Real bug, worth flagging for any future work in this app's shared `globals.css`**:
+  its `@theme inline` block (`globals.css:141`) binds Tailwind's `font-display` utility
+  class to `--font-favorit-display` at the CSS-generation layer — a scoped CSS custom
+  property override on a descendant does NOT intercept this, because Tailwind bakes the
+  literal variable name into the generated utility rule. Any new page wanting a
+  different display font under `.font-display` must override with an explicit
+  higher-specificity rule (see `marketing/tokens.css`'s `.marketing-v2 .font-display`
+  block), not just redefine `--font-display` in a scoped ancestor.
+- Fixed mid-session (all verified via `getBoundingClientRect`/computed-style checks, not
+  just screenshots, after the browser tool's screenshot capture proved to lag/stale
+  during this session): a CSS sizing loop that collapsed chapter graphics to 0 width
+  when stacked on mobile/tablet (an `inline-flex` glow wrapper conflicting with several
+  chapters' own `w-full` content — Play in particular went completely blank), a
+  resulting loss of horizontal centering for the fixed-width chapters (Match/Explore),
+  the Match card's zoomed end-state overlapping the copy text above it on narrow
+  viewports, a stray visible seam where the hero mascot's ambient glow got hard-clipped
+  by `overflow:hidden` before the fade-to-background overlay had ramped up enough to
+  mask it, and three Tailwind default-breakpoint mismatches (nav links wrapped and
+  chapter rows forced into a cramped row layout in the 768–899px range) where the
+  reference's own breakpoints are 900px/800px/600px, not Tailwind's 768px.
+- Validation: ESLint, `tsc --noEmit`, `npm run tokens:check`, and a full production
+  build (`npm run build`) all pass clean as of the last change this session.
+- Browser-verified: hero mascot eye-tracking and scroll-exit fade, all 5 chapter
+  animations play-once/hold/replay-on-rescroll correctly, Student/Schools toggle
+  (including the light-theme repaint), mobile (390px) and tablet (768px) layouts with no
+  horizontal overflow, chapter-graphic centering and width numerically confirmed clean
+  at mobile width after the fixes above.
+- Not pushed to `origin` or opened as a PR as of this entry — see "Recommended next
+  step" for status once that happens.
+
+### 2026-08-06 hero copy pass (superseded by the full rebuild above)
+
 - Date: 2026-08-06
 - Active branch: `v2`
 - Main branch: do not change without a new explicit instruction

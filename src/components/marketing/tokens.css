@@ -1,0 +1,139 @@
+/* Resolved directly from the Figma "Dreamari Design System v2.0" DTCG token export
+   (Primitives.Default / Semantic.Dark / Semantic.Light — design-tokens.zip). Values are
+   transcribed with their source token path in each comment for traceability; this file
+   has no hand-guessed numbers. Scoped to .marketing-v2 rather than :root: the rest of
+   the app has its own separate DTCG pipeline (design-tokens/, design-tokens.generated.css)
+   for its own routes, and this rebuild deliberately uses this fresh export instead, per
+   explicit direction, without clobbering those global names for /flow, /home,
+   /career-report, or /onboarding. */
+.marketing-v2 {
+  /* ---- Semantic colors (Semantic.Dark) ---- */
+  --background: #05070f; /* neutral.900 */
+  --foreground: #f4f7ff; /* neutral.50 */
+  --card: #0e0f18; /* neutral.800 */
+  --muted: #ffffff08; /* white-alpha.3 */
+  --muted-foreground: #ffffff9e; /* white-alpha.62 */
+  --border: #ffffff17; /* white-alpha.9 */
+  --primary: #2f6bf2; /* blue.600 */
+  --primary-foreground: #ffffff; /* white */
+  --secondary: #ffffff17; /* white-alpha.9 */
+  --secondary-foreground: #f4f7ff; /* neutral.50 */
+  --accent: #7d5cff; /* purple.600 */
+  --destructive: #ef4444; /* red.550 */
+  --glass-surface-1: #ffffff08; /* white-alpha.3 */
+  --glass-surface-2: #ffffff17; /* white-alpha.9 */
+  --glass-surface-3: #0c1023cc; /* dark-alpha.80 */
+  --glass-border: #ffffff17; /* white-alpha.9 */
+
+  /* ---- Career "world" colors (Semantic.Dark, 13-world set) ---- */
+  --world-business-money-office: #ffb81f; /* amber.500 */
+  --world-health-medicine: #14b8a6; /* teal.500 */
+  --world-tech-engineering-design: #6366f1; /* indigo.500 */
+  --world-building-construction: #ff9640; /* orange.500 */
+  --world-arts-media-sport: #ff4585; /* pink.600 */
+  --world-food-farming-nature: #1fc76e; /* green.500 */
+  --world-science-research: #00c8dc; /* cyan.500 */
+  --world-law-safety-government: #e5484d; /* red.500 */
+  --world-driving-flying-shipping: #3b82f6;
+  --world-factories-making-things: #c2703d;
+  --world-fixing-machines-engines: #64748b;
+  --world-helping-human-services: #c05fa6;
+  --world-teaching-learning: #8b5cf6;
+
+  /* ---- Hero background accents (Semantic.Dark -> hero.*-dark) ---- */
+  --hero-accent-purple: #2e2466; /* hero.purple-dark */
+  --hero-accent-teal: #0f474d; /* hero.teal-dark */
+  --hero-mid: #0c0d26; /* hero.mid-dark */
+  --hero-accent-pink: #471438; /* hero.pink-dark */
+
+  /* ---- Scrims ---- */
+  --scrim-transparent: #05070f00;
+  --scrim-medium: #05070f80;
+  --scrim-heavy: #05070fbf;
+
+  /* ---- Finance-world glow (Semantic.Dark -> glow.business-finance) ---- */
+  --glow-business-finance-0: #ffb81f00;
+  --glow-business-finance-38: #ffb81f61;
+  --glow-business-finance-92: #ffb81feb;
+
+  /* ---- Spacing scale (Primitives.Default -> space) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-13: 52px;
+  --space-14: 56px;
+
+  /* ---- Radius scale (Primitives.Default -> radius / radius-*-alt) ---- */
+  --radius-xs: 4px;
+  --radius-sm-alt: 5px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-md-alt: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 999px;
+
+  /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
+  --shadow-sm: 0 2px 8px 0 #00000073;
+  --shadow-md: 0 8px 24px 0 #00000085, 0 2px 8px 0 #0000003d;
+  --shadow-lg: 0 16px 48px -4px #0000009e, 0 4px 16px 0 #00000047;
+
+  /* ---- Type families (Primitives.Default -> font-family) ---- */
+  --font-display: var(--font-bricolage), sans-serif; /* font-family.display: Bricolage Grotesque */
+  --font-body: var(--font-montserrat), sans-serif; /* font-family.montserrat: Montserrat */
+  --font-mono: var(--font-space-mono), monospace; /* reference prototype's --font-mono: Space Mono */
+
+  /* Reference prototype's own local accent tint used for the hero headline's "dream
+     career." span — lighter than --primary itself. */
+  --primary-tint: #7aa2ff;
+
+  --nav-bg: rgba(5, 7, 15, 0.72);
+
+  background: var(--background);
+  color: var(--foreground);
+  /* The reference prototype sets Bricolage Grotesque as the page-WIDE default (body,
+     headings, buttons, nav) — Montserrat is only used where a poster-title font is
+     explicitly requested, never as running body copy. */
+  font-family: var(--font-display);
+}
+
+/* This app's shared Tailwind theme (globals.css) binds the `font-display` and
+   `font-mono` utility classes to ITS OWN global fonts (Favorit, the DREAMARI wordmark
+   face; and Tailwind's generic system-mono stack) at the CSS-utility-generation layer,
+   which a scoped custom property override can't intercept. These rules force this
+   scope's own fonts back for any element still using those utility classNames. */
+.marketing-v2 .font-display {
+  font-family: var(--font-display);
+}
+.marketing-v2 .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Schools/Enterprise audience: light mode (Semantic.Light), resolved the same way. */
+.marketing-v2 .theme-light {
+  --background: #f4f7ff; /* neutral.50 */
+  --foreground: #05070f; /* neutral.900 */
+  --card: #d8dbe8; /* neutral.100 */
+  --muted-foreground: #4a4f6d; /* neutral.400 */
+  --border: #b0b4c7; /* neutral.200 */
+  --primary: #1e4fcc; /* blue.700 */
+  --glass-surface-1: #00000008; /* black-alpha.3 */
+  --glass-surface-2: #00000017; /* black-alpha.9 */
+  --glass-surface-3: #05081466; /* black-alpha.40 */
+  --nav-bg: rgba(244, 247, 255, 0.85);
+  /* Redefining the custom properties alone doesn't repaint anything — this element's
+     own background/color must be re-applied here too, since .marketing-v2's background
+     was already painted from ITS OWN (dark) scope and doesn't recompute just because a
+     descendant redefines the variable. */
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100%;
+  transition: background 0.3s ease, color 0.3s ease;
+}
