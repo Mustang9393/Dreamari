@@ -285,7 +285,10 @@ export function ExploreChapter() {
       >
         <div
           ref={trackRef}
-          className="mkt-explore-track absolute inset-0 overflow-y-auto"
+          // touch-pan-y locks touch scrolling to vertical only — without it the
+          // browser's default touch-action allows free 2D panning, which read as
+          // "dragging the contents anywhere" instead of a normal vertical feed.
+          className="mkt-explore-track absolute inset-0 touch-pan-y overflow-y-auto"
           style={{ scrollSnapType: "y mandatory" }}
           onScroll={() => setScrolled(true)}
         >

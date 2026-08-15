@@ -509,6 +509,18 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   glowing aura around it.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 locked Explore's feed to vertical-only touch scrolling
+
+- Reported as "scrolling within the card goes side to side and vertical, like a free
+  scroll to anywhere / dragging the contents." `.mkt-explore-track` had no explicit
+  `touch-action`, so the browser's default (`auto`) let touch gestures pan in any
+  direction rather than committing to vertical-only scroll the moment a `overflow-y-
+  auto` + `scroll-snap-type: y` feed is touched. Added `touch-pan-y` (Tailwind utility
+  for `touch-action: pan-y`), matching the same fix already used on Match's card.
+  Confirmed via computed style that `touchAction` now resolves to `pan-y`.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
