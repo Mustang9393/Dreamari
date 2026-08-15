@@ -92,7 +92,7 @@ export function MatchChapter() {
         </div>
         <div
           className="mkt-m3-actions relative z-[3] flex items-center"
-          style={{ marginTop: "calc(var(--mu) * -34px)" }}
+          style={{ marginTop: "calc(var(--mu) * -14px)" }}
         >
           {/* Fades/collapses out in sync with the center card's zoom-in, so the flex
              row shrinks to just the heart, which the row's own centering re-lands in

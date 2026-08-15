@@ -31,7 +31,15 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
           setPlaying(false);
         }
       },
-      { threshold: 0.35 },
+      // A plain 35%-visible threshold triggers as soon as a chapter's TOP edge
+      // crosses into a tall viewport — on desktop, where a section is short
+      // relative to viewport height, the next chapter down can clear 35% while
+      // the current one is still front and center, so it starts (and often
+      // finishes) its animation before the reader ever scrolls to it. Shrinking
+      // the observed root to a thin band around the viewport's vertical center
+      // instead means a chapter only counts as "in view" once it's actually
+      // centered on screen, at any viewport height.
+      { rootMargin: "-40% 0px -40% 0px", threshold: 0 },
     );
     io.observe(el);
     return () => {
