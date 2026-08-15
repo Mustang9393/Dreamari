@@ -54,7 +54,7 @@ export function ChapterShell({
             {eyebrow}
           </div>
           <h2
-            className="mt-2 font-extrabold"
+            className="mt-2 font-extrabold uppercase"
             style={{
               fontSize: "clamp(2.6rem, 6vw, 4.6rem)",
               lineHeight: 1,

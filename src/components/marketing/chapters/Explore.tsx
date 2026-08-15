@@ -30,7 +30,7 @@ export function ExploreChapter() {
       eyebrow="Chapter Four"
       title="Explore"
       color="#1fc76e"
-      oneliner="8 worlds. Still shaped around you."
+      oneliner="13 worlds. Still shaped around you."
       flip
       altBackground
       graphicRef={graphicRef}

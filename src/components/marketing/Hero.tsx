@@ -62,16 +62,26 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-3 max-w-[500px] text-[16px] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)" }}
           >
-            Step into real careers through guided simulations. Build the skills, earn the proof, and picture yourself
-            in the room. One clear step at a time.
+            Build your profile, match with careers, play day-in-the-life work simulations, explore new paths, and
+            connect with professionals. One clear step at a time.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">
-              Start exploring →
+              Start my journey
             </MarketingButton>
             <MarketingButton href="#how-it-works" variant="ghost">
               See how it works
             </MarketingButton>
+          </div>
+          {/* Hidden on short viewports (same tier the mascot-visibility fix already
+              tightens elsewhere) so this never competes with the mascot's peeking sliver
+              for the little vertical room a short phone has above the fold. */}
+          <div
+            className="mt-8 font-mono text-[11px] font-bold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            Scroll
+            <div className="mt-1 text-[14px] leading-none">⌄</div>
           </div>
         </div>
 

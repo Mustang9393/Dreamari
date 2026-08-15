@@ -114,6 +114,15 @@
      headings, buttons, nav) — Montserrat is only used where a poster-title font is
      explicitly requested, never as running body copy. */
   font-family: var(--font-display);
+
+  /* A vertical swipe on mobile was also dragging the page sideways (rubber-band
+     scrolling in all directions). touch-action locks panning gestures to the Y axis so
+     a drag that starts slightly off-vertical still only scrolls the page down/up;
+     overflow-x/overscroll-behavior-x back that up in case any descendant's layout ever
+     creeps a fraction past 100% width. */
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 
 /* See --mascot-size above: shrink the floor as viewport height gets tighter, so the

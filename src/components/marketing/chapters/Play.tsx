@@ -67,14 +67,8 @@ export function PlayChapter() {
           </span>
         </div>
         <div style={{ background: "var(--glass-surface-1)" }}>
-          <div className="mkt-dialogue flex items-center gap-4 px-[clamp(14px,2.8cqw,24px)] pt-[clamp(11px,2.2cqw,20px)] pb-[clamp(8px,1.6cqw,14px)]">
-            <span
-              className="flex-none rounded-full px-[clamp(8px,1.4cqw,13px)] py-[clamp(4px,.8cqw,7px)] font-mono text-[clamp(9px,1.4cqw,13px)] font-bold tracking-[.05em] uppercase"
-              style={{ background: "var(--glass-surface-2)", color: "var(--c)" }}
-            >
-              Dreamy
-            </span>
-            <span className="flex-1 text-[clamp(11px,1.9cqw,15px)] leading-snug" style={{ color: "var(--foreground)" }}>
+          <div className="mkt-dialogue flex items-center px-[clamp(14px,2.8cqw,24px)] pt-[clamp(11px,2.2cqw,20px)] pb-[clamp(8px,1.6cqw,14px)]">
+            <span className="flex-1 text-[clamp(13px,2.3cqw,18px)] leading-snug font-bold" style={{ color: "var(--foreground)" }}>
               &quot;A client&apos;s portfolio just dropped 12% overnight. What do you do?&quot;
             </span>
           </div>

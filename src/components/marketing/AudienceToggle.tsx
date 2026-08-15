@@ -20,7 +20,7 @@ export function AudienceToggle({ view, onChange }: AudienceToggleProps) {
               : { background: "transparent", color: "var(--muted-foreground)" }
           }
         >
-          {v === "student" ? "Students" : "Schools"}
+          {v === "student" ? "Student" : "Enterprise"}
         </button>
       ))}
     </div>
