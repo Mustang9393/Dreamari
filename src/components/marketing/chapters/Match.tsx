@@ -52,7 +52,28 @@ function posterTitleStyle(title: string): React.CSSProperties {
 const SWIPE_COMMIT_PX = 90;
 
 export function MatchChapter() {
-  const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [graphicRef, playing, graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
+  return (
+    <ChapterShell
+      id="match"
+      title="Match"
+      color={WORLD_COLOR}
+      oneliner="with the right college major, schools and career."
+      flip
+      graphicRef={graphicRef}
+      playing={playing}
+      graphicRevealed={graphicRevealed}
+    >
+      {/* Keyed by visitId: remounts this whole demo fresh every time the reader
+         scrolls back onto Match, so a swiped deck or a "You're matched" screen from a
+         previous visit doesn't stay stuck showing — the swipe interaction and the
+         celebration are both there to replay every visit, not just the first. */}
+      <MatchDemo key={visitId} />
+    </ChapterShell>
+  );
+}
+
+function MatchDemo() {
   const [stack, setStack] = useState(CARDS);
   const [exiting, setExiting] = useState<{ key: string; direction: "like" | "pass" } | null>(null);
   const [flipped, setFlipped] = useState(false);
@@ -158,16 +179,6 @@ export function MatchChapter() {
   }
 
   return (
-    <ChapterShell
-      id="match"
-      title="Match"
-      color={WORLD_COLOR}
-      oneliner="with the right college major, schools and career."
-      flip
-      graphicRef={graphicRef}
-      playing={playing}
-      graphicRevealed={graphicRevealed}
-    >
       <div className="relative z-[1] flex h-full w-full flex-col items-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
         {/* aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared
            frame on any viewport: flex:1 gives it the column's available height, then
@@ -419,6 +430,5 @@ export function MatchChapter() {
           </div>
         )}
       </div>
-    </ChapterShell>
   );
 }

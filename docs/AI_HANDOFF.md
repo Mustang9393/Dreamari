@@ -587,6 +587,55 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   Browser-verified at desktop and mobile (375px) widths.
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 all four interactive chapters reset and replay on every scroll-back
+
+- Direct request: every chapter's demo (and Explore's nudge specifically) should
+  start over and replay each time the reader scrolls back onto it, not just once
+  ever. `usePlayingOnScroll` (`scrollHooks.ts`) previously exposed `everPlayed`
+  (sticky true forever after the first reveal) — fine for a one-time entrance fade,
+  useless for "reset on every revisit." Added a `visitId` counter, returned as the
+  hook's new 4th tuple element, that increments every time the IntersectionObserver
+  reports the section entering view (unlike `everPlayed`, this changes on every
+  single visit, including the first).
+- Each chapter with its own interactive state (Build's picked interest, Match's
+  swipe deck/celebration, Play's picked scenario option, Explore's carousel
+  position/nudge) was split into an outer component (still owns `ChapterShell` +
+  the `usePlayingOnScroll` call) and an inner `*Demo`/`ExploreCarousel` component
+  holding all of that local state, mounted as `<XDemo key={visitId} />`. Remounting
+  via key is the standard React pattern for "reset all local state when X changes"
+  and was the correct fix here — a first attempt just called the state setters
+  directly inside a `useEffect(() => setX(null), [visitId])` and was rejected by
+  this repo's `react-hooks/set-state-in-effect` eslint rule (calling setState
+  synchronously inside an effect body is flagged as an error, not a warning); a
+  fresh mount's own effects already replay any entrance sequence without ever
+  calling setState from a change-triggered effect.
+- Explore's nudge effect no longer depends on `graphicRevealed`/`scrolled` — since
+  `ExploreCarousel` now remounts fresh every visit, a plain mount-time effect
+  (deps: `[containerHeight]` only) already replays the sequence each time; a new
+  `scrolledRef` mirrors the `scrolled` state so the chained setTimeouts can still
+  bail out cleanly if the reader interacts partway through, without needing
+  `scrolled` in the dependency array (which would otherwise skip the whole
+  sequence once it's already true). Also shaved the nudge's initial delay from
+  900ms to 650ms per direct feedback ("start a few ms sooner").
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check`, and
+  `eslint` on all five touched files all pass clean (one pre-existing
+  `react-hooks/refs` error in `Explore.tsx` predates this change — confirmed via
+  `git stash` that it's already present on `main` before this commit, unrelated to
+  this work).
+- Not yet browser-verified end-to-end: this session's browser tab got stuck with
+  `document.hidden === true` (confirmed via a manual `IntersectionObserver` probe
+  that never fired a single callback, not even its mandatory initial one),
+  which is a page-visibility artifact of the tool's tab, not the app — Chrome
+  throttles/suspends `IntersectionObserver` for hidden documents, and this would
+  block the SAME reveal/replay mechanism for all five chapters equally, not just
+  the new code. Restarting the dev server, clearing `.next`, and opening multiple
+  fresh tabs did not clear it. The remount-via-key implementation itself follows a
+  standard, well-established React pattern and needs no exotic runtime behavior to
+  work correctly once the tab is genuinely visible/focused — flagging for whoever
+  picks this up next to do a quick manual scroll-away-and-back check on each
+  chapter before considering this fully closed.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

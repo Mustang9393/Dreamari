@@ -27,7 +27,27 @@ const CHECK = (
 );
 
 export function PlayChapter() {
-  const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [graphicRef, , graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
+
+  return (
+    <ChapterShell
+      id="play"
+      title="Play"
+      color="#3b82f6"
+      oneliner="a day-in-the-life situation where every instinct pays off."
+      graphicRef={graphicRef}
+      playing={false}
+      graphicRevealed={graphicRevealed}
+    >
+      {/* Keyed by visitId: remounts this demo fresh every time the reader scrolls back
+         onto Play, so a previously-picked option (and its feedback) doesn't stay stuck
+         showing — the pick-and-react moment is there to replay every visit. */}
+      <PlayDemo key={visitId} />
+    </ChapterShell>
+  );
+}
+
+function PlayDemo() {
   const [pickedIndex, setPickedIndex] = useState<number | null>(null);
 
   // Same act-then-advance rhythm as Build and Match: advance the moment the burst/glow
@@ -43,19 +63,10 @@ export function PlayChapter() {
     return () => clearTimeout(timeout);
   }, [pickedIndex]);
 
+  // Full-bleed scene (not a cropped banner) with the simulation floating on top in a
+  // glass panel, same read as Match's photo cards: the scene stays visible behind a
+  // translucent/blurred surface rather than a solid one covering it.
   return (
-    <ChapterShell
-      id="play"
-      title="Play"
-      color="#3b82f6"
-      oneliner="a day-in-the-life situation where every instinct pays off."
-      graphicRef={graphicRef}
-      playing={false}
-      graphicRevealed={graphicRevealed}
-    >
-      {/* Full-bleed scene (not a cropped banner) with the simulation floating on top in
-         a glass panel, same read as Match's photo cards: the scene stays visible behind
-         a translucent/blurred surface rather than a solid one covering it. */}
       <div
         className={`mkt-play-card relative z-[1] h-full max-w-full overflow-hidden ${pickedIndex !== null ? "mkt-play-feedback" : ""}`}
         style={{ width: "clamp(300px, 90cqw, 560px)", aspectRatio: "168 / 300", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
@@ -173,6 +184,5 @@ export function PlayChapter() {
           </div>
         )}
       </div>
-    </ChapterShell>
   );
 }

@@ -217,7 +217,29 @@ const GUTTER_FRACTION = 0.09;
 const LAST_INDEX = CARDS.length - 1;
 
 export function ExploreChapter() {
-  const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [graphicRef, , graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
+
+  return (
+    <ChapterShell
+      id="explore"
+      title="Explore"
+      color="#1fc76e"
+      oneliner="careers, companies, and pathways with depth."
+      flip
+      graphicRef={graphicRef}
+      playing={false}
+      graphicRevealed={graphicRevealed}
+    >
+      {/* Keyed by visitId: remounts the whole carousel fresh every time the reader
+         scrolls back onto Explore, so it always starts over from the first card with
+         the peek+arrow nudge ready to replay, rather than staying wherever a previous
+         visit left it. */}
+      <ExploreCarousel key={visitId} />
+    </ChapterShell>
+  );
+}
+
+function ExploreCarousel() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -233,6 +255,11 @@ export function ExploreChapter() {
   const pointerActive = useRef(false);
   const moved = useRef(false);
   const startY = useRef(0);
+  // Mirrors `scrolled` state for the nudge sequence's chained setTimeouts below —
+  // those timeouts are scheduled once (the effect only depends on containerHeight)
+  // and would otherwise read a stale, always-false `scrolled` from that render's
+  // closure even after the reader interacts partway through the sequence.
+  const scrolledRef = useRef(false);
 
   // Shared position math for a card at a given index — used both by the main clipped
   // card loop and by the unclipped Wildcard aura sibling below, so the aura always
@@ -281,6 +308,10 @@ export function ExploreChapter() {
     document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  useEffect(() => {
+    scrolledRef.current = scrolled;
+  }, [scrolled]);
+
   // Nudge, in two beats: first the next card physically slides up into view and
   // settles back (a "look, this scrolls" cue more intuitive than an icon alone), THEN
   // — once that's done, not simultaneously — a small down-arrow fades in as a
@@ -288,25 +319,38 @@ export function ExploreChapter() {
   // competing for attention at the same time; sequencing them reads as one clear cue
   // instead of two clashing ones. Reuses the exact same dragPx channel a real swipe
   // would drive, so the peek is just "what a small real swipe would look like."
+  // Depends only on containerHeight (not `scrolled`/`graphicRevealed`): this whole
+  // component remounts fresh via `key={visitId}` every time the reader scrolls back
+  // onto Explore, so a plain mount-time effect already replays the sequence every
+  // visit — the `scrolledRef` checks below just bail out cleanly if the reader
+  // interacts partway through the chained timeouts, without needing `scrolled` in
+  // the dependency array (which would otherwise skip the whole sequence once it's
+  // already true).
   useEffect(() => {
-    if (!graphicRevealed || scrolled || containerHeight === 0) return;
+    if (containerHeight === 0) return;
     let cancelPeek: (() => void) | undefined;
     let cancelSettle: (() => void) | undefined;
     const cardHeight = containerHeight * (1 - 2 * GUTTER_FRACTION);
     const peekPx = cardHeight * 0.22;
     const timeout = setTimeout(() => {
+      if (scrolledRef.current) return;
       cancelPeek = animateNumber(0, peekPx, 900, setDragPx);
       setTimeout(() => {
+        if (scrolledRef.current) return;
         cancelSettle = animateNumber(peekPx, 0, 700, setDragPx);
-        setTimeout(() => setShowArrow(true), 700);
+        setTimeout(() => {
+          if (!scrolledRef.current) setShowArrow(true);
+        }, 700);
       }, 900 + 650);
-    }, 900);
+      // Was 900ms — a few ms sooner per direct feedback, so the tease starts a
+      // little earlier without crowding the copy's own reveal transition above it.
+    }, 650);
     return () => {
       clearTimeout(timeout);
       cancelPeek?.();
       cancelSettle?.();
     };
-  }, [graphicRevealed, scrolled, containerHeight]);
+  }, [containerHeight]);
 
   function commit(direction: 1 | -1) {
     setScrolled(true);
@@ -362,30 +406,20 @@ export function ExploreChapter() {
     }, 550);
   }
 
+  // aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared frame on
+  // any viewport, matching Match's card sizing exactly.
+  //
+  // No native scroll here anymore — this is a committed, index-based carousel
+  // (TikTok/Reels-style paging, per direct request) rather than a free-scrolling list
+  // that happens to snap. Every card is rendered at `cardHeight` (shorter than the
+  // container by a `GUTTER_FRACTION` margin top and bottom — see the constant's
+  // comment for why that margin has to exist at all) and placed via
+  // `translateY(offset * cardHeight)`, where `offset` is continuous (not just -1/0/1)
+  // so a live drag/peek smoothly interpolates position, scale, and opacity — the
+  // focused card fills that space fully, and the ones above/below shrink and fade the
+  // further they are from center, their sliver peeking into the gutter, reading as
+  // spatially behind rather than just visually dimmed.
   return (
-    <ChapterShell
-      id="explore"
-      title="Explore"
-      color="#1fc76e"
-      oneliner="careers, companies, and pathways with depth."
-      flip
-      graphicRef={graphicRef}
-      playing={false}
-      graphicRevealed={graphicRevealed}
-    >
-      {/* aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared frame
-         on any viewport, matching Match's card sizing exactly.
-
-         No native scroll here anymore — this is a committed, index-based carousel
-         (TikTok/Reels-style paging, per direct request) rather than a free-scrolling
-         list that happens to snap. Every card is rendered at `cardHeight` (shorter than
-         the container by a `GUTTER_FRACTION` margin top and bottom — see the constant's
-         comment for why that margin has to exist at all) and placed via
-         `translateY(offset * cardHeight)`, where `offset` is continuous (not just
-         -1/0/1) so a live drag/peek smoothly interpolates position, scale, and
-         opacity — the focused card fills that space fully, and the ones above/below
-         shrink and fade the further they are from center, their sliver peeking into the
-         gutter, reading as spatially behind rather than just visually dimmed. */}
       <div className="relative h-full max-w-full" style={{ aspectRatio: "168 / 240" }}>
         <div
           ref={containerRef}
@@ -498,6 +532,5 @@ export function ExploreChapter() {
           ))}
         </div>
       </div>
-    </ChapterShell>
   );
 }

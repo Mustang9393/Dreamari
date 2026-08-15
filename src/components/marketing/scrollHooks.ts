@@ -17,6 +17,13 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [playing, setPlaying] = useState(false);
   const [everPlayed, setEverPlayed] = useState(false);
+  // Increments every time the section crosses INTO view (never back down) — unlike
+  // everPlayed (sticky true forever, so it can only ever gate a first-time reveal),
+  // this changes on every single visit, including the first. A chapter with its own
+  // interactive state (a picked answer, a swiped deck, a carousel position) can key a
+  // "reset to initial + replay the entrance cue" effect off this value so the whole
+  // demo starts fresh each time a reader scrolls back onto it, not just once ever.
+  const [visitId, setVisitId] = useState(0);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -26,6 +33,7 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
         clearTimeout(timeout);
         if (entry.isIntersecting) {
           setEverPlayed(true);
+          setVisitId((v) => v + 1);
           timeout = setTimeout(() => setPlaying(true), STORYBOARD_READ_DELAY_MS);
         } else {
           setPlaying(false);
@@ -53,7 +61,7 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
   // tell a plain state field on an object apart from ref.current when both come back
   // together, and flags every access as "reading a ref during render." A tuple mirrors
   // useState's own shape and sidesteps that false positive.
-  return [ref, playing, everPlayed] as const;
+  return [ref, playing, everPlayed, visitId] as const;
 }
 
 // Fires once, permanently — used by the side-aware chapter-copy reveal and the final CTA.
