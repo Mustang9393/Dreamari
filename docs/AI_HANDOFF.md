@@ -572,7 +572,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   boundary handoff to Play (up) and Connect (down) at the first/last card, peek
   visibility on both neighbors, rounded corners on all three cards, and the
   Wildcard's border/sheen rendering with no glow artifacts leaking past the frame.
-- Not yet pushed to `origin` as of this entry.
+- Pushed to `origin/main` with explicit user authorization.
+
+### 2026-08-16 Hero subhead: force the second sentence onto its own line
+
+- The hero's two-sentence subhead ("Build, match, play, explore, and connect, all in
+  one place. One clear step at a time.") was one plain text node, so its wrap points
+  were whatever the browser's line-breaking happened to land on at a given width —
+  at some widths that left the second sentence's last couple of words orphaned alone
+  on their own line. Split into two `<span className="block">` elements, one per
+  sentence, so each sentence always starts its own line regardless of viewport width;
+  each still wraps internally on its own if it's ever too long for the line.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified at desktop and mobile (375px) widths.
+- Pushed to `origin/main` with explicit user authorization.
 
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
