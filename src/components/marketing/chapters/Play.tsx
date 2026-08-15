@@ -32,6 +32,14 @@ export function PlayChapter() {
           className="relative h-[clamp(88px,16cqw,180px)] overflow-hidden"
           style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--c) 30%, #0b0d16), #05070f 88%)" }}
         >
+          {/* Real in-game art as the actual scene, not a faint wash — only scrimmed at
+             the very top/bottom edges so the chart/badge stay readable and it blends
+             into the panel below, rather than darkened all over. */}
+          <Image src="/images/play-illustration.jpg" alt="" fill className="object-cover" style={{ objectPosition: "center 30%" }} />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--c) 22%, transparent) 0%, transparent 30%, transparent 70%, #05070fe6 100%)" }}
+          />
           <svg className="mkt-chart absolute inset-0 h-full w-full" viewBox="0 0 200 80" preserveAspectRatio="none">
             <defs>
               <linearGradient id="playChartFade" x1="0" y1="0" x2="0" y2="1">
@@ -57,13 +65,6 @@ export function PlayChapter() {
           >
             -12%
           </span>
-          <Image
-            src="/images/dreamy-expressions/dreamy-nervous.webp"
-            alt=""
-            width={78}
-            height={78}
-            className="absolute bottom-[clamp(6px,1.4cqw,14px)] left-[clamp(14px,3cqw,30px)] h-[clamp(38px,7.5cqw,78px)] w-[clamp(38px,7.5cqw,78px)] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,.5)]"
-          />
         </div>
         <div style={{ background: "var(--glass-surface-1)" }}>
           <div className="mkt-dialogue flex items-center gap-4 px-[clamp(14px,2.8cqw,24px)] pt-[clamp(11px,2.2cqw,20px)] pb-[clamp(8px,1.6cqw,14px)]">
