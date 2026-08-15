@@ -18,13 +18,13 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // lab/clinical-coded shots rather than going without a photo. Salary bands are the same
 // standard entry-level estimates used in Match, not sourced from the taxonomy sheet
 // (which has no salary column filled in).
-const INDUSTRY = "Business & Finance";
-
 const CARDS = [
-  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
-  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
-  { photo: "/images/career-product-designer.jpg", title: "Human Resources", matchLevel: "Stretch", tagColor: "#ffb81f", salary: "$55K-90K", major: "Human Resources" },
-  { photo: "/images/career-neurosurgeon.jpg", title: "Food Scientist", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
+  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
+  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
+  { photo: "/images/career-product-designer.jpg", title: "Human Resources", industry: "Business & Finance", matchLevel: "Stretch", tagColor: "#ffb81f", salary: "$55K-90K", major: "Human Resources" },
+  // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
+  // it should never say "Business & Finance" just because the other three do.
+  { photo: "/images/career-neurosurgeon.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
 const ACTION_ICONS = [
@@ -121,7 +121,7 @@ function ExploreCardBody({ card }: { card: Card }) {
             color: "#ffb81f",
           }}
         >
-          {INDUSTRY}
+          {card.industry}
         </p>
         <div className="mt-2 flex flex-wrap items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 10px)" }}>
           {[
@@ -200,7 +200,7 @@ export function ExploreChapter() {
       <div
         className="relative h-full max-w-full overflow-hidden border"
         style={{
-          aspectRatio: "168 / 300",
+          aspectRatio: "168 / 240",
           borderRadius: "calc(var(--mu) * 20px)",
           borderColor: "var(--glass-surface-2)",
         }}

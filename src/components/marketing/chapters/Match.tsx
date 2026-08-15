@@ -164,7 +164,7 @@ export function MatchChapter() {
            frame on any viewport: flex:1 gives it the column's available height, then
            aspect-ratio derives width from that — capped by max-width so a tall/narrow
            frame still caps width instead of ever overflowing it sideways. */}
-        <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 300" }}>
+        <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 240" }}>
           {matched ? (
             <div
               className="mkt-match-celebrate absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
@@ -371,9 +371,9 @@ export function MatchChapter() {
               aria-label="Pass"
               onClick={() => act("pass")}
               className="flex items-center justify-center rounded-full border"
-              style={{ width: "calc(var(--mu) * 42px)", height: "calc(var(--mu) * 42px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
                 <path d="M18 6 6 18" />
                 <path d="m6 6 12 12" />
               </svg>
@@ -383,9 +383,9 @@ export function MatchChapter() {
               aria-label="Like"
               onClick={() => act("like")}
               className="flex items-center justify-center rounded-full border"
-              style={{ width: "calc(var(--mu) * 42px)", height: "calc(var(--mu) * 42px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
+              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
               </svg>
             </button>

@@ -196,6 +196,31 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   Browser-verified all 5 chapters at both viewport widths.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 Food Scientist industry fix, bigger Match buttons, mobile safe-area
+
+- Explore's industry line was a single shared `INDUSTRY` constant ("Business &
+  Finance") applied to all four cards, including the Wildcard — per direct feedback
+  that a food scientist obviously isn't in business/finance, this is now a per-card
+  `industry` field; the three business-track cards keep "Business & Finance," Food
+  Scientist now reads "Science & Research."
+- Match's (and, to stay the same scale per the standing "read as the same thing"
+  requirement, Explore's) card aspect ratio moved from `168/300` to `168/240` — a bit
+  shorter and wider — freeing enough vertical room to grow the like/pass button
+  circles from 42px\*mu to 52px\*mu (icons 18→22px\*mu) per direct request that they
+  read as too small to comfortably tap.
+- Fixed the iOS Safari "compact tab bar" floating chip overlapping the bottom of the
+  mobile layout: `ChapterShell`'s row gap/padding was a flat 40px/32px at every width
+  below 901px, which was tight enough that the frame's content (e.g. Match's like/pass
+  buttons) sat right at the phone's bottom edge, right where that floating chip lives.
+  Reduced the mobile-only gap/padding, dropped the frame's dvh ceiling from 82 to
+  74dvh, and added real safe-area room below 640px specifically (`max-[640px]:pb-
+  [calc(1.25rem+env(safe-area-inset-bottom))]`) so bottom controls clear it.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified at 375px mobile width across Match/Play/Connect/Explore — no
+  cropping introduced by the smaller dvh ceiling, Food Scientist now reads "Science &
+  Research," Match's card is visibly wider/shorter with bigger buttons.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

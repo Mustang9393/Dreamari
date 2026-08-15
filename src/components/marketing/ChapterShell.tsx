@@ -40,8 +40,15 @@ export function ChapterShell({
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
           have room for). */}
+      {/* Tighter gap/padding on mobile (was gap-10/py-8 at every width below 901px) so
+         the stacked copy+graphic column doesn't run all the way to the bottom edge —
+         iOS Safari's floating compact-tab-bar "chip" sits on top of that edge and was
+         overlapping the bottom-most content (e.g. Match's like/pass buttons). The
+         extra max-[640px] bottom padding adds real safe-area room on phones
+         specifically; sm:/lg: (tablet and up) keep their own larger padding
+         untouched since the chip issue is a phone-only concern. */}
       <div
-        className={`mx-auto flex w-full max-w-[1200px] items-center gap-10 px-6 py-8 max-[900px]:flex-col sm:py-10 min-[901px]:gap-[60px] lg:py-14 ${flip ? "flex-row-reverse" : "flex-row"}`}
+        className={`mx-auto flex w-full max-w-[1200px] items-center gap-6 px-6 pt-6 pb-6 max-[900px]:flex-col max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 min-[901px]:gap-[60px] lg:pt-14 lg:pb-14 ${flip ? "flex-row-reverse" : "flex-row"}`}
         style={{ ["--c" as string]: color }}
       >
         <div
@@ -113,7 +120,7 @@ export function ChapterShell({
               second container-type here, sized off this already-capped frame, gives
               every chapter's inner text a --mu that maxes out around 1.5 (480/320)
               instead of 2.3, matching the frame's real size on any viewport. */}
-          <div className="mkt-graphic-scale relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(82dvh, 680px)" }}>
+          <div className="mkt-graphic-scale relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(74dvh, 680px)" }}>
             {children}
           </div>
         </div>
