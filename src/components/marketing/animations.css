@@ -17,123 +17,28 @@
   --mu: clamp(1, calc(100cqw / 320px), 2.3);
 }
 
-/* ---------- Build: three interest tags, Finance wins ---------- */
-.mkt-tag {
-  transform-origin: center center;
+/* ---------- Shared: nudge pulse on the first, un-picked interactive option (Build,
+   Play) — reads --c off the graphic's own accent, so it's the right color per chapter. */
+@keyframes mkt-nudge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 35%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 0%, transparent); }
 }
-/* Rest state (pre-`data-playing`) has to be set here, not just at the keyframe's own
-   0% — without it the checkmark defaults to plain visible CSS opacity and reads as
-   "already selected" for the ~900ms reading beat before the animation starts, then
-   visibly un-selects before selecting again once the keyframe takes over. */
-.mkt-tag-check {
-  opacity: 0;
-  transform: scale(0.4);
-}
-.mkt-graphic[data-playing="true"] .mkt-tag.mkt-top,
-.mkt-graphic[data-playing="true"] .mkt-tag.mkt-bottom {
-  animation: mkt-build-tag-fade-out 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
-}
-.mkt-graphic[data-playing="true"] .mkt-tag.mkt-finance {
-  animation: mkt-build-tag-focus 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards;
-}
-.mkt-graphic[data-playing="true"] .mkt-tag.mkt-finance .mkt-tag-check {
-  animation: mkt-build-check-pop 2s 1 forwards;
-}
-@keyframes mkt-build-tag-fade-out {
-  0%, 28% { opacity: 1; transform: scale(1); }
-  50%, 100% { opacity: 0; transform: scale(0.82); animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
-}
-@keyframes mkt-build-tag-focus {
-  0%, 28% { transform: scale(1); box-shadow: none; }
-  50% { transform: scale(1); animation-timing-function: cubic-bezier(0.34, 1.3, 0.4, 1); }
-  76%, 100% {
-    transform: scale(1.04);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent), 0 14px 26px -12px color-mix(in srgb, var(--c) 45%, transparent);
-  }
-}
-@keyframes mkt-build-check-pop {
-  0%, 56% { opacity: 0; transform: scale(0.4); }
-  76%, 100% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+.mkt-nudge-pulse {
+  animation: mkt-nudge-pulse 1.8s ease-in-out infinite;
 }
 
-/* ---------- Match: 3-card deck settles on the center card ---------- */
-.mkt-m3-card.mkt-left { transform: translate(calc(var(--mu) * -100px - 50%), -50%); }
-.mkt-m3-card.mkt-right { transform: translate(calc(var(--mu) * 100px - 50%), -50%); }
-.mkt-m3-card.mkt-center { transform: translate(-50%, -50%) scale(1); z-index: 2; }
-.mkt-graphic[data-playing="true"] .mkt-m3-card.mkt-left { animation: mkt-m3-card-left 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-.mkt-graphic[data-playing="true"] .mkt-m3-card.mkt-right { animation: mkt-m3-card-right 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-.mkt-graphic[data-playing="true"] .mkt-m3-card.mkt-center { animation: mkt-m3-card-center 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-@keyframes mkt-m3-card-left {
-  0%, 28% { opacity: 1; transform: translate(calc(var(--mu) * -96px - 50%), -50%) scale(1); }
-  50%, 100% { opacity: 0; transform: translate(calc(var(--mu) * -96px - 50%), calc(-50% + var(--mu) * 6px)) scale(0.8); animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
-}
-@keyframes mkt-m3-card-right {
-  0%, 28% { opacity: 1; transform: translate(calc(var(--mu) * 96px - 50%), -50%) scale(1); }
-  50%, 100% { opacity: 0; transform: translate(calc(var(--mu) * 96px - 50%), calc(-50% + var(--mu) * 6px)) scale(0.8); animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
-}
-@keyframes mkt-m3-card-center {
-  0%, 28% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.6); }
-  50% { transform: translate(-50%, -50%) scale(1); animation-timing-function: cubic-bezier(0.34, 1.4, 0.4, 1); }
-  70%, 100% { transform: translate(-50%, -50%) scale(1.3); box-shadow: 0 0 0 2px var(--c), 0 26px 46px -14px color-mix(in srgb, var(--c) 55%, transparent); animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1); }
-}
-.mkt-m3-actions { opacity: 0; transform: translateY(calc(var(--mu) * 8px)); }
-.mkt-graphic[data-playing="true"] .mkt-m3-actions { animation: mkt-m3-actions-in 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-@keyframes mkt-m3-actions-in {
-  0%, 28% { opacity: 0; transform: translateY(calc(var(--mu) * 8px)); }
-  42%, 100% { opacity: 1; transform: translateY(0); }
-}
-.mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like { animation: mkt-m3-like-glow 2s 1 forwards; }
-@keyframes mkt-m3-like-glow {
-  0%, 50% { background: var(--glass-surface-2); border-color: var(--border); box-shadow: none; transform: scale(1); animation-timing-function: cubic-bezier(0.34, 1.66, 0.5, 1); }
-  70% { background: var(--c); border-color: var(--c); box-shadow: 0 0 26px 6px color-mix(in srgb, var(--c) 60%, transparent); transform: scale(1.32); animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1); }
-  100% { background: var(--c); border-color: var(--c); box-shadow: 0 0 20px 4px color-mix(in srgb, var(--c) 50%, transparent); transform: scale(1.1); }
-}
-.mkt-m3-heart-fill { opacity: 0; }
-.mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like .mkt-m3-heart-outline { animation: mkt-m3-heart-outline-fade 2s ease 1 forwards; }
-.mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like .mkt-m3-heart-fill { animation: mkt-m3-heart-fill-fade 2s ease 1 forwards; }
-@keyframes mkt-m3-heart-outline-fade { 0%, 50% { opacity: 1; } 70%, 100% { opacity: 0; } }
-@keyframes mkt-m3-heart-fill-fade { 0%, 50% { opacity: 0; } 70%, 100% { opacity: 1; } }
-.mkt-graphic[data-playing="true"] .mkt-m3-cancel { animation: mkt-m3-cancel-out 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards; }
-@keyframes mkt-m3-cancel-out {
-  0%, 58% { opacity: 1; width: calc(var(--mu) * 38px); margin-right: calc(var(--mu) * 18px); transform: scale(1); }
-  78%, 100% { opacity: 0; width: 0; margin-right: 0; transform: scale(0.6); }
-}
+/* Match, Explore, Build, and Play are all now driven by real React state/interaction
+   (see each chapter file) rather than a scroll-triggered CSS timeline, so their old
+   keyframe rules have been removed from here — nothing left to gate behind
+   [data-playing] for those four. Connect still uses the scroll-triggered pattern below. */
 
-/* ---------- Play: scenario chart draws in, question, answer pick, progress fill ---------- */
-.mkt-chart-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
-.mkt-graphic[data-playing="true"] .mkt-chart-line { animation: mkt-play-chart-draw 2s cubic-bezier(0.65, 0, 0.35, 1) 1 forwards; }
-@keyframes mkt-play-chart-draw { 0%, 6% { stroke-dashoffset: 200; } 40%, 100% { stroke-dashoffset: 0; } }
-.mkt-chart-fill { opacity: 0; }
-.mkt-graphic[data-playing="true"] .mkt-chart-fill { animation: mkt-play-chart-fill-in 2s ease 1 forwards; }
-@keyframes mkt-play-chart-fill-in { 0%, 18% { opacity: 0; } 40%, 100% { opacity: 1; } }
-.mkt-chart-badge { opacity: 0; transform: translate(-50%, 4px); }
-.mkt-graphic[data-playing="true"] .mkt-chart-badge { animation: mkt-play-badge-in 2s ease 1 forwards; }
-@keyframes mkt-play-badge-in { 0%, 32% { opacity: 0; transform: translate(-50%, 4px); } 46%, 100% { opacity: 1; transform: translate(-50%, 0); } }
-.mkt-dialogue { opacity: 0; transform: translateY(6px); }
-.mkt-graphic[data-playing="true"] .mkt-dialogue { animation: mkt-play-dialogue-in 0.45s ease 1 forwards; animation-delay: 0.85s; }
-@keyframes mkt-play-dialogue-in { to { opacity: 1; transform: translateY(0); } }
-.mkt-answer-check { opacity: 0; transform: scale(0.5); }
-.mkt-graphic[data-playing="true"] .mkt-answer.mkt-target { animation: mkt-play-answer-pick 2s 1 forwards; }
-@keyframes mkt-play-answer-pick {
-  0%, 55% { background: var(--glass-surface-2); border-color: transparent; }
-  78%, 100% { background: color-mix(in srgb, var(--c) 18%, var(--glass-surface-2)); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+/* ---------- Explore: fading "swipe up" nudge over the real scroll feed ---------- */
+@keyframes mkt-explore-nudge-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-6px); opacity: 0.5; }
 }
-.mkt-graphic[data-playing="true"] .mkt-answer.mkt-target .mkt-answer-check { animation: mkt-play-check-pop 2s 1 forwards; }
-@keyframes mkt-play-check-pop { 0%, 70% { opacity: 0; transform: scale(0.5); } 88%, 100% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); } }
-.mkt-progress-bar { width: 0%; }
-.mkt-graphic[data-playing="true"] .mkt-progress-bar { animation: mkt-play-progress-fill 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-@keyframes mkt-play-progress-fill { 0%, 74% { width: 0%; } 100% { width: 72%; } }
-
-/* ---------- Explore: an Instagram/TikTok-style doomscroll through career cards,
-   settling on the chapter's target world. Three full-bleed cards are stacked in one
-   track (each 100% of the frame height); the track slides up through them with a quick
-   smooth swipe + brief hold at each, landing on the last and staying there — same
-   play-once/hold/replay-on-rescroll contract as every other chapter. ---------- */
-.mkt-graphic[data-playing="true"] .mkt-explore-track { animation: mkt-explore-scroll 2s cubic-bezier(0.65, 0, 0.35, 1) 1 forwards; }
-@keyframes mkt-explore-scroll {
-  0%, 8% { transform: translateY(0%); }
-  34%, 42% { transform: translateY(-33.3333%); }
-  68%, 100% { transform: translateY(-66.6666%); }
+.mkt-explore-nudge {
+  animation: mkt-explore-nudge-bounce 1.4s ease-in-out infinite;
 }
 
 /* ---------- Connect: replies land one after another ---------- */

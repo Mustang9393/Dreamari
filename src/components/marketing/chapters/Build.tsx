@@ -1,7 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
+
+// PLACEHOLDER content: the real personality/skill assessment question bank wasn't
+// available to source this from, so these are stand-ins in the same plain, 8th-grade
+// voice as the taxonomy copy elsewhere on this page. Swap QUESTIONS for the real set.
+const QUESTIONS = [
+  { text: "Which of these sounds most like you?", options: ["Solving number puzzles", "Building or fixing things", "Leading a group project"] },
+  { text: "A free afternoon: what are you doing?", options: ["Reading about how markets work", "Sketching or designing something", "Organizing an event"] },
+  { text: "Pick the class you'd never skip.", options: ["Economics", "Computer Science", "Debate"] },
+];
+const TOTAL_QUESTIONS = 12;
 
 const CHECK = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -9,83 +20,100 @@ const CHECK = (
   </svg>
 );
 
-// Ported 1:1 from the reference .mock-tag rules, which scale with the shared --mu
-// container multiplier (set on .mkt-graphic) rather than a fixed size — at wide
-// desktop widths these tags render noticeably larger (up to a 20px label / 65px tall
-// pill) than a flat Tailwind size would ever produce. Using inline clamp()/calc()
-// rather than Tailwind utilities since arbitrary values can't express calc(var(--mu) * N).
-function tagStyle(): React.CSSProperties {
-  return {
-    display: "flex",
-    alignItems: "center",
-    gap: "clamp(10px, calc(var(--mu) * 12px), 16px)",
-    padding: "clamp(12px, calc(var(--mu) * 14px), 19px) clamp(16px, calc(var(--mu) * 18px), 24px)",
-    borderRadius: "var(--radius-md-alt)",
-    fontSize: "clamp(13.5px, calc(var(--mu) * 11px), 20px)",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-    background: "var(--glass-surface-2)",
-    color: "var(--muted-foreground)",
-  };
-}
-
-const iconStyle: React.CSSProperties = {
-  width: "clamp(16px, calc(var(--mu) * 18px), 23px)",
-  height: "clamp(16px, calc(var(--mu) * 18px), 23px)",
-  flex: "none",
-};
-
 export function BuildChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [qIndex, setQIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+
+  const question = QUESTIONS[qIndex % QUESTIONS.length];
+
+  function next() {
+    setSelected(null);
+    setQIndex((i) => i + 1);
+  }
 
   return (
     <ChapterShell
       id="build"
-      eyebrow="Chapter One"
       title="Build"
       color="#6366f1"
-      oneliner="By taking a personality, skill, and academic assessment."
+      oneliner="by taking a personality, skill, and academic assessment."
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div
-        className="mkt-tags flex flex-col"
-        style={{ width: "clamp(270px, 68cqw, 600px)", gap: "clamp(10px, 2cqw, 16px)" }}
-      >
-        <div className="mkt-tag mkt-top" style={tagStyle()}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
-            <path d="m18 16 4-4-4-4" />
-            <path d="m6 8-4 4 4 4" />
-            <path d="m14.5 4-5 16" />
-          </svg>
-          Software Engineering
+      <div className="flex flex-col items-center" style={{ width: "clamp(270px, 68cqw, 480px)", gap: "calc(var(--mu) * 14px)" }}>
+        <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
+          Question {(qIndex % TOTAL_QUESTIONS) + 1} of {TOTAL_QUESTIONS}
+        </p>
+
+        <p className="text-center font-bold" style={{ fontSize: "calc(var(--mu) * 16px)", lineHeight: 1.3, color: "var(--foreground)" }}>
+          {question.text}
+        </p>
+
+        <div className="flex w-full flex-col" style={{ gap: "calc(var(--mu) * 10px)" }}>
+          {question.options.map((option, i) => {
+            const isSelected = selected === i;
+            const isNudge = selected === null && i === 0;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setSelected(i)}
+                className={`flex items-center justify-between rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
+                style={{
+                  padding: "calc(var(--mu) * 14px) calc(var(--mu) * 18px)",
+                  fontSize: "calc(var(--mu) * 12px)",
+                  fontWeight: 600,
+                  background: isSelected ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))" : "var(--glass-surface-2)",
+                  borderColor: isSelected ? "#6366f1" : "var(--border)",
+                  color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
+                  opacity: selected !== null && !isSelected ? 0.6 : 1,
+                }}
+              >
+                {option}
+                <span
+                  className="mkt-build-check flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+                  style={{
+                    width: "calc(var(--mu) * 20px)",
+                    height: "calc(var(--mu) * 20px)",
+                    padding: "calc(var(--mu) * 5px)",
+                    background: "#6366f1",
+                    opacity: isSelected ? 1 : 0,
+                    transform: isSelected ? "scale(1)" : "scale(0.4)",
+                  }}
+                >
+                  {CHECK}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="mkt-tag mkt-finance relative z-[2] border border-transparent" style={tagStyle()}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
-            <path d="M22 7 13.5 15.5 8.5 10.5 2 17" />
-            <path d="M16 7h6v6" />
-          </svg>
-          Finance
-          <span
-            className="mkt-tag-check ml-auto flex flex-none items-center justify-center rounded-full"
+
+        {selected === null ? (
+          <p className="text-center" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
+            Tap an answer. {TOTAL_QUESTIONS - 1} more questions like this build your profile.
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={next}
+            className="flex items-center rounded-full border font-semibold"
             style={{
-              width: "clamp(17px, calc(var(--mu) * 22px), 25px)",
-              height: "clamp(17px, calc(var(--mu) * 22px), 25px)",
-              padding: "clamp(4px, calc(var(--mu) * 5px), 6px)",
-              background: "var(--c)",
+              gap: "calc(var(--mu) * 6px)",
+              padding: "calc(var(--mu) * 8px) calc(var(--mu) * 16px)",
+              fontSize: "calc(var(--mu) * 11px)",
+              background: "var(--glass-surface-2)",
+              borderColor: "var(--border)",
+              color: "var(--foreground)",
             }}
           >
-            {CHECK}
-          </span>
-        </div>
-        <div className="mkt-tag mkt-bottom" style={tagStyle()}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-          </svg>
-          Design
-        </div>
+            Next question
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 12px)", height: "calc(var(--mu) * 12px)" }}>
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </button>
+        )}
       </div>
     </ChapterShell>
   );

@@ -35,10 +35,9 @@ export function ConnectChapter() {
   return (
     <ChapterShell
       id="connect"
-      eyebrow="Chapter Five"
       title="Connect"
       color="#00c8dc"
-      oneliner="Real people. Real conversations. Not a stock photo."
+      oneliner="with professionals in the industry you're interested in."
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}

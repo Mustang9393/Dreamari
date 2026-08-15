@@ -1,15 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
-// A doomscroll through three career cards (Figma "Mobile Explore" reference), settling
-// on the chapter's own target world (Investing) — quick, smooth, one continuous track.
-// Per the QA doc's "our new direction" Explore mockup (salary/focus/competition stats),
-// represented as plain icon chips (no numbers) — a card a third that mockup's height has
-// no room for real figures to stay legible, so the icons just signal "pays well" /
-// "needs a degree" rather than quoting exact ones.
+// A real, user-scrollable feed (native overflow-y + scroll-snap), not a scroll-triggered
+// CSS animation — matches Match's card size (168 x 300 mu) per feedback that the two
+// should read as the same scale of thing.
 const CARDS = [
   { photo: "/images/career-neurosurgeon.jpg", title: "Neurosurgeon", subtitle: "Health", worldColor: "var(--world-health-medicine)" },
   { photo: "/images/career-product-designer.jpg", title: "Product Designer", subtitle: "Tech", worldColor: "var(--world-tech-engineering-design)" },
@@ -25,7 +23,7 @@ const ACTION_ICONS = [
   <path key="bookmark" d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />,
 ];
 
-// Lucide "dollar-sign" / "graduation-cap" paths, same convention as ACTION_ICONS above.
+// Lucide "dollar-sign" / "graduation-cap" paths.
 const STAT_ICONS = {
   salary: (
     <>
@@ -43,19 +41,37 @@ const STAT_ICONS = {
 };
 
 export function ExploreChapter() {
-  const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Nudge: once the chapter is revealed, tease-scroll the track down a little and
+  // back, so the reader's eye catches that this thing actually scrolls, then get out
+  // of the way the moment they touch it themselves.
+  useEffect(() => {
+    if (!graphicRevealed || scrolled) return;
+    const el = trackRef.current;
+    if (!el) return;
+    const timeout = setTimeout(() => {
+      el.scrollTo({ top: 34, behavior: "smooth" });
+      setTimeout(() => {
+        if (!el) return;
+        el.scrollTo({ top: 0, behavior: "smooth" });
+      }, 550);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [graphicRevealed, scrolled]);
 
   return (
     <ChapterShell
       id="explore"
-      eyebrow="Chapter Four"
       title="Explore"
       color="#1fc76e"
-      oneliner="Careers, companies, and pathways with depth."
+      oneliner="careers, companies, and pathways with depth."
       flip
       altBackground
       graphicRef={graphicRef}
-      playing={playing}
+      playing={false}
       graphicRevealed={graphicRevealed}
     >
       <div
@@ -67,9 +83,14 @@ export function ExploreChapter() {
           borderColor: "var(--glass-surface-2)",
         }}
       >
-        <div className="mkt-explore-track absolute inset-0" style={{ height: "300%" }}>
+        <div
+          ref={trackRef}
+          className="mkt-explore-track absolute inset-0 overflow-y-auto"
+          style={{ scrollSnapType: "y mandatory" }}
+          onScroll={() => setScrolled(true)}
+        >
           {CARDS.map((card) => (
-            <div key={card.title} className="relative" style={{ height: "33.3333%" }}>
+            <div key={card.title} className="relative" style={{ height: "100%", scrollSnapAlign: "start" }}>
               <Image src={card.photo} alt="" fill className="object-cover" />
               <div
                 aria-hidden
@@ -135,10 +156,10 @@ export function ExploreChapter() {
           ))}
         </div>
 
-        {/* Right-side action rail, straight off the reference — static, not part of the
-           scroll animation, just selling the "real app feed" read. */}
+        {/* Right-side action rail, straight off the reference — static, just selling
+           the "real app feed" read. */}
         <div
-          className="absolute flex flex-col items-center"
+          className="pointer-events-none absolute flex flex-col items-center"
           style={{ right: "calc(var(--mu) * 10px)", bottom: "calc(var(--mu) * 46px)", gap: "calc(var(--mu) * 10px)" }}
         >
           {ACTION_ICONS.map((icon, i) => (
@@ -166,6 +187,18 @@ export function ExploreChapter() {
             </div>
           ))}
         </div>
+
+        {/* Scroll nudge: fades out the moment the reader scrolls it themselves. */}
+        {!scrolled && (
+          <div
+            className="mkt-explore-nudge pointer-events-none absolute inset-x-0 flex flex-col items-center"
+            style={{ bottom: "calc(var(--mu) * 12px)", gap: "calc(var(--mu) * 2px)" }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+        )}
       </div>
     </ChapterShell>
   );

@@ -1,8 +1,30 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
+
+// A positive glossary mini-game replacing the old market-drop scenario: pick the right
+// definition, always get an encouraging read regardless of which one you tap (no red,
+// no "wrong answer" framing) — terms lean finance since that's this storyboard's fixed
+// destination (Investment Banking Analyst), matching Connect's own thread.
+const TERMS = [
+  {
+    term: "IPO",
+    correct: "When a company sells shares to the public for the first time.",
+    distractors: ["A type of business bank loan.", "A company's yearly tax filing."],
+  },
+  {
+    term: "Valuation",
+    correct: "Figuring out what a company is actually worth.",
+    distractors: ["The interest rate on a loan.", "How many people a company employs."],
+  },
+  {
+    term: "Equity",
+    correct: "Owning a piece of a company, not just lending it money.",
+    distractors: ["A fixed monthly paycheck.", "The tax rate on a stock sale."],
+  },
+];
 
 const CHECK = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -10,96 +32,118 @@ const CHECK = (
   </svg>
 );
 
+function shuffledOptions(termIndex: number) {
+  const t = TERMS[termIndex % TERMS.length];
+  const options = [t.correct, ...t.distractors];
+  // Deterministic per-term shuffle (not Math.random, which the harness disallows and
+  // which would also just reshuffle on every re-render) — rotate by the term's own index.
+  const offset = termIndex % options.length;
+  return [...options.slice(offset), ...options.slice(0, offset)];
+}
+
 export function PlayChapter() {
-  const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const [termIndex, setTermIndex] = useState(0);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  const term = TERMS[termIndex % TERMS.length];
+  const options = shuffledOptions(termIndex);
+  const isCorrect = picked === term.correct;
+
+  function next() {
+    setPicked(null);
+    setTermIndex((i) => i + 1);
+  }
 
   return (
     <ChapterShell
       id="play"
-      eyebrow="Chapter Three"
       title="Play"
-      color="#e5484d"
-      oneliner="Day-in-the-life college major and career games you actually want to open."
+      color="#3b82f6"
+      oneliner="day-in-the-life career simulations and learn industry terms through the glossary game."
       graphicRef={graphicRef}
-      playing={playing}
+      playing={false}
       graphicRevealed={graphicRevealed}
     >
       <div
         className="relative z-[1] overflow-hidden"
-        style={{ width: "clamp(260px, 58cqw, 560px)", background: "var(--card)", borderRadius: "var(--radius-md-alt)" }}
+        style={{ width: "clamp(270px, 62cqw, 480px)", background: "var(--card)", borderRadius: "var(--radius-md-alt)", padding: "calc(var(--mu) * 22px)" }}
       >
-        <div
-          className="relative h-[clamp(88px,16cqw,180px)] overflow-hidden"
-          style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--c) 30%, #0b0d16), #05070f 88%)" }}
-        >
-          {/* Real in-game art as the actual scene, not a faint wash — only scrimmed at
-             the very top/bottom edges so the chart/badge stay readable and it blends
-             into the panel below, rather than darkened all over. */}
-          <Image src="/images/play-illustration.jpg" alt="" fill className="object-cover" style={{ objectPosition: "center 30%" }} />
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--c) 22%, transparent) 0%, transparent 30%, transparent 70%, #05070fe6 100%)" }}
-          />
-          <svg className="mkt-chart absolute inset-0 h-full w-full" viewBox="0 0 200 80" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="playChartFade" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--c)" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="var(--c)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path className="mkt-chart-fill" fill="url(#playChartFade)" d="M4,22 L50,18 L82,20 L100,58 L140,64 L196,60 L196,80 L4,80 Z" />
-            <path
-              className="mkt-chart-line"
-              pathLength={200}
-              d="M4,22 L50,18 L82,20 L100,58 L140,64 L196,60"
-              stroke="var(--c)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-          <span
-            className="mkt-chart-badge absolute top-[60%] left-[48%] rounded-full px-2 py-0.5 font-mono text-[clamp(9.5px,1.6cqw,12px)] font-bold text-white"
-            style={{ background: "#c33338" }}
-          >
-            -12%
-          </span>
+        <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
+          Glossary game
+        </p>
+        <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 22px)", color: "#3b82f6" }}>
+          {term.term}
+        </p>
+        <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 11px)", color: "var(--muted-foreground)" }}>
+          Which definition is right?
+        </p>
+
+        <div className="mt-4 flex flex-col" style={{ gap: "calc(var(--mu) * 10px)" }}>
+          {options.map((option, i) => {
+            const isThisCorrect = option === term.correct;
+            const isThisPicked = option === picked;
+            const revealed = picked !== null;
+            const isNudge = picked === null && i === 0;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setPicked(option)}
+                className={`flex items-center justify-between rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
+                style={{
+                  padding: "calc(var(--mu) * 12px) calc(var(--mu) * 16px)",
+                  fontSize: "calc(var(--mu) * 11px)",
+                  fontWeight: 600,
+                  background: revealed && isThisCorrect ? "color-mix(in srgb, #3b82f6 16%, var(--glass-surface-2))" : "var(--glass-surface-2)",
+                  borderColor: revealed && isThisCorrect ? "#3b82f6" : revealed && isThisPicked ? "var(--muted-foreground)" : "var(--border)",
+                  color: revealed && !isThisCorrect && !isThisPicked ? "var(--muted-foreground)" : "var(--foreground)",
+                  opacity: revealed && !isThisCorrect && !isThisPicked ? 0.55 : 1,
+                }}
+              >
+                {option}
+                <span
+                  className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+                  style={{
+                    width: "calc(var(--mu) * 18px)",
+                    height: "calc(var(--mu) * 18px)",
+                    padding: "calc(var(--mu) * 4px)",
+                    background: "#3b82f6",
+                    opacity: revealed && isThisCorrect ? 1 : 0,
+                    transform: revealed && isThisCorrect ? "scale(1)" : "scale(0.4)",
+                  }}
+                >
+                  {CHECK}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div style={{ background: "var(--glass-surface-1)" }}>
-          <div className="mkt-dialogue flex items-center px-[clamp(14px,2.8cqw,24px)] pt-[clamp(11px,2.2cqw,20px)] pb-[clamp(8px,1.6cqw,14px)]">
-            <span className="flex-1 text-[clamp(13px,2.3cqw,18px)] leading-snug font-bold" style={{ color: "var(--foreground)" }}>
-              &quot;A client&apos;s portfolio just dropped 12% overnight. What do you do?&quot;
-            </span>
-          </div>
-          <div className="flex flex-col gap-[clamp(7px,1.4cqw,11px)] px-[clamp(14px,2.8cqw,24px)] pb-[clamp(12px,2.2cqw,18px)]">
-            <div
-              className="mkt-answer flex items-center justify-between gap-2 rounded-full border border-transparent px-[clamp(12px,2.2cqw,16px)] py-[clamp(8px,1.6cqw,12px)] text-[clamp(10.5px,1.8cqw,13.5px)] font-semibold"
-              style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}
+
+        <div className="mt-4 flex items-center justify-between" style={{ minHeight: "calc(var(--mu) * 24px)" }}>
+          <p style={{ fontSize: "calc(var(--mu) * 10.5px)", fontWeight: 600, color: picked === null ? "var(--muted-foreground)" : "#3b82f6" }}>
+            {picked === null ? "Tap one to see what it means." : isCorrect ? "Nice, that's exactly it!" : "Close! That's the one highlighted above."}
+          </p>
+          {picked !== null && (
+            <button
+              type="button"
+              onClick={next}
+              className="flex flex-none items-center rounded-full border font-semibold"
+              style={{
+                gap: "calc(var(--mu) * 5px)",
+                padding: "calc(var(--mu) * 6px) calc(var(--mu) * 12px)",
+                fontSize: "calc(var(--mu) * 10px)",
+                background: "var(--glass-surface-2)",
+                borderColor: "var(--border)",
+                color: "var(--foreground)",
+              }}
             >
-              Sell everything
-            </div>
-            <div
-              className="mkt-answer mkt-target flex items-center justify-between gap-2 rounded-full border border-transparent px-[clamp(12px,2.2cqw,16px)] py-[clamp(8px,1.6cqw,12px)] text-[clamp(10.5px,1.8cqw,13.5px)] font-semibold"
-              style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}
-            >
-              Review the plan together
-              <span className="mkt-answer-check flex h-[clamp(15px,2.6cqw,20px)] w-[clamp(15px,2.6cqw,20px)] flex-none items-center justify-center rounded-full p-1 text-white" style={{ background: "var(--c)" }}>
-                {CHECK}
-              </span>
-            </div>
-            <div
-              className="mkt-answer flex items-center justify-between gap-2 rounded-full border border-transparent px-[clamp(12px,2.2cqw,16px)] py-[clamp(8px,1.6cqw,12px)] text-[clamp(10.5px,1.8cqw,13.5px)] font-semibold"
-              style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}
-            >
-              Ignore it
-            </div>
-          </div>
-          <div className="px-[clamp(14px,2.8cqw,24px)] pb-[clamp(14px,2.6cqw,22px)]">
-            <div className="h-[clamp(5px,1cqw,8px)] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-              <div className="mkt-progress-bar h-full rounded-full" style={{ background: "linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 55%, #fff))" }} />
-            </div>
-          </div>
+              Next term
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 11px)", height: "calc(var(--mu) * 11px)" }}>
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </ChapterShell>

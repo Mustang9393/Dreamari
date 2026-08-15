@@ -5,7 +5,6 @@ import { useRevealOnScroll } from "./scrollHooks";
 
 type ChapterShellProps = {
   id: string;
-  eyebrow: string;
   title: string;
   color: string;
   oneliner: string;
@@ -19,7 +18,6 @@ type ChapterShellProps = {
 
 export function ChapterShell({
   id,
-  eyebrow,
   title,
   color,
   oneliner,
@@ -33,13 +31,17 @@ export function ChapterShell({
   const [copyRef, copyRevealed] = useRevealOnScroll<HTMLDivElement>();
 
   return (
-    <section id={id} className="relative" style={altBackground ? { background: "var(--card)" } : undefined}>
+    <section
+      id={id}
+      className="relative flex min-h-dvh items-center"
+      style={{ scrollSnapAlign: "start", ...(altBackground ? { background: "var(--card)" } : undefined) }}
+    >
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
           have room for). */}
       <div
-        className={`mx-auto flex max-w-[1200px] items-center gap-10 px-6 py-8 max-[900px]:flex-col sm:py-10 min-[901px]:gap-[60px] lg:py-14 ${flip ? "flex-row-reverse" : "flex-row"}`}
+        className={`mx-auto flex w-full max-w-[1200px] items-center gap-10 px-6 py-8 max-[900px]:flex-col sm:py-10 min-[901px]:gap-[60px] lg:py-14 ${flip ? "flex-row-reverse" : "flex-row"}`}
         style={{ ["--c" as string]: color }}
       >
         <div
@@ -50,11 +52,8 @@ export function ChapterShell({
             transform: copyRevealed ? "translateX(0)" : `translateX(${flip ? "42px" : "-42px"})`,
           }}
         >
-          <div className="font-mono text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
-            {eyebrow}
-          </div>
           <h2
-            className="mt-2 font-extrabold uppercase"
+            className="font-extrabold uppercase"
             style={{
               fontSize: "clamp(2.6rem, 6vw, 4.6rem)",
               lineHeight: 1,
