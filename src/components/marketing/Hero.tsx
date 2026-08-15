@@ -62,8 +62,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-3 max-w-[500px] text-[16px] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)" }}
           >
-            Build your profile, match with careers, play day-in-the-life work simulations, explore new paths, and
-            connect with professionals. One clear step at a time.
+            Build, match, play, explore, and connect, all in one place. One clear step at a time.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">

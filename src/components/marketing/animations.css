@@ -93,6 +93,11 @@
 .mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like .mkt-m3-heart-fill { animation: mkt-m3-heart-fill-fade 2s ease 1 forwards; }
 @keyframes mkt-m3-heart-outline-fade { 0%, 50% { opacity: 1; } 70%, 100% { opacity: 0; } }
 @keyframes mkt-m3-heart-fill-fade { 0%, 50% { opacity: 0; } 70%, 100% { opacity: 1; } }
+.mkt-graphic[data-playing="true"] .mkt-m3-cancel { animation: mkt-m3-cancel-out 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards; }
+@keyframes mkt-m3-cancel-out {
+  0%, 58% { opacity: 1; width: calc(var(--mu) * 38px); margin-right: calc(var(--mu) * 18px); transform: scale(1); }
+  78%, 100% { opacity: 0; width: 0; margin-right: 0; transform: scale(0.6); }
+}
 
 /* ---------- Play: scenario chart draws in, question, answer pick, progress fill ---------- */
 .mkt-chart-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
