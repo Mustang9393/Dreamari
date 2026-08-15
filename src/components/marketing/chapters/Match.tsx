@@ -120,7 +120,10 @@ export function MatchChapter() {
   }
 
   function onCardPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (exiting || flipped || !top) return;
+    // No `flipped` guard here on purpose — a tap while the info panel is showing
+    // should flip back to the poster, and a swipe while it's showing should still
+    // commit like/pass, not require flipping back first.
+    if (exiting || !top) return;
     pointerActive.current = true;
     moved.current = false;
     startX.current = e.clientX;
@@ -185,7 +188,7 @@ export function MatchChapter() {
                 <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 12px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
                   You&apos;re matched!
                 </p>
-                <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, color: "var(--foreground)", ...posterTitleStyle(matchedCard.title) }}>
+                <p className="uppercase" style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, color: "var(--foreground)", ...posterTitleStyle(matchedCard.title) }}>
                   {matchedCard.title}
                 </p>
                 <button
@@ -209,163 +212,172 @@ export function MatchChapter() {
               </div>
             </div>
           ) : (
-            <>
-              {/* Peeking cards behind the top one — static, just selling "there's a
-                 deck here," never interactive themselves. Bigger offset/scale step and
-                 a visible border per card (rather than a small nudge that read as one
-                 washed-out image) so it actually reads as a stack of distinct cards,
-                 not a blur behind the top one. */}
-              {stack
-                .slice(1, 3)
-                .reverse()
-                .map((card, i) => {
-                  const depth = stack.slice(1, 3).length - i;
-                  return (
-                    <div
-                      key={card.key}
-                      aria-hidden
-                      className="absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)] border"
-                      style={{
-                        transform: `translateY(${depth * -18}px) scale(${1 - depth * 0.06})`,
-                        opacity: 1 - depth * 0.16,
-                        borderColor: "var(--glass-surface-2)",
-                        boxShadow: "0 10px 24px -12px rgba(0,0,0,0.5)",
-                      }}
-                    >
-                      <Image src={card.photo} alt="" fill className="object-cover" />
-                    </div>
-                  );
-                })}
+            /* One unified map over the visible slice of the stack (not two separate
+               blocks for "the top card" vs "the peeking cards behind it"). Each card
+               keeps the SAME key for as long as it's in the stack, so when a swipe
+               removes the front card and everyone else moves up a depth, React updates
+               the EXISTING DOM nodes in place instead of unmounting a "peeking" render
+               and mounting a brand new "top card" render — that mount/unmount is what
+               was reading as "the card behind reloads, then a dark overlay pops in":
+               the peeking version had no scrim/text and a different transform, so
+               swapping it for a freshly-mounted top-card element was an instant jump,
+               not a transition. Now every depth change (2→1→0) animates continuously
+               via the same transform/opacity transition, and the scrim/poster text
+               simply fade in as part of that. */
+            stack.slice(0, 3).map((card, depth) => {
+              const isTop = depth === 0;
+              const isExiting = isTop && exiting?.key === card.key;
+              const isDragging = isTop && dragX !== 0 && !isExiting;
+              const transition = isExiting
+                ? "transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s"
+                : isDragging
+                  ? "none"
+                  : "transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s, box-shadow 0.4s";
+              const transform = isExiting
+                ? exiting!.direction === "pass"
+                  ? "translate(-140%, 10%) rotate(-18deg)"
+                  : "translate(0, -130%) scale(1.04)"
+                : isDragging
+                  ? `translate(${dragX}px, ${-Math.abs(dragX) * 0.06}px) rotate(${dragX / 20}deg)`
+                  : isTop && flipped
+                    ? "scale(0.97)"
+                    : `translateY(${depth * -18}px) scale(${1 - depth * 0.06})`;
+              const opacity = isExiting ? 0 : isTop ? 1 : 1 - depth * 0.16;
 
-              {top && (
+              return (
                 <div
-                  key={top.key}
-                  className="mkt-match-card mkt-match-card-enter absolute inset-0 cursor-grab overflow-hidden rounded-[calc(var(--mu)*20px)] border touch-pan-y select-none active:cursor-grabbing"
+                  key={card.key}
+                  className={`absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)] border ${isTop ? "mkt-match-card cursor-grab touch-pan-y select-none active:cursor-grabbing" : ""}`}
                   style={{
                     borderColor: "var(--glass-surface-2)",
-                    transition:
-                      exiting?.key === top.key
-                        ? "transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s"
-                        : pointerActive.current
-                          ? "none"
-                          : "transform 0.3s ease",
-                    transform:
-                      exiting?.key === top.key
-                        ? exiting.direction === "pass"
-                          ? "translate(-140%, 10%) rotate(-18deg)"
-                          : "translate(0, -130%) scale(1.04)"
-                        : dragX !== 0
-                          ? `translate(${dragX}px, ${-Math.abs(dragX) * 0.06}px) rotate(${dragX / 20}deg)`
-                          : flipped
-                            ? "scale(0.97)"
-                            : "none",
-                    opacity: exiting?.key === top.key ? 0 : 1,
+                    boxShadow: isTop ? "none" : "0 10px 24px -12px rgba(0,0,0,0.5)",
+                    // Explicit stacking, not just DOM order: depth 0 (the map's first
+                    // item) needs to paint front-most, but later siblings in the same
+                    // stacking context paint OVER earlier ones by default — without
+                    // this, the peeking cards behind rendered on TOP of the top card,
+                    // and their own <1 opacity let it ghost through as a double image.
+                    zIndex: 3 - depth,
+                    transition,
+                    transform,
+                    opacity,
                   }}
-                  onTransitionEnd={(e) => {
-                    if (e.propertyName === "transform" && exiting?.key === top.key) onExitTransitionEnd();
-                  }}
-                  onPointerDown={onCardPointerDown}
-                  onPointerMove={onCardPointerMove}
-                  onPointerUp={onCardPointerUp}
-                  onPointerCancel={onCardPointerCancel}
+                  onTransitionEnd={
+                    isTop
+                      ? (e) => {
+                          if (e.propertyName === "transform" && isExiting) onExitTransitionEnd();
+                        }
+                      : undefined
+                  }
+                  onPointerDown={isTop ? onCardPointerDown : undefined}
+                  onPointerMove={isTop ? onCardPointerMove : undefined}
+                  onPointerUp={isTop ? onCardPointerUp : undefined}
+                  onPointerCancel={isTop ? onCardPointerCancel : undefined}
+                  {...(!isTop ? { "aria-hidden": true } : {})}
                 >
-                  <Image src={top.photo} alt="" fill className="object-cover" draggable={false} />
-                  {/* Scrim only needs to darken enough for the title/industry text at
-                     the very bottom to read — pushed the transparent zone down (was
-                     starting to darken at 42%) so most of the photo itself stays
-                     visible instead of reading as a near-black card. */}
-                  <div
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-transparent) 58%, var(--scrim-medium) 80%, var(--background) 100%)" }}
-                  />
+                  <Image src={card.photo} alt="" fill className="object-cover" draggable={false} />
 
-                  {/* Swipe intent badges — same "like/pass" language as the buttons
-                     below, just surfaced mid-drag so a swipe reads as decisive even
-                     before release commits it. */}
-                  <div
-                    aria-hidden
-                    className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
-                    style={{
-                      top: "calc(var(--mu) * 16px)",
-                      left: "calc(var(--mu) * 14px)",
-                      padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
-                      fontSize: "calc(var(--mu) * 12px)",
-                      letterSpacing: "0.05em",
-                      color: WORLD_COLOR,
-                      borderColor: WORLD_COLOR,
-                      transform: "rotate(-12deg)",
-                      opacity: dragX > 0 ? Math.min(dragX / SWIPE_COMMIT_PX, 1) : 0,
-                    }}
-                  >
-                    Like
-                  </div>
-                  <div
-                    aria-hidden
-                    className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
-                    style={{
-                      top: "calc(var(--mu) * 16px)",
-                      right: "calc(var(--mu) * 14px)",
-                      padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
-                      fontSize: "calc(var(--mu) * 12px)",
-                      letterSpacing: "0.05em",
-                      color: "var(--muted-foreground)",
-                      borderColor: "var(--muted-foreground)",
-                      transform: "rotate(12deg)",
-                      opacity: dragX < 0 ? Math.min(-dragX / SWIPE_COMMIT_PX, 1) : 0,
-                    }}
-                  >
-                    Pass
-                  </div>
+                  {isTop && (
+                    <>
+                      {/* Scrim only needs to darken enough for the title/industry text
+                         at the very bottom to read — pushed the transparent zone down
+                         (was starting to darken at 42%) so most of the photo itself
+                         stays visible instead of reading as a near-black card. */}
+                      <div
+                        aria-hidden
+                        className="absolute inset-0"
+                        style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-transparent) 58%, var(--scrim-medium) 80%, var(--background) 100%)" }}
+                      />
 
-                  <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
-                    <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, letterSpacing: "0.3px", color: "var(--foreground)", ...posterTitleStyle(top.title) }}>
-                      {top.title}
-                    </p>
-                    <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 11px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
-                      Business &amp; Finance
-                    </p>
-                  </div>
+                      {/* Swipe intent badges — same "like/pass" language as the buttons
+                         below, just surfaced mid-drag so a swipe reads as decisive
+                         even before release commits it. */}
+                      <div
+                        aria-hidden
+                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                        style={{
+                          top: "calc(var(--mu) * 16px)",
+                          left: "calc(var(--mu) * 14px)",
+                          padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
+                          fontSize: "calc(var(--mu) * 12px)",
+                          letterSpacing: "0.05em",
+                          color: WORLD_COLOR,
+                          borderColor: WORLD_COLOR,
+                          transform: "rotate(-12deg)",
+                          opacity: dragX > 0 ? Math.min(dragX / SWIPE_COMMIT_PX, 1) : 0,
+                        }}
+                      >
+                        Like
+                      </div>
+                      <div
+                        aria-hidden
+                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                        style={{
+                          top: "calc(var(--mu) * 16px)",
+                          right: "calc(var(--mu) * 14px)",
+                          padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
+                          fontSize: "calc(var(--mu) * 12px)",
+                          letterSpacing: "0.05em",
+                          color: "var(--muted-foreground)",
+                          borderColor: "var(--muted-foreground)",
+                          transform: "rotate(12deg)",
+                          opacity: dragX < 0 ? Math.min(-dragX / SWIPE_COMMIT_PX, 1) : 0,
+                        }}
+                      >
+                        Pass
+                      </div>
 
-                  {/* Tap-to-flip info panel — real taxonomy copy, not invented. */}
-                  <div
-                    className="absolute inset-0 flex flex-col justify-center text-center normal-case transition-opacity duration-200"
-                    style={{
-                      padding: "calc(var(--mu) * 20px)",
-                      background: "var(--card)",
-                      opacity: flipped ? 1 : 0,
-                      pointerEvents: flipped ? "auto" : "none",
-                      gap: "calc(var(--mu) * 10px)",
-                    }}
-                  >
-                    <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 18px)", color: WORLD_COLOR }}>{top.title}</p>
-                    <p style={{ fontSize: "calc(var(--mu) * 14px)", lineHeight: 1.5, color: "var(--foreground)", fontWeight: 600 }}>{top.blurb}</p>
+                      <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
+                        <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, letterSpacing: "0.3px", color: "var(--foreground)", ...posterTitleStyle(card.title) }}>
+                          {card.title}
+                        </p>
+                        <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 11px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
+                          Business &amp; Finance
+                        </p>
+                      </div>
 
-                    <div className="mt-1 flex flex-col self-stretch" style={{ gap: "calc(var(--mu) * 6px)" }}>
-                      {[
-                        { label: "Salary", value: top.salary },
-                        { label: "College major", value: top.major },
-                      ].map((row) => (
-                        <div
-                          key={row.label}
-                          className="flex items-center justify-between rounded-[calc(var(--mu)*10px)]"
-                          style={{ padding: "calc(var(--mu) * 7px) calc(var(--mu) * 11px)", background: "var(--glass-surface-2)" }}
-                        >
-                          <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
-                            {row.label}
-                          </span>
-                          <span style={{ fontSize: "calc(var(--mu) * 13px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
+                      {/* Tap-to-flip info panel — real taxonomy copy, not invented. */}
+                      <div
+                        className="absolute inset-0 flex flex-col justify-center text-center transition-opacity duration-200"
+                        style={{
+                          padding: "calc(var(--mu) * 20px)",
+                          background: "var(--card)",
+                          opacity: flipped ? 1 : 0,
+                          pointerEvents: flipped ? "auto" : "none",
+                          gap: "calc(var(--mu) * 10px)",
+                        }}
+                      >
+                        <p className="uppercase" style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 18px)", color: WORLD_COLOR }}>
+                          {card.title}
+                        </p>
+                        <p style={{ fontSize: "calc(var(--mu) * 14px)", lineHeight: 1.5, color: "var(--foreground)", fontWeight: 600 }}>{card.blurb}</p>
+
+                        <div className="mt-1 flex flex-col self-stretch" style={{ gap: "calc(var(--mu) * 6px)" }}>
+                          {[
+                            { label: "Salary", value: card.salary },
+                            { label: "College major", value: card.major },
+                          ].map((row) => (
+                            <div
+                              key={row.label}
+                              className="flex items-center justify-between rounded-[calc(var(--mu)*10px)]"
+                              style={{ padding: "calc(var(--mu) * 7px) calc(var(--mu) * 11px)", background: "var(--glass-surface-2)" }}
+                            >
+                              <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
+                                {row.label}
+                              </span>
+                              <span style={{ fontSize: "calc(var(--mu) * 13px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
 
-                    <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
-                      + more inside the real app · tap to flip back
-                    </p>
-                  </div>
+                        <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
+                          + more inside the real app · tap to flip back
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
-              )}
-            </>
+              );
+            })
           )}
         </div>
 

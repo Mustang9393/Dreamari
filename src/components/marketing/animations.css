@@ -53,19 +53,6 @@
   animation-delay: 0.3s;
 }
 
-/* Match: the next card sliding into the top spot after a swipe. The card there is a
-   fresh DOM node each time (React key = card.key, so a stack shift is a remount, not an
-   update) — no `forwards` fill here on purpose, so once the animation ends control
-   reverts cleanly to whatever transform the element's own inline style calls for
-   (drag/exit/idle), instead of the animation's last frame fighting with it. */
-@keyframes mkt-match-card-enter {
-  0% { opacity: 0; transform: translateY(14px) scale(0.95); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-.mkt-match-card-enter {
-  animation: mkt-match-card-enter 0.35s cubic-bezier(0.16, 0.84, 0.44, 1) 1;
-}
-
 /* ---------- Play: an immediate checkmark burst + radiating ring on every tap — the
    dopamine hit itself, not a "next question" prompt, so this fires on every pick rather
    than gating behind a correct/incorrect check. ---------- */
@@ -129,15 +116,6 @@
   background-repeat: no-repeat;
   animation: mkt-holo-sheen-sweep 3.4s ease-in-out infinite;
   mix-blend-mode: overlay;
-}
-
-/* ---------- Explore: fading "swipe up" nudge over the real scroll feed ---------- */
-@keyframes mkt-explore-nudge-bounce {
-  0%, 100% { transform: translateY(0); opacity: 0.9; }
-  50% { transform: translateY(-6px); opacity: 0.5; }
-}
-.mkt-explore-nudge {
-  animation: mkt-explore-nudge-bounce 1.4s ease-in-out infinite;
 }
 
 /* ---------- Connect: replies land one after another ---------- */

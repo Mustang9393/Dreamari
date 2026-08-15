@@ -18,12 +18,14 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // user-supplied photo instead. Salary bands are the same standard entry-level
 // estimates used in Match, not sourced from the taxonomy sheet (which has no salary
 // column filled in).
+// Trimmed from 4 to 3 cards per direct request — dropped Human Resources/Stretch,
+// keeping the two ends of the match-strength spectrum (Strong Match, Match) plus the
+// Wildcard, rather than the middle-of-the-road one.
 const CARDS = [
   { photo: "/images/career-pe-analyst.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
   { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
-  { photo: "/images/career-product-designer.jpg", title: "Human Resources", industry: "Business & Finance", matchLevel: "Stretch", tagColor: "#ffb81f", salary: "$55K-90K", major: "Human Resources" },
   // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
-  // it should never say "Business & Finance" just because the other three do.
+  // it should never say "Business & Finance" just because the other two do.
   { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
@@ -159,27 +161,100 @@ function ExploreCardBody({ card }: { card: Card }) {
   );
 }
 
+// Eased scrollTop animation with real control over duration — native `scrollTo({
+// behavior: "smooth" })` doesn't reliably support a slow, deliberate speed across
+// browsers, and the nudge specifically needs to read as slow and intentional (the next
+// card visibly sliding up into view) rather than a quick flick.
+function animateScrollTop(el: HTMLElement, to: number, duration: number): () => void {
+  const start = el.scrollTop;
+  const change = to - start;
+  const startTime = performance.now();
+  let raf = 0;
+  function step(now: number) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.scrollTop = start + change * eased;
+    if (t < 1) raf = requestAnimationFrame(step);
+  }
+  raf = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(raf);
+}
+
 export function ExploreChapter() {
   const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
-  // Nudge: once the chapter is revealed, tease-scroll the track down a little and
-  // back, so the reader's eye catches that this thing actually scrolls, then get out
-  // of the way the moment they touch it themselves.
+  // Nudge: once the chapter is revealed, slowly slide the next card up into view and
+  // hold there for a beat before settling back — a physical "look, this scrolls" cue
+  // instead of a bouncing icon, since a visible chunk of the next card peeking up is a
+  // much more intuitive invitation to take over the scroll than an arrow glyph.
   useEffect(() => {
     if (!graphicRevealed || scrolled) return;
     const el = trackRef.current;
     if (!el) return;
+    let cancelPeek: (() => void) | undefined;
+    let cancelSettle: (() => void) | undefined;
     const timeout = setTimeout(() => {
-      el.scrollTo({ top: 34, behavior: "smooth" });
+      cancelPeek = animateScrollTop(el, 86, 900);
       setTimeout(() => {
-        if (!el) return;
-        el.scrollTo({ top: 0, behavior: "smooth" });
-      }, 550);
-    }, 1000);
-    return () => clearTimeout(timeout);
+        cancelSettle = animateScrollTop(el, 0, 700);
+      }, 900 + 650);
+    }, 900);
+    return () => {
+      clearTimeout(timeout);
+      cancelPeek?.();
+      cancelSettle?.();
+    };
   }, [graphicRevealed, scrolled]);
+
+  // Nested scroll containers on touch devices otherwise "trap" the gesture entirely:
+  // once a touch starts inside this feed, iOS in particular keeps routing the whole
+  // gesture to it even after the feed hits its own top/bottom, so scrolling the OUTER
+  // page from on top of the card silently does nothing. When the feed is already at a
+  // boundary and the gesture is still pushing further that direction, hand the delta
+  // to the page instead of letting the feed swallow it. Wheel gets the same handoff
+  // for trackpad/mouse users.
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    let touchStartY = 0;
+
+    function atTop() {
+      return el!.scrollTop <= 0;
+    }
+    function atBottom() {
+      return el!.scrollTop + el!.clientHeight >= el!.scrollHeight - 1;
+    }
+
+    function onTouchStart(e: TouchEvent) {
+      touchStartY = e.touches[0].clientY;
+    }
+    function onTouchMove(e: TouchEvent) {
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStartY - currentY;
+      if ((atTop() && deltaY < 0) || (atBottom() && deltaY > 0)) {
+        e.preventDefault();
+        window.scrollBy(0, deltaY);
+        touchStartY = currentY;
+      }
+    }
+    function onWheel(e: WheelEvent) {
+      if ((atTop() && e.deltaY < 0) || (atBottom() && e.deltaY > 0)) {
+        e.preventDefault();
+        window.scrollBy(0, e.deltaY);
+      }
+    }
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, []);
 
   return (
     <ChapterShell
@@ -268,17 +343,6 @@ export function ExploreChapter() {
           ))}
         </div>
 
-        {/* Scroll nudge: fades out the moment the reader scrolls it themselves. */}
-        {!scrolled && (
-          <div
-            className="mkt-explore-nudge pointer-events-none absolute inset-x-0 flex flex-col items-center"
-            style={{ bottom: "calc(var(--mu) * 12px)", gap: "calc(var(--mu) * 2px)" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </div>
-        )}
       </div>
     </ChapterShell>
   );

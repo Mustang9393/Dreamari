@@ -355,6 +355,68 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   height match, matching the previous round's mobile result).
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 fixed Match's swipe glitch, flip/swipe interaction, Explore scroll trap
+
+- **Match's swipe "glitch"** ("the card behind loads again like a glitch, then a dark
+  overlay happens") was a real structural bug: the top (interactive) card and the
+  peeking cards behind it were two SEPARATE JSX blocks/render paths. When a swipe
+  removed the front card, the card that had been peeking at depth 1 didn't get updated
+  in place — it unmounted from the peeking block and a brand new element mounted in
+  the top-card block instead, jumping straight from a faded/bordered/no-scrim peeking
+  look to the full-strength scrim+text top-card look with no transition between the
+  two. Refactored to a single map over `stack.slice(0, 3)` keyed by `card.key`, where
+  each card's transform/opacity is a continuous function of its depth (0/1/2) — the
+  same DOM node now animates smoothly from depth 1 to depth 0 instead of unmount/
+  remount. Only depth 0 gets the scrim, poster text, swipe badges, and pointer
+  handlers. Removed the now-unnecessary `mkt-match-card-enter` mount animation.
+  **Follow-up bug caught during verification**: the refactor's DOM order put the front
+  card first and the peeking cards after, and later DOM siblings paint on top by
+  default with no z-index set — so the peeking cards were rendering OVER the top card,
+  ghosting through as a double-exposure image. Fixed with explicit `zIndex: 3 - depth`.
+- **Tap-to-flip was a dead end**: `onCardPointerDown` had `if (exiting || flipped ||
+  !top) return`, which blocked STARTING any new interaction whenever the info panel
+  was already showing — so there was no way to tap back to the poster, or swipe
+  like/pass while flipped. Removed the `flipped` condition from that guard. Verified:
+  tap flips to the info panel, tap again flips back, and swiping right while the info
+  panel is showing correctly commits the match.
+- **Career titles are now uppercase everywhere**: the celebration screen's title
+  (`matchedCard.title`) and the tap-to-flip info panel's title had no `uppercase`
+  applied (the info panel's wrapper explicitly sets `normal-case`, which was
+  overriding it) — both now force uppercase directly. Match's top-card poster title
+  and Explore's card titles were already uppercase via an ancestor class.
+- **Explore reduced from 4 to 3 cards** per direct request — dropped Human Resources/
+  Stretch (the middle-of-the-spectrum one), keeping Accountant/Strong Match,
+  Management Analyst/Match, and the Food Scientist Wildcard.
+- **Explore's scroll nudge replaced**: the bouncing chevron icon (`.mkt-explore-nudge`)
+  is gone; the existing tease-scroll-and-settle effect is now the whole nudge, made
+  slower and more pronounced (86px over 900ms eased, holds, settles back over 700ms)
+  via a small custom `animateScrollTop` helper — native `scrollTo({behavior:"smooth"})`
+  doesn't give reliable control over duration across browsers, and the ask was
+  specifically for a slow, deliberate "the next card is peeking" motion rather than a
+  quick bounce.
+- **Fixed Explore's feed trapping page scroll** ("scroll up again while on the card,
+  the page doesn't scroll up" / "messes up the scroll of the page"): nested scrollable
+  containers on touch devices (and to a lesser extent, wheel/trackpad) don't
+  automatically hand a scroll gesture back to the parent once the inner one hits its
+  boundary — iOS Safari in particular keeps routing an entire touch gesture to
+  whichever scroller it started on. Added `touchmove`/`wheel` listeners on
+  `.mkt-explore-track` that detect "already at this boundary, gesture still pushing
+  that direction" and manually forward the delta to `window.scrollBy` instead of
+  letting the feed absorb it. Verified via direct scrollTop/window.scrollY
+  measurement: scrolling down from the feed's bottom boundary now advances the page
+  into Connect, and scrolling up from the top boundary advances it back toward Play.
+- A mid-session note: the dev server's Fast Refresh state became corrupted after many
+  rapid edits this session (stale closures throwing `ReferenceError`s for variables
+  renamed/removed several rounds ago, e.g. `likedMatched`), which also made the browser
+  tool's click actions hang. Cleared `.next` and restarted the dev server to recover;
+  worth doing proactively if click actions start timing out mid-session again.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified on a fresh dev server + fresh tab: swipe stack transitions
+  smoothly with no ghosting, tap/tap-back/swipe-while-flipped all work, celebration
+  and flip-panel titles are uppercase, Explore has exactly 3 cards, and the scroll
+  boundary handoff moves the outer page correctly in both directions.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
