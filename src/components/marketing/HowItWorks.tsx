@@ -47,7 +47,11 @@ export function HowItWorks() {
 
       <ChapterRail wrapRef={wrapRef} />
 
-      <div ref={wrapRef}>
+      {/* pb-8/12: Connect (and Build) are now `compact` — a much shorter section than
+         Match/Explore/Play's full-viewport ones — so without a little extra room here
+         the CTA block right after Connect started immediately below it with almost no
+         separation, reading as one run-on block instead of the end of the storyboard. */}
+      <div ref={wrapRef} className="pb-8 sm:pb-12">
         <BuildChapter />
         <MatchChapter />
         <PlayChapter />

@@ -320,6 +320,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   confirmed), and Match's card is untouched (still full-size).
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 responsive reply count for Connect, fixed CTA-adjacency gap
+
+- Root cause of "cropping out on desktop" (user sent a screenshot from
+  `dreamari.vercel.app` showing Jordan's reply cut off mid-box): `--mu` (the font/
+  spacing scale every chapter uses) is driven by the graphic frame's WIDTH, but the
+  frame's HEIGHT cap doesn't scale to match — so a wide-but-not-especially-tall
+  viewport (e.g. 1440×900) gets a bigger `--mu` (bigger text/padding, taller content)
+  than a narrower/taller one, while the frame's height budget stays fixed. At that
+  combination, 3 replies needed ~549px but the frame only had 450px, and the card's
+  `max-h-full` + `overflow-hidden` silently clipped the excess instead of showing it or
+  scrolling.
+- Rather than pick a breakpoint by guessing, made the reply count self-measuring:
+  `Connect.tsx` now renders `REPLIES.slice(0, visibleReplies)`, where `visibleReplies`
+  starts at 3 and a `useLayoutEffect` drops it by one (floor of 2) whenever the card's
+  true content height (`scrollHeight`, unaffected by the clip) exceeds the frame's
+  actual available height (`frame.clientHeight`) — verified before paint, so there's no
+  visible flash of the overflowing state. A `resize` listener resets the attempt to 3
+  on every resize, so a taller/narrower viewport gets the third reply back
+  automatically. This directly implements the "reduce to two / add one back if there's
+  room, be responsive" instruction without a hardcoded height breakpoint.
+- Separately, "the You're ready section looks weird" traced to `HowItWorks.tsx`: since
+  Connect (and Build) now use the shorter `compact` section from the previous round,
+  the CTA block right after Connect started with almost no gap, reading as one run-on
+  block. Added `pb-8 sm:pb-12` to the chapters wrapper so there's real breathing room
+  before the CTA begins, without touching `FinalCTAs.tsx` itself (shared by the Schools
+  variant elsewhere).
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified at 1440×900 (where the crop reproduced): reply count now
+  self-corrects to 2 with `scrollHeight <= clientHeight` confirmed (no crop), Jordan's
+  full reply text renders and its bottom edge sits inside the card, and there's now a
+  ~245px gap between Connect's card and the "You're ready" heading. At 375px mobile,
+  all 3 replies still fit with no crop and no blank space (measured `fits:true`, exact
+  height match, matching the previous round's mobile result).
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
@@ -67,8 +68,38 @@ const SHARE_ICON = (
   </svg>
 );
 
+const MIN_VISIBLE_REPLIES = 2;
+
 export function ConnectChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
+  const cardRef = useRef<HTMLDivElement>(null);
+  // How many replies actually fit. --mu (font/spacing scale) is driven by the frame's
+  // WIDTH, but the frame's height cap doesn't grow to match — so a wide-but-short
+  // viewport can need more vertical room for 3 replies than the frame has, while the
+  // same 3 replies fit fine on a narrower/taller one. Rather than guess a breakpoint,
+  // measure: always attempt every reply, and only drop the last one(s) if the card's
+  // true content height (scrollHeight, unaffected by the overflow-hidden clip) would
+  // exceed the frame's actual available height. Resize re-attempts the full count
+  // first, so a taller/wider viewport gets the extra reply back.
+  const [visibleReplies, setVisibleReplies] = useState(REPLIES.length);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const frame = card.closest(".mkt-graphic-scale");
+    if (!frame) return;
+    if (card.scrollHeight > frame.clientHeight && visibleReplies > MIN_VISIBLE_REPLIES) {
+      setVisibleReplies((n) => n - 1);
+    }
+  }, [visibleReplies]);
+
+  useLayoutEffect(() => {
+    function handleResize() {
+      setVisibleReplies(REPLIES.length);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <ChapterShell
@@ -90,6 +121,7 @@ export function ConnectChapter() {
          never overflow the frame if content ever runs long. */}
       <div className="flex h-full w-full items-center justify-center">
         <div
+          ref={cardRef}
           className="relative flex max-h-full w-full flex-col overflow-hidden rounded-2xl border"
           style={{
             maxWidth: "min(94cqw, 480px)",
@@ -146,11 +178,12 @@ export function ConnectChapter() {
           </div>
 
           {/* Comments - linear, not pinned/rotated, each its own translucent glass row.
-             No overflow/scroll here on purpose — sized to fit all three replies within
-             the frame outright rather than relying on an internal scrollbar. */}
+             No overflow/scroll here on purpose — REPLIES is sliced to whatever count
+             the layout effect above measured actually fits, rather than relying on an
+             internal scrollbar or ever clipping the last reply. */}
           <div style={{ padding: "0 calc(var(--mu) * 14px) calc(var(--mu) * 12px)" }}>
             <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 7px)" }}>
-              {REPLIES.map((reply, i) => (
+              {REPLIES.slice(0, visibleReplies).map((reply, i) => (
                 <div
                   key={reply.name}
                   className="mkt-reply rounded-xl"
