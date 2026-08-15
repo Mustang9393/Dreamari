@@ -98,6 +98,7 @@
 .mkt-holo-border {
   background: linear-gradient(120deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700, #8b5cf6);
   background-size: 300% 100%;
+  background-repeat: no-repeat;
   animation: mkt-holo-spin 5s linear infinite;
 }
 @keyframes mkt-holo-sheen-sweep {
@@ -105,8 +106,14 @@
   100% { background-position: -60% -60%; }
 }
 .mkt-holo-sheen {
+  /* The sweep is a single soft band on transparent, sized well past 100% so it can
+     travel fully off-frame in both directions - background-repeat must stay
+     no-repeat, or the browser tiles this gradient and the tile seam (gradient jumps
+     straight from "70% transparent" back to "30% transparent" with nothing eased
+     between) reads as a hard rectangular edge dragging across the card. */
   background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.4) 45%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.4) 55%, transparent 70%);
   background-size: 250% 250%;
+  background-repeat: no-repeat;
   animation: mkt-holo-sheen-sweep 3.4s ease-in-out infinite;
   mix-blend-mode: overlay;
 }

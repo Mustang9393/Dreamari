@@ -221,6 +221,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   Research," Match's card is visibly wider/shorter with bigger buttons.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 fixed a hard-edge tiling artifact in the Wildcard holo sheen
+
+- Reported as "a smooth gradient shine, but also a hard rectangle/line dragging across
+  the screen." Both `.mkt-holo-border` and `.mkt-holo-sheen` (in `animations.css`) set
+  a `background-size` larger than 100% and animated `background-position` to sweep the
+  gradient across, but never set `background-repeat: no-repeat` — the default
+  `repeat` tiles the gradient, and since each tile's gradient runs from transparent
+  back to transparent with no easing *between* tiles, the seam where one tile ends and
+  the next begins renders as a hard straight edge riding along with the animation.
+  Added `background-repeat: no-repeat` to both rules; confirmed via computed style
+  that `background-repeat` now resolves to `no-repeat` on both.
+- Validation: `npm run build`, `npm run tokens:check` pass clean (no TS changes).
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
