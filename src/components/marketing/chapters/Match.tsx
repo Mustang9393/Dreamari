@@ -8,9 +8,8 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // All three cards are real Business/Money/Office-world careers with real copy pulled
 // from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
 // standard entry-level ranges for these roles (not in the taxonomy source, which has no
-// salary column filled in yet). Whichever order the deck gets swiped in, the reveal
-// always names Investment Banking: this is a demo of the interaction, not a real
-// matching engine, so there's no real branch to build per card.
+// salary column filled in yet). The match is real: whichever card gets liked is the one
+// the celebration screen shows, not a fixed outcome.
 const CARDS = [
   {
     key: "iba",
@@ -58,7 +57,7 @@ export function MatchChapter() {
   const [exiting, setExiting] = useState<{ key: string; direction: "like" | "pass" } | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [likedCount, setLikedCount] = useState(0);
-  const [likedMatched, setLikedMatched] = useState(false);
+  const [matchedCard, setMatchedCard] = useState<(typeof CARDS)[number] | null>(null);
   const [dragX, setDragX] = useState(0);
 
   // A tap and a swipe both start as a pointerdown on the same card, so these two refs
@@ -72,11 +71,10 @@ export function MatchChapter() {
   const startX = useRef(0);
 
   const top = stack[0];
-  // Liking any card is the "real" match moment (illusion of choice — whichever card you
-  // like, the deck resolves to Investment Banking), so it doesn't wait for the rest of
-  // the stack to clear. Passing every card is still a valid path through, so running out
-  // of cards without ever liking one still resolves the same way.
-  const matched = likedMatched || stack.length === 0;
+  // Liking a card is the match moment for THAT card — it doesn't wait for the rest of
+  // the stack to clear. Passing every card without ever liking one still needs to end
+  // somewhere, so it falls back to matching with whichever card was last on screen.
+  const matched = matchedCard !== null;
 
   // The emotional payoff of the whole deck: give it a beat to land, then carry the
   // reader straight into Play — same act-then-advance rhythm as Build.
@@ -95,13 +93,20 @@ export function MatchChapter() {
 
   function onExitTransitionEnd() {
     const direction = exiting?.direction;
+    const exited = top;
     setExiting(null);
     setFlipped(false);
     if (direction === "like") {
       setLikedCount((n) => n + 1);
-      setLikedMatched(true);
+      setMatchedCard(exited);
     } else {
-      setStack((s) => s.slice(1));
+      setStack((s) => {
+        const next = s.slice(1);
+        // Ran out of cards without ever liking one — fall back to matching with
+        // whichever was last on screen so the storyboard still ends in a match.
+        if (next.length === 0) setMatchedCard(exited);
+        return next;
+      });
     }
   }
 
@@ -110,7 +115,7 @@ export function MatchChapter() {
     setExiting(null);
     setFlipped(false);
     setLikedCount(0);
-    setLikedMatched(false);
+    setMatchedCard(null);
     setDragX(0);
   }
 
@@ -165,23 +170,23 @@ export function MatchChapter() {
            aspect-ratio derives width from that — capped by max-width so a tall/narrow
            frame still caps width instead of ever overflowing it sideways. */}
         <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 240" }}>
-          {matched ? (
+          {matched && matchedCard ? (
             <div
               className="mkt-match-celebrate absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
               style={{ ["--glow" as string]: WORLD_COLOR }}
             >
-              <Image src="/images/career-chief-executive.jpg" alt="" fill className="object-cover" />
+              <Image src={matchedCard.photo} alt="" fill className="object-cover" />
               <div
                 aria-hidden
                 className="absolute inset-0"
-                style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 40%, var(--scrim-heavy) 68%, var(--background) 100%)" }}
+                style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-transparent) 55%, var(--scrim-medium) 78%, var(--background) 100%)" }}
               />
               <div className="mkt-match-celebrate-text absolute inset-x-0 bottom-0 flex flex-col items-center text-center" style={{ padding: "calc(var(--mu) * 16px)", gap: "calc(var(--mu) * 8px)" }}>
                 <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 12px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
                   You&apos;re matched!
                 </p>
-                <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 24px)", lineHeight: 1.15, color: "var(--foreground)" }}>
-                  Investment Banking
+                <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, color: "var(--foreground)", ...posterTitleStyle(matchedCard.title) }}>
+                  {matchedCard.title}
                 </p>
                 <button
                   type="button"
@@ -206,7 +211,10 @@ export function MatchChapter() {
           ) : (
             <>
               {/* Peeking cards behind the top one — static, just selling "there's a
-                 deck here," never interactive themselves. */}
+                 deck here," never interactive themselves. Bigger offset/scale step and
+                 a visible border per card (rather than a small nudge that read as one
+                 washed-out image) so it actually reads as a stack of distinct cards,
+                 not a blur behind the top one. */}
               {stack
                 .slice(1, 3)
                 .reverse()
@@ -216,10 +224,12 @@ export function MatchChapter() {
                     <div
                       key={card.key}
                       aria-hidden
-                      className="absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
+                      className="absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)] border"
                       style={{
-                        transform: `translateY(${depth * -10}px) scale(${1 - depth * 0.04})`,
-                        opacity: 1 - depth * 0.25,
+                        transform: `translateY(${depth * -18}px) scale(${1 - depth * 0.06})`,
+                        opacity: 1 - depth * 0.16,
+                        borderColor: "var(--glass-surface-2)",
+                        boxShadow: "0 10px 24px -12px rgba(0,0,0,0.5)",
                       }}
                     >
                       <Image src={card.photo} alt="" fill className="object-cover" />
@@ -230,7 +240,7 @@ export function MatchChapter() {
               {top && (
                 <div
                   key={top.key}
-                  className="mkt-match-card absolute inset-0 cursor-grab overflow-hidden rounded-[calc(var(--mu)*20px)] border touch-pan-y select-none active:cursor-grabbing"
+                  className="mkt-match-card mkt-match-card-enter absolute inset-0 cursor-grab overflow-hidden rounded-[calc(var(--mu)*20px)] border touch-pan-y select-none active:cursor-grabbing"
                   style={{
                     borderColor: "var(--glass-surface-2)",
                     transition:
@@ -260,10 +270,14 @@ export function MatchChapter() {
                   onPointerCancel={onCardPointerCancel}
                 >
                   <Image src={top.photo} alt="" fill className="object-cover" draggable={false} />
+                  {/* Scrim only needs to darken enough for the title/industry text at
+                     the very bottom to read — pushed the transparent zone down (was
+                     starting to darken at 42%) so most of the photo itself stays
+                     visible instead of reading as a near-black card. */}
                   <div
                     aria-hidden
                     className="absolute inset-0"
-                    style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 42%, var(--scrim-heavy) 66%, var(--background) 100%)" }}
+                    style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-transparent) 58%, var(--scrim-medium) 80%, var(--background) 100%)" }}
                   />
 
                   {/* Swipe intent badges — same "like/pass" language as the buttons

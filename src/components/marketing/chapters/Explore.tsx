@@ -8,23 +8,23 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // A real, user-scrollable feed (native overflow-y + scroll-snap), not a scroll-triggered
 // CSS animation — matches Match's card size (168 x 300 mu) per feedback that the two
 // should read as the same scale of thing.
-// The industry line ("Business & Finance," same world every card in this storyboard
-// belongs to) stays where it always was, under the title; match strength (Strong
-// Match/Match/Stretch/Wildcard) is a separate corner-ribbon badge rather than replacing
-// it — the two say different things and shouldn't compete for the same line. Photos are
-// reused stand-ins from the shoot we already have on hand — none of these four are
-// literal photoshoots of these specific careers (Figma's local asset server is
-// unreachable to pull those), so Food Scientist reuses the closest thing on hand among
-// lab/clinical-coded shots rather than going without a photo. Salary bands are the same
-// standard entry-level estimates used in Match, not sourced from the taxonomy sheet
-// (which has no salary column filled in).
+// The industry line (under the title) says what field a career is actually in — the
+// three business-track cards share "Business & Finance," but the Wildcard genuinely
+// isn't, so it gets its own. Match strength (Strong Match/Match/Stretch/Wildcard) is a
+// separate corner-ribbon badge rather than replacing the industry line — the two say
+// different things and shouldn't compete for the same line. Photos for the three
+// business-track cards are reused stand-ins from the shoot we already have on hand
+// (none are literal photoshoots of these specific careers); Food Scientist uses a
+// user-supplied photo instead. Salary bands are the same standard entry-level
+// estimates used in Match, not sourced from the taxonomy sheet (which has no salary
+// column filled in).
 const CARDS = [
   { photo: "/images/career-pe-analyst.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
   { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
   { photo: "/images/career-product-designer.jpg", title: "Human Resources", industry: "Business & Finance", matchLevel: "Stretch", tagColor: "#ffb81f", salary: "$55K-90K", major: "Human Resources" },
   // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
   // it should never say "Business & Finance" just because the other three do.
-  { photo: "/images/career-neurosurgeon.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
+  { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
 const ACTION_ICONS = [

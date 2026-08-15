@@ -235,6 +235,63 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Validation: `npm run build`, `npm run tokens:check` pass clean (no TS changes).
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 real Food Scientist photo
+
+- The Wildcard card's stand-in (`career-neurosurgeon.jpg`, an OR/surgical shot) was
+  visibly wrong for "Food Scientist" — user supplied a real photo (a food-science lab
+  scene: pipette, jars, produce) via a pasted image, saved to
+  `public/images/career-food-scientist.jpg` and wired into `Explore.tsx`'s `CARDS`
+  array in place of the surgeon photo. The now-unused `career-neurosurgeon.jpg` asset
+  was left in place (not referenced anywhere, but not deleted either).
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified the new photo crops well in the card at its `168/240` aspect ratio,
+  with the holo border/sheen still intact around it.
+- Not yet pushed to `origin` as of this entry.
+
+### 2026-08-16 real per-card matching, brighter cards, deck polish, extra reply
+
+- **Match no longer always resolves to Investment Banking.** Per direct request, the
+  celebration screen now shows whichever card was actually liked (new `matchedCard`
+  state holding the real `CARDS` entry, replacing the old `likedMatched` boolean).
+  Passing all three without ever liking one still needs to end somewhere, so it falls
+  back to matching whichever card was last on screen — the only remaining "soft" rule.
+  Connect's thread ("How do you get an internship at a bank?", Marcus at Goldman
+  Sachs) was intentionally left as-is since it wasn't in scope of this request; it will
+  read as bank-specific even if the visitor actually matched with Operations or
+  Project Manager. Flagging this as a known follow-up, not fixed here.
+  `career-chief-executive.jpg` was also replaced with a user-supplied higher-res
+  version of the same photo.
+- **Scrim gradients lightened** on both the top card and the celebration screen — the
+  darken zone now starts around 55-58% down the card instead of 40-42%, so most of the
+  photo stays visible instead of the card reading as near-black. Same fix applies to
+  both spots since they shared the same gradient stops.
+  the previous 42px/18px per direct feedback that the swipe/pass targets were too
+  small.
+- The card stack now actually reads as a stack: peeking cards behind the top one got a
+  bigger offset/scale step, a visible border, and less opacity falloff (was washing out
+  almost invisibly). Added a `mkt-match-card-enter` keyframe animation (not a
+  transition — the top card is a fresh DOM node each time due to `key={card.key}`, so
+  only an `animation` reliably restarts on mount) so the newly-promoted top card slides/
+  scales in instead of popping into place instantly after a swipe.
+- Explore's Food Scientist card now uses a real user-supplied photo
+  (`career-food-scientist.jpg`) instead of reusing the surgeon stand-in, which had
+  already been flagged as an obvious mismatch.
+- Connect got a third reply (Priya, Grade 12, reusing the now-unused
+  `career-neurosurgeon.jpg` as an avatar crop) per direct request that there was room
+  for one more. This initially relied on the comments list's internal
+  `overflow-y-auto` scroll to fit the third reply — corrected right after, per an
+  explicit "nothing should scroll inside the graphics other than Explore" rule: removed
+  the scroll entirely and tightened the Post section and each comment row's
+  padding/gaps/font sizes instead, so all three replies fit outright within the frame
+  at both mobile and desktop widths. Verified via `scrollHeight <= clientHeight` at
+  both 375px and desktop widths.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified: passing Investment Banking then liking Operations correctly shows
+  "You're matched! Operations" (not the old fixed outcome), the top-card scrim is
+  visibly lighter, peeking cards read as a distinct stack, the promoted card slides in
+  smoothly, and Connect shows all three replies (scrolling to the third when needed).
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

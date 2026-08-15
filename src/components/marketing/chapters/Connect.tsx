@@ -27,6 +27,17 @@ const REPLIES = [
     text: "Just applied, thanks for the tip!",
     verified: false,
   },
+  {
+    // Reuses career-neurosurgeon.jpg as a face crop — no dedicated fourth avatar shot
+    // on hand, and it's now otherwise unused since Explore's Food Scientist card moved
+    // to a real supplied photo.
+    photo: "/images/career-neurosurgeon.jpg",
+    color: "#ec4899",
+    name: "Priya",
+    tag: "Grade 12",
+    text: "Same here, bookmarking this!",
+    verified: false,
+  },
 ];
 
 const VERIFIED_BADGE = (
@@ -90,35 +101,38 @@ export function ConnectChapter() {
             style={{ background: "color-mix(in srgb, var(--c) 30%, transparent)" }}
           />
 
-          {/* Post */}
-          <div style={{ padding: "calc(var(--mu) * 18px) calc(var(--mu) * 18px) calc(var(--mu) * 12px)" }}>
-            <div className="flex items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
-              <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 38px)", height: "calc(var(--mu) * 38px)" }}>
+          {/* Post — tightened from the original padding/gaps (18/14/12 → smaller
+             throughout) to reclaim vertical room for a third reply below without
+             needing to scroll; nothing in this card should ever need to scroll except
+             Explore's own feed. */}
+          <div style={{ padding: "calc(var(--mu) * 14px) calc(var(--mu) * 14px) calc(var(--mu) * 10px)" }}>
+            <div className="flex items-center" style={{ gap: "calc(var(--mu) * 9px)" }}>
+              <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 34px)", height: "calc(var(--mu) * 34px)" }}>
                 <Image src={ASKER.photo} alt="" fill className="object-cover" />
               </div>
               <div>
-                <div className="font-bold" style={{ fontSize: "calc(var(--mu) * 13px)", color: ASKER.color }}>
+                <div className="font-bold" style={{ fontSize: "calc(var(--mu) * 12.5px)", color: ASKER.color }}>
                   {ASKER.name}
                 </div>
-                <div className="font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
+                <div className="font-semibold" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
                   {ASKER.tag}
                 </div>
               </div>
             </div>
-            <p className="font-bold" style={{ marginTop: "calc(var(--mu) * 12px)", fontSize: "calc(var(--mu) * 16px)", lineHeight: 1.3, color: "var(--foreground)" }}>
+            <p className="font-bold" style={{ marginTop: "calc(var(--mu) * 10px)", fontSize: "calc(var(--mu) * 15px)", lineHeight: 1.28, color: "var(--foreground)" }}>
               How do you get an internship at a bank?
             </p>
 
             {/* Engagement row */}
-            <div className="flex items-center border-t border-b" style={{ marginTop: "calc(var(--mu) * 14px)", paddingTop: "calc(var(--mu) * 10px)", paddingBottom: "calc(var(--mu) * 10px)", gap: "calc(var(--mu) * 20px)", borderColor: "var(--glass-border)" }}>
+            <div className="flex items-center border-t border-b" style={{ marginTop: "calc(var(--mu) * 10px)", paddingTop: "calc(var(--mu) * 7px)", paddingBottom: "calc(var(--mu) * 7px)", gap: "calc(var(--mu) * 16px)", borderColor: "var(--glass-border)" }}>
               {[
                 { icon: HEART, label: "24" },
                 { icon: COMMENT_ICON, label: String(REPLIES.length) },
                 { icon: SHARE_ICON, label: "Share" },
               ].map((action, i) => (
                 <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 5px)", color: "var(--muted-foreground)" }}>
-                  <span style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>{action.icon}</span>
-                  <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 10.5px)" }}>
+                  <span style={{ width: "calc(var(--mu) * 13px)", height: "calc(var(--mu) * 13px)" }}>{action.icon}</span>
+                  <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)" }}>
                     {action.label}
                   </span>
                 </div>
@@ -126,30 +140,32 @@ export function ConnectChapter() {
             </div>
           </div>
 
-          {/* Comments - linear, not pinned/rotated, each its own translucent glass row */}
-          <div className="min-h-0 flex-1 overflow-y-auto" style={{ padding: "0 calc(var(--mu) * 18px) calc(var(--mu) * 18px)" }}>
-            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 10px)", paddingTop: "calc(var(--mu) * 12px)" }}>
+          {/* Comments - linear, not pinned/rotated, each its own translucent glass row.
+             No overflow/scroll here on purpose — sized to fit all three replies within
+             the frame outright rather than relying on an internal scrollbar. */}
+          <div className="min-h-0 flex-1" style={{ padding: "0 calc(var(--mu) * 14px) calc(var(--mu) * 12px)" }}>
+            <div className="flex h-full flex-col justify-center" style={{ gap: "calc(var(--mu) * 7px)" }}>
               {REPLIES.map((reply, i) => (
                 <div
                   key={reply.name}
                   className="mkt-reply rounded-xl"
-                  style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 14px)", background: "var(--glass-surface-2)", ["--d" as string]: i }}
+                  style={{ padding: "calc(var(--mu) * 9px) calc(var(--mu) * 12px)", background: "var(--glass-surface-2)", ["--d" as string]: i }}
                 >
-                  <div className="flex items-center" style={{ gap: "calc(var(--mu) * 8px)" }}>
-                    <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)" }}>
+                  <div className="flex items-center" style={{ gap: "calc(var(--mu) * 7px)" }}>
+                    <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
                       <Image src={reply.photo} alt="" fill className="object-cover" />
                     </div>
                     <div className="flex items-center" style={{ gap: "calc(var(--mu) * 4px)" }}>
-                      <span className="font-bold" style={{ fontSize: "calc(var(--mu) * 12px)", color: reply.color }}>
+                      <span className="font-bold" style={{ fontSize: "calc(var(--mu) * 11.5px)", color: reply.color }}>
                         {reply.name}
                       </span>
-                      {reply.verified && <span style={{ width: "calc(var(--mu) * 12px)", height: "calc(var(--mu) * 12px)", color: reply.color }}>{VERIFIED_BADGE}</span>}
-                      <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
+                      {reply.verified && <span style={{ width: "calc(var(--mu) * 11px)", height: "calc(var(--mu) * 11px)", color: reply.color }}>{VERIFIED_BADGE}</span>}
+                      <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 9px)", color: "var(--muted-foreground)" }}>
                         · {reply.tag}
                       </span>
                     </div>
                   </div>
-                  <p style={{ marginTop: "calc(var(--mu) * 6px)", fontSize: "calc(var(--mu) * 11.5px)", lineHeight: 1.5, color: "var(--foreground)" }}>{reply.text}</p>
+                  <p style={{ marginTop: "calc(var(--mu) * 4px)", fontSize: "calc(var(--mu) * 11px)", lineHeight: 1.4, color: "var(--foreground)" }}>{reply.text}</p>
                 </div>
               ))}
             </div>
