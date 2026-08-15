@@ -268,7 +268,7 @@ export function Mascot({ heroRef }: MascotProps) {
         >
           <Image
             src="/images/hero-cloud-mascot.png"
-            alt="Dreamari mascot — a friendly cloud character"
+            alt="Dreamari mascot, a friendly cloud character"
             fill
             sizes="460px"
             className="pointer-events-none object-contain select-none [filter:drop-shadow(0_30px_40px_rgba(0,0,0,.45))]"

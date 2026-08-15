@@ -18,7 +18,7 @@ export function PlayChapter() {
       id="play"
       eyebrow="Chapter Three"
       title="Play"
-      color="#ffb81f"
+      color="#e5484d"
       oneliner="Day-in-the-life college major and career games you actually want to open."
       graphicRef={graphicRef}
       playing={playing}

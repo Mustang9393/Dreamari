@@ -76,7 +76,7 @@ export function MatchChapter() {
       id="match"
       eyebrow="Chapter Two"
       title="Match"
-      color="#e5484d"
+      color="var(--world-business-money-office)"
       oneliner="With the right career, college major, and schools."
       flip
       altBackground
@@ -86,9 +86,9 @@ export function MatchChapter() {
     >
       <div className="relative z-[1] flex flex-col items-center gap-5" style={{ width: "calc(var(--mu) * 250px)", height: "calc(var(--mu) * 210px)" }}>
         <div className="relative w-full" style={{ height: "calc(var(--mu) * 138px)" }}>
-          <PosterCard slot="left" photo="/images/career-neurosurgeon.jpg" title="Neurosurgeon" subtitle="Health" worldColor="var(--world-health-medicine)" />
-          <PosterCard slot="right" photo="/images/career-product-designer.jpg" title="Product Designer" subtitle="Tech" worldColor="var(--world-tech-engineering-design)" />
-          <PosterCard slot="center" photo="/images/career-pe-analyst.jpg" title="Banker" subtitle="Finance" worldColor="var(--world-business-money-office)" />
+          <PosterCard slot="left" photo="/images/career-surgeon.jpg" title="Surgeon" subtitle="Health" worldColor="var(--world-health-medicine)" />
+          <PosterCard slot="right" photo="/images/career-ux-designer.jpg" title="UX Designer" subtitle="Tech" worldColor="var(--world-tech-engineering-design)" />
+          <PosterCard slot="center" photo="/images/career-chief-executive.jpg" title="Analyst" subtitle="Finance" worldColor="var(--world-business-money-office)" />
         </div>
         <div className="mkt-m3-actions flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
           <div
@@ -139,14 +139,6 @@ export function MatchChapter() {
             </svg>
           </div>
         </div>
-        {/* QA doc's explicit copy note: "have the MATCH page say 'You've been matched
-           with Investment Banking!'" — timed to land just after the like-glow settles. */}
-        <p
-          className="mkt-match-reveal text-center whitespace-nowrap"
-          style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "calc(var(--mu) * 11px)", color: "var(--foreground)" }}
-        >
-          You&apos;ve been matched with <span style={{ color: "var(--c)" }}>Investment Banking!</span>
-        </p>
       </div>
     </ChapterShell>
   );

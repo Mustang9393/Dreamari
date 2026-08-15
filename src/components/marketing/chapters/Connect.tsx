@@ -1,12 +1,32 @@
 "use client";
 
+import Image from "next/image";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
+// A pinned community board, not a Reddit thread: no vote arrow, no indented linear
+// reply list — real profile photos on slightly-rotated pinned notes. A short, real
+// exchange (one corporate volunteer answer, one student following up) rather than an
+// implied crowd, so every name on the board is someone the reader actually sees reply.
+const ASKER = { photo: "/images/avatar-maya.jpg", color: "#6366f1", name: "Maya", tag: "Grade 10" };
+
 const REPLIES = [
-  { initials: "M", color: "#6366f1", name: "Maya", text: "Started with a finance club" },
-  { initials: "J", color: "#ffb81f", name: "Jordan", text: "Ask about internships early" },
-  { initials: "P", color: "#1fc76e", name: "Priya", text: "Shadowed at a credit union" },
+  {
+    photo: "/images/avatar-marcus.jpg",
+    color: "#1fc76e",
+    name: "Marcus",
+    tag: "JPMorgan Chase · Analyst",
+    text: "Join your school's finance club and apply junior year. GPA and networking both matter.",
+    rotate: "-1.5deg",
+  },
+  {
+    photo: "/images/avatar-jordan.jpg",
+    color: "#ffb81f",
+    name: "Jordan",
+    tag: "Grade 11",
+    text: "Just applied, thanks for the tip!",
+    rotate: "1deg",
+  },
 ];
 
 export function ConnectChapter() {
@@ -23,60 +43,52 @@ export function ConnectChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="relative z-[1] flex flex-col gap-5" style={{ width: "clamp(260px, 60cqw, 520px)" }}>
-        <div className="flex items-start gap-4">
-          <div className="flex flex-none flex-col items-center gap-0.5 pt-0.5" style={{ color: "var(--c)" }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
-              <path d="M12 5v14M5 12l7-7 7 7" />
-            </svg>
-            <span className="font-mono text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-              86
-            </span>
+      <div
+        className="relative z-[1] rounded-2xl border"
+        style={{ width: "clamp(260px, 60cqw, 520px)", background: "var(--card)", borderColor: "var(--border)", padding: "20px" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="relative h-9 w-9 flex-none overflow-hidden rounded-full">
+            <Image src={ASKER.photo} alt="" fill className="object-cover" />
           </div>
           <div>
-            <div className="text-[18px] leading-snug font-bold" style={{ color: "var(--foreground)" }}>
-              How do I get into investment banking?
+            <div className="text-[14px] font-bold" style={{ color: ASKER.color }}>
+              {ASKER.name}
             </div>
-            <div
-              className="mt-1.5 inline-block rounded-full px-[9px] py-[3px] font-mono text-[12px]"
-              style={{ color: "var(--c)", background: "color-mix(in srgb, var(--c) 14%, transparent)" }}
-            >
-              Business &amp; Finance
+            <div className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {ASKER.tag}
             </div>
           </div>
         </div>
-        <div className="ml-2.5 flex flex-col gap-3 border-l pl-[34px]" style={{ borderColor: "var(--border)" }}>
+        <div className="mt-3 text-[17px] leading-snug font-bold" style={{ color: "var(--foreground)" }}>
+          How do you get an internship at a bank?
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-3">
           {REPLIES.map((reply, i) => (
             <div
               key={reply.name}
-              className="mkt-reply flex flex-wrap items-center gap-3 rounded-xl border px-[15px] py-3"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--border)", ["--d" as string]: i }}
+              className="mkt-reply relative flex-1 rounded-xl border px-4 py-3"
+              style={{ background: "var(--glass-surface-2)", borderColor: "var(--border)", minWidth: "180px", transform: `rotate(${reply.rotate})`, ["--d" as string]: i }}
             >
-              <div
-                className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full text-[12px] font-bold text-white"
-                style={{ background: reply.color }}
-              >
-                {reply.initials}
+              <div className="flex items-center gap-2">
+                <div className="relative h-7 w-7 flex-none overflow-hidden rounded-full">
+                  <Image src={reply.photo} alt="" fill className="object-cover" />
+                </div>
+                <div>
+                  <div className="text-[13px] font-bold" style={{ color: reply.color }}>
+                    {reply.name}
+                  </div>
+                  <div className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                    {reply.tag}
+                  </div>
+                </div>
               </div>
-              <div className="text-[14px] font-bold" style={{ color: reply.color }}>
-                {reply.name}
-              </div>
-              <div className="text-[14px]" style={{ color: "var(--foreground)" }}>
+              <div className="mt-2 text-[13px] leading-snug" style={{ color: "var(--foreground)" }}>
                 {reply.text}
               </div>
             </div>
           ))}
-          <div
-            className="mkt-reply flex flex-wrap items-center gap-3 rounded-xl border px-[15px] py-3"
-            style={{ background: "var(--glass-surface-2)", borderColor: "var(--border)", ["--d" as string]: REPLIES.length }}
-          >
-            <div className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full text-[12px] font-bold text-white" style={{ background: "#e5484d" }}>
-              +12
-            </div>
-            <div className="text-[14px]" style={{ color: "var(--foreground)" }}>
-              more replies
-            </div>
-          </div>
         </div>
       </div>
     </ChapterShell>

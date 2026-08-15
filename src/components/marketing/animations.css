@@ -21,6 +21,14 @@
 .mkt-tag {
   transform-origin: center center;
 }
+/* Rest state (pre-`data-playing`) has to be set here, not just at the keyframe's own
+   0% — without it the checkmark defaults to plain visible CSS opacity and reads as
+   "already selected" for the ~900ms reading beat before the animation starts, then
+   visibly un-selects before selecting again once the keyframe takes over. */
+.mkt-tag-check {
+  opacity: 0;
+  transform: scale(0.4);
+}
 .mkt-graphic[data-playing="true"] .mkt-tag.mkt-top,
 .mkt-graphic[data-playing="true"] .mkt-tag.mkt-bottom {
   animation: mkt-build-tag-fade-out 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
@@ -85,9 +93,6 @@
 .mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like .mkt-m3-heart-fill { animation: mkt-m3-heart-fill-fade 2s ease 1 forwards; }
 @keyframes mkt-m3-heart-outline-fade { 0%, 50% { opacity: 1; } 70%, 100% { opacity: 0; } }
 @keyframes mkt-m3-heart-fill-fade { 0%, 50% { opacity: 0; } 70%, 100% { opacity: 1; } }
-.mkt-match-reveal { opacity: 0; transform: translateY(6px); }
-.mkt-graphic[data-playing="true"] .mkt-match-reveal { animation: mkt-match-reveal-in 2s ease 1 forwards; }
-@keyframes mkt-match-reveal-in { 0%, 80% { opacity: 0; transform: translateY(6px); } 94%, 100% { opacity: 1; transform: translateY(0); } }
 
 /* ---------- Play: scenario chart draws in, question, answer pick, progress fill ---------- */
 .mkt-chart-line { stroke-dasharray: 200; stroke-dashoffset: 200; }

@@ -24,11 +24,6 @@ export function HowItWorks() {
           <h2 className="mt-3 max-w-[640px] text-[clamp(1.75rem,4vw,2.4rem)] font-extrabold" style={{ color: "var(--foreground)" }}>
             Five chapters. One clearer future.
           </h2>
-          <p className="mt-4 max-w-[560px] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-            Every student&apos;s path looks different. Dreamari breaks it into five moves you can
-            actually do, not a 40-question quiz that spits out &quot;engineer.&quot; Scroll on. This next
-            stretch is the walkthrough.
-          </p>
         </div>
       </section>
 

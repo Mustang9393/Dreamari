@@ -7,33 +7,13 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // A doomscroll through three career cards (Figma "Mobile Explore" reference), settling
 // on the chapter's own target world (Investing) — quick, smooth, one continuous track.
 // Per the QA doc's "our new direction" Explore mockup (salary/focus/competition stats),
-// simplified down to two icon+value stats instead of a full labeled table — this card
-// is a third the mockup's height, so it only has room for the headline numbers.
+// represented as plain icon chips (no numbers) — a card a third that mockup's height has
+// no room for real figures to stay legible, so the icons just signal "pays well" /
+// "needs a degree" rather than quoting exact ones.
 const CARDS = [
-  {
-    photo: "/images/career-neurosurgeon.jpg",
-    title: "Neurosurgeon",
-    subtitle: "Health",
-    worldColor: "var(--world-health-medicine)",
-    salary: "$260K+",
-    duration: "12+ yr",
-  },
-  {
-    photo: "/images/career-product-designer.jpg",
-    title: "Product Designer",
-    subtitle: "Tech",
-    worldColor: "var(--world-tech-engineering-design)",
-    salary: "$95K–150K",
-    duration: "4-yr degree",
-  },
-  {
-    photo: "/images/career-pe-analyst.jpg",
-    title: "Private Equity Analyst",
-    subtitle: "Investing",
-    worldColor: "var(--world-business-money-office)",
-    salary: "$100K–160K",
-    duration: "4-yr degree",
-  },
+  { photo: "/images/career-neurosurgeon.jpg", title: "Neurosurgeon", subtitle: "Health", worldColor: "var(--world-health-medicine)" },
+  { photo: "/images/career-product-designer.jpg", title: "Product Designer", subtitle: "Tech", worldColor: "var(--world-tech-engineering-design)" },
+  { photo: "/images/career-pe-analyst.jpg", title: "Private Equity Analyst", subtitle: "Investing", worldColor: "var(--world-business-money-office)" },
 ];
 
 const ACTION_ICONS = [
@@ -124,32 +104,29 @@ export function ExploreChapter() {
                 >
                   {card.subtitle}
                 </p>
-                <div
-                  className="mt-1.5 flex items-center justify-center normal-case"
-                  style={{ gap: "calc(var(--mu) * 12px)" }}
-                >
-                  {[
-                    { icon: STAT_ICONS.salary, value: card.salary },
-                    { icon: STAT_ICONS.duration, value: card.duration },
-                  ].map((stat, i) => (
-                    <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 3px)" }}>
+                <div className="mt-1.5 flex items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 6px)" }}>
+                  {[STAT_ICONS.salary, STAT_ICONS.duration].map((icon, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-center rounded-full border"
+                      style={{
+                        width: "calc(var(--mu) * 18px)",
+                        height: "calc(var(--mu) * 18px)",
+                        background: "var(--glass-surface-1)",
+                        borderColor: "var(--glass-border)",
+                      }}
+                    >
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="var(--muted-foreground)"
+                        stroke="var(--foreground)"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}
                       >
-                        {stat.icon}
+                        {icon}
                       </svg>
-                      <span
-                        className="whitespace-nowrap"
-                        style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 6.5px)", color: "var(--muted-foreground)" }}
-                      >
-                        {stat.value}
-                      </span>
                     </div>
                   ))}
                 </div>
