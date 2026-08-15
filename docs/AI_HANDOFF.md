@@ -63,6 +63,57 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Not pushed to `origin` or opened as a PR as of this entry — see "Recommended next
   step" for status once that happens.
 
+### 2026-08-15 finance-focused content pass, full-frame chapter redesign
+
+- Scope: same five `HowItWorks` chapters only (Build/Match/Play/Explore/Connect);
+  no other route touched.
+- Build now asks the real Question 3 of 7 ("Choose your interests": Tech / Business &
+  Money / Health, Business & Money nudged as the example), oneliner states the 7-question
+  assessment. Rows are full-width and identically sized (a `flex-col`, not wrapped pills of
+  variable width) per explicit feedback that mixed chip sizes read as broken.
+- Match's 3-card deck is now all Business & Finance careers (Investment Banking /
+  Operations / Project Manager) rather than a cross-category mix — per explicit request
+  that the deck stay on-theme with Build's finance path. Tapping a card flips it to a
+  Description/Salary/College-major info panel; liking/disliking is illusion-of-choice only
+  (`Match.tsx`) — every path ends on the same "You're matched! Investment Banking" reveal,
+  since no real per-choice branching was requested. Explore's 4 cards were reframed to
+  match-strength categories (Strong Match/Match/Stretch/Wildcard) over the previous mixed
+  category set; the Wildcard (Food Scientist) has no stand-in photo and renders an icon
+  tile instead of a placeholder image.
+- Play was rebuilt from a split image-banner/content layout into a full-bleed photo card
+  with the glossary game overlaid in a glass panel (`rgba(8,11,23,0.42)` + blur — the
+  standard `--glass-surface-3` token was too opaque and hid the scene entirely, so this one
+  panel intentionally uses a custom lower-opacity value rather than that token). Red
+  answer-state color and the progress bar are both gone per direct request.
+- Connect was rebuilt from a pinned-corkboard layout into a single social-post card
+  (avatar/name/tag, question, like/comment/share row, then a linear comment list) using the
+  existing `--glass-surface-2`/`--glass-surface-3` tokens and blur, not new colors. Marcus's
+  tag changed from JPMorgan Chase to Goldman Sachs per direct request.
+- Shared chapter frame (`ChapterShell.tsx`) raised from `min(56dvh, 520px)` to
+  `min(82dvh, 680px)` / `min(94cqw, 480px)` after direct feedback that graphics read as
+  small and Play required internal scrolling to see all three answers; `dvh` (not `vh`) is
+  deliberate so the cap still shrinks safely on short viewports rather than ever
+  overflowing the fold.
+- Added auto-advance-on-interaction: Build's `pick()` and Match's post-celebration
+  `useEffect` both call `scrollIntoView` on the next chapter's section id after a short
+  delay, so picking an interest or finishing the swipe deck carries the reader forward
+  without a manual scroll. Match's "You're matched" reveal also got a real entrance
+  (scale/glow bounce, `mkt-match-celebrate` in `animations.css`) since the user asked for
+  an "emotional moment" payoff there, not a static swap.
+- A mid-session debugging detour: `usePlayingOnScroll`'s IntersectionObserver appeared to
+  never fire at all (stuck `graphicRevealed: false`) on both local dev and the live
+  production deploy, reproduced with injected `window.__ioObserved`/`__ioLog` counters
+  showing `observe()` ran but the callback never called back — this correlated with the
+  browser automation tool itself reporting "Browser pane is currently hidden" on click/
+  scroll actions. A fresh tab in the same tool recovered normal IntersectionObserver
+  firing, confirming this was a browser-automation-session state issue, not a code defect.
+  The debug instrumentation has been removed from `scrollHooks.ts`.
+- Validation: `tsc --noEmit`, `npm run build`, and `npm run tokens:check` all pass clean.
+  Browser-verified end to end: Build's picks and auto-scroll, Match's flip/like/celebrate/
+  auto-scroll, Play's overlay legibility with the scene still visible behind it, Explore's
+  reframed cards, and Connect's post/comment layout with the Goldman Sachs swap.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

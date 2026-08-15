@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
@@ -60,6 +60,16 @@ export function MatchChapter() {
   const top = stack[0];
   const matched = stack.length === 0;
 
+  // The emotional payoff of the whole deck: give it a beat to land, then carry the
+  // reader straight into Play — same act-then-advance rhythm as Build.
+  useEffect(() => {
+    if (!matched) return;
+    const timeout = setTimeout(() => {
+      document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 2200);
+    return () => clearTimeout(timeout);
+  }, [matched]);
+
   function act(direction: "like" | "pass") {
     if (!top || exiting) return;
     setExiting({ key: top.key, direction });
@@ -99,8 +109,8 @@ export function MatchChapter() {
         <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 300" }}>
           {matched ? (
             <div
-              className="mkt-match-result absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
-              style={{ boxShadow: `0 0 0 1.5px ${WORLD_COLOR}, 0 20px 40px -16px color-mix(in srgb, ${WORLD_COLOR} 50%, transparent)` }}
+              className="mkt-match-celebrate absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
+              style={{ ["--glow" as string]: WORLD_COLOR }}
             >
               <Image src="/images/career-chief-executive.jpg" alt="" fill className="object-cover" />
               <div
@@ -108,11 +118,11 @@ export function MatchChapter() {
                 className="absolute inset-0"
                 style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 40%, var(--scrim-heavy) 68%, var(--background) 100%)" }}
               />
-              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center text-center" style={{ padding: "calc(var(--mu) * 16px)", gap: "calc(var(--mu) * 8px)" }}>
-                <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
-                  You&apos;re matched
+              <div className="mkt-match-celebrate-text absolute inset-x-0 bottom-0 flex flex-col items-center text-center" style={{ padding: "calc(var(--mu) * 16px)", gap: "calc(var(--mu) * 8px)" }}>
+                <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
+                  You&apos;re matched!
                 </p>
-                <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 15px)", lineHeight: 1.15, color: "var(--foreground)" }}>
+                <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.15, color: "var(--foreground)" }}>
                   Investment Banking
                 </p>
                 <button

@@ -27,6 +27,23 @@
   animation: mkt-nudge-pulse 1.8s ease-in-out infinite;
 }
 
+/* ---------- Match: the "you're matched" emotional payoff — a real entrance (scale
+   bounce + glow pulse), not just a static reveal, since this is the moment the whole
+   card-swipe interaction has been building toward. ---------- */
+@keyframes mkt-match-celebrate-in {
+  0% { transform: scale(0.82); opacity: 0; box-shadow: 0 0 0 0 color-mix(in srgb, var(--glow) 0%, transparent); }
+  55% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 0 3px var(--glow), 0 24px 48px -14px color-mix(in srgb, var(--glow) 65%, transparent); }
+  100% { transform: scale(1); box-shadow: 0 0 0 1.5px var(--glow), 0 20px 40px -16px color-mix(in srgb, var(--glow) 50%, transparent); }
+}
+.mkt-match-celebrate {
+  animation: mkt-match-celebrate-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1 forwards;
+}
+.mkt-match-celebrate-text {
+  opacity: 0;
+  animation: mkt-reply-in 0.5s ease 1 forwards;
+  animation-delay: 0.3s;
+}
+
 /* Match, Explore, Build, and Play are all now driven by real React state/interaction
    (see each chapter file) rather than a scroll-triggered CSS timeline, so their old
    keyframe rules have been removed from here — nothing left to gate behind

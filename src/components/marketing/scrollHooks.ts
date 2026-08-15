@@ -31,15 +31,17 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
           setPlaying(false);
         }
       },
-      // A plain 35%-visible threshold triggers as soon as a chapter's TOP edge
-      // crosses into a tall viewport — on desktop, where a section is short
-      // relative to viewport height, the next chapter down can clear 35% while
-      // the current one is still front and center, so it starts (and often
-      // finishes) its animation before the reader ever scrolls to it. Shrinking
-      // the observed root to a thin band around the viewport's vertical center
-      // instead means a chapter only counts as "in view" once it's actually
-      // centered on screen, at any viewport height.
-      { rootMargin: "-40% 0px -40% 0px", threshold: 0 },
+      // Each chapter section is min-h-dvh with scroll-snap-align: start, so arriving
+      // at a chapter (via snap) already means the reader is "there" - a plain
+      // percentage-visible threshold is enough now. (An earlier version of this used
+      // a thin center-band rootMargin instead, back when sections were natural-height
+      // and a short one could leave the next chapter's sliver clearing 35% while the
+      // current one was still front and center. With full-screen snap sections and
+      // graphics now sized to fill most of that height, that same rootMargin instead
+      // meant a graphic taller than one screen never crossed the center band at all -
+      // "revealed" stayed stuck false even after scrolling to the very top of its
+      // section and waiting.)
+      { threshold: 0.15 },
     );
     io.observe(el);
     return () => {

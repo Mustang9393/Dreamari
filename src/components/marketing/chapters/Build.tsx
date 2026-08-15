@@ -21,6 +21,15 @@ export function BuildChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
   const [selected, setSelected] = useState<string | null>(null);
 
+  function pick(interest: string) {
+    setSelected(interest);
+    // A beat to see the pick land, then straight into Match — the same rhythm every
+    // interaction in this storyboard follows: act, get feedback, move forward.
+    setTimeout(() => {
+      document.getElementById("match")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 900);
+  }
+
   return (
     <ChapterShell
       id="build"
@@ -32,74 +41,63 @@ export function BuildChapter() {
       graphicRevealed={graphicRevealed}
     >
       {/* h-full/w-full: same allocated frame footprint as every other chapter's
-         graphic, even though this content is naturally shorter — centered within it
-         rather than stretched, so it doesn't distort into an oddly spaced-out list. */}
-      <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
-        <div className="flex flex-col items-center" style={{ width: "clamp(270px, 68cqw, 480px)", gap: "calc(var(--mu) * 14px)" }}>
-        <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
-          Question 3
-        </p>
+         graphic. Full-width, identically-sized rows (not wrapped pills of whatever
+         width their own text needs) so nothing reads as mismatched chips, and a wide
+         column so it actually uses the frame instead of floating a small cluster in a
+         lot of empty space. */}
+      <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 18px)" }}>
+        <div className="flex w-full flex-col items-center" style={{ maxWidth: "min(92%, 440px)", gap: "calc(var(--mu) * 16px)" }}>
+          <div className="text-center">
+            <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
+              Question 3 of 7
+            </p>
+            <p className="mt-2 font-bold" style={{ fontSize: "calc(var(--mu) * 19px)", lineHeight: 1.25, color: "var(--foreground)" }}>
+              Choose your interests
+            </p>
+          </div>
 
-        <p className="text-center font-bold" style={{ fontSize: "calc(var(--mu) * 16px)", lineHeight: 1.3, color: "var(--foreground)" }}>
-          Choose your interests
-        </p>
-
-        <div className="flex w-full flex-wrap justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
-          {INTERESTS.map((interest) => {
-            const isSelected = selected === interest;
-            const isNudge = selected === null && interest === EXAMPLE;
-            return (
-              <button
-                key={interest}
-                type="button"
-                onClick={() => setSelected(interest)}
-                className={`flex items-center rounded-full border transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
-                style={{
-                  gap: "calc(var(--mu) * 8px)",
-                  padding: "calc(var(--mu) * 12px) calc(var(--mu) * 18px)",
-                  fontSize: "calc(var(--mu) * 12px)",
-                  fontWeight: 600,
-                  background: isSelected ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))" : "var(--glass-surface-2)",
-                  borderColor: isSelected ? "#6366f1" : "var(--border)",
-                  color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
-                  opacity: selected !== null && !isSelected ? 0.6 : 1,
-                }}
-              >
-                {interest}
-                <span
-                  className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+          <div className="flex w-full flex-col" style={{ gap: "calc(var(--mu) * 12px)" }}>
+            {INTERESTS.map((interest) => {
+              const isSelected = selected === interest;
+              const isNudge = selected === null && interest === EXAMPLE;
+              return (
+                <button
+                  key={interest}
+                  type="button"
+                  onClick={() => pick(interest)}
+                  className={`flex w-full items-center justify-between rounded-[var(--radius-md-alt)] border transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
                   style={{
-                    width: "calc(var(--mu) * 16px)",
-                    height: "calc(var(--mu) * 16px)",
-                    padding: "calc(var(--mu) * 4px)",
-                    background: "#6366f1",
-                    opacity: isSelected ? 1 : 0,
-                    transform: isSelected ? "scale(1)" : "scale(0.4)",
+                    padding: "calc(var(--mu) * 16px) calc(var(--mu) * 20px)",
+                    fontSize: "calc(var(--mu) * 14px)",
+                    fontWeight: 600,
+                    background: isSelected ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))" : "var(--glass-surface-2)",
+                    borderColor: isSelected ? "#6366f1" : "var(--border)",
+                    color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
+                    opacity: selected !== null && !isSelected ? 0.6 : 1,
                   }}
                 >
-                  {CHECK}
-                </span>
-              </button>
-            );
-          })}
-          <div
-            className="flex items-center rounded-full border"
-            style={{
-              padding: "calc(var(--mu) * 12px) calc(var(--mu) * 16px)",
-              fontSize: "calc(var(--mu) * 11px)",
-              fontWeight: 600,
-              background: "transparent",
-              borderColor: "var(--border)",
-              color: "var(--muted-foreground)",
-            }}
-          >
-            + 12 more
+                  {interest}
+                  <span
+                    className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+                    style={{
+                      width: "calc(var(--mu) * 22px)",
+                      height: "calc(var(--mu) * 22px)",
+                      padding: "calc(var(--mu) * 5px)",
+                      background: "#6366f1",
+                      opacity: isSelected ? 1 : 0,
+                      transform: isSelected ? "scale(1)" : "scale(0.4)",
+                    }}
+                  >
+                    {CHECK}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </div>
 
-        <p className="text-center" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
-          {selected === null ? "Tap an interest, pick as many as fit." : `${selected} noted. Pick another, or that's the profile.`}
-        </p>
+          <p className="text-center" style={{ fontSize: "calc(var(--mu) * 10.5px)", color: "var(--muted-foreground)" }}>
+            {selected === null ? "+ 12 more interests in the full assessment" : `${selected} noted. Heading to your match...`}
+          </p>
         </div>
       </div>
     </ChapterShell>

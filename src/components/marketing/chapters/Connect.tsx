@@ -4,10 +4,10 @@ import Image from "next/image";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
-// A pinned community board, not a Reddit thread: no vote arrow, no indented linear
-// reply list — real profile photos on slightly-rotated pinned notes. A short, real
-// exchange (one corporate volunteer answer, one student following up) rather than an
-// implied crowd, so every name on the board is someone the reader actually sees reply.
+// Reads as a real social post + comment thread (Facebook/Twitter shape: post, engagement
+// row, linear comments) done in this site's own glassmorphic surfaces — not a pinned
+// corkboard, not a Reddit vote-arrow thread. A short, real exchange (one corporate
+// volunteer answer, one student following up) rather than an implied crowd.
 const ASKER = { photo: "/images/avatar-maya.jpg", color: "#6366f1", name: "Maya", tag: "Grade 10" };
 
 const REPLIES = [
@@ -17,7 +17,6 @@ const REPLIES = [
     name: "Marcus",
     tag: "Goldman Sachs · Analyst",
     text: "Join your school's finance club and apply junior year. GPA and networking both matter.",
-    rotate: "-1.5deg",
     verified: true,
   },
   {
@@ -26,7 +25,6 @@ const REPLIES = [
     name: "Jordan",
     tag: "Grade 11",
     text: "Just applied, thanks for the tip!",
-    rotate: "1deg",
     verified: false,
   },
 ];
@@ -35,6 +33,26 @@ const VERIFIED_BADGE = (
   <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" className="h-full w-full">
     <path d="M12 1l2.6 2.1 3.3-.5 1 3.2 3 1.6-1 3.2 1 3.2-3 1.6-1 3.2-3.3-.5L12 21l-2.6-2.1-3.3.5-1-3.2-3-1.6 1-3.2-1-3.2 3-1.6 1-3.2 3.3.5z" />
     <path d="M9 12.2l2 2 4-4.2" stroke="var(--card)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const HEART = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+  </svg>
+);
+
+const COMMENT_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+
+const SHARE_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+    <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+    <path d="M16 6l-4-4-4 4" />
+    <path d="M12 2v13" />
   </svg>
 );
 
@@ -51,80 +69,91 @@ export function ConnectChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      {/* h-full/w-full: same allocated frame footprint as every other chapter's
-         graphic, centered rather than stretched. A soft glow + top accent bar + the
-         verified badge below dress this up past "plain forum thread" — this is the
-         board a Fortune 500 partner is being pitched on paying to be part of. */}
+      {/* h-full/w-full: same allocated frame footprint as every other chapter's graphic.
+         Glass surfaces + a soft accent glow so this reads high-end - the board a Fortune
+         500 partner is being pitched on paying to be part of, not a plain forum post. */}
       <div className="flex h-full w-full items-center justify-center">
         <div
-          className="relative rounded-2xl border"
+          className="relative flex h-full max-h-full w-full flex-col overflow-hidden rounded-2xl border"
           style={{
-            width: "clamp(260px, 92cqw, 520px)",
-            maxWidth: "100%",
-            background: "var(--card)",
-            borderColor: "var(--border)",
-            padding: "22px",
-            boxShadow: "0 0 0 1px color-mix(in srgb, var(--c) 18%, transparent), 0 30px 60px -20px color-mix(in srgb, var(--c) 35%, transparent), 0 12px 28px -12px rgba(0,0,0,0.5)",
+            maxWidth: "min(94cqw, 480px)",
+            background: "var(--glass-surface-3)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderColor: "var(--glass-border)",
+            boxShadow: "0 0 0 1px color-mix(in srgb, var(--c) 18%, transparent), 0 30px 70px -20px color-mix(in srgb, var(--c) 40%, transparent), 0 12px 28px -12px rgba(0,0,0,0.55)",
           }}
         >
           <div
             aria-hidden
-            className="absolute inset-x-6 top-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, var(--c), transparent)" }}
+            className="pointer-events-none absolute -top-16 left-1/2 -z-10 h-[180px] w-[85%] -translate-x-1/2 rounded-full blur-[60px]"
+            style={{ background: "color-mix(in srgb, var(--c) 30%, transparent)" }}
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[140px] w-[80%] -translate-x-1/2 rounded-full blur-[50px]"
-            style={{ background: "color-mix(in srgb, var(--c) 25%, transparent)" }}
-          />
-        <div className="flex items-center gap-2.5">
-          <div className="relative h-9 w-9 flex-none overflow-hidden rounded-full">
-            <Image src={ASKER.photo} alt="" fill className="object-cover" />
-          </div>
-          <div>
-            <div className="text-[14px] font-bold" style={{ color: ASKER.color }}>
-              {ASKER.name}
-            </div>
-            <div className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              {ASKER.tag}
-            </div>
-          </div>
-        </div>
-        <div className="mt-3 text-[17px] leading-snug font-bold" style={{ color: "var(--foreground)" }}>
-          How do you get an internship at a bank?
-        </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          {REPLIES.map((reply, i) => (
-            <div
-              key={reply.name}
-              className="mkt-reply relative flex-1 rounded-xl border px-4 py-3"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--border)", minWidth: "180px", transform: `rotate(${reply.rotate})`, ["--d" as string]: i }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="relative h-7 w-7 flex-none overflow-hidden rounded-full">
-                  <Image src={reply.photo} alt="" fill className="object-cover" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[13px] font-bold" style={{ color: reply.color }}>
-                      {reply.name}
-                    </span>
-                    {reply.verified && (
-                      <span style={{ width: "13px", height: "13px", color: reply.color, flex: "none" }}>{VERIFIED_BADGE}</span>
-                    )}
-                  </div>
-                  <div className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                    {reply.tag}
-                  </div>
-                </div>
+          {/* Post */}
+          <div style={{ padding: "calc(var(--mu) * 18px) calc(var(--mu) * 18px) calc(var(--mu) * 12px)" }}>
+            <div className="flex items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+              <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 38px)", height: "calc(var(--mu) * 38px)" }}>
+                <Image src={ASKER.photo} alt="" fill className="object-cover" />
               </div>
-              <div className="mt-2 text-[13px] leading-snug" style={{ color: "var(--foreground)" }}>
-                {reply.text}
+              <div>
+                <div className="font-bold" style={{ fontSize: "calc(var(--mu) * 13px)", color: ASKER.color }}>
+                  {ASKER.name}
+                </div>
+                <div className="font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
+                  {ASKER.tag}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+            <p className="font-bold" style={{ marginTop: "calc(var(--mu) * 12px)", fontSize: "calc(var(--mu) * 16px)", lineHeight: 1.3, color: "var(--foreground)" }}>
+              How do you get an internship at a bank?
+            </p>
+
+            {/* Engagement row */}
+            <div className="flex items-center border-t border-b" style={{ marginTop: "calc(var(--mu) * 14px)", paddingTop: "calc(var(--mu) * 10px)", paddingBottom: "calc(var(--mu) * 10px)", gap: "calc(var(--mu) * 20px)", borderColor: "var(--glass-border)" }}>
+              {[
+                { icon: HEART, label: "24" },
+                { icon: COMMENT_ICON, label: String(REPLIES.length) },
+                { icon: SHARE_ICON, label: "Share" },
+              ].map((action, i) => (
+                <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 5px)", color: "var(--muted-foreground)" }}>
+                  <span style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>{action.icon}</span>
+                  <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 10.5px)" }}>
+                    {action.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Comments - linear, not pinned/rotated, each its own translucent glass row */}
+          <div className="min-h-0 flex-1 overflow-y-auto" style={{ padding: "0 calc(var(--mu) * 18px) calc(var(--mu) * 18px)" }}>
+            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 10px)", paddingTop: "calc(var(--mu) * 12px)" }}>
+              {REPLIES.map((reply, i) => (
+                <div
+                  key={reply.name}
+                  className="mkt-reply rounded-xl"
+                  style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 14px)", background: "var(--glass-surface-2)", ["--d" as string]: i }}
+                >
+                  <div className="flex items-center" style={{ gap: "calc(var(--mu) * 8px)" }}>
+                    <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)" }}>
+                      <Image src={reply.photo} alt="" fill className="object-cover" />
+                    </div>
+                    <div className="flex items-center" style={{ gap: "calc(var(--mu) * 4px)" }}>
+                      <span className="font-bold" style={{ fontSize: "calc(var(--mu) * 12px)", color: reply.color }}>
+                        {reply.name}
+                      </span>
+                      {reply.verified && <span style={{ width: "calc(var(--mu) * 12px)", height: "calc(var(--mu) * 12px)", color: reply.color }}>{VERIFIED_BADGE}</span>}
+                      <span className="font-semibold" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
+                        · {reply.tag}
+                      </span>
+                    </div>
+                  </div>
+                  <p style={{ marginTop: "calc(var(--mu) * 6px)", fontSize: "calc(var(--mu) * 11.5px)", lineHeight: 1.5, color: "var(--foreground)" }}>{reply.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </ChapterShell>

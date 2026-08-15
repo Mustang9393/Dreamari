@@ -96,11 +96,11 @@ export function ChapterShell({
           />
           {/* Shared frame every chapter's own content sizes itself to fill or center
               within, so all five graphics read as the same scale of thing rather than
-              each chapter picking its own size. Capped by dvh (viewport height), not
-              just cqw (container width), specifically so a short viewport shrinks it
-              proportionally instead of letting it grow past the fold and get clipped -
-              cqw alone has no idea how tall the actual screen is. */}
-          <div className="relative z-[1] flex items-center justify-center" style={{ width: "min(90cqw, 460px)", height: "min(56dvh, 520px)" }}>
+              each chapter picking its own size. Generous by default (this is the
+              *ceiling*, not a target to shrink to) - only a genuinely short viewport
+              should ever actually hit the dvh cap; on a normal phone/laptop screen this
+              should just give every chapter plenty of room to be big. */}
+          <div className="relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(82dvh, 680px)" }}>
             {children}
           </div>
         </div>
