@@ -38,19 +38,18 @@ export function ChapterShell({
   const [copyRef, copyRevealed] = useRevealOnScroll<HTMLDivElement>();
 
   return (
-    // compact sections don't claim a full min-h-dvh — Build/Connect's content is
-    // meaningfully shorter than Match/Explore/Play's big cards, and forcing it into a
-    // full-viewport-tall section (even with a shorter internal frame) just moved the
-    // dead space from "inside the frame" to "the section's own centering slack,"
-    // leaving the same long scroll of near-nothing before the next chapter. A shorter
-    // section still snaps correctly (scroll-snap doesn't require uniform heights).
+    // compact sections don't claim a full min-h-dvh at all — Build/Connect's content
+    // is meaningfully shorter than Match/Explore/Play's big cards, and they now hug
+    // their own content height (see the frame's height below) rather than being
+    // forced to fill a fixed viewport-height section. The section's own vertical
+    // padding (below) provides the breathing room instead of a min-height guess. A
+    // shorter section still snaps correctly (scroll-snap doesn't require uniform
+    // heights).
     //
     // No per-chapter background override (there used to be one, alternating chapters
     // between the page background and var(--card)) — every chapter now shares the same
-    // background so the boundary between two sections never reads as a hard seam,
-    // which was especially visible when a `compact` section's shorter height put that
-    // seam right behind trailing text like Build's "+ 12 more interests" line.
-    <section id={id} className={`relative flex items-center ${compact ? "min-h-[62dvh]" : "min-h-dvh"}`} style={{ scrollSnapAlign: "start" }}>
+    // background so the boundary between two sections never reads as a hard seam.
+    <section id={id} className={`relative flex items-center ${compact ? "" : "min-h-dvh"}`} style={{ scrollSnapAlign: "start" }}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
@@ -135,9 +134,23 @@ export function ChapterShell({
               second container-type here, sized off this already-capped frame, gives
               every chapter's inner text a --mu that maxes out around 1.5 (480/320)
               instead of 2.3, matching the frame's real size on any viewport. */}
+          {/* compact: the frame HUGS its content (height: auto, capped only as a
+             safety net) instead of imposing a fixed height content must fit under.
+             The fixed-height version was the actual bug behind "Connect crops on
+             desktop but not mobile": --mu scales off the frame's WIDTH, which caps at
+             the same ~480px/mu~1.5 on both, but a fixed dvh-based HEIGHT doesn't grow
+             to match that bigger text — so the same 2-3 replies that fit fine at
+             mobile's smaller mu could outgrow a fixed ceiling at desktop's larger one.
+             Auto-height means content is never squeezed to fit a pre-picked number;
+             the frame just becomes exactly as tall as Build's question or Connect's
+             card actually needs, on any viewport. */}
           <div
             className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
-            style={{ width: "min(94cqw, 480px)", height: compact ? "min(50dvh, 460px)" : "min(74dvh, 680px)" }}
+            style={{
+              width: "min(94cqw, 480px)",
+              height: compact ? "auto" : "min(74dvh, 680px)",
+              maxHeight: compact ? "min(72dvh, 620px)" : undefined,
+            }}
           >
             {children}
           </div>

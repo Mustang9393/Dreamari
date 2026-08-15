@@ -291,15 +291,17 @@ export function ExploreChapter() {
         >
           {CARDS.map((card) =>
             card.matchLevel === "Wildcard" ? (
-              // Rare-pull treatment: an animated gradient "foil" border framing the
-              // card (rather than the full-bleed edge-to-edge photo the other three
-              // use), plus a diagonal sheen sweeping across on a loop — same idea as a
-              // holographic trading card catching the light.
+              // Rare-pull treatment: a soft blurred aura glowing behind the card, a
+              // rotating gradient "foil" border framing it (rather than the
+              // full-bleed edge-to-edge photo the other two use), and a diagonal
+              // sheen sweeping across on top — same idea as a holographic trading
+              // card catching the light.
               <div
                 key={card.title}
                 className="relative"
                 style={{ height: "100%", scrollSnapAlign: "start", padding: "calc(var(--mu) * 3px)" }}
               >
+                <div aria-hidden className="mkt-holo-aura pointer-events-none absolute" style={{ inset: "-10px", borderRadius: "calc(var(--mu) * 24px)" }} />
                 <div className="mkt-holo-border absolute inset-0" style={{ borderRadius: "calc(var(--mu) * 20px)" }} />
                 <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "calc(var(--mu) * 17px)" }}>
                   <ExploreCardBody card={card} />

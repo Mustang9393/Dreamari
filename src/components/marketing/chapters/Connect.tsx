@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useLayoutEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
@@ -68,43 +67,8 @@ const SHARE_ICON = (
   </svg>
 );
 
-// Was 2, but a real-world report showed even 2 replies clipping on a wide-but-short
-// desktop window (--mu maxes out from width alone, while the frame's height budget is
-// independent of width and doesn't grow to match) — the floor must never win out over
-// "no crop," so this only stops at 1, which is still a real, substantive reply rather
-// than an empty-looking post.
-const MIN_VISIBLE_REPLIES = 1;
-
 export function ConnectChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
-  const cardRef = useRef<HTMLDivElement>(null);
-  // How many replies actually fit. --mu (font/spacing scale) is driven by the frame's
-  // WIDTH, but the frame's height cap doesn't grow to match — so a wide-but-short
-  // viewport can need more vertical room for 3 replies than the frame has, while the
-  // same 3 replies fit fine on a narrower/taller one. Rather than guess a breakpoint,
-  // measure: always attempt every reply, and only drop the last one(s) if the card's
-  // true content height (scrollHeight, unaffected by the overflow-hidden clip) would
-  // exceed the frame's actual available height. Resize re-attempts the full count
-  // first, so a taller/wider viewport gets the extra reply back.
-  const [visibleReplies, setVisibleReplies] = useState(REPLIES.length);
-
-  useLayoutEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    const frame = card.closest(".mkt-graphic-scale");
-    if (!frame) return;
-    if (card.scrollHeight > frame.clientHeight && visibleReplies > MIN_VISIBLE_REPLIES) {
-      setVisibleReplies((n) => n - 1);
-    }
-  }, [visibleReplies]);
-
-  useLayoutEffect(() => {
-    function handleResize() {
-      setVisibleReplies(REPLIES.length);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   return (
     <ChapterShell
@@ -121,13 +85,13 @@ export function ConnectChapter() {
          graphic, but the card sizes to its own content's height instead of stretching
          to fill the frame — a post + a few short comments is naturally shorter than
          Match/Explore's photo cards, and forcing it to fill the frame anyway (then
-         centering the replies within the leftover space) was exactly what produced the
-         large dead gaps above/below the comments. max-h-full still caps it so it can
-         never overflow the frame if content ever runs long. */}
+         centering the replies within the leftover space) was exactly what produced
+         large dead gaps above/below the comments. The frame itself now hugs this
+         card's content (see ChapterShell's `compact` sizing), so there's no fixed
+         ceiling this content needs to fit under — all replies always show. */}
       <div className="flex h-full w-full items-center justify-center">
         <div
-          ref={cardRef}
-          className="relative flex max-h-full w-full flex-col overflow-hidden rounded-2xl border"
+          className="relative flex w-full flex-col overflow-hidden rounded-2xl border"
           style={{
             maxWidth: "min(94cqw, 480px)",
             background: "var(--glass-surface-3)",
@@ -183,12 +147,12 @@ export function ConnectChapter() {
           </div>
 
           {/* Comments - linear, not pinned/rotated, each its own translucent glass row.
-             No overflow/scroll here on purpose — REPLIES is sliced to whatever count
-             the layout effect above measured actually fits, rather than relying on an
-             internal scrollbar or ever clipping the last reply. */}
+             No overflow/scroll here on purpose — the frame hugs the card, so all
+             replies always fit outright rather than needing a scrollbar or being
+             dropped to make room. */}
           <div style={{ padding: "0 calc(var(--mu) * 14px) calc(var(--mu) * 12px)" }}>
             <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 7px)" }}>
-              {REPLIES.slice(0, visibleReplies).map((reply, i) => (
+              {REPLIES.map((reply, i) => (
                 <div
                   key={reply.name}
                   className="mkt-reply rounded-xl"

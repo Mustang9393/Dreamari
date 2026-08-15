@@ -471,6 +471,44 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   break at all.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 frame hugs content instead of capping it; conic-gradient holo border
+
+- **Root-caused "why does Connect fit 2 replies on mobile but not desktop"**: `--mu`
+  scales off the graphic frame's WIDTH (capped at ~480px on both), so text/padding
+  sizes end up the same on mobile and desktop once both are wide enough — but the
+  frame's HEIGHT was a fixed `compact` ceiling (`min(50dvh, 460px)`) that has nothing
+  to do with width, so the same content needed more vertical room at desktop's larger
+  mu than the ceiling allowed, while mobile's smaller mu (since its narrower frame
+  never reaches the 480px width cap) let more fit under the same-ish budget. Direct
+  ask was to stop fighting this with a JS reply-count workaround and instead make the
+  frame **hug its content** — implemented in `ChapterShell.tsx`: `compact` chapters now
+  get `height: auto` (with `maxHeight` only as a generous safety net,
+  `min(72dvh, 620px)`) instead of a fixed height, and the compact section dropped its
+  `min-h-[62dvh]` entirely in favor of just its own padding. Removed Connect's whole
+  `visibleReplies`/`useLayoutEffect` measurement system from the previous two rounds —
+  no longer needed, since the frame just grows to fit all 3 replies now. Verified at
+  1920×750 (the viewport that broke it before): frame height matches card height
+  exactly, all 3 replies present, `fits: true`.
+- **Wildcard holo border reworked** per direct feedback that it was "too slow and
+  disappears for quite a bit": the old version animated `background-position` across
+  an oversized, non-repeating `linear-gradient`, so only a slice of the 6-color
+  sequence sat inside the border at any moment — as that slice drifted across a
+  same-ish-hue stretch, the border visibly dulled for a beat. Replaced with a
+  `conic-gradient` rotated via an animated `@property` custom angle: a conic gradient
+  wraps the FULL color sequence around the shape at all times, so rotating it changes
+  *where* each color sits, never *how much* of the spectrum is showing — the
+  "disappears" complaint structurally can't happen anymore. Sped up 5s → 2.2s. Added a
+  second layer, `.mkt-holo-aura` — the same rotating gradient, blurred and enlarged
+  (`inset: -10px`, `blur(18px)`), sitting behind the card as a soft glowing halo
+  bleeding past the edges, with a slight animation-delay offset from the border so the
+  glow doesn't feel perfectly glued to the ring.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified: Connect shows all 3 replies with the frame exactly matching card
+  height at both 1440×900 and the extreme 1920×750 case, Build's layout is unaffected,
+  and the Wildcard card now shows the full color spectrum continuously with a visible
+  glowing aura around it.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
