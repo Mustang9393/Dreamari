@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// A "read the copy first" beat before the storyboard animation starts: the graphic's
+// own container still fades/slides into place immediately (everPlayed, below), but the
+// internal keyframe sequence (data-playing) waits this long past that so the title +
+// oneliner have already landed by the time anything moves. Without this, the animation
+// was racing the copy's own 700ms reveal transition and finishing before a reader's eye
+// even got to the graphic.
+const STORYBOARD_READ_DELAY_MS = 900;
+
 // Toggles on/off every time the element crosses the viewport (no unobserve) — used by
 // each chapter's graphic so its storyboard plays once per visit and replays only if the
 // user scrolls away and back, never a background loop.
@@ -12,15 +20,24 @@ export function usePlayingOnScroll<T extends HTMLElement>() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     const io = new IntersectionObserver(
       ([entry]) => {
-        setPlaying(entry.isIntersecting);
-        if (entry.isIntersecting) setEverPlayed(true);
+        clearTimeout(timeout);
+        if (entry.isIntersecting) {
+          setEverPlayed(true);
+          timeout = setTimeout(() => setPlaying(true), STORYBOARD_READ_DELAY_MS);
+        } else {
+          setPlaying(false);
+        }
       },
       { threshold: 0.35 },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      clearTimeout(timeout);
+      io.disconnect();
+    };
   }, []);
   // Returned as a tuple (not { ref, playing }): the react-hooks/refs lint rule can't
   // tell a plain state field on an object apart from ref.current when both come back
