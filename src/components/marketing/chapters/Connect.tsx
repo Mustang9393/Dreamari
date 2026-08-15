@@ -76,16 +76,21 @@ export function ConnectChapter() {
       title="Connect"
       color="#00c8dc"
       oneliner="with professionals in the industry you're interested in."
+      compact
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      {/* h-full/w-full: same allocated frame footprint as every other chapter's graphic.
-         Glass surfaces + a soft accent glow so this reads high-end - the board a Fortune
-         500 partner is being pitched on paying to be part of, not a plain forum post. */}
+      {/* w-full (not h-full): same allocated frame WIDTH as every other chapter's
+         graphic, but the card sizes to its own content's height instead of stretching
+         to fill the frame — a post + a few short comments is naturally shorter than
+         Match/Explore's photo cards, and forcing it to fill the frame anyway (then
+         centering the replies within the leftover space) was exactly what produced the
+         large dead gaps above/below the comments. max-h-full still caps it so it can
+         never overflow the frame if content ever runs long. */}
       <div className="flex h-full w-full items-center justify-center">
         <div
-          className="relative flex h-full max-h-full w-full flex-col overflow-hidden rounded-2xl border"
+          className="relative flex max-h-full w-full flex-col overflow-hidden rounded-2xl border"
           style={{
             maxWidth: "min(94cqw, 480px)",
             background: "var(--glass-surface-3)",
@@ -143,8 +148,8 @@ export function ConnectChapter() {
           {/* Comments - linear, not pinned/rotated, each its own translucent glass row.
              No overflow/scroll here on purpose — sized to fit all three replies within
              the frame outright rather than relying on an internal scrollbar. */}
-          <div className="min-h-0 flex-1" style={{ padding: "0 calc(var(--mu) * 14px) calc(var(--mu) * 12px)" }}>
-            <div className="flex h-full flex-col justify-center" style={{ gap: "calc(var(--mu) * 7px)" }}>
+          <div style={{ padding: "0 calc(var(--mu) * 14px) calc(var(--mu) * 12px)" }}>
+            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 7px)" }}>
               {REPLIES.map((reply, i) => (
                 <div
                   key={reply.name}

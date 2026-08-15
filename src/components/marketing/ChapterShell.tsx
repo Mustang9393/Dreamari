@@ -10,6 +10,14 @@ type ChapterShellProps = {
   oneliner: string;
   flip?: boolean;
   altBackground?: boolean;
+  // Build and Connect are content-driven (a short question, a post + a few comments) —
+  // not card-driven like Match/Explore/Play, which need the full-height frame so their
+  // photo cards can be genuinely big. Forcing Build/Connect's much shorter content into
+  // that same tall frame left a large dead gap: the frame itself is min-h-dvh tall
+  // regardless of content, so scrolling past a chapter whose content doesn't fill it
+  // meant scrolling through mostly-empty space before the next chapter's snap point.
+  // compact caps the frame at content-appropriate height instead.
+  compact?: boolean;
   graphicRef: RefObject<HTMLDivElement | null>;
   playing: boolean;
   graphicRevealed: boolean;
@@ -23,6 +31,7 @@ export function ChapterShell({
   oneliner,
   flip = false,
   altBackground = false,
+  compact = false,
   graphicRef,
   playing,
   graphicRevealed,
@@ -31,9 +40,15 @@ export function ChapterShell({
   const [copyRef, copyRevealed] = useRevealOnScroll<HTMLDivElement>();
 
   return (
+    // compact sections don't claim a full min-h-dvh — Build/Connect's content is
+    // meaningfully shorter than Match/Explore/Play's big cards, and forcing it into a
+    // full-viewport-tall section (even with a shorter internal frame) just moved the
+    // dead space from "inside the frame" to "the section's own centering slack,"
+    // leaving the same long scroll of near-nothing before the next chapter. A shorter
+    // section still snaps correctly (scroll-snap doesn't require uniform heights).
     <section
       id={id}
-      className="relative flex min-h-dvh items-center"
+      className={`relative flex items-center ${compact ? "min-h-[62dvh]" : "min-h-dvh"}`}
       style={{ scrollSnapAlign: "start", ...(altBackground ? { background: "var(--card)" } : undefined) }}
     >
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
@@ -120,7 +135,10 @@ export function ChapterShell({
               second container-type here, sized off this already-capped frame, gives
               every chapter's inner text a --mu that maxes out around 1.5 (480/320)
               instead of 2.3, matching the frame's real size on any viewport. */}
-          <div className="mkt-graphic-scale relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(74dvh, 680px)" }}>
+          <div
+            className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
+            style={{ width: "min(94cqw, 480px)", height: compact ? "min(50dvh, 460px)" : "min(74dvh, 680px)" }}
+          >
             {children}
           </div>
         </div>

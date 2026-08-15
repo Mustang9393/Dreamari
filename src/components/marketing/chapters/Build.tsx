@@ -36,6 +36,7 @@ export function BuildChapter() {
       title="Build"
       color="#6366f1"
       oneliner="by taking a 7-question personality, skill, and academic assessment."
+      compact
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}

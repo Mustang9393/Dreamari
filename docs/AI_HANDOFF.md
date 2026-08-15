@@ -292,6 +292,34 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   smoothly, and Connect shows all three replies (scrolling to the third when needed).
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 compact sections for Build/Connect, fixed Connect's stretch-and-center
+
+- Root cause of "huge gap scrolling past Build without interacting" and "huge blank
+  space above/below Connect's comments": both symptoms came from forcing
+  content-driven chapters (a short question; a post + a few comments) into the SAME
+  full-viewport-tall section and frame that Match/Explore/Play need for their big photo
+  cards. Shrinking just the inner frame (tried first) didn't help — the section itself
+  was still `min-h-dvh`, so the dead space just moved from "inside the frame" to "the
+  section's own vertical-centering slack." Added a `compact` prop to `ChapterShell`
+  that Build and Connect now pass: the section drops from `min-h-dvh` to
+  `min-h-[62dvh]`, and the graphic frame from `min(74dvh,680px)` to
+  `min(50dvh,460px)`. Match/Explore/Play don't pass it and are visually unchanged —
+  confirmed via screenshot.
+- Separately, Connect's card had its own bug compounding the "big blank space"
+  complaint: the card div used `h-full` (stretch to fill the frame) and, from the
+  previous round's no-scroll fix, the replies column had `justify-center` — the
+  combination meant any leftover height between a short comment thread and a much
+  taller frame became blank padding **inside the glass card**, not just empty page
+  background around it. Removed `h-full` (now `max-h-full` only, sizes to actual
+  content) and the `justify-center` on the replies column, matching how Match/Explore's
+  own cards already size to content rather than force-stretching.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified at 375px: Build's gap to Match is now proportionate instead of a
+  near-full extra screen, Connect's card is content-sized with no internal dead space
+  and still fits all 3 replies with zero scroll (`scrollHeight <= clientHeight`
+  confirmed), and Match's card is untouched (still full-size).
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
