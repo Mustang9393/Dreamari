@@ -8,18 +8,23 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // A real, user-scrollable feed (native overflow-y + scroll-snap), not a scroll-triggered
 // CSS animation — matches Match's card size (168 x 300 mu) per feedback that the two
 // should read as the same scale of thing.
-// Reframed around match strength (Strong Match/Match/Stretch/Wildcard) rather than
-// world name. Photos are reused stand-ins from the shoot we already have on hand for
-// Accountant/Management Analyst/Human Resources — Figma's local asset server is
-// unreachable right now to pull literal photos for these four specific careers, and
-// there wasn't a reasonable stand-in for Food Scientist among what's already downloaded
-// (the closest photos on hand are both operating-room shots), so that card is an icon
-// tile instead of a mismatched photo. Swap in real photos once Figma's back up.
+// The industry line ("Business & Finance," same world every card in this storyboard
+// belongs to) stays where it always was, under the title; match strength (Strong
+// Match/Match/Stretch/Wildcard) is a separate corner-ribbon badge rather than replacing
+// it — the two say different things and shouldn't compete for the same line. Photos are
+// reused stand-ins from the shoot we already have on hand — none of these four are
+// literal photoshoots of these specific careers (Figma's local asset server is
+// unreachable to pull those), so Food Scientist reuses the closest thing on hand among
+// lab/clinical-coded shots rather than going without a photo. Salary bands are the same
+// standard entry-level estimates used in Match, not sourced from the taxonomy sheet
+// (which has no salary column filled in).
+const INDUSTRY = "Business & Finance";
+
 const CARDS = [
-  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", subtitle: "Strong Match", tagColor: "#1fc76e" },
-  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", subtitle: "Match", tagColor: "#3b82f6" },
-  { photo: "/images/career-product-designer.jpg", title: "Human Resources", subtitle: "Stretch", tagColor: "#ffb81f" },
-  { photo: null, title: "Food Scientist", subtitle: "Wildcard", tagColor: "#8b5cf6" },
+  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
+  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
+  { photo: "/images/career-product-designer.jpg", title: "Human Resources", matchLevel: "Stretch", tagColor: "#ffb81f", salary: "$55K-90K", major: "Human Resources" },
+  { photo: "/images/career-neurosurgeon.jpg", title: "Food Scientist", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
 const ACTION_ICONS = [
@@ -47,6 +52,112 @@ const STAT_ICONS = {
     </>
   ),
 };
+
+// Same length-tiered sizing problem Match's poster titles solve: a flat font size let
+// longer titles ("Management Analyst") run into the right-side action rail. Shorter
+// titles get to be genuinely big; longer ones step down and, past a point, wrap.
+function exploreTitleStyle(title: string): React.CSSProperties {
+  if (title.length <= 10) return { fontSize: "calc(var(--mu) * 21px)", whiteSpace: "nowrap" };
+  if (title.length <= 16) return { fontSize: "calc(var(--mu) * 18px)", whiteSpace: "normal" };
+  return { fontSize: "calc(var(--mu) * 15px)", whiteSpace: "normal" };
+}
+
+type Card = (typeof CARDS)[number];
+
+// Shared between a plain card and the holo-framed Wildcard variant below, so the two
+// don't drift out of sync with duplicated markup.
+function ExploreCardBody({ card }: { card: Card }) {
+  return (
+    <>
+      <Image src={card.photo} alt="" fill className="object-cover" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(180deg, transparent 42%, var(--scrim-heavy) 100%)" }}
+      />
+
+      {/* Match-strength corner ribbon — separate from the industry line below, not a
+         replacement for it. */}
+      <div
+        className="absolute font-mono font-bold uppercase"
+        style={{
+          top: "calc(var(--mu) * 12px)",
+          right: "calc(var(--mu) * 12px)",
+          padding: "calc(var(--mu) * 4px) calc(var(--mu) * 9px)",
+          fontSize: "calc(var(--mu) * 8.5px)",
+          letterSpacing: "0.06em",
+          borderRadius: "calc(var(--mu) * 20px)",
+          color: card.tagColor,
+          background: "color-mix(in srgb, var(--card) 55%, transparent)",
+          border: `1px solid ${card.tagColor}`,
+          backdropFilter: "blur(6px)",
+        }}
+      >
+        {card.matchLevel}
+      </div>
+
+      <div
+        className="absolute inset-x-0 bottom-0 text-center uppercase"
+        style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 44px)" }}
+      >
+        <p
+          style={{
+            fontFamily: "var(--font-poster)",
+            lineHeight: 1.15,
+            letterSpacing: "0.4px",
+            color: "var(--foreground)",
+            ...exploreTitleStyle(card.title),
+          }}
+        >
+          {card.title}
+        </p>
+        <p
+          className="mt-1.5 whitespace-nowrap"
+          style={{
+            fontFamily: "var(--font-body)",
+            fontWeight: 600,
+            fontSize: "calc(var(--mu) * 8px)",
+            letterSpacing: "0.5px",
+            color: "#ffb81f",
+          }}
+        >
+          {INDUSTRY}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 10px)" }}>
+          {[
+            { icon: STAT_ICONS.salary, value: card.salary },
+            { icon: STAT_ICONS.duration, value: card.major },
+          ].map((stat, i) => (
+            <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 5px)" }}>
+              <span
+                className="flex flex-none items-center justify-center rounded-full border"
+                style={{
+                  width: "calc(var(--mu) * 18px)",
+                  height: "calc(var(--mu) * 18px)",
+                  background: "var(--glass-surface-1)",
+                  borderColor: "var(--glass-border)",
+                }}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--foreground)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}
+                >
+                  {stat.icon}
+                </svg>
+              </span>
+              <span style={{ fontSize: "calc(var(--mu) * 10.5px)", fontWeight: 700, color: "var(--foreground)" }}>{stat.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 export function ExploreChapter() {
   const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
@@ -100,84 +211,29 @@ export function ExploreChapter() {
           style={{ scrollSnapType: "y mandatory" }}
           onScroll={() => setScrolled(true)}
         >
-          {CARDS.map((card) => (
-            <div key={card.title} className="relative" style={{ height: "100%", scrollSnapAlign: "start" }}>
-              {card.photo ? (
-                <Image src={card.photo} alt="" fill className="object-cover" />
-              ) : (
-                <div
-                  aria-hidden
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{ background: `radial-gradient(circle at 50% 35%, color-mix(in srgb, ${card.tagColor} 35%, transparent), var(--card) 75%)` }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke={card.tagColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 46px)", height: "calc(var(--mu) * 46px)", opacity: 0.6 }}>
-                    <path d="M9 3v9c0 1-1 2-2 3l-4 4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1l-4-4c-1-1-2-2-2-3V3" />
-                    <path d="M6 3h12M6 8h12" />
-                  </svg>
-                </div>
-              )}
+          {CARDS.map((card) =>
+            card.matchLevel === "Wildcard" ? (
+              // Rare-pull treatment: an animated gradient "foil" border framing the
+              // card (rather than the full-bleed edge-to-edge photo the other three
+              // use), plus a diagonal sheen sweeping across on a loop — same idea as a
+              // holographic trading card catching the light.
               <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{ background: "linear-gradient(180deg, transparent 42%, var(--scrim-heavy) 100%)" }}
-              />
-              <div
-                className="absolute inset-x-0 bottom-0 text-center uppercase"
-                style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 8px)" }}
+                key={card.title}
+                className="relative"
+                style={{ height: "100%", scrollSnapAlign: "start", padding: "calc(var(--mu) * 3px)" }}
               >
-                <p
-                  className="whitespace-nowrap"
-                  style={{
-                    fontFamily: "var(--font-poster)",
-                    fontSize: "calc(var(--mu) * 12px)",
-                    lineHeight: 1.15,
-                    letterSpacing: "0.4px",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {card.title}
-                </p>
-                <p
-                  className="mt-1 whitespace-nowrap"
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontWeight: 600,
-                    fontSize: "calc(var(--mu) * 7px)",
-                    letterSpacing: "0.5px",
-                    color: card.tagColor,
-                  }}
-                >
-                  {card.subtitle}
-                </p>
-                <div className="mt-1.5 flex items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 6px)" }}>
-                  {[STAT_ICONS.salary, STAT_ICONS.duration].map((icon, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-center rounded-full border"
-                      style={{
-                        width: "calc(var(--mu) * 18px)",
-                        height: "calc(var(--mu) * 18px)",
-                        background: "var(--glass-surface-1)",
-                        borderColor: "var(--glass-border)",
-                      }}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="var(--foreground)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}
-                      >
-                        {icon}
-                      </svg>
-                    </div>
-                  ))}
+                <div className="mkt-holo-border absolute inset-0" style={{ borderRadius: "calc(var(--mu) * 20px)" }} />
+                <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "calc(var(--mu) * 17px)" }}>
+                  <ExploreCardBody card={card} />
+                  <div aria-hidden className="mkt-holo-sheen pointer-events-none absolute inset-0" />
                 </div>
               </div>
-            </div>
-          ))}
+            ) : (
+              <div key={card.title} className="relative" style={{ height: "100%", scrollSnapAlign: "start" }}>
+                <ExploreCardBody card={card} />
+              </div>
+            ),
+          )}
         </div>
 
         {/* Right-side action rail, straight off the reference — static, just selling

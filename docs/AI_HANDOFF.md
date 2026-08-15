@@ -114,6 +114,56 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   reframed cards, and Connect's post/comment layout with the Goldman Sachs swap.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 Match/Play interaction rework, Explore card fixes, mobile alignment
+
+- Match now matches immediately on a "like" (button or swipe) instead of waiting for
+  the whole 3-card deck to clear — passing every card without ever liking one still
+  falls through to the same match, so the illusion-of-choice ending is unchanged.
+  Added real pointer-based swipe (drag left = pass, drag right = match, a plain tap
+  still flips the card) so mobile has genuine swipe gesture support, not just the two
+  buttons; swipe intent shows as Like/Pass badges that fade in with drag distance.
+- Play was rewritten twice this session: first into a 3-scenario auto-advancing
+  situational simulation (replacing the glossary-term quiz), then, per direct
+  feedback, cut down to a single scenario with a "Try again" replay control instead of
+  cycling scenarios. Feedback on picking an option is now a checkmark burst + radiating
+  ring positioned with explicit z-index above the glass panel (the panel's own
+  backdrop-filter stacking context was rendering on top of the burst before this).
+  Picking an option also auto-scrolls to Explore after a couple of seconds, same
+  act-then-advance rhythm as Build/Match, cancelled if "Try again" is tapped first.
+- Explore: all 4 cards now show a real photo (Food Scientist reuses
+  `career-neurosurgeon.jpg` as the closest available stand-in — worth flagging that
+  this is a surgical/OR scene, not an actual food-science lab, and should be swapped for
+  a real photo once one is available) plus real salary/major text under the title. The
+  match-strength label (Strong Match/Match/Stretch/Wildcard) moved to a corner-ribbon
+  badge instead of replacing the industry line, which is back to reading "Business &
+  Finance" like every other career here. The Wildcard card gets a distinct "rare pull"
+  treatment: an animated gradient border plus a diagonal sheen sweep (`mkt-holo-border`/
+  `mkt-holo-sheen` in `animations.css`), built from the app's own indigo/blue/cyan/pink/
+  gold tones rather than a literal rainbow, keeping clear of red per the standing rule.
+  Title sizing is now length-tiered with wrap allowed (not a flat nowrap size), since
+  longer titles like "Management Analyst" were overlapping the right-side action rail.
+- Fixed a large dead gap between Build's title copy and its actual question: the
+  shared frame is sized for the tallest chapter's content, and Build's own content was
+  vertically centered inside it (`justify-center`), leaving empty space above the
+  question every time the frame was taller than Build's content. Anchored to
+  `justify-start` instead so the question sits right below the headline; the leftover
+  slack now falls below the interactive content, which is normal for a full-height
+  snap section.
+- The "How Dreamari works" eyebrow and "Five chapters. One clearer future." heading in
+  `HowItWorks.tsx` had no responsive text alignment at all (left-aligned at every
+  width) while every chapter's own copy was already mobile-centered via ChapterShell —
+  added the same `text-center min-[901px]:text-left` pattern so mobile reads as
+  centered throughout, matching everything else on the page. Footer's two-column
+  PRODUCT/COMPANY link list was left as-is (left-aligned link columns are the
+  conventional pattern there, not part of what was flagged).
+- Validation: `tsc --noEmit`, `npm run build`, and `npm run tokens:check` all pass
+  clean. Browser-verified: Match's immediate-match-on-like and drag-to-swipe, Play's
+  single-question replay flow and the burst now rendering above the glass panel,
+  Explore's four real photos with salary/major and corner badges, the Wildcard holo
+  card, Build's tightened copy-to-question gap, and mobile-centered intro copy at
+  375px width.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

@@ -45,7 +45,12 @@ export function BuildChapter() {
          width their own text needs) so nothing reads as mismatched chips, and a wide
          column so it actually uses the frame instead of floating a small cluster in a
          lot of empty space. */}
-      <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 18px)" }}>
+      {/* justify-start (not center): the frame is sized generously to fit every
+         chapter's content at its biggest, but Build's own content is shorter than
+         that ceiling, so centering it left a large dead gap between the title copy
+         above and the actual question — anchoring to the top of the frame keeps this
+         reading as "right below the headline" instead. */}
+      <div className="flex h-full w-full flex-col items-center justify-start" style={{ gap: "calc(var(--mu) * 18px)" }}>
         <div className="flex w-full flex-col items-center" style={{ maxWidth: "min(92%, 440px)", gap: "calc(var(--mu) * 16px)" }}>
           <div className="text-center">
             <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>

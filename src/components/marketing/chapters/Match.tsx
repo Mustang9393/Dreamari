@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
@@ -45,10 +45,12 @@ const WORLD_COLOR = "var(--world-business-money-office)";
 // keeping shrinking a single line down to illegible, since these real titles ("Investment
 // Banking Analyst") run long and this card has the vertical room to spare.
 function posterTitleStyle(title: string): React.CSSProperties {
-  if (title.length <= 16) return { fontSize: "calc(var(--mu) * 15px)", whiteSpace: "nowrap" };
-  if (title.length <= 22) return { fontSize: "calc(var(--mu) * 12px)", whiteSpace: "nowrap" };
-  return { fontSize: "calc(var(--mu) * 12px)", whiteSpace: "normal" };
+  if (title.length <= 10) return { fontSize: "calc(var(--mu) * 22px)", whiteSpace: "normal" };
+  if (title.length <= 17) return { fontSize: "calc(var(--mu) * 19px)", whiteSpace: "normal" };
+  return { fontSize: "calc(var(--mu) * 16px)", whiteSpace: "normal" };
 }
+
+const SWIPE_COMMIT_PX = 90;
 
 export function MatchChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
@@ -56,9 +58,25 @@ export function MatchChapter() {
   const [exiting, setExiting] = useState<{ key: string; direction: "like" | "pass" } | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [likedCount, setLikedCount] = useState(0);
+  const [likedMatched, setLikedMatched] = useState(false);
+  const [dragX, setDragX] = useState(0);
+
+  // A tap and a swipe both start as a pointerdown on the same card, so these two refs
+  // (not state — nothing here should trigger a render on their own) tell them apart:
+  // pointerActive marks "a pointer is currently down," moved marks "it travelled far
+  // enough to count as a drag, not a tap." Also drives the drag transition: while a
+  // pointer is down the card should track the finger with no easing, but the instant it
+  // lifts (committed swipe or spring-back) the same transform change should animate.
+  const pointerActive = useRef(false);
+  const moved = useRef(false);
+  const startX = useRef(0);
 
   const top = stack[0];
-  const matched = stack.length === 0;
+  // Liking any card is the "real" match moment (illusion of choice — whichever card you
+  // like, the deck resolves to Investment Banking), so it doesn't wait for the rest of
+  // the stack to clear. Passing every card is still a valid path through, so running out
+  // of cards without ever liking one still resolves the same way.
+  const matched = likedMatched || stack.length === 0;
 
   // The emotional payoff of the whole deck: give it a beat to land, then carry the
   // reader straight into Play — same act-then-advance rhythm as Build.
@@ -73,13 +91,18 @@ export function MatchChapter() {
   function act(direction: "like" | "pass") {
     if (!top || exiting) return;
     setExiting({ key: top.key, direction });
-    if (direction === "like") setLikedCount((n) => n + 1);
   }
 
   function onExitTransitionEnd() {
+    const direction = exiting?.direction;
     setExiting(null);
     setFlipped(false);
-    setStack((s) => s.slice(1));
+    if (direction === "like") {
+      setLikedCount((n) => n + 1);
+      setLikedMatched(true);
+    } else {
+      setStack((s) => s.slice(1));
+    }
   }
 
   function reset() {
@@ -87,6 +110,41 @@ export function MatchChapter() {
     setExiting(null);
     setFlipped(false);
     setLikedCount(0);
+    setLikedMatched(false);
+    setDragX(0);
+  }
+
+  function onCardPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (exiting || flipped || !top) return;
+    pointerActive.current = true;
+    moved.current = false;
+    startX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function onCardPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!pointerActive.current) return;
+    const delta = e.clientX - startX.current;
+    if (Math.abs(delta) > 4) moved.current = true;
+    setDragX(delta);
+  }
+
+  function onCardPointerUp() {
+    if (!pointerActive.current) return;
+    pointerActive.current = false;
+    const delta = dragX;
+    setDragX(0);
+    if (!moved.current) {
+      setFlipped((f) => !f);
+      return;
+    }
+    if (delta > SWIPE_COMMIT_PX) act("like");
+    else if (delta < -SWIPE_COMMIT_PX) act("pass");
+  }
+
+  function onCardPointerCancel() {
+    pointerActive.current = false;
+    setDragX(0);
   }
 
   return (
@@ -119,10 +177,10 @@ export function MatchChapter() {
                 style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 40%, var(--scrim-heavy) 68%, var(--background) 100%)" }}
               />
               <div className="mkt-match-celebrate-text absolute inset-x-0 bottom-0 flex flex-col items-center text-center" style={{ padding: "calc(var(--mu) * 16px)", gap: "calc(var(--mu) * 8px)" }}>
-                <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
+                <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 12px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
                   You&apos;re matched!
                 </p>
-                <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.15, color: "var(--foreground)" }}>
+                <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 24px)", lineHeight: 1.15, color: "var(--foreground)" }}>
                   Investment Banking
                 </p>
                 <button
@@ -172,36 +230,85 @@ export function MatchChapter() {
               {top && (
                 <div
                   key={top.key}
-                  className="mkt-match-card absolute inset-0 cursor-pointer overflow-hidden rounded-[calc(var(--mu)*20px)] border"
+                  className="mkt-match-card absolute inset-0 cursor-grab overflow-hidden rounded-[calc(var(--mu)*20px)] border touch-pan-y select-none active:cursor-grabbing"
                   style={{
                     borderColor: "var(--glass-surface-2)",
-                    transition: exiting?.key === top.key ? "transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s" : "transform 0.3s ease",
+                    transition:
+                      exiting?.key === top.key
+                        ? "transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s"
+                        : pointerActive.current
+                          ? "none"
+                          : "transform 0.3s ease",
                     transform:
                       exiting?.key === top.key
                         ? exiting.direction === "pass"
                           ? "translate(-140%, 10%) rotate(-18deg)"
                           : "translate(0, -130%) scale(1.04)"
-                        : flipped
-                          ? "scale(0.97)"
-                          : "none",
+                        : dragX !== 0
+                          ? `translate(${dragX}px, ${-Math.abs(dragX) * 0.06}px) rotate(${dragX / 20}deg)`
+                          : flipped
+                            ? "scale(0.97)"
+                            : "none",
                     opacity: exiting?.key === top.key ? 0 : 1,
                   }}
                   onTransitionEnd={(e) => {
                     if (e.propertyName === "transform" && exiting?.key === top.key) onExitTransitionEnd();
                   }}
-                  onClick={() => !exiting && setFlipped((f) => !f)}
+                  onPointerDown={onCardPointerDown}
+                  onPointerMove={onCardPointerMove}
+                  onPointerUp={onCardPointerUp}
+                  onPointerCancel={onCardPointerCancel}
                 >
-                  <Image src={top.photo} alt="" fill className="object-cover" />
+                  <Image src={top.photo} alt="" fill className="object-cover" draggable={false} />
                   <div
                     aria-hidden
                     className="absolute inset-0"
                     style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 42%, var(--scrim-heavy) 66%, var(--background) 100%)" }}
                   />
+
+                  {/* Swipe intent badges — same "like/pass" language as the buttons
+                     below, just surfaced mid-drag so a swipe reads as decisive even
+                     before release commits it. */}
+                  <div
+                    aria-hidden
+                    className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                    style={{
+                      top: "calc(var(--mu) * 16px)",
+                      left: "calc(var(--mu) * 14px)",
+                      padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
+                      fontSize: "calc(var(--mu) * 12px)",
+                      letterSpacing: "0.05em",
+                      color: WORLD_COLOR,
+                      borderColor: WORLD_COLOR,
+                      transform: "rotate(-12deg)",
+                      opacity: dragX > 0 ? Math.min(dragX / SWIPE_COMMIT_PX, 1) : 0,
+                    }}
+                  >
+                    Like
+                  </div>
+                  <div
+                    aria-hidden
+                    className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                    style={{
+                      top: "calc(var(--mu) * 16px)",
+                      right: "calc(var(--mu) * 14px)",
+                      padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
+                      fontSize: "calc(var(--mu) * 12px)",
+                      letterSpacing: "0.05em",
+                      color: "var(--muted-foreground)",
+                      borderColor: "var(--muted-foreground)",
+                      transform: "rotate(12deg)",
+                      opacity: dragX < 0 ? Math.min(-dragX / SWIPE_COMMIT_PX, 1) : 0,
+                    }}
+                  >
+                    Pass
+                  </div>
+
                   <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
                     <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, letterSpacing: "0.3px", color: "var(--foreground)", ...posterTitleStyle(top.title) }}>
                       {top.title}
                     </p>
-                    <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 8px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
+                    <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 11px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
                       Business &amp; Finance
                     </p>
                   </div>
@@ -217,8 +324,8 @@ export function MatchChapter() {
                       gap: "calc(var(--mu) * 10px)",
                     }}
                   >
-                    <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 13px)", color: WORLD_COLOR }}>{top.title}</p>
-                    <p style={{ fontSize: "calc(var(--mu) * 11px)", lineHeight: 1.5, color: "var(--foreground)", fontWeight: 600 }}>{top.blurb}</p>
+                    <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 18px)", color: WORLD_COLOR }}>{top.title}</p>
+                    <p style={{ fontSize: "calc(var(--mu) * 14px)", lineHeight: 1.5, color: "var(--foreground)", fontWeight: 600 }}>{top.blurb}</p>
 
                     <div className="mt-1 flex flex-col self-stretch" style={{ gap: "calc(var(--mu) * 6px)" }}>
                       {[
@@ -230,33 +337,32 @@ export function MatchChapter() {
                           className="flex items-center justify-between rounded-[calc(var(--mu)*10px)]"
                           style={{ padding: "calc(var(--mu) * 7px) calc(var(--mu) * 11px)", background: "var(--glass-surface-2)" }}
                         >
-                          <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 7.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
+                          <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
                             {row.label}
                           </span>
-                          <span style={{ fontSize: "calc(var(--mu) * 9.5px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
+                          <span style={{ fontSize: "calc(var(--mu) * 13px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
                         </div>
                       ))}
                     </div>
 
-                    <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 8px)", color: "var(--muted-foreground)" }}>
+                    <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
                       + more inside the real app · tap to flip back
                     </p>
                   </div>
                 </div>
               )}
-
-              {/* Nudge: only shows before anyone has interacted. */}
-              {!exiting && likedCount === 0 && stack.length === CARDS.length && (
-                <p
-                  className="mkt-match-nudge pointer-events-none absolute inset-x-0 text-center font-semibold"
-                  style={{ bottom: "calc(var(--mu) * -22px)", fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}
-                >
-                  Tap the card for details · swipe to choose
-                </p>
-              )}
             </>
           )}
         </div>
+
+        {/* Nudge lives in normal flow between the card and the action buttons (not
+           absolutely positioned over the card), so it never overlaps the like/pass
+           icons below it. */}
+        {!matched && !exiting && likedCount === 0 && stack.length === CARDS.length && (
+          <p className="text-center font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
+            Swipe right to match · tap for details
+          </p>
+        )}
 
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
