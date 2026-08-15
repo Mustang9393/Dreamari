@@ -1,7 +1,72 @@
 "use client";
 
+import Image from "next/image";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
+
+// Ported from the real Career Poster Card component (Figma node 2403:4760): full-bleed
+// photo, bottom text-scrim, Viaoda Libre poster title (uppercase), Montserrat SemiBold
+// world-colored subtitle. Sizes scale with the shared --mu multiplier like the rest of
+// this mockup, since a real poster card's fixed 24px/10px type would be oversized on a
+// card this small.
+type PosterCardProps = {
+  slot: "left" | "right" | "center";
+  photo: string;
+  title: string;
+  subtitle: string;
+  worldColor: string;
+};
+
+function PosterCard({ slot, photo, title, subtitle, worldColor }: PosterCardProps) {
+  return (
+    <div
+      className={`mkt-m3-card mkt-${slot} absolute top-1/2 left-1/2 overflow-hidden`}
+      style={{
+        width: "calc(var(--mu) * 96px)",
+        height: "calc(var(--mu) * 132px)",
+        borderRadius: "calc(var(--mu) * 14px)",
+        boxShadow: slot === "center" ? undefined : "0 16px 30px -16px rgba(0,0,0,0.6)",
+      }}
+    >
+      <Image src={photo} alt="" fill className="object-cover" />
+      <div
+        className="absolute inset-x-0 bottom-0 flex flex-col items-center text-center uppercase"
+        style={{
+          gap: "calc(var(--mu) * 1.5px)",
+          padding: "calc(var(--mu) * 8px) calc(var(--mu) * 4px)",
+          background:
+            "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 30%, var(--scrim-heavy) 51%, var(--background) 100%)",
+        }}
+      >
+        <p
+          className="w-full whitespace-nowrap"
+          style={{
+            fontFamily: "var(--font-poster)",
+            fontSize: "calc(var(--mu) * 13px)",
+            lineHeight: 1.15,
+            letterSpacing: "0.4px",
+            color: "var(--foreground)",
+          }}
+        >
+          {title}
+        </p>
+        <p
+          className="w-full whitespace-nowrap"
+          style={{
+            fontFamily: "var(--font-body)",
+            fontWeight: 600,
+            fontSize: "calc(var(--mu) * 7.5px)",
+            lineHeight: 1.4,
+            letterSpacing: "0.5px",
+            color: worldColor,
+          }}
+        >
+          {subtitle}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function MatchChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
@@ -21,74 +86,9 @@ export function MatchChapter() {
     >
       <div className="relative z-[1] flex flex-col items-center gap-5" style={{ width: "calc(var(--mu) * 250px)", height: "calc(var(--mu) * 210px)" }}>
         <div className="relative w-full" style={{ height: "calc(var(--mu) * 138px)" }}>
-          <div
-            className="mkt-m3-card mkt-left absolute top-1/2 left-1/2 flex flex-col items-start justify-end shadow-[0_16px_30px_-16px_rgba(0,0,0,0.6)]"
-            style={{
-              width: "calc(var(--mu) * 96px)",
-              height: "calc(var(--mu) * 132px)",
-              borderRadius: "calc(var(--mu) * 14px)",
-              padding: "calc(var(--mu) * 11px)",
-              gap: "calc(var(--mu) * 2px)",
-              background: "linear-gradient(165deg, var(--glass-surface-3), var(--glass-surface-2))",
-            }}
-          >
-            <div className="font-display font-bold whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 12.5px)", color: "var(--foreground)" }}>
-              Nurse
-            </div>
-            <div className="font-mono whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
-              Health
-            </div>
-          </div>
-          <div
-            className="mkt-m3-card mkt-right absolute top-1/2 left-1/2 flex flex-col items-start justify-end shadow-[0_16px_30px_-16px_rgba(0,0,0,0.6)]"
-            style={{
-              width: "calc(var(--mu) * 96px)",
-              height: "calc(var(--mu) * 132px)",
-              borderRadius: "calc(var(--mu) * 14px)",
-              padding: "calc(var(--mu) * 11px)",
-              gap: "calc(var(--mu) * 2px)",
-              background: "linear-gradient(165deg, var(--glass-surface-3), var(--glass-surface-2))",
-            }}
-          >
-            <div className="font-display font-bold whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 12.5px)", color: "var(--foreground)" }}>
-              Engineer
-            </div>
-            <div className="font-mono whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
-              Tech
-            </div>
-          </div>
-          <div
-            className="mkt-m3-card mkt-center absolute top-1/2 left-1/2 flex flex-col items-start justify-end"
-            style={{
-              width: "calc(var(--mu) * 96px)",
-              height: "calc(var(--mu) * 132px)",
-              borderRadius: "calc(var(--mu) * 14px)",
-              padding: "calc(var(--mu) * 11px)",
-              gap: "calc(var(--mu) * 2px)",
-              background: "linear-gradient(165deg, color-mix(in srgb, var(--c) 24%, var(--glass-surface-3)), var(--glass-surface-1) 80%)",
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ width: "calc(var(--mu) * 20px)", height: "calc(var(--mu) * 20px)", marginBottom: "calc(var(--mu) * 3px)", color: "var(--c)" }}
-            >
-              <path d="M3 3v18h18" />
-              <path d="M18 17V9" />
-              <path d="M13 17V5" />
-              <path d="M8 17v-3" />
-            </svg>
-            <div className="font-display font-bold whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 12.5px)", color: "var(--foreground)" }}>
-              Accountant
-            </div>
-            <div className="font-mono whitespace-nowrap" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
-              Finance
-            </div>
-          </div>
+          <PosterCard slot="left" photo="/images/career-neurosurgeon.jpg" title="Neurosurgeon" subtitle="Health" worldColor="var(--world-health-medicine)" />
+          <PosterCard slot="right" photo="/images/career-product-designer.jpg" title="Product Designer" subtitle="Tech" worldColor="var(--world-tech-engineering-design)" />
+          <PosterCard slot="center" photo="/images/career-pe-analyst.jpg" title="PE Analyst" subtitle="Finance" worldColor="var(--world-business-money-office)" />
         </div>
         <div className="mkt-m3-actions flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
           <div

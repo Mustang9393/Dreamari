@@ -111,24 +111,17 @@
 .mkt-graphic[data-playing="true"] .mkt-progress-bar { animation: mkt-play-progress-fill 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
 @keyframes mkt-play-progress-fill { 0%, 74% { width: 0%; } 100% { width: 72%; } }
 
-/* ---------- Explore: world tiles scatter, target zooms into focus ---------- */
-.mkt-world-tile {
-  transform: translate(calc(-50% + var(--mu) * var(--tx)), calc(-50% + var(--mu) * var(--ty)));
+/* ---------- Explore: an Instagram/TikTok-style doomscroll through career cards,
+   settling on the chapter's target world. Three full-bleed cards are stacked in one
+   track (each 100% of the frame height); the track slides up through them with a quick
+   smooth swipe + brief hold at each, landing on the last and staying there — same
+   play-once/hold/replay-on-rescroll contract as every other chapter. ---------- */
+.mkt-graphic[data-playing="true"] .mkt-explore-track { animation: mkt-explore-scroll 2s cubic-bezier(0.65, 0, 0.35, 1) 1 forwards; }
+@keyframes mkt-explore-scroll {
+  0%, 8% { transform: translateY(0%); }
+  34%, 42% { transform: translateY(-33.3333%); }
+  68%, 100% { transform: translateY(-66.6666%); }
 }
-.mkt-world-label { opacity: 0; transform: translate(-50%, 4px); }
-.mkt-graphic[data-playing="true"] .mkt-world-tile.mkt-orbit { animation: mkt-explore-orbit-fade 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards; }
-@keyframes mkt-explore-orbit-fade {
-  0%, 28% { opacity: 1; transform: translate(calc(-50% + var(--mu) * var(--tx)), calc(-50% + var(--mu) * var(--ty))) scale(1); }
-  56%, 100% { opacity: 0; transform: translate(calc(-50% + var(--mu) * var(--tx) * 1.45), calc(-50% + var(--mu) * var(--ty) * 1.45)) scale(0.6); }
-}
-.mkt-graphic[data-playing="true"] .mkt-world-tile.mkt-target { animation: mkt-explore-target-zoom 2s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; }
-@keyframes mkt-explore-target-zoom {
-  0%, 28% { transform: translate(-50%, -50%) scale(1); box-shadow: none; }
-  56% { transform: translate(-50%, -50%) scale(1); animation-timing-function: cubic-bezier(0.34, 1.4, 0.4, 1); }
-  76%, 100% { transform: translate(-50%, -50%) scale(1.55); box-shadow: 0 0 0 2px var(--tc), 0 22px 40px -14px color-mix(in srgb, var(--tc) 55%, transparent); }
-}
-.mkt-graphic[data-playing="true"] .mkt-world-tile.mkt-target .mkt-world-label { animation: mkt-explore-label-in 2s ease 1 forwards; }
-@keyframes mkt-explore-label-in { 0%, 66% { opacity: 0; transform: translate(-50%, 4px); } 86%, 100% { opacity: 1; transform: translate(-50%, 0); } }
 
 /* ---------- Connect: replies land one after another ---------- */
 .mkt-reply { opacity: 0; transform: translateY(8px); }
