@@ -23,11 +23,12 @@ export function BuildChapter() {
 
   function pick(interest: string) {
     setSelected(interest);
-    // A beat to see the pick land, then straight into Match — the same rhythm every
-    // interaction in this storyboard follows: act, get feedback, move forward.
+    // Just long enough to see the row's own 200ms check-in transition land, then
+    // straight into Match — advance the moment the feedback finishes, not after a
+    // separate "linger and admire it" pause on top of that.
     setTimeout(() => {
       document.getElementById("match")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 900);
+    }, 400);
   }
 
   return (

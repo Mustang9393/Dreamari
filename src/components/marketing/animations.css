@@ -118,6 +118,24 @@
   mix-blend-mode: overlay;
 }
 
+/* ---------- Explore: the second-beat down-arrow (see Explore.tsx's effect comment for
+   why it's sequenced after the peek-scroll rather than simultaneous with it) — fades
+   in once, then gently bobs, disappearing the instant the reader scrolls the feed
+   themselves (unmounted via the `scrolled` state, not just hidden). ---------- */
+@keyframes mkt-explore-arrow-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 0.9; transform: translateY(0); }
+}
+@keyframes mkt-explore-arrow-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+.mkt-explore-arrow {
+  animation:
+    mkt-explore-arrow-in 0.4s ease-out 1 forwards,
+    mkt-explore-arrow-bob 1.6s ease-in-out 0.4s infinite;
+}
+
 /* ---------- Connect: replies land one after another ---------- */
 .mkt-reply { opacity: 0; transform: translateY(8px); }
 .mkt-graphic[data-playing="true"] .mkt-reply { animation: mkt-reply-in 0.5s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; animation-delay: calc(var(--d) * 0.4s + 0.15s); }

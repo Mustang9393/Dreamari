@@ -30,14 +30,16 @@ export function PlayChapter() {
   const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
   const [pickedIndex, setPickedIndex] = useState<number | null>(null);
 
-  // Same act-then-advance rhythm as Build and Match: give the feedback a beat to land,
-  // then carry the reader into Explore. Hitting "Try again" resets pickedIndex to null
-  // before this fires, which clears the effect and cancels the scroll.
+  // Same act-then-advance rhythm as Build and Match: advance the moment the burst/glow
+  // feedback (longest piece is the 0.8s whole-card glow) actually finishes, not on a
+  // separate multi-second timer stacked on top of it. Hitting "Try again" resets
+  // pickedIndex to null before this fires, which clears the effect and cancels the
+  // scroll.
   useEffect(() => {
     if (pickedIndex === null) return;
     const timeout = setTimeout(() => {
       document.getElementById("explore")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 2000);
+    }, 950);
     return () => clearTimeout(timeout);
   }, [pickedIndex]);
 

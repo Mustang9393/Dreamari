@@ -68,7 +68,12 @@ const SHARE_ICON = (
   </svg>
 );
 
-const MIN_VISIBLE_REPLIES = 2;
+// Was 2, but a real-world report showed even 2 replies clipping on a wide-but-short
+// desktop window (--mu maxes out from width alone, while the frame's height budget is
+// independent of width and doesn't grow to match) — the floor must never win out over
+// "no crop," so this only stops at 1, which is still a real, substantive reply rather
+// than an empty-looking post.
+const MIN_VISIBLE_REPLIES = 1;
 
 export function ConnectChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();

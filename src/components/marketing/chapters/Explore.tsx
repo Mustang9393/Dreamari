@@ -184,11 +184,14 @@ export function ExploreChapter() {
   const [graphicRef, , graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [showArrow, setShowArrow] = useState(false);
 
-  // Nudge: once the chapter is revealed, slowly slide the next card up into view and
-  // hold there for a beat before settling back — a physical "look, this scrolls" cue
-  // instead of a bouncing icon, since a visible chunk of the next card peeking up is a
-  // much more intuitive invitation to take over the scroll than an arrow glyph.
+  // Nudge, in two beats: first the next card physically slides up into view and
+  // settles back (a "look, this scrolls" cue more intuitive than an icon alone), THEN
+  // — once that's done, not simultaneously — a small down-arrow fades in as a
+  // lingering reminder. Doing both at once had the peek motion and the arrow
+  // competing for attention at the same time; sequencing them reads as one clear cue
+  // instead of two clashing ones.
   useEffect(() => {
     if (!graphicRevealed || scrolled) return;
     const el = trackRef.current;
@@ -199,6 +202,7 @@ export function ExploreChapter() {
       cancelPeek = animateScrollTop(el, 86, 900);
       setTimeout(() => {
         cancelSettle = animateScrollTop(el, 0, 700);
+        setTimeout(() => setShowArrow(true), 700);
       }, 900 + 650);
     }, 900);
     return () => {
@@ -310,6 +314,35 @@ export function ExploreChapter() {
             ),
           )}
         </div>
+
+        {/* Second beat of the nudge: a small down-arrow, only after the peek-scroll
+           above has already settled back (not simultaneous with it — see the effect's
+           comment). Sits at the card's vertical midpoint rather than near the bottom,
+           since every card's own title/industry/stats text lives in the bottom ~30%
+           of the card — the earlier version overlapped that zone and read as
+           "clashing with the text in the card." The photo itself has nothing there on
+           any of the three cards, so this stays clear regardless of which is showing. */}
+        {showArrow && !scrolled && (
+          <div
+            aria-hidden
+            className="mkt-explore-arrow pointer-events-none absolute inset-x-0 flex justify-center"
+            style={{ top: "56%" }}
+          >
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: "calc(var(--mu) * 30px)",
+                height: "calc(var(--mu) * 30px)",
+                background: "color-mix(in srgb, var(--background) 45%, transparent)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+          </div>
+        )}
 
         {/* Right-side action rail, straight off the reference — static, just selling
            the "real app feed" read. */}

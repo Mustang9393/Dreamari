@@ -417,6 +417,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   boundary handoff moves the outer page correctly in both directions.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 Connect's real crop floor, sequenced Explore nudge, faster auto-scroll
+
+- **Connect was still cropping** on a real wide-but-short desktop window even after the
+  previous round's fix — `MIN_VISIBLE_REPLIES` was hard-floored at 2, so once the
+  measurement determined even 2 replies didn't fit, it just stopped there and let the
+  overflow clip instead of dropping further. Lowered the floor to 1 (still a real,
+  substantive reply — Marcus's answer — rather than an empty-looking post). Verified
+  by force-reproducing the crop at 1920×750: it now correctly drops to 1 reply with
+  `scrollHeight <= clientHeight` confirmed (no crop), whereas the same viewport would
+  have stuck at a cropped 2 before this fix.
+- **Explore's nudge, take two**: the single tease-scroll wasn't reading as "solved" —
+  per direct feedback, a physical peek and a static arrow were fighting each other
+  when shown together, and the user didn't want the nudge to feel "permanent" (i.e.
+  always in the way) or to sit where it overlapped the card's own title/industry/stats
+  text. Restructured into two sequential beats instead of one: the existing peek-scroll
+  plays first and fully settles back, and only THEN does a small down-arrow fade in —
+  positioned at the card's vertical midpoint (`top: 56%`) rather than near the bottom,
+  since every card's text lives in the bottom ~30% and the photo itself has nothing at
+  the midpoint on any of the three cards. Still disappears entirely (unmounted, not
+  just hidden) the instant the reader scrolls the feed themselves.
+- **Auto-scroll delays cut down** per direct feedback that the wait after each
+  interaction was too long: Build 900ms→400ms, Match 2200ms→950ms, Play 2000ms→950ms.
+  Each new value is sized to the actual feedback animation plus a small buffer (Match's
+  celebrate bounce + text fade settles by ~0.8s, Play's burst/glow settles by ~0.8s,
+  Build's check-in transition is ~0.2s), not an arbitrary "let them admire it" pause on
+  top of that.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified: Connect's 1-reply floor at 1920×750 (measured, no crop), Explore's
+  arrow appearing only after the peek settles and sitting clear of card text, and
+  Build's pick advancing to Match within ~1s of tapping (down from ~2s+).
+- A second occurrence of the dev-server Fast-Refresh/browser-tool-hang issue from the
+  previous entry came up again mid-session (click actions timing out); a fresh tab
+  recovered it each time without needing another full server restart.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
