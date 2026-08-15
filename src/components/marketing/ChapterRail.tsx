@@ -54,12 +54,19 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
     <nav
       ref={railRef}
       aria-label="Chapter progress"
-      className="fixed top-1/2 right-7 z-40 hidden -translate-y-1/2 flex-col items-center gap-6 transition-opacity duration-300 lg:flex"
+      // Slim and close to the true edge (right-3, ~6px dots) rather than the
+      // fixed 38px labeled buttons this replaced: those sat right where
+      // Build/Play/Connect's own graphic column already lands (the row only
+      // reverses for Match/Explore), so at any width between "content hits its
+      // 1200px cap" and "there's real gutter to spare" the two visibly
+      // collided. A hairline never competes for that space. xl: (not lg:)
+      // since 1024-1279px is exactly that tight range.
+      className="fixed top-1/2 right-3 z-40 hidden -translate-y-1/2 flex-col items-center gap-3 transition-opacity duration-300 xl:flex"
       style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none" }}
     >
-      <span className="absolute top-0 bottom-0 left-1/2 z-0 w-0.5 -translate-x-1/2" style={{ background: "var(--border)" }} />
+      <span className="absolute top-0 bottom-0 left-1/2 z-0 w-px -translate-x-1/2" style={{ background: "var(--border)" }} />
       <span
-        className="absolute top-0 left-1/2 z-[1] w-0.5 -translate-x-1/2 rounded-full transition-[height] duration-250 ease-out"
+        className="absolute top-0 left-1/2 z-[1] w-px -translate-x-1/2 rounded-full transition-[height] duration-250 ease-out"
         style={{
           height: `${(activeIndex / (CHAPTERS.length - 1)) * 100}%`,
           background: "linear-gradient(180deg,#6366f1,#e5484d,#ffb81f,#1fc76e,#00c8dc)",
@@ -74,27 +81,18 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
             type="button"
             aria-label={chapter.label}
             onClick={() => document.getElementById(chapter.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            className="group relative z-[2] flex h-[38px] w-[38px] items-center justify-center rounded-full border-2 transition-all duration-250"
-            style={{
-              background: isActive || isPassed ? chapter.color : "var(--card)",
-              borderColor: chapter.color,
-              color: isActive || isPassed ? "#fff" : "var(--muted-foreground)",
-              opacity: isPassed && !isActive ? 0.5 : 1,
-              transform: isActive ? "scale(1.18)" : "scale(1)",
-              boxShadow: isActive ? `0 0 0 6px color-mix(in srgb, ${chapter.color} 20%, transparent)` : "none",
-            }}
+            className="group relative z-[2] flex h-3.5 w-3.5 items-center justify-center p-1"
           >
             <span
-              className="pointer-events-none absolute top-1/2 right-[calc(100%+12px)] -translate-y-1/2 rounded-full border px-2.5 py-1 text-[11.5px] font-bold whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              className="rounded-full transition-all duration-250"
               style={{
-                background: "var(--glass-surface-3)",
-                borderColor: "var(--border)",
-                color: "var(--foreground)",
-                opacity: isActive ? 1 : undefined,
+                width: isActive ? "8px" : "6px",
+                height: isActive ? "8px" : "6px",
+                background: isActive || isPassed ? chapter.color : "var(--card)",
+                border: `1.5px solid ${chapter.color}`,
+                opacity: isPassed && !isActive ? 0.5 : 1,
               }}
-            >
-              {chapter.label}
-            </span>
+            />
           </button>
         );
       })}
