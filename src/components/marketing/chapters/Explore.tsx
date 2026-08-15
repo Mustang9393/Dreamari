@@ -267,7 +267,6 @@ export function ExploreChapter() {
       color="#1fc76e"
       oneliner="careers, companies, and pathways with depth."
       flip
-      altBackground
       graphicRef={graphicRef}
       playing={false}
       graphicRevealed={graphicRevealed}

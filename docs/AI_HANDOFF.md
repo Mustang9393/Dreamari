@@ -452,6 +452,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   recovered it each time without needing another full server restart.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 removed the per-chapter alternating background
+
+- User-reported screenshot showed a hard background-color seam sitting right behind
+  Build's "+ 12 more interests" line — `ChapterShell` had an `altBackground` prop that
+  alternated chapters between the page background and `var(--card)` (Match and
+  Explore had it, Build/Play/Connect didn't), and the previous round's `compact`
+  section height made Build noticeably shorter, putting that pre-existing seam right
+  behind trailing content instead of in empty space below it. Per direct feedback
+  ("can it not just flow organically? keep the same background everywhere") this
+  wasn't just a compact-mode edge case — the alternating background itself was the
+  thing to remove. Deleted `altBackground` entirely (prop, default, and the
+  conditional style) from `ChapterShell.tsx`, and dropped the `altBackground` line
+  from `Match.tsx` and `Explore.tsx`'s `ChapterShell` calls. All 5 chapters now share
+  one continuous background with no per-section seam anywhere.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified: scrolling from Build straight into Match now shows no background
+  break at all.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

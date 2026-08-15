@@ -9,7 +9,6 @@ type ChapterShellProps = {
   color: string;
   oneliner: string;
   flip?: boolean;
-  altBackground?: boolean;
   // Build and Connect are content-driven (a short question, a post + a few comments) —
   // not card-driven like Match/Explore/Play, which need the full-height frame so their
   // photo cards can be genuinely big. Forcing Build/Connect's much shorter content into
@@ -30,7 +29,6 @@ export function ChapterShell({
   color,
   oneliner,
   flip = false,
-  altBackground = false,
   compact = false,
   graphicRef,
   playing,
@@ -46,11 +44,13 @@ export function ChapterShell({
     // dead space from "inside the frame" to "the section's own centering slack,"
     // leaving the same long scroll of near-nothing before the next chapter. A shorter
     // section still snaps correctly (scroll-snap doesn't require uniform heights).
-    <section
-      id={id}
-      className={`relative flex items-center ${compact ? "min-h-[62dvh]" : "min-h-dvh"}`}
-      style={{ scrollSnapAlign: "start", ...(altBackground ? { background: "var(--card)" } : undefined) }}
-    >
+    //
+    // No per-chapter background override (there used to be one, alternating chapters
+    // between the page background and var(--card)) — every chapter now shares the same
+    // background so the boundary between two sections never reads as a hard seam,
+    // which was especially visible when a `compact` section's shorter height put that
+    // seam right behind trailing text like Build's "+ 12 more interests" line.
+    <section id={id} className={`relative flex items-center ${compact ? "min-h-[62dvh]" : "min-h-dvh"}`} style={{ scrollSnapAlign: "start" }}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't

@@ -164,7 +164,6 @@ export function MatchChapter() {
       color={WORLD_COLOR}
       oneliner="with the right college major, schools and career."
       flip
-      altBackground
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}
