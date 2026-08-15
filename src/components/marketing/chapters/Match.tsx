@@ -90,7 +90,10 @@ export function MatchChapter() {
           <PosterCard slot="right" photo="/images/career-ux-designer.jpg" title="UX Designer" subtitle="Tech" worldColor="var(--world-tech-engineering-design)" />
           <PosterCard slot="center" photo="/images/career-chief-executive.jpg" title="Analyst" subtitle="Finance" worldColor="var(--world-business-money-office)" />
         </div>
-        <div className="mkt-m3-actions flex items-center">
+        <div
+          className="mkt-m3-actions relative z-[3] flex items-center"
+          style={{ marginTop: "calc(var(--mu) * -34px)" }}
+        >
           {/* Fades/collapses out in sync with the center card's zoom-in, so the flex
              row shrinks to just the heart, which the row's own centering re-lands in
              the middle — no manual translateX math needed. */}
