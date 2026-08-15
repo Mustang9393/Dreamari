@@ -85,6 +85,9 @@
 .mkt-graphic[data-playing="true"] .mkt-m3-btn.mkt-like .mkt-m3-heart-fill { animation: mkt-m3-heart-fill-fade 2s ease 1 forwards; }
 @keyframes mkt-m3-heart-outline-fade { 0%, 50% { opacity: 1; } 70%, 100% { opacity: 0; } }
 @keyframes mkt-m3-heart-fill-fade { 0%, 50% { opacity: 0; } 70%, 100% { opacity: 1; } }
+.mkt-match-reveal { opacity: 0; transform: translateY(6px); }
+.mkt-graphic[data-playing="true"] .mkt-match-reveal { animation: mkt-match-reveal-in 2s ease 1 forwards; }
+@keyframes mkt-match-reveal-in { 0%, 80% { opacity: 0; transform: translateY(6px); } 94%, 100% { opacity: 1; transform: translateY(0); } }
 
 /* ---------- Play: scenario chart draws in, question, answer pick, progress fill ---------- */
 .mkt-chart-line { stroke-dasharray: 200; stroke-dashoffset: 200; }

@@ -44,7 +44,7 @@ export function BuildChapter() {
       eyebrow="Chapter One"
       title="Build"
       color="#6366f1"
-      oneliner="What pulls you in becomes your world: live, as it happens."
+      oneliner="By taking a personality, skill, and academic assessment."
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}

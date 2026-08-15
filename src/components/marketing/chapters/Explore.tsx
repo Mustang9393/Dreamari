@@ -6,10 +6,34 @@ import { usePlayingOnScroll } from "../scrollHooks";
 
 // A doomscroll through three career cards (Figma "Mobile Explore" reference), settling
 // on the chapter's own target world (Investing) — quick, smooth, one continuous track.
+// Per the QA doc's "our new direction" Explore mockup (salary/focus/competition stats),
+// simplified down to two icon+value stats instead of a full labeled table — this card
+// is a third the mockup's height, so it only has room for the headline numbers.
 const CARDS = [
-  { photo: "/images/career-neurosurgeon.jpg", title: "Neurosurgeon", subtitle: "Health", worldColor: "var(--world-health-medicine)" },
-  { photo: "/images/career-product-designer.jpg", title: "Product Designer", subtitle: "Tech", worldColor: "var(--world-tech-engineering-design)" },
-  { photo: "/images/career-pe-analyst.jpg", title: "Private Equity Analyst", subtitle: "Investing", worldColor: "var(--world-business-money-office)" },
+  {
+    photo: "/images/career-neurosurgeon.jpg",
+    title: "Neurosurgeon",
+    subtitle: "Health",
+    worldColor: "var(--world-health-medicine)",
+    salary: "$260K+",
+    duration: "12+ yr",
+  },
+  {
+    photo: "/images/career-product-designer.jpg",
+    title: "Product Designer",
+    subtitle: "Tech",
+    worldColor: "var(--world-tech-engineering-design)",
+    salary: "$95K–150K",
+    duration: "4-yr degree",
+  },
+  {
+    photo: "/images/career-pe-analyst.jpg",
+    title: "Private Equity Analyst",
+    subtitle: "Investing",
+    worldColor: "var(--world-business-money-office)",
+    salary: "$100K–160K",
+    duration: "4-yr degree",
+  },
 ];
 
 const ACTION_ICONS = [
@@ -21,6 +45,23 @@ const ACTION_ICONS = [
   <path key="bookmark" d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />,
 ];
 
+// Lucide "dollar-sign" / "graduation-cap" paths, same convention as ACTION_ICONS above.
+const STAT_ICONS = {
+  salary: (
+    <>
+      <line x1="12" x2="12" y1="2" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </>
+  ),
+  duration: (
+    <>
+      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+      <path d="M22 10v6" />
+      <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+    </>
+  ),
+};
+
 export function ExploreChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
 
@@ -30,7 +71,7 @@ export function ExploreChapter() {
       eyebrow="Chapter Four"
       title="Explore"
       color="#1fc76e"
-      oneliner="15 worlds. Still shaped around you."
+      oneliner="Careers, companies, and pathways with depth."
       flip
       altBackground
       graphicRef={graphicRef}
@@ -53,7 +94,7 @@ export function ExploreChapter() {
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
-                style={{ background: "linear-gradient(180deg, transparent 55%, var(--scrim-heavy) 100%)" }}
+                style={{ background: "linear-gradient(180deg, transparent 42%, var(--scrim-heavy) 100%)" }}
               />
               <div
                 className="absolute inset-x-0 bottom-0 text-center uppercase"
@@ -83,6 +124,35 @@ export function ExploreChapter() {
                 >
                   {card.subtitle}
                 </p>
+                <div
+                  className="mt-1.5 flex items-center justify-center normal-case"
+                  style={{ gap: "calc(var(--mu) * 12px)" }}
+                >
+                  {[
+                    { icon: STAT_ICONS.salary, value: card.salary },
+                    { icon: STAT_ICONS.duration, value: card.duration },
+                  ].map((stat, i) => (
+                    <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 3px)" }}>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="var(--muted-foreground)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}
+                      >
+                        {stat.icon}
+                      </svg>
+                      <span
+                        className="whitespace-nowrap"
+                        style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 6.5px)", color: "var(--muted-foreground)" }}
+                      >
+                        {stat.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

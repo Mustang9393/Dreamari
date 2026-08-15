@@ -19,7 +19,7 @@ export function PlayChapter() {
       eyebrow="Chapter Three"
       title="Play"
       color="#ffb81f"
-      oneliner="Step into the job before you choose it."
+      oneliner="Day-in-the-life college major and career games you actually want to open."
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}
