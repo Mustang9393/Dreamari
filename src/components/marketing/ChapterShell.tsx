@@ -99,8 +99,21 @@ export function ChapterShell({
               each chapter picking its own size. Generous by default (this is the
               *ceiling*, not a target to shrink to) - only a genuinely short viewport
               should ever actually hit the dvh cap; on a normal phone/laptop screen this
-              should just give every chapter plenty of room to be big. */}
-          <div className="relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(82dvh, 680px)" }}>
+              should just give every chapter plenty of room to be big.
+
+              mkt-graphic-scale (a second, nested container-query context, not just the
+              outer .mkt-graphic's) is the fix for text that ballooned way past the H2
+              title/oneliner in width: this frame's own width is capped at 480px, but
+              the OUTER .mkt-graphic wrapper it sits in can be much wider on a big
+              desktop screen (it's a flex-1 column, not capped) - every chapter's
+              --mu was reading cqw off that wider, uncapped outer box, so on a big
+              screen font sizes scaled as if the card were ~700-800px wide when the
+              card actually rendered at its 480px ceiling the whole time. A container
+              only ever resolves cqw against an ANCESTOR (never itself), so nesting a
+              second container-type here, sized off this already-capped frame, gives
+              every chapter's inner text a --mu that maxes out around 1.5 (480/320)
+              instead of 2.3, matching the frame's real size on any viewport. */}
+          <div className="mkt-graphic-scale relative z-[1] flex items-center justify-center" style={{ width: "min(94cqw, 480px)", height: "min(82dvh, 680px)" }}>
             {children}
           </div>
         </div>

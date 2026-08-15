@@ -164,6 +164,38 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   375px width.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 fixed the `--mu` scaling bug behind oversized graphic text
+
+- Root cause of "the graphics' text is way too big and overpowers the page copy"
+  (reported after several rounds of "scale the text up" requests this session): every
+  chapter graphic's internal font sizes are `calc(var(--mu) * Npx)`, and `--mu` was
+  defined on the OUTER `.mkt-graphic` wrapper (a `flex-1` column with no width cap),
+  not on the actual card frame inside it (capped at `min(94cqw, 480px)`). On a wide
+  desktop screen the outer wrapper can reach ~770-800px, so `--mu` was scaling as if
+  the visible card were that wide, even though the card itself always rendered at its
+  480px ceiling. Net effect: card-internal text grew disproportionately on wide
+  screens, independent of and eventually exceeding the fixed-size H2 chapter
+  title/oneliner next to it.
+- Fix: added a second, nested container-query context (`mkt-graphic-scale` in
+  `animations.css`, applied to the actual frame div in `ChapterShell.tsx`) so `--mu`
+  for every chapter's own content is computed from the frame's real, already-capped
+  width instead of the outer wrapper's. A container can only resolve `cqw` against an
+  ancestor, never itself, so the frame's own `width: min(94cqw, 480px)` still resolves
+  against the outer wrapper exactly as before — only what `--mu` means for the frame's
+  *children* changed. This caps `--mu` around 1.5 on any normal-to-wide screen (down
+  from up to 2.3), while leaving the frame/card itself exactly the same visual size —
+  the ask was "cards should stay large, only the text was too big," and this fixes the
+  text without touching card dimensions at all.
+- No per-file font-size numbers were changed; this was purely the shared scaling
+  mechanism. Verified via computed `getComputedStyle().fontSize` at both a narrow
+  (800px, stacked) and wide (1440px, side-by-side) viewport that graphic headline text
+  (e.g. Build's "Choose your interests," Match's card title, Explore's card title) now
+  renders well below the H2 chapter title's font size at every width, instead of
+  approaching or exceeding it on wide screens.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified all 5 chapters at both viewport widths.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

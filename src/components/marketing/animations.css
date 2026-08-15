@@ -17,6 +17,15 @@
   --mu: clamp(1, calc(100cqw / 320px), 2.3);
 }
 
+/* Overrides .mkt-graphic's --mu for everything inside the actual card frame, scaled
+   off the frame's own (capped-at-480px) width instead of the outer wrapper's — see the
+   long comment in ChapterShell.tsx for why the outer version alone let text balloon on
+   wide screens. */
+.mkt-graphic-scale {
+  container-type: inline-size;
+  --mu: clamp(1, calc(100cqw / 320px), 2.3);
+}
+
 /* ---------- Shared: nudge pulse on the first, un-picked interactive option (Build,
    Play) — reads --c off the graphic's own accent, so it's the right color per chapter. */
 @keyframes mkt-nudge-pulse {
