@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
@@ -65,21 +66,35 @@ export function PlayChapter() {
       playing={false}
       graphicRevealed={graphicRevealed}
     >
+      {/* h-full: same allocated frame footprint as every other chapter's graphic. The
+         illustration is a flex-none percentage of that height (not a flat cqw clamp),
+         so it's genuinely larger on genuinely larger frames instead of capping out; the
+         game content below is flex-1 + its own overflow-y-auto as a safety net so it
+         scrolls internally rather than ever getting clipped on a very short frame. */}
       <div
-        className="relative z-[1] overflow-hidden"
-        style={{ width: "clamp(270px, 62cqw, 480px)", background: "var(--card)", borderRadius: "var(--radius-md-alt)", padding: "calc(var(--mu) * 22px)" }}
+        className="relative z-[1] flex h-full max-w-full flex-col overflow-hidden"
+        style={{ width: "clamp(300px, 90cqw, 560px)", background: "var(--card)", borderRadius: "var(--radius-md-alt)" }}
       >
-        <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
-          Glossary game
-        </p>
-        <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 22px)", color: "#3b82f6" }}>
-          {term.term}
-        </p>
-        <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 11px)", color: "var(--muted-foreground)" }}>
-          Which definition is right?
-        </p>
+        <div className="relative flex-none overflow-hidden" style={{ height: "44%" }}>
+          <Image src="/images/play-illustration.jpg" alt="" fill className="object-cover" style={{ objectPosition: "center 30%" }} />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, transparent 55%, var(--card) 100%)" }}
+          />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto" style={{ padding: "calc(var(--mu) * 22px)", paddingTop: 0 }}>
+          <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
+            Glossary game
+          </p>
+          <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 22px)", color: "#3b82f6" }}>
+            {term.term}
+          </p>
+          <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 11px)", color: "var(--muted-foreground)" }}>
+            Which definition is right?
+          </p>
 
-        <div className="mt-4 flex flex-col" style={{ gap: "calc(var(--mu) * 10px)" }}>
+          <div className="mt-4 flex flex-col" style={{ gap: "calc(var(--mu) * 10px)" }}>
           {options.map((option, i) => {
             const isThisCorrect = option === term.correct;
             const isThisPicked = option === picked;
@@ -144,6 +159,7 @@ export function PlayChapter() {
               </svg>
             </button>
           )}
+        </div>
         </div>
       </div>
     </ChapterShell>

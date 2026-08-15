@@ -4,15 +4,12 @@ import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
-// PLACEHOLDER content: the real personality/skill assessment question bank wasn't
-// available to source this from, so these are stand-ins in the same plain, 8th-grade
-// voice as the taxonomy copy elsewhere on this page. Swap QUESTIONS for the real set.
-const QUESTIONS = [
-  { text: "Which of these sounds most like you?", options: ["Solving number puzzles", "Building or fixing things", "Leading a group project"] },
-  { text: "A free afternoon: what are you doing?", options: ["Reading about how markets work", "Sketching or designing something", "Organizing an event"] },
-  { text: "Pick the class you'd never skip.", options: ["Economics", "Computer Science", "Debate"] },
-];
-const TOTAL_QUESTIONS = 12;
+// Real question from the actual 7-question assessment (question 3 of 7): "Choose Your
+// Interests." Business & Money is the demo's example path, since that's this whole
+// storyboard's fixed destination (Investment Banking) — nudged to invite the tap, not
+// pre-selected, so nothing reads as "already chosen" before the reader acts.
+const INTERESTS = ["Tech", "Business & Money", "Health"];
+const EXAMPLE = "Business & Money";
 
 const CHECK = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -22,47 +19,44 @@ const CHECK = (
 
 export function BuildChapter() {
   const [graphicRef, playing, graphicRevealed] = usePlayingOnScroll<HTMLDivElement>();
-  const [qIndex, setQIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-
-  const question = QUESTIONS[qIndex % QUESTIONS.length];
-
-  function next() {
-    setSelected(null);
-    setQIndex((i) => i + 1);
-  }
+  const [selected, setSelected] = useState<string | null>(null);
 
   return (
     <ChapterShell
       id="build"
       title="Build"
       color="#6366f1"
-      oneliner="by taking a personality, skill, and academic assessment."
+      oneliner="by taking a 7-question personality, skill, and academic assessment."
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="flex flex-col items-center" style={{ width: "clamp(270px, 68cqw, 480px)", gap: "calc(var(--mu) * 14px)" }}>
+      {/* h-full/w-full: same allocated frame footprint as every other chapter's
+         graphic, even though this content is naturally shorter — centered within it
+         rather than stretched, so it doesn't distort into an oddly spaced-out list. */}
+      <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
+        <div className="flex flex-col items-center" style={{ width: "clamp(270px, 68cqw, 480px)", gap: "calc(var(--mu) * 14px)" }}>
         <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
-          Question {(qIndex % TOTAL_QUESTIONS) + 1} of {TOTAL_QUESTIONS}
+          Question 3
         </p>
 
         <p className="text-center font-bold" style={{ fontSize: "calc(var(--mu) * 16px)", lineHeight: 1.3, color: "var(--foreground)" }}>
-          {question.text}
+          Choose your interests
         </p>
 
-        <div className="flex w-full flex-col" style={{ gap: "calc(var(--mu) * 10px)" }}>
-          {question.options.map((option, i) => {
-            const isSelected = selected === i;
-            const isNudge = selected === null && i === 0;
+        <div className="flex w-full flex-wrap justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+          {INTERESTS.map((interest) => {
+            const isSelected = selected === interest;
+            const isNudge = selected === null && interest === EXAMPLE;
             return (
               <button
-                key={option}
+                key={interest}
                 type="button"
-                onClick={() => setSelected(i)}
-                className={`flex items-center justify-between rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
+                onClick={() => setSelected(interest)}
+                className={`flex items-center rounded-full border transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
                 style={{
-                  padding: "calc(var(--mu) * 14px) calc(var(--mu) * 18px)",
+                  gap: "calc(var(--mu) * 8px)",
+                  padding: "calc(var(--mu) * 12px) calc(var(--mu) * 18px)",
                   fontSize: "calc(var(--mu) * 12px)",
                   fontWeight: 600,
                   background: isSelected ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))" : "var(--glass-surface-2)",
@@ -71,13 +65,13 @@ export function BuildChapter() {
                   opacity: selected !== null && !isSelected ? 0.6 : 1,
                 }}
               >
-                {option}
+                {interest}
                 <span
-                  className="mkt-build-check flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+                  className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
                   style={{
-                    width: "calc(var(--mu) * 20px)",
-                    height: "calc(var(--mu) * 20px)",
-                    padding: "calc(var(--mu) * 5px)",
+                    width: "calc(var(--mu) * 16px)",
+                    height: "calc(var(--mu) * 16px)",
+                    padding: "calc(var(--mu) * 4px)",
                     background: "#6366f1",
                     opacity: isSelected ? 1 : 0,
                     transform: isSelected ? "scale(1)" : "scale(0.4)",
@@ -88,32 +82,25 @@ export function BuildChapter() {
               </button>
             );
           })}
-        </div>
-
-        {selected === null ? (
-          <p className="text-center" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
-            Tap an answer. {TOTAL_QUESTIONS - 1} more questions like this build your profile.
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={next}
-            className="flex items-center rounded-full border font-semibold"
+          <div
+            className="flex items-center rounded-full border"
             style={{
-              gap: "calc(var(--mu) * 6px)",
-              padding: "calc(var(--mu) * 8px) calc(var(--mu) * 16px)",
+              padding: "calc(var(--mu) * 12px) calc(var(--mu) * 16px)",
               fontSize: "calc(var(--mu) * 11px)",
-              background: "var(--glass-surface-2)",
+              fontWeight: 600,
+              background: "transparent",
               borderColor: "var(--border)",
-              color: "var(--foreground)",
+              color: "var(--muted-foreground)",
             }}
           >
-            Next question
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 12px)", height: "calc(var(--mu) * 12px)" }}>
-              <path d="m9 6 6 6-6 6" />
-            </svg>
-          </button>
-        )}
+            + 12 more
+          </div>
+        </div>
+
+        <p className="text-center" style={{ fontSize: "calc(var(--mu) * 9.5px)", color: "var(--muted-foreground)" }}>
+          {selected === null ? "Tap an interest, pick as many as fit." : `${selected} noted. Pick another, or that's the profile.`}
+        </p>
+        </div>
       </div>
     </ChapterShell>
   );

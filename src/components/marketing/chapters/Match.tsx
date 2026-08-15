@@ -5,35 +5,36 @@ import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
-// All three cards are real Business/Money/Office-world careers (Figma "Career Poster
-// Card" photos where available) with real copy pulled from the vetted 322-career
-// taxonomy spreadsheet — no invented blurbs. Whichever order the deck gets swiped in,
-// the reveal always names Investment Banking Analyst: this is a demo of the
-// interaction, not a real matching engine, so there's no real branch to build per card.
+// All three cards are real Business/Money/Office-world careers with real copy pulled
+// from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
+// standard entry-level ranges for these roles (not in the taxonomy source, which has no
+// salary column filled in yet). Whichever order the deck gets swiped in, the reveal
+// always names Investment Banking: this is a demo of the interaction, not a real
+// matching engine, so there's no real branch to build per card.
 const CARDS = [
   {
     key: "iba",
     photo: "/images/career-chief-executive.jpg",
-    title: "Investment Banking Analyst",
+    title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
-    example: "Imagine a sneaker company that wants to buy a smaller one. You work out what it's actually worth and whether the price is fair.",
-    education: "Bachelor's · Business & Management",
+    salary: "$85K-150K",
+    major: "Business & Management",
   },
   {
-    key: "pe",
+    key: "ops",
     photo: "/images/career-pe-analyst.jpg",
-    title: "Private Equity Associate",
-    blurb: "Buys whole companies, improves them, then sells them.",
-    example: "Imagine buying a chain of ten pizza shops, fixing how they order supplies, and selling twenty shops five years later.",
-    education: "Bachelor's · Business & Management",
+    title: "Operations",
+    blurb: "Keeps the day-to-day running of a business working.",
+    salary: "$65K-110K",
+    major: "Business & Management",
   },
   {
-    key: "fa",
+    key: "pm",
     photo: "/images/career-ux-designer.jpg",
-    title: "Financial Advisor",
-    blurb: "Helps regular people plan their money and retirement.",
-    example: "Imagine a couple who thought they could never afford a house. You map out their spending and show them a path in four years.",
-    education: "Bachelor's · Business & Management",
+    title: "Project Manager",
+    blurb: "Keeps a project on schedule and everyone talking to each other.",
+    salary: "$70K-115K",
+    major: "Business & Management",
   },
 ];
 
@@ -90,8 +91,12 @@ export function MatchChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="relative z-[1] flex flex-col items-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
-        <div className="relative" style={{ width: "calc(var(--mu) * 168px)", height: "calc(var(--mu) * 300px)" }}>
+      <div className="relative z-[1] flex h-full w-full flex-col items-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
+        {/* aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared
+           frame on any viewport: flex:1 gives it the column's available height, then
+           aspect-ratio derives width from that — capped by max-width so a tall/narrow
+           frame still caps width instead of ever overflowing it sideways. */}
+        <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 300" }}>
           {matched ? (
             <div
               className="mkt-match-result absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
@@ -108,7 +113,7 @@ export function MatchChapter() {
                   You&apos;re matched
                 </p>
                 <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 15px)", lineHeight: 1.15, color: "var(--foreground)" }}>
-                  Investment Banking Analyst
+                  Investment Banking
                 </p>
                 <button
                   type="button"
@@ -204,15 +209,27 @@ export function MatchChapter() {
                   >
                     <p style={{ fontFamily: "var(--font-poster)", fontSize: "calc(var(--mu) * 13px)", color: WORLD_COLOR }}>{top.title}</p>
                     <p style={{ fontSize: "calc(var(--mu) * 11px)", lineHeight: 1.5, color: "var(--foreground)", fontWeight: 600 }}>{top.blurb}</p>
-                    <p style={{ fontSize: "calc(var(--mu) * 9.5px)", lineHeight: 1.5, color: "var(--muted-foreground)" }}>{top.example}</p>
-                    <p
-                      className="mt-1 inline-block self-center rounded-full"
-                      style={{ padding: "calc(var(--mu) * 5px) calc(var(--mu) * 11px)", fontSize: "calc(var(--mu) * 8.5px)", fontWeight: 700, background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-                    >
-                      {top.education}
-                    </p>
+
+                    <div className="mt-1 flex flex-col self-stretch" style={{ gap: "calc(var(--mu) * 6px)" }}>
+                      {[
+                        { label: "Salary", value: top.salary },
+                        { label: "College major", value: top.major },
+                      ].map((row) => (
+                        <div
+                          key={row.label}
+                          className="flex items-center justify-between rounded-[calc(var(--mu)*10px)]"
+                          style={{ padding: "calc(var(--mu) * 7px) calc(var(--mu) * 11px)", background: "var(--glass-surface-2)" }}
+                        >
+                          <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 7.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
+                            {row.label}
+                          </span>
+                          <span style={{ fontSize: "calc(var(--mu) * 9.5px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
                     <p className="mt-1" style={{ fontSize: "calc(var(--mu) * 8px)", color: "var(--muted-foreground)" }}>
-                      Tap to flip back
+                      + more inside the real app · tap to flip back
                     </p>
                   </div>
                 </div>

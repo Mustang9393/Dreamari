@@ -94,7 +94,15 @@ export function ChapterShell({
             className="pointer-events-none absolute top-1/2 left-1/2 z-0 h-[min(70%,340px)] w-[min(70%,340px)] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[36px]"
             style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--c) 30%, transparent), transparent 72%)" }}
           />
-          <div className="relative z-[1] flex w-full items-center justify-center">{children}</div>
+          {/* Shared frame every chapter's own content sizes itself to fill or center
+              within, so all five graphics read as the same scale of thing rather than
+              each chapter picking its own size. Capped by dvh (viewport height), not
+              just cqw (container width), specifically so a short viewport shrinks it
+              proportionally instead of letting it grow past the fold and get clipped -
+              cqw alone has no idea how tall the actual screen is. */}
+          <div className="relative z-[1] flex items-center justify-center" style={{ width: "min(90cqw, 460px)", height: "min(56dvh, 520px)" }}>
+            {children}
+          </div>
         </div>
       </div>
     </section>

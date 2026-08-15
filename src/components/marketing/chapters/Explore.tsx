@@ -8,10 +8,18 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // A real, user-scrollable feed (native overflow-y + scroll-snap), not a scroll-triggered
 // CSS animation — matches Match's card size (168 x 300 mu) per feedback that the two
 // should read as the same scale of thing.
+// Reframed around match strength (Strong Match/Match/Stretch/Wildcard) rather than
+// world name. Photos are reused stand-ins from the shoot we already have on hand for
+// Accountant/Management Analyst/Human Resources — Figma's local asset server is
+// unreachable right now to pull literal photos for these four specific careers, and
+// there wasn't a reasonable stand-in for Food Scientist among what's already downloaded
+// (the closest photos on hand are both operating-room shots), so that card is an icon
+// tile instead of a mismatched photo. Swap in real photos once Figma's back up.
 const CARDS = [
-  { photo: "/images/career-neurosurgeon.jpg", title: "Neurosurgeon", subtitle: "Health", worldColor: "var(--world-health-medicine)" },
-  { photo: "/images/career-product-designer.jpg", title: "Product Designer", subtitle: "Tech", worldColor: "var(--world-tech-engineering-design)" },
-  { photo: "/images/career-pe-analyst.jpg", title: "Private Equity Analyst", subtitle: "Investing", worldColor: "var(--world-business-money-office)" },
+  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", subtitle: "Strong Match", tagColor: "#1fc76e" },
+  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", subtitle: "Match", tagColor: "#3b82f6" },
+  { photo: "/images/career-product-designer.jpg", title: "Human Resources", subtitle: "Stretch", tagColor: "#ffb81f" },
+  { photo: null, title: "Food Scientist", subtitle: "Wildcard", tagColor: "#8b5cf6" },
 ];
 
 const ACTION_ICONS = [
@@ -74,11 +82,14 @@ export function ExploreChapter() {
       playing={false}
       graphicRevealed={graphicRevealed}
     >
+      {/* aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared frame
+         on any viewport, matching Match's card sizing exactly: height:100% of the
+         frame, width derived from the ratio, capped by max-width so it never
+         overflows the frame sideways either. */}
       <div
-        className="relative overflow-hidden border"
+        className="relative h-full max-w-full overflow-hidden border"
         style={{
-          width: "calc(var(--mu) * 168px)",
-          height: "calc(var(--mu) * 300px)",
+          aspectRatio: "168 / 300",
           borderRadius: "calc(var(--mu) * 20px)",
           borderColor: "var(--glass-surface-2)",
         }}
@@ -91,7 +102,20 @@ export function ExploreChapter() {
         >
           {CARDS.map((card) => (
             <div key={card.title} className="relative" style={{ height: "100%", scrollSnapAlign: "start" }}>
-              <Image src={card.photo} alt="" fill className="object-cover" />
+              {card.photo ? (
+                <Image src={card.photo} alt="" fill className="object-cover" />
+              ) : (
+                <div
+                  aria-hidden
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: `radial-gradient(circle at 50% 35%, color-mix(in srgb, ${card.tagColor} 35%, transparent), var(--card) 75%)` }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke={card.tagColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 46px)", height: "calc(var(--mu) * 46px)", opacity: 0.6 }}>
+                    <path d="M9 3v9c0 1-1 2-2 3l-4 4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1l-4-4c-1-1-2-2-2-3V3" />
+                    <path d="M6 3h12M6 8h12" />
+                  </svg>
+                </div>
+              )}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
@@ -120,7 +144,7 @@ export function ExploreChapter() {
                     fontWeight: 600,
                     fontSize: "calc(var(--mu) * 7px)",
                     letterSpacing: "0.5px",
-                    color: card.worldColor,
+                    color: card.tagColor,
                   }}
                 >
                   {card.subtitle}
