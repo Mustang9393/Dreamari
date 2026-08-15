@@ -89,10 +89,9 @@
    [data-playing] for those four. Connect still uses the scroll-triggered pattern below. */
 
 /* ---------- Explore: the Wildcard card's "rare pull" foil treatment — a rotating
-   gradient border, a soft blurred aura glowing behind it, and a diagonal sheen
-   sweeping across on top. Deliberately built from the app's own indigo/blue/cyan/pink/
-   gold palette rather than a literal rainbow, so it reads as premium rather than
-   off-brand — and stays clear of red.
+   gradient border and a diagonal sheen sweeping across on top. Deliberately built from
+   the app's own indigo/blue/cyan/pink/gold palette rather than a literal rainbow, so it
+   reads as premium rather than off-brand — and stays clear of red.
 
    Switched the border from "animate background-position across an oversized, static
    linear-gradient" to a conic-gradient rotated via an animated custom property —
@@ -101,7 +100,14 @@
    visibly went duller/near-solid for a beat ("disappears for quite a bit"). A conic
    gradient wraps the FULL color sequence around the shape at all times — rotating it
    just changes which color sits where, never how much of the spectrum is showing —
-   and it's faster now (2.2s vs 5s) so it reads as lively rather than a slow drift. */
+   and it's faster now (2.2s vs 5s) so it reads as lively rather than a slow drift.
+
+   A blurred "aura" halo bleeding past the card's edges was tried and dropped — every
+   version either bled past the whole chapter frame into the next section, or clipped
+   unevenly (soft on one axis, a hard line on the other, since the card has vertical
+   peek-gutter room to fade into but zero horizontal equivalent). A glow that reads
+   differently on different sides looks like a bug, not an effect — the rotating border
+   plus sheen alone already reads as premium and is perfectly uniform on every edge. */
 @property --mkt-holo-angle {
   syntax: "<angle>";
   inherits: false;
@@ -113,18 +119,6 @@
 .mkt-holo-border {
   background: conic-gradient(from var(--mkt-holo-angle), #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700, #8b5cf6);
   animation: mkt-holo-spin 2.2s linear infinite;
-}
-/* The aura: the same rotating spectrum, blurred and enlarged behind the card so it
-   reads as a soft glowing halo bleeding past the edges — a fluid, breathing light
-   rather than just a crisp outline. Kept a touch behind the border in timing (0.15s
-   animation-delay) so the glow doesn't feel perfectly glued to the ring, closer to
-   how a real light source lags its own reflection. */
-.mkt-holo-aura {
-  background: conic-gradient(from var(--mkt-holo-angle), #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700, #8b5cf6);
-  filter: blur(18px) saturate(1.3);
-  opacity: 0.75;
-  animation: mkt-holo-spin 2.2s linear infinite;
-  animation-delay: -0.15s;
 }
 @keyframes mkt-holo-sheen-sweep {
   0% { background-position: 160% 160%; }

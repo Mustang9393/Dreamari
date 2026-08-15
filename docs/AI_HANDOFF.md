@@ -521,6 +521,59 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 Explore rebuilt as a committed TikTok/Reels-style carousel
+
+- `touch-pan-y` (previous entry) turned out to make vertical `touchmove` events
+  non-cancelable in some browsers, which broke an earlier `preventDefault`-based
+  scroll-forwarding approach for handing off scroll at the feed's first/last card to
+  the adjacent chapter. Rather than patch that forwarding again, `Explore.tsx`'s whole
+  feed was replaced: no native scroll/`scroll-snap` at all now, just a custom
+  index-based carousel (`activeIndex` + a continuous `dragPx` for live drag/peek)
+  driving `translateY`/`scale`/`opacity` per card via `requestAnimationFrame`-eased
+  math, per direct request for "TikTok/Reels" one-card-per-gesture paging instead of
+  free scroll with snap.
+- Peek visibility required a real discovery: cards rendered at the container's full
+  size leave zero overlappable pixels for a neighbor to peek into, regardless of
+  z-index (two edge-to-edge same-size cards never share a visible boundary strip).
+  Fixed by rendering every card `GUTTER_FRACTION` (9%) shorter than the container top
+  and bottom, so there's genuine empty space for a neighbor's sliver to occupy — the
+  focused card still fills that inner band exactly, so its own edges are never
+  affected.
+- The carousel's `commit()` function IS the boundary handoff now — committing past
+  index 0 or the last index calls `scrollIntoView` on `#play`/`#connect` directly, no
+  separate touchend-detection layer needed.
+- Real bug found and fixed during this round's verification: the wheel handler had no
+  `preventDefault()`, and React's `onWheel` prop has been passive by default since
+  v17 (calling `preventDefault` inside it silently no-ops) — a single trackpad swipe
+  was committing the carousel's own index **and** letting the native page scroll
+  advance through the scroll-snap sections at the same time, which is almost
+  certainly what looked like "a two-card jump" in earlier manual testing. Fixed with a
+  plain non-passive `addEventListener("wheel", ..., {passive:false})` on the track
+  purely to call `preventDefault`, leaving the existing `onWheel` prop's commit logic
+  untouched. Re-verified: single wheel gesture now advances exactly one card, and
+  boundary handoff to Play/Connect no longer overshoots into the CTA section.
+- The Wildcard's blurred aura glow (added in the previous round) was reported as
+  getting clipped by the track's necessary `overflow-hidden`. Tried three fixes in
+  order: (1) an unclipped sibling layer outside the track — bled past the whole
+  chapter frame into Connect below it; (2) back inside the clipped track with a
+  track-level `mask-image` fade — faded the *other* two cards' own left/right photo
+  edges too, and still cut hard on the card's left/right (the track has zero
+  horizontal margin the way it has a vertical gutter, so there's no room to fade
+  into); (3) killed the aura glow entirely per direct instruction ("if you can't fix
+  it, kill the glow"). The rotating conic-gradient border + diagonal sheen sweep
+  (both unaffected by any of this) are the Wildcard's whole "rare pull" treatment now
+  — uniform on all four edges, nothing bleeding past the frame.
+- Also rounded the two plain cards' corners (`calc(var(--mu) * 17px)`, matching the
+  Wildcard's own inner radius) — they'd been rendering as sharp-cornered rectangles
+  since `ExploreCardBody` is a bare fragment with no wrapping element to round;
+  `CardFace` now wraps the non-Wildcard path in a rounded `overflow-hidden` div too.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` all pass clean.
+  Browser-verified: single-card-per-gesture wheel commit with no overshoot, correct
+  boundary handoff to Play (up) and Connect (down) at the first/last card, peek
+  visibility on both neighbors, rounded corners on all three cards, and the
+  Wildcard's border/sheen rendering with no glow artifacts leaking past the frame.
+- Not yet pushed to `origin` as of this entry.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
