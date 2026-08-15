@@ -18,7 +18,7 @@ const favoritDisplay = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Dreamari — Discover your dream career.",
+  title: "Dreamari: Discover your dream career.",
   description:
     "Build your profile, match with careers, play day-in-the-life work simulations, explore new paths, and connect with professionals.",
 };
