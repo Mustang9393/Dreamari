@@ -6,6 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 hero rebalance, bigger phone Dreamy, frosted island nav
+
+- Hero copy re-anchored justify-end -> justify-START per direct feedback ("too
+  centred / starts too low"): the headline block now begins right under the nav
+  like a normal landing page; leftover height on tall screens pools between the
+  scroll hint and Dreamy, who visibly holds the bezel beneath it.
+- Dreamy's mask fade band now COMPLETES BELOW the bezel (71% -> 83%, vs the 77%
+  visible cut): the old band hit zero alpha a hair above the edge, which read as
+  him hovering above the screen border on iPhone (reported with a screenshot).
+  ~50% mist opacity survives AT the bezel so the physical screen edge makes the
+  final cut. Phone size floor also raised: --mascot-size clamp floor 210 -> 264px
+  (38vw mid-band; short-viewport overrides untouched).
+- Nav re-imagined as a floating frosted ISLAND (fixed, centered, rounded-full)
+  per direct feedback: "Sign in" removed entirely, single compact "Get started"
+  CTA (the hero's Start Journey is the real conversion point), links unchanged on
+  desktop. Fully transparent at page top (links float over the hero), frosts in
+  past 24px of scroll: color-mix background off var(--background) (so the Schools
+  light theme frosts correctly), blur(18px) saturate(1.6), hairline border, soft
+  shadow. Being `fixed` it no longer occupies flow: hero is min-h-[100dvh] with
+  pt-[88px] to clear it; SchoolsView's own pt-[76px] still clears the ~72px
+  island envelope.
+- NOTE: the design-system alignment work lives on the `design-system-alignment`
+  branch (Phase 2 committed there: 15-world token layer through the DTCG
+  pipeline; Vercel Preview deployments confirmed working for branches). This
+  entry's changes are marketing-page fixes shipped straight on main.
+
 ### 2026-08-19 mascot fixed to the viewport bezel + hero gap compression
 
 - **Dreamy is now `position: fixed` to the viewport's bottom edge** — the final

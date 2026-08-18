@@ -24,7 +24,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
     // all in one void above the mascot — that's the "without introducing so much
     // blank space" half of the request: the gap gets split roughly half above the
     // toggle and half between the CTA and the mascot, so neither reads as empty.
-    <section ref={heroRef} className="relative isolate flex min-h-[calc(100dvh-77px)] flex-col overflow-hidden px-6 pt-[76px]">
+    <section ref={heroRef} className="relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[88px]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height
@@ -57,14 +57,13 @@ export function Hero({ view, onChangeView }: HeroProps) {
          behind it and reads as a band; self-fading alpha has no color to mismatch. */}
 
       {/* flex-1 + w-full stretches this wrapper to the section's full dvh-filling
-         height. justify-END (was -center): with the mascot now FIXED to the
-         viewport, any leftover hero height that lands BELOW the copy block just
-         scrolls by later as blank page between the scroll hint and Build — the
-         reader pointed at exactly that void. Packing the copy downward pushes all
-         leftover ABOVE the toggle instead (an airy header reads intentional; a
-         quiet mid-scroll gap reads broken), and the copy ends as close to the
-         mascot's reserve as it can. */}
-      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-end">
+         height. justify-START (round three of this knob, per direct feedback each
+         time): -center read as floaty, -end packed the headline too far DOWN the
+         screen ("starts too low"). Top-anchored copy starts right under the nav
+         like a normal landing page; leftover height on tall screens pools between
+         the scroll hint and Dreamy at the bezel, which reads as his airspace —
+         and he's visibly holding the bottom of it the whole time it scrolls by. */}
+      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start">
         <div className="mb-[18px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>

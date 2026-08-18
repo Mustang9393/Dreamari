@@ -341,8 +341,16 @@ export function Mascot({ heroRef }: MascotProps) {
       // a rectangular halo; that was the original reason the mask got moved onto
       // the float wrapper at all).
       style={{
-        WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
-        maskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
+        // Fade band deliberately COMPLETES BELOW the bezel (83% > the 77% visible
+        // cut): earlier the band finished at 76.5%, i.e. alpha hit zero a hair above
+        // the screen edge — technically seamless, but perceptually the mist "ended"
+        // 20-30px early against a dark background and Dreamy read as hovering above
+        // the border (reported from an iPhone with a screenshot). Running the ramp
+        // 71% -> 83% leaves ~50% opacity AT the bezel, so the physical screen edge
+        // itself makes the final, visible cut — which is the entire point of the
+        // fixed-to-viewport design. Everything below 77% is off-screen anyway.
+        WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
+        maskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
       }}
     >
       <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
