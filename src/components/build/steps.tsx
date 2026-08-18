@@ -9,6 +9,7 @@ import { LocalBurst } from "./DreamyGuide";
 import { BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, Globe, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, UserRound, Wrench, Zap } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade, useVariant } from "./variant";
+import { playMilestoneChime } from "./sound";
 import {
   EDUCATION_OPTIONS,
   ENERGY_OPTIONS,
@@ -355,9 +356,11 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, phas
 export function MilestoneScreen({ onNext, percent }: { onNext: () => void; percent: number }) {
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
+    const chime = setTimeout(() => playMilestoneChime(), 200);
     const kick = setTimeout(() => setBurstNonce(1), 60);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
     return () => {
+      clearTimeout(chime);
       clearTimeout(kick);
       clearInterval(interval);
     };
@@ -409,9 +412,11 @@ export function CompletionScreen({ state, patch, onSeeMatches }: { state: BuildS
   const variant = useVariant();
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
+    const chime = setTimeout(() => playMilestoneChime(), 200);
     const kick = setTimeout(() => setBurstNonce(1), 60);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
     return () => {
+      clearTimeout(chime);
       clearTimeout(kick);
       clearInterval(interval);
     };

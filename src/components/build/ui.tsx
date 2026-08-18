@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { cascade, useVariant } from "./variant";
-import { playProgressSwell } from "./sound";
 import { useEffect, useRef, useState } from "react";
 
 // Shared primitives for the build flow, variant-aware (see variant.tsx): the same
@@ -89,11 +88,9 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
     if (mounted.current) return;
     mounted.current = true;
     if (percent > lastCelebratedPercent) {
-      const from = lastCelebratedPercent;
       lastCelebratedPercent = percent;
-      // Swell rides the fill animation; sparks pop at the crest.
-      const duration = playProgressSwell(from, percent) ?? 0.6;
-      const timer = setTimeout(() => setSparkNonce((n) => n + 1), duration * 850);
+      // Sparks pop as the 700ms fill animation crests — no sound per step.
+      const timer = setTimeout(() => setSparkNonce((n) => n + 1), 620);
       return () => clearTimeout(timer);
     }
   }, [percent]);
