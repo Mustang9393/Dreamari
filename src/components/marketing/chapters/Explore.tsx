@@ -30,6 +30,18 @@ const CARDS = [
   { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
+// Per-world poster-title font + industry-line color, straight from the design
+// system's actual Career Poster Card component (Figma node 2403:244) — each career
+// world has its OWN poster title typeface and its own accent color there, not one
+// blanket Viaoda Libre + amber for every card regardless of field. Business, Money,
+// Sales & Office uses Viaoda Libre regular at var(--world-business-money-office);
+// Science & Research specifically uses Source Code Pro SemiBold at
+// var(--world-science-research) — both already defined in tokens.css.
+const WORLDS: Record<string, { color: string; font: string; weight: number }> = {
+  "Business & Finance": { color: "var(--world-business-money-office)", font: "var(--font-poster)", weight: 400 },
+  "Science & Research": { color: "var(--world-science-research)", font: "var(--font-poster-mono)", weight: 600 },
+};
+
 const ACTION_ICONS = [
   // heart
   <path key="heart" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />,
@@ -70,6 +82,7 @@ type Card = (typeof CARDS)[number];
 // Shared between a plain card and the holo-framed Wildcard variant below, so the two
 // don't drift out of sync with duplicated markup.
 function ExploreCardBody({ card }: { card: Card }) {
+  const world = WORLDS[card.industry];
   return (
     <>
       <Image src={card.photo} alt="" fill className="object-cover" draggable={false} />
@@ -105,7 +118,8 @@ function ExploreCardBody({ card }: { card: Card }) {
       >
         <p
           style={{
-            fontFamily: "var(--font-poster)",
+            fontFamily: world.font,
+            fontWeight: world.weight,
             lineHeight: 1.15,
             letterSpacing: "0.4px",
             color: "var(--foreground)",
@@ -121,7 +135,7 @@ function ExploreCardBody({ card }: { card: Card }) {
             fontWeight: 600,
             fontSize: "calc(var(--mu) * 8px)",
             letterSpacing: "0.5px",
-            color: "#ffb81f",
+            color: world.color,
           }}
         >
           {card.industry}

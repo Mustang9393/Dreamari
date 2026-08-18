@@ -750,6 +750,44 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - Pushed to `origin/main` with explicit user authorization (this entry covers both
   this round and the previous round's changes, pushed together).
 
+### 2026-08-16 Explore cards use each career's own world font + color, per the design system
+
+- Direct request to pull Explore's card fonts/colors from the real design system
+  (Figma's Career Poster Card component, node 2403:244) instead of one-size-fits-
+  all values. Checked the component's actual per-world token values via
+  `get_variable_defs` and `get_design_context` on two of its "World" variants:
+  Business, Money, Sales & Office uses Viaoda Libre Regular for the poster title
+  and `--world-business-money-office` (#ffb81f) for the industry-line color;
+  Science & Research specifically uses a DIFFERENT poster-title font — Source Code
+  Pro SemiBold — and its own `--world-science-research` (#00c8dc) color. The
+  component's own usage note confirms this is deliberate: each of its 13 "worlds"
+  carries its own poster-title typeface, not one blanket font for every card.
+- Explore's `ExploreCardBody` was applying a single hardcoded `--font-poster`
+  (Viaoda Libre) to every card's title regardless of industry, and a literal
+  `color: "#ffb81f"` to every card's industry line — coincidentally correct for
+  the two Business & Finance cards, but wrong for Food Scientist (Science &
+  Research), which should never have looked like a Business & Finance card
+  typographically. `--world-business-money-office`/`--world-science-research`
+  were already correctly defined in `tokens.css` from an earlier round; added a
+  new `--font-poster-mono: "Source Code Pro", monospace` alongside the existing
+  `--font-poster`, and loaded the actual webfont (weight 600 only — the only
+  weight this design system variant uses) by appending
+  `&family=Source+Code+Pro:wght@600` to the existing Google Fonts `<link>` URL in
+  `fonts.ts` (this project loads fonts via a plain stylesheet link rather than
+  next/font/google, which broke specifically on Vercel's build — see that file's
+  existing comment). A new `WORLDS` lookup in `Explore.tsx` maps each card's
+  `industry` string to its `{ color, font, weight }`, and `ExploreCardBody` now
+  reads the title's `fontFamily`/`fontWeight` and the industry line's `color`
+  from that lookup instead of hardcoding either.
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error).
+  Browser-verified via computed style: Food Scientist's title now measures as
+  `"Source Code Pro", monospace` at weight 600 with its industry line at
+  `rgb(0, 200, 220)`; Accountant's title still measures as `"Viaoda Libre", serif`
+  at weight 400 with its industry line at `rgb(255, 184, 31)` — confirmed
+  unchanged. Also screenshot-verified visually.
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

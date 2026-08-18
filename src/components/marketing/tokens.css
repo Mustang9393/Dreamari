@@ -101,6 +101,12 @@
   --font-body: var(--font-montserrat), sans-serif; /* font-family.montserrat: Montserrat, still loaded via next/font in layout.tsx */
   --font-mono: "Space Mono", monospace; /* reference prototype's --font-mono */
   --font-poster: "Viaoda Libre", serif; /* Browse Cards/Poster Title/Viaoda Libre */
+  /* Per the Career Poster Card component in the design system (Figma node 2403:244),
+     the poster title's font is itself per-world, not one blanket family for every
+     card — Business, Money, Sales & Office uses Viaoda Libre (above), but Science &
+     Research specifically uses Source Code Pro at SemiBold. Explore's cards map
+     each career's own world to the matching font (see WORLDS in Explore.tsx). */
+  --font-poster-mono: "Source Code Pro", monospace; /* Browse Cards/Poster Title/Source Code Pro */
 
   /* Reference prototype's own local accent tint used for the hero headline's "dream
      career." span — lighter than --primary itself. */
