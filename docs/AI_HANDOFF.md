@@ -6,6 +6,28 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 tall-phone void fix + build-flow discovery
+
+- **Tall-phone hero void fixed** (user screenshot showed a huge dead band between
+  the hero copy and Build on a ~930pt iPhone): --mascot-size now takes the max of
+  the width term and a height term, `max(clamp(264px, 38vw, 460px), min(40dvh,
+  520px))` — the hero must fill 100dvh (Dreamy is fixed to the bezel), so on tall
+  narrow screens the leftover height pooled as void; letting Dreamy's size track
+  dvh converts that void into character (~372px on a 930pt phone). Desktop
+  unchanged; short-viewport overrides still win.
+- **Build-profile flow rebuild is IN FLIGHT on the design-system-alignment
+  branch** — full verbatim spec of the Replit reference flow captured in
+  docs/BUILD_FLOW_SPEC.md (8 steps + 50% milestone + completion, all copy exact).
+  Key implementation directives from the user: real USA map (not the Replit's
+  chip grid) alongside the List/dropdown view; enhanced slider for Education
+  Cost; interactive Dreamy (eye-tracking/parallax rig + sprite expression
+  reactions — sprite packs unpacked in the session scratchpad, 10 expressions +
+  3 themed poses); keep the aurora background but align it to the design system;
+  Replit's "Skip" buttons are demo-only, omit; then purge legacy/orphaned design
+  system tokens (only after the new flow is verified — guardrail). Figma frame
+  3009-15623 is the visual source; pull pending on the file being Figma's active
+  tab.
+
 ### 2026-08-19 scroll snapping removed entirely
 
 - Page-level scroll snap is gone (rule in globals.css, scrollSnapAlign in
