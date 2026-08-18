@@ -6,6 +6,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 hero top-air composition, Simulate -> Play revert
+
+- Hero top padding pt-[88px] -> pt-[clamp(120px,15vh,176px)]: with the copy
+  top-anchored, 88px put the audience toggle nearly touching the floating nav
+  island (called out directly). The clamp gives the island a viewport-scaled
+  band of clear air (~122px phone, ~150px laptop, capped for tall monitors) so
+  the toggle sits in the quiet zone between nav and headline.
+- Chapter name reverted Simulate -> Play "for now" per direct request, in all
+  four user-visible spots (chapter title, rail label, CTA eyebrow, hero caption
+  verb list). Section id was "play" throughout, so nothing structural moved.
+  Expect this may flip again.
+- Design-system alignment continues on the `design-system-alignment` branch —
+  Phase 3 started there: `component.cta` token group extracted live from Figma
+  (CTA = 2261:12200; NOTE: primary is light-surface with BLUE as the pressed
+  state, not blue-primary) with every value aliased through new cta-foundation
+  primitives, and `src/components/ui/Button.tsx` (which had zero call sites)
+  rebuilt as that CTA. The user's Figma PAT seen in chat lacks variables scope
+  and should be revoked; the desktop-bridge MCP tools are the working pull path.
+
 ### 2026-08-19 hero rebalance, bigger phone Dreamy, frosted island nav
 
 - Hero copy re-anchored justify-end -> justify-START per direct feedback ("too

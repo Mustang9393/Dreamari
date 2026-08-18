@@ -24,7 +24,17 @@ export function Hero({ view, onChangeView }: HeroProps) {
     // all in one void above the mascot — that's the "without introducing so much
     // blank space" half of the request: the gap gets split roughly half above the
     // toggle and half between the CTA and the mascot, so neither reads as empty.
-    <section ref={heroRef} className="relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[88px]">
+    // pt is clamp(120px, 15vh, 176px), not a flat 88px — with the copy top-anchored,
+    // 88px put the audience toggle almost touching the floating nav island (~72px
+    // envelope), which read as crowded (called out directly). Composition intent:
+    // the island needs its own clear band of air (roughly two-thirds of its own
+    // height below it) before the page's content begins, and that band should
+    // breathe WITH the viewport — 15vh gives ~122px on a phone, ~150px on a laptop,
+    // capped so a tall monitor doesn't push the headline into the page's middle.
+    // The result keeps the headline block in the upper third (where a hero headline
+    // reads as a headline) while the toggle sits in the quiet zone between nav and
+    // headline rather than glued to either.
+    <section ref={heroRef} className="relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[clamp(120px,15vh,176px)]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height
@@ -93,7 +103,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
-            Discover your dream career. Build, match, explore, simulate, and connect, all in one place. One clear step at a time.
+            Discover your dream career. Build, match, explore, play, and connect, all in one place. One clear step at a time.
           </p>
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}

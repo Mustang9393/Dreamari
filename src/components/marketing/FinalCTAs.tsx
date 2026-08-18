@@ -55,7 +55,7 @@ export function StudentFinalCTA() {
   return (
     <div className="py-6 sm:py-8">
       <CTABlock
-        eyebrow="Build. Match. Explore. Simulate. Connect."
+        eyebrow="Build. Match. Explore. Play. Connect."
         heading="You're ready."
         body="Let's build your future."
         primary={{ label: "Start Journey", href: "/flow" }}
