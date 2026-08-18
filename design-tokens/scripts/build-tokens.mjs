@@ -28,13 +28,29 @@ function colorVariables(tokens) {
     .join("\n");
 }
 
+// fontFamily emitted alongside the other foundations — this type previously never
+// reached the generated CSS at all (nothing consumed it), but the 15-world token
+// layer added for the design-system alignment carries a per-world display typeface
+// that Phase 3 component work needs as a var(--font-family-world-*) binding. Array
+// values render as a CSS font stack, quoting multi-word family names.
+function fontFamilyCss(value) {
+  const families = Array.isArray(value) ? value : [value];
+  return families.map((name) => (/\s/.test(name) ? `"${name}"` : name)).join(", ");
+}
+
 function foundationVariables(tokens) {
   return [...tokens]
-    .filter(([, token]) => ["dimension", "duration", "fontWeight", "number"].includes(token.$resolvedType))
+    .filter(([, token]) => ["dimension", "duration", "fontWeight", "number", "fontFamily"].includes(token.$resolvedType))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([tokenPath]) => {
       const value = resolveToken(tokenPath, tokens);
-      const cssValue = value && typeof value === "object" && Object.hasOwn(value, "unit") ? `${value.value}${value.unit}` : String(value);
+      const token = tokens.get(tokenPath);
+      const cssValue =
+        token.$resolvedType === "fontFamily"
+          ? fontFamilyCss(value)
+          : value && typeof value === "object" && Object.hasOwn(value, "unit")
+            ? `${value.value}${value.unit}`
+            : String(value);
       return `  --${tokenPath.replaceAll(".", "-")}: ${cssValue};`;
     })
     .join("\n");
