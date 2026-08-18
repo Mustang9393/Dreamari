@@ -37,11 +37,9 @@ export function PlayChapter() {
   return (
     <ChapterShell
       id="play"
-      // Renamed from "Play" per direct request — the chapter's section id stays
-      // "play" (Explore's next-chapter jump, ChapterRail, and the snap flow all
-      // target it by id; renaming the anchor buys nothing user-visible and would
-      // break every hardcoded scroll target).
-      title="Simulate"
+      // Briefly renamed "Simulate", reverted to "Play" per direct request ("for
+      // now" — may flip again). The section id has been "play" throughout.
+      title="Play"
       color="#3b82f6"
       oneliner="a day-in-the-life situation where every instinct pays off."
       flip

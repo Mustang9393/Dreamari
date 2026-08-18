@@ -6,6 +6,60 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 tall-phone void fix + build-flow discovery
+
+- **Tall-phone hero void fixed** (user screenshot showed a huge dead band between
+  the hero copy and Build on a ~930pt iPhone): --mascot-size now takes the max of
+  the width term and a height term, `max(clamp(264px, 38vw, 460px), min(40dvh,
+  520px))` — the hero must fill 100dvh (Dreamy is fixed to the bezel), so on tall
+  narrow screens the leftover height pooled as void; letting Dreamy's size track
+  dvh converts that void into character (~372px on a 930pt phone). Desktop
+  unchanged; short-viewport overrides still win.
+- **Build-profile flow rebuild is IN FLIGHT on the design-system-alignment
+  branch** — full verbatim spec of the Replit reference flow captured in
+  docs/BUILD_FLOW_SPEC.md (8 steps + 50% milestone + completion, all copy exact).
+  Key implementation directives from the user: real USA map (not the Replit's
+  chip grid) alongside the List/dropdown view; enhanced slider for Education
+  Cost; interactive Dreamy (eye-tracking/parallax rig + sprite expression
+  reactions — sprite packs unpacked in the session scratchpad, 10 expressions +
+  3 themed poses); keep the aurora background but align it to the design system;
+  Replit's "Skip" buttons are demo-only, omit; then purge legacy/orphaned design
+  system tokens (only after the new flow is verified — guardrail). Figma frame
+  3009-15623 is the visual source; pull pending on the file being Figma's active
+  tab.
+
+### 2026-08-19 scroll snapping removed entirely
+
+- Page-level scroll snap is gone (rule in globals.css, scrollSnapAlign in
+  ChapterShell, the IntersectionObserver wiring in HowItWorks) after a full
+  assessment, per direct approval of the recommendation: proximity snap kept
+  grabbing phone flings (any deceleration near a boundary, which with five
+  near-full-screen chapters is most of the page), and nothing depended on it —
+  every guided chapter advance is JS scrollIntoView, Explore's paging is its own
+  system, and the chapter rail reads position independently. Verified post-
+  removal: computed scroll-snap-type is none, the Build pick still lands Match
+  flush at the viewport top, rail still shows. If snap ever returns, scope it to
+  fine-pointer devices.
+
+### 2026-08-19 hero top-air composition, Simulate -> Play revert
+
+- Hero top padding pt-[88px] -> pt-[clamp(120px,15vh,176px)]: with the copy
+  top-anchored, 88px put the audience toggle nearly touching the floating nav
+  island (called out directly). The clamp gives the island a viewport-scaled
+  band of clear air (~122px phone, ~150px laptop, capped for tall monitors) so
+  the toggle sits in the quiet zone between nav and headline.
+- Chapter name reverted Simulate -> Play "for now" per direct request, in all
+  four user-visible spots (chapter title, rail label, CTA eyebrow, hero caption
+  verb list). Section id was "play" throughout, so nothing structural moved.
+  Expect this may flip again.
+- Design-system alignment continues on the `design-system-alignment` branch —
+  Phase 3 started there: `component.cta` token group extracted live from Figma
+  (CTA = 2261:12200; NOTE: primary is light-surface with BLUE as the pressed
+  state, not blue-primary) with every value aliased through new cta-foundation
+  primitives, and `src/components/ui/Button.tsx` (which had zero call sites)
+  rebuilt as that CTA. The user's Figma PAT seen in chat lacks variables scope
+  and should be revoked; the desktop-bridge MCP tools are the working pull path.
+
 ### 2026-08-19 hero rebalance, bigger phone Dreamy, frosted island nav
 
 - Hero copy re-anchored justify-end -> justify-START per direct feedback ("too

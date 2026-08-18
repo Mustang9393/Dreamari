@@ -5,18 +5,13 @@
    Keeping the snap behavior on the document scroller preserves the real, overlapping
    movement between stages while guaranteeing a stable focused state after each
    wheel, trackpad or touch gesture. */
-/* proximity, NOT mandatory — mandatory requires the viewport to always rest at a
-   snap point while the chapter block is on screen, and the final CTA + footer that
-   follow Connect have no snap points of their own: with mandatory, scrolling from
-   Connect toward the footer had the browser yanking back up to Connect's start the
-   whole way down (the snap flag only turns off once the entire chapter block has
-   left the viewport, which can't happen while Connect is still partially visible).
-   proximity keeps the "settle onto a chapter when you land near its boundary"
-   assist but lets a reader scroll freely past the block's edges and rest anywhere
-   in between — the difference between guided and fought-with. */
-html[data-how-it-works-snap="true"] {
-  scroll-snap-type: y proximity;
-}
+/* Scroll snap is fully REMOVED (was: y mandatory, then y proximity, then gone) —
+   per direct feedback it kept commandeering touch flings on phones: proximity grabs
+   any fling that decelerates near a section boundary, and with five near-full-screen
+   chapters, "near a boundary" is most of the page. Nothing needed it: every guided
+   chapter advance (Build->Match->Explore->Play->Connect) is JS scrollIntoView and
+   Explore's card paging is its own system — snap only added fighting. If a future
+   pass wants snap back, scope it to fine-pointer devices only. */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
