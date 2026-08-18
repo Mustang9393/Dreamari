@@ -152,7 +152,7 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
                 <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
               </div>
             )}
-            <div className="flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] sm:px-10">
+            <div className="flow-scroll-fade flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
               {phase === "build" && <StepTransition key={`${stageId}-${variant}`}>{content}</StepTransition>}
               {phase === "loading" && (
                 <StepTransition key="match-loading">

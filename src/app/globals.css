@@ -462,3 +462,21 @@ body {
     transform: translateY(-5px) scale(1.02);
   }
 }
+
+/* Build-flow phone fades: masked blur instead of painted gradient slabs — the
+   flat-color gradient bands read as hard-edged cutouts over the nebula
+   background. A mask fades the WHOLE element (tint included) so there is no
+   visible edge anywhere. Desktop steps always fit, so neither applies there. */
+@media (max-width: 639px) {
+  .flow-sticky-footer {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--color-night-background) 55%, transparent);
+    -webkit-mask-image: linear-gradient(to top, black 55%, transparent);
+    mask-image: linear-gradient(to top, black 55%, transparent);
+  }
+  .flow-scroll-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 14px, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, black 14px, black 100%);
+  }
+}

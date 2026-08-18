@@ -14,6 +14,15 @@ import type { StepProps } from "./steps";
 type UsaMap = { viewBox: string; locations: { id: string; name: string; path: string }[] };
 const USA = (usaMapModule as unknown as { default?: UsaMap }).default ?? (usaMapModule as unknown as UsaMap);
 
+// Reposition the outliers: Alaska shrinks to 55% and tucks under the Southwest
+// (the stock layout strands it far bottom-left); the viewBox then crops to the
+// tightened composition so the mainland renders ~15% larger for free.
+// final point = translate + scale * point; labels get the same math in render.
+const REPOSITION: Record<string, { s: number; tx: number; ty: number }> = {
+  Alaska: { s: 0.55, tx: 229.6, ty: 299.9 },
+};
+const TIGHT_VIEWBOX = "283 3 944 722";
+
 // The dropdowns list "Washington, D.C." (the map data calls it "District of
 // Columbia") — display per the reference.
 function displayName(name: string): string {
@@ -119,7 +128,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
 
       {view === "map" ? (
         <div
-          className="rounded-2xl border p-3 sm:p-4"
+          className="rounded-2xl border p-2.5 sm:p-3"
           style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
         >
           <div className="mb-2 flex items-center justify-between px-1">
@@ -152,7 +161,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             </div>
           )}
 
-          <svg ref={svgRef} viewBox={USA.viewBox} role="group" aria-label="Map of the United States" className="mx-auto max-h-[36vh] w-full">
+          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[52vh] w-[calc(100%+8px)]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
               const order = selected.indexOf(name);
@@ -163,6 +172,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                   key={location.id}
                   data-code={STATE_CODES[location.name] ?? ""}
                   d={location.path}
+                  transform={REPOSITION[location.name] ? `translate(${REPOSITION[location.name].tx} ${REPOSITION[location.name].ty}) scale(${REPOSITION[location.name].s})` : undefined}
                   role="button"
                   aria-label={name}
                   aria-pressed={isSelected}
@@ -192,8 +202,10 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             })}
             {USA.locations.map((location) => {
               const code = STATE_CODES[location.name];
-              const pos = code ? labelPos[code] : undefined;
-              if (!pos) return null;
+              const rawPos = code ? labelPos[code] : undefined;
+              if (!rawPos) return null;
+              const move = REPOSITION[location.name];
+              const pos = move ? { x: move.tx + move.s * rawPos.x, y: move.ty + move.s * rawPos.y } : rawPos;
               const name = displayName(location.name);
               const isSelected = selected.includes(name);
               return (
@@ -205,10 +217,10 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                   dominantBaseline="central"
                   className="pointer-events-none select-none"
                   style={{
-                    fontSize: 13,
+                    fontSize: 16,
                     fontWeight: 700,
                     fill: isSelected ? "#ffffff" : "var(--color-night-muted-foreground)",
-                    opacity: isSelected ? 1 : 0.55,
+                    opacity: isSelected ? 1 : 0.8,
                   }}
                 >
                   {code}

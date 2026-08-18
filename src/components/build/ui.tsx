@@ -210,7 +210,7 @@ export function StepFooter({
   return (
     // Sticky to the step column's scroll container: on phones where a stage
     // scrolls, Next/Previous stay on screen instead of hiding below the fold.
-    <div className="sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1 max-sm:[background:linear-gradient(to_top,color-mix(in_srgb,var(--color-night-background)_92%,transparent)_62%,transparent)]">
+    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
           Previous
