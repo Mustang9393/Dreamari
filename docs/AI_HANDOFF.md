@@ -913,6 +913,43 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   commit()/onPointerUp code paths, with only the boundary branch added.
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 Explore: boundary jump made uniform again (wheel included)
+
+- The previous entry's assumption — "desktop never gets stuck because the
+  wheel/trackpad still works over the rest of the page" — turned out to be
+  wrong: it only holds if the reader's cursor isn't already sitting on the
+  card itself. Direct feedback: "I still get stuck there if my mouse is on top
+  of the last card and I scroll down." Hovering the graphic and continuing to
+  scroll down hits the SAME captured, non-passive wheel listener, and with
+  `commit()` only clamping at the boundary there was nowhere for that scroll to
+  go — desktop readers could get just as stuck as mobile ones, just via a
+  different, easy-to-hit precondition (cursor position) instead of an
+  unavoidable one (screen space).
+- Removed the split from the previous entry: the boundary-jump
+  (`goToPrevChapter()`/`goToNextChapter()`) now lives inside `commit()` itself
+  again, so it fires identically for wheel, touch, and the nav buttons — this is
+  the same shape `commit()` had several rounds ago, before it was first narrowed
+  to "never jump, any input" and then to "jump only on touch." `onPointerUp` goes
+  back to simply calling `commit()` on both directions with no special-casing of
+  its own.
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error). Live
+  verification was blocked again by the same recurring `document.hidden`
+  tool-tab quirk (confirmed directly this time: a manual check read
+  `document.hidden === true` on the active tab, and a dispatched synthetic wheel
+  event plus a direct button click at the boundary card both failed to trigger
+  `scrollIntoView`'s smooth-scroll animation, consistent with how this same
+  condition has previously suppressed IntersectionObserver callbacks, CSS
+  transitions, and pointer/touch event delivery elsewhere this session — not a
+  code defect). Confidence here rests on this being a straightforward
+  simplification back to a structure that WAS verified working earlier in the
+  session, not new untested logic.
+- Not yet independently re-verified live on a real device/browser as of this
+  entry — worth a manual spot-check (scroll wheel with the cursor directly over
+  Explore's last card, and a real touch swipe on a phone) next time this app is
+  opened somewhere the automation tooling isn't fighting itself.
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
