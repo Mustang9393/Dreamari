@@ -33,6 +33,10 @@
   --color-category-skills: #1f5ff0;
   --color-category-workstyle: #d97706;
   --color-coral-500: #ff6058;
+  --color-cta-foundation-glass-deep: rgb(12 16 35 / 0.8);
+  --color-cta-foundation-glass-faint: rgb(255 255 255 / 0.09);
+  --color-cta-foundation-on-surface-dark: #05070f;
+  --color-cta-foundation-surface-light: #f4f7ff;
   --color-cyan-500: #00c0e8;
   --color-elevation-card: rgb(100 130 200 / 0.1);
   --color-elevation-overlay: rgb(0 0 0 / 0.4);
@@ -147,6 +151,19 @@
   --component-button-secondary-background: #ffffff;
   --component-button-secondary-border: #e2e8f0;
   --component-button-secondary-text: #5b6472;
+  --component-cta-primary-background: #f4f7ff;
+  --component-cta-primary-hover-background: rgb(12 16 35 / 0.8);
+  --component-cta-primary-hover-text: #f4f7ff;
+  --component-cta-primary-pressed-background: #2f6bf2;
+  --component-cta-primary-pressed-text: #ffffff;
+  --component-cta-primary-text: #05070f;
+  --component-cta-secondary-background: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-border: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-hover-background: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-hover-text: #f4f7ff;
+  --component-cta-secondary-pressed-background: #2f6bf2;
+  --component-cta-secondary-pressed-text: #ffffff;
+  --component-cta-secondary-text: #f4f7ff;
   --component-flow-card-background: #ffffff;
   --component-home-card-background: #ffffff;
   --component-home-card-border: #e2e8f0;
@@ -217,6 +234,16 @@
   --component-button-primary-transition: 150ms;
   --component-button-secondary-height: 52px;
   --component-button-secondary-radius: 12px;
+  --component-cta-gap: 4px;
+  --component-cta-icon-size: 16px;
+  --component-cta-primary-disabled-opacity: 0.4;
+  --component-cta-secondary-disabled-content-opacity: 0.78;
+  --component-cta-size-default-padding-x: 16px;
+  --component-cta-size-default-padding-y: 8px;
+  --component-cta-size-default-radius: 12px;
+  --component-cta-size-large-padding-x: 24px;
+  --component-cta-size-large-padding-y: 16px;
+  --component-cta-size-large-radius: 16px;
   --component-flow-card-padding-desktop: 36px;
   --component-flow-card-padding-mobile: 16px;
   --component-flow-card-radius: 24px;
@@ -290,6 +317,7 @@
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --duration-slow: 700ms;
+  --fontFamily-cta: "Bricolage Grotesque", sans-serif;
   --fontFamily-display: "Favorit ExtraBold C", Montserrat, Arial, Helvetica, sans-serif;
   --fontFamily-sans: Montserrat, Arial, Helvetica, sans-serif;
   --fontFamily-world-arts-media-sport: Fraunces, serif;
@@ -314,9 +342,11 @@
   --fontWeight-semibold: 600;
   --number-line-height-body: 1.5;
   --number-line-height-compact: 1.35;
+  --number-line-height-cta: 1.375;
   --number-line-height-heading: 1.15;
   --number-line-height-tight: 1.1;
   --number-opacity-disabled: 0.4;
+  --number-opacity-disabled-content: 0.78;
   --number-opacity-muted: 0.7;
 }
 
@@ -354,6 +384,10 @@
   --color-category-skills: #1f5ff0;
   --color-category-workstyle: #d97706;
   --color-coral-500: #ff6058;
+  --color-cta-foundation-glass-deep: rgb(12 16 35 / 0.8);
+  --color-cta-foundation-glass-faint: rgb(255 255 255 / 0.09);
+  --color-cta-foundation-on-surface-dark: #05070f;
+  --color-cta-foundation-surface-light: #f4f7ff;
   --color-cyan-500: #00c0e8;
   --color-elevation-card: rgb(0 0 0 / 0.4);
   --color-elevation-overlay: rgb(0 0 0 / 0.4);
@@ -468,6 +502,19 @@
   --component-button-secondary-background: #1e2a3f;
   --component-button-secondary-border: #314158;
   --component-button-secondary-text: #cad5e2;
+  --component-cta-primary-background: #f4f7ff;
+  --component-cta-primary-hover-background: rgb(12 16 35 / 0.8);
+  --component-cta-primary-hover-text: #f4f7ff;
+  --component-cta-primary-pressed-background: #2f6bf2;
+  --component-cta-primary-pressed-text: #ffffff;
+  --component-cta-primary-text: #05070f;
+  --component-cta-secondary-background: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-border: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-hover-background: rgb(255 255 255 / 0.09);
+  --component-cta-secondary-hover-text: #f4f7ff;
+  --component-cta-secondary-pressed-background: #2f6bf2;
+  --component-cta-secondary-pressed-text: #ffffff;
+  --component-cta-secondary-text: #f4f7ff;
   --component-flow-card-background: #1e2a3f;
   --component-home-card-background: #071634;
   --component-home-card-border: #314158;
@@ -538,6 +585,16 @@
   --component-button-primary-transition: 150ms;
   --component-button-secondary-height: 52px;
   --component-button-secondary-radius: 12px;
+  --component-cta-gap: 4px;
+  --component-cta-icon-size: 16px;
+  --component-cta-primary-disabled-opacity: 0.4;
+  --component-cta-secondary-disabled-content-opacity: 0.78;
+  --component-cta-size-default-padding-x: 16px;
+  --component-cta-size-default-padding-y: 8px;
+  --component-cta-size-default-radius: 12px;
+  --component-cta-size-large-padding-x: 24px;
+  --component-cta-size-large-padding-y: 16px;
+  --component-cta-size-large-radius: 16px;
   --component-flow-card-padding-desktop: 36px;
   --component-flow-card-padding-mobile: 16px;
   --component-flow-card-radius: 24px;
@@ -611,6 +668,7 @@
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --duration-slow: 700ms;
+  --fontFamily-cta: "Bricolage Grotesque", sans-serif;
   --fontFamily-display: "Favorit ExtraBold C", Montserrat, Arial, Helvetica, sans-serif;
   --fontFamily-sans: Montserrat, Arial, Helvetica, sans-serif;
   --fontFamily-world-arts-media-sport: Fraunces, serif;
@@ -635,8 +693,10 @@
   --fontWeight-semibold: 600;
   --number-line-height-body: 1.5;
   --number-line-height-compact: 1.35;
+  --number-line-height-cta: 1.375;
   --number-line-height-heading: 1.15;
   --number-line-height-tight: 1.1;
   --number-opacity-disabled: 0.4;
+  --number-opacity-disabled-content: 0.78;
   --number-opacity-muted: 0.7;
 }

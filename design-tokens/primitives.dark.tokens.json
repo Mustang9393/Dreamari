@@ -1082,6 +1082,61 @@
         },
         "$description": "World accent for Tech & Engineering. Identical in light and dark modes by design."
       }
+    },
+    "cta-foundation": {
+      "$description": "Foundation values for the design system's CTA component (Figma 2261:12200), added during the design-system alignment. Named after the Figma semantic variables they mirror; identical across modes to match the live file.",
+      "surface-light": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.956863,
+            0.968627,
+            1.0
+          ],
+          "hex": "#f4f7ff"
+        },
+        "$description": "Mirrors Figma var(--foreground): the CTA Primary/Default surface."
+      },
+      "on-surface-dark": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.019608,
+            0.027451,
+            0.058824
+          ],
+          "hex": "#05070f"
+        },
+        "$description": "Mirrors Figma var(--background): CTA Primary/Default label."
+      },
+      "glass-deep": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.047059,
+            0.062745,
+            0.137255
+          ],
+          "alpha": 0.8
+        },
+        "$description": "Mirrors Figma var(--glass-surface-3): CTA Primary/Hover surface."
+      },
+      "glass-faint": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.09
+        },
+        "$description": "Mirrors Figma var(--secondary)/var(--border)/var(--glass-surface-2): CTA Secondary family surface and border."
+      }
     }
   },
   "dimension": {
@@ -1527,6 +1582,14 @@
         ],
         "$description": "Display typeface for Tech & Engineering (Science Gothic)."
       }
+    },
+    "cta": {
+      "$type": "fontFamily",
+      "$value": [
+        "Bricolage Grotesque",
+        "sans-serif"
+      ],
+      "$description": "CTA label face from the design system (UI/Body: Bricolage Grotesque SemiBold)."
     }
   },
   "fontWeight": {
@@ -1570,16 +1633,27 @@
       "compact": {
         "$value": 1.35,
         "$description": "Compact card-body leading."
+      },
+      "cta": {
+        "$type": "number",
+        "$value": 1.375,
+        "$description": "CTA label line-height: 22px over 16px, expressed as a ratio like the other line-heights."
       }
     },
     "opacity": {
       "disabled": {
+        "$type": "number",
         "$value": 0.4,
-        "$description": "Disabled content opacity."
+        "$description": "Whole-control disabled opacity (CTA Primary/Disabled)."
       },
       "muted": {
         "$value": 0.7,
         "$description": "Muted decorative content opacity."
+      },
+      "disabled-content": {
+        "$type": "number",
+        "$value": 0.78,
+        "$description": "Content-only disabled opacity (CTA Secondary/Disabled)."
       }
     }
   },
