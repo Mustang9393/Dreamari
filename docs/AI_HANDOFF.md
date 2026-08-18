@@ -6,6 +6,14 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 Start Journey CTA size tiers
+
+- `MarketingButton` gained a `size` prop (md/lg/xl; md is the old fixed size and
+  the default, so Nav's className overrides and SchoolsView are untouched). The
+  hero's Start Journey is now `lg`, and the final "You're ready." section's is
+  `xl` (44px/20px padding, 18px text) per direct feedback that the closing CTA
+  especially needed more weight — the last action on the page is its biggest.
+
 ### 2026-08-18 mascot exit retimed to hero position (mobile blank-space fix)
 
 - **Mascot scroll-exit rewritten to anchor on the hero's real viewport position**

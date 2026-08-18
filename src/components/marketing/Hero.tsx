@@ -95,7 +95,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
-            <MarketingButton href="/flow" variant="primary">
+            <MarketingButton href="/flow" variant="primary" size="lg">
               Start Journey
             </MarketingButton>
           </div>

@@ -38,7 +38,7 @@ export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABloc
         {body}
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3.5">
-        <MarketingButton variant="primary" href={primary.href}>
+        <MarketingButton variant="primary" size="xl" href={primary.href}>
           {primary.label}
         </MarketingButton>
         {secondary && (
