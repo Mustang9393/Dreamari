@@ -145,23 +145,21 @@ export function ChapterShell({
              the frame just becomes exactly as tall as Build's question or Connect's
              card actually needs, on any viewport. */}
           <div
-            // Ceilings raised (was 480/680/620px) — per direct feedback that content
-            // should "scale logically with screen size": on a genuinely large desktop
-            // display, --mu (read off THIS frame's own width via container queries —
-            // see the long comment above) was maxing out around 1.5 well before the
-            // formula's own 2.3 ceiling, because 480px was the binding constraint. That
-            // capped every chapter's card/text/spacing at the same absolute size
-            // regardless of how much bigger the section around it actually was — a big
-            // monitor just got more EMPTY FRAME padding around the same small card,
-            // not a bigger card. Raising the ceiling lets --mu actually approach its
-            // real 2.3 max on large screens, so the whole shared frame (and everything
-            // inside every chapter that scales off --mu) genuinely grows with the
-            // viewport instead of plateauing early.
+            // A prior attempt raised these ceilings (640/860/780px) to make content
+            // "scale with screen size" on large monitors — reverted per direct
+            // feedback: mu-scaled elements that aren't part of the card itself (Match's
+            // like/pass buttons, Build's padding/font sizes) grew out of proportion
+            // with the actual card, since the card's own rendered size is bounded by
+            // its aspect-ratio + the frame's HEIGHT, while --mu tracks the frame's
+            // WIDTH — the two don't scale at the same rate once the ceiling moves, and
+            // the card (which should be the dominant, most prominent element in every
+            // chapter) ended up looking small relative to its own UI chrome. Back to
+            // the original values, which keep that proportion correct.
             className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
             style={{
-              width: "min(94cqw, 640px)",
-              height: compact ? "auto" : "min(74dvh, 860px)",
-              maxHeight: compact ? "min(72dvh, 780px)" : undefined,
+              width: "min(94cqw, 480px)",
+              height: compact ? "auto" : "min(74dvh, 680px)",
+              maxHeight: compact ? "min(72dvh, 620px)" : undefined,
             }}
           >
             {children}

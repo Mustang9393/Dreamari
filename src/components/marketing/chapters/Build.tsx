@@ -93,7 +93,7 @@ function BuildDemo() {
       <div
         className="relative flex w-full flex-col overflow-hidden rounded-2xl border"
         style={{
-          maxWidth: "min(92cqw, 560px)",
+          maxWidth: "min(92cqw, 440px)",
           padding: "calc(var(--mu) * 22px) calc(var(--mu) * 20px)",
           gap: "calc(var(--mu) * 18px)",
           background: "var(--glass-surface-3)",

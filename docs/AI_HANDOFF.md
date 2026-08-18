@@ -6,6 +6,50 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 revert broken scaling attempt, fix Footer disappearing entirely
+
+- The previous entry's ChapterShell frame-ceiling increase (480→640/680→860/620→780)
+  and the matching Build/Connect/Play inner-card width bumps were **reverted** per
+  direct feedback — real regression, not a design nitpick: Match's like/pass buttons
+  (sized off `--mu`, which tracks the FRAME's width) grew out of proportion with the
+  card itself (sized off aspect-ratio + the frame's HEIGHT) since the two don't scale
+  at the same rate once the ceiling moves, Build's text-heavy card ballooned since
+  raising --mu inflates ALL its mu-scaled padding/font-sizes together, and Explore's
+  info layout broke similarly. The card is supposed to be the single dominant element
+  in every one of these chapters — back to the original 480/680/620/440/480/560
+  values, which is the last known-good state for this. Left the separate `clamp()`
+  text-scaling changes (oneliners, Hero paragraph, CTA body/heading) and the
+  `justify-center` additions in place — neither was implicated in this regression.
+  **Lesson for any future scaling work here**: `--mu` is shared across a LOT of
+  differently-purposed elements (photo cards, buttons, padding, prose) that don't
+  actually want to scale at the same rate — a single shared multiplier isn't the
+  right lever for "make the card bigger without also inflating the button next to
+  it"; that needs the card's own sizing decoupled from --mu, not a bigger ceiling on
+  the ceiling everything already shares.
+- **Real bug, found while investigating a "there's no footer, just a huge blank
+  scroll" report**: the ambient background div (`MarketingApp.tsx`, `position:
+  absolute`) was fully covering `Footer.tsx` near the bottom of the page — not just
+  visually competing with it, completely hiding it. Root cause is a genuine CSS
+  stacking-order quirk worth remembering: any positioned element (`relative`,
+  `absolute`, `fixed`, or even just `transform`-having) paints ON TOP OF every
+  static/non-positioned sibling, REGARDLESS of DOM order, once you flatten out
+  elements that don't establish their own stacking context. Hero's `<section>` and
+  every `ChapterShell`'s `<section>` are already `position: relative` (for unrelated
+  reasons), so they accidentally escaped this and rendered fine; `FinalCTAs`' CTABlock
+  also escaped it, but only because its `useRevealOnScroll` transform incidentally
+  promotes it into the same tier. Footer had neither, so it fell into the earlier
+  "static" paint tier and got buried under the ambient div's own fade-to-black layer,
+  BUT WAS STILL FULLY PRESENT IN THE DOM (`getBoundingClientRect` looked completely
+  normal — the bug was invisible to layout inspection, only showed up visually).
+  Fixed with one `relative` class on the `<footer>` element itself. **Any future
+  content added as a DIRECT descendant of MarketingApp's own wrapper div, without
+  going through Hero/ChapterShell/CTABlock's existing positioning, needs its own
+  `position: relative` (or equivalent) or it'll silently render behind the ambient
+  backdrop the same way.**
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` (503 tokens) all
+  pass clean. `eslint` has the same one pre-existing, unrelated failure in
+  `Explore.tsx` noted in earlier entries.
+
 ### 2026-08-18 responsive scaling, fade-to-black ending, Hero wordmark headline
 
 - **Content scaling with screen size**: every chapter's shared frame (`ChapterShell.tsx`'s
