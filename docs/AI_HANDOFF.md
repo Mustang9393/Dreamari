@@ -6,6 +6,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 Connect post engagement counts
+
+- Post card's counts bumped per direct request: 333 likes (user floated 274 and
+  asked for a "Gen-Z trendy number" near it that isn't 420 — went with the angel
+  number 333, a genuinely current Gen-Z thing; 222/247 were the runners-up) and
+  67 comments (the user's own pick — the viral "six-seven" meme number). Comment
+  count is now deliberately decoupled from REPLIES.length: real social apps show
+  the total while rendering only top comments, so 67-total/3-visible reads
+  authentic rather than broken.
+
 ### 2026-08-18 environmental mascot fade + parallax lighting rig
 
 - **Mascot fade made environmental** per direct feedback with a phone screenshot:

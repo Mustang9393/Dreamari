@@ -224,9 +224,17 @@ function PostCard() {
 
         {/* Engagement row */}
         <div className="flex items-center border-t border-b" style={{ marginTop: "calc(var(--mu) * 10px)", paddingTop: "calc(var(--mu) * 7px)", paddingBottom: "calc(var(--mu) * 7px)", gap: "calc(var(--mu) * 16px)", borderColor: "var(--glass-border)" }}>
+          {/* Counts bumped to feel like a genuinely active community per direct
+             request. 333 (not the asked-about 274) is the Gen-Z pick: angel numbers
+             (222/333/444) are a real current thing in that cohort — positive
+             "alignment" energy, and it pairs with 67, which is itself the viral
+             "six-seven" meme number the user chose. Comment count is deliberately
+             decoupled from REPLIES.length now — every real social app shows the
+             TOTAL count while rendering only the top few comments, so the mismatch
+             (67 vs 3 visible) is exactly what makes it read authentic. */}
           {[
-            { icon: HEART, label: "24" },
-            { icon: COMMENT_ICON, label: String(REPLIES.length) },
+            { icon: HEART, label: "333" },
+            { icon: COMMENT_ICON, label: "67" },
             { icon: SHARE_ICON, label: "Share" },
           ].map((action, i) => (
             <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 5px)", color: "var(--muted-foreground)" }}>
