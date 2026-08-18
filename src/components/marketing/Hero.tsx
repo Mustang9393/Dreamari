@@ -72,17 +72,22 @@ export function Hero({ view, onChangeView }: HeroProps) {
           style={{ paddingBottom: "calc(var(--mascot-size) * .7 + 16px)" }}
         >
           <h1
-            className="font-display text-[38px] font-extrabold [@media(max-height:600px)]:text-[28px] sm:text-[52px]"
+            className="font-display text-[38px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(52px,4vw,64px)]"
             style={{ lineHeight: 1.05, color: "var(--foreground)" }}
           >
-            Discover your <span style={{ color: "var(--primary-tint)" }}>dream career.</span>
+            <span style={{ color: "var(--primary-tint)" }}>Dream</span>ari
           </h1>
+          {/* textWrap:balance (not fixed <span className="block"> breaks) — a longer
+             caption now that "Discover your dream career" moved down here from the
+             headline above, so hardcoded 2-line breaks would risk a lone short word
+             stranded on its own line at some widths (a widow). Balance lets the
+             browser pick break points based on the ACTUAL rendered width, keeping
+             every line a reasonably even length instead. */}
           <p
-            className="mt-3 max-w-[500px] text-[16px] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
-            style={{ color: "var(--muted-foreground)" }}
+            className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
+            style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
-            <span className="block">Build, match, play, explore, and connect, all in one place.</span>
-            <span className="block">One clear step at a time.</span>
+            Discover your dream career. Build, match, play, explore, and connect, all in one place. One clear step at a time.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">

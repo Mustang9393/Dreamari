@@ -197,7 +197,7 @@ function MatchDemo() {
   }
 
   return (
-      <div className="relative z-[1] flex h-full w-full flex-col items-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
+      <div className="relative z-[1] flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 14px)" }}>
         {/* aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared
            frame on any viewport: flex:1 gives it the column's available height, then
            aspect-ratio derives width from that — capped by max-width so a tall/narrow

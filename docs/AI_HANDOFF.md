@@ -6,6 +6,52 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 responsive scaling, fade-to-black ending, Hero wordmark headline
+
+- **Content scaling with screen size**: every chapter's shared frame (`ChapterShell.tsx`'s
+  `.mkt-graphic-scale`) was capped at a flat 480px wide / 680px (or 620px compact) tall
+  regardless of viewport — since every chapter's `--mu` multiplier (and therefore all its
+  card/text/spacing sizing) reads off THIS frame's own container-query width, a big
+  desktop display just got more empty frame padding around the same small card, not a
+  bigger one. Raised the ceilings (640px / 860px / 780px) and proportionally raised
+  Build's and Connect's own inner card `maxWidth` caps (440→560, 480→600) and Play's
+  card width clamp (560→680) so they actually take advantage of the bigger frame.
+  Verified at a 1728×1117 viewport: Match's card grew from the old ~480px cap to a
+  genuine ~640px-wide card. Along the way, found and fixed a real bug this exposed: on
+  a viewport tall enough that the frame's new height ceiling exceeds the card's own
+  aspect-ratio-derived height, Match's and Explore's card+button-row content wasn't
+  vertically centered within the frame (`items-center` with no `justify-center` on
+  their own inner wrapper — packed to the top instead, leaving dead space below); added
+  `justify-center` to both.
+- **Text scaling**: several text elements were stuck at flat pixel sizes while headings
+  already used `clamp()` — `ChapterShell`'s oneliner, Hero's paragraph, and the final
+  CTA's heading/body. Converted them to `clamp()`-based sizing too (modest ceilings, not
+  uncapped vw scaling, to avoid overly large text on ultra-wide monitors) and widened
+  the `ChapterShell` H2 and CTA heading's existing clamp ceilings slightly to match.
+- **Fade to black by the end of the scroll**: the ambient backdrop added earlier this
+  session was `position: fixed` (deliberately, at the time, to avoid gaps between
+  overlapping blobs regardless of scroll position) — but `fixed` has no concept of
+  "near the bottom of the page," only "near the bottom of whatever's on screen right
+  now," which ruled it out once the ask became a scroll-driven fade. Switched it to
+  `position: absolute` against a newly-`relative` `MarketingApp` wrapper spanning the
+  full document (Nav through Footer), re-expressed all the blob positions AND a new
+  top-listed fade-to-`var(--background)` layer as percentages of that full height, so
+  the reader now arrives at the Footer through a deliberate darkening rather than the
+  vivid wash just stopping arbitrarily.
+- **Hero headline**: now reads "DREAMARI" (all-caps wordmark, "DREAM" kept in the
+  accent tint as a callback to the old "dream career" highlight) instead of "Discover
+  your dream career." — that phrase moved down into the caption underneath, which now
+  reads "Discover your dream career. Build, match, play, explore, and connect, all in
+  one place. One clear step at a time." as one flowing paragraph. Switched the caption
+  from two hardcoded `<span className="block">` line breaks to `textWrap: "balance"` —
+  the fixed breaks were sized for the OLD shorter caption and risked a stranded single
+  word (a widow) at various widths now that it's longer; balance picks break points
+  from the actual rendered width instead, verified 2 lines on desktop / 3 on mobile
+  with no widow on either.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` (503 tokens) all
+  pass clean. `eslint` has the same one pre-existing, unrelated failure in
+  `Explore.tsx` noted in earlier entries (not touched this round).
+
 ### 2026-08-18 background depth, chapter reorder, Play/Build interaction tweaks
 
 - **Background**: the whole How It Works storyboard sat on flat `var(--background)`

@@ -31,10 +31,10 @@ export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABloc
       <div className="font-mono text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
         {eyebrow}
       </div>
-      <h2 className="mx-auto mt-3 max-w-[640px] text-[clamp(1.75rem,4vw,2.6rem)] font-extrabold" style={{ color: "var(--foreground)" }}>
+      <h2 className="mx-auto mt-3 max-w-[680px] text-[clamp(1.75rem,4vw,3rem)] font-extrabold" style={{ color: "var(--foreground)" }}>
         {heading}
       </h2>
-      <p className="mx-auto mt-4 max-w-[520px] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+      <p className="mx-auto mt-4 max-w-[560px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
         {body}
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3.5">

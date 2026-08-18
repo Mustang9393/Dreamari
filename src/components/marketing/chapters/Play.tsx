@@ -81,7 +81,7 @@ function PlayDemo() {
   return (
       <div
         className={`mkt-play-card relative z-[1] flex h-full max-w-full flex-col overflow-hidden ${pickedIndex !== null ? "mkt-play-feedback" : ""}`}
-        style={{ width: "clamp(300px, 90cqw, 560px)", aspectRatio: "168 / 290", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
+        style={{ width: "clamp(300px, 90cqw, 680px)", aspectRatio: "168 / 290", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
       >
         {/* The art itself — full color, uncovered, the dominant element. flex-1
            (not a fixed percentage): the choice panel below sizes to its own

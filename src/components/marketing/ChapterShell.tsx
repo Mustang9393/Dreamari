@@ -76,7 +76,7 @@ export function ChapterShell({
           <h2
             className="font-extrabold uppercase"
             style={{
-              fontSize: "clamp(2.6rem, 6vw, 4.6rem)",
+              fontSize: "clamp(2.6rem, 6vw, 5.2rem)",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               background: "linear-gradient(135deg, var(--c), var(--foreground) 130%)",
@@ -87,7 +87,7 @@ export function ChapterShell({
           >
             {title}
           </h2>
-          <p className="mt-2 text-[18px] leading-snug" style={{ color: "var(--muted-foreground)" }}>
+          <p className="mt-2 text-[clamp(18px,1vw+13px,23px)] leading-snug" style={{ color: "var(--muted-foreground)" }}>
             {oneliner}
           </p>
         </div>
@@ -145,11 +145,23 @@ export function ChapterShell({
              the frame just becomes exactly as tall as Build's question or Connect's
              card actually needs, on any viewport. */}
           <div
+            // Ceilings raised (was 480/680/620px) — per direct feedback that content
+            // should "scale logically with screen size": on a genuinely large desktop
+            // display, --mu (read off THIS frame's own width via container queries —
+            // see the long comment above) was maxing out around 1.5 well before the
+            // formula's own 2.3 ceiling, because 480px was the binding constraint. That
+            // capped every chapter's card/text/spacing at the same absolute size
+            // regardless of how much bigger the section around it actually was — a big
+            // monitor just got more EMPTY FRAME padding around the same small card,
+            // not a bigger card. Raising the ceiling lets --mu actually approach its
+            // real 2.3 max on large screens, so the whole shared frame (and everything
+            // inside every chapter that scales off --mu) genuinely grows with the
+            // viewport instead of plateauing early.
             className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
             style={{
-              width: "min(94cqw, 480px)",
-              height: compact ? "auto" : "min(74dvh, 680px)",
-              maxHeight: compact ? "min(72dvh, 620px)" : undefined,
+              width: "min(94cqw, 640px)",
+              height: compact ? "auto" : "min(74dvh, 860px)",
+              maxHeight: compact ? "min(72dvh, 780px)" : undefined,
             }}
           >
             {children}

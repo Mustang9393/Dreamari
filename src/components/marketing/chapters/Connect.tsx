@@ -110,7 +110,7 @@ function CardShell({ children }: { children: React.ReactNode }) {
     <div
       className="relative flex w-full flex-col overflow-hidden rounded-2xl border"
       style={{
-        maxWidth: "min(94cqw, 480px)",
+        maxWidth: "min(94cqw, 600px)",
         background: "var(--glass-surface-3)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",

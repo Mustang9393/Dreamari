@@ -483,7 +483,7 @@ function ExploreCarousel() {
     // aspect-ratio on the card box (no explicit width) lets flex-grow determine
     // its height first, then aspect-ratio derives the width from that; max-w-full
     // caps it from ever overflowing sideways on a tall/narrow frame.
-    <div className="flex h-full w-full flex-col items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+    <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
       <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 240" }}>
         <div
           ref={containerRef}
