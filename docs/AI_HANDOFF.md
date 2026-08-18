@@ -788,6 +788,58 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   unchanged. Also screenshot-verified visually.
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 Explore nav buttons repositioned, Play rebuilt as an immersive RPG scene, mascot visibility
+
+- Explore's left-side up/down nav buttons went through two iterations this round.
+  First attempt moved them into their own row BELOW the card (mirroring how Match
+  budgets a button row below its own card) — rejected; direct feedback wanted them
+  specifically on the LEFT side, stacked vertically, just genuinely outside the
+  card's bounds rather than overlapping the photo. Final version: the whole
+  carousel is now a flex ROW (button column, then the card), not a flex column.
+  The card itself no longer uses `flex-1` for its own sizing (a row's flex-grow
+  and an aspect-ratio's derived width would fight over the same horizontal axis) —
+  it just uses `h-full` + `aspectRatio` directly, same as the original single-child
+  version, with `max-w-full` as a safety cap.
+- Play was substantially rebuilt per direct feedback ("the image is the least
+  visible part, it's supposed to be an immersive simulation experience like an
+  RPG... elevate it to look amazing") against a reference screenshot of a
+  visual-novel-style choice screen (full uncovered art on top, a separate opaque
+  panel below with a dialogue bubble and lettered A/B/C choice rows). Adapted the
+  structure to this app's dark theme rather than cloning the reference's light
+  panel: the scene image is now a real, unobscured `flex-1` region (previously it
+  was a full-bleed background under a heavy dark gradient PLUS a translucent
+  blurred panel covering most of it — the actual bug behind "least visible part"),
+  and the interaction area below it is a genuine opaque `var(--card)` surface
+  (`flex-none`, sized to its own content) rather than glass laid over the art.
+  Added a chat-bubble treatment for the scene text and a leading arrow icon per
+  option row. Two follow-up corrections: the first pass used a fixed image/panel
+  percentage split, which clipped the third option on shorter viewports — fixed by
+  making the panel `flex-none` (sizes to its own real content height, so it can
+  never be clipped) and the image `flex-1` (absorbs whatever's left), plus
+  tightening every padding/gap/font-size in the panel so its natural height stays
+  comfortably small; and the reference's lettered A/B/C badges were tried, then
+  removed per direct feedback, leaving just the arrow to signal "tap to choose."
+- Mascot: `VISIBLE_FRACTION` (Mascot.tsx) raised from 0.63 to 0.7 per direct
+  feedback ("I don't see enough of it") — 0.63 was deliberately calibrated to stop
+  exactly at the mouth's own top edge (y=63.5% in the source artwork) so literally
+  none of it showed; 0.7 does let the very top of the mouth peek in now, a
+  conscious tradeoff since more of the character actually visible was judged worth
+  it. Updated both hardcoded `37%` transform offsets (the resting position and the
+  scroll-driven exit) to `30%` (= 1 − 0.7) to match, and Hero.tsx's reserved
+  `paddingBottom` multiplier from `.63` to `.7` so the copy above still never
+  overlaps the taller visible mascot (these three numbers aren't a shared import,
+  they have to be kept in sync by hand — noted in both files' comments).
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error).
+  Browser-verified at both desktop and 375px mobile widths: Explore's button
+  column sits outside the card at both sizes, Play shows the full scene plus all
+  three options with no scrolling and no clipping (picking an option correctly
+  shows its feedback text + "Try again"), the mascot shows noticeably more of
+  itself without looking broken, and Connect/Build's earlier changes were spot-
+  checked on mobile too since this was a broader "make sure this all works on
+  mobile" pass.
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

@@ -5,12 +5,13 @@ import { type RefObject, useEffect, useRef } from "react";
 
 // Measured directly from public/images/hero-cloud-mascot.png (1200x1200): the two dark
 // starry eye ellipses sit at these percentages of the image's own bounding box (ending
-// at 61.33%). Mouth starts at y=63.5%, so a 63%-visible crop is as generous as it can
-// get while still never showing the mouth — needed because the eyes' own bottom edge
-// sits right at the old 62% crop line with almost no margin below them.
+// at 61.33%). Mouth starts at y=63.5% — 63% was the old crop line, kept tight enough to
+// never show any of the mouth. Per direct feedback ("I don't see enough of it"), pushed
+// to 70% instead: this does let the very top of the mouth peek in, but the tradeoff of
+// "more of the character actually visible" was worth it over "technically zero mouth."
 const EYE_LEFT = { left: 25.17, top: 42.17, width: 16.83, height: 19.16 };
 const EYE_RIGHT = { left: 58.17, top: 42.17, width: 16.83, height: 19.16 };
-const VISIBLE_FRACTION = 0.63;
+const VISIBLE_FRACTION = 0.7;
 
 type MascotProps = {
   heroRef: RefObject<HTMLElement | null>;
@@ -39,7 +40,7 @@ export function Mascot({ heroRef }: MascotProps) {
       const exitDistance = heroHeight * 0.62;
       const progress = Math.min(1, Math.max(0, window.scrollY / exitDistance));
       stage.style.opacity = String(1 - progress);
-      stage.style.transform = `translate(-50%, 37%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
+      stage.style.transform = `translate(-50%, 30%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
     }
     function onScroll() {
       if (ticking) return;

@@ -463,6 +463,39 @@ function ExploreCarousel() {
   // further they are from center, their sliver peeking into the gutter, reading as
   // spatially behind rather than just visually dimmed.
   return (
+    // Row layout: a stacked up/down button column to the LEFT of the card, outside
+    // its bounds entirely — per direct feedback, floating on top of the photo read
+    // as clutter, and a row below the card wasn't what was wanted either. The card
+    // itself sizes off its own height (h-full) with aspect-ratio deriving width
+    // from that — no flex-grow on the card, since flex-grow and aspect-ratio would
+    // otherwise fight over the same (horizontal, in a row) axis; max-w-full is
+    // just a safety cap if the row ever has less width than the ratio wants.
+    <div className="flex h-full w-full items-center justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+      <div className="flex flex-none flex-col items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+        <button
+          type="button"
+          aria-label="Previous card"
+          onClick={() => commit(-1)}
+          className="flex items-center justify-center rounded-full border"
+          style={{ width: "calc(var(--mu) * 28px)", height: "calc(var(--mu) * 28px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
+            <path d="m18 15-6-6-6 6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="Next card"
+          onClick={() => commit(1)}
+          className="flex items-center justify-center rounded-full border"
+          style={{ width: "calc(var(--mu) * 28px)", height: "calc(var(--mu) * 28px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+      </div>
+
       <div className="relative h-full max-w-full" style={{ aspectRatio: "168 / 240" }}>
         <div
           ref={containerRef}
@@ -575,39 +608,6 @@ function ExploreCarousel() {
           ))}
         </div>
 
-        {/* Left-side up/down nav — per direct feedback, a swipe-only feed doesn't
-           intuitively read as "swipe up/down like a FYP feed," so real buttons give a
-           discoverable, clickable alternative to the gesture. Unlike the right rail
-           (decorative, pointer-events-none), these are real controls wired straight
-           into the same commit() the swipe/wheel paths use. */}
-        <div
-          className="absolute flex flex-col items-center"
-          style={{ left: "calc(var(--mu) * 10px)", bottom: "calc(var(--mu) * 46px)", gap: "calc(var(--mu) * 10px)", zIndex: 200 }}
-        >
-          <button
-            type="button"
-            aria-label="Previous card"
-            onClick={() => commit(-1)}
-            className="flex items-center justify-center rounded-full border"
-            style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 14px)", height: "calc(var(--mu) * 14px)" }}>
-              <path d="m18 15-6-6-6 6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="Next card"
-            onClick={() => commit(1)}
-            className="flex items-center justify-center rounded-full border"
-            style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 14px)", height: "calc(var(--mu) * 14px)" }}>
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
-        </div>
-
         {/* Persistent hint — per direct feedback, readers don't intuitively know to
            swipe up/down here the way they would on a FYP-style feed. Sits in the top
            gutter band (the same zone a peeking neighbor's sliver occupies), small and
@@ -632,5 +632,6 @@ function ExploreCarousel() {
           </div>
         </div>
       </div>
+    </div>
   );
 }
