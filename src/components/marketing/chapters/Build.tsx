@@ -241,6 +241,23 @@ function BuildDemo() {
             {`${selected} noted. Heading to your match...`}
           </p>
         )}
+
+        {/* Source citation for the assessment questions — deliberately transparent
+           but quiet, per direct request: last element in the card (under the "+ more"
+           chip), tiny, and at reduced opacity of the already-muted foreground so it
+           reads as a footnote rather than competing with the question UI. Outside the
+           selected-state conditional above so it stays visible in both states. */}
+        <p
+          className="text-center"
+          style={{
+            fontSize: "calc(var(--mu) * 8px)",
+            letterSpacing: "0.02em",
+            color: "var(--muted-foreground)",
+            opacity: 0.62,
+          }}
+        >
+          Source: Harvard FAS Mignone + O*NET Interest Profiler
+        </p>
       </div>
     </div>
   );

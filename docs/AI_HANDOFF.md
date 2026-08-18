@@ -6,6 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 follow-up: mouth-visible crop, final IB photo, Build citation
+
+- **Mascot crop widened to show eyes + full mouth** per direct request ("on desktop
+  I can only see dreamy's upper head"): measured the mouth's real pixel extent in
+  `hero-cloud-mascot.png` (63.42%..68.83% of the artwork — the old 70% crop with a
+  fade completing at 69.5% was dissolving the mouth itself). New geometry, all
+  values moved together: `VISIBLE_FRACTION` 0.7 -> 0.77, the scroll-exit transform
+  now derives its translate from that constant instead of hardcoding it, the
+  static className translate matches (23%), the mask fades 69.5% -> 76.5%, and
+  Hero's reserve-padding multiplier is .77. Fallback agreed in advance if the
+  mouth-visible version doesn't land: pull `VISIBLE_FRACTION` back toward 0.7 and
+  slide the mask band back up (fade must always COMPLETE just before
+  1 - translate). The cloud raster bottoms out at 84.67%, so 77% still reads as a
+  peek.
+- Investment Banking's photo replaced again with the user's final pick (Figma node
+  `3173-16594`, 1088x1445 — the seated three-monitor office portrait), same
+  filename so no code change. Verified the dev server serves the new 387KB file.
+- Confirmed "Business & Finance" -> "Business & Money" is fully swept — zero
+  occurrences left anywhere in `src/` (Match's card line + Explore's data/lookup
+  were done earlier this round).
+- Build's assessment card now carries its question-source citation ("Source:
+  Harvard FAS Mignone + O*NET Interest Profiler") as the card's last element,
+  under the "+ more" chip — mu-scaled 8px at 0.62 opacity of the muted foreground:
+  transparent but footnote-quiet, per direct request. Sits outside the
+  picked-state conditional so it's visible in both states.
+
 ### 2026-08-18 UX audit: organic mascot fade, snap friction, title clip, image sizing
 
 - **Mascot hard line finally solved properly** (third attempt, this one verified at

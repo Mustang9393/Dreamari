@@ -66,13 +66,13 @@ export function Hero({ view, onChangeView }: HeroProps) {
         </div>
         <div
           className="relative z-[2] mx-auto flex max-w-[720px] flex-col items-center text-center"
-          // Reserves room below the CTAs for the mascot's peeking sliver (70% of its own
-          // box, since it's cropped to show its top 70% — see Mascot.tsx's
+          // Reserves room below the CTAs for the mascot's peeking sliver (77% of its
+          // own box, since it's cropped to show its top 77% — see Mascot.tsx's
           // VISIBLE_FRACTION) so the copy and the mascot can never overlap, at any hero
           // height or viewport size. Reads the same --mascot-size Mascot.tsx uses
           // (tokens.css), so the two can't drift apart; the multiplier itself has to be
           // kept in sync by hand with VISIBLE_FRACTION since it's not a shared import.
-          style={{ paddingBottom: "calc(var(--mascot-size) * .7 + 16px)" }}
+          style={{ paddingBottom: "calc(var(--mascot-size) * .77 + 16px)" }}
         >
           <h1
             className="font-display text-[38px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(52px,4vw,64px)]"

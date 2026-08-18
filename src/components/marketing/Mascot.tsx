@@ -11,7 +11,14 @@ import { type RefObject, useEffect, useRef } from "react";
 // "more of the character actually visible" was worth it over "technically zero mouth."
 const EYE_LEFT = { left: 25.17, top: 42.17, width: 16.83, height: 19.16 };
 const EYE_RIGHT = { left: 58.17, top: 42.17, width: 16.83, height: 19.16 };
-const VISIBLE_FRACTION = 0.7;
+// 0.77, up from 0.7 — per direct feedback the crop should show eyes AND the full
+// mouth before the dissolve takes over. Measured from the PNG's actual pixels: the
+// mouth spans 63.42%..68.83% of the artwork, so a 70% crop with the fade completing
+// at 69.5% was dissolving the mouth itself — only the upper head read as solid. At
+// 0.77 the fade band (69.5%..76.5%, see the mask below) sits fully BELOW the mouth:
+// eyes and mouth solid, chin/body dissolving, bottom ~15% of the cloud (raster ends
+// at 84.67%) still cropped so it keeps reading as a peek.
+const VISIBLE_FRACTION = 0.77;
 
 type MascotProps = {
   heroRef: RefObject<HTMLElement | null>;
@@ -40,7 +47,7 @@ export function Mascot({ heroRef }: MascotProps) {
       const exitDistance = heroHeight * 0.62;
       const progress = Math.min(1, Math.max(0, window.scrollY / exitDistance));
       stage.style.opacity = String(1 - progress);
-      stage.style.transform = `translate(-50%, 30%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
+      stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
     }
     function onScroll() {
       if (ticking) return;
@@ -256,29 +263,30 @@ export function Mascot({ heroRef }: MascotProps) {
       // --mascot-size comes from tokens.css (.marketing-v2), which also shrinks it on
       // short viewports via media queries — not set inline here, so Hero.tsx's reserved
       // padding (calc(var(--mascot-size) * .62 + 28px)) always matches automatically.
-      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,37%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
+      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,23%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
     >
       {/* The organic bottom dissolve. Geometry that makes this work — all percentages
-         are of the stage box: the scroll-exit effect above sets translate(-50%, 30%)
-         at runtime, so the hero section's overflow:hidden crops this stage at exactly
-         70% of its height; the eyes end at 61.33% (EYE_* above) and the mouth starts
-         at 63.5%. So the fade runs 61.5% -> 69.5%: eyes stay fully opaque, the
-         mouth/chin region dissolves to full transparency just BEFORE the hard crop
-         line, and the crop itself never touches a visible pixel. Two earlier failed
-         attempts, for the record: (1) a fade band placed below 70% is entirely
-         invisible — the crop happens first, so the hard line stays; (2) the mask must
-         NOT live on the outer stage element while the Image keeps its old drop-shadow
-         filter — mask clips filter output to the masked box and the shadow painted
-         past it, which rendered as a rectangular halo. Hence: mask on THIS float
-         wrapper (it only ever bobs UP from its base position, so the traveling fade
-         band can never let opaque artwork slip below the crop), and no drop-shadow on
-         the Image anymore (invisible against a near-black page anyway — the ambient
-         glow above carries the depth). */}
+         are of the stage box: the scroll-exit effect above translates the stage down
+         by (1 - VISIBLE_FRACTION), so the hero section's overflow:hidden crops this
+         stage at exactly VISIBLE_FRACTION (77%) of its height; the eyes end at 61.33%
+         (EYE_* above) and the mouth spans 63.42%..68.83% (measured from the PNG's
+         pixels). So the fade runs 69.5% -> 76.5%: eyes AND the full mouth stay
+         opaque, the chin/body below dissolves to full transparency just BEFORE the
+         hard crop line, and the crop itself never touches a visible pixel. Earlier
+         failed attempts, for the record: (1) a fade band placed below the crop line
+         is entirely invisible — the crop happens first, so the hard line stays; (2)
+         the mask must NOT live on the outer stage element while the Image keeps its
+         old drop-shadow filter — mask clips filter output to the masked box and the
+         shadow painted past it, which rendered as a rectangular halo. Hence: mask on
+         THIS float wrapper (it only ever bobs UP from its base position, so the
+         traveling fade band can never let opaque artwork slip below the crop), and no
+         drop-shadow on the Image anymore (invisible against a near-black page anyway
+         — the ambient glow carries the depth). */}
       <div
         className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]"
         style={{
-          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 61.5%, transparent 69.5%)",
-          maskImage: "linear-gradient(to bottom, black 0%, black 61.5%, transparent 69.5%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
+          maskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
         }}
       >
         {/* Ambient glow lives INSIDE the masked float wrapper, not as a stage-level
