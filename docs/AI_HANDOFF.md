@@ -6,7 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
-### 2026-08-18 Connect post engagement counts
+### 2026-08-18 mascot exit retimed to hero position (mobile blank-space fix)
+
+- **Mascot scroll-exit rewritten to anchor on the hero's real viewport position**
+  (`Mascot.tsx` update()): the old driver was raw `window.scrollY` against 62% of
+  the hero's height — which silently assumed Dreamy is on screen at scroll 0 and
+  should be gone shortly after. True on desktop; badly false on phones, where the
+  hero's content column fills the whole screen: Dreamy started at/below the fold,
+  and by the time a reader scrolled to him the fade had already dissolved him —
+  leaving his entire reserved strip as a big blank purple void before Build
+  (reported directly from a phone). Now: progress derives from the hero's bottom
+  edge in the viewport, with a DEAD ZONE — 0 until that edge climbs past 55% of
+  the viewport (Dreamy fully solid the whole time his strip is in the lower/
+  middle of the screen), ramping to fully faded by ~8% from the top. Verified on
+  the mobile viewport: opacity 1.0 at load and at 200px scrolled, 0.88/0.48/0.09
+  at 400/550/700 as the region actually exits. Also added a ResizeObserver on the
+  hero re-running the computation — the one-shot mount call could run before
+  layout settled and left a stale opacity until the first scroll event.
+- Reduced the exit's sink/shrink (110px/0.32 -> 60px/0.24) — with the fade now
+  happening only during actual exit, the bigger values overshot.
+
+### 2026-08-18 Connect post engagement counts + class-year tags
+
+- Jordan and Priya's reply tags switched from high-school grades to college class
+  years per direct request, assigned logically around Maya (the Sophomore asker):
+  Jordan · Freshman is the "just applied" early explorer, Priya · Sophomore is
+  Maya's peer bookmarking for this cycle. Marcus stays Goldman Sachs · Analyst.
 
 - Post card's counts bumped per direct request: 333 likes (user floated 274 and
   asked for a "Gen-Z trendy number" near it that isn't 420 — went with the angel

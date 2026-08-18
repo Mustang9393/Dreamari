@@ -45,11 +45,32 @@ export function Mascot({ heroRef }: MascotProps) {
     function update() {
       ticking = false;
       if (!stage || !hero) return;
-      const heroHeight = hero.offsetHeight || 1;
-      const exitDistance = heroHeight * 0.62;
-      const progress = Math.min(1, Math.max(0, window.scrollY / exitDistance));
+      // Exit progress comes from where the hero's bottom edge actually sits in
+      // the viewport, NOT from raw scrollY. The scrollY version assumed Dreamy is
+      // on screen at scroll position 0 and gone by ~62% of the hero's height —
+      // true on desktop, badly false on phones, where the hero's content column
+      // is about as tall as the screen: Dreamy started at/below the fold, and by
+      // the time a reader scrolled down to where he was, the scrollY-driven fade
+      // had already dissolved him — leaving his entire reserved region as a big
+      // blank purple void between the CTA and Build (reported directly, with a
+      // screenshot). Anchoring to the hero's bottom edge means: while his strip
+      // is still at the viewport's bottom border, progress is 0 and he's fully
+      // there; he only starts sinking/fading as his region genuinely lifts away
+      // from the border, finishing by the time the hero's bottom has climbed 70%
+      // of the screen. Works identically wherever the fold lands relative to the
+      // hero on any device.
+      const heroBottom = hero.getBoundingClientRect().bottom;
+      const vh = window.innerHeight || 1;
+      // Dead zone, then exit: progress stays 0 until the hero's bottom edge has
+      // climbed past 55% of the viewport (Dreamy fully solid the whole time his
+      // strip is in the lower/middle of the screen — the first version of this
+      // started fading immediately and he was gone while still mid-screen, which
+      // recreated a shorter version of the same blank-region complaint), then
+      // ramps to fully faded as the edge reaches ~8% from the top — dissolving
+      // exactly while his region actually exits.
+      const progress = Math.min(1, Math.max(0, (0.55 * vh - heroBottom) / (0.47 * vh)));
       stage.style.opacity = String(1 - progress);
-      stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${progress * 110}px) scale(${1 - progress * 0.32})`;
+      stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${progress * 60}px) scale(${1 - progress * 0.24})`;
     }
     function onScroll() {
       if (ticking) return;
@@ -59,9 +80,18 @@ export function Mascot({ heroRef }: MascotProps) {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", update);
+    // The one-shot mount call above can run before layout settles (fonts swap in,
+    // the hero's min-h resolves, images load) and then nothing re-runs it until
+    // the first scroll — which left Dreamy stuck at a stale mid-fade opacity on
+    // load (caught at 0.6 on a mobile viewport). Observing the hero's size means
+    // every layout settle recomputes the exit progress, so the load state is
+    // always current, not a snapshot of pre-hydration geometry.
+    const heroResize = new ResizeObserver(onScroll);
+    heroResize.observe(hero);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", update);
+      heroResize.disconnect();
     };
   }, [heroRef]);
 

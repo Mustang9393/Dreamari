@@ -25,8 +25,13 @@ const REPLIES = [
   {
     photo: "/images/avatar-jordan.jpg",
     color: "#ffb81f",
+    // College class years (not high-school grades) for the student repliers, per
+    // direct request — Maya the asker is a Sophomore, so the thread reads
+    // logically as peers-and-younger learning from her question: Jordan, a
+    // Freshman, is the one who "just applied" (early explorer acting on the tip),
+    // and Priya, a Sophomore like Maya, bookmarks it for this cycle.
     name: "Jordan",
-    tag: "Grade 11",
+    tag: "Freshman",
     text: "Just applied, thanks for the tip!",
     verified: false,
   },
@@ -37,7 +42,7 @@ const REPLIES = [
     photo: "/images/career-neurosurgeon.jpg",
     color: "#ec4899",
     name: "Priya",
-    tag: "Grade 12",
+    tag: "Sophomore",
     text: "Same here, bookmarking this!",
     verified: false,
   },
