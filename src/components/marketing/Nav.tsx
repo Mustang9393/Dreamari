@@ -31,10 +31,27 @@ const LINKS = [
 // padding clears it.
 export function Nav({ onSchoolsClick }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
+  // Hide-on-scroll-down / reveal-on-scroll-up — added after the floating island
+  // was reported covering chapter titles (PLAY especially) on mobile: the chapters
+  // fill the viewport and their titles sit near its top, exactly where an
+  // always-visible island lives. Scrolling down = reading = the island gets out of
+  // the way entirely; any upward scroll (= reaching for navigation) brings it
+  // back. A small delta threshold keeps micro-jitters (iOS momentum wobble, dvh
+  // toolbar settling) from toggling it. ChapterShell also sets scroll-mt on
+  // sections so JS-driven chapter advances land titles below the island's zone
+  // for the cases where it IS showing.
   useEffect(() => {
+    let lastY = window.scrollY;
     function onScroll() {
-      setScrolled(window.scrollY > 24);
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      const delta = y - lastY;
+      if (Math.abs(delta) > 6) {
+        setHidden(delta > 0 && y > 160);
+        lastY = y;
+      }
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -42,7 +59,10 @@ export function Nav({ onSchoolsClick }: NavProps) {
   }, []);
 
   return (
-    <header className="fixed inset-x-3 top-3 z-50 flex justify-center sm:inset-x-6 sm:top-4">
+    <header
+      className="fixed inset-x-3 top-3 z-50 flex justify-center transition-transform duration-300 sm:inset-x-6 sm:top-4"
+      style={{ transform: hidden ? "translateY(calc(-100% - 16px))" : "translateY(0)" }}
+    >
       <div
         className="flex w-full max-w-[1040px] items-center justify-between rounded-full py-2 pr-2 pl-5 transition-all duration-300 sm:py-2.5 sm:pr-2.5 sm:pl-6"
         style={{

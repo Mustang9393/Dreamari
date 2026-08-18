@@ -6,6 +6,26 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 duck retimed to the fold + hide-on-scroll nav (both prod bug reports)
+
+- **Void report round two, actual root cause found**: the duck's lead distance
+  was proportional to Dreamy's stage height — fine at 264px, but the dvh-aware
+  sizing made the stage 372px+ on tall phones and the lead grew past the entire
+  hero-to-Build gap: progress hit 1 while Build was still ~600px below the fold,
+  so tall phones saw void with NO Dreamy (the exact complaint, twice). New
+  formula: progress = (vh - buildTop) / (0.5 * stageHeight) clamped — he holds
+  the bezel at full opacity until Build's top actually crosses the fold, by
+  definition on every screen size, then tucks away over half a stage-height of
+  scroll while the reader can see what he's yielding to. Verified stepwise at
+  430x930: opacity 1.0 until Build entered, 0.62 at buildTop=859, gone by
+  buildTop=709; reverse scroll re-materializes him symmetrically.
+- **Nav island covering chapter titles (PLAY on mobile)**: island now hides on
+  scroll-down past 160px (translateY off-screen, 300ms) and reveals on any
+  scroll-up, with a 6px delta threshold so iOS momentum wobble and dvh toolbar
+  settling don't flicker it. Plus scroll-mt-24 on every ChapterShell section so
+  JS chapter advances land titles 96px clear for whenever the island IS visible.
+  Verified: post-advance PLAY title at y=162 with the island hidden.
+
 ### 2026-08-19 tall-phone void fix + build-flow discovery
 
 - **Tall-phone hero void fixed** (user screenshot showed a huge dead band between
