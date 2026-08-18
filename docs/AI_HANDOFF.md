@@ -6,6 +6,29 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-19
 
+### 2026-08-19 prod incident: /flow crashed WebKit phones — FIXED + legacy purge
+
+- **iPhone (Safari AND iOS Chrome — both WebKit) crashed the tab on /flow**
+  ("a problem repeatedly occurred"): four full-viewport `filter: blur(120-180px)`
+  nebula layers + Dreamy's blur-2xl glow + a backdrop-filter on all 13 cinematic
+  chips exhausted WebKit's GPU memory. Fix (3c9606d, pushed): nebulas and glow
+  are now pure radial-gradients (visually equivalent, no filter), per-chip
+  backdrop-blur removed. RULE for this project: never ship large-area
+  `filter: blur()` layers or per-item backdrop-filters — WebKit phones die.
+  Card-level glass backdrop-blur (2-3 layers) is fine.
+- **Legacy purge (user-approved, post-verification)**: deleted the orphaned
+  12-step flow — FlowContainer, src/components/flow/steps/ (12 files), and 14
+  single-use widgets (FlowButton/FlowCard/FlowProgress/StepHeader/GridOption/
+  LabeledInput/LabeledSelect/RadioPillGroup/SelectionRow/PathOption/GifBanner/
+  BackButton/DreamyCorner/DreamySpeechBubble) plus flow/types.ts. KEPT (live
+  consumers): HomeButton, StepTransition, icons.tsx, aurora/, match/, theme/.
+- **Token pipeline cleanup**: removed `color.step.*` (semantic, 12-step accents
+  + step-08 gradients — only consumer was the deleted flow) and
+  `component.button` (superseded by `component.cta`, which is what the dev
+  handoff documents). Generator no longer emits src/generated/design-tokens.ts
+  (deleted; its arrays fed only the old flow). `color.category.*` KEPT — the
+  student app + globals.css consume it. tokens:check: 583 tokens green.
+
 ### 2026-08-19 /flow rebuilt end-to-end with A/B variants — SHIPPED TO MAIN
 
 - **New build-profile flow** under `src/components/build/` replaces the flow

@@ -12,7 +12,7 @@ type PathSavedScreenProps = {
 // progress/deck/buttons entirely while celebrating (see MatchExperience's early return
 // on pendingPathSaved), rather than overlaying on top of them. No backdrop-blur here:
 // the whole point is that the colorful, interactive AuroraBackground + confetti +
-// lightning behind this (see FlowContainer's matchCelebrating) reads crisp and in-
+// lightning behind this (see BuildFlowExperience's matchCelebrating) reads crisp and in-
 // focus, not blurred — only the content panel itself gets a solid-ish background, for
 // legibility, not a blur that would also soften the confetti/lightning behind it.
 export function PathSavedScreen({ pathTitle, liked, passed, onContinue }: PathSavedScreenProps) {

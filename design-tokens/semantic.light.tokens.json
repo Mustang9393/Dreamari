@@ -1,119 +1,320 @@
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
   "$description": "Dreamari semantic tokens for light mode. Every semantic decision aliases a primitive; no resolved palette value is duplicated here.",
-  "$extensions": { "com.dreamari.collection": "semantic", "com.dreamari.mode": "light" },
+  "$extensions": {
+    "com.dreamari.collection": "semantic",
+    "com.dreamari.mode": "light"
+  },
   "color": {
     "$type": "color",
     "text": {
-      "primary": { "$value": "{color.neutral.900}", "$description": "Primary headings and high-emphasis text on light surfaces." },
-      "secondary": { "$value": "{color.neutral.600}", "$description": "Body copy and secondary labels on light surfaces." },
-      "muted": { "$value": "{color.neutral.600}", "$description": "Muted readable text; intentionally uses neutral 600 to meet normal-text contrast." },
-      "inverse": { "$value": "{color.white}", "$description": "Text displayed on dark or saturated surfaces." },
-      "on-media": { "$value": "{color.white}", "$description": "High-emphasis text placed over cinematic imagery or saturated media." },
-      "on-media-secondary": { "$value": "{color.neutral.200}", "$description": "Supporting text placed over cinematic imagery or saturated media." },
-      "on-media-muted": { "$value": "{color.neutral.300}", "$description": "Low-emphasis metadata placed over cinematic imagery or saturated media." },
-      "on-warning": { "$value": "{color.neutral.900}", "$description": "Readable compact text placed on amber or yellow warning and reward surfaces." },
-      "brand": { "$value": "{color.brand.600}", "$description": "Brand-emphasis text." }
+      "primary": {
+        "$value": "{color.neutral.900}",
+        "$description": "Primary headings and high-emphasis text on light surfaces."
+      },
+      "secondary": {
+        "$value": "{color.neutral.600}",
+        "$description": "Body copy and secondary labels on light surfaces."
+      },
+      "muted": {
+        "$value": "{color.neutral.600}",
+        "$description": "Muted readable text; intentionally uses neutral 600 to meet normal-text contrast."
+      },
+      "inverse": {
+        "$value": "{color.white}",
+        "$description": "Text displayed on dark or saturated surfaces."
+      },
+      "on-media": {
+        "$value": "{color.white}",
+        "$description": "High-emphasis text placed over cinematic imagery or saturated media."
+      },
+      "on-media-secondary": {
+        "$value": "{color.neutral.200}",
+        "$description": "Supporting text placed over cinematic imagery or saturated media."
+      },
+      "on-media-muted": {
+        "$value": "{color.neutral.300}",
+        "$description": "Low-emphasis metadata placed over cinematic imagery or saturated media."
+      },
+      "on-warning": {
+        "$value": "{color.neutral.900}",
+        "$description": "Readable compact text placed on amber or yellow warning and reward surfaces."
+      },
+      "brand": {
+        "$value": "{color.brand.600}",
+        "$description": "Brand-emphasis text."
+      }
     },
     "surface": {
-      "page": { "$value": "{color.aurora.canvas-light}", "$description": "Default light-mode application background." },
-      "card": { "$value": "{color.white}", "$description": "Primary card surface." },
-      "subtle": { "$value": "{color.neutral.50}", "$description": "Subtle nested panel or option surface." },
-      "navigation": { "$value": "{color.white}", "$description": "Primary application navigation surface in light mode." },
-      "home-card": { "$value": "{color.white}", "$description": "Career-discovery card body surface in light mode." },
-      "feature": { "$value": "{color.brand.100}", "$description": "Soft branded feature-panel surface in light mode." },
-      "feature-strong": { "$value": "{color.brand.200}", "$description": "Stronger endpoint for feature-panel gradients in light mode." },
-      "media-overlay": { "$value": "{color.black}", "$description": "Absolute overlay foundation used to protect text over media." },
-      "brand": { "$value": "{color.brand.950}", "$description": "Dark branded landing surface." },
-      "match-card": { "$value": "{color.match.card-background}", "$description": "Always-dark Match card surface." },
-      "match-toast": { "$value": "{color.match.toast-background}", "$description": "Always-dark Match toast surface." }
+      "page": {
+        "$value": "{color.aurora.canvas-light}",
+        "$description": "Default light-mode application background."
+      },
+      "card": {
+        "$value": "{color.white}",
+        "$description": "Primary card surface."
+      },
+      "subtle": {
+        "$value": "{color.neutral.50}",
+        "$description": "Subtle nested panel or option surface."
+      },
+      "navigation": {
+        "$value": "{color.white}",
+        "$description": "Primary application navigation surface in light mode."
+      },
+      "home-card": {
+        "$value": "{color.white}",
+        "$description": "Career-discovery card body surface in light mode."
+      },
+      "feature": {
+        "$value": "{color.brand.100}",
+        "$description": "Soft branded feature-panel surface in light mode."
+      },
+      "feature-strong": {
+        "$value": "{color.brand.200}",
+        "$description": "Stronger endpoint for feature-panel gradients in light mode."
+      },
+      "media-overlay": {
+        "$value": "{color.black}",
+        "$description": "Absolute overlay foundation used to protect text over media."
+      },
+      "brand": {
+        "$value": "{color.brand.950}",
+        "$description": "Dark branded landing surface."
+      },
+      "match-card": {
+        "$value": "{color.match.card-background}",
+        "$description": "Always-dark Match card surface."
+      },
+      "match-toast": {
+        "$value": "{color.match.toast-background}",
+        "$description": "Always-dark Match toast surface."
+      }
     },
     "border": {
-      "subtle": { "$value": "{color.neutral.75}", "$description": "Low-emphasis border on light surfaces." },
-      "default": { "$value": "{color.neutral.200}", "$description": "Default form and panel border." },
-      "strong": { "$value": "{color.neutral.400}", "$description": "High-emphasis neutral border." },
-      "match": { "$value": "{color.match.border}", "$description": "Always-dark Match border." }
+      "subtle": {
+        "$value": "{color.neutral.75}",
+        "$description": "Low-emphasis border on light surfaces."
+      },
+      "default": {
+        "$value": "{color.neutral.200}",
+        "$description": "Default form and panel border."
+      },
+      "strong": {
+        "$value": "{color.neutral.400}",
+        "$description": "High-emphasis neutral border."
+      },
+      "match": {
+        "$value": "{color.match.border}",
+        "$description": "Always-dark Match border."
+      }
     },
     "action": {
-      "primary": { "$value": "{color.brand.600}", "$description": "Primary interactive action." },
-      "primary-hover": { "$value": "{color.brand.700}", "$description": "Primary action hover state." },
-      "secondary": { "$value": "{color.brand.300}", "$description": "Secondary interactive action." }
+      "primary": {
+        "$value": "{color.brand.600}",
+        "$description": "Primary interactive action."
+      },
+      "primary-hover": {
+        "$value": "{color.brand.700}",
+        "$description": "Primary action hover state."
+      },
+      "secondary": {
+        "$value": "{color.brand.300}",
+        "$description": "Secondary interactive action."
+      }
     },
     "feedback": {
-      "success": { "$value": "{color.green.700}", "$description": "Accessible success text and indicator on light surfaces." },
-      "success-dark-surface": { "$value": "{color.match.success}", "$description": "Success indicator on the dark Match surface." },
-      "danger": { "$value": "{color.red.600}", "$description": "Danger and destructive-state color." }
+      "success": {
+        "$value": "{color.green.700}",
+        "$description": "Accessible success text and indicator on light surfaces."
+      },
+      "success-dark-surface": {
+        "$value": "{color.match.success}",
+        "$description": "Success indicator on the dark Match surface."
+      },
+      "danger": {
+        "$value": "{color.red.600}",
+        "$description": "Danger and destructive-state color."
+      }
     },
     "elevation": {
-      "card": { "$value": "{color.shadow.blue-10}", "$description": "Mode-aware shadow color for elevated cards and controls." },
-      "overlay": { "$value": "{color.shadow.black-40}", "$description": "Shadow color for controls floating above cinematic media." }
+      "card": {
+        "$value": "{color.shadow.blue-10}",
+        "$description": "Mode-aware shadow color for elevated cards and controls."
+      },
+      "overlay": {
+        "$value": "{color.shadow.black-40}",
+        "$description": "Shadow color for controls floating above cinematic media."
+      }
     },
     "category": {
-      "classes": { "$value": "{color.red.500}", "$description": "Match Classes category." },
-      "skills": { "$value": "{color.brand.600}", "$description": "Match Skills category." },
-      "workstyle": { "$value": "{color.amber.600}", "$description": "Match Workstyle category." },
-      "earning-potential": { "$value": "{color.purple.500}", "$description": "Match Earning Potential category." },
-      "future-fit": { "$value": "{color.green.450}", "$description": "Match Future Fit category." }
+      "classes": {
+        "$value": "{color.red.500}",
+        "$description": "Match Classes category."
+      },
+      "skills": {
+        "$value": "{color.brand.600}",
+        "$description": "Match Skills category."
+      },
+      "workstyle": {
+        "$value": "{color.amber.600}",
+        "$description": "Match Workstyle category."
+      },
+      "earning-potential": {
+        "$value": "{color.purple.500}",
+        "$description": "Match Earning Potential category."
+      },
+      "future-fit": {
+        "$value": "{color.green.450}",
+        "$description": "Match Future Fit category."
+      }
     },
     "path": {
-      "high-school": { "$value": "{color.path-accent.high-school}", "$description": "High School path emphasis." },
-      "university": { "$value": "{color.path-accent.university}", "$description": "University path emphasis." },
-      "job-seeker": { "$value": "{color.path-accent.job-seeker}", "$description": "Job Seeker path emphasis." }
-    },
-    "step": {
-      "$description": "Stable semantic aliases for the twelve Build-step accent modes. Gradient endpoints remain runtime derivations except for the approved Future Values override.",
-      "01": { "accent": { "$value": "{color.brand.600}", "$description": "Welcome accent." } },
-      "02": { "accent": { "$value": "{color.green.500}", "$description": "Choose Path accent." } },
-      "03": { "accent": { "$value": "{color.orange.600}", "$description": "About You accent." } },
-      "04": { "accent": { "$value": "{color.teal.700}", "$description": "Academic Journey accent." } },
-      "05": { "accent": { "$value": "{color.red.600}", "$description": "Confidence Check accent." } },
-      "06": { "accent": { "$value": "{color.teal.700}", "$description": "Spend Your Days accent." } },
-      "07": { "accent": { "$value": "{color.teal.600}", "$description": "Work Style accent." } },
-      "08": {
-        "accent": { "$value": "{color.amber.600}", "$description": "Future Values accent." },
-        "button-from": { "$value": "{color.amber.500}", "$description": "Approved Future Values button gradient start." },
-        "button-to": { "$value": "{color.amber.650}", "$description": "Approved Future Values button gradient end." },
-        "progress-from": { "$value": "{color.amber.400}", "$description": "Approved Future Values progress gradient start." },
-        "progress-to": { "$value": "{color.amber.675}", "$description": "Approved Future Values progress gradient end." }
+      "high-school": {
+        "$value": "{color.path-accent.high-school}",
+        "$description": "High School path emphasis."
       },
-      "09": { "accent": { "$value": "{color.orange.600}", "$description": "Path Forward accent." } },
-      "10": { "accent": { "$value": "{color.green.500}", "$description": "Financial accent." } },
-      "11": { "accent": { "$value": "{color.teal.600}", "$description": "Location accent." } },
-      "12": { "accent": { "$value": "{color.brand.600}", "$description": "Congratulations accent." } }
+      "university": {
+        "$value": "{color.path-accent.university}",
+        "$description": "University path emphasis."
+      },
+      "job-seeker": {
+        "$value": "{color.path-accent.job-seeker}",
+        "$description": "Job Seeker path emphasis."
+      }
     }
   },
   "typography": {
     "$type": "typography",
     "display": {
       "hero": {
-        "$value": { "fontFamily": "{fontFamily.display}", "fontSize": "{dimension.font-size.5xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.tight}" },
+        "$value": {
+          "fontFamily": "{fontFamily.display}",
+          "fontSize": "{dimension.font-size.5xl}",
+          "fontWeight": "{fontWeight.extrabold}",
+          "letterSpacing": "{dimension.letter-spacing.tight}",
+          "lineHeight": "{number.line-height.tight}"
+        },
         "$description": "Large Dreamari display heading using the licensed Favorit display face."
       }
     },
     "heading": {
-      "page": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.4xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.tight}", "lineHeight": "{number.line-height.heading}" }, "$description": "Primary page heading." },
-      "section": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.3xl}", "fontWeight": "{fontWeight.extrabold}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.heading}" }, "$description": "Section and flow heading." },
-      "card": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.2xl}", "fontWeight": "{fontWeight.bold}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.heading}" }, "$description": "Card heading." }
+      "page": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.4xl}",
+          "fontWeight": "{fontWeight.extrabold}",
+          "letterSpacing": "{dimension.letter-spacing.tight}",
+          "lineHeight": "{number.line-height.heading}"
+        },
+        "$description": "Primary page heading."
+      },
+      "section": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.3xl}",
+          "fontWeight": "{fontWeight.extrabold}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.heading}"
+        },
+        "$description": "Section and flow heading."
+      },
+      "card": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.2xl}",
+          "fontWeight": "{fontWeight.bold}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.heading}"
+        },
+        "$description": "Card heading."
+      }
     },
     "body": {
-      "large": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.lg}", "fontWeight": "{fontWeight.regular}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.body}" }, "$description": "Large introductory body text." },
-      "default": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.body-lg}", "fontWeight": "{fontWeight.regular}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.body}" }, "$description": "Default body text." },
-      "small": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.body-sm}", "fontWeight": "{fontWeight.regular}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.body}" }, "$description": "Compact supporting body text." }
+      "large": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.lg}",
+          "fontWeight": "{fontWeight.regular}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.body}"
+        },
+        "$description": "Large introductory body text."
+      },
+      "default": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.body-lg}",
+          "fontWeight": "{fontWeight.regular}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.body}"
+        },
+        "$description": "Default body text."
+      },
+      "small": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.body-sm}",
+          "fontWeight": "{fontWeight.regular}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.body}"
+        },
+        "$description": "Compact supporting body text."
+      }
     },
     "label": {
-      "default": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.body-sm}", "fontWeight": "{fontWeight.semibold}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.compact}" }, "$description": "Form and control label." },
-      "eyebrow": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.micro}", "fontWeight": "{fontWeight.bold}", "letterSpacing": "{dimension.letter-spacing.eyebrow}", "lineHeight": "{number.line-height.compact}" }, "$description": "Uppercase eyebrow label." },
-      "caption": { "$value": { "fontFamily": "{fontFamily.sans}", "fontSize": "{dimension.font-size.caption}", "fontWeight": "{fontWeight.regular}", "letterSpacing": "{dimension.letter-spacing.normal}", "lineHeight": "{number.line-height.compact}" }, "$description": "Citation and microcopy style." }
+      "default": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.body-sm}",
+          "fontWeight": "{fontWeight.semibold}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.compact}"
+        },
+        "$description": "Form and control label."
+      },
+      "eyebrow": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.micro}",
+          "fontWeight": "{fontWeight.bold}",
+          "letterSpacing": "{dimension.letter-spacing.eyebrow}",
+          "lineHeight": "{number.line-height.compact}"
+        },
+        "$description": "Uppercase eyebrow label."
+      },
+      "caption": {
+        "$value": {
+          "fontFamily": "{fontFamily.sans}",
+          "fontSize": "{dimension.font-size.caption}",
+          "fontWeight": "{fontWeight.regular}",
+          "letterSpacing": "{dimension.letter-spacing.normal}",
+          "lineHeight": "{number.line-height.compact}"
+        },
+        "$description": "Citation and microcopy style."
+      }
     }
   },
   "shadow": {
     "$type": "shadow",
     "card": {
-      "$value": { "color": "{color.shadow.amber-12}", "offsetX": "{dimension.spacing.0}", "offsetY": "{dimension.spacing.0}", "blur": "{dimension.spacing.24}", "spread": "{dimension.spacing.0}" },
+      "$value": {
+        "color": "{color.shadow.amber-12}",
+        "offsetX": "{dimension.spacing.0}",
+        "offsetY": "{dimension.spacing.0}",
+        "blur": "{dimension.spacing.24}",
+        "spread": "{dimension.spacing.0}"
+      },
       "$description": "Light Flow card glow."
     },
     "selection": {
-      "$value": { "color": "{color.shadow.blue-10}", "offsetX": "{dimension.spacing.0}", "offsetY": "{dimension.spacing.4}", "blur": "{dimension.spacing.24}", "spread": "{dimension.spacing.0}" },
+      "$value": {
+        "color": "{color.shadow.blue-10}",
+        "offsetX": "{dimension.spacing.0}",
+        "offsetY": "{dimension.spacing.4}",
+        "blur": "{dimension.spacing.24}",
+        "spread": "{dimension.spacing.0}"
+      },
       "$description": "Light selection-card elevation."
     }
   }

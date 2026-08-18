@@ -15,7 +15,7 @@ const TOAST_DURATION_MS = 3000;
 type MatchExperienceProps = {
   paths: MatchPath[];
   onComplete: () => void;
-  /** Fires whenever the "Path Saved!" celebration opens/closes — lets FlowContainer swap
+  /** Fires whenever the "Path Saved!" celebration opens/closes — lets BuildFlowExperience swap
    * in the same colorful, interactive AuroraBackground + confetti treatment the Build
    * finale uses instead of the plain static MatchBackdrop, for exactly as long as the
    * celebration is on screen. */
