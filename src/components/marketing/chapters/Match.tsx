@@ -8,7 +8,11 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // All three cards are real Business/Money/Office-world careers with real copy pulled
 // from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
 // standard entry-level ranges for these roles (not in the taxonomy source, which has no
-// salary column filled in yet).
+// salary column filled in yet). All three now use real per-career photos pulled from
+// the design system's Figma file: Investment Banking and Project Manager from node
+// 3156-15148, Operations from the larger "Section 2" library (node 3156-15794, "TEMPLATE
+// FOR Business Money and Office" / "Operations manager") — the first section didn't
+// include a dedicated Operations shot.
 //
 // Per direct feedback this is now a guided, two-beat tutorial rather than a genuinely
 // open swipe: Operations goes first as the "how to pass" demo card (liking it never
@@ -19,7 +23,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 const CARDS = [
   {
     key: "ops",
-    photo: "/images/career-pe-analyst.jpg",
+    photo: "/images/career-operations.jpg",
     title: "Operations",
     blurb: "Keeps the day-to-day running of a business working.",
     salary: "$65K-110K",
@@ -27,7 +31,7 @@ const CARDS = [
   },
   {
     key: "iba",
-    photo: "/images/career-chief-executive.jpg",
+    photo: "/images/career-investment-banking.jpg",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
     salary: "$85K-150K",
@@ -35,7 +39,7 @@ const CARDS = [
   },
   {
     key: "pm",
-    photo: "/images/career-ux-designer.jpg",
+    photo: "/images/career-project-manager.jpg",
     title: "Project Manager",
     blurb: "Keeps a project on schedule and everyone talking to each other.",
     salary: "$70K-115K",

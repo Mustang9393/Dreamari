@@ -4,6 +4,63 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
+- Date: 2026-08-18
+
+### 2026-08-18 real per-career photos for Match and Explore
+
+- Scope: `Match.tsx`/`Explore.tsx` `CARDS` data only (photos + one new Explore card) plus
+  new files under `public/images/` — no other logic, mechanics, or copy touched.
+- Sourced real per-career photos from the design system's Figma file
+  (`Dreamari-Design-System-v2.0`) via the Figma MCP tools (`get_design_context` +
+  `get_screenshot`, no separate OAuth needed — distinct from the unrelated
+  `plugin:figma:figma` skill integration, which does need interactive auth and was not
+  used). Downloaded each via Figma desktop's local dev-asset bridge
+  (`http://localhost:3845/assets/<hash>.png`, only reachable while Figma desktop is open
+  on this machine) and converted PNG → JPEG with `sips -s format jpeg -s formatOptions 85`
+  to match the existing `career-<slug>.jpg` naming convention.
+- Match keeps its existing 3-card guided-tutorial composition unchanged (Operations →
+  Investment Banking → Project Manager); only photos changed. Operations got its first-
+  ever real photo (from node 3156-15794, the larger "TEMPLATE FOR Business Money and
+  Office" library, since the well-organized node 3156-15148 has no dedicated Operations
+  shot). Investment Banking's photo is a real photo but low resolution (198x297px vs
+  ~941x1672px for the others, from node 3156-15840) — flagged explicitly to the user, who
+  confirmed using it anyway. Project Manager's existing photo (from 3156-15148) is
+  unchanged; user deferred providing an alternate.
+- Explore's 4-tier match-strength spread (Strong Match/Match/Stretch/Wildcard) is back to
+  full per direct request: Accountant and Management Analyst got real photos (from node
+  3156-15148, replacing stand-in shots reused from Match's own photoshoot), Human
+  Resources is a brand-new 4th card (Stretch tier, `tagColor: "#ff9640"`, inherits
+  Business & Finance's existing font/color via `WORLDS` with no lookup changes needed),
+  and Food Scientist (Wildcard) got an updated real photo from node 3156-15149 (replacing
+  an earlier user-supplied stand-in).
+- **Workaround worth reusing**: the large `3156-16315` library node is too disorganized to
+  search blindly — `get_metadata` on it exceeds the tool's token limit and dumps to a
+  file, and even decoded, layer names don't expose actual rendered text for
+  generically-named text layers (e.g. "Title"), so career titles aren't
+  `grep`-able — only `get_design_context`/`get_screenshot` on a specific node reveals what
+  it actually shows. After a few blind guesses missed, pivoted to asking the user for
+  exact frame links one at a time instead of continuing to search — much faster, use this
+  pattern first for any future ambiguous/large Figma asset needs.
+- Old stand-in images (`career-pe-analyst.jpg`, `career-ux-designer.jpg`) are no longer
+  referenced anywhere in `src/` after this change but were left in place, not deleted.
+- Validation: `tsc --noEmit`, `npm run build`, and `npm run tokens:check` (503 tokens) all
+  pass clean. `eslint` has one pre-existing, unrelated failure in `Explore.tsx` (a
+  ref-accessed-during-render warning in the carousel-height calculation, not touched by
+  this change) — not introduced this session.
+- Browser-verified live: Investment Banking's and Operations' new photos both confirmed
+  rendering in Match's card stack (DOM text + `img.src` + raw `fetch()` byte-size checks,
+  since this session's browser-automation tab repeatedly hit the known `document.hidden`
+  issue below); Food Scientist's updated photo confirmed served correctly in Explore via
+  `fetch()`.
+- Recurring environment quirk, same as noted elsewhere in this file: the browser tool's
+  tab frequently reports `document.hidden === true`, which not only blackens screenshots
+  but also **suspends CSS transitions** — so Match's swipe-exit animation's `transitionend`
+  event (which `onExitTransitionEnd` depends on to advance the card stack) never fires,
+  making the deck look stuck on the front card under automation even though the code is
+  correct. Confirmed by dispatching a synthetic `transitionend` event to unstick it during
+  verification. This does not affect real users; only ever seen through this automation
+  tool.
+
 - Date: 2026-08-15
 - Active branch: `redesign/marketing-handoff-rebuild` (branched from `main`; `archive/pre-redesign`
   preserves pre-rebuild `main` per the handoff brief's own instruction)

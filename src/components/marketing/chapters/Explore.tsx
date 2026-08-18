@@ -10,23 +10,26 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // Matches Match's card size (168 x 300 mu) per feedback that the two should read as the
 // same scale of thing.
 // The industry line (under the title) says what field a career is actually in — the
-// two business-track cards share "Business & Finance," but the Wildcard genuinely
-// isn't, so it gets its own. Match strength (Strong Match/Match/Wildcard) is a
+// three business-track cards share "Business & Finance," but the Wildcard genuinely
+// isn't, so it gets its own. Match strength (Strong Match/Match/Stretch/Wildcard) is a
 // separate corner-ribbon badge rather than replacing the industry line — the two say
-// different things and shouldn't compete for the same line. Photos for the
-// business-track cards are reused stand-ins from the shoot we already have on hand
-// (neither is a literal photoshoot of that specific career); Food Scientist uses a
-// user-supplied photo instead. Salary bands are the same standard entry-level
+// different things and shouldn't compete for the same line. Accountant, Management
+// Analyst, and Human Resources use real per-career photos pulled from the design
+// system's Figma file (node 3156-15148) — Accountant/Management Analyst previously
+// reused stand-in shots from Match's own photoshoot; Food Scientist keeps its own
+// separately user-supplied photo. Salary bands are the same standard entry-level
 // estimates used in Match, not sourced from the taxonomy sheet (which has no salary
 // column filled in).
-// Trimmed from 4 to 3 cards per direct request — dropped Human Resources/Stretch,
-// keeping the two ends of the match-strength spectrum (Strong Match, Match) plus the
-// Wildcard, rather than the middle-of-the-road one.
+// Human Resources/Stretch — dropped earlier this session for being the
+// middle-of-the-road tier between the match-strength spectrum's two ends and the
+// Wildcard — is back per direct request, restoring the full four-tier spread:
+// Strong Match, Match, Stretch, Wildcard.
 const CARDS = [
-  { photo: "/images/career-pe-analyst.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
-  { photo: "/images/career-ux-designer.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
+  { photo: "/images/career-accountant.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
+  { photo: "/images/career-management-analyst.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
+  { photo: "/images/career-human-resources.jpg", title: "Human Resources", industry: "Business & Finance", matchLevel: "Stretch", tagColor: "#ff9640", salary: "$45K-70K", major: "Human Resources" },
   // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
-  // it should never say "Business & Finance" just because the other two do.
+  // it should never say "Business & Finance" just because the other three do.
   { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
