@@ -39,12 +39,14 @@ type Phase = "build" | "loading" | "match";
 function BackgroundSpace() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
-      {/* px floors on every nebula: vw-only sizing collapsed to near-invisible
-         blobs on phones, leaving the flow on flat black with no glass depth. */}
-      <div className="absolute rounded-full" style={{ width: "max(60vw, 620px)", aspectRatio: "1", left: "50%", top: "-16vh", transform: "translateX(-35%)", background: "var(--color-brand-500)", opacity: 0.32, filter: "blur(160px)" }} />
-      <div className="absolute rounded-full" style={{ width: "max(70vw, 680px)", aspectRatio: "1", left: "min(-14vw, -60px)", top: "52vh", background: "var(--color-accent-subtle)", opacity: 0.22, filter: "blur(180px)" }} />
-      <div className="absolute rounded-full" style={{ width: "max(50vw, 480px)", aspectRatio: "1", left: "12vw", top: "28vh", background: "var(--color-decorative-pink-glow)", opacity: 0.12, filter: "blur(150px)" }} />
-      <div className="absolute rounded-full" style={{ width: "max(80vw, 560px)", height: "max(30vh, 260px)", left: "5vw", top: "4vh", background: "#ffffff", opacity: 0.06, filter: "blur(120px)" }} />
+      {/* Radial-gradient nebulas, NOT filter:blur() — giant blur() layers blow
+         iOS Safari's GPU memory and crash the tab ("a problem repeatedly
+         occurred"), which is exactly what happened in prod. Gradients give the
+         same soft wash for free. px floors keep phones from going flat black. */}
+      <div className="absolute" style={{ width: "max(90vw, 900px)", aspectRatio: "1", left: "50%", top: "-30vh", transform: "translateX(-40%)", background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 34%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) 14%, transparent) 40%, transparent 68%)" }} />
+      <div className="absolute" style={{ width: "max(100vw, 980px)", aspectRatio: "1", left: "min(-30vw, -220px)", top: "40vh", background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-subtle) 24%, transparent) 0%, transparent 66%)" }} />
+      <div className="absolute" style={{ width: "max(75vw, 700px)", aspectRatio: "1", left: "4vw", top: "18vh", background: "radial-gradient(circle, color-mix(in srgb, var(--color-decorative-pink-glow) 14%, transparent) 0%, transparent 64%)" }} />
+      <div className="absolute" style={{ width: "max(95vw, 820px)", height: "max(45vh, 380px)", left: "0", top: "-4vh", background: "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.07) 0%, transparent 62%)" }} />
     </div>
   );
 }

@@ -276,9 +276,10 @@ export function ChipGrid({
             type="button"
             aria-pressed={isSelected}
             onClick={(e) => toggle(option, e)}
-            className={`flex h-full min-h-[48px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 hover:-translate-y-px sm:text-[14px] ${
-              variant === "cinematic" ? "backdrop-blur-sm" : ""
-            }`}
+            // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
+            // is a WebKit compositing bomb on phones; the token surface reads
+            // fine without it.
+            className="flex h-full min-h-[48px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 hover:-translate-y-px sm:text-[14px]"
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
               borderColor: isSelected ? accent : "var(--color-glass-border)",

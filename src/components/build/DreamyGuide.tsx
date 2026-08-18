@@ -122,8 +122,8 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
         >
           <div
             aria-hidden
-            className="absolute inset-[-70%] rounded-full blur-2xl"
-            style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 32%, transparent), color-mix(in srgb, var(--color-accent-purple) 10%, transparent) 45%, transparent 68%)" }}
+            className="absolute inset-[-90%] rounded-full"
+            style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 30%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 9%, transparent) 42%, transparent 64%)" }}
           />
           <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
             <div ref={tiltRef} className="relative h-full w-full [transition:transform_.06s_linear] [will-change:transform]">
@@ -178,8 +178,8 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
       >
         <div
           aria-hidden
-          className="absolute inset-[-70%] rounded-full blur-2xl"
-          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 36%, transparent), color-mix(in srgb, var(--color-accent-purple) 11%, transparent) 45%, transparent 68%)" }}
+          className="absolute inset-[-90%] rounded-full"
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 34%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 10%, transparent) 42%, transparent 64%)" }}
         />
         <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
           <div ref={tiltRef} className="relative h-full w-full [transition:transform_.06s_linear] [will-change:transform]">
