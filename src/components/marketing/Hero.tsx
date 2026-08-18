@@ -16,28 +16,45 @@ export function Hero({ view, onChangeView }: HeroProps) {
   return (
     <section ref={heroRef} className="relative isolate overflow-hidden px-6 pt-[76px]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
-         (hero-accent-purple -> hero-mid -> background). */}
+         (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
+         before the section's own bottom edge — this used to cover Hero's full height
+         at a flat 60% opacity with a hard stop right at the section boundary, which
+         read as a visible seam once the page background became a vivid multi-color
+         ambient wash (MarketingApp.tsx) instead of one flat color: Hero looked
+         distinctly different from the section immediately below it, with a sharp line
+         exactly where one ended and the other began. Fading this overlay's own
+         opacity out lets it dissolve into that same ambient layer underneath instead
+         of cutting off hard. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{ background: "linear-gradient(90deg, var(--hero-accent-purple), var(--hero-mid) 65%, var(--background) 100%)" }}
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "linear-gradient(90deg, var(--hero-accent-purple), var(--hero-mid) 65%, var(--background) 100%)",
+          opacity: 0.6,
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)",
+        }}
       />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-56 -right-40 h-[640px] w-[640px] rounded-full blur-[10px]"
         style={{ background: "radial-gradient(circle at 50% 50%, rgba(47,107,242,.35), rgba(122,45,226,.18) 45%, transparent 70%)" }}
       />
-      {/* Fades the hero's own bottom edge to the flat background color right where the
-          mascot gets cropped. Kept short and back-loaded (only the last ~15% of its own
-          height is fully opaque): the mascot's eyes sit near the BOTTOM of its visible
-          62% crop (not the middle), so a taller/earlier fade here doesn't just smooth
-          the clip line, it hides the eyes entirely on short mobile viewports where the
-          mascot is already at its 190px floor size. The seam this was fixing is handled
-          by keeping the ambient glow (Mascot.tsx) well clear of the crop edge instead. */}
+      {/* Dims (rather than replaces) the hero's own bottom edge right where the mascot
+         gets cropped by this section's overflow-hidden — fading in a translucent BLACK
+         (not a flat opaque color) means it darkens whatever's actually behind it at
+         that point instead of painting over it with one hardcoded hue, so it still
+         blends once that background is a vivid multi-color ambient gradient rather
+         than a single flat color. A first attempt tried fading the mascot's own alpha
+         out via mask-image instead of a curtain at all, which seemed cleaner, but
+         mask-image also clips any filter effects on its descendants (here, the
+         mascot's drop-shadow) to the masked box's own bounds — since the shadow
+         normally spreads a little past the mascot's raster edges, that turned into a
+         visible rectangular halo cutoff, a worse artifact than the one being fixed. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[48px]"
-        style={{ background: "linear-gradient(180deg, transparent, var(--background) 88%)" }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[70px]"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(2,3,10,0.62) 88%)" }}
       />
 
       <div className="relative z-[2] mx-auto max-w-[1200px]">

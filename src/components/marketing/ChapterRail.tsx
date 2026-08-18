@@ -5,8 +5,8 @@ import { type RefObject, useEffect, useRef, useState } from "react";
 const CHAPTERS = [
   { id: "build", label: "Build", color: "#6366f1" },
   { id: "match", label: "Match", color: "#ffb81f" },
-  { id: "play", label: "Play", color: "#3b82f6" },
   { id: "explore", label: "Explore", color: "#1fc76e" },
+  { id: "play", label: "Play", color: "#3b82f6" },
   { id: "connect", label: "Connect", color: "#00c8dc" },
 ];
 
@@ -69,7 +69,7 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
         className="absolute top-0 left-1/2 z-[1] w-px -translate-x-1/2 rounded-full transition-[height] duration-250 ease-out"
         style={{
           height: `${(activeIndex / (CHAPTERS.length - 1)) * 100}%`,
-          background: "linear-gradient(180deg,#6366f1,#ffb81f,#3b82f6,#1fc76e,#00c8dc)",
+          background: "linear-gradient(180deg,#6366f1,#ffb81f,#1fc76e,#3b82f6,#00c8dc)",
         }}
       />
       {CHAPTERS.map((chapter, i) => {

@@ -256,7 +256,6 @@ export function ExploreChapter() {
       title="Explore"
       color="#1fc76e"
       oneliner="careers, companies, and pathways with depth."
-      flip
       graphicRef={graphicRef}
       playing={false}
       graphicRevealed={graphicRevealed}
@@ -394,33 +393,30 @@ function ExploreCarousel() {
     };
   }, []);
 
-  function goToPrevChapter() {
+  function goToNextChapter() {
     document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  function goToNextChapter() {
-    document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
 
-  // Committing past the first/last card advances to the adjacent chapter for
-  // every input path (swipe, wheel, nav buttons) — this was briefly narrowed to
-  // "just clamp, never jump" per feedback that it felt like launching the reader
-  // somewhere unasked, then narrowed AGAIN to jump only on a touch swipe (not
-  // wheel), on the assumption a desktop reader always has the rest of the page to
-  // scroll from instead. That assumption didn't hold: hovering directly over the
-  // card and continuing to scroll down left a desktop reader just as stuck as a
-  // phone's touch-action:none track did — there's no free space to grab if your
-  // cursor already happens to be sitting on the graphic. So this is uniform again
-  // across every input: a genuine, threshold-exceeding commit at the boundary
-  // always advances, since the alternative is a reader with no way to proceed at
-  // all, which is worse than an occasional "that scrolled further than expected."
+  // Committing past the LAST card advances to the next chapter (Play) — this was
+  // briefly narrowed to "just clamp, never jump" per feedback that it felt like
+  // launching the reader somewhere unasked, then narrowed AGAIN to jump only on a
+  // touch swipe (not wheel), on the assumption a desktop reader always has the
+  // rest of the page to scroll from instead. That assumption didn't hold:
+  // hovering directly over the card and continuing to scroll down left a desktop
+  // reader just as stuck as a phone's touch-action:none track did — there's no
+  // free space to grab if your cursor already happens to be sitting on the
+  // graphic. So the forward jump is uniform across every input.
+  //
+  // Going backward past the FIRST card does NOT jump to the previous chapter
+  // (Match) — per direct feedback that jumping away read as unwanted. It just
+  // clamps at the first card instead.
   function commit(direction: 1 | -1) {
     setScrolled(true);
     if (direction === 1) {
       if (activeIndex < LAST_INDEX) setActiveIndex((i) => i + 1);
       else goToNextChapter();
-    } else {
-      if (activeIndex > 0) setActiveIndex((i) => i - 1);
-      else goToPrevChapter();
+    } else if (activeIndex > 0) {
+      setActiveIndex((i) => i - 1);
     }
   }
 

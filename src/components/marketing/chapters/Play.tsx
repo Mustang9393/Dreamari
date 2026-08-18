@@ -6,19 +6,24 @@ import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
 // A single day-in-the-life situational moment replacing the earlier glossary quiz and
-// the earlier 3-scenario auto-advancing cycle: one scene, three genuinely good ways to
-// react to it (illusion of choice, same as Build/Match — no wrong branch to build), and
-// a real "Try again" replay instead of auto-advancing to a next question. The point is
-// the immediate hit of positive feedback on tap, not a quiz result or a queue of scenes.
+// the earlier 3-scenario auto-advancing cycle: one scene, a real "Try again" replay
+// instead of auto-advancing to a next question. The point is the immediate hit of
+// positive feedback on tap, not a quiz result or a queue of scenes.
+//
+// Per direct feedback, only the genuinely right answer is clickable — same locked-path
+// pattern as Build's interest picker — rather than three equally-valid options; the
+// other two are shown but inert, so the demo reads as "this is the right move," not an
+// open multiple-choice with no wrong branch.
 const SCENARIO = {
   scene: "Christina (VP) introduces you to Marcus, the Managing Director. The team pitches to a big company tomorrow.",
   prompt: "What should you do first?",
   options: [
     { label: "Ask for your role and deadline", response: "Smart, clarify scope first." },
-    { label: "Start changing slides", response: "Fast and confident under pressure." },
-    { label: "Wait for Jordan (Fellow Analyst)", response: "Teamwork keeps deals moving." },
+    { label: "Start changing slides", response: "" },
+    { label: "Wait for Jordan (Fellow Analyst)", response: "" },
   ],
 };
+const CORRECT_INDEX = 0;
 
 const CHECK = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -35,6 +40,7 @@ export function PlayChapter() {
       title="Play"
       color="#3b82f6"
       oneliner="a day-in-the-life situation where every instinct pays off."
+      flip
       graphicRef={graphicRef}
       playing={false}
       graphicRevealed={graphicRevealed}
@@ -58,7 +64,7 @@ function PlayDemo() {
   useEffect(() => {
     if (pickedIndex === null) return;
     const timeout = setTimeout(() => {
-      document.getElementById("explore")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 950);
     return () => clearTimeout(timeout);
   }, [pickedIndex]);
@@ -133,7 +139,7 @@ function PlayDemo() {
         >
           <div>
             <p className="font-mono uppercase" style={{ fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
-              Day in the life
+              Day in the life of an investment banker
             </p>
             {/* A dialogue-bubble treatment for the scene text — reads as an NPC/
                narrator line the way an RPG's own dialogue box would, rather than
@@ -159,21 +165,25 @@ function PlayDemo() {
              feedback. */}
           <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 5px)" }}>
             {SCENARIO.options.map((option, i) => {
+              const isCorrect = i === CORRECT_INDEX;
               const isPicked = pickedIndex === i;
-              const isNudge = pickedIndex === null && i === 0;
+              const isNudge = pickedIndex === null && isCorrect;
               return (
                 <button
                   key={option.label}
                   type="button"
-                  disabled={pickedIndex !== null}
-                  onClick={() => setPickedIndex(i)}
-                  className={`flex items-center rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""}`}
+                  disabled={pickedIndex !== null || !isCorrect}
+                  aria-disabled={!isCorrect}
+                  onClick={() => {
+                    if (isCorrect) setPickedIndex(i);
+                  }}
+                  className={`flex items-center rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""} ${isCorrect ? "cursor-pointer" : "cursor-default"}`}
                   style={{
                     padding: "calc(var(--mu) * 7px) calc(var(--mu) * 10px)",
                     gap: "calc(var(--mu) * 8px)",
                     background: isPicked ? "color-mix(in srgb, #3b82f6 30%, var(--glass-surface-2))" : "var(--glass-surface-2)",
                     borderColor: isPicked ? "#3b82f6" : "var(--glass-border)",
-                    opacity: pickedIndex !== null && !isPicked ? 0.5 : 1,
+                    opacity: pickedIndex === null ? (isCorrect ? 1 : 0.5) : isPicked ? 1 : 0.5,
                   }}
                 >
                   <span className="flex-1" style={{ fontSize: "clamp(13px, calc(var(--mu) * 10px), 15px)", fontWeight: 600, color: "#fff" }}>
@@ -186,7 +196,7 @@ function PlayDemo() {
                     strokeWidth="2.4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ width: "calc(var(--mu) * 13px)", height: "calc(var(--mu) * 13px)", flex: "none" }}
+                    style={{ width: "calc(var(--mu) * 13px)", height: "calc(var(--mu) * 13px)", flex: "none", opacity: isCorrect ? 1 : 0.35 }}
                   >
                     <path d="M5 12h14" />
                     <path d="m13 6 6 6-6 6" />

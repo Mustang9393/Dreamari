@@ -106,14 +106,14 @@ function MatchDemo() {
   // somewhere, so it falls back to matching with whichever card was last on screen.
   const matched = matchedCard !== null;
 
-  // The emotional payoff of the whole deck, then straight into Play — advance the
+  // The emotional payoff of the whole deck, then straight into Explore — advance the
   // moment the celebration's own animation actually finishes (bounce-in 0.7s, text
   // fade-in starting at 0.3s and running 0.5s more = settled by ~0.8s), not on a
   // separate multi-second "linger" timer stacked on top of it.
   useEffect(() => {
     if (!matched) return;
     const timeout = setTimeout(() => {
-      document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("explore")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 950);
     return () => clearTimeout(timeout);
   }, [matched]);

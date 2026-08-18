@@ -54,8 +54,8 @@ export function HowItWorks() {
       <div ref={wrapRef} className="pb-8 sm:pb-12">
         <BuildChapter />
         <MatchChapter />
-        <PlayChapter />
         <ExploreChapter />
+        <PlayChapter />
         <ConnectChapter />
       </div>
     </>

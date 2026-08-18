@@ -13,6 +13,21 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // makes sense regardless of what a reader tries.
 const INTERESTS = ["Tech", "Business & Money", "Health"];
 const CLICKABLE = "Business & Money";
+// The rest of the real assessment's interest categories, straight from the design
+// system's 13-world set (tokens.css) — surfaced on hover of the "+ more" chip so it
+// reads as "there's a real, specific list behind this," not just decorative copy.
+const MORE_INTERESTS = [
+  "Building & Construction",
+  "Arts, Media & Sport",
+  "Food, Farming & Nature",
+  "Science & Research",
+  "Law, Safety & Government",
+  "Driving, Flying & Shipping",
+  "Factories & Making Things",
+  "Fixing Machines & Engines",
+  "Helping & Human Services",
+  "Teaching & Learning",
+];
 
 const CHECK = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
@@ -49,6 +64,7 @@ export function BuildChapter() {
 function BuildDemo() {
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [moreHovered, setMoreHovered] = useState(false);
 
   function pick(interest: string) {
     if (interest !== CLICKABLE) return;
@@ -157,20 +173,68 @@ function BuildDemo() {
           // clutter and plain text read as inert copy easy to overlook. A single
           // button-like pill (not a full second button) signals "there's more behind
           // this whole assessment" without repeating itself three times.
-          <div className="flex justify-center">
-            <span
-              className="flex flex-none items-center rounded-full border font-bold uppercase"
+          <div className="relative flex justify-center">
+            {/* Hover-revealed list of the assessment's other interest categories —
+               per direct feedback the chip should actually be interactive, not a
+               static label. Shown on hover only (no click target: this demo has
+               nothing real to navigate to for "more"), same restraint as Build's
+               own Tech/Health rows being hover-only, not clickable. */}
+            <button
+              type="button"
+              tabIndex={-1}
+              onMouseEnter={() => setMoreHovered(true)}
+              onMouseLeave={() => setMoreHovered(false)}
+              onFocus={() => setMoreHovered(true)}
+              onBlur={() => setMoreHovered(false)}
+              className="flex flex-none cursor-pointer items-center rounded-full border font-bold uppercase transition-colors duration-150"
               style={{
                 fontSize: "calc(var(--mu) * 8.5px)",
                 letterSpacing: "0.04em",
                 padding: "calc(var(--mu) * 5px) calc(var(--mu) * 12px)",
-                color: "var(--muted-foreground)",
-                borderColor: "var(--glass-border)",
-                background: "var(--glass-surface-1)",
+                color: moreHovered ? "var(--foreground)" : "var(--muted-foreground)",
+                borderColor: moreHovered ? "var(--muted-foreground)" : "var(--glass-border)",
+                background: moreHovered ? "var(--glass-surface-2)" : "var(--glass-surface-1)",
               }}
             >
               + more
-            </span>
+            </button>
+            {/* inset-x-0 + flex justify-center (not left-1/2 + -translate-x-1/2 on the
+               bubble itself) — centers the bubble against the FULL WIDTH of this row
+               via layout instead of percentage-of-self transform math, so it can't
+               drift off to one side the way the transform-based approach did. Only
+               the small entrance nudge (translateY) needs a transform now, and that's
+               single-axis with no centering math to get wrong. */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-full z-10 flex justify-center"
+              style={{ marginBottom: "calc(var(--mu) * 8px)" }}
+            >
+              <div
+                role="tooltip"
+                className="rounded-[var(--radius-md)] border text-left transition-all duration-150"
+                style={{
+                  width: "max(220px, 80cqw)",
+                  maxWidth: "320px",
+                  padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px)",
+                  background: "var(--glass-surface-3)",
+                  borderColor: "var(--glass-border)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  boxShadow: "var(--shadow-md)",
+                  opacity: moreHovered ? 1 : 0,
+                  transform: moreHovered ? "translateY(0)" : "translateY(4px)",
+                }}
+              >
+                <p
+                  className="font-bold uppercase"
+                  style={{ fontSize: "calc(var(--mu) * 8px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}
+                >
+                  Plus 10 more categories
+                </p>
+                <p className="mt-1.5 leading-snug" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--foreground)" }}>
+                  {MORE_INTERESTS.join(" · ")}
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           <p className="text-center" style={{ fontSize: "calc(var(--mu) * 10.5px)", color: "var(--muted-foreground)" }}>

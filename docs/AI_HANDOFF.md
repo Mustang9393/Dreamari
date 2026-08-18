@@ -6,6 +6,68 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 background depth, chapter reorder, Play/Build interaction tweaks
+
+- **Background**: the whole How It Works storyboard sat on flat `var(--background)`
+  (near-black) below Hero's own gradient, which fades fully to that flat color by its
+  bottom edge (per ChapterShell's earlier "no per-chapter background override"
+  decision). Per direct feedback ("too much dead black space"), added a persistent
+  ambient backdrop in `MarketingApp.tsx`: a single `position: fixed` div (first child,
+  NOT negative z-index — a negative z-index would sink it behind this wrapper's own
+  ancestor backgrounds in `globals.css`, hiding it entirely) with several large
+  overlapping `radial-gradient` ellipses in blue/purple/cyan (`--primary`,
+  `--hero-accent-purple`, `--world-driving-flying-shipping`, `--accent`), tuned up
+  twice for intensity. Hidden in the Schools/light theme. This surfaced two seams that
+  used to be invisible against flat black and are now visible against a vivid
+  backdrop, both fixed in `Hero.tsx`: (1) Hero's own horizontal gradient overlay
+  covered its full section height at a flat 60% opacity with a hard stop at the
+  section boundary — added a vertical `mask-image` fade so it dissolves into the
+  ambient layer instead of cutting off; (2) the curtain fading the mascot's crop line
+  to flat `var(--background)` now mismatched the vivid backdrop below it — changed to
+  fade to a translucent black (dims whatever's behind it rather than replacing it with
+  one hardcoded hue). A first attempt at (2) tried fading the mascot's own alpha via
+  `mask-image` in `Mascot.tsx` instead of a curtain at all (no color to mismatch,
+  seemed cleaner) — reverted: `mask-image` also clips any `filter` effects on
+  descendants (the mascot's `drop-shadow`) to the masked box's bounds, and since that
+  shadow normally spreads a little past the mascot's raster edges, it turned into a
+  visible rectangular halo cutoff, worse than the seam being fixed.
+- **Chapter order**: Play moved to after Explore per direct request (new order Build →
+  Match → Explore → Play → Connect). Updated in three places that all hardcode chapter
+  order/adjacency: `HowItWorks.tsx` (render order), `ChapterRail.tsx` (the `CHAPTERS`
+  array driving the side progress-dot nav and its gradient line — order and colors both
+  had to move together), and each chapter's own hardcoded `scrollIntoView` target for
+  "advance to next chapter" (Match → now targets `explore`; Play → now targets
+  `connect`). Also swapped which of Explore/Play gets ChapterShell's `flip` prop (text/
+  graphic side swap) — Match and Explore were both `flip` under the new order, which
+  would put two flipped chapters back-to-back and break the alternating left/right
+  rhythm; moved `flip` from Explore to Play to restore the zigzag.
+- **Explore boundary nav**: per direct feedback, committing UP past the first card no
+  longer jumps to the previous chapter (Match) — it just clamps there now. Committing
+  DOWN past the last card still jumps forward (to Play now, not Connect) since that
+  direction has a real "reader is stuck with no room to scroll" problem this component's
+  own wheel/pointer handlers create by calling `preventDefault()`; going backward at
+  the very first card doesn't have that problem, native scroll still works normally.
+- **Play**: only the correct answer ("Ask for your role and deadline") is clickable now,
+  same locked-path pattern as Build's interest picker — the other two options are shown
+  but inert (dimmed, `disabled`), rather than three equally-valid choices. Label above
+  the scene changed from "Day in the life" to "Day in the life of an investment banker"
+  per direct request.
+- **Build**: the "+ more" chip is now a real hover target (background/border feedback +
+  a tooltip listing the other 10 interest categories from the design system's 13-world
+  set) instead of a static label. Hit one real bug building it: the tooltip's original
+  `left-1/2` + `-translate-x-1/2` centering rendered ~160px (exactly half the tooltip's
+  own width) too far left — traced to the combination not resolving as expected here;
+  switched to a `inset-x-0` + `flex justify-center` wrapper instead, which centers via
+  layout rather than percentage-of-self transform math and isn't susceptible to
+  whatever caused the miscalculation.
+- Section-height sanity check (desktop, this viewport): Build 690px, Match/Explore/Play
+  784px each (uniform — the three card-driven chapters share the same frame ceiling as
+  designed), Connect 584px (intentionally `compact`). Nothing is disproportionately
+  long.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` (503 tokens) all
+  pass clean. `eslint` has the same one pre-existing, unrelated failure in
+  `Explore.tsx` noted in the entry above (not touched this round).
+
 ### 2026-08-18 follow-up: Investment Banking photo swap, Food Scientist re-verified
 
 - User supplied a better Investment Banking photo directly as a pasted image in chat
