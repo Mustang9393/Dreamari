@@ -205,7 +205,9 @@ function PostCard() {
         </p>
         <div className="mt-2 flex items-center" style={{ gap: "calc(var(--mu) * 9px)" }}>
           <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 34px)", height: "calc(var(--mu) * 34px)" }}>
-            <Image src={ASKER.photo} alt="" fill className="object-cover" />
+            {/* sizes: this avatar renders at calc(--mu * 34px), i.e. ~51px at --mu's
+               1.5 max — without sizes, next/image assumes 100vw and serves w=3840. */}
+            <Image src={ASKER.photo} alt="" fill sizes="52px" className="object-cover" />
           </div>
           <div>
             <div className="font-bold" style={{ fontSize: "calc(var(--mu) * 12.5px)", color: ASKER.color }}>
@@ -251,7 +253,7 @@ function PostCard() {
             >
               <div className="flex items-center" style={{ gap: "calc(var(--mu) * 7px)" }}>
                 <div className="relative flex-none overflow-hidden rounded-full" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                  <Image src={reply.photo} alt="" fill className="object-cover" />
+                  <Image src={reply.photo} alt="" fill sizes="34px" className="object-cover" />
                 </div>
                 <div className="flex items-center" style={{ gap: "calc(var(--mu) * 4px)" }}>
                   <span className="font-bold" style={{ fontSize: "calc(var(--mu) * 11.5px)", color: reply.color }}>

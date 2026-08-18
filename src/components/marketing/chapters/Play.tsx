@@ -90,7 +90,9 @@ function PlayDemo() {
            which is still the clear majority of the card once the panel below is
            kept compact. */}
         <div className="relative min-h-0 flex-1">
-          <Image src="/images/play-illustration.jpg" alt="" fill className="object-cover" style={{ objectPosition: "center 30%" }} />
+          {/* sizes mirrors this card's own width clamp below (90cqw capped at 560px) —
+             without it next/image assumes 100vw and serves a w=3840 file. */}
+          <Image src="/images/play-illustration.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="object-cover" style={{ objectPosition: "center 30%" }} />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 bottom-0"

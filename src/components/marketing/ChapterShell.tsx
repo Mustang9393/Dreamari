@@ -76,7 +76,16 @@ export function ChapterShell({
           <h2
             className="font-extrabold uppercase"
             style={{
-              fontSize: "clamp(2.6rem, 6vw, 5.2rem)",
+              // Ceiling is 4.6rem, NOT higher — this was briefly bumped to 5.2rem for
+              // "text should scale with screen size" and it broke CONNECT/EXPLORE on
+              // wide laptops: background-clip:text only paints gradient inside the
+              // element's own box, this copy column caps at 360px, and at 5.2rem the
+              // longer titles overflow that box — glyphs past the edge get NO
+              // background, i.e. they turn invisible ("CONNEC" with half a T). Any
+              // future size increase here must also widen the column, or the tail of
+              // the longest title vanishes on exactly the screens the increase was
+              // meant to help.
+              fontSize: "clamp(2.6rem, 6vw, 4.6rem)",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               background: "linear-gradient(135deg, var(--c), var(--foreground) 130%)",

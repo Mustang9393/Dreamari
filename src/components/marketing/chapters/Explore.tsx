@@ -10,7 +10,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // Matches Match's card size (168 x 300 mu) per feedback that the two should read as the
 // same scale of thing.
 // The industry line (under the title) says what field a career is actually in — the
-// three business-track cards share "Business & Finance," but the Wildcard genuinely
+// three business-track cards share "Business & Money," but the Wildcard genuinely
 // isn't, so it gets its own. Match strength (Strong Match/Match/Stretch/Wildcard) is a
 // separate corner-ribbon badge rather than replacing the industry line — the two say
 // different things and shouldn't compete for the same line. Accountant, Management
@@ -25,11 +25,11 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // Wildcard — is back per direct request, restoring the full four-tier spread:
 // Strong Match, Match, Stretch, Wildcard.
 const CARDS = [
-  { photo: "/images/career-accountant.jpg", title: "Accountant", industry: "Business & Finance", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
-  { photo: "/images/career-management-analyst.jpg", title: "Management Analyst", industry: "Business & Finance", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
-  { photo: "/images/career-human-resources.jpg", title: "Human Resources", industry: "Business & Finance", matchLevel: "Stretch", tagColor: "#ff9640", salary: "$45K-70K", major: "Human Resources" },
+  { photo: "/images/career-accountant.jpg", title: "Accountant", industry: "Business & Money", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
+  { photo: "/images/career-management-analyst.jpg", title: "Management Analyst", industry: "Business & Money", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
+  { photo: "/images/career-human-resources.jpg", title: "Human Resources", industry: "Business & Money", matchLevel: "Stretch", tagColor: "#ff9640", salary: "$45K-70K", major: "Human Resources" },
   // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
-  // it should never say "Business & Finance" just because the other three do.
+  // it should never say "Business & Money" just because the other three do.
   { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
 ];
 
@@ -41,7 +41,7 @@ const CARDS = [
 // Science & Research specifically uses Source Code Pro SemiBold at
 // var(--world-science-research) — both already defined in tokens.css.
 const WORLDS: Record<string, { color: string; font: string; weight: number }> = {
-  "Business & Finance": { color: "var(--world-business-money-office)", font: "var(--font-poster)", weight: 400 },
+  "Business & Money": { color: "var(--world-business-money-office)", font: "var(--font-poster)", weight: 400 },
   "Science & Research": { color: "var(--world-science-research)", font: "var(--font-poster-mono)", weight: 600 },
 };
 
@@ -88,7 +88,11 @@ function ExploreCardBody({ card }: { card: Card }) {
   const world = WORLDS[card.industry];
   return (
     <>
-      <Image src={card.photo} alt="" fill className="object-cover" draggable={false} />
+      {/* sizes matters on every fill image in these chapters: without it, next/image
+         assumes 100vw and served w=3840 files for cards that ChapterShell caps at
+         480px — an ~8-10x oversized download per photo. 94vw below 900px mirrors the
+         frame's own min(94cqw, 480px) sizing. */}
+      <Image src={card.photo} alt="" fill sizes="(max-width: 900px) 94vw, 480px" className="object-cover" draggable={false} />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"

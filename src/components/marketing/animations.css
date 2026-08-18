@@ -7,9 +7,17 @@
    same: gate animation-name (not just play-state) behind the attribute so removing it
    fully resets to the base/static state, and re-adding it always restarts from 0%. */
 
+/* Squash & stretch, not just a translate bob — at the bottom of the float the cloud
+   settles slightly wide-and-short, and it stretches a touch tall-and-narrow as it
+   rises, the classic principle that makes a bob read as a soft body with weight
+   instead of a flat sticker sliding up and down. Values are deliberately tiny (≤2%):
+   the character has to stay recognizably the same artwork, just breathing. Safe with
+   the bottom-dissolve mask (Mascot.tsx): the mask lives on this same animated element,
+   so it scales/translates in lockstep with the artwork and the fade can never fall
+   out of alignment. */
 @keyframes mkt-mascot-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-16px); }
+  0%, 100% { transform: translateY(0) scale(1.015, 0.985); }
+  50% { transform: translateY(-16px) scale(0.99, 1.02); }
 }
 
 .mkt-graphic {

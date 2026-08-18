@@ -6,6 +6,67 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 UX audit: organic mascot fade, snap friction, title clip, image sizing
+
+- **Mascot hard line finally solved properly** (third attempt, this one verified at
+  mobile/tablet/laptop): the fix is an alpha mask ON the float-animation wrapper in
+  `Mascot.tsx`, fading 61.5% -> 69.5% of the stage box. The geometry that makes it
+  correct, for anyone touching this again: the scroll-exit effect sets
+  `translate(-50%, 30%)` at runtime (the className's 37% is overridden on mount), so
+  the hero's overflow-hidden crops the stage at exactly 70% of its height; eyes end
+  at 61.33%, mouth starts 63.5%. Fade must complete BEFORE 70% or it's invisible
+  (attempt #1 faded at 78-97% — entirely below the crop). Mask must NOT be on the
+  outer stage while any descendant has a filter (attempt #2 — mask clips filter
+  output to the masked box; the Image's drop-shadow painted past it and rendered as
+  a rectangular halo). So: mask on the float wrapper (bobs only UP from base, so
+  the traveling fade can't slip below the crop), drop-shadow removed from the Image
+  (invisible on a near-black page anyway), Hero's curtain strip removed entirely.
+  **Plus a hairline regression caught on mobile**: the ambient glow div was a stage-
+  level SIBLING of the masked wrapper — unmasked, it still crossed the 70% crop at
+  faint opacity and hard-clipped as a seam across the chin. Moved it INSIDE the
+  masked float wrapper (also means it bobs with the body, which reads better).
+- **Hero now fills the first screen** (`min-h-[calc(100dvh-77px)]`, 77px = the
+  sticky nav's in-flow height; inner wrapper flex-1/justify-center) — per direct
+  feedback that Dreamy's crop must always be the SCREEN's bottom edge: before, the
+  hero was content-height, so on tall viewports (tablet portrait) the section ended
+  mid-screen and the mascot dissolved against nothing. justify-center splits any
+  leftover height around the copy instead of pooling it in one void.
+- **CONNECT title clip root-caused** (user screenshot showed "CONNEC" with half a
+  T): `background-clip: text` only paints gradient inside the element's box; the
+  ChapterShell copy column caps at 360px; the previous round's H2 clamp ceiling
+  bump (4.6->5.2rem) made CONNECT/EXPLORE overflow that box on wide laptops, and
+  overflowing glyphs get no background = invisible. Reverted ceiling to 4.6rem —
+  verified CONNECT now measures exactly its column width at 1440px, no overflow.
+  Any future title-size increase must widen the column with it.
+- **Scroll-snap switched mandatory -> proximity** (`globals.css`): mandatory
+  required the viewport to always rest at a section start while the chapter block
+  was visible, but the CTA/footer after Connect have no snap points — scrolling
+  from Connect to the footer had the browser yanking back up the whole way (the
+  snap flag can't turn off while Connect is still partially visible). proximity
+  keeps the settle-onto-chapter assist without the fighting. This was the main
+  "navigation friction" find of the audit.
+- **next/image `sizes` added everywhere** (`Match`/`Explore`/`Play` cards, Connect
+  avatars): fill images without `sizes` assume 100vw, so every card photo was
+  served at w=3840 for a 480px-capped card and avatars at w=3840 for ~50px circles.
+  Verified live after: cards now serve w=1080/1200, avatars w=96/128 — roughly an
+  8-10x payload cut per image, no visual change.
+- **Dreamy expressiveness** (same artwork, no redesign, per direct request):
+  squash-and-stretch on the float keyframes (≤2% scale — settles wide-and-short at
+  the bob's bottom, stretches slightly as it rises), and body language in the rAF
+  tick — the whole cloud now leans toward the cursor (translate ±7px/±4px + a 2.2°
+  cartoon z-tilt) and "puffs up" ~3% with the same curExcite the eyes already use,
+  so body and eyes react as one creature. All inside the masked wrapper, so the
+  dissolve stays glued to the artwork. A REAL 3D mascot (three.js + a modeled/
+  rigged cloud) was explicitly floated by the user as welcome — that's a separate,
+  larger project; noted here as an open invitation, not started.
+- Copy (explicit user override of the no-copy rule): "Business & Finance" ->
+  "Business & Money" in Match's world line and Explore's three business cards +
+  WORLDS lookup key (the key HAD to move with the data or every card would lose
+  its per-world font/color). Hero's ghost "See how it works" button removed —
+  single CTA now.
+- Validation: `tsc`, `npm run build`, `tokens:check` (503) clean; same lone
+  pre-existing eslint ref-in-render error in Explore.tsx, untouched.
+
 ### 2026-08-18 revert broken scaling attempt, fix Footer disappearing entirely
 
 - The previous entry's ChapterShell frame-ceiling increase (480→640/680→860/620→780)

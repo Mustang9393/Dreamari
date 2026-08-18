@@ -14,7 +14,17 @@ export function Hero({ view, onChangeView }: HeroProps) {
   const heroRef = useRef<HTMLElement | null>(null);
 
   return (
-    <section ref={heroRef} className="relative isolate overflow-hidden px-6 pt-[76px]">
+    // min-h fills the first screen exactly (100dvh minus the sticky nav's 77px of
+    // in-flow height) — per direct feedback, Dreamy's crop line must ALWAYS be the
+    // screen's own bottom edge: before this, the hero was only as tall as its
+    // content, so on tall viewports (tablet portrait especially) the section ended
+    // mid-screen and the mascot visibly dissolved against nothing, "floating" with
+    // no edge motivating the cut. flex + the inner wrapper's flex-1/justify-center
+    // distribute any leftover height AROUND the copy block instead of dumping it
+    // all in one void above the mascot — that's the "without introducing so much
+    // blank space" half of the request: the gap gets split roughly half above the
+    // toggle and half between the CTA and the mascot, so neither reads as empty.
+    <section ref={heroRef} className="relative isolate flex min-h-[calc(100dvh-77px)] flex-col overflow-hidden px-6 pt-[76px]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height
@@ -40,24 +50,17 @@ export function Hero({ view, onChangeView }: HeroProps) {
         className="pointer-events-none absolute -top-56 -right-40 h-[640px] w-[640px] rounded-full blur-[10px]"
         style={{ background: "radial-gradient(circle at 50% 50%, rgba(47,107,242,.35), rgba(122,45,226,.18) 45%, transparent 70%)" }}
       />
-      {/* Dims (rather than replaces) the hero's own bottom edge right where the mascot
-         gets cropped by this section's overflow-hidden — fading in a translucent BLACK
-         (not a flat opaque color) means it darkens whatever's actually behind it at
-         that point instead of painting over it with one hardcoded hue, so it still
-         blends once that background is a vivid multi-color ambient gradient rather
-         than a single flat color. A first attempt tried fading the mascot's own alpha
-         out via mask-image instead of a curtain at all, which seemed cleaner, but
-         mask-image also clips any filter effects on its descendants (here, the
-         mascot's drop-shadow) to the masked box's own bounds — since the shadow
-         normally spreads a little past the mascot's raster edges, that turned into a
-         visible rectangular halo cutoff, a worse artifact than the one being fixed. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[70px]"
-        style={{ background: "linear-gradient(180deg, transparent, rgba(2,3,10,0.62) 88%)" }}
-      />
+      {/* No bottom curtain/dim strip here anymore — the mascot now fades ITSELF to
+         full transparency before the section's overflow-hidden crop line can touch it
+         (see the mask on Mascot.tsx's float wrapper for the geometry). Any curtain
+         painted here, translucent or not, necessarily tints the ambient page gradient
+         behind it and reads as a band; self-fading alpha has no color to mismatch. */}
 
-      <div className="relative z-[2] mx-auto max-w-[1200px]">
+      {/* flex-1 + w-full: stretches this wrapper to the section's full (now dvh-
+         filling) height so the Mascot's absolute bottom-0 lands on the section's —
+         i.e. the screen's — real bottom edge, and justify-center recenters the copy
+         in whatever's left. */}
+      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-center">
         <div className="mb-[18px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
@@ -89,12 +92,11 @@ export function Hero({ view, onChangeView }: HeroProps) {
           >
             Discover your dream career. Build, match, play, explore, and connect, all in one place. One clear step at a time.
           </p>
+          {/* Single CTA per direct feedback — the ghost "See how it works" button is
+             gone; the scroll hint below already covers "there's more to see." */}
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">
               Start Journey
-            </MarketingButton>
-            <MarketingButton href="#how-it-works" variant="ghost">
-              See how it works
             </MarketingButton>
           </div>
           {/* Hidden on short viewports (same tier the mascot-visibility fix already

@@ -208,7 +208,7 @@ function MatchDemo() {
               className="mkt-match-celebrate absolute inset-0 overflow-hidden rounded-[calc(var(--mu)*20px)]"
               style={{ ["--glow" as string]: WORLD_COLOR }}
             >
-              <Image src={matchedCard.photo} alt="" fill className="object-cover" />
+              <Image src={matchedCard.photo} alt="" fill sizes="(max-width: 900px) 94vw, 480px" className="object-cover" />
               <div
                 aria-hidden
                 className="absolute inset-0"
@@ -304,7 +304,9 @@ function MatchDemo() {
                   onPointerCancel={isTop ? onCardPointerCancel : undefined}
                   {...(!isTop ? { "aria-hidden": true } : {})}
                 >
-                  <Image src={card.photo} alt="" fill className="object-cover" draggable={false} />
+                  {/* sizes: without it next/image assumes 100vw and serves w=3840
+                     files for a card ChapterShell caps at 480px wide. */}
+                  <Image src={card.photo} alt="" fill sizes="(max-width: 900px) 94vw, 480px" className="object-cover" draggable={false} />
 
                   {isTop && (
                     <>
@@ -361,7 +363,7 @@ function MatchDemo() {
                           {card.title}
                         </p>
                         <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 11px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
-                          Business &amp; Finance
+                          Business &amp; Money
                         </p>
                       </div>
 

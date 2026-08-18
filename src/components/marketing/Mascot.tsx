@@ -216,9 +216,22 @@ export function Mascot({ heroRef }: MascotProps) {
         if (c) c.style.transform = `translate(${txPx}px, ${tyPx}px) scale(${eyeScale}) scaleY(${blinkScale / eyeScale})`;
       });
 
+      // Body language, not just eye tracking: the whole cloud leans toward the
+      // cursor (a few px of translate + a slight cartoon z-tilt in the lean's
+      // direction) and puffs up a touch as excitement rises — the same curExcite
+      // the eyes already use, so body and eyes react as one creature rather than
+      // two independent systems. All of this happens INSIDE the masked float
+      // wrapper, so the bottom dissolve stays glued to the artwork no matter how
+      // far it leans. Kept to single-digit px/degrees: past that the lean starts
+      // reading as the sticker sliding around its frame instead of a character
+      // shifting its weight.
       const rotY = curX * 9;
       const rotX = -curY * 6.5;
-      tilt.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      const leanX = curX * 7;
+      const leanY = curY * 4;
+      const rotZ = curX * 2.2;
+      const puff = 1 + curExcite * 0.03;
+      tilt.style.transform = `translate(${leanX}px, ${leanY}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${puff})`;
     }
     rafId = requestAnimationFrame(tick);
 
@@ -245,18 +258,41 @@ export function Mascot({ heroRef }: MascotProps) {
       // padding (calc(var(--mascot-size) * .62 + 28px)) always matches automatically.
       className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,37%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
     >
-      {/* Kept well inside the stage box (not just a shallow -16% inset): this glow sits
-         behind a mascot that's cropped by the hero's own overflow:hidden, and a glow
-         that still has real opacity right at that hard clip boundary shows up as a
-         visible seam/line where the blur gets abruptly cut off instead of fading out
-         naturally — this stays far enough from the edge that its own falloff finishes
-         before it ever reaches the crop line. */}
+      {/* The organic bottom dissolve. Geometry that makes this work — all percentages
+         are of the stage box: the scroll-exit effect above sets translate(-50%, 30%)
+         at runtime, so the hero section's overflow:hidden crops this stage at exactly
+         70% of its height; the eyes end at 61.33% (EYE_* above) and the mouth starts
+         at 63.5%. So the fade runs 61.5% -> 69.5%: eyes stay fully opaque, the
+         mouth/chin region dissolves to full transparency just BEFORE the hard crop
+         line, and the crop itself never touches a visible pixel. Two earlier failed
+         attempts, for the record: (1) a fade band placed below 70% is entirely
+         invisible — the crop happens first, so the hard line stays; (2) the mask must
+         NOT live on the outer stage element while the Image keeps its old drop-shadow
+         filter — mask clips filter output to the masked box and the shadow painted
+         past it, which rendered as a rectangular halo. Hence: mask on THIS float
+         wrapper (it only ever bobs UP from its base position, so the traveling fade
+         band can never let opaque artwork slip below the crop), and no drop-shadow on
+         the Image anymore (invisible against a near-black page anyway — the ambient
+         glow above carries the depth). */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute rounded-full blur-[24px] [background:radial-gradient(circle,rgba(47,107,242,.28),transparent_60%)]"
-        style={{ inset: "6%" }}
-      />
-      <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
+        className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]"
+        style={{
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 61.5%, transparent 69.5%)",
+          maskImage: "linear-gradient(to bottom, black 0%, black 61.5%, transparent 69.5%)",
+        }}
+      >
+        {/* Ambient glow lives INSIDE the masked float wrapper, not as a stage-level
+           sibling — as a sibling it escaped the mask, still reached past the hero's
+           70% crop line at faint opacity, and hard-clipped there as a hairline seam
+           across the mascot's chin (caught on mobile, where the vivid page gradient
+           makes any clipped glow edge visible). In here it inherits the same bottom
+           dissolve as the artwork and bobs with the float, which also reads more
+           physically coherent than a glow pinned in place under a moving character. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute rounded-full blur-[24px] [background:radial-gradient(circle,rgba(47,107,242,.28),transparent_60%)]"
+          style={{ inset: "6%" }}
+        />
         {/* No transform-style:preserve-3d — this element's own rotateX/rotateY tilt
             doesn't need real relative depth for its children, just a flat rotated
             plane. Nesting the eyes' circular overflow:hidden clip inside a live 3D
@@ -272,7 +308,7 @@ export function Mascot({ heroRef }: MascotProps) {
             alt="Dreamari mascot, a friendly cloud character"
             fill
             sizes="460px"
-            className="pointer-events-none object-contain select-none [filter:drop-shadow(0_30px_40px_rgba(0,0,0,.45))]"
+            className="pointer-events-none object-contain select-none"
             priority
           />
           <div
