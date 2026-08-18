@@ -6,6 +6,26 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 follow-up: Investment Banking photo swap, Food Scientist re-verified
+
+- User supplied a better Investment Banking photo directly as a pasted image in chat
+  (not a Figma link) — pasting doesn't give this tool a retrievable file path/bytes, so
+  the user re-shared it as a specific Figma node link (`3166-16318`, a "ChatGPT Image"
+  asset placed into the design file) instead, which was fetchable the normal way via
+  `get_design_context`. Replaced `public/images/career-investment-banking.jpg` with this
+  new, full-resolution (1024x1536) version — no code change, same filename already wired
+  in `Match.tsx`.
+- Re-verified the previous entry's Food Scientist photo update after the user reported
+  not seeing it: confirmed via direct `curl` against both the raw static file and the
+  `/_next/image` optimization endpoint on the live `dreamari.vercel.app` deploy that the
+  new file was already being served correctly (fresh `x-vercel-cache: MISS`, correct
+  byte count) — the prior push had already gone out fine; likely just local browser
+  cache on the user's end, not a deploy issue. Also confirmed all 4 Explore cards
+  (Accountant/Management Analyst/Human Resources/Food Scientist) render with correct
+  photo, title, salary, and major via direct DOM text/src checks on production.
+- Validation: `tsc --noEmit`, `npm run build`, `npm run tokens:check` (503 tokens) all
+  pass clean — image-only change, no source touched.
+
 ### 2026-08-18 real per-career photos for Match and Explore
 
 - Scope: `Match.tsx`/`Explore.tsx` `CARDS` data only (photos + one new Explore card) plus
