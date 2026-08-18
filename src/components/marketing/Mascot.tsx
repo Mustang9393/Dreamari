@@ -64,20 +64,21 @@ export function Mascot({ heroRef }: MascotProps) {
       // section's content reaches his strip. Anything that overlaps momentarily
       // paints above him (later DOM order), and he's translucent by then.
       const vh = window.innerHeight || 1;
-      // The duck is timed off Build's MEASURED arrival, not off hero percentages
-      // — every percentage-of-viewport version mistimed on some device class
-      // (hero-relative guesses can't know how far below the hero Build's title
-      // actually renders on a given width). Dreamy holds the bezel, solid, while
-      // the page slides past him — that's the fixed-position metaphor, and it's
-      // what keeps his old reserved strip from reading as a blank void — then
-      // starts sinking when Build's section top comes within one stage-height of
-      // his head, reaching fully-below-the-bezel EXACTLY as Build's title line
-      // arrives at where his head was. They trade places; the title never sits
-      // on his face and he never leaves early.
+      // The duck is timed off Build's MEASURED arrival, and the trigger is the
+      // VIEWPORT BOTTOM, not Dreamy's own head: progress stays 0 until Build's
+      // section top actually crosses the fold, then ramps to 1 over half a
+      // stage-height of further scroll. The previous version led by 0.9x the
+      // stage height from his head's position — fine at 264px, but once his size
+      // became dvh-aware (372px+ on tall phones) that lead grew so long he was
+      // fully dissolved while Build was still hundreds of px below the fold,
+      // leaving a stretch of pure void with NO Dreamy in it (reported twice from
+      // a tall iPhone; the math checks out — progress hit 1 with Build ~600px
+      // away). Anchoring the start to "Build is visibly entering the screen"
+      // means he holds the bezel through the entire empty traversal by
+      // definition, on every screen size, and only tucks away while the reader
+      // can SEE what he's making room for.
       const buildTop = document.getElementById("build")?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
-      const stripTop = vh - stage.offsetHeight * VISIBLE_FRACTION;
-      const lead = stage.offsetHeight * 0.9;
-      const progress = Math.min(1, Math.max(0, (stripTop + lead - buildTop) / lead));
+      const progress = Math.min(1, Math.max(0, (vh - buildTop) / (stage.offsetHeight * 0.5)));
       const sinkPx = progress * stage.offsetHeight * VISIBLE_FRACTION;
       stage.style.opacity = String(1 - progress);
       stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${sinkPx}px)`;
