@@ -393,10 +393,28 @@ function ExploreCarousel() {
     };
   }, []);
 
+  function goToPrevChapter() {
+    document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function goToNextChapter() {
+    document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   // Committing past the first/last card used to auto-scroll straight into the
-  // adjacent chapter — per direct feedback that felt like it was launching the
-  // reader somewhere they didn't ask to go. Now it just stops at the boundary card;
-  // the reader has to deliberately scroll past the section themselves.
+  // adjacent chapter for EVERY input path (swipe, wheel, nav buttons) — per direct
+  // feedback that felt like it was launching the reader somewhere they didn't ask
+  // to go, so this was cut down to just clamping at the boundary card, full stop.
+  // That surfaced a real problem specifically on mobile touch, though: the track
+  // has `touch-action: none` so it can fully own every drag gesture itself (see
+  // the wheel-listener comment below for why a passive/uncancelable native scroll
+  // fighting with our own transform math is worse), which means once a reader is
+  // stuck on the last/first card there's no leftover screen space their thumb can
+  // land on to reach a plain native scroll instead — unlike desktop, which always
+  // has the wheel/trackpad working over the rest of the page even when the track
+  // itself has captured a gesture. So the boundary jump is back, but scoped
+  // specifically to a genuine swipe commit (onPointerUp below) rather than baked
+  // into `commit()` itself — wheel/trackpad still just clamps and never jumps,
+  // since a desktop reader was never actually stuck in the first place.
   function commit(direction: 1 | -1) {
     setScrolled(true);
     if (direction === 1) {
@@ -426,8 +444,19 @@ function ExploreCarousel() {
     if (!moved.current || containerHeight === 0) return;
     const cardHeight = containerHeight * (1 - 2 * GUTTER_FRACTION);
     const threshold = cardHeight * COMMIT_THRESHOLD_FRACTION;
-    if (delta > threshold) commit(1);
-    else if (delta < -threshold) commit(-1);
+    if (delta > threshold) {
+      if (activeIndex < LAST_INDEX) commit(1);
+      else {
+        setScrolled(true);
+        goToNextChapter();
+      }
+    } else if (delta < -threshold) {
+      if (activeIndex > 0) commit(-1);
+      else {
+        setScrolled(true);
+        goToPrevChapter();
+      }
+    }
   }
   function onPointerCancel() {
     pointerActive.current = false;

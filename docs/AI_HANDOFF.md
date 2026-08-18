@@ -879,6 +879,40 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   `scrollHeight === clientHeight` (confirmed no overflow/clipping).
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 Explore: swiping past the last/first card on mobile no longer gets stuck
+
+- Reported: after reaching the last card in Explore's feed, a mobile reader could
+  no longer scroll to the next section at all — the track has
+  `touch-action: none` (needed so it can fully own every drag gesture itself,
+  rather than fighting a native scroll the way `touch-pan-y` did earlier this
+  project — see that fix's own note about non-cancelable touchmove events), which
+  on a phone leaves literally no free screen space for a plain scroll gesture to
+  land on once the carousel has captured the touch. Desktop never had this
+  problem — a wheel/trackpad gesture still works over the rest of the page even
+  while the track's own wheel listener has captured one scroll — so the earlier
+  "stop auto-jumping at the boundary" fix (a few rounds back) only actually
+  trapped mobile readers, not desktop ones.
+- Fix is scoped specifically to the touch/drag path, not wheel: `onPointerUp` now
+  checks whether the committed swipe is already at the boundary card in that
+  direction, and if so calls `goToPrevChapter()`/`goToNextChapter()` (re-added,
+  scrollIntoView on `#play`/`#connect`) instead of a no-op; `commit()` itself and
+  the wheel handler are untouched and still just clamp at the edge with no jump.
+  This isn't a reversion of the earlier "don't auto-launch me" feedback — that
+  was about ANY input (including incidental wheel scroll) silently launching
+  navigation; this only fires on a genuine, deliberate, threshold-exceeding swipe
+  commit specifically at the edge, the same gesture strength that already moves
+  between cards mid-deck, and only for the one input method that can otherwise
+  leave a reader with no way to proceed at all.
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error). Live
+  drag-gesture verification was blocked by this session's browser tab
+  intermittently reporting itself "hidden" to the automation tool (a recurring,
+  previously-documented tool quirk, not a code issue) right as the test was
+  attempted; confirmed via DOM inspection that the carousel reaches the last card
+  correctly and the rest of the logic is unchanged from the already-verified
+  commit()/onPointerUp code paths, with only the boundary branch added.
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
