@@ -6,6 +6,31 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 nudge-stutter fix, Simulate Q&A declutter
+
+- **Explore's peek-nudge stutter root-caused and fixed** (reported on desktop AND
+  mobile): the intro peek drives `dragPx` per-frame from requestAnimationFrame, but
+  each card's inline `transition: transform 0.42s` was active whenever no pointer
+  was down — so every rAF update got re-smoothed by a transition that perpetually
+  restarted and chased the target a beat behind. The card visibly rubber-banded.
+  Fix: transition is now gated on `pointerActive || dragPx !== 0` — rAF-driven
+  motion tracks 1:1, and the eased transition still owns the release settle and
+  button/wheel commits (both happen at dragPx === 0). General rule worth keeping:
+  never leave a CSS transition enabled on a property a rAF loop is writing.
+- **Simulate's Q&A decluttered without copy changes** (asked directly "do they look
+  too cluttered?" — yes): the narrator/scene line dropped its full bordered-bubble
+  box for a left quote-bar treatment, so boxes are now reserved exclusively for
+  the three tappable answer rows; slightly more air above the question line. The
+  panel now reads label -> narration -> question -> answers instead of
+  box-box-box.
+- Open items from the user, answered in chat but NOT built: a possible better name
+  than "Simulate" (recommended keeping it — matches the nav's existing
+  "Simulations" item; alternatives offered: Experience / Step In / Shadow), and a
+  true-3D Dreamy (feasible via react-three-fiber but requires the character
+  modeled as a GLB to keep the exact appearance — a separate scoped project;
+  offered a pseudo-3D layered-parallax middle path that keeps the artwork's
+  pixels untouched).
+
 ### 2026-08-18 SIMULATE rename, new deal-kickoff scene, cache-busting image names
 
 - Play chapter renamed to **Simulate** everywhere it's presented as a name: the

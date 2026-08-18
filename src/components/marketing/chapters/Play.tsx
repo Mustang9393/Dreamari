@@ -161,21 +161,22 @@ function PlayDemo() {
             <p className="font-mono uppercase" style={{ fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
               Day in the life of an investment banker
             </p>
-            {/* A dialogue-bubble treatment for the scene text — reads as an NPC/
-               narrator line the way an RPG's own dialogue box would, rather than
-               a plain caption. */}
+            {/* Narrator line as a quote bar, not a full bordered bubble — the old
+               bubble was a third boxed element stacked between the label and the
+               three boxed answer rows, and the pile of borders read as clutter
+               (called out directly). A left accent bar says "someone is telling
+               you this" with one edge instead of four, and keeps actual boxes
+               reserved for the things you can press. Copy unchanged. */}
             <div
-              className="rounded-xl border"
               style={{
-                marginTop: "calc(var(--mu) * 5px)",
-                padding: "calc(var(--mu) * 7px) calc(var(--mu) * 10px)",
-                background: "color-mix(in srgb, #3b82f6 14%, var(--glass-surface-2))",
-                borderColor: "color-mix(in srgb, #3b82f6 35%, transparent)",
+                marginTop: "calc(var(--mu) * 6px)",
+                paddingLeft: "calc(var(--mu) * 10px)",
+                borderLeft: "3px solid color-mix(in srgb, #3b82f6 65%, transparent)",
               }}
             >
-              <p style={{ fontSize: "clamp(12.5px, calc(var(--mu) * 10px), 15px)", lineHeight: 1.3, fontWeight: 600, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
+              <p style={{ fontSize: "clamp(12.5px, calc(var(--mu) * 10px), 15px)", lineHeight: 1.35, fontWeight: 600, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
             </div>
-            <p className="font-extrabold" style={{ marginTop: "calc(var(--mu) * 5px)", fontSize: "clamp(14px, calc(var(--mu) * 12px), 18px)", color: "var(--foreground)" }}>
+            <p className="font-extrabold" style={{ marginTop: "calc(var(--mu) * 8px)", fontSize: "clamp(14px, calc(var(--mu) * 12px), 18px)", color: "var(--foreground)" }}>
               {SCENARIO.prompt}
             </p>
           </div>

@@ -529,7 +529,18 @@ function ExploreCarousel() {
                       transform: `translateY(${offset * cardHeight}px) scale(${scale})`,
                       opacity,
                       zIndex: 100 - Math.round(Math.min(Math.abs(offset), 1) * 100),
-                      transition: pointerActive.current ? "none" : "transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.42s",
+                      // Transition off during ANY dragPx-driven movement, not just
+                      // while a finger is down — the intro peek nudge (and its
+                      // settle) drive dragPx per-frame from requestAnimationFrame,
+                      // and layering a 420ms ease-out transition on top of a value
+                      // that changes every frame means the transition perpetually
+                      // restarts and chases the target a beat behind: that lag
+                      // read as visible stutter on desktop AND mobile. With the
+                      // transition gated on dragPx !== 0, rAF-driven motion tracks
+                      // 1:1 (butter), and the eased transition still owns what it
+                      // should: the settle after release and button/wheel commits,
+                      // both of which happen at dragPx === 0.
+                      transition: pointerActive.current || dragPx !== 0 ? "none" : "transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.42s",
                     }}
                   >
                     <CardFace card={card} />
