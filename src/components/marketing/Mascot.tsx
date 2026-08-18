@@ -45,32 +45,42 @@ export function Mascot({ heroRef }: MascotProps) {
     function update() {
       ticking = false;
       if (!stage || !hero) return;
-      // Exit progress comes from where the hero's bottom edge actually sits in
-      // the viewport, NOT from raw scrollY. The scrollY version assumed Dreamy is
-      // on screen at scroll position 0 and gone by ~62% of the hero's height —
-      // true on desktop, badly false on phones, where the hero's content column
-      // is about as tall as the screen: Dreamy started at/below the fold, and by
-      // the time a reader scrolled down to where he was, the scrollY-driven fade
-      // had already dissolved him — leaving his entire reserved region as a big
-      // blank purple void between the CTA and Build (reported directly, with a
-      // screenshot). Anchoring to the hero's bottom edge means: while his strip
-      // is still at the viewport's bottom border, progress is 0 and he's fully
-      // there; he only starts sinking/fading as his region genuinely lifts away
-      // from the border, finishing by the time the hero's bottom has climbed 70%
-      // of the screen. Works identically wherever the fold lands relative to the
-      // hero on any device.
-      const heroBottom = hero.getBoundingClientRect().bottom;
+      // The stage is position:FIXED to the viewport's bottom edge (see the stage
+      // element) — that is what finally guarantees "the screen's limit does the
+      // cut" on every screen size. Two earlier hero-anchored versions each failed
+      // on some class of device: pinning to the hero's bottom puts the crop line
+      // wherever the hero happens to end (mid-screen on tall viewports, below the
+      // fold on small phones whose hero content exceeds 100dvh), and no exit-fade
+      // retiming can fix an anchor that simply isn't the screen edge. Fixed
+      // positioning makes the viewport itself the anchor: at page top Dreamy
+      // peeks from the actual bottom bezel on ANY device, and this exit ducks
+      // him back down THROUGH that same edge as the reader scrolls on — so the
+      // cut is the screen's, always, by construction.
+      //
+      // progress: 0 while the hero's bottom edge is at/below the fold (reader is
+      // still inside the hero — Dreamy stays pinned and solid); ramps to 1 as
+      // that edge climbs the first ~32% of the viewport past the fold, sinking
+      // him by his own visible height (fully below the bezel) before the next
+      // section's content reaches his strip. Anything that overlaps momentarily
+      // paints above him (later DOM order), and he's translucent by then.
       const vh = window.innerHeight || 1;
-      // Dead zone, then exit: progress stays 0 until the hero's bottom edge has
-      // climbed past 55% of the viewport (Dreamy fully solid the whole time his
-      // strip is in the lower/middle of the screen — the first version of this
-      // started fading immediately and he was gone while still mid-screen, which
-      // recreated a shorter version of the same blank-region complaint), then
-      // ramps to fully faded as the edge reaches ~8% from the top — dissolving
-      // exactly while his region actually exits.
-      const progress = Math.min(1, Math.max(0, (0.55 * vh - heroBottom) / (0.47 * vh)));
+      // The duck is timed off Build's MEASURED arrival, not off hero percentages
+      // — every percentage-of-viewport version mistimed on some device class
+      // (hero-relative guesses can't know how far below the hero Build's title
+      // actually renders on a given width). Dreamy holds the bezel, solid, while
+      // the page slides past him — that's the fixed-position metaphor, and it's
+      // what keeps his old reserved strip from reading as a blank void — then
+      // starts sinking when Build's section top comes within one stage-height of
+      // his head, reaching fully-below-the-bezel EXACTLY as Build's title line
+      // arrives at where his head was. They trade places; the title never sits
+      // on his face and he never leaves early.
+      const buildTop = document.getElementById("build")?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+      const stripTop = vh - stage.offsetHeight * VISIBLE_FRACTION;
+      const lead = stage.offsetHeight * 0.9;
+      const progress = Math.min(1, Math.max(0, (stripTop + lead - buildTop) / lead));
+      const sinkPx = progress * stage.offsetHeight * VISIBLE_FRACTION;
       stage.style.opacity = String(1 - progress);
-      stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${progress * 60}px) scale(${1 - progress * 0.24})`;
+      stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${sinkPx}px)`;
     }
     function onScroll() {
       if (ticking) return;
@@ -303,7 +313,14 @@ export function Mascot({ heroRef }: MascotProps) {
       // --mascot-size comes from tokens.css (.marketing-v2), which also shrinks it on
       // short viewports via media queries — not set inline here, so Hero.tsx's reserved
       // padding (calc(var(--mascot-size) * .62 + 28px)) always matches automatically.
-      className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,23%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
+      // `fixed`, not absolute-in-hero: the ONLY anchor that is the screen's bottom
+      // edge on every device (see the exit effect's comment for the full story).
+      // No ancestor between here and the viewport has a transform/filter, so the
+      // fixed containing block really is the viewport; the hero's overflow-hidden
+      // no longer crops this element at all — the viewport edge itself is the
+      // crop, which is exactly the point. Hidden along with the whole student
+      // <main> when the Schools view is active (display:none propagates).
+      className="pointer-events-none fixed bottom-0 left-1/2 z-[1] [transform:translate(-50%,23%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
       // The organic bottom dissolve — ENVIRONMENTAL, on this static stage, not on the
       // float wrapper inside it. Per direct feedback (with a phone screenshot to
       // prove it): a mask glued to the float wrapper travels WITH the bob, so the

@@ -6,6 +6,33 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 mascot fixed to the viewport bezel + hero gap compression
+
+- **Dreamy is now `position: fixed` to the viewport's bottom edge** — the final
+  answer to "the screen's limit must do the cut, on every screen size." Both
+  hero-anchored versions put the crop line wherever the hero happened to end
+  (mid-screen on tall viewports, below the fold on small phones); no exit-fade
+  retiming can fix an anchor that isn't the screen edge. Fixed positioning makes
+  the viewport the anchor by construction: he peeks from the actual bezel at
+  page top on ANY device, holds there solid while the page scrolls past him,
+  then ducks back down THROUGH the edge. The duck is timed off **Build's
+  measured position** (`#build.getBoundingClientRect().top`), not viewport
+  percentages — every percentage guess mistimed on some device class; now he
+  reaches fully-below-the-bezel exactly as Build's title arrives at where his
+  head was, so they trade places (verified stepwise on the mobile viewport:
+  solid at 0/150px scroll, gone precisely at Build handoff). Notes: the hero's
+  overflow-hidden no longer crops him at all — irrelevant, the viewport edge is
+  the crop; no ancestor has a transform so the fixed containing block really is
+  the viewport; Schools view hides him via the student <main>'s display:none.
+- **Hero scroll-gap compressed** per follow-up ("long empty blank space when I
+  scroll to Build"): hero's inner wrapper switched justify-center -> justify-end
+  (leftover height now pools ABOVE the toggle as intentional-looking header air
+  instead of scrolling by later as mid-page void), the mascot reserve padding
+  trimmed .77+16px -> .72+8px, and the "How Dreamari works" block's paddings
+  tightened. Measured on the 375px viewport: hint-to-Build gap 401px -> 288px,
+  with the hint still clearing Dreamy's head at load (9px margin; also clear on
+  1440x800 where the mascot is largest).
+
 ### 2026-08-18 Start Journey CTA size tiers
 
 - `MarketingButton` gained a `size` prop (md/lg/xl; md is the old fixed size and

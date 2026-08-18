@@ -32,14 +32,18 @@ export function HowItWorks() {
   return (
     <>
       <section id="how-it-works" className="pb-0">
-        <div className="mx-auto max-w-[1200px] px-6 pt-6 pb-4 sm:pt-8 sm:pb-6 lg:pt-10">
+        {/* Tighter than it was (pt-6/pb-4 -> pt-3/pb-2 on mobile, similar shaves
+           up the tiers): this block sits inside the quiet stretch between the
+           hero's scroll hint and Build's title that was called out as a long
+           blank gap — every px trimmed here directly shortens that scroll. */}
+        <div className="mx-auto max-w-[1200px] px-6 pt-3 pb-2 sm:pt-5 sm:pb-4 lg:pt-8">
           <div
             className="text-center font-mono text-[11px] font-bold tracking-[0.14em] uppercase before:mr-2 before:inline-block before:h-px before:w-4 before:align-middle before:content-[''] min-[901px]:text-left"
             style={{ color: "var(--primary-tint)" }}
           >
             How Dreamari works
           </div>
-          <h2 className="mt-3 max-w-[640px] text-center text-[clamp(1.75rem,4vw,2.4rem)] font-extrabold min-[901px]:text-left" style={{ color: "var(--foreground)" }}>
+          <h2 className="mt-2 max-w-[640px] text-center text-[clamp(1.75rem,4vw,2.4rem)] font-extrabold min-[901px]:text-left" style={{ color: "var(--foreground)" }}>
             Five chapters. One clearer future.
           </h2>
         </div>

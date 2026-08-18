@@ -56,11 +56,15 @@ export function Hero({ view, onChangeView }: HeroProps) {
          painted here, translucent or not, necessarily tints the ambient page gradient
          behind it and reads as a band; self-fading alpha has no color to mismatch. */}
 
-      {/* flex-1 + w-full: stretches this wrapper to the section's full (now dvh-
-         filling) height so the Mascot's absolute bottom-0 lands on the section's —
-         i.e. the screen's — real bottom edge, and justify-center recenters the copy
-         in whatever's left. */}
-      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-center">
+      {/* flex-1 + w-full stretches this wrapper to the section's full dvh-filling
+         height. justify-END (was -center): with the mascot now FIXED to the
+         viewport, any leftover hero height that lands BELOW the copy block just
+         scrolls by later as blank page between the scroll hint and Build — the
+         reader pointed at exactly that void. Packing the copy downward pushes all
+         leftover ABOVE the toggle instead (an airy header reads intentional; a
+         quiet mid-scroll gap reads broken), and the copy ends as close to the
+         mascot's reserve as it can. */}
+      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-end">
         <div className="mb-[18px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
@@ -72,7 +76,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
           // height or viewport size. Reads the same --mascot-size Mascot.tsx uses
           // (tokens.css), so the two can't drift apart; the multiplier itself has to be
           // kept in sync by hand with VISIBLE_FRACTION since it's not a shared import.
-          style={{ paddingBottom: "calc(var(--mascot-size) * .77 + 16px)" }}
+          style={{ paddingBottom: "calc(var(--mascot-size) * .72 + 8px)" }}
         >
           <h1
             className="font-display text-[38px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(52px,4vw,64px)]"
