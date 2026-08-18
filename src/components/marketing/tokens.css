@@ -86,7 +86,11 @@
      landscape phone) a 34vw-floor-190px box left NO room for the headline/paragraph/
      buttons above it to fit above the fold at all, pushing the mascot fully offscreen —
      these overrides shrink the floor as height gets tighter instead. */
-  --mascot-size: clamp(210px, 36vw, 460px);
+  /* Floor raised 210 -> 264 per direct feedback ("scale dreamy up for phones") —
+     36vw only governs mid-size screens; on any phone under ~630px wide the floor IS
+     the size, so the floor is the phone knob. Short-viewport overrides below still
+     win on landscape/short devices. */
+  --mascot-size: clamp(264px, 38vw, 460px);
 
   /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
   --shadow-sm: 0 2px 8px 0 #00000073;
