@@ -125,14 +125,11 @@ function MatchDemo() {
     setExiting(null);
     setFlipped(false);
     if (direction === "like") {
-      // Operations is the guided "how to pass" demo card — liking it should never
-      // actually match (that would undercut the "swipe left to see it's not a
-      // match" beat), so it just advances the stack the same way a pass would.
-      if (exited?.key === "ops") {
-        setStack((s) => s.slice(1));
-      } else {
-        setMatchedCard(exited);
-      }
+      // Operations can no longer even commit a "like" exit at all (see
+      // onCardPointerUp/the Like button's own guard below — swiping or tapping
+      // right on it is blocked outright now, not just neutered after the fact),
+      // so every "like" that reaches here is a real match.
+      setMatchedCard(exited);
     } else {
       setStack((s) => {
         const next = s.slice(1);
@@ -179,11 +176,14 @@ function MatchDemo() {
       setFlipped((f) => !f);
       return;
     }
-    if (delta > SWIPE_COMMIT_PX) act("like");
-    // Investment Banking is the deck's guaranteed final match — passing it would
-    // let the storyboard end without ever matching, so a left-swipe here is simply
-    // absorbed (the card springs back to its resting position via the normal
-    // non-dragging transform) instead of being treated as a real pass.
+    // Each guided card is locked to the one direction its own on-screen
+    // instruction actually shows — swiping the "wrong" way is simply absorbed
+    // (the card springs back to its resting position via the normal
+    // non-dragging transform) rather than committing anything. Operations only
+    // ever demos "swipe left" (liking it is blocked outright, not just
+    // neutered after the fact); Investment Banking only ever demos "swipe
+    // right" (passing it is blocked so the deck can't end without matching).
+    if (delta > SWIPE_COMMIT_PX && top?.key !== "ops") act("like");
     else if (delta < -SWIPE_COMMIT_PX && top?.key !== "iba") act("pass");
   }
 
@@ -419,12 +419,10 @@ function MatchDemo() {
           </p>
         )}
 
-        {/* Per direct feedback these need to actually work again — same guarded
-           logic the swipe path uses: passing Investment Banking is still a no-op
-           (it's the deck's guaranteed final match, see onCardPointerUp's own
-           comment), liking Operations still won't match (guarded in
-           onExitTransitionEnd), so tapping these buttons behaves identically to
-           swiping regardless of which one a reader actually uses. */}
+        {/* Same guarded, direction-locked logic the swipe path uses: each button
+           only commits when it matches the on-screen instruction for whichever
+           card is up — Pass is a no-op on Investment Banking, Like is a no-op on
+           Operations — so tapping behaves identically to swiping either way. */}
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
             <button
@@ -444,7 +442,9 @@ function MatchDemo() {
             <button
               type="button"
               aria-label="Like"
-              onClick={() => act("like")}
+              onClick={() => {
+                if (top?.key !== "ops") act("like");
+              }}
               className="flex items-center justify-center rounded-full border"
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
             >

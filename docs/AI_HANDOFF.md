@@ -950,6 +950,38 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   opened somewhere the automation tooling isn't fighting itself.
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 Match's guided cards locked to one swipe direction, Explore's redundant arrow removed
+
+- Match: per direct feedback ("don't let people swipe right on it, lock swiping
+  to the instructions"), Operations now blocks a right-swipe/Like outright
+  rather than just neutering its outcome after the fact — `onCardPointerUp`'s
+  threshold check gained a `top?.key !== "ops"` guard (mirroring the existing
+  `top?.key !== "iba"` guard on the pass/left-swipe side), and the Like button's
+  `onClick` got the same guard. Each guided card is now locked to the single
+  direction its own on-screen instruction actually shows: Operations only ever
+  demos "swipe left," Investment Banking only ever demos "swipe right." Since
+  liking Operations can no longer happen via any path, the dead-code branch in
+  `onExitTransitionEnd` that used to catch and neutralize it (added when this
+  was only a soft, post-hoc block) was removed — every "like" that reaches there
+  now is a real match, no special-casing needed.
+- Explore: removed the second-beat down-arrow nudge (`showArrow` state, the
+  `mkt-explore-arrow` JSX block, and its now-unused keyframes in
+  `animations.css`) per direct feedback that it was redundant — the persistent
+  "swipe up/down or use arrows" hint pill and the two visible arrow buttons
+  already communicate the same thing. The first-beat physical peek (the next
+  card sliding up and settling back) is untouched.
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error).
+  Browser-verified: clicking Like on Operations is confirmed a real no-op (the
+  top card, checked via textContent, stays Operations with no match); the
+  `.mkt-explore-arrow` element no longer exists anywhere in the DOM. Pass-on-
+  Operations (unchanged code, already verified working in an earlier round)
+  couldn't be re-confirmed this round — the same recurring `document.hidden`
+  tool-tab condition was active again, which blocks the CSS transitionend that
+  `onExitTransitionEnd` depends on; confirmed via a direct `document.hidden`
+  check rather than assumed.
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06

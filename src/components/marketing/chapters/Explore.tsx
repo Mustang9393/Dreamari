@@ -278,7 +278,6 @@ function ExploreCarousel() {
   // commits to a new activeIndex or springs back to the current one.
   const [dragPx, setDragPx] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [showArrow, setShowArrow] = useState(false);
 
   const pointerActive = useRef(false);
   const moved = useRef(false);
@@ -340,11 +339,13 @@ function ExploreCarousel() {
     containerHeightRef.current = containerHeight;
   }, [containerHeight]);
 
-  // Nudge, in two beats: first the next card physically slides up into view and
-  // settles back (a "look, this scrolls" cue more intuitive than an icon alone), THEN
-  // — once that's done, not simultaneously — a small down-arrow fades in as a
-  // lingering reminder. Reuses the exact same dragPx channel a real swipe would
-  // drive, so the peek is just "what a small real swipe would look like."
+  // Nudge: the next card physically slides up into view and settles back — a
+  // "look, this scrolls" cue more intuitive than a static icon. Used to end with
+  // a second beat (a small down-arrow fading in as a lingering reminder), removed
+  // per direct feedback as redundant now that the persistent "swipe up/down or
+  // use arrows" hint pill and the two arrow buttons already do that job. Reuses
+  // the exact same dragPx channel a real swipe would drive, so the peek is just
+  // "what a small real swipe would look like."
   //
   // Mount-only (deps: []), NOT keyed to containerHeight — an earlier version
   // depended on containerHeight directly, which was the actual bug behind "doesn't
@@ -378,9 +379,6 @@ function ExploreCarousel() {
       pendingTimeout = setTimeout(() => {
         if (scrolledRef.current) return;
         cancelSettle = animateNumber(peekPx, 0, 400, setDragPx);
-        pendingTimeout = setTimeout(() => {
-          if (!scrolledRef.current) setShowArrow(true);
-        }, 200);
       }, 500 + 250);
     }
 
@@ -537,35 +535,6 @@ function ExploreCarousel() {
               });
             })()}
         </div>
-
-        {/* Second beat of the nudge: a small down-arrow, only after the peek-scroll
-           above has already settled back (not simultaneous with it — see the effect's
-           comment). Sits at the card's vertical midpoint rather than near the bottom,
-           since every card's own title/industry/stats text lives in the bottom ~30%
-           of the card — the earlier version overlapped that zone and read as
-           "clashing with the text in the card." The photo itself has nothing there on
-           any of the three cards, so this stays clear regardless of which is showing. */}
-        {showArrow && !scrolled && (
-          <div
-            aria-hidden
-            className="mkt-explore-arrow pointer-events-none absolute inset-x-0 flex justify-center"
-            style={{ top: "56%" }}
-          >
-            <div
-              className="flex items-center justify-center rounded-full"
-              style={{
-                width: "calc(var(--mu) * 30px)",
-                height: "calc(var(--mu) * 30px)",
-                background: "color-mix(in srgb, var(--background) 45%, transparent)",
-                backdropFilter: "blur(4px)",
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
-          </div>
-        )}
 
         {/* Right-side action rail, straight off the reference — static, just selling
            the "real app feed" read. */}
