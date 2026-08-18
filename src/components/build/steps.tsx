@@ -175,83 +175,6 @@ function VibeButtonRow({
   );
 }
 
-// Figma's Work Vibe format (frame 3002:14540): each row is a card with the label,
-// a value pill, and a 3-stop SLIDER — not buttons. Copy (labels/options) stays
-// verbatim from the reference; the slider is the design system's input format.
-function VibeSliderRow({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value: string | null;
-  onChange: (next: string) => void;
-}) {
-  const index = value ? options.indexOf(value) : -1;
-  const fraction = index >= 0 ? index / (options.length - 1) : 0;
-  return (
-    <div className="rounded-2xl border px-4 py-3.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">{label}</p>
-        <span
-          className="rounded-full px-3 py-1 text-[11.5px] font-bold text-white transition-colors"
-          style={{ background: index >= 0 ? "var(--color-accent-purple)" : "var(--color-glass-surface-2)", color: index >= 0 ? "#ffffff" : "var(--color-night-muted-foreground)", minWidth: 74, textAlign: "center" }}
-        >
-          {value ?? "…"}
-        </span>
-      </div>
-      <div className="relative mt-3 h-7">
-        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full" style={{ background: "var(--color-glass-surface-2)" }} />
-        {index >= 0 && (
-          <div
-            className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full transition-[width] duration-200"
-            style={{ width: `${fraction * 100}%`, background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))" }}
-          />
-        )}
-        <input
-          type="range"
-          min={0}
-          max={options.length - 1}
-          step={1}
-          value={index >= 0 ? index : 1}
-          aria-label={label}
-          aria-valuetext={value ?? "not set"}
-          onChange={(e) => onChange(options[Number(e.target.value)])}
-          className="absolute inset-0 w-full cursor-pointer opacity-0"
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-[left] duration-200"
-          style={{
-            left: `${(index >= 0 ? fraction : 0.5) * 100}%`,
-            background: "var(--color-night-foreground)",
-            borderColor: index >= 0 ? "var(--color-accent-purple)" : "var(--color-glass-stroke)",
-            boxShadow: index >= 0 ? "0 0 0 5px color-mix(in srgb, var(--color-accent-purple) 22%, transparent)" : "0 3px 10px rgba(0,0,0,0.4)",
-          }}
-        />
-      </div>
-      <div className="mt-1 flex justify-between">
-        {options.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={(e) => {
-              dispatchAuroraPulse("select", e);
-              onChange(option);
-            }}
-            className="text-[11px] font-semibold transition-colors"
-            style={{ color: value === option ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)", opacity: value === option ? 1 : 0.7 }}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, phase }: StepProps) {
   const variant = useVariant();
   const glass = variant === "glass";
@@ -288,11 +211,11 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, pha
             </div>
           </div>
         ) : (
-          /* Side-by-side on ≥sm: a full-column track is mostly dead travel for a
-             3-stop slider, and the two dials read as one decision when paired. */
+          /* Pick-one rows here too — a slider suggests a continuum, but these
+             are three discrete choices; one tap beats drag-and-guess. */
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <VibeSliderRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
-            <VibeSliderRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
+            <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
+            <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
             {setupPanel}
           </div>
         )}

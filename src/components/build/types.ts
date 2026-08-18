@@ -64,7 +64,8 @@ export const SUBJECTS = [
   "Psychology",
 ];
 
-export const ENERGY_OPTIONS = ["Fast pace", "Calm", "Balanced"];
+// Balanced sits in the middle so the slider reads as a spectrum: fast — balanced — calm.
+export const ENERGY_OPTIONS = ["Fast pace", "Balanced", "Calm"];
 export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
 export const EDUCATION_OPTIONS: { title: string; subtitle: string }[] = [
