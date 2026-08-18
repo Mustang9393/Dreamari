@@ -11,12 +11,12 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // a real "Try again" replay instead of auto-advancing to a next question. The point is
 // the immediate hit of positive feedback on tap, not a quiz result or a queue of scenes.
 const SCENARIO = {
-  scene: "9 PM. Your MD just sent deck edits.",
-  prompt: "What's your move?",
+  scene: "Christina (VP) introduces you to Marcus, the Managing Director. The team pitches to a big company tomorrow.",
+  prompt: "What should you do first?",
   options: [
-    { label: "Turn it around tonight", response: "That's the analyst mindset." },
-    { label: "Grab coffee, then dive in", response: "Smart, sustainable pace." },
-    { label: "Loop in a teammate", response: "Deals are a team sport." },
+    { label: "Ask for your role and deadline", response: "Smart, clarify scope first." },
+    { label: "Start changing slides", response: "Fast and confident under pressure." },
+    { label: "Wait for Jordan (Fellow Analyst)", response: "Teamwork keeps deals moving." },
   ],
 };
 

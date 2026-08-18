@@ -67,7 +67,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
             <MarketingButton href="/flow" variant="primary">
-              Start my journey
+              Start Journey
             </MarketingButton>
             <MarketingButton href="#how-it-works" variant="ghost">
               See how it works
@@ -80,7 +80,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-8 font-mono text-[11px] font-bold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
             style={{ color: "var(--muted-foreground)" }}
           >
-            Scroll
+            Scroll Down To Learn More
             <div className="mt-1 text-[14px] leading-none">⌄</div>
           </div>
         </div>

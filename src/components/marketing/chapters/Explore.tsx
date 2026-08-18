@@ -126,12 +126,21 @@ function ExploreCardBody({ card }: { card: Card }) {
         >
           {card.industry}
         </p>
-        <div className="mt-2 flex flex-wrap items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 10px)" }}>
+        {/* flex-nowrap (not flex-wrap) + min-width:0 on each stat item + a truncating
+           ellipsis on the value — per direct feedback, salary and major must always
+           sit side by side and never switch to a stacked layout. A long major like
+           "Business Administration" would otherwise wrap the row onto two lines on
+           narrower cards (flex-wrap's whole point); min-width:0 lets a flex item
+           shrink below its own text's natural width (the flex default is effectively
+           min-width:auto, which refuses to shrink and forces the wrap instead), and
+           the ellipsis keeps whatever text doesn't fit from ever forcing a wider
+           layout or breaking to a second line. */}
+        <div className="mt-2 flex flex-nowrap items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 8px)" }}>
           {[
             { icon: STAT_ICONS.salary, value: card.salary },
             { icon: STAT_ICONS.duration, value: card.major },
           ].map((stat, i) => (
-            <div key={i} className="flex items-center" style={{ gap: "calc(var(--mu) * 5px)" }}>
+            <div key={i} className="flex min-w-0 items-center" style={{ gap: "calc(var(--mu) * 5px)" }}>
               <span
                 className="flex flex-none items-center justify-center rounded-full border"
                 style={{
@@ -153,7 +162,12 @@ function ExploreCardBody({ card }: { card: Card }) {
                   {stat.icon}
                 </svg>
               </span>
-              <span style={{ fontSize: "calc(var(--mu) * 10.5px)", fontWeight: 700, color: "var(--foreground)" }}>{stat.value}</span>
+              <span
+                className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+                style={{ maxWidth: "calc(var(--mu) * 72px)", fontSize: "calc(var(--mu) * 10.5px)", fontWeight: 700, color: "var(--foreground)" }}
+              >
+                {stat.value}
+              </span>
             </div>
           ))}
         </div>
@@ -301,65 +315,80 @@ function ExploreCarousel() {
     return () => el.removeEventListener("wheel", preventNativeScroll);
   }, []);
 
-  function goToPrevChapter() {
-    document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  function goToNextChapter() {
-    document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   useEffect(() => {
     scrolledRef.current = scrolled;
   }, [scrolled]);
 
+  // Kept in sync with containerHeight via its own effect (below) rather than being a
+  // dependency of the nudge effect itself — see that effect's comment for why.
+  const containerHeightRef = useRef(0);
+  useEffect(() => {
+    containerHeightRef.current = containerHeight;
+  }, [containerHeight]);
+
   // Nudge, in two beats: first the next card physically slides up into view and
   // settles back (a "look, this scrolls" cue more intuitive than an icon alone), THEN
   // — once that's done, not simultaneously — a small down-arrow fades in as a
-  // lingering reminder. Doing both at once had the peek motion and the arrow
-  // competing for attention at the same time; sequencing them reads as one clear cue
-  // instead of two clashing ones. Reuses the exact same dragPx channel a real swipe
-  // would drive, so the peek is just "what a small real swipe would look like."
-  // Depends only on containerHeight (not `scrolled`/`graphicRevealed`): this whole
-  // component remounts fresh via `key={visitId}` every time the reader scrolls back
-  // onto Explore, so a plain mount-time effect already replays the sequence every
-  // visit — the `scrolledRef` checks below just bail out cleanly if the reader
-  // interacts partway through the chained timeouts, without needing `scrolled` in
-  // the dependency array (which would otherwise skip the whole sequence once it's
-  // already true).
+  // lingering reminder. Reuses the exact same dragPx channel a real swipe would
+  // drive, so the peek is just "what a small real swipe would look like."
+  //
+  // Mount-only (deps: []), NOT keyed to containerHeight — an earlier version
+  // depended on containerHeight directly, which was the actual bug behind "doesn't
+  // always work": ResizeObserver can fire more than once while the frame's layout
+  // settles (scroll-into-view physics, font/container-query recalculation), and
+  // each firing tore down and restarted the whole chained-timeout sequence via the
+  // effect's cleanup — if a resize landed mid-peek or mid-settle, the animation got
+  // cancelled with dragPx left mid-flight and never actually finished. Polling
+  // `containerHeightRef` from inside a single mount-only effect instead means once
+  // the sequence actually starts, nothing can tear it down early except the reader
+  // scrolling away (unmounting this component) or interacting (the scrolledRef
+  // checks below). Durations were also cut down across the board per feedback that
+  // the whole tease read as too slow.
   useEffect(() => {
-    if (containerHeight === 0) return;
+    let cancelled = false;
     let cancelPeek: (() => void) | undefined;
     let cancelSettle: (() => void) | undefined;
-    const cardHeight = containerHeight * (1 - 2 * GUTTER_FRACTION);
-    const peekPx = cardHeight * 0.22;
-    const timeout = setTimeout(() => {
+    let pendingTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    function begin() {
+      if (cancelled) return;
+      const height = containerHeightRef.current;
+      if (height === 0) {
+        pendingTimeout = setTimeout(begin, 50);
+        return;
+      }
       if (scrolledRef.current) return;
-      cancelPeek = animateNumber(0, peekPx, 900, setDragPx);
-      setTimeout(() => {
+      const cardHeight = height * (1 - 2 * GUTTER_FRACTION);
+      const peekPx = cardHeight * 0.22;
+      cancelPeek = animateNumber(0, peekPx, 500, setDragPx);
+      pendingTimeout = setTimeout(() => {
         if (scrolledRef.current) return;
-        cancelSettle = animateNumber(peekPx, 0, 700, setDragPx);
-        setTimeout(() => {
+        cancelSettle = animateNumber(peekPx, 0, 400, setDragPx);
+        pendingTimeout = setTimeout(() => {
           if (!scrolledRef.current) setShowArrow(true);
-        }, 700);
-      }, 900 + 650);
-      // Was 900ms — a few ms sooner per direct feedback, so the tease starts a
-      // little earlier without crowding the copy's own reveal transition above it.
-    }, 650);
+        }, 200);
+      }, 500 + 250);
+    }
+
+    pendingTimeout = setTimeout(begin, 350);
     return () => {
-      clearTimeout(timeout);
+      cancelled = true;
+      clearTimeout(pendingTimeout);
       cancelPeek?.();
       cancelSettle?.();
     };
-  }, [containerHeight]);
+  }, []);
 
+  // Committing past the first/last card used to auto-scroll straight into the
+  // adjacent chapter — per direct feedback that felt like it was launching the
+  // reader somewhere they didn't ask to go. Now it just stops at the boundary card;
+  // the reader has to deliberately scroll past the section themselves.
   function commit(direction: 1 | -1) {
     setScrolled(true);
     if (direction === 1) {
       if (activeIndex < LAST_INDEX) setActiveIndex((i) => i + 1);
-      else goToNextChapter();
     } else {
       if (activeIndex > 0) setActiveIndex((i) => i - 1);
-      else goToPrevChapter();
     }
   }
 
@@ -530,6 +559,63 @@ function ExploreCarousel() {
               </svg>
             </div>
           ))}
+        </div>
+
+        {/* Left-side up/down nav — per direct feedback, a swipe-only feed doesn't
+           intuitively read as "swipe up/down like a FYP feed," so real buttons give a
+           discoverable, clickable alternative to the gesture. Unlike the right rail
+           (decorative, pointer-events-none), these are real controls wired straight
+           into the same commit() the swipe/wheel paths use. */}
+        <div
+          className="absolute flex flex-col items-center"
+          style={{ left: "calc(var(--mu) * 10px)", bottom: "calc(var(--mu) * 46px)", gap: "calc(var(--mu) * 10px)", zIndex: 200 }}
+        >
+          <button
+            type="button"
+            aria-label="Previous card"
+            onClick={() => commit(-1)}
+            className="flex items-center justify-center rounded-full border"
+            style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 14px)", height: "calc(var(--mu) * 14px)" }}>
+              <path d="m18 15-6-6-6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Next card"
+            onClick={() => commit(1)}
+            className="flex items-center justify-center rounded-full border"
+            style={{ width: "calc(var(--mu) * 26px)", height: "calc(var(--mu) * 26px)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 14px)", height: "calc(var(--mu) * 14px)" }}>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Persistent hint — per direct feedback, readers don't intuitively know to
+           swipe up/down here the way they would on a FYP-style feed. Sits in the top
+           gutter band (the same zone a peeking neighbor's sliver occupies), small and
+           blurred so it doesn't compete with either card's own content. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 flex justify-center"
+          style={{ top: "calc(var(--mu) * 8px)", zIndex: 210 }}
+        >
+          <div
+            className="flex items-center rounded-full font-mono font-bold uppercase"
+            style={{
+              padding: "calc(var(--mu) * 5px) calc(var(--mu) * 12px)",
+              fontSize: "calc(var(--mu) * 8px)",
+              letterSpacing: "0.06em",
+              color: "var(--foreground)",
+              background: "color-mix(in srgb, var(--background) 55%, transparent)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            Swipe up/down or use arrows
+          </div>
         </div>
       </div>
   );

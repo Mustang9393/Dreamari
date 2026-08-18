@@ -8,7 +8,10 @@ type CTABlockProps = {
   heading: string;
   body: string;
   primary: { label: string; href: string };
-  secondary: { label: string; href: string };
+  // Optional: the Schools view still shows a paired primary/secondary CTA, but the
+  // student "You're ready" block was simplified to a single button per direct
+  // feedback ("we don't need 'See How It Works'... one clear CTA").
+  secondary?: { label: string; href: string };
 };
 
 export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABlockProps) {
@@ -38,9 +41,11 @@ export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABloc
         <MarketingButton variant="primary" href={primary.href}>
           {primary.label}
         </MarketingButton>
-        <MarketingButton variant="ghost" href={secondary.href}>
-          {secondary.label}
-        </MarketingButton>
+        {secondary && (
+          <MarketingButton variant="ghost" href={secondary.href}>
+            {secondary.label}
+          </MarketingButton>
+        )}
       </div>
     </div>
   );
@@ -54,7 +59,6 @@ export function StudentFinalCTA() {
         heading="You're ready."
         body="Let's build your future."
         primary={{ label: "Start Journey", href: "/flow" }}
-        secondary={{ label: "See how it works", href: "#how-it-works" }}
       />
     </div>
   );

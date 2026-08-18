@@ -8,23 +8,29 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // All three cards are real Business/Money/Office-world careers with real copy pulled
 // from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
 // standard entry-level ranges for these roles (not in the taxonomy source, which has no
-// salary column filled in yet). The match is real: whichever card gets liked is the one
-// the celebration screen shows, not a fixed outcome.
+// salary column filled in yet).
+//
+// Per direct feedback this is now a guided, two-beat tutorial rather than a genuinely
+// open swipe: Operations goes first as the "how to pass" demo card (liking it never
+// actually matches — see onExitTransitionEnd), and Investment Banking is the deck's
+// guaranteed final match (passing it is absorbed rather than dismissing it — see
+// onCardPointerUp). Project Manager stays in the stack purely for the peeking-card
+// depth effect; it's not reachable in the normal guided flow.
 const CARDS = [
-  {
-    key: "iba",
-    photo: "/images/career-chief-executive.jpg",
-    title: "Investment Banking",
-    blurb: "Helps big companies raise money and buy other companies.",
-    salary: "$85K-150K",
-    major: "Business & Management",
-  },
   {
     key: "ops",
     photo: "/images/career-pe-analyst.jpg",
     title: "Operations",
     blurb: "Keeps the day-to-day running of a business working.",
     salary: "$65K-110K",
+    major: "Business & Management",
+  },
+  {
+    key: "iba",
+    photo: "/images/career-chief-executive.jpg",
+    title: "Investment Banking",
+    blurb: "Helps big companies raise money and buy other companies.",
+    salary: "$85K-150K",
     major: "Business & Management",
   },
   {
@@ -77,7 +83,6 @@ function MatchDemo() {
   const [stack, setStack] = useState(CARDS);
   const [exiting, setExiting] = useState<{ key: string; direction: "like" | "pass" } | null>(null);
   const [flipped, setFlipped] = useState(false);
-  const [likedCount, setLikedCount] = useState(0);
   const [matchedCard, setMatchedCard] = useState<(typeof CARDS)[number] | null>(null);
   const [dragX, setDragX] = useState(0);
 
@@ -120,8 +125,14 @@ function MatchDemo() {
     setExiting(null);
     setFlipped(false);
     if (direction === "like") {
-      setLikedCount((n) => n + 1);
-      setMatchedCard(exited);
+      // Operations is the guided "how to pass" demo card — liking it should never
+      // actually match (that would undercut the "swipe left to see it's not a
+      // match" beat), so it just advances the stack the same way a pass would.
+      if (exited?.key === "ops") {
+        setStack((s) => s.slice(1));
+      } else {
+        setMatchedCard(exited);
+      }
     } else {
       setStack((s) => {
         const next = s.slice(1);
@@ -137,7 +148,6 @@ function MatchDemo() {
     setStack(CARDS);
     setExiting(null);
     setFlipped(false);
-    setLikedCount(0);
     setMatchedCard(null);
     setDragX(0);
   }
@@ -170,7 +180,11 @@ function MatchDemo() {
       return;
     }
     if (delta > SWIPE_COMMIT_PX) act("like");
-    else if (delta < -SWIPE_COMMIT_PX) act("pass");
+    // Investment Banking is the deck's guaranteed final match — passing it would
+    // let the storyboard end without ever matching, so a left-swipe here is simply
+    // absorbed (the card springs back to its resting position via the normal
+    // non-dragging transform) instead of being treated as a real pass.
+    else if (delta < -SWIPE_COMMIT_PX && top?.key !== "iba") act("pass");
   }
 
   function onCardPointerCancel() {
@@ -395,19 +409,25 @@ function MatchDemo() {
 
         {/* Nudge lives in normal flow between the card and the action buttons (not
            absolutely positioned over the card), so it never overlaps the like/pass
-           icons below it. */}
-        {!matched && !exiting && likedCount === 0 && stack.length === CARDS.length && (
+           icons below it. Two beats, keyed off whichever card is actually on top
+           (not likedCount/stack.length): "swipe left" while Operations (the demo
+           card) is up front, then "swipe right" once Investment Banking (the
+           guaranteed match) is. */}
+        {!matched && !exiting && top && (
           <p className="text-center font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
-            Swipe right to match · tap for details
+            {top.key === "ops" ? "Swipe left to see it's not a match" : "Swipe right to see a match"}
           </p>
         )}
 
+        {/* Decorative only — per direct feedback, these shouldn't actually be
+           pressable, so the guided tutorial has to be experienced as a real swipe
+           rather than clicked through. No onClick; the look is unchanged. */}
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
             <button
               type="button"
               aria-label="Pass"
-              onClick={() => act("pass")}
+              aria-disabled="true"
               className="flex items-center justify-center rounded-full border"
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
             >
@@ -419,12 +439,15 @@ function MatchDemo() {
             <button
               type="button"
               aria-label="Like"
-              onClick={() => act("like")}
+              aria-disabled="true"
               className="flex items-center justify-center rounded-full border"
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
             >
+              {/* Thumbs-up, not a heart — per direct feedback the heart read as too
+                 Tinder-like for a career-interest signal. */}
               <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+                <path d="M7 10v12H4a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z" />
+                <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H9a2 2 0 0 1-2-2V11.24a2 2 0 0 1 .59-1.42l4.17-4.17a1 1 0 0 1 1.63.24Z" />
               </svg>
             </button>
           </div>

@@ -636,6 +636,120 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   chapter before considering this fully closed.
 - Not yet pushed to `origin` as of this entry.
 
+### 2026-08-16 landing-page copy refresh + Build/Match/Explore/Play/Connect UX pass
+
+- Copy pass for tomorrow's meeting, plus a batch of direct UI/UX feedback across
+  four chapters. Scope: `Hero.tsx`, `FinalCTAs.tsx`, and all five `HowItWorks`
+  chapters except Connect's core copy (untouched) — no other route touched.
+- Hero: "Start my journey" → "Start Journey" (now matches the bottom CTA's own
+  label); "Scroll" hint → "Scroll Down To Learn More".
+- Bottom "You're ready" CTA (`StudentFinalCTA`): dropped the secondary "See how it
+  works" ghost button per direct feedback ("we don't need it... one clear CTA").
+  `CTABlock`'s `secondary` prop is now optional so `SchoolsFinalCTA` (which still
+  wants both of its own buttons) is unaffected. Left Hero's own separate "See how
+  it works" button alone — it's a different instance, not in scope here.
+- Build: the "Question 3 of 7 / Choose your interests" step now sits inside its
+  own bordered glass card (previously floated loose in the section, reading as not
+  obviously "one step of 7"). Same card recipe as Connect's post card
+  (glass-surface-3 + blur + a `var(--c)`-tinted glow) for visual consistency —
+  `var(--c)` resolves to each chapter's own accent since `ChapterShell` sets it
+  from the `color` prop. Renamed the old `EXAMPLE` constant to `CLICKABLE`: only
+  "Business & Money" is clickable now, Tech and Health show a hover color change
+  (via a small `hovered` state, since the background is otherwise driven by inline
+  styles that plain Tailwind `hover:` classes can't override) but do nothing on
+  click, so the rest of the storyboard's fixed path still makes sense no matter
+  what a reader tries.
+- Match: `CARDS` reordered to Operations first, then Investment Banking, then
+  Project Manager (previously Investment Banking led). The nudge text is now a
+  two-beat guided sequence keyed off whichever card is actually on top (not
+  `likedCount`/`stack.length` as before) — "Swipe left to see it's not a match"
+  while Operations is up front, "Swipe right to see a match" once Investment
+  Banking is. To guarantee the deck can only ever end matched with Investment
+  Banking: liking Operations (`onExitTransitionEnd`, `exited.key === "ops"`) just
+  advances the stack instead of setting `matchedCard`; passing Investment Banking
+  (`onCardPointerUp`, `top?.key !== "iba"` guard) is silently absorbed rather than
+  dismissing the card, so it springs back instead of ever being passable. Removed
+  `likedCount` state entirely (nothing reads it anymore). The Like/Pass buttons
+  lost their `onClick` per direct feedback ("don't have the button actually
+  pressable") — visually identical, swipe-only now. Heart icon path replaced with
+  a hand-authored solid thumbs-up (less Tinder-like per feedback).
+- Explore: added a left-side up/down chevron button pair (mirroring the existing
+  right-side action rail, but real controls wired straight into `commit()`) plus a
+  persistent "Swipe up/down or use arrows" hint pill, since a swipe-only feed
+  doesn't intuitively read as "like a FYP feed" to everyone.
+- Play: `SCENARIO` copy replaced — Christina (VP) introduces Marcus, the Managing
+  Director, ahead of a big pitch tomorrow; three new options (role/deadline, start
+  slides, wait for a teammate) with new short positive-feedback response lines,
+  matching the existing illusion-of-choice tone (no wrong branch to build). Kept
+  the existing artwork — no new image asset was supplied for this scenario.
+- Connect: rebuilt as a two-screen flow. Screen 1 is a new Community Overview
+  card ("Students Interested in Business & Money", a horizontal 1,987/212/123
+  Students/Professionals/Posts stat row, an "Enter Community" button) shown by
+  default; clicking it reveals Screen 2, the pre-existing post/comment card.
+  Extracted a shared `CardShell` component so both screens use the exact same
+  glass-card recipe. Screen 2 also picked up two smaller, separately-requested
+  fixes: a "Community Board" kicker label at the top (so the card reads as a
+  public post, not a private message) and Maya's tag changed from "Grade 10" to
+  "Howard University · Sophomore" (a college sophomore asking about landing a
+  bank internship is more realistic than a high schooler asking the same). Local
+  `screen` state lives in a new `ConnectDemo` component, keyed by `visitId` (same
+  reset-on-revisit pattern as the other four chapters) so scrolling back onto
+  Connect always starts back on the Community Overview screen.
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same one pre-existing `react-hooks/refs` error in `Explore.tsx`,
+  unrelated to this work).
+- Browser-verified via DOM/text inspection and `.click()` on real buttons (Build's
+  lock behavior, Explore's nav buttons, Connect's screen transition) — this
+  session's browser tab was stuck reporting itself hidden to the page (see the
+  previous entry), which blocks synthetic PointerEvent drag/swipe gestures
+  specifically (confirmed: neither a raw `dispatchEvent(new PointerEvent(...))`
+  nor a CDP-driven `left_click_drag` produced any pointer events on the target
+  element at all, while plain `.click()` calls worked reliably). Match's new
+  guaranteed-ending swipe logic was therefore verified by code review rather than
+  a live drag test; every click-based path verified live successfully.
+- Not yet pushed to `origin` as of this entry.
+
+### 2026-08-16 Explore nudge reliability/speed fix, dropped auto chapter-jump, Build "+more" consolidated, Explore stat row never wraps
+
+- Explore's peek+arrow nudge was reported as "doesn't always work and too slow."
+  Root cause: the nudge's `useEffect` depended on `containerHeight`, and
+  `ResizeObserver` can fire more than once while the frame's layout settles
+  (scroll-into-view physics, container-query recalculation) — each firing tore
+  down the in-flight chained-`setTimeout` sequence via the effect's cleanup, so a
+  resize landing mid-peek or mid-settle cancelled the animation with `dragPx` left
+  mid-flight and the sequence never actually finished. Fixed by making the effect
+  mount-only (`deps: []`) and reading `containerHeight` through a ref
+  (`containerHeightRef`, kept in sync by its own tiny effect) instead, with a
+  50ms-interval retry (`begin()`) until a real measurement exists — once the
+  sequence actually starts, nothing can tear it down early except unmounting or
+  the reader interacting. Also cut every duration in the chain (900/700/700ms →
+  500/400/200ms, initial delay 650ms → 350ms): the arrow now reliably appears in
+  ~1.7s instead of ~3.6s, confirmed across several repeated page reloads.
+- Committing past Explore's first/last card used to auto-scroll into Play/Connect
+  — per direct feedback this felt like being launched somewhere unasked for.
+  `commit()` now just stops at the boundary card; `goToPrevChapter`/
+  `goToNextChapter` were removed as they're no longer referenced anywhere.
+- Build: consolidated the three per-option "+more" chips (added earlier this
+  session) plus the old "+12 more interests in the full assessment" text into a
+  single "+ more" chip below the options row, per direct feedback that per-option
+  chips were clutter. The post-selection state ("{selected} noted...") is
+  unchanged.
+- Explore's salary/major stat row (`ExploreCardBody`) used `flex-wrap`, which let
+  the two stats wrap onto separate lines on narrower cards when the major name was
+  long ("Business Administration"). Per direct feedback they must always sit side
+  by side. Switched to `flex-nowrap` + `min-width:0` on each stat item (a flex
+  item's default `min-width:auto` refuses to shrink below its content's natural
+  width, which is what was forcing the wrap in the first place) + a
+  `text-overflow: ellipsis` truncation capped at `calc(var(--mu) * 72px)` on the
+  value text, so an overlong value truncates instead of ever breaking the layout.
+  Verified via `getBoundingClientRect()` on both stat spans (same `top` value,
+  i.e. same line) and visually via screenshot at both desktop and 375px mobile
+  widths, on the Management Analyst card specifically (the longest major).
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error).
+- Pushed to `origin/main` with explicit user authorization (this entry covers both
+  this round and the previous round's changes, pushed together).
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
