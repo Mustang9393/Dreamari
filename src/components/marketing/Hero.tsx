@@ -90,7 +90,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
-            Discover your dream career. Build, match, play, explore, and connect, all in one place. One clear step at a time.
+            Discover your dream career. Build, match, explore, simulate, and connect, all in one place. One clear step at a time.
           </p>
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}

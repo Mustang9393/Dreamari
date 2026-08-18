@@ -31,7 +31,10 @@ const CARDS = [
   },
   {
     key: "iba",
-    photo: "/images/career-investment-banking.jpg",
+    // -2 suffix: same asset as career-investment-banking.jpg's final version —
+    // renamed for cache busting, since this file was overwritten in place twice and
+    // browsers/optimizers that had cached the URL kept showing an old photo.
+    photo: "/images/career-investment-banking-2.jpg",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
     salary: "$85K-150K",

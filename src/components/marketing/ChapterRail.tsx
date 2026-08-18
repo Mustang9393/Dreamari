@@ -6,7 +6,7 @@ const CHAPTERS = [
   { id: "build", label: "Build", color: "#6366f1" },
   { id: "match", label: "Match", color: "#ffb81f" },
   { id: "explore", label: "Explore", color: "#1fc76e" },
-  { id: "play", label: "Play", color: "#3b82f6" },
+  { id: "play", label: "Simulate", color: "#3b82f6" },
   { id: "connect", label: "Connect", color: "#00c8dc" },
 ];
 

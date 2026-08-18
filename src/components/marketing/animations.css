@@ -80,6 +80,22 @@
   animation: mkt-burst-ring 0.6s ease-out 1 forwards;
 }
 
+/* Simulate's scene art: a very slow Ken Burns drift (scale + a slight lateral
+   wander, 18s each way, alternating) so the boardroom reads as a living moment the
+   reader is sitting inside rather than a static photo header — the cheapest honest
+   way to make the art feel immersive without covering it in any UI. Amplitude stays
+   tiny (6% zoom) and the duration long, so it registers as ambience, not motion
+   that competes with the choice panel below. The base scale is 1.02 (never 1.0):
+   the drift's translate would otherwise slide the image's own edge into view. */
+@keyframes mkt-sim-drift {
+  0% { transform: scale(1.02) translate(0.6%, 0.4%); }
+  100% { transform: scale(1.08) translate(-0.6%, -0.6%); }
+}
+.mkt-sim-drift {
+  animation: mkt-sim-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
 /* Whole-card glow pulse alongside the burst, so the feedback reads as one big moment
    rather than just a small badge in the corner of the scene. */
 @keyframes mkt-play-feedback-glow {

@@ -6,6 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 SIMULATE rename, new deal-kickoff scene, cache-busting image names
+
+- Play chapter renamed to **Simulate** everywhere it's presented as a name: the
+  ChapterShell title, ChapterRail label, the final CTA eyebrow (also fixed to the
+  current chapter ORDER: "Build. Match. Explore. Simulate. Connect."), and the
+  hero caption's verb list. The section id stays `play` on purpose — Explore's
+  next-chapter jump, the rail, and the snap flow all target it by id; renaming the
+  anchor is invisible to users and would break every hardcoded scroll target.
+- Simulate's scene art replaced with the user's new deal-team-kickoff illustration
+  (Figma node `3173-16665`, 1448x1086 — first-person POV at the table, Christina
+  presenting, Marcus arms crossed; matches the scenario copy beat for beat).
+  Immersion pass without copy changes: a slow Ken Burns drift on the scene
+  (`mkt-sim-drift`, 18s alternate, 1.02->1.08 scale — base is 1.02 so the drift's
+  translate never exposes the image edge) and the choice panel's padding/gap
+  shaved slightly so the art absorbs the difference.
+- **Same-name image swaps are now banned practice in this repo — three separate
+  stale-cache incidents this session**, including the user seeing an old
+  Investment Banking photo on their own machine after a deploy: browsers AND the
+  Next image optimizer key caches on the URL, and the dev optimizer even
+  re-persists its in-memory cache on shutdown (deleting `.next/cache/images`
+  while the server is running does nothing — stop, delete, then start). Fixed
+  properly by renaming: `sim-deal-kickoff.jpg` (was play-illustration.jpg) and
+  `career-investment-banking-2.jpg` (was career-investment-banking.jpg), with
+  components updated. Old files left in place. **Rule going forward: a replaced
+  image gets a NEW filename, never an overwrite.**
+
 ### 2026-08-18 follow-up: mouth-visible crop, final IB photo, Build citation
 
 - **Mascot crop widened to show eyes + full mouth** per direct request ("on desktop

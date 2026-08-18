@@ -37,7 +37,11 @@ export function PlayChapter() {
   return (
     <ChapterShell
       id="play"
-      title="Play"
+      // Renamed from "Play" per direct request — the chapter's section id stays
+      // "play" (Explore's next-chapter jump, ChapterRail, and the snap flow all
+      // target it by id; renaming the anchor buys nothing user-visible and would
+      // break every hardcoded scroll target).
+      title="Simulate"
       color="#3b82f6"
       oneliner="a day-in-the-life situation where every instinct pays off."
       flip
@@ -91,8 +95,18 @@ function PlayDemo() {
            kept compact. */}
         <div className="relative min-h-0 flex-1">
           {/* sizes mirrors this card's own width clamp below (90cqw capped at 560px) —
-             without it next/image assumes 100vw and serves a w=3840 file. */}
-          <Image src="/images/play-illustration.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="object-cover" style={{ objectPosition: "center 30%" }} />
+             without it next/image assumes 100vw and serves a w=3840 file.
+             objectPosition centers on the two presenting characters + the kickoff
+             screen (the new scene's subject band sits in the upper-middle of a
+             landscape frame; the POV hand at the bottom can crop freely).
+             mkt-sim-drift is the slow ambient Ken Burns zoom — see animations.css. */}
+          {/* sim-deal-kickoff.jpg is the same asset formerly saved over
+             play-illustration.jpg — renamed because same-name image swaps kept
+             serving stale cached copies (browser HTTP cache and the optimizer both
+             key on the URL; this bit three times this session, including the user
+             seeing an old Investment Banking photo on their own machine). Any future
+             image REPLACEMENT here should get a fresh filename, not overwrite. */}
+          <Image src="/images/sim-deal-kickoff.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="mkt-sim-drift object-cover" style={{ objectPosition: "center 35%" }} />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 bottom-0"
@@ -137,7 +151,11 @@ function PlayDemo() {
            was called out as an acceptable trade explicitly. */}
         <div
           className="relative z-[1] flex flex-none flex-col"
-          style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 13px) calc(var(--mu) * 10px)", gap: "calc(var(--mu) * 6px)", background: "var(--card)" }}
+          // Padding/gap shaved slightly (12/13/10/6 -> 10/12/8/5): the panel is
+          // flex-none content-sized and the art above absorbs whatever's left, so
+          // every pixel trimmed here goes straight to the scene — part of the "image
+          // should be immersive and prominent" pass, without dropping any content.
+          style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px) calc(var(--mu) * 8px)", gap: "calc(var(--mu) * 5px)", background: "var(--card)" }}
         >
           <div>
             <p className="font-mono uppercase" style={{ fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
