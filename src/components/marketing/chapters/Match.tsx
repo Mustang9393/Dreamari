@@ -419,15 +419,20 @@ function MatchDemo() {
           </p>
         )}
 
-        {/* Decorative only — per direct feedback, these shouldn't actually be
-           pressable, so the guided tutorial has to be experienced as a real swipe
-           rather than clicked through. No onClick; the look is unchanged. */}
+        {/* Per direct feedback these need to actually work again — same guarded
+           logic the swipe path uses: passing Investment Banking is still a no-op
+           (it's the deck's guaranteed final match, see onCardPointerUp's own
+           comment), liking Operations still won't match (guarded in
+           onExitTransitionEnd), so tapping these buttons behaves identically to
+           swiping regardless of which one a reader actually uses. */}
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
             <button
               type="button"
               aria-label="Pass"
-              aria-disabled="true"
+              onClick={() => {
+                if (top?.key !== "iba") act("pass");
+              }}
               className="flex items-center justify-center rounded-full border"
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
             >
@@ -439,7 +444,7 @@ function MatchDemo() {
             <button
               type="button"
               aria-label="Like"
-              aria-disabled="true"
+              onClick={() => act("like")}
               className="flex items-center justify-center rounded-full border"
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
             >

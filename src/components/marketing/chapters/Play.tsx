@@ -118,15 +118,21 @@ function PlayDemo() {
            behind it (there's nothing behind it to dim). flex-none (sizes to its
            own content, doesn't get squeezed by the image above it) — per direct
            feedback that all three options need to be visible without any
-           scrolling, every size/padding/gap in here was tightened specifically so
-           the whole panel's natural height stays comfortably inside the frame on
-           a short viewport, not just a tall one. */}
+           scrolling. Font sizes use clamp() (not pure calc(var(--mu)*Npx)) with a
+           real minimum, not just a scaled-down one — --mu is a container-query
+           value off the frame's own width, which shrinks toward its 1.0 floor on
+           a narrow phone, and pure mu-scaled text got uncomfortably small there
+           per direct feedback. The floor guarantees readable text on mobile; the
+           panel (being flex-none, content-sized) grows a bit to fit that bigger
+           text, which is exactly why the image above it — flex-1, absorbing
+           whatever's left — ends up proportionally smaller on mobile too, which
+           was called out as an acceptable trade explicitly. */}
         <div
           className="relative z-[1] flex flex-none flex-col"
           style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 13px) calc(var(--mu) * 10px)", gap: "calc(var(--mu) * 6px)", background: "var(--card)" }}
         >
           <div>
-            <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 8px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
+            <p className="font-mono uppercase" style={{ fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
               Day in the life
             </p>
             {/* A dialogue-bubble treatment for the scene text — reads as an NPC/
@@ -141,9 +147,9 @@ function PlayDemo() {
                 borderColor: "color-mix(in srgb, #3b82f6 35%, transparent)",
               }}
             >
-              <p style={{ fontSize: "calc(var(--mu) * 10px)", lineHeight: 1.3, fontWeight: 600, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
+              <p style={{ fontSize: "clamp(12.5px, calc(var(--mu) * 10px), 15px)", lineHeight: 1.3, fontWeight: 600, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
             </div>
-            <p className="font-extrabold" style={{ marginTop: "calc(var(--mu) * 5px)", fontSize: "calc(var(--mu) * 12px)", color: "var(--foreground)" }}>
+            <p className="font-extrabold" style={{ marginTop: "calc(var(--mu) * 5px)", fontSize: "clamp(14px, calc(var(--mu) * 12px), 18px)", color: "var(--foreground)" }}>
               {SCENARIO.prompt}
             </p>
           </div>
@@ -170,7 +176,7 @@ function PlayDemo() {
                     opacity: pickedIndex !== null && !isPicked ? 0.5 : 1,
                   }}
                 >
-                  <span className="flex-1" style={{ fontSize: "calc(var(--mu) * 10px)", fontWeight: 600, color: "#fff" }}>
+                  <span className="flex-1" style={{ fontSize: "clamp(13px, calc(var(--mu) * 10px), 15px)", fontWeight: 600, color: "#fff" }}>
                     {option.label}
                   </span>
                   <svg
@@ -191,7 +197,7 @@ function PlayDemo() {
           </div>
 
           <div className="flex items-center justify-between" style={{ minHeight: "calc(var(--mu) * 16px)" }}>
-            <p style={{ fontSize: "calc(var(--mu) * 9.5px)", fontWeight: 700, color: "#7aa4ff" }}>
+            <p style={{ fontSize: "clamp(12px, calc(var(--mu) * 9.5px), 14px)", fontWeight: 700, color: "#7aa4ff" }}>
               {pickedIndex !== null ? SCENARIO.options[pickedIndex].response : ""}
             </p>
             {pickedIndex !== null && (
@@ -202,7 +208,7 @@ function PlayDemo() {
                 style={{
                   gap: "calc(var(--mu) * 4px)",
                   padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
-                  fontSize: "calc(var(--mu) * 9px)",
+                  fontSize: "clamp(11px, calc(var(--mu) * 9px), 13px)",
                   background: "var(--glass-surface-2)",
                   borderColor: "var(--glass-border)",
                   color: "#fff",

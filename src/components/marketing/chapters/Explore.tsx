@@ -463,40 +463,14 @@ function ExploreCarousel() {
   // further they are from center, their sliver peeking into the gutter, reading as
   // spatially behind rather than just visually dimmed.
   return (
-    // Row layout: a stacked up/down button column to the LEFT of the card, outside
-    // its bounds entirely — per direct feedback, floating on top of the photo read
-    // as clutter, and a row below the card wasn't what was wanted either. The card
-    // itself sizes off its own height (h-full) with aspect-ratio deriving width
-    // from that — no flex-grow on the card, since flex-grow and aspect-ratio would
-    // otherwise fight over the same (horizontal, in a row) axis; max-w-full is
-    // just a safety cap if the row ever has less width than the ratio wants.
-    <div className="flex h-full w-full items-center justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
-      <div className="flex flex-none flex-col items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
-        <button
-          type="button"
-          aria-label="Previous card"
-          onClick={() => commit(-1)}
-          className="flex items-center justify-center rounded-full border"
-          style={{ width: "calc(var(--mu) * 28px)", height: "calc(var(--mu) * 28px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
-            <path d="m18 15-6-6-6 6" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          aria-label="Next card"
-          onClick={() => commit(1)}
-          className="flex items-center justify-center rounded-full border"
-          style={{ width: "calc(var(--mu) * 28px)", height: "calc(var(--mu) * 28px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="relative h-full max-w-full" style={{ aspectRatio: "168 / 240" }}>
+    // Column layout: the card on top, an up/down button row below it in normal
+    // flow — per direct feedback, a left-side button column made the card sit off
+    // to one side in a lopsided way that looked wrong on mobile. flex-1 +
+    // aspect-ratio on the card box (no explicit width) lets flex-grow determine
+    // its height first, then aspect-ratio derives the width from that; max-w-full
+    // caps it from ever overflowing sideways on a tall/narrow frame.
+    <div className="flex h-full w-full flex-col items-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+      <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 240" }}>
         <div
           ref={containerRef}
           className="relative h-full w-full touch-none overflow-hidden select-none"
@@ -631,6 +605,34 @@ function ExploreCarousel() {
             Swipe up/down or use arrows
           </div>
         </div>
+      </div>
+
+      {/* Up/down nav, back in a row below the card (same shape as Match's own
+         button row below its card) — per direct feedback, a left-side column
+         made the card sit off-center and looked wrong on mobile. */}
+      <div className="flex items-center" style={{ gap: "calc(var(--mu) * 16px)" }}>
+        <button
+          type="button"
+          aria-label="Previous card"
+          onClick={() => commit(-1)}
+          className="flex items-center justify-center rounded-full border"
+          style={{ width: "calc(var(--mu) * 30px)", height: "calc(var(--mu) * 30px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
+            <path d="m18 15-6-6-6 6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="Next card"
+          onClick={() => commit(1)}
+          className="flex items-center justify-center rounded-full border"
+          style={{ width: "calc(var(--mu) * 30px)", height: "calc(var(--mu) * 30px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
       </div>
     </div>
   );

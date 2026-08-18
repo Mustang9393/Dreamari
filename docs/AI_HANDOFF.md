@@ -840,6 +840,45 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   mobile" pass.
 - Pushed to `origin/main` with explicit user authorization.
 
+### 2026-08-16 Match buttons re-enabled, Explore nav reverted to below-card, Play mobile text floor
+
+- Match's Like/Pass buttons had been made decorative-only (no `onClick`) in an
+  earlier round specifically so the guided tutorial could only be experienced via
+  a real swipe. Direct feedback asked for them to work again — re-added
+  `onClick`, using the exact same guards the swipe path already has: Like always
+  calls `act("like")` (the "no match on Operations" rule lives downstream in
+  `onExitTransitionEnd`'s own `exited?.key === "ops"` check, so it applies
+  regardless of trigger source); Pass only calls `act("pass")` when
+  `top?.key !== "iba"`, mirroring `onCardPointerUp`'s own guard, so passing
+  Investment Banking via the button is still a no-op — the deck still can only
+  ever end matched with Investment Banking, tap or swipe.
+- Explore's nav buttons went back to a row below the card (this chapter's THIRD
+  layout for these buttons this session) — the left-side button-column version
+  from the previous entry made the card sit off-center in a lopsided way that
+  looked wrong specifically on mobile, per direct feedback. Back to the
+  flex-column-with-flex-1-card structure from two rounds ago (card on top, button
+  row below in normal flow, same shape as Match's own row).
+- Play's panel font sizes (tightened significantly two rounds ago specifically so
+  nothing would clip) were flagged as too small on mobile — root cause: `--mu` is
+  a container-query value off the frame's own width, which shrinks toward its 1.0
+  floor on a narrow phone, so mu-scaled text has no real minimum size. Switched
+  every panel font-size from plain `calc(var(--mu) * Npx)` to
+  `clamp(minPx, calc(var(--mu) * Npx), maxPx)`, giving mobile a genuine readable
+  floor (e.g. the prompt headline floors at 14px, option labels at 13px) while
+  leaving desktop's sizing unchanged. Since the panel is `flex-none` (sized to its
+  own content) and the image above it is `flex-1` (absorbs whatever's left), a
+  taller panel on mobile automatically means a proportionally smaller image there
+  too — exactly the trade-off directly confirmed as acceptable ("okay if we
+  shrink it a bit for mobile too").
+- Validation: `tsc --noEmit`, `eslint`, `npm run build`, `npm run tokens:check`
+  all pass clean (same pre-existing, unrelated `react-hooks/refs` error).
+  Browser-verified: Match's Like button correctly matches Investment Banking,
+  Pass correctly no-ops on it; Explore's card is centered again with buttons
+  below at both desktop and mobile widths; Play's option-label/headline computed
+  font sizes hit their 13px/14px floors on a 375px viewport with the card's
+  `scrollHeight === clientHeight` (confirmed no overflow/clipping).
+- Pushed to `origin/main` with explicit user authorization.
+
 ### 2026-08-06 hero copy pass (superseded by the full rebuild above)
 
 - Date: 2026-08-06
