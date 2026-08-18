@@ -2,6 +2,8 @@
 :root {
   --color-accent-deep: #0f4cd1;
   --color-accent-navy: #1f418f;
+  --color-accent-purple: #7d5cff;
+  --color-accent-subtle: #8b7bff;
   --color-action-primary: #1f5ff0;
   --color-action-primary-hover: #143c96;
   --color-action-secondary: #7fa8ff;
@@ -38,11 +40,18 @@
   --color-cta-foundation-on-surface-dark: #05070f;
   --color-cta-foundation-surface-light: #f4f7ff;
   --color-cyan-500: #00c0e8;
+  --color-decorative-pink-glow: #ff5d7d;
   --color-elevation-card: rgb(100 130 200 / 0.1);
   --color-elevation-overlay: rgb(0 0 0 / 0.4);
   --color-feedback-danger: #dc2626;
   --color-feedback-success: #007a55;
   --color-feedback-success-dark-surface: #33c78c;
+  --color-glass-border: rgb(0 0 0 / 0.12);
+  --color-glass-hover: rgb(0 0 0 / 0.14);
+  --color-glass-stroke: rgb(0 0 0 / 0.28);
+  --color-glass-surface-1: rgb(0 0 0 / 0.031);
+  --color-glass-surface-2: rgb(0 0 0 / 0.09);
+  --color-glass-surface-3: rgb(255 255 255 / 0.72);
   --color-green-450: #01be58;
   --color-green-500: #10b981;
   --color-green-600: #009966;
@@ -77,6 +86,10 @@
   --color-neutral-800: #1d293d;
   --color-neutral-900: #1e2a3f;
   --color-neutral-950: #030712;
+  --color-night-background: #f4f7ff;
+  --color-night-card: #d8dbe8;
+  --color-night-foreground: #05070f;
+  --color-night-muted-foreground: #4a4f6d;
   --color-orange-600: #ea580c;
   --color-path-accent-high-school: #60a5fa;
   --color-path-accent-job-seeker: #a78bfa;
@@ -353,6 +366,8 @@
 .dark {
   --color-accent-deep: #0f4cd1;
   --color-accent-navy: #1f418f;
+  --color-accent-purple: #7d5cff;
+  --color-accent-subtle: #8b7bff;
   --color-action-primary: #2e73f5;
   --color-action-primary-hover: #4a82ff;
   --color-action-secondary: #7fa8ff;
@@ -389,11 +404,18 @@
   --color-cta-foundation-on-surface-dark: #05070f;
   --color-cta-foundation-surface-light: #f4f7ff;
   --color-cyan-500: #00c0e8;
+  --color-decorative-pink-glow: #ff5d7d;
   --color-elevation-card: rgb(0 0 0 / 0.4);
   --color-elevation-overlay: rgb(0 0 0 / 0.4);
   --color-feedback-danger: #ea4459;
   --color-feedback-success: #33c78c;
   --color-feedback-success-dark-surface: #33c78c;
+  --color-glass-border: rgb(255 255 255 / 0.09);
+  --color-glass-hover: rgb(255 255 255 / 0.18);
+  --color-glass-stroke: rgb(255 255 255 / 0.3);
+  --color-glass-surface-1: rgb(255 255 255 / 0.031);
+  --color-glass-surface-2: rgb(255 255 255 / 0.09);
+  --color-glass-surface-3: rgb(12 16 35 / 0.8);
   --color-green-450: #01be58;
   --color-green-500: #10b981;
   --color-green-600: #009966;
@@ -428,6 +450,10 @@
   --color-neutral-800: #1d293d;
   --color-neutral-900: #1e2a3f;
   --color-neutral-950: #030712;
+  --color-night-background: #05070f;
+  --color-night-card: #0e0f18;
+  --color-night-foreground: #f4f7ff;
+  --color-night-muted-foreground: rgb(255 255 255 / 0.62);
   --color-orange-600: #ea580c;
   --color-path-accent-high-school: #60a5fa;
   --color-path-accent-job-seeker: #a78bfa;

@@ -1,0 +1,170 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { Confetti } from "@/components/flow/aurora/Confetti";
+import { HomeButton } from "@/components/flow/HomeButton";
+import { MatchBackdrop } from "@/components/flow/match/MatchBackdrop";
+import { MatchExperience } from "@/components/flow/match/MatchExperience";
+import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
+import { MATCH_PATHS } from "@/components/flow/match/matchData";
+import { StepTransition } from "@/components/flow/StepTransition";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
+import { DreamyGuide } from "./DreamyGuide";
+import { CostStep } from "./CostStep";
+import { LocationStep } from "./LocationStep";
+import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
+import { VariantContext, type FlowVariant } from "./variant";
+import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildState, type StageId } from "./types";
+
+// The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).
+// Design/layout/structure follow the Figma Build Flow frames (3009-15623):
+// Background Space nebulas + the reactive dot-matrix aurora curtain, a centered
+// glass card carrying its own phase HUD, the CTA row outside the card. Dreamy
+// perches over the card's top edge as an interactive, reacting guide. Two A/B
+// presentation variants share this one implementation (see variant.tsx): "glass"
+// at /flow, "cinematic" at /flow/cinematic, switchable mid-flow (state persists)
+// via the floating A/B pill.
+
+const MATCH_LOADING_MS = 1800;
+const MATCH_ACCENT = "#2f6bf2";
+
+type Phase = "build" | "loading" | "match";
+
+// Figma "Background Space" (dev handoff Step 4): nebula ellipses positioned
+// proportionally, colored by pipeline tokens. Sits UNDER the aurora canvas.
+function BackgroundSpace() {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
+      {/* px floors on every nebula: vw-only sizing collapsed to near-invisible
+         blobs on phones, leaving the flow on flat black with no glass depth. */}
+      <div className="absolute rounded-full" style={{ width: "max(60vw, 620px)", aspectRatio: "1", left: "50%", top: "-16vh", transform: "translateX(-35%)", background: "var(--color-brand-500)", opacity: 0.32, filter: "blur(160px)" }} />
+      <div className="absolute rounded-full" style={{ width: "max(70vw, 680px)", aspectRatio: "1", left: "min(-14vw, -60px)", top: "52vh", background: "var(--color-accent-subtle)", opacity: 0.22, filter: "blur(180px)" }} />
+      <div className="absolute rounded-full" style={{ width: "max(50vw, 480px)", aspectRatio: "1", left: "12vw", top: "28vh", background: "var(--color-decorative-pink-glow)", opacity: 0.12, filter: "blur(150px)" }} />
+      <div className="absolute rounded-full" style={{ width: "max(80vw, 560px)", height: "max(30vh, 260px)", left: "5vw", top: "4vh", background: "#ffffff", opacity: 0.06, filter: "blur(120px)" }} />
+    </div>
+  );
+}
+
+export function BuildFlowExperience({ initialVariant = "glass" }: { initialVariant?: FlowVariant }) {
+  const router = useRouter();
+  const [variant, setVariant] = useState<FlowVariant>(initialVariant);
+  const [stageIndex, setStageIndex] = useState(0);
+  const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
+  const [phase, setPhase] = useState<Phase>("build");
+  const [matchCelebrating, setMatchCelebrating] = useState(false);
+  const [reactionNonce, setReactionNonce] = useState(0);
+
+  const stage = STAGES[stageIndex];
+  const stageId: StageId = stage.id;
+
+  const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
+  const back = () => setStageIndex((current) => Math.max(current - 1, 0));
+  const react = () => setReactionNonce((n) => n + 1);
+  const seeMatches = () => setPhase("loading");
+
+  useEffect(() => {
+    if (phase !== "loading") return;
+    const timer = setTimeout(() => setPhase("match"), MATCH_LOADING_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  function patch(update: Partial<BuildState>) {
+    setState((current) => ({ ...current, ...update }));
+  }
+
+  const accent = phase === "build" ? STAGE_ACCENTS[stageId] : MATCH_ACCENT;
+  const isComplete = stageId === "complete" && phase === "build";
+
+  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, phase: stage.phase, almostDone: stage.almostDone };
+
+  let content: ReactNode = null;
+  if (stageId === "interests") content = <InterestsStep {...stepProps} />;
+  else if (stageId === "subjects") content = <SubjectsStep {...stepProps} onBack={back} />;
+  else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
+  else if (stageId === "milestone") content = <MilestoneScreen onNext={next} percent={stage.percent} />;
+  else if (stageId === "education") content = <EducationStep {...stepProps} onBack={back} />;
+  else if (stageId === "cost") content = <CostStep {...stepProps} onBack={back} />;
+  else if (stageId === "location") content = <LocationStep {...stepProps} onBack={back} />;
+  else if (stageId === "profile") content = <ProfileStep {...stepProps} onBack={back} />;
+  else if (stageId === "complete") content = <CompletionScreen state={state} patch={patch} onSeeMatches={seeMatches} />;
+
+  const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
+
+  return (
+    <ThemeProvider>
+      <VariantContext.Provider value={variant}>
+        <BackgroundSpace />
+        {/* No accumulated per-step blobs (visitedAccents empty, per direct
+           feedback); the single accent tracks the progress bar's gradient at the
+           current percent, and input pulses supply the reactivity. Screen-wide
+           confetti is reserved for the Match celebration — the flow's own
+           celebrations are Dreamy-local bursts. */}
+        <AuroraBackground accent={accent} visitedAccents={[]} finale={isComplete || matchCelebrating} lightning={matchCelebrating} />
+        {phase !== "build" && !matchCelebrating && <MatchBackdrop />}
+        <Confetti colors={[accent, "#8b5cf6", "#ff4585", "#2f6bf2"]} active={matchCelebrating} />
+        <HomeButton />
+        <ThemeToggle />
+
+        {/* A/B variant switcher — demo affordance for the A/B test, sits left of
+           the theme toggle. Switching preserves all answers (same state tree). */}
+        {phase === "build" && (
+          <div
+            className="fixed top-5 right-[4.5rem] z-20 flex overflow-hidden rounded-full border text-[11px] font-bold backdrop-blur"
+            style={{ borderColor: "var(--color-glass-border)", background: "var(--color-glass-surface-3)" }}
+          >
+            {(["glass", "cinematic"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={variant === option}
+                onClick={() => setVariant(option)}
+                className="px-3 py-2 capitalize transition-colors"
+                style={{
+                  background: variant === option ? "var(--color-brand-500)" : "transparent",
+                  color: variant === option ? "#ffffff" : "var(--color-night-muted-foreground)",
+                }}
+              >
+                {option === "glass" ? "A" : "B"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's
+           content exceeds the viewport (short landscape phones), the step column
+           scrolls internally instead. */}
+        {/* h-dvh + overflow-hidden: the page itself never scrolls. The column
+           inside is the ONE scroll container; its child uses m-auto so short
+           steps center vertically and tall steps (13 chips on a phone) scroll
+           as a single coherent group — Dreamy, progress, and question together.
+           pt clears the fixed home/theme/AB controls on phones. */}
+        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-16 pb-4 sm:py-5">
+          <div className="flex h-full w-full flex-col items-center overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] sm:px-10 lg:px-16">
+            <div className={`m-auto w-full ${variant === "cinematic" ? "max-w-[860px]" : "max-w-[680px]"}`}>
+              {phase === "build" && dreamy && (
+                <div className={`w-full px-1 ${variant === "cinematic" ? "mb-3" : ""}`}>
+                  <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
+                </div>
+              )}
+              {phase === "build" && <StepTransition key={`${stageId}-${variant}`}>{content}</StepTransition>}
+              {phase === "loading" && (
+                <StepTransition key="match-loading">
+                  <MatchLoadingScreen />
+                </StepTransition>
+              )}
+              {phase === "match" && (
+                <StepTransition key="match-experience">
+                  <MatchExperience paths={MATCH_PATHS} onComplete={() => router.push("/career-report?from=match")} onCelebrationChange={setMatchCelebrating} />
+                </StepTransition>
+              )}
+            </div>
+          </div>
+        </section>
+      </VariantContext.Provider>
+    </ThemeProvider>
+  );
+}

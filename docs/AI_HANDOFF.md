@@ -4,7 +4,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-18
+- Date: 2026-08-19
+
+### 2026-08-19 /flow rebuilt end-to-end with A/B variants — SHIPPED TO MAIN
+
+- **New build-profile flow** under `src/components/build/` replaces the flow
+  step rendering path for `/flow` (old `src/components/flow/steps/*` +
+  FlowContainer remain on disk, now orphaned — purge is the agreed NEXT task,
+  only now that the replacement is verified). Copy is verbatim from
+  `docs/BUILD_FLOW_SPEC.md` (Replit walkthrough); input formats follow the
+  Figma Build Flow frames; surfaces use the pipeline glass/night tokens only.
+- **Two A/B variants, one implementation** (`variant.tsx` context):
+  - A "boxed/glass" at `/flow`: Replit card structure — gradient header strip
+    (icon + step title + constraint), progress above the box, "Your Setup"
+    natural-height side panel on Work Vibe desktop, Work Vibe = pick-one button
+    rows, tracker row on Interests. Column capped 680px.
+  - B "cinematic" at `/flow/cinematic`: boxless, left-aligned per Figma frame
+    3214-7363, in-flow progress with the question block, ink-bleed headings,
+    frosted whisper speech bubble for Dreamy. Column capped 860px. Same state,
+    switchable mid-flow via the A/B pill (answers persist).
+- Both variants keep: real USA map (@svg-maps/usa, state codes, order chips) +
+  list dropdowns, enhanced 6-stop cost slider, interactive Dreamy rig (parallax,
+  reactions, local bursts), progress swell sound + spark fan, phases-only
+  labels ("Phase 1"–"Phase 4" — names dropped per direct request), light/dark
+  toggle, match handoff to `/career-report`.
+- **Mobile made real**: one scroll container with m-auto centering (short steps
+  center, tall steps scroll as a coherent group), pt clearance for fixed
+  controls, 2-up chips on phones, nebula backgrounds given px floors (vw-only
+  sizes vanished at 375px → flat black; that's why glass looked dead on phones),
+  Dreamy glow enlarged/softened so no wrapper edge clips it.
+- Validation: tokens:check 627 tokens green, prod build green, eslint green in
+  src/components/build (the one remaining repo error is Explore.tsx:517
+  refs-in-render, pre-existing on main, untouched).
+- Pushed to main → production per explicit user authorization ("push to prod
+  once copy is aligned"). Task list: purge of the orphaned flow-step components
+  + retired token/code paths is next (user-approved, post-verification).
 
 ### 2026-08-19 duck retimed to the fold + hide-on-scroll nav (both prod bug reports)
 

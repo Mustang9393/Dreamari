@@ -1,9 +1,9 @@
-import { FlowContainer } from "@/components/flow/FlowContainer";
+import { BuildFlowExperience } from "@/components/build/BuildFlowExperience";
 
 export default function FlowPage() {
   return (
     <main>
-      <FlowContainer />
+      <BuildFlowExperience />
     </main>
   );
 }

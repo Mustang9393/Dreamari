@@ -166,6 +166,32 @@
           "hex": "#1f418f"
         },
         "$description": "Navy role-toggle accent."
+      },
+      "purple": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.490196,
+            0.360784,
+            1.0
+          ],
+          "hex": "#7d5cff"
+        },
+        "$description": "Figma var(--accent)."
+      },
+      "subtle": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.545098,
+            0.482353,
+            1.0
+          ],
+          "hex": "#8b7bff"
+        },
+        "$description": "Figma var(--accent-subtle) - the violet nebula color."
       }
     },
     "ink": {
@@ -1136,6 +1162,158 @@
           "alpha": 0.09
         },
         "$description": "Mirrors Figma var(--secondary)/var(--border)/var(--glass-surface-2): CTA Secondary family surface and border."
+      }
+    },
+    "glass": {
+      "$description": "The Figma design system's glass surface set (Semantic.Dark), verbatim from the live variable pull and the dev handoff package - the canonical translucent panel/chip/border recipe for space-background screens like the build flow.",
+      "surface-1": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.031
+        },
+        "$description": "Figma var(--glass-surface-1) #ffffff08 - faintest glass fill (chips at rest)."
+      },
+      "surface-2": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.09
+        },
+        "$description": "Figma var(--glass-surface-2) #ffffff17 - mid glass fill (hover/active chips)."
+      },
+      "surface-3": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.047059,
+            0.062745,
+            0.137255
+          ],
+          "alpha": 0.8
+        },
+        "$description": "Figma var(--glass-surface-3) #0c1023cc - deep glass panel fill (cards)."
+      },
+      "border": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.09
+        },
+        "$description": "Figma var(--glass-border) #ffffff17."
+      },
+      "stroke": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.3
+        },
+        "$description": "Figma var(--glass-stroke) #ffffff4d - stronger hairline."
+      },
+      "hover": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.18
+        },
+        "$description": "Figma var(--glass-hover) #ffffff2e."
+      }
+    },
+    "night": {
+      "$description": "Figma Semantic.Dark base surfaces/text used by space-background screens, verbatim from the live pull.",
+      "background": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.019608,
+            0.027451,
+            0.058824
+          ],
+          "hex": "#05070f"
+        },
+        "$description": "Figma var(--background)."
+      },
+      "card": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.054902,
+            0.058824,
+            0.094118
+          ],
+          "hex": "#0e0f18"
+        },
+        "$description": "Figma var(--card)."
+      },
+      "foreground": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.956863,
+            0.968627,
+            1.0
+          ],
+          "hex": "#f4f7ff"
+        },
+        "$description": "Figma var(--foreground)."
+      },
+      "muted-foreground": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.62
+        },
+        "$description": "Figma var(--muted-foreground) #ffffff9e."
+      }
+    },
+    "decorative": {
+      "$description": "Figma decorative accents from the live pull.",
+      "pink-glow": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            0.364706,
+            0.490196
+          ],
+          "hex": "#ff5d7d"
+        },
+        "$description": "Figma var(--decorative-pink-glow) - the pink nebula color."
       }
     }
   },
