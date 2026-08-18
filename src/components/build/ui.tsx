@@ -68,7 +68,7 @@ export function GlassCard({ children, className = "", header }: { children: Reac
           {header.constraint && <span className="ml-auto text-right text-[12px] font-semibold text-white/85">{header.constraint}</span>}
         </div>
       )}
-      <div className={`p-4 sm:p-6 ${className}`}>{children}</div>
+      <div className={`p-3.5 sm:p-6 ${className}`}>{children}</div>
     </div>
   );
 }
@@ -155,7 +155,7 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
 // box (Replit chrome) / above the heading (frameless frame 3214-7363).
 export function CardHud({ percent, phase, almostDone }: { percent: number; phase?: string; almostDone?: boolean }) {
   return (
-    <div className="mb-4 sm:mb-5">
+    <div className="mb-3 sm:mb-5">
       <PhaseProgress percent={percent} phase={phase} almostDone={almostDone} />
     </div>
   );
@@ -168,7 +168,7 @@ export function QuestionHeading({ title, subtitle }: { title: string; subtitle?:
     // to the same grid as the options below, not floating centered.
     return (
       <div className="mb-5 sm:mb-7">
-        <h1 className={`${bricolage.className} text-[28px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
+        <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
           <InkText text={title} />
         </h1>
         {subtitle && (
@@ -183,8 +183,8 @@ export function QuestionHeading({ title, subtitle }: { title: string; subtitle?:
     );
   }
   return (
-    <div className="mb-4 sm:mb-5">
-      <h1 className={`${bricolage.className} text-xl font-bold text-[var(--color-night-foreground)] sm:text-2xl`}>{title}</h1>
+    <div className="mb-3 sm:mb-5">
+      <h1 className={`${bricolage.className} text-[17px] font-bold text-[var(--color-night-foreground)] sm:text-2xl`}>{title}</h1>
       {subtitle && <p className="mt-1 text-[13px] font-medium text-[var(--color-night-muted-foreground)] sm:text-sm">{subtitle}</p>}
     </div>
   );
@@ -211,7 +211,9 @@ export function StepFooter({
   nextLabel?: string;
 }) {
   return (
-    <div className="mt-4 flex w-full items-center justify-between gap-3">
+    // Sticky to the step column's scroll container: on phones where a stage
+    // scrolls, Next/Previous stay on screen instead of hiding below the fold.
+    <div className="sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1 max-sm:[background:linear-gradient(to_top,color-mix(in_srgb,var(--color-night-background)_92%,transparent)_62%,transparent)]">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
           Previous
@@ -279,7 +281,7 @@ export function ChipGrid({
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className="flex h-full min-h-[48px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 hover:-translate-y-px sm:text-[14px]"
+            className="flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 hover:-translate-y-px sm:text-[14px]"
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
               borderColor: isSelected ? accent : "var(--color-glass-border)",

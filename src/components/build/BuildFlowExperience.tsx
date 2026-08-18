@@ -139,19 +139,20 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
         {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's
            content exceeds the viewport (short landscape phones), the step column
            scrolls internally instead. */}
-        {/* h-dvh + overflow-hidden: the page itself never scrolls. The column
-           inside is the ONE scroll container; its child uses m-auto so short
-           steps center vertically and tall steps (13 chips on a phone) scroll
-           as a single coherent group — Dreamy, progress, and question together.
-           pt clears the fixed home/theme/AB controls on phones. */}
-        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-16 pb-4 sm:py-5">
-          <div className="flex h-full w-full flex-col items-center overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] sm:px-10 lg:px-16">
-            <div className={`m-auto w-full ${variant === "cinematic" ? "max-w-[860px]" : "max-w-[680px]"}`}>
-              {phase === "build" && dreamy && (
-                <div className={`w-full px-1 ${variant === "cinematic" ? "mb-3" : ""}`}>
-                  <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
-                </div>
-              )}
+        {/* h-dvh + overflow-hidden: the page never scrolls. Dreamy + progress
+           stay PINNED (flex-none) so the fixed header controls never cut him
+           off; only the step content below scrolls when a stage is taller than
+           the viewport, and the whole group centers when it is not. The CTA
+           row inside each step is sticky to this scroll container's bottom so
+           Next/Previous never need hunting. */}
+        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] pb-3 sm:py-5">
+          <div className={`flex min-h-0 w-full flex-1 flex-col justify-center ${variant === "cinematic" ? "max-w-[860px]" : "max-w-[680px]"}`}>
+            {phase === "build" && dreamy && (
+              <div className={`w-full flex-none px-5 sm:px-10 ${variant === "cinematic" ? "mb-3" : ""}`}>
+                <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
+              </div>
+            )}
+            <div className="flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] sm:px-10">
               {phase === "build" && <StepTransition key={`${stageId}-${variant}`}>{content}</StepTransition>}
               {phase === "loading" && (
                 <StepTransition key="match-loading">

@@ -113,8 +113,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
     return (
       <div className="relative z-20 flex w-full items-center gap-3">
         <div
-          className="relative flex-none [perspective:600px]"
-          style={{ width: 88, height: 88 }}
+          className="relative h-[72px] w-[72px] flex-none [perspective:600px] sm:h-[88px] sm:w-[88px]"
           onMouseEnter={() => {
             setWiggling(true);
             setTimeout(() => setWiggling(false), 650);
@@ -150,7 +149,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
             style={{ background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)", borderLeft: "1px solid var(--color-glass-border)", borderBottom: "1px solid var(--color-glass-border)" }}
           />
           <p
-            className={`${bricolage.className} relative rounded-2xl px-4 py-2.5 text-[14px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
+            className={`${bricolage.className} relative rounded-2xl px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
             style={{
               background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)",
               border: "1px solid var(--color-glass-border)",
@@ -169,8 +168,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
       {/* Negative bottom margin makes him PERCH OVER the card's top edge below —
          gamified, physics-defying placement per direct request. */}
       <div
-        className="relative -mb-2 flex-none [perspective:600px] sm:-mb-3"
-        style={{ width: 104, height: 104 }}
+        className="relative -mb-2 h-[80px] w-[80px] flex-none [perspective:600px] sm:-mb-3 sm:h-[104px] sm:w-[104px]"
         onMouseEnter={() => {
           setWiggling(true);
           setTimeout(() => setWiggling(false), 650);
@@ -205,7 +203,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
           style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
         />
         <p
-          className={`${bricolage.className} relative rounded-2xl border px-4 py-2.5 text-[14px] leading-snug font-semibold text-[var(--color-night-foreground)] backdrop-blur-xl sm:text-[15px]`}
+          className={`${bricolage.className} relative rounded-2xl border px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] backdrop-blur-xl sm:text-[15px]`}
           style={{
             background: "var(--color-glass-surface-3)",
             borderColor: "var(--color-glass-border)",
