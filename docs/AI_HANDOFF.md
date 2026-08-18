@@ -6,6 +6,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-18 environmental mascot fade + parallax lighting rig
+
+- **Mascot fade made environmental** per direct feedback with a phone screenshot:
+  the mask moved OFF the float wrapper (where it traveled with the bob and read as
+  a black fade painted on the character mid-air) and onto the static stage — the
+  fade band now belongs to the frame, so Dreamy bobbing up rises OUT of it and
+  more of him becomes visible, like mist at the screen's limit. Safe only because
+  the Image's drop-shadow filter is already gone (a mask on an element clips any
+  descendant filter output to the masked box — the original halo bug). Same band
+  numbers (69.5->76.5%, crop at 77%); the float's base position is its lowest
+  point, so opacity still can never cross the crop.
+- **Parallax pseudo-3D chosen over a modeled 3D character** (user picked it
+  explicitly): three layers now move at three rates off the existing cursor
+  state — the ambient glow drifts AGAINST the cursor (farthest), the body lean
+  sits in the middle (existing), and a new lighting sheen travels WITH the cursor
+  (nearest). The sheen is a soft-light radial hotspot masked by the mascot PNG's
+  own alpha (`mask-image: url(...)`) so light lands only on the cloud silhouette
+  and the artwork's pixels stay untouched; driven per-frame via
+  backgroundPosition on a 220%-oversized gradient. Verified live: hovering left
+  of the mascot moves the sheen hotspot left while the glow shifts right.
+
 ### 2026-08-18 nudge-stutter fix, Simulate Q&A declutter
 
 - **Explore's peek-nudge stutter root-caused and fixed** (reported on desktop AND

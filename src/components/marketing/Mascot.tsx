@@ -27,6 +27,8 @@ type MascotProps = {
 export function Mascot({ heroRef }: MascotProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
+  const sheenRef = useRef<HTMLDivElement | null>(null);
   const eyeLeftRef = useRef<HTMLDivElement | null>(null);
   const eyeRightRef = useRef<HTMLDivElement | null>(null);
   const canvasLeftRef = useRef<HTMLCanvasElement | null>(null);
@@ -239,6 +241,14 @@ export function Mascot({ heroRef }: MascotProps) {
       const rotZ = curX * 2.2;
       const puff = 1 + curExcite * 0.03;
       tilt.style.transform = `translate(${leanX}px, ${leanY}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${puff})`;
+
+      // Parallax depth layers (see the sheen element's comment): the ambient glow
+      // is the FARTHEST layer so it drifts against the cursor, the body lean above
+      // is the middle layer, and the surface sheen is the NEAREST so its hotspot
+      // travels furthest with the cursor. Three rates of motion from one input is
+      // what sells the depth.
+      if (glowRef.current) glowRef.current.style.transform = `translate(${-curX * 9}px, ${-curY * 6}px)`;
+      if (sheenRef.current) sheenRef.current.style.backgroundPosition = `${50 + curX * 28}% ${40 + curY * 22}%`;
     }
     rafId = requestAnimationFrame(tick);
 
@@ -264,31 +274,31 @@ export function Mascot({ heroRef }: MascotProps) {
       // short viewports via media queries — not set inline here, so Hero.tsx's reserved
       // padding (calc(var(--mascot-size) * .62 + 28px)) always matches automatically.
       className="pointer-events-none absolute bottom-0 left-1/2 z-[1] [transform:translate(-50%,23%)] [width:var(--mascot-size)] [height:var(--mascot-size)]"
+      // The organic bottom dissolve — ENVIRONMENTAL, on this static stage, not on the
+      // float wrapper inside it. Per direct feedback (with a phone screenshot to
+      // prove it): a mask glued to the float wrapper travels WITH the bob, so the
+      // faded chin rose mid-air with the character, reading as "the object has a
+      // black fade painted on it." The fade belongs to the frame: static in stage
+      // space, so as Dreamy bobs up through it more of him becomes visible, and as
+      // he settles back down the band swallows the chin again — mist at the frame's
+      // limit, not a stain on the character. Geometry (percentages of the stage
+      // box): the scroll-exit effect translates the stage down by
+      // (1 - VISIBLE_FRACTION), so the hero's overflow:hidden crops at exactly
+      // VISIBLE_FRACTION (77%) of the stage; eyes end at 61.33%, mouth spans
+      // 63.42..68.83% (measured from the PNG). Fade runs 69.5% -> 76.5%: eyes and
+      // full mouth solid at the float's base, dissolve completes just before the
+      // crop, and since the float only bobs UP from base, artwork can never carry
+      // opacity past the crop line. A static mask on this stage is only safe
+      // because the Image no longer has its drop-shadow filter (mask clips filter
+      // output to the masked box — the old shadow painted past it and rendered as
+      // a rectangular halo; that was the original reason the mask got moved onto
+      // the float wrapper at all).
+      style={{
+        WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
+        maskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
+      }}
     >
-      {/* The organic bottom dissolve. Geometry that makes this work — all percentages
-         are of the stage box: the scroll-exit effect above translates the stage down
-         by (1 - VISIBLE_FRACTION), so the hero section's overflow:hidden crops this
-         stage at exactly VISIBLE_FRACTION (77%) of its height; the eyes end at 61.33%
-         (EYE_* above) and the mouth spans 63.42%..68.83% (measured from the PNG's
-         pixels). So the fade runs 69.5% -> 76.5%: eyes AND the full mouth stay
-         opaque, the chin/body below dissolves to full transparency just BEFORE the
-         hard crop line, and the crop itself never touches a visible pixel. Earlier
-         failed attempts, for the record: (1) a fade band placed below the crop line
-         is entirely invisible — the crop happens first, so the hard line stays; (2)
-         the mask must NOT live on the outer stage element while the Image keeps its
-         old drop-shadow filter — mask clips filter output to the masked box and the
-         shadow painted past it, which rendered as a rectangular halo. Hence: mask on
-         THIS float wrapper (it only ever bobs UP from its base position, so the
-         traveling fade band can never let opaque artwork slip below the crop), and no
-         drop-shadow on the Image anymore (invisible against a near-black page anyway
-         — the ambient glow carries the depth). */}
-      <div
-        className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]"
-        style={{
-          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
-          maskImage: "linear-gradient(to bottom, black 0%, black 69.5%, transparent 76.5%)",
-        }}
-      >
+      <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
         {/* Ambient glow lives INSIDE the masked float wrapper, not as a stage-level
            sibling — as a sibling it escaped the mask, still reached past the hero's
            70% crop line at faint opacity, and hard-clipped there as a hairline seam
@@ -297,6 +307,7 @@ export function Mascot({ heroRef }: MascotProps) {
            dissolve as the artwork and bobs with the float, which also reads more
            physically coherent than a glow pinned in place under a moving character. */}
         <div
+          ref={glowRef}
           aria-hidden
           className="pointer-events-none absolute rounded-full blur-[24px] [background:radial-gradient(circle,rgba(47,107,242,.28),transparent_60%)]"
           style={{ inset: "6%" }}
@@ -318,6 +329,37 @@ export function Mascot({ heroRef }: MascotProps) {
             sizes="460px"
             className="pointer-events-none object-contain select-none"
             priority
+          />
+          {/* Parallax lighting sheen — the "pseudo-3D" pass, chosen over a real
+             modeled 3D character per direct request ("parallax for the style").
+             A soft light spot that travels WITH the cursor across the cloud's
+             surface (the glow layer behind travels AGAINST it — see the tick), so
+             three layers move at three different rates: glow behind, body lean in
+             the middle, light on the surface. The div is masked by the mascot
+             PNG's own alpha channel, so the light lands ONLY on the cloud's
+             silhouette — never a rectangular glow over the background — and the
+             artwork's pixels stay untouched (soft-light blend just modulates
+             them). Driven per-frame via backgroundPosition (the gradient is
+             oversized to 220% so the hotspot can wander well off-center without
+             its own edge showing). Sits under the eye sockets so the glossy eye
+             canvases keep their own baked lighting. */}
+          <div
+            ref={sheenRef}
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(196,218,255,0.9) 0%, rgba(150,186,255,0.35) 30%, transparent 58%)",
+              backgroundSize: "220% 220%",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "50% 40%",
+              mixBlendMode: "soft-light",
+              WebkitMaskImage: "url(/images/hero-cloud-mascot.png)",
+              maskImage: "url(/images/hero-cloud-mascot.png)",
+              WebkitMaskSize: "100% 100%",
+              maskSize: "100% 100%",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+            }}
           />
           <div
             ref={eyeLeftRef}
