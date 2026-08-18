@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ChapterRail } from "./ChapterRail";
 import { BuildChapter } from "./chapters/Build";
 import { ConnectChapter } from "./chapters/Connect";
@@ -9,25 +9,12 @@ import { MatchChapter } from "./chapters/Match";
 import { PlayChapter } from "./chapters/Play";
 
 export function HowItWorks() {
+  // wrapRef survives the scroll-snap removal — ChapterRail still uses it to decide
+  // when the side progress dots are visible. The IntersectionObserver that toggled
+  // html[data-how-it-works-snap] is gone along with the snap CSS itself (see
+  // globals.css for the full why: snap kept grabbing phone flings and nothing
+  // depended on it — every guided chapter advance is JS scrollIntoView).
   const wrapRef = useRef<HTMLDivElement | null>(null);
-
-  // Each chapter is a full-viewport-height slide (ChapterShell's min-h-dvh); this turns
-  // page-level scroll-snap on only while any part of that 5-chapter block is on screen
-  // (globals.css already had the html[data-how-it-works-snap] rule scaffolded, just
-  // never wired up), so scrolling through Build->Connect snaps section to section while
-  // the hero above and the final CTA/footer below still scroll freely.
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    const io = new IntersectionObserver(([entry]) => {
-      document.documentElement.dataset.howItWorksSnap = entry.isIntersecting ? "true" : "false";
-    });
-    io.observe(wrap);
-    return () => {
-      io.disconnect();
-      delete document.documentElement.dataset.howItWorksSnap;
-    };
-  }, []);
 
   return (
     <>
