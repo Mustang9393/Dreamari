@@ -257,31 +257,40 @@ export function ChipGrid({
 }) {
   const variant = useVariant();
 
+  const atMax = selected.length >= max;
+
   function toggle(option: string, e: React.MouseEvent) {
     if (selected.includes(option)) {
       onChange(selected.filter((item) => item !== option));
       return;
     }
+    // Hard cap: at the max, new picks are locked out until one is deselected —
+    // no silent oldest-swap.
+    if (atMax) return;
     dispatchAuroraPulse("select", e);
     onPick?.();
-    onChange(selected.length >= max ? [...selected.slice(1), option] : [...selected, option]);
+    onChange([...selected, option]);
   }
 
   return (
     <div className={`grid auto-rows-fr gap-2 ${columns}`}>
       {options.map((option, index) => {
         const isSelected = selected.includes(option);
+        const isLocked = atMax && !isSelected;
         const accent = accents?.[option] ?? "var(--color-brand-400)";
         return (
           <button
             key={option}
             type="button"
             aria-pressed={isSelected}
+            aria-disabled={isLocked}
             onClick={(e) => toggle(option, e)}
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className="flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 hover:-translate-y-px sm:text-[14px]"
+            className={`flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
+              isLocked ? "cursor-not-allowed opacity-40" : "hover:-translate-y-px"
+            }`}
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
               borderColor: isSelected ? accent : "var(--color-glass-border)",
