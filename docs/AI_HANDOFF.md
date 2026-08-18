@@ -6,6 +6,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-18
 
+### 2026-08-19 scroll snapping removed entirely
+
+- Page-level scroll snap is gone (rule in globals.css, scrollSnapAlign in
+  ChapterShell, the IntersectionObserver wiring in HowItWorks) after a full
+  assessment, per direct approval of the recommendation: proximity snap kept
+  grabbing phone flings (any deceleration near a boundary, which with five
+  near-full-screen chapters is most of the page), and nothing depended on it —
+  every guided chapter advance is JS scrollIntoView, Explore's paging is its own
+  system, and the chapter rail reads position independently. Verified post-
+  removal: computed scroll-snap-type is none, the Build pick still lands Match
+  flush at the viewport top, rail still shows. If snap ever returns, scope it to
+  fine-pointer devices.
+
 ### 2026-08-19 hero top-air composition, Simulate -> Play revert
 
 - Hero top padding pt-[88px] -> pt-[clamp(120px,15vh,176px)]: with the copy
