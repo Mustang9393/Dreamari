@@ -146,7 +146,9 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
         <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:py-5">
-          <div className={`flex min-h-0 w-full flex-1 flex-col justify-center ${variant === "cinematic" ? "max-w-[860px]" : "max-w-[680px]"}`}>
+          {/* Same 860px column for BOTH variants — per direct feedback the framed
+             question blocks should match the unframed version's width. */}
+          <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">
             {phase === "build" && dreamy && (
               <div className={`w-full flex-none px-5 sm:px-10 ${variant === "cinematic" ? "mb-3" : ""}`}>
                 <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
