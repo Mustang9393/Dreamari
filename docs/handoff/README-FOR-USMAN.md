@@ -17,6 +17,8 @@ especially "pull tokens live from the Variables API, never hand-type."
 | `bridge.css` | Working snapshot that re-addresses your pull to the `--color-*` names those two surfaces consume. Drop-in. |
 | `figma-variables-to-add.md` | Executable spec for the missing Semantic variables (shadcn gaps + bridge verifications), with Light/Dark values and alias targets. |
 | `BUILD_FLOW_SPEC.md` | Verbatim behavioral spec for the build flow (copy is contractual). |
+| `background-space-extraction.md` | Why the atmospheric background can't be "extracted" (it's five blurred ellipses, not a token) + the production-ready, WebKit-safe CSS to use instead. |
+| `figma-agent-prompt.md` | Micro-stepped prompt for the Figma AI agent to add all missing variables and run the approved cleanup — the design side runs this, then you re-pull. |
 
 ## Architecture in one paragraph
 
@@ -38,8 +40,9 @@ truth long-term.
 2. Include `shadcn-adapter.css` after your generated tokens, before
    shadcn styles. Decide the admin default theme — the product is
    dark-first; admin renders light unless the root has `class="dark"`.
-3. Whoever owns the Figma file applies `figma-variables-to-add.md`
-   (30 minutes in the Variables panel); re-pull; the fallbacks go dead.
+3. Whoever owns the Figma file runs `figma-agent-prompt.md` through
+   the Figma AI agent (or applies `figma-variables-to-add.md` by hand);
+   re-pull; the fallbacks go dead.
 4. For the landing page and build flow: the deployed prototype
    (dreamari.vercel.app, /flow, /flow/cinematic) is the canonical
    design + behavior reference. The React sources
