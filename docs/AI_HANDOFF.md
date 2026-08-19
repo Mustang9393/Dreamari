@@ -6,6 +6,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 For You reel: full 8-card TikTok doom-scroll (v3, LOCAL)
+
+- Figma tab reopened: pulled the remaining 7 Env Cards from the Mobile
+  Reel (2530:46431) — Aerospace Engineer, Product Designer, Biomedical
+  Researcher, Marine Biologist, Neurosurgeon, Constitutional Attorney,
+  Creative Director — copy + salaries verbatim, env photos into
+  public/images/app/env-*.png (some are 8-9MB source PNGs; Next/Image
+  optimizes at serve time, repo weight noted).
+- ForYouFace rebuilt as a vertical scroll-snap feed (TikTok-style):
+  full-bleed viewport on mobile, the 390×672 card frame on desktop;
+  chevrons/arrow-keys scroll the feed; IntersectionObserver tracks the
+  active card. Active card's photo runs an 18s Ken Burns push-in
+  (env-slow-zoom in app.css, restarts per card) + rAF parallax (~36px
+  drift on a taller-than-card wrapper). prefers-reduced-motion disables
+  both. Verified live: snap paging, zoom class following the active
+  card, parallax offsets on neighbors.
+
 ### 2026-08-20 App Home + Explore (For You / Browse All) built from Figma (v3, LOCAL)
 
 - /home REPLACED (old tabbed StudentHomeExperience superseded; file kept,

@@ -20,6 +20,7 @@ import {
   type ReelCareer,
 } from "./catalog";
 import { WORLD_LABELS } from "./worlds";
+import "./app.css";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -203,13 +204,17 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
   return list;
 }
 
-function EnvCard({ career }: { career: ReelCareer }) {
+function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   return (
     <article
-      className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:h-[672px] md:w-[390px] md:rounded-[var(--radius-xl)]"
+      className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-xl)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "var(--background)" }}
     >
-      <Image src={career.photo} alt="" fill sizes="(max-width: 768px) 100vw, 390px" className="object-cover md:rounded-[var(--radius-xl)]" priority draggable={false} />
+      {/* Env photo: taller-than-card wrapper for parallax (JS translateY),
+         slow Ken Burns push-in while the card is the active one. */}
+      <div aria-hidden data-parallax className={`absolute inset-x-0 -top-[8%] -bottom-[8%] overflow-hidden will-change-transform ${active ? "env-zoom-active" : ""}`}>
+        <Image src={career.photo} alt="" fill sizes="(max-width: 768px) 100vw, 390px" className="object-cover" priority={active} draggable={false} />
+      </div>
 
       {/* Mobile-only in-card preference rail (desktop keeps it beside the card) */}
       <div className="absolute top-1/2 right-4 z-[2] flex -translate-y-1/2 flex-col gap-[var(--space-6)] md:hidden">
@@ -288,17 +293,63 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
 }
 
 function ForYouFace() {
-  const [index, setIndex] = useState(0);
   const total = FOR_YOU_REEL.length;
-  const career = FOR_YOU_REEL[Math.min(index, total - 1)];
-  const touchStartY = useRef<number | null>(null);
+  const [active, setActive] = useState(0);
+  const feedRef = useRef<HTMLDivElement | null>(null);
 
-  const step = useCallback(
-    (delta: number) => {
-      setIndex((current) => Math.max(0, Math.min(total - 1, current + delta)));
-    },
-    [total],
-  );
+  // Active-card tracking (drives the Ken Burns restart + paging state).
+  useEffect(() => {
+    const feed = feedRef.current;
+    if (!feed) return;
+    const cards = Array.from(feed.querySelectorAll("[data-reel-index]"));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            setActive(Number((entry.target as HTMLElement).dataset.reelIndex));
+          }
+        }
+      },
+      { root: feed, threshold: 0.6 },
+    );
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  // Parallax: each card's photo drifts against the scroll (~36px range).
+  useEffect(() => {
+    const feed = feedRef.current;
+    if (!feed) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let frame = 0;
+    function apply() {
+      frame = 0;
+      const viewH = feed!.clientHeight;
+      feed!.querySelectorAll<HTMLElement>("[data-reel-index]").forEach((card) => {
+        const photo = card.querySelector<HTMLElement>("[data-parallax]");
+        if (!photo) return;
+        const rect = card.getBoundingClientRect();
+        const feedRect = feed!.getBoundingClientRect();
+        const offset = (rect.top + rect.height / 2 - (feedRect.top + viewH / 2)) / viewH;
+        photo.style.transform = `translateY(${(-offset * 36).toFixed(1)}px)`;
+      });
+    }
+    function onScroll() {
+      if (!frame) frame = requestAnimationFrame(apply);
+    }
+    feed.addEventListener("scroll", onScroll, { passive: true });
+    apply();
+    return () => {
+      feed.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const step = useCallback((delta: number) => {
+    const feed = feedRef.current;
+    if (!feed) return;
+    feed.scrollBy({ top: delta * feed.clientHeight, behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -310,20 +361,18 @@ function ForYouFace() {
   }, [step]);
 
   return (
-    <div
-      className="relative flex w-full items-center justify-center gap-[10px]"
-      onTouchStart={(event) => {
-        touchStartY.current = event.touches[0].clientY;
-      }}
-      onTouchEnd={(event) => {
-        if (touchStartY.current === null) return;
-        const delta = touchStartY.current - event.changedTouches[0].clientY;
-        if (Math.abs(delta) > 60) step(delta > 0 ? 1 : -1);
-        touchStartY.current = null;
-      }}
-    >
-      <div className="fixed inset-0 z-0 md:relative md:inset-auto md:z-auto md:h-[672px] md:w-[390px]">
-        <EnvCard career={career} />
+    <div className="relative flex w-full items-center justify-center gap-[10px]">
+      {/* The feed: TikTok-style vertical snap scroll. Full-bleed viewport on
+         mobile; the Env Card frame (390×672) on desktop. */}
+      <div
+        ref={feedRef}
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
+      >
+        {FOR_YOU_REEL.map((career, index) => (
+          <div key={career.title} data-reel-index={index} className="h-full w-full snap-start snap-always">
+            <EnvCard career={career} active={index === active} />
+          </div>
+        ))}
       </div>
 
       {/* Desktop Career Preference Rail — "Place immediately to the right of
@@ -339,7 +388,7 @@ function ForYouFace() {
         <button
           type="button"
           aria-label="Previous career"
-          disabled={index === 0}
+          disabled={active === 0}
           onClick={() => step(-1)}
           className="flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
@@ -349,7 +398,7 @@ function ForYouFace() {
         <button
           type="button"
           aria-label="Next career"
-          disabled={index >= total - 1}
+          disabled={active >= total - 1}
           onClick={() => step(1)}
           className="flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}

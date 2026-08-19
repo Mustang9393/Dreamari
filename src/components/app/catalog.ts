@@ -95,9 +95,9 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
   C("Marine Biologist", "Science & Research", "/images/app/poster-marine-biologist.png", "$112K"),
 ];
 
-// Explore — For You reel (Env Card family). The design's reel holds 8 careers;
-// cards enter here as their env photos + copy are pulled from Figma. Private
-// Equity Analyst is complete (from Explore — v2.1B, 2288:16179).
+// Explore — For You reel: all 8 Env Card variants (section 2530:46431,
+// "Explore: Mobile Reel"), copy and photos verbatim from each variant.
+// (The card UI doesn't render the world; it's kept for data completeness.)
 export type ReelCareer = {
   title: string;
   world: string;
@@ -115,5 +115,61 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Helps investors buy, improve, and sell companies for long-term returns.",
     salary: "$95K - $250K+",
     photo: "/images/app/env-private-equity.png",
+  },
+  {
+    title: "Aerospace Engineer",
+    world: "Tech & Engineering",
+    matchLabel: "STRONG MATCH",
+    description: "Designs aircraft and spacecraft that fly safely through demanding conditions.",
+    salary: "$85K - $190K+",
+    photo: "/images/app/env-aerospace-engineer.png",
+  },
+  {
+    title: "Product Designer",
+    world: "Tech & Engineering",
+    matchLabel: "STRONG MATCH",
+    description: "Shapes useful digital products around people's needs.",
+    salary: "$75K - $180K+",
+    photo: "/images/app/env-product-designer.png",
+  },
+  {
+    title: "Biomedical Researcher",
+    world: "Science & Research",
+    matchLabel: "STRONG MATCH",
+    description: "Studies disease to develop better tests and treatments.",
+    salary: "$70K - $160K+",
+    photo: "/images/app/env-biomedical-researcher.png",
+  },
+  {
+    title: "Marine Biologist",
+    world: "Science & Research",
+    matchLabel: "STRONG MATCH",
+    description: "Studies ocean life and protects marine ecosystems.",
+    salary: "$55K - $120K+",
+    photo: "/images/app/env-marine-biologist.png",
+  },
+  {
+    title: "Neurosurgeon",
+    world: "Health & Medicine",
+    matchLabel: "STRONG MATCH",
+    description: "Diagnoses and operates on the brain and nervous system.",
+    salary: "$350K - $800K+",
+    photo: "/images/app/env-neurosurgeon.png",
+  },
+  {
+    title: "Constitutional Attorney",
+    world: "Law, Safety & Justice",
+    matchLabel: "STRONG MATCH",
+    description: "Handles cases about rights, laws, and government power.",
+    salary: "$90K - $250K+",
+    photo: "/images/app/env-constitutional-attorney.png",
+  },
+  {
+    title: "Creative Director",
+    world: "Arts, Media & Sport",
+    matchLabel: "STRONG MATCH",
+    description: "Leads the visual direction of brands and campaigns.",
+    salary: "$95K - $220K+",
+    photo: "/images/app/env-creative-director.png",
   },
 ];

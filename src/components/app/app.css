@@ -1,0 +1,33 @@
+/* For You reel motion — TikTok-style vertical snap feed.
+   The active card's env photo does a slow Ken Burns push-in; a JS-driven
+   translateY on the photo wrapper adds parallax against the scroll. Both
+   respect prefers-reduced-motion. */
+
+@keyframes env-slow-zoom {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+
+.env-zoom-active img {
+  animation: env-slow-zoom 18s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.foryou-snap {
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.foryou-snap::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .env-zoom-active img {
+    animation: none;
+  }
+}
