@@ -6,6 +6,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 For You fits the viewport; standard nav gap (PUSHED)
+
+- Explore For You (desktop) no longer scrolls: main is
+  h-[calc(100dvh-62px)] with the snap feed capped at min(672px,
+  available) so the Env Card shrinks to fit short screens, centered in
+  the leftover space. Verified at 1280x700: zero page scroll, card
+  fully visible.
+- One standard content offset below the navbar — space-10 (40px) — on
+  /home and both Explore faces (landing page untouched, per user).
+
 ### 2026-08-20 Details panel flip + logo-to-landing + quick-links everywhere
 
 - For You reel's info card is now the two-face Career Details Panel

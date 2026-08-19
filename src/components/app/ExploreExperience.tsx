@@ -398,12 +398,12 @@ function ForYouFace() {
   }, [step]);
 
   return (
-    <div className="relative flex w-full items-center justify-center gap-[10px]">
+    <div className="relative flex w-full items-center justify-center gap-[10px] md:min-h-0 md:flex-1">
       {/* The feed: TikTok-style vertical snap scroll. Full-bleed viewport on
          mobile; the Env Card frame (390×672) on desktop. */}
       <div
         ref={feedRef}
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
       >
         {FOR_YOU_REEL.map((career, index) => (
           <div key={career.title} data-reel-index={index} className="h-full w-full snap-start snap-always">
@@ -500,7 +500,15 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         <QuickLinksMenu align="left" className="absolute top-1/2 left-4 -translate-y-1/2 [&>button]:size-9" />
       </div>
 
-      <main className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start gap-[var(--space-10)] px-5 pb-[120px] md:px-[var(--space-14)] ${tab === "browse" ? "pt-[72px] md:pt-[var(--space-14)]" : "pt-[64px] md:pt-[72px]"}`}>
+      {/* One standard gap between the navbar and page content everywhere
+         (space-10); For You fits the viewport with the card centered. */}
+      <main
+        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 md:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+          tab === "browse"
+            ? "gap-[var(--space-10)] pt-[72px] pb-[120px]"
+            : "gap-[var(--space-6)] pt-[64px] pb-0 md:h-[calc(100dvh-62px)] md:overflow-hidden md:pb-[var(--space-6)]"
+        }`}
+      >
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
