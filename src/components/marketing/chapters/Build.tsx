@@ -111,7 +111,7 @@ function BuildDemo() {
         />
 
         <div className="text-center">
-          <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 700 }}>
+          <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 600 }}>
             Question 3 of 7
           </p>
           <p className="mt-2 font-bold" style={{ fontSize: "calc(var(--mu) * 19px)", lineHeight: 1.25, color: "var(--foreground)" }}>

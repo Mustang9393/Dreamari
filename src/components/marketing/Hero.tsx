@@ -116,7 +116,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
               tightens elsewhere) so this never competes with the mascot's peeking sliver
               for the little vertical room a short phone has above the fold. */}
           <div
-            className="mt-8 font-mono text-[11px] font-bold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
+            className="mt-8 text-[11px] font-semibold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
             style={{ color: "var(--muted-foreground)" }}
           >
             Scroll Down To Learn More

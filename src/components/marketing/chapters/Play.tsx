@@ -156,7 +156,7 @@ function PlayDemo() {
           style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px) calc(var(--mu) * 8px)", gap: "calc(var(--mu) * 5px)", background: "var(--card)" }}
         >
           <div>
-            <p className="font-mono uppercase" style={{ fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 700 }}>
+            <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 600 }}>
               Day in the life of an investment banker
             </p>
             {/* Narrator line as a quote bar, not a full bordered bubble — the old

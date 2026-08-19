@@ -45,7 +45,7 @@ function SectionHead({ eyebrow, title, body }: { eyebrow: string; title: string;
   return (
     <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-end gap-6 px-6 pb-8 max-[800px]:items-start sm:gap-10 sm:pb-12 min-[801px]:grid-cols-2">
       <div>
-        <div className="font-mono text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
+        <div className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
           {eyebrow}
         </div>
         <h2 className="mt-3 text-[30px] font-extrabold" style={{ color: "var(--foreground)" }}>
@@ -87,7 +87,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <AudienceToggle view={view} onChange={onChangeView} />
           </div>
           <div
-            className="mb-3.5 inline-block rounded-md px-2.5 py-1 font-mono text-[10.5px] tracking-[0.08em]"
+            className="mb-3.5 inline-block rounded-md px-2.5 py-1 text-[10.5px] font-semibold tracking-[0.08em] uppercase"
             style={{ background: "var(--glass-surface-1)", border: "1px solid var(--border)", color: "var(--muted-foreground)" }}
           >
             FOR SCHOOLS · DISTRICTS · NONPROFITS
@@ -113,7 +113,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pb-14">
         <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 min-[801px]:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <div className="font-mono text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
+            <div className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
               One platform. Every student.
             </div>
             <h2 className="mt-3 text-[30px] font-extrabold" style={{ color: "var(--foreground)" }}>
@@ -166,7 +166,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               ))}
             </div>
           </div>
-          <div className="mt-3.5 text-center font-mono text-[10px] opacity-60" style={{ color: "var(--muted-foreground)" }}>
+          <div className="mt-3.5 text-center text-[10px] font-semibold tracking-[0.06em] uppercase opacity-60" style={{ color: "var(--muted-foreground)" }}>
             [illustrative preview, not a Figma-sourced screen]
           </div>
         </div>
@@ -189,7 +189,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#ff5f57" }} />
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#febc2e" }} />
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#28c840" }} />
-            <span className="ml-3.5 rounded-md px-2.5 py-1 font-mono text-[10.5px]" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
+            <span className="ml-3.5 rounded-md px-2.5 py-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
               app.dreamari.com/counselor
             </span>
           </div>

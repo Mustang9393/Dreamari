@@ -53,7 +53,7 @@ export function Footer() {
         </div>
       </div>
       <div
-        className="mx-auto mt-12 max-w-[1200px] border-t pt-6 font-mono text-[12.5px]"
+        className="mx-auto mt-12 max-w-[1200px] border-t pt-6 text-[12.5px]"
         style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}
       >
         © 2026 Dreamari · Discover, don&apos;t guess.

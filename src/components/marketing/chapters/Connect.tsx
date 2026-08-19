@@ -143,7 +143,7 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
     <CardShell>
       <div style={{ padding: "calc(var(--mu) * 24px) calc(var(--mu) * 20px)" }}>
         <div className="text-center">
-          <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--c)", fontWeight: 700 }}>
+          <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--c)", fontWeight: 600 }}>
             Community Board
           </p>
           <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.25, color: "var(--foreground)" }}>
@@ -164,7 +164,7 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
               <span className="mt-1.5 font-extrabold" style={{ fontSize: "calc(var(--mu) * 15px)", color: "var(--foreground)" }}>
                 {stat.value}
               </span>
-              <span className="mt-0.5 font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 7.5px)", letterSpacing: "0.05em", color: "var(--muted-foreground)" }}>
+              <span className="mt-0.5 uppercase" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 7.5px)", letterSpacing: "0.05em", color: "var(--muted-foreground)" }}>
                 {stat.label}
               </span>
             </div>
@@ -205,7 +205,7 @@ function PostCard() {
       <div style={{ padding: "calc(var(--mu) * 14px) calc(var(--mu) * 14px) calc(var(--mu) * 10px)" }}>
         {/* Community Board label — per direct feedback, this needs to read as a
            public/community-facing post, not a private message or profile. */}
-        <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 8.5px)", letterSpacing: "0.1em", color: "var(--c)", fontWeight: 700 }}>
+        <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 8.5px)", letterSpacing: "0.1em", color: "var(--c)", fontWeight: 600 }}>
           Community Board
         </p>
         <div className="mt-2 flex items-center" style={{ gap: "calc(var(--mu) * 9px)" }}>

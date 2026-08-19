@@ -25,7 +25,7 @@ export function HowItWorks() {
            blank gap — every px trimmed here directly shortens that scroll. */}
         <div className="mx-auto max-w-[1200px] px-6 pt-3 pb-2 sm:pt-5 sm:pb-4 lg:pt-8">
           <div
-            className="text-center font-mono text-[11px] font-bold tracking-[0.14em] uppercase before:mr-2 before:inline-block before:h-px before:w-4 before:align-middle before:content-[''] min-[901px]:text-left"
+            className="text-center text-[11px] font-semibold tracking-[0.14em] uppercase before:mr-2 before:inline-block before:h-px before:w-4 before:align-middle before:content-[''] min-[901px]:text-left"
             style={{ color: "var(--primary-tint)" }}
           >
             How Dreamari works

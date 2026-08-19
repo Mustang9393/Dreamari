@@ -28,7 +28,7 @@ export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABloc
         transform: revealed ? "translateY(0) scale(1)" : "translateY(32px) scale(0.98)",
       }}
     >
-      <div className="font-mono text-[11px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
+      <div className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
         {eyebrow}
       </div>
       <h2 className="mx-auto mt-3 max-w-[680px] text-[clamp(1.75rem,4vw,3rem)] font-extrabold" style={{ color: "var(--foreground)" }}>

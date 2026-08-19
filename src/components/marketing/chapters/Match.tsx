@@ -218,7 +218,7 @@ function MatchDemo() {
                 style={{ background: "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-transparent) 55%, var(--scrim-medium) 78%, var(--background) 100%)" }}
               />
               <div className="mkt-match-celebrate-text absolute inset-x-0 bottom-0 flex flex-col items-center text-center" style={{ padding: "calc(var(--mu) * 16px)", gap: "calc(var(--mu) * 8px)" }}>
-                <p className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 12px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 700 }}>
+                <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 12px)", letterSpacing: "0.1em", color: WORLD_COLOR, fontWeight: 600 }}>
                   You&apos;re matched!
                 </p>
                 <p className="uppercase" style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, color: "var(--foreground)", ...posterTitleStyle(matchedCard.title) }}>
@@ -328,7 +328,7 @@ function MatchDemo() {
                          even before release commits it. */}
                       <div
                         aria-hidden
-                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-semibold uppercase"
                         style={{
                           top: "calc(var(--mu) * 16px)",
                           left: "calc(var(--mu) * 14px)",
@@ -345,7 +345,7 @@ function MatchDemo() {
                       </div>
                       <div
                         aria-hidden
-                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-mono font-extrabold uppercase"
+                        className="absolute flex items-center justify-center rounded-[calc(var(--mu)*6px)] border-2 font-semibold uppercase"
                         style={{
                           top: "calc(var(--mu) * 16px)",
                           right: "calc(var(--mu) * 14px)",
@@ -359,6 +359,27 @@ function MatchDemo() {
                         }}
                       >
                         Pass
+                      </div>
+
+                      {/* Subtle flip affordance (review request): a quiet glass
+                         info chip — the whole card already flips on tap. */}
+                      <div
+                        aria-hidden
+                        className="absolute flex items-center justify-center rounded-full border"
+                        style={{
+                          top: "calc(var(--mu) * 10px)",
+                          right: "calc(var(--mu) * 10px)",
+                          width: "calc(var(--mu) * 20px)",
+                          height: "calc(var(--mu) * 20px)",
+                          background: "var(--glass-surface-1)",
+                          borderColor: "var(--glass-border)",
+                          backdropFilter: "blur(6px)",
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" style={{ width: "calc(var(--mu) * 11px)", height: "calc(var(--mu) * 11px)" }}>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 16v-4M12 8h.01" />
+                        </svg>
                       </div>
 
                       <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
@@ -396,7 +417,7 @@ function MatchDemo() {
                               className="flex items-center justify-between rounded-[calc(var(--mu)*10px)]"
                               style={{ padding: "calc(var(--mu) * 7px) calc(var(--mu) * 11px)", background: "var(--glass-surface-2)" }}
                             >
-                              <span className="font-mono uppercase" style={{ fontSize: "calc(var(--mu) * 9.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
+                              <span className="uppercase" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 9.5px)", letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>
                                 {row.label}
                               </span>
                               <span style={{ fontSize: "calc(var(--mu) * 13px)", fontWeight: 700, color: "var(--foreground)" }}>{row.value}</span>
