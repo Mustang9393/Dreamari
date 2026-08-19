@@ -1,255 +1,166 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
+import { bricolage } from "@/components/build/fonts";
 
-// A real, user-driven feed — committed one-card-at-a-time paging (TikTok/Reels shape,
-// per direct request), not a native free-scrolling list with scroll-snap settling.
-// Matches Match's card size (168 x 300 mu) per feedback that the two should read as the
-// same scale of thing.
-// The industry line (under the title) says what field a career is actually in — the
-// three business-track cards share "Business & Money," but the Wildcard genuinely
-// isn't, so it gets its own. Match strength (Strong Match/Match/Stretch/Wildcard) is a
-// separate corner-ribbon badge rather than replacing the industry line — the two say
-// different things and shouldn't compete for the same line. Accountant, Management
-// Analyst, and Human Resources use real per-career photos pulled from the design
-// system's Figma file (node 3156-15148) — Accountant/Management Analyst previously
-// reused stand-in shots from Match's own photoshoot; Food Scientist keeps its own
-// separately user-supplied photo. Salary bands are the same standard entry-level
-// estimates used in Match, not sourced from the taxonomy sheet (which has no salary
-// column filled in).
-// Human Resources/Stretch — dropped earlier this session for being the
-// middle-of-the-road tier between the match-strength spectrum's two ends and the
-// Wildcard — is back per direct request, restoring the full four-tier spread:
-// Strong Match, Match, Stretch, Wildcard.
-const CARDS = [
-  { photo: "/images/career-accountant.jpg", title: "Accountant", industry: "Business & Money", matchLevel: "Strong Match", tagColor: "#1fc76e", salary: "$50K-85K", major: "Accounting" },
-  { photo: "/images/career-management-analyst.jpg", title: "Management Analyst", industry: "Business & Money", matchLevel: "Match", tagColor: "#3b82f6", salary: "$70K-100K", major: "Business Administration" },
-  { photo: "/images/career-human-resources.jpg", title: "Human Resources", industry: "Business & Money", matchLevel: "Stretch", tagColor: "#ff9640", salary: "$45K-70K", major: "Human Resources" },
-  // The Wildcard is meant to be a genuine reach outside the storyboard's own world —
-  // it should never say "Business & Money" just because the other three do.
-  { photo: "/images/career-food-scientist.jpg", title: "Food Scientist", industry: "Science & Research", matchLevel: "Wildcard", tagColor: "#8b5cf6", salary: "$60K-95K", major: "Food Science" },
-];
+// The Explore chapter graphic is a miniature of the app's actual Browse page
+// (Figma node 3185-17011): page header, the world-filter chip band, and the
+// ranked "Top 5 Trending" poster rail. Per review feedback the FYP-style swipe
+// deck is gone from this chapter — horizontal browse rails are the one catalog
+// mental model every generation shares (TV guide -> Netflix -> streaming rows),
+// which is what makes the section land for parents and school clients without
+// reading as dated to students (the ranked row + poster art is straight off
+// every streaming home screen they use daily). One rail only, per feedback —
+// the previous two-row version read as clutter.
+//
+// Composition: three horizontal bands (header chrome / filter chips / rail),
+// vertically centered as a group. The rail's tiles derive their size from the
+// band's own height (h-full inside a capped flex-1 area), so a taller frame
+// grows the poster art instead of accumulating dead space above and below it.
 
-// Per-world poster-title font + industry-line color, straight from the design
-// system's actual Career Poster Card component (Figma node 2403:244) — each career
-// world has its OWN poster title typeface and its own accent color there, not one
-// blanket Viaoda Libre + amber for every card regardless of field. Business, Money,
-// Sales & Office uses Viaoda Libre regular at var(--world-business-money-office);
-// Science & Research specifically uses Source Code Pro SemiBold at
-// var(--world-science-research) — both already defined in tokens.css.
-const WORLDS: Record<string, { color: string; font: string; weight: number }> = {
-  "Business & Money": { color: "var(--world-business-money-office)", font: "var(--font-poster)", weight: 400 },
-  "Science & Research": { color: "var(--world-science-research)", font: "var(--font-poster-mono)", weight: 600 },
+const WORLD_COLORS: Record<string, string> = {
+  "Business & Money": "var(--world-business-money-office)",
+  "Science & Research": "var(--world-science-research)",
+  "Tech & Engineering": "var(--world-tech-engineering-design)",
+  "Health & Medicine": "var(--world-health-medicine)",
+  "Arts, Media & Sport": "var(--world-arts-media-sport)",
+  "Teaching & Education": "var(--world-teaching-learning)",
+  "Building & Construction": "var(--world-building-construction)",
+  "Law, Safety & Justice": "var(--world-law-safety-government)",
+  "Food & Cooking": "var(--world-food-farming-nature)",
+  "Driving, Flying & Shipping": "var(--world-driving-flying-shipping)",
 };
 
-const ACTION_ICONS = [
-  // heart
-  <path key="heart" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />,
-  // thumbs-down
-  <path key="thumbs-down" d="M17 14V2M9 18.12 10 14H4.17a2 2 0 0 1-2-2.3l1.4-9A2 2 0 0 1 5.57 1H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3.34a2 2 0 0 0-1.82 1.18l-2.3 5.02a1.7 1.7 0 0 1-1.54.98v0A2.13 2.13 0 0 1 9 18.12Z" />,
-  // bookmark
-  <path key="bookmark" d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />,
+type BrowseItem = { photo: string; title: string; world: string; rank: number };
+
+const BROWSE_TOP5: BrowseItem[] = [
+  { photo: "/images/trending/trending-doctor.png", title: "Doctor", world: "Health & Medicine", rank: 1 },
+  { photo: "/images/trending/trending-software-engineer.png", title: "Software Engineer", world: "Tech & Engineering", rank: 2 },
+  { photo: "/images/trending/trending-nurse.png", title: "Nurse", world: "Health & Medicine", rank: 3 },
+  { photo: "/images/trending/trending-lawyer.png", title: "Lawyer", world: "Law, Safety & Justice", rank: 4 },
+  { photo: "/images/trending/trending-airline-pilot.png", title: "Airline Pilot", world: "Driving, Flying & Shipping", rank: 5 },
 ];
 
-// Lucide "dollar-sign" / "graduation-cap" paths.
-const STAT_ICONS = {
-  salary: (
-    <>
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </>
-  ),
-  duration: (
-    <>
-      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
-      <path d="M22 10v6" />
-      <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
-    </>
-  ),
-};
+// The filter band's world names, straight off the Browse page's own chip row.
+const FILTER_CHIPS = [
+  "All",
+  "Tech & Engineering",
+  "Health & Medicine",
+  "Business & Money",
+  "Arts, Media & Sport",
+  "Science & Research",
+  "Teaching & Education",
+  "Building & Construction",
+  "Law, Safety & Justice",
+  "Food & Cooking",
+];
 
-// Same length-tiered sizing problem Match's poster titles solve: a flat font size let
-// longer titles ("Management Analyst") run into the right-side action rail. Shorter
-// titles get to be genuinely big; longer ones step down and, past a point, wrap.
-function exploreTitleStyle(title: string): React.CSSProperties {
-  if (title.length <= 10) return { fontSize: "calc(var(--mu) * 21px)", whiteSpace: "nowrap" };
-  if (title.length <= 16) return { fontSize: "calc(var(--mu) * 18px)", whiteSpace: "normal" };
-  return { fontSize: "calc(var(--mu) * 15px)", whiteSpace: "normal" };
+// Poster-title typeface per world, mirroring the Browse Cards component:
+// Business & Money keeps Viaoda, Science & Research keeps Source Code Pro;
+// the rest use the site's own bold sans so tech/health don't wear a serif.
+function browseTitleFont(world: string): React.CSSProperties {
+  if (world === "Business & Money" || world === "Law, Safety & Justice" || world === "Driving, Flying & Shipping")
+    return { fontFamily: "var(--font-poster)", fontWeight: 400 };
+  if (world === "Science & Research") return { fontFamily: "var(--font-poster-mono)", fontWeight: 600 };
+  return { fontFamily: "var(--font-body)", fontWeight: 800 };
 }
 
-type Card = (typeof CARDS)[number];
-
-// Shared between a plain card and the holo-framed Wildcard variant below, so the two
-// don't drift out of sync with duplicated markup.
-function ExploreCardBody({ card }: { card: Card }) {
-  const world = WORLDS[card.industry];
+function BrowseTile({ item }: { item: BrowseItem }) {
   return (
-    <>
-      {/* sizes matters on every fill image in these chapters: without it, next/image
-         assumes 100vw and served w=3840 files for cards that ChapterShell caps at
-         480px — an ~8-10x oversized download per photo. 94vw below 900px mirrors the
-         frame's own min(94cqw, 480px) sizing. */}
-      <Image src={card.photo} alt="" fill sizes="(max-width: 900px) 94vw, 480px" className="object-cover" draggable={false} />
-      <div
+    <div className="flex h-full flex-none items-end">
+      {/* Oversized outlined rank numeral tucked behind the card's left edge —
+         straight off the reference frame's "Top 5" row. */}
+      <span
         aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "linear-gradient(180deg, transparent 42%, var(--scrim-heavy) 100%)" }}
-      />
-
-      {/* Match-strength corner ribbon — separate from the industry line below, not a
-         replacement for it. */}
-      <div
-        className="absolute font-mono font-bold uppercase"
+        className={`${bricolage.className} relative select-none`}
         style={{
-          top: "calc(var(--mu) * 12px)",
-          right: "calc(var(--mu) * 12px)",
-          padding: "calc(var(--mu) * 4px) calc(var(--mu) * 9px)",
-          fontSize: "calc(var(--mu) * 8.5px)",
-          letterSpacing: "0.06em",
-          borderRadius: "calc(var(--mu) * 20px)",
-          color: card.tagColor,
-          background: "color-mix(in srgb, var(--card) 55%, transparent)",
-          border: `1px solid ${card.tagColor}`,
-          backdropFilter: "blur(6px)",
+          // cqh against the rail band: the digit stays the component spec's
+          // fixed fraction of the CARD height (Figma: 155px digit on a 250px
+          // card, Bricolage ExtraBold, tight tracking) at every rail size.
+          fontSize: "clamp(64px, 62cqh, 320px)",
+          fontWeight: 800,
+          lineHeight: 0.86,
+          letterSpacing: "-0.028em",
+          marginRight: "clamp(-40px, -5cqh, -12px)",
+          color: "var(--background)",
+          WebkitTextStroke: "1.5px color-mix(in srgb, var(--foreground) 32%, transparent)",
         }}
       >
-        {card.matchLevel}
-      </div>
-
+        {item.rank}
+      </span>
       <div
-        className="absolute inset-x-0 bottom-0 text-center uppercase"
-        style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 44px)" }}
+        className="relative z-10 h-full flex-none overflow-hidden"
+        style={{ aspectRatio: "2 / 3", borderRadius: "max(12px, calc(var(--mu) * 9px))", border: "1px solid var(--glass-border)" }}
       >
-        <p
-          style={{
-            fontFamily: world.font,
-            fontWeight: world.weight,
-            lineHeight: 1.15,
-            letterSpacing: "0.4px",
-            color: "var(--foreground)",
-            ...exploreTitleStyle(card.title),
-          }}
-        >
-          {card.title}
-        </p>
-        <p
-          className="mt-1.5 whitespace-nowrap"
-          style={{
-            fontFamily: "var(--font-body)",
-            fontWeight: 600,
-            fontSize: "calc(var(--mu) * 8px)",
-            letterSpacing: "0.5px",
-            color: world.color,
-          }}
-        >
-          {card.industry}
-        </p>
-        {/* flex-nowrap (not flex-wrap) + min-width:0 on each stat item + a truncating
-           ellipsis on the value — per direct feedback, salary and major must always
-           sit side by side and never switch to a stacked layout. A long major like
-           "Business Administration" would otherwise wrap the row onto two lines on
-           narrower cards (flex-wrap's whole point); min-width:0 lets a flex item
-           shrink below its own text's natural width (the flex default is effectively
-           min-width:auto, which refuses to shrink and forces the wrap instead), and
-           the ellipsis keeps whatever text doesn't fit from ever forcing a wider
-           layout or breaking to a second line. */}
-        <div className="mt-2 flex flex-nowrap items-center justify-center normal-case" style={{ gap: "calc(var(--mu) * 8px)" }}>
-          {[
-            { icon: STAT_ICONS.salary, value: card.salary },
-            { icon: STAT_ICONS.duration, value: card.major },
-          ].map((stat, i) => (
-            <div key={i} className="flex min-w-0 items-center" style={{ gap: "calc(var(--mu) * 5px)" }}>
-              <span
-                className="flex flex-none items-center justify-center rounded-full border"
-                style={{
-                  width: "calc(var(--mu) * 18px)",
-                  height: "calc(var(--mu) * 18px)",
-                  background: "var(--glass-surface-1)",
-                  borderColor: "var(--glass-border)",
-                }}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--foreground)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}
-                >
-                  {stat.icon}
-                </svg>
-              </span>
-              <span
-                className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                style={{ maxWidth: "calc(var(--mu) * 72px)", fontSize: "calc(var(--mu) * 10.5px)", fontWeight: 700, color: "var(--foreground)" }}
-              >
-                {stat.value}
-              </span>
-            </div>
-          ))}
+        <Image src={item.photo} alt="" fill sizes="260px" className="object-cover" draggable={false} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, var(--scrim-heavy) 100%)" }} />
+        <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "max(8px, calc(var(--mu) * 7px)) max(5px, calc(var(--mu) * 4px))" }}>
+          <p style={{ ...browseTitleFont(item.world), fontSize: "max(12.5px, calc(var(--mu) * 10px))", lineHeight: 1.12, letterSpacing: "0.3px", color: "var(--foreground)" }}>
+            {item.title}
+          </p>
+          <p
+            className="mt-0.5"
+            style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "max(8px, calc(var(--mu) * 6px))", letterSpacing: "0.06em", color: WORLD_COLORS[item.world] }}
+          >
+            {item.world}
+          </p>
         </div>
-      </div>
-    </>
-  );
-}
-
-function CardFace({ card }: { card: Card }) {
-  if (card.matchLevel !== "Wildcard")
-    return (
-      <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "calc(var(--mu) * 17px)" }}>
-        <ExploreCardBody card={card} />
-      </div>
-    );
-  // Rare-pull treatment: a rotating gradient "foil" border framing it (rather than the
-  // full-bleed edge-to-edge photo the other two use), and a diagonal sheen sweeping
-  // across on top — same idea as a holographic trading card catching the light. No
-  // separate blurred aura layer — every version of that (unclipped sibling, clipped-
-  // in-place, self-masked) either bled into the chapter below or clipped unevenly on
-  // one axis vs. the other (soft top/bottom, hard left/right, or vice versa), and a
-  // glow that reads differently on different sides looks like a mistake rather than a
-  // deliberate effect. The rotating border + sheen alone already reads as premium and
-  // stays uniform on every edge.
-  return (
-    <div className="relative h-full w-full" style={{ padding: "calc(var(--mu) * 3px)" }}>
-      <div className="mkt-holo-border absolute inset-0" style={{ borderRadius: "calc(var(--mu) * 20px)" }} />
-      <div className="relative h-full w-full overflow-hidden" style={{ borderRadius: "calc(var(--mu) * 17px)" }}>
-        <ExploreCardBody card={card} />
-        <div aria-hidden className="mkt-holo-sheen pointer-events-none absolute inset-0" />
       </div>
     </div>
   );
 }
 
-// Drives a numeric React state through an eased ramp — used for both the intro "peek"
-// nudge and (implicitly, via the same drag math) nothing else, but kept generic since
-// native scrollTo-style easing doesn't apply to a value that isn't a real scrollTop.
-function animateNumber(from: number, to: number, duration: number, onUpdate: (v: number) => void): () => void {
-  const startTime = performance.now();
-  let raf = 0;
-  function step(now: number) {
-    const t = Math.min(1, (now - startTime) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    onUpdate(from + (to - from) * eased);
-    if (t < 1) raf = requestAnimationFrame(step);
-  }
-  raf = requestAnimationFrame(step);
-  return () => cancelAnimationFrame(raf);
+// Auto-drifting marquee — the sequence renders twice and the track translates
+// -50%, so the loop is seamless. Pauses on hover; disabled under
+// prefers-reduced-motion (see globals.css).
+function Marquee({ children, duration, reverse, className = "" }: { children: React.ReactNode; duration: number; reverse?: boolean; className?: string }) {
+  return (
+    <div
+      className={`w-full overflow-hidden ${className}`}
+      style={{
+        maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+      }}
+    >
+      <div
+        className="mkt-rail-track flex h-full w-max items-center"
+        style={{ gap: "max(10px, calc(var(--mu) * 8px))", animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal", paddingRight: "max(10px, calc(var(--mu) * 8px))" }}
+      >
+        {children}
+        {children}
+      </div>
+    </div>
+  );
 }
 
-const COMMIT_THRESHOLD_FRACTION = 0.16; // swipe past 16% of a card's height to commit
-// Each card is rendered slightly SHORTER than the container (not full inset-0), leaving
-// a gutter above and below the focused card — that gutter is exactly the space the
-// next/previous card's own top/bottom sliver peeks into. Without this, every card
-// (focused or not) is exactly container-sized, so the focused one covers the entire
-// container edge-to-edge and there is no gap for a neighbor to ever show through,
-// regardless of z-index or position — z-index only resolves OVERLAPPING pixels, and
-// two same-size, edge-to-edge cards never leave any pixels for a third to occupy.
-const GUTTER_FRACTION = 0.09;
-const LAST_INDEX = CARDS.length - 1;
+function FilterChip({ label }: { label: string }) {
+  const active = label === "All";
+  return (
+    <span
+      className="flex flex-none items-center rounded-full border font-mono font-bold uppercase whitespace-nowrap"
+      style={{
+        gap: "max(5px, calc(var(--mu) * 4px))",
+        padding: "max(5px, calc(var(--mu) * 4px)) max(11px, calc(var(--mu) * 9px))",
+        fontSize: "max(8.5px, calc(var(--mu) * 6.5px))",
+        letterSpacing: "0.06em",
+        background: active ? "var(--foreground)" : "var(--glass-surface-1)",
+        borderColor: active ? "var(--foreground)" : "var(--glass-border)",
+        color: active ? "var(--background)" : "var(--muted-foreground)",
+      }}
+    >
+      {label !== "All" && (
+        <span
+          aria-hidden
+          className="rounded-full"
+          style={{ width: "max(6px, calc(var(--mu) * 4.5px))", height: "max(6px, calc(var(--mu) * 4.5px))", background: WORLD_COLORS[label] }}
+        />
+      )}
+      {label}
+    </span>
+  );
+}
 
 export function ExploreChapter() {
   const [graphicRef, , graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
@@ -264,375 +175,52 @@ export function ExploreChapter() {
       playing={false}
       graphicRevealed={graphicRevealed}
     >
-      {/* Keyed by visitId: remounts the whole carousel fresh every time the reader
-         scrolls back onto Explore, so it always starts over from the first card with
-         the peek+arrow nudge ready to replay, rather than staying wherever a previous
-         visit left it. */}
-      <ExploreCarousel key={visitId} />
+      {/* Keyed by visitId: the marquees restart from their seams on every
+         return visit, so the section always re-enters mid-motion. */}
+      <BrowsePage key={visitId} />
     </ChapterShell>
   );
 }
 
-function ExploreCarousel() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerHeight, setContainerHeight] = useState(0);
-  const [activeIndex, setActiveIndex] = useState(0);
-  // dragPx: how far the current gesture (real touch/pointer, or the scripted intro
-  // peek) has moved, in the SAME sign convention as a Reels swipe — positive means
-  // "pushing toward the next card." Added straight into each card's position so the
-  // whole deck visually follows the finger (or the peek animation) before a release
-  // commits to a new activeIndex or springs back to the current one.
-  const [dragPx, setDragPx] = useState(0);
-  const [scrolled, setScrolled] = useState(false);
-
-  const pointerActive = useRef(false);
-  const moved = useRef(false);
-  const startY = useRef(0);
-  // Mirrors `scrolled` state for the nudge sequence's chained setTimeouts below —
-  // those timeouts are scheduled once (the effect only depends on containerHeight)
-  // and would otherwise read a stale, always-false `scrolled` from that render's
-  // closure even after the reader interacts partway through the sequence.
-  const scrolledRef = useRef(false);
-
-  // Shared position math for a card at a given index — used both by the main clipped
-  // card loop and by the unclipped Wildcard aura sibling below, so the aura always
-  // tracks exactly where the Wildcard card itself currently sits (mid-drag included)
-  // without duplicating the offset/scale/opacity formulas in two places.
-  function cardMetrics(index: number, cardHeight: number) {
-    const virtualIndex = activeIndex + dragPx / cardHeight;
-    const offset = index - virtualIndex;
-    const distance = Math.min(Math.abs(offset), 1);
-    const scale = 1 - distance * 0.14;
-    const opacity = 1 - distance * 0.65;
-    return { offset, scale, opacity };
-  }
-
-  useLayoutEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setContainerHeight(entry.contentRect.height));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // React's own onWheel prop (below) is attached passively since v17, so calling
-  // preventDefault() from inside it silently does nothing — a real trackpad swipe was
-  // committing this carousel's own index AND letting the native page scroll through the
-  // scroll-snap sections at the same time, which is what actually caused an apparent
-  // "jump two cards/chapters at once" on a single swipe. A plain, non-passive listener
-  // registered directly on the element (bubling order between it and React's delegated
-  // handler doesn't matter — the browser only checks defaultPrevented once the whole
-  // dispatch finishes) stops the native scroll; the onWheel prop below is untouched and
-  // still owns all the actual commit logic.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    function preventNativeScroll(e: WheelEvent) {
-      e.preventDefault();
-    }
-    el.addEventListener("wheel", preventNativeScroll, { passive: false });
-    return () => el.removeEventListener("wheel", preventNativeScroll);
-  }, []);
-
-  useEffect(() => {
-    scrolledRef.current = scrolled;
-  }, [scrolled]);
-
-  // Kept in sync with containerHeight via its own effect (below) rather than being a
-  // dependency of the nudge effect itself — see that effect's comment for why.
-  const containerHeightRef = useRef(0);
-  useEffect(() => {
-    containerHeightRef.current = containerHeight;
-  }, [containerHeight]);
-
-  // Nudge: the next card physically slides up into view and settles back — a
-  // "look, this scrolls" cue more intuitive than a static icon. Used to end with
-  // a second beat (a small down-arrow fading in as a lingering reminder), removed
-  // per direct feedback as redundant now that the persistent "swipe up/down or
-  // use arrows" hint pill and the two arrow buttons already do that job. Reuses
-  // the exact same dragPx channel a real swipe would drive, so the peek is just
-  // "what a small real swipe would look like."
-  //
-  // Mount-only (deps: []), NOT keyed to containerHeight — an earlier version
-  // depended on containerHeight directly, which was the actual bug behind "doesn't
-  // always work": ResizeObserver can fire more than once while the frame's layout
-  // settles (scroll-into-view physics, font/container-query recalculation), and
-  // each firing tore down and restarted the whole chained-timeout sequence via the
-  // effect's cleanup — if a resize landed mid-peek or mid-settle, the animation got
-  // cancelled with dragPx left mid-flight and never actually finished. Polling
-  // `containerHeightRef` from inside a single mount-only effect instead means once
-  // the sequence actually starts, nothing can tear it down early except the reader
-  // scrolling away (unmounting this component) or interacting (the scrolledRef
-  // checks below). Durations were also cut down across the board per feedback that
-  // the whole tease read as too slow.
-  useEffect(() => {
-    let cancelled = false;
-    let cancelPeek: (() => void) | undefined;
-    let cancelSettle: (() => void) | undefined;
-    let pendingTimeout: ReturnType<typeof setTimeout> | undefined;
-
-    function begin() {
-      if (cancelled) return;
-      const height = containerHeightRef.current;
-      if (height === 0) {
-        pendingTimeout = setTimeout(begin, 50);
-        return;
-      }
-      if (scrolledRef.current) return;
-      const cardHeight = height * (1 - 2 * GUTTER_FRACTION);
-      const peekPx = cardHeight * 0.22;
-      cancelPeek = animateNumber(0, peekPx, 500, setDragPx);
-      pendingTimeout = setTimeout(() => {
-        if (scrolledRef.current) return;
-        cancelSettle = animateNumber(peekPx, 0, 400, setDragPx);
-      }, 500 + 250);
-    }
-
-    pendingTimeout = setTimeout(begin, 350);
-    return () => {
-      cancelled = true;
-      clearTimeout(pendingTimeout);
-      cancelPeek?.();
-      cancelSettle?.();
-    };
-  }, []);
-
-  function goToNextChapter() {
-    document.getElementById("play")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  // Committing past the LAST card advances to the next chapter (Play) — this was
-  // briefly narrowed to "just clamp, never jump" per feedback that it felt like
-  // launching the reader somewhere unasked, then narrowed AGAIN to jump only on a
-  // touch swipe (not wheel), on the assumption a desktop reader always has the
-  // rest of the page to scroll from instead. That assumption didn't hold:
-  // hovering directly over the card and continuing to scroll down left a desktop
-  // reader just as stuck as a phone's touch-action:none track did — there's no
-  // free space to grab if your cursor already happens to be sitting on the
-  // graphic. So the forward jump is uniform across every input.
-  //
-  // Going backward past the FIRST card does NOT jump to the previous chapter
-  // (Match) — per direct feedback that jumping away read as unwanted. It just
-  // clamps at the first card instead.
-  function commit(direction: 1 | -1) {
-    setScrolled(true);
-    if (direction === 1) {
-      if (activeIndex < LAST_INDEX) setActiveIndex((i) => i + 1);
-      else goToNextChapter();
-    } else if (activeIndex > 0) {
-      setActiveIndex((i) => i - 1);
-    }
-  }
-
-  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    pointerActive.current = true;
-    moved.current = false;
-    startY.current = e.clientY;
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!pointerActive.current) return;
-    const delta = startY.current - e.clientY; // finger moving up → positive → toward next card
-    if (Math.abs(delta) > 4) moved.current = true;
-    setDragPx(delta);
-  }
-  function onPointerUp() {
-    if (!pointerActive.current) return;
-    pointerActive.current = false;
-    const delta = dragPx;
-    setDragPx(0);
-    if (!moved.current || containerHeight === 0) return;
-    const cardHeight = containerHeight * (1 - 2 * GUTTER_FRACTION);
-    const threshold = cardHeight * COMMIT_THRESHOLD_FRACTION;
-    if (delta > threshold) commit(1);
-    else if (delta < -threshold) commit(-1);
-  }
-  function onPointerCancel() {
-    pointerActive.current = false;
-    setDragPx(0);
-  }
-
-  // Desktop wheel/trackpad gets the same discrete, one-gesture-one-card commit
-  // (rather than continuously forwarding scroll deltas) — a cooldown treats a whole
-  // trackpad swipe as a single commit instead of firing many times per gesture.
-  const wheelLocked = useRef(false);
-  function onWheel(e: React.WheelEvent<HTMLDivElement>) {
-    if (wheelLocked.current) return;
-    if (Math.abs(e.deltaY) < 4) return;
-    wheelLocked.current = true;
-    setScrolled(true);
-    commit(e.deltaY > 0 ? 1 : -1);
-    setTimeout(() => {
-      wheelLocked.current = false;
-    }, 550);
-  }
-
-  // aspect-ratio (not a fixed mu height) so this fits ChapterShell's shared frame on
-  // any viewport, matching Match's card sizing exactly.
-  //
-  // No native scroll here anymore — this is a committed, index-based carousel
-  // (TikTok/Reels-style paging, per direct request) rather than a free-scrolling list
-  // that happens to snap. Every card is rendered at `cardHeight` (shorter than the
-  // container by a `GUTTER_FRACTION` margin top and bottom — see the constant's
-  // comment for why that margin has to exist at all) and placed via
-  // `translateY(offset * cardHeight)`, where `offset` is continuous (not just -1/0/1)
-  // so a live drag/peek smoothly interpolates position, scale, and opacity — the
-  // focused card fills that space fully, and the ones above/below shrink and fade the
-  // further they are from center, their sliver peeking into the gutter, reading as
-  // spatially behind rather than just visually dimmed.
+function BrowsePage() {
   return (
-    // Column layout: the card on top, an up/down button row below it in normal
-    // flow — per direct feedback, a left-side button column made the card sit off
-    // to one side in a lopsided way that looked wrong on mobile. flex-1 +
-    // aspect-ratio on the card box (no explicit width) lets flex-grow determine
-    // its height first, then aspect-ratio derives the width from that; max-w-full
-    // caps it from ever overflowing sideways on a tall/narrow frame.
-    <div className="flex h-full w-full flex-col items-center justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
-      <div className="relative min-h-0 max-w-full flex-1" style={{ aspectRatio: "168 / 240" }}>
-        <div
-          ref={containerRef}
-          className="relative h-full w-full touch-none overflow-hidden select-none"
-          style={{
-            cursor: "grab",
-            // Fades the track's own top/bottom strip to transparent instead of a hard
-            // clip line — stops exactly at the gutter boundary on each side, so the
-            // FOCUSED card (which always sits fully within that middle band) never has
-            // its own edges faded; only a peeking neighbor's sliver, which lives inside
-            // the faded strip by definition, softens as it nears the frame's edge. Only
-            // vertical: cards never peek side-to-side, so there's no equivalent
-            // horizontal margin to fade within — the Wildcard's aura needs its own
-            // self-contained fade for that (see CardFace) rather than one here, since a
-            // fade on the whole track would also dim every other card's own photo at
-            // its left/right edges.
-            maskImage: `linear-gradient(to bottom, transparent 0%, black ${GUTTER_FRACTION * 100}%, black ${(1 - GUTTER_FRACTION) * 100}%, transparent 100%)`,
-            WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black ${GUTTER_FRACTION * 100}%, black ${(1 - GUTTER_FRACTION) * 100}%, transparent 100%)`,
-          }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerCancel}
-          onWheel={onWheel}
-        >
-          {containerHeight > 0 &&
-            (() => {
-              const gutterPx = containerHeight * GUTTER_FRACTION;
-              const cardHeight = containerHeight - gutterPx * 2;
-              return CARDS.map((card, i) => {
-                const { offset, scale, opacity } = cardMetrics(i, cardHeight);
-                return (
-                  <div
-                    key={card.title}
-                    className="absolute inset-x-0"
-                    style={{
-                      top: gutterPx,
-                      height: cardHeight,
-                      transform: `translateY(${offset * cardHeight}px) scale(${scale})`,
-                      opacity,
-                      zIndex: 100 - Math.round(Math.min(Math.abs(offset), 1) * 100),
-                      // Transition off during ANY dragPx-driven movement, not just
-                      // while a finger is down — the intro peek nudge (and its
-                      // settle) drive dragPx per-frame from requestAnimationFrame,
-                      // and layering a 420ms ease-out transition on top of a value
-                      // that changes every frame means the transition perpetually
-                      // restarts and chases the target a beat behind: that lag
-                      // read as visible stutter on desktop AND mobile. With the
-                      // transition gated on dragPx !== 0, rAF-driven motion tracks
-                      // 1:1 (butter), and the eased transition still owns what it
-                      // should: the settle after release and button/wheel commits,
-                      // both of which happen at dragPx === 0.
-                      transition: pointerActive.current || dragPx !== 0 ? "none" : "transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.42s",
-                    }}
-                  >
-                    <CardFace card={card} />
-                  </div>
-                );
-              });
-            })()}
-        </div>
+    <div className="flex h-full w-full flex-col justify-center" style={{ gap: "max(14px, calc(var(--mu) * 12px))" }}>
+      {/* World filter chips — drifting slowly the opposite way so the two bands
+         read as independent, alive surfaces rather than one conveyor belt. */}
+      <Marquee duration={70} reverse className="flex-none">
+        {FILTER_CHIPS.map((chip) => (
+          <FilterChip key={chip} label={chip} />
+        ))}
+      </Marquee>
 
-        {/* Right-side action rail, straight off the reference — static, just selling
-           the "real app feed" read. */}
-        <div
-          className="pointer-events-none absolute flex flex-col items-center"
-          style={{ right: "calc(var(--mu) * 10px)", bottom: "calc(var(--mu) * 46px)", gap: "calc(var(--mu) * 10px)", zIndex: 200 }}
+      {/* flex-none + an explicit width-proportional band height: with flex-1
+         here, tall phone frames dumped all their spare height into this block
+         and the group read as two islands with a dead gap between them. Now
+         chips, label, rail, and caption center together as one cluster. */}
+      <div className="flex w-full flex-none flex-col" style={{ gap: "max(10px, calc(var(--mu) * 8px))" }}>
+        <p
+          className="w-full flex-none text-left"
+          style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "max(12.5px, calc(var(--mu) * 9.5px))", color: "var(--foreground)" }}
         >
-          {ACTION_ICONS.map((icon, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-center rounded-full border"
-              style={{
-                width: "calc(var(--mu) * 26px)",
-                height: "calc(var(--mu) * 26px)",
-                background: "var(--glass-surface-1)",
-                borderColor: "var(--glass-border)",
-              }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--foreground)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ width: "calc(var(--mu) * 13px)", height: "calc(var(--mu) * 13px)" }}
-              >
-                {icon}
-              </svg>
-            </div>
-          ))}
+          The Top 5 Trending Careers Among Gen Z
+        </p>
+        {/* The rail band: tiles take their height FROM this band (h-full inside
+           a definite flex-1 area, capped), so taller viewports grow the poster
+           art instead of leaving dead space. */}
+        <div className="w-full" style={{ height: "min(380px, 92cqw)", minHeight: 170, containerType: "size" }}>
+          <Marquee duration={46} className="h-full">
+            {BROWSE_TOP5.map((item) => (
+              <BrowseTile key={item.title} item={item} />
+            ))}
+          </Marquee>
         </div>
-
-        {/* Persistent hint — per direct feedback, readers don't intuitively know to
-           swipe up/down here the way they would on a FYP-style feed. Sits in the top
-           gutter band (the same zone a peeking neighbor's sliver occupies), small and
-           blurred so it doesn't compete with either card's own content. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 flex justify-center"
-          style={{ top: "calc(var(--mu) * 8px)", zIndex: 210 }}
+        {/* Requested in review: the cards should say they go deeper. */}
+        <p
+          className="w-full flex-none text-center font-mono uppercase"
+          style={{ fontSize: "max(9px, calc(var(--mu) * 7px))", letterSpacing: "0.08em", color: "var(--muted-foreground)", opacity: 0.9 }}
         >
-          <div
-            className="flex items-center rounded-full font-mono font-bold uppercase"
-            style={{
-              padding: "calc(var(--mu) * 5px) calc(var(--mu) * 12px)",
-              fontSize: "calc(var(--mu) * 8px)",
-              letterSpacing: "0.06em",
-              color: "var(--foreground)",
-              background: "color-mix(in srgb, var(--background) 55%, transparent)",
-              backdropFilter: "blur(6px)",
-            }}
-          >
-            Swipe up/down or use arrows
-          </div>
-        </div>
-      </div>
-
-      {/* Up/down nav, back in a row below the card (same shape as Match's own
-         button row below its card) — per direct feedback, a left-side column
-         made the card sit off-center and looked wrong on mobile. */}
-      <div className="flex items-center" style={{ gap: "calc(var(--mu) * 16px)" }}>
-        <button
-          type="button"
-          aria-label="Previous card"
-          onClick={() => commit(-1)}
-          className="flex items-center justify-center rounded-full border"
-          style={{ width: "calc(var(--mu) * 30px)", height: "calc(var(--mu) * 30px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
-            <path d="m18 15-6-6-6 6" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          aria-label="Next card"
-          onClick={() => commit(1)}
-          className="flex items-center justify-center rounded-full border"
-          style={{ width: "calc(var(--mu) * 30px)", height: "calc(var(--mu) * 30px)", background: "var(--glass-surface-2)", borderColor: "var(--border)" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
+          Tap to learn more →
+        </p>
       </div>
     </div>
   );

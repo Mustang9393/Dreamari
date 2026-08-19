@@ -512,3 +512,24 @@ body {
     mask-image: linear-gradient(to bottom, transparent 0, black 14px, black 100%);
   }
 }
+
+/* Marketing Explore "Browse All" rails: seamless marquee (content doubled,
+   track slides half its width). Hover pauses; reduced-motion disables. */
+@keyframes mkt-rail-drift {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.mkt-rail-track {
+  animation-name: mkt-rail-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.mkt-rail-track:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mkt-rail-track {
+    animation: none;
+  }
+}

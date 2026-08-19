@@ -6,6 +6,24 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-19
 
+### 2026-08-19 landing Explore chapter redesigned as Browse (v2 branch, NOT pushed)
+
+- Per stakeholder review: FYP-style swipe deck read as too-modern for older
+  clients. Explore chapter graphic is now a miniature of the app's real Browse
+  page (Figma 3185-17011): drifting world-filter chip band + the ranked
+  "The Top 5 Trending Careers Among Gen Z" rail (marquee, pauses on hover,
+  reduced-motion safe) + "Tap to learn more →" caption (also from review).
+  Top-5 list/images are the Figma section's own (Doctor, Software Engineer,
+  Nurse, Lawyer, Airline Pilot — assets downloaded to public/images/trending/).
+  Rank numerals follow the component spec: Bricolage ExtraBold, dark fill,
+  ~62% of card height via cqh (band is a size container). Tokens only —
+  world colors, glass, scrims, poster fonts from marketing tokens.css.
+- The old deck (ExploreCarousel + holo Wildcard) was deleted with the toggle —
+  this also removed the repo's last eslint error (refs-in-render). History has
+  it if ever needed.
+- ON BRANCH v2 ONLY, per explicit instruction: NOT pushed, live deployment
+  untouched. The stale old v2 branch (fully merged) was reset to current main.
+
 ### 2026-08-19 prod incident: /flow crashed WebKit phones — FIXED + legacy purge
 
 - **iPhone (Safari AND iOS Chrome — both WebKit) crashed the tab on /flow**
