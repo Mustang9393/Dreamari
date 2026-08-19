@@ -105,6 +105,11 @@ export type ReelCareer = {
   description: string;
   salary: string;
   photo: string;
+  // Details face of the Career Details Panel (2486:43002). Private Equity
+  // carries the component's own default values; the other majors/skills are
+  // prototype copy until real content lands.
+  major: string;
+  mainSkills: string;
 };
 
 export const FOR_YOU_REEL: ReelCareer[] = [
@@ -115,6 +120,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Helps investors buy, improve, and sell companies for long-term returns.",
     salary: "$95K - $250K+",
     photo: "/images/app/env-private-equity.png",
+    major: "Finance or Economics",
+    mainSkills: "Analysis · Valuation · Modeling · Research · Communication",
   },
   {
     title: "Aerospace Engineer",
@@ -123,6 +130,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Designs aircraft and spacecraft that fly safely through demanding conditions.",
     salary: "$85K - $190K+",
     photo: "/images/app/env-aerospace-engineer.png",
+    major: "Aerospace or Mechanical Engineering",
+    mainSkills: "Aerodynamics · CAD · Simulation · Systems Thinking · Math",
   },
   {
     title: "Product Designer",
@@ -131,6 +140,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Shapes useful digital products around people's needs.",
     salary: "$75K - $180K+",
     photo: "/images/app/env-product-designer.png",
+    major: "Design, HCI, or Psychology",
+    mainSkills: "UX Research · Prototyping · Visual Design · Figma · Storytelling",
   },
   {
     title: "Biomedical Researcher",
@@ -139,6 +150,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Studies disease to develop better tests and treatments.",
     salary: "$70K - $160K+",
     photo: "/images/app/env-biomedical-researcher.png",
+    major: "Biology or Biomedical Sciences",
+    mainSkills: "Lab Methods · Data Analysis · Scientific Writing · Rigor",
   },
   {
     title: "Marine Biologist",
@@ -147,6 +160,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Studies ocean life and protects marine ecosystems.",
     salary: "$55K - $120K+",
     photo: "/images/app/env-marine-biologist.png",
+    major: "Marine Biology or Ecology",
+    mainSkills: "Field Research · Diving · Data Collection · Conservation",
   },
   {
     title: "Neurosurgeon",
@@ -155,6 +170,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Diagnoses and operates on the brain and nervous system.",
     salary: "$350K - $800K+",
     photo: "/images/app/env-neurosurgeon.png",
+    major: "Pre-Med, then Medical School",
+    mainSkills: "Anatomy · Precision · Decision-Making · Stamina · Focus",
   },
   {
     title: "Constitutional Attorney",
@@ -163,6 +180,8 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Handles cases about rights, laws, and government power.",
     salary: "$90K - $250K+",
     photo: "/images/app/env-constitutional-attorney.png",
+    major: "Political Science, then Law School",
+    mainSkills: "Legal Writing · Argumentation · Research · Public Speaking",
   },
   {
     title: "Creative Director",
@@ -171,5 +190,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     description: "Leads the visual direction of brands and campaigns.",
     salary: "$95K - $220K+",
     photo: "/images/app/env-creative-director.png",
+    major: "Design, Advertising, or Fine Arts",
+    mainSkills: "Art Direction · Branding · Leadership · Concepting · Taste",
   },
 ];

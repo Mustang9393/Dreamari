@@ -218,6 +218,7 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
 }
 
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
+  const [face, setFace] = useState<"Summary" | "Details">("Summary");
   return (
     <article
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-xl)]"
@@ -237,29 +238,52 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
       </div>
 
       <div className="relative z-[1] flex flex-col gap-[var(--space-4)] pb-[64px] md:pb-0">
-        <div className="flex w-fit max-w-full flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-4)]" style={{ background: "var(--scrim-heavy)" }}>
-          <div className="flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
+        {/* Career Details Panel (Figma 2486:43002): two faces sharing one
+           geometry — tap flips Summary <-> Details (major + main skills). */}
+        <button
+          type="button"
+          aria-label={face === "Summary" ? "Show more info" : "Show summary"}
+          onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
+          className="flex w-fit max-w-full cursor-pointer flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-4)] text-left"
+          style={{ background: "var(--scrim-heavy)" }}
+        >
+          <div key={face} className="face-swap flex min-h-[151px] w-full flex-col gap-[var(--space-2)] md:w-[326px]">
             <div className="flex items-start justify-between gap-[var(--space-2)]">
               <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted-alt)" }}>
-                {career.matchLabel}
+                {face === "Summary" ? career.matchLabel : "MORE INFO"}
               </span>
               <span aria-hidden className="flex items-center">
-                <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={{ background: "var(--foreground)" }} />
-                <span className="mx-[2px] h-[5px] w-[5px] rounded-full border" style={{ borderColor: "var(--muted-foreground)" }} />
+                <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Summary" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
+                <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Details" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
               </span>
             </div>
-            <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
-              {career.title}
-            </h2>
-            <p className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
-              {career.description}
-            </p>
-            <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-              <span style={{ color: "var(--muted-foreground)" }}>SALARY</span>
-              <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
-            </div>
+            {face === "Summary" ? (
+              <>
+                <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                  {career.title}
+                </h2>
+                <p className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                  {career.description}
+                </p>
+                <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                  <span style={{ color: "var(--muted-foreground)" }}>SALARY</span>
+                  <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                <div className="flex flex-col gap-[var(--space-1)]">
+                  <span style={{ color: "var(--muted-foreground)" }}>MAJOR</span>
+                  <span style={{ color: "var(--foreground)" }}>{career.major}</span>
+                </div>
+                <div className="flex flex-col gap-[var(--space-1)]">
+                  <span style={{ color: "var(--muted-foreground)" }}>MAIN SKILLS</span>
+                  <span style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </button>
 
         <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
           <button
