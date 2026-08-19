@@ -40,6 +40,15 @@
   --world-helping-human-services: #c05fa6;
   --world-teaching-learning: #8b5cf6;
 
+  /* ---- App Home/Explore additions (values as emitted by the certified
+     Figma file's design context for Home — v2.1 and Explore — v2.1B) ---- */
+  --accent-subtle: #3894ff; /* accent-subtle — brand-blue accent family */
+  --chart-2: #ff4585; /* chart.2 — positional chart primitive */
+  --chart-3: #ff9640; /* chart.3 — positional chart primitive */
+  --primary-ghost: #99c2ff; /* primary-ghost (Signal badge text) */
+  --amber-400: #ffc94d; /* primitive.amber.400 (Glossary Challenge) */
+  --text-muted-alt: #b0b6c2; /* text-muted-alt (Env Card match label) */
+
   /* ---- Hero background accents (Semantic.Dark -> hero.*-dark) ---- */
   --hero-accent-purple: #2e2466; /* hero.purple-dark */
   --hero-accent-teal: #0f474d; /* hero.teal-dark */

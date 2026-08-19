@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
-import { StudentHomeExperience } from "@/components/home/StudentHomeExperience";
+import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
+import { HomeExperience } from "@/components/app/HomeExperience";
+import "@/components/marketing/tokens.css";
 
 export const metadata: Metadata = {
   title: "Home — Dreamari",
   description: "Continue your Dreamari journey, discover careers and build career-ready skills.",
 };
 
-const studentTabs = ["home", "explore", "play", "community", "profile"] as const;
-type StudentTab = (typeof studentTabs)[number];
-
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ tab?: string | string[]; category?: string | string[] }> }) {
-  const params = await searchParams;
-  const requestedTab = Array.isArray(params.tab) ? params.tab[0] : params.tab;
-  const category = Array.isArray(params.category) ? params.category[0] : params.category;
-  const initialTab: StudentTab = requestedTab && studentTabs.includes(requestedTab as StudentTab) ? requestedTab as StudentTab : "home";
-  return <StudentHomeExperience initialTab={initialTab} initialCategory={category} />;
+// Home — v2.1 (Figma 2099:3423 / mobile 7:1749). The previous tabbed
+// StudentHomeExperience is superseded by this design.
+export default function HomePage() {
+  return (
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
+      <HomeExperience />
+    </>
+  );
 }

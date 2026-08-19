@@ -1,0 +1,87 @@
+import Image from "next/image";
+import type { CatalogCareer } from "./catalog";
+import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "./worlds";
+
+// Career Poster Card, ported 1:1 from the Figma component (210×297, radius-xl,
+// glass border, gradient/text-scrim, per-world title face at 24/28, world
+// label in UI/Label Small tracked +0.6). The salary variant adds the
+// gradient-shimmer Bricolage figure in the top-right, exactly as the
+// "Typical Pay" rail's cards carry it.
+
+export function PosterCard({ career, className = "" }: { career: CatalogCareer; className?: string }) {
+  return (
+    <button
+      type="button"
+      className={`relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] border text-center uppercase ${className}`}
+      style={{ borderColor: "var(--glass-border)" }}
+    >
+      <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
+      {career.salary && (
+        <span
+          className="absolute top-2 right-2 z-[1] text-[16px] leading-[22px] font-extrabold"
+          style={{
+            fontFamily: "var(--font-display)",
+            mixBlendMode: "screen",
+            backgroundImage: "linear-gradient(157deg, rgba(255,255,255,0.72) 12.857%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.32) 84.286%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            textShadow: "0px 4px 6px rgba(0,0,0,0.5)",
+          }}
+        >
+          {career.salary}
+        </span>
+      )}
+      <span
+        className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
+        style={{ backgroundImage: TEXT_SCRIM }}
+      >
+        <span className="w-full text-[24px] leading-[28px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
+          {career.title}
+        </span>
+        <span
+          className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]"
+          style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}
+        >
+          {career.world}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+// Trending rail slot: giant background-colored numeral silhouetted against the
+// starfield behind a 175×250 CareerCard (Figma "Ranked N" frames, 220×250).
+export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank: number }) {
+  return (
+    <div className="relative h-[250px] w-[220px] flex-none">
+      <p
+        aria-hidden
+        className="absolute top-[40px] left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] font-extrabold tracking-[-5px] whitespace-nowrap select-none"
+        style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}
+      >
+        {rank}
+      </p>
+      <button
+        type="button"
+        className="absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] text-center uppercase"
+      >
+        <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
+        <span
+          className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
+          style={{ backgroundImage: TEXT_SCRIM }}
+        >
+          <span className="w-full text-[24px] leading-[28px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
+            {career.title}
+          </span>
+          <span
+            className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]"
+            style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}
+          >
+            {career.world}
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+}

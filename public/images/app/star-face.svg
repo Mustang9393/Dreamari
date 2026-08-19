@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="face">
+<circle id="cheek-left" cx="32" cy="88" r="13" fill="#EEEAFF"/>
+<circle id="cheek-right" cx="108" cy="88" r="13" fill="#EEEAFF"/>
+<circle id="pupil-left" cx="36" cy="52" r="6" fill="#05070F"/>
+<circle id="pupil-right" cx="104" cy="52" r="6" fill="#05070F"/>
+<circle id="sparkle-left" opacity="0.95" cx="35" cy="49" r="3" fill="white" fill-opacity="0.03"/>
+<circle id="sparkle-right" opacity="0.95" cx="103" cy="49" r="3" fill="white" fill-opacity="0.03"/>
+</g>
+</svg>

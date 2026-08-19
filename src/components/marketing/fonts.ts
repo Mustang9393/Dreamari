@@ -14,6 +14,9 @@
 // Nunito 700 / Science Gothic 700 / ZCOOL XiaoWei / Sekuya are the Career
 // Poster Card component's OTHER world title faces (Health & Medicine, Tech &
 // Engineering, Law Safety & Justice, Driving Flying & Shipping respectively),
-// added for Explore's Top-5 rail. All verified live on Google Fonts.
+// added for Explore's Top-5 rail. Rozha One (Arts, Media & Sport), Merriweather
+// 700 (Teaching & Education) and Zain 900 (Counseling & Social Work) complete
+// the set for the app Home/Explore poster rails, straight from the Figma
+// Career Poster Card variants. All verified live on Google Fonts.
 export const FONT_STYLESHEET_HREF =
-  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&family=Rozha+One&family=Merriweather:wght@700&family=Zain:wght@900&display=swap";

@@ -6,6 +6,39 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 App Home + Explore (For You / Browse All) built from Figma (v3, LOCAL)
+
+- /home REPLACED (old tabbed StudentHomeExperience superseded; file kept,
+  unused — StudentAppShell still serves /career-report). New Home ports
+  Figma "Home — v2.1" (2099:3423): 3-panel hero carousel (Today's Drop
+  star+comet art, Continue w/ progress, Trending; dots + pause, 7s
+  auto-advance), Active Activity rail, Careers Picked for You poster
+  rail, Career Signal Banner, Glossary Challenge Banner. Mobile per the
+  mobile frame: logo+streak/XP header, in-flow star, full-width pill
+  CTA, mobile copy variants, bottom Mobile Nav.
+- /explore NEW: For You (Env Card reel, 2288:16179 — preference rail,
+  prev/next, mobile full-bleed w/ in-card actions) + Browse All
+  (3185:17011 — all six rails incl. ranked numerals + salary shimmer
+  cards) via ?tab=browse. Search interaction per user spec: collapsed
+  icon → input + world pills + Sort by; Sort by ⇄ sort pills (Recommended
+  / A–Z / Salary, functional). Mobile gets its own search entry.
+- Shared: src/components/app/{worlds,catalog,chrome,PosterCard,
+  HomeExperience,ExploreExperience}. Tokens via .marketing-v2 scope;
+  added --accent-subtle/--chart-2/--chart-3/--primary-ghost/--amber-400/
+  --text-muted-alt to tokens.css (values from certified design context).
+  Poster faces bind per Figma variants (added Rozha One/Merriweather/
+  Zain to FONT_STYLESHEET_HREF). ~45 assets in public/images/app/.
+- KNOWN GAPS (Figma desktop tab went inactive mid-pull): For You reel
+  has only Private Equity (7 more env cards to pull: Aerospace, Product
+  Designer, Biomedical, Marine Biologist, Neurosurgeon, Attorney,
+  Creative Director — section 2530:46431); Mobile Nav icons approximated
+  with Lucide pending component 2569:4894; nav logo mark + mobile smiley
+  star face assets unavailable; tiny hero circles/particles re-rendered
+  as positioned dots (geometry from design, fill white). Design content
+  quirks ported verbatim & flagged: Browse rail headed "Tech &
+  Engineering" holds farming/building cards; rank-3 NURSE carries the
+  ranch photo. tsc/eslint/build green; desktop+mobile browser-verified.
+
 ### 2026-08-20 Fashion Designer gets its designated poster; v3 → main PUSHED
 
 - User pointed at Figma node 3284:9051 as THE Fashion Designer image —

@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="181" height="190" viewBox="0 0 181 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect id="Portrait Fade Mask" width="181" height="190" fill="url(#paint0_linear_3285_9982)"/>
+<defs>
+<linearGradient id="paint0_linear_3285_9982" x1="0" y1="95" x2="181" y2="95" gradientUnits="userSpaceOnUse">
+<stop stop-opacity="0"/>
+<stop offset="0.35" stop-color="white" stop-opacity="0.6"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
