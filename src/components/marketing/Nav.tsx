@@ -16,6 +16,8 @@ const LINKS = [
 // Demo quick-links (v3): jump straight into the interactive prototypes without
 // scrolling for a CTA — Build = the profile flow, Match = the match-flow lab.
 const QUICK_LINKS = [
+  { label: "Home", href: "/home" },
+  { label: "Explore", href: "/explore" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
 ];

@@ -6,6 +6,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Build → new match flow; old MatchExperience DELETED; quick links
+
+- CompletionScreen's "See My Matches" now bridges through the 1.8s
+  MatchLoadingScreen beat and router.pushes to /match-lab (the real
+  match flow). The old in-page match flow is deleted:
+  MatchExperience.tsx, PathSavedScreen.tsx, matchData.ts removed;
+  BuildFlowExperience's match phase/confetti plumbing stripped
+  (MatchBackdrop + MatchLoadingScreen kept for the loading beat).
+  /career-report still accepts ?from=match. Verified with a full flow
+  walk in the browser: completion → loading → lands on /match-lab.
+- Landing nav QUICK_LINKS now: Home /home, Explore /explore, Build
+  /flow, Match /match-lab. Pushed to main per user.
+
 ### 2026-08-20 For You reel: full 8-card TikTok doom-scroll (v3, LOCAL)
 
 - Figma tab reopened: pulled the remaining 7 Env Cards from the Mobile

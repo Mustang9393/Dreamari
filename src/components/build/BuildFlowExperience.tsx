@@ -4,12 +4,9 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
-import { Confetti } from "@/components/flow/aurora/Confetti";
 import { HomeButton } from "@/components/flow/HomeButton";
 import { MatchBackdrop } from "@/components/flow/match/MatchBackdrop";
-import { MatchExperience } from "@/components/flow/match/MatchExperience";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
-import { MATCH_PATHS } from "@/components/flow/match/matchData";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
@@ -30,7 +27,9 @@ import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildSta
 const MATCH_LOADING_MS = 1800;
 const MATCH_ACCENT = "#2f6bf2";
 
-type Phase = "build" | "loading" | "match";
+// After the loading beat, Build hands off to the real match flow at
+// /match-lab (the old in-page MatchExperience is deleted).
+type Phase = "build" | "loading";
 
 // Figma "Background Space" (dev handoff Step 4): nebula ellipses positioned
 // proportionally, colored by pipeline tokens. Sits UNDER the aurora canvas.
@@ -54,7 +53,6 @@ export function BuildFlowExperience() {
   const [stageIndex, setStageIndex] = useState(0);
   const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
   const [phase, setPhase] = useState<Phase>("build");
-  const [matchCelebrating, setMatchCelebrating] = useState(false);
   const [reactionNonce, setReactionNonce] = useState(0);
 
   const stage = STAGES[stageIndex];
@@ -67,9 +65,9 @@ export function BuildFlowExperience() {
 
   useEffect(() => {
     if (phase !== "loading") return;
-    const timer = setTimeout(() => setPhase("match"), MATCH_LOADING_MS);
+    const timer = setTimeout(() => router.push("/match-lab"), MATCH_LOADING_MS);
     return () => clearTimeout(timer);
-  }, [phase]);
+  }, [phase, router]);
 
   function patch(update: Partial<BuildState>) {
     setState((current) => ({ ...current, ...update }));
@@ -101,9 +99,8 @@ export function BuildFlowExperience() {
            current percent, and input pulses supply the reactivity. Screen-wide
            confetti is reserved for the Match celebration — the flow's own
            celebrations are Dreamy-local bursts. */}
-        <AuroraBackground accent={accent} visitedAccents={[]} finale={isComplete || matchCelebrating} lightning={matchCelebrating} />
-        {phase !== "build" && !matchCelebrating && <MatchBackdrop />}
-        <Confetti colors={[accent, "#8b5cf6", "#ff4585", "#2f6bf2"]} active={matchCelebrating} />
+        <AuroraBackground accent={accent} visitedAccents={[]} finale={isComplete} lightning={false} />
+        {phase !== "build" && <MatchBackdrop />}
         <HomeButton />
         <ThemeToggle />
 
@@ -130,11 +127,6 @@ export function BuildFlowExperience() {
               {phase === "loading" && (
                 <StepTransition key="match-loading">
                   <MatchLoadingScreen />
-                </StepTransition>
-              )}
-              {phase === "match" && (
-                <StepTransition key="match-experience">
-                  <MatchExperience paths={MATCH_PATHS} onComplete={() => router.push("/career-report?from=match")} onCelebrationChange={setMatchCelebrating} />
                 </StepTransition>
               )}
             </div>
