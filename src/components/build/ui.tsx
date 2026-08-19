@@ -6,6 +6,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { cascade, useVariant } from "./variant";
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 // Shared primitives for the build flow, variant-aware (see variant.tsx): the same
 // step implementations render the "glass" treatment (Figma card structure, glass
@@ -254,6 +255,28 @@ export function ChipGrid({
 }) {
   const variant = useVariant();
 
+  // Progressive disclosure on phones: long lists show 6 options + one "Show
+  // all N" reveal (never a second tier), so the CTA is visible without any
+  // scrolling and the rest slides in on request. Desktop always fits, so it
+  // always shows everything.
+  const PREVIEW = 6;
+  const [isPhone, setIsPhone] = useState(false);
+  // null = collapsed; "tap" = user revealed (animate the tail in). Derived
+  // guard below force-expands when a pick lives in the hidden tail (e.g.
+  // returning via Previous), with no animation.
+  const [expandedBy, setExpandedBy] = useState<null | "tap">(null);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  const collapsible = isPhone && options.length > PREVIEW + 1;
+  const mustExpand = selected.some((option) => options.indexOf(option) >= PREVIEW);
+  const expanded = expandedBy !== null || mustExpand;
+  const visibleOptions = collapsible && !expanded ? options.slice(0, PREVIEW) : options;
+
   const atMax = selected.length >= max;
 
   function toggle(option: string, e: React.MouseEvent) {
@@ -270,8 +293,9 @@ export function ChipGrid({
   }
 
   return (
-    <div className={`grid auto-rows-fr gap-2 ${columns}`}>
-      {options.map((option, index) => {
+    <div>
+      <div className={`grid auto-rows-fr gap-2 ${columns}`}>
+        {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
         const isLocked = atMax && !isSelected;
         const accent = accents?.[option] ?? "var(--color-brand-400)";
@@ -292,7 +316,9 @@ export function ChipGrid({
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
               borderColor: isSelected ? accent : "var(--color-glass-border)",
               color: isSelected ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
-              ...cascade(variant, index),
+              ...(expandedBy === "tap" && index >= PREVIEW
+                ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
+                : cascade(variant, index)),
             }}
           >
             {icons?.[option] ? (
@@ -313,7 +339,26 @@ export function ChipGrid({
             {option}
           </button>
         );
-      })}
+        })}
+      </div>
+      {collapsible && !expanded && (
+        <button
+          type="button"
+          onClick={(e) => {
+            setExpandedBy("tap");
+            dispatchAuroraPulse("select", e);
+          }}
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
+          style={{
+            background: "var(--color-glass-surface-2)",
+            borderColor: "var(--color-glass-border)",
+            color: "var(--color-night-muted-foreground)",
+          }}
+        >
+          Show all {options.length}
+          <ChevronDown aria-hidden className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }
