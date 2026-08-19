@@ -6,6 +6,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-19
 
+### 2026-08-19 v3 branch opened: match-flow prototyping (LOCAL-ONLY)
+
+- `v3` branched from 78129a9 for prototyping a new match flow. HARD RULE
+  from the user: v3 NEVER merges and NEVER deploys unless explicitly
+  asked — and since Vercel auto-builds previews from any pushed branch,
+  v3 is never pushed at all. Local commits only.
+- Scaffold: /match-lab mounts the current production MatchExperience
+  standalone (src/components/match-lab/MatchLab.tsx) so the match flow
+  can be iterated without walking the eight build steps first.
+
 ### 2026-08-19 landing v2 line SHIPPED TO MAIN (was parked on v2 branch)
 
 - Full v2 redesign line merged to main per explicit authorization: Explore
