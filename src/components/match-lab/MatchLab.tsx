@@ -348,6 +348,11 @@ export function MatchLab() {
         <Sheet onClose={() => setGuideOpen(false)}>
           <div className="flex flex-col items-center gap-5 text-center">
             <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>How this works</h2>
+            {/* TEMP build marker for device debugging — tells us the phone is
+               running the current code, not a stale pre-restart tab. */}
+            <span className="rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-wide text-[var(--color-night-muted-foreground)] uppercase" style={{ borderColor: "var(--color-glass-border)" }}>
+              lab build 3
+            </span>
             <div className="flex w-full flex-col gap-3">
               <GuideRow icon={<ChevronsDown className="h-5 w-5 motion-safe:animate-bounce" />} color="var(--color-brand-400)">
                 <b>Swipe up on a card</b> to see classes, skills, work style & pathway.
