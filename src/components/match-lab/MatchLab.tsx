@@ -286,7 +286,7 @@ export function MatchLab() {
               style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
             >
               <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${"#33c78c"}` }} />
-              {remaining} in the stack
+              {remaining} remaining
             </span>
           </div>
 
