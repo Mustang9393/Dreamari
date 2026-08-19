@@ -364,7 +364,9 @@ export function MatchLab() {
                   <div
                     key={career.id}
                     ref={isTop ? cardRef : undefined}
-                    className={`absolute inset-0 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"}`}
+                    // bottom-7 reserves the stack-peek band inside the deck
+                    // area, so peeked cards never overlap the action buttons.
+                    className={`absolute inset-x-0 top-0 bottom-7 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"}`}
                     style={{
                       background: "var(--color-night-card)",
                       borderColor: "var(--color-glass-border)",
@@ -599,8 +601,10 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
           <div
             className="relative z-[1] flex flex-col items-center gap-1.5 px-2 pt-16 pb-4 text-center uppercase"
             style={{
-              // gradient/text-scrim — the Browse Card component's own stops
-              background: "linear-gradient(180deg, rgba(5,7,15,0) 0%, rgba(5,7,15,0.5) 30%, rgba(5,7,15,0.75) 51%, rgb(5,7,15) 100%)",
+              // gradient/text-scrim — the Browse Card stops, built from the
+              // background token so light mode fades to white, not night.
+              background:
+                "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 50%, transparent) 30%, color-mix(in srgb, var(--color-night-background) 75%, transparent) 51%, var(--color-night-background) 100%)",
             }}
           >
             <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 28, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.03em", color: "var(--color-night-foreground)" }}>
