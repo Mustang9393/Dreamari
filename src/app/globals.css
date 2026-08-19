@@ -476,6 +476,10 @@ body {
        buttons themselves. */
     margin-left: -16px;
     margin-right: -16px;
+    /* The element carries Tailwind's w-full (width: 100% of the padded
+       container = 343px), which negative margins SHIFT rather than stretch —
+       that was the inset slab with a gap at the edge. Widen the box itself. */
+    width: calc(100% + 32px);
     padding-left: 16px;
     padding-right: 16px;
     padding-top: 28px;
