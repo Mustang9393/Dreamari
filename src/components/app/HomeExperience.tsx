@@ -2,9 +2,10 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
-import { DesktopNavigation, MobileNav } from "./chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { HOME_PICKS } from "./catalog";
 
@@ -464,10 +465,10 @@ export function HomeExperience() {
       <DesktopNavigation active="Home" />
 
       {/* Mobile header (logo + streak/XP, per the mobile frame) */}
-      <header className="relative z-10 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-        <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+      <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+        <Link href="/" aria-label="Dreamari landing page" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           DREAMARI
-        </span>
+        </Link>
         <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold" style={{ fontFamily: "var(--font-body)" }}>
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent)" }}>
             <Flame className="h-4 w-4" /> 12
@@ -475,6 +476,7 @@ export function HomeExperience() {
           <span className="flex items-center gap-[6px]" style={{ color: "var(--world-business-money-office)" }}>
             <Sparkle className="h-4 w-4" /> 15,980 XP
           </span>
+          <QuickLinksMenu />
         </span>
       </header>
 

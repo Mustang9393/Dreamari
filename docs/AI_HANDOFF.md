@@ -6,6 +6,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Details panel flip + logo-to-landing + quick-links everywhere
+
+- For You reel's info card is now the two-face Career Details Panel
+  (2486:43002): tap flips Summary <-> Details (MAJOR + MAIN SKILLS,
+  MORE INFO header, page dots swap). PE carries the component's own
+  default details; other 7 careers' majors/skills are PROTOTYPE COPY
+  flagged in catalog.ts.
+- DREAMARI logo (desktop nav + mobile home header) now links to the
+  landing page (/). New QuickLinksMenu in chrome.tsx: glass dropdown
+  with Landing/Home/Explore/Build/Match, mounted in the desktop nav's
+  right panel, the mobile home header, and Explore's mobile top bar
+  (left-aligned variant). Every app page can now reach every other
+  prototype page.
+
 ### 2026-08-20 Explore header redesign + rank numerals + hero controls (PUSHED)
 
 - Explore/Browse search now expands from the 40px icon (matching the

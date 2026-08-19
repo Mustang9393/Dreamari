@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, X } from "lucide-react";
-import { DesktopNavigation, MobileNav } from "./chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 import {
   BROWSE_BECAUSE_LIKED,
@@ -497,6 +497,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
             <Search className="h-4 w-4" />
           </button>
         )}
+        <QuickLinksMenu align="left" className="absolute top-1/2 left-4 -translate-y-1/2 [&>button]:size-9" />
       </div>
 
       <main className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start gap-[var(--space-10)] px-5 pb-[120px] md:px-[var(--space-14)] ${tab === "browse" ? "pt-[72px] md:pt-[var(--space-14)]" : "pt-[64px] md:pt-[72px]"}`}>
