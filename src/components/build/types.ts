@@ -31,7 +31,9 @@ export const STAGES: { id: StageId; percent: number; phase?: string; almostDone?
   { id: "complete", percent: 100 },
 ];
 
-// The 13 worlds exactly as the reference lists them, paired with the pipeline's
+// All 15 worlds from the token set (the Replit reference only listed 13 —
+// Farming/Animals/Nature and Fixing Machines & Engines were missing), paired
+// with the pipeline's
 // world color tokens (design-tokens: color.world.*) so each chip carries its own
 // world accent. Slugs mirror the Figma variable names (see the tokens' descriptions
 // for why some diverge from display labels).
@@ -42,6 +44,8 @@ export const INTEREST_WORLDS: { label: string; slug: string }[] = [
   { label: "Counseling & Social Work", slug: "helping-human-services" },
   { label: "Driving, Flying & Shipping", slug: "driving-flying-shipping" },
   { label: "Factories & Making Things", slug: "factories-making-things" },
+  { label: "Farming, Animals & Nature", slug: "farming-animals-nature" },
+  { label: "Fixing Machines & Engines", slug: "fixing-machines-engines" },
   { label: "Food & Cooking", slug: "food-farming-nature" },
   { label: "Health & Medicine", slug: "health-medicine" },
   { label: "Law, Safety & Justice", slug: "law-safety-government" },

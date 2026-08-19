@@ -70,31 +70,32 @@ export function InterestsStep({ state, patch, onNext, react, percent, phase }: S
       <CardHud percent={percent} phase={phase} />
       <GlassCard header={{ icon: <Globe className="h-4 w-4" />, title: "Interests", constraint: "Choose up to 2" }}>
         <QuestionHeading title="What sounds interesting?" subtitle="Choose up to 2" />
-        <div
-          className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl border px-3.5 py-2"
-          style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
-        >
-          <span className="text-[12.5px] font-bold text-[var(--color-night-foreground)]">Your picks</span>
-          {/* The actual selections, live, in pick order — not just a count. */}
-          {state.interests.map((interest) => (
+        {/* "Your picks" — a composed panel, not a wrapping strip: caption
+           row up top (label + counter), then each pick on its OWN line as a
+           big Bricolage statement in its world color. Stacked lines stay
+           composed at every width; long names wrap within their own line. */}
+        <div className="mb-3 rounded-xl border px-4 py-3" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10.5px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
-              key={interest}
-              className="rounded-full border px-2.5 py-0.5 text-[11.5px] font-semibold"
-              style={{
-                borderColor: WORLD_ACCENTS[interest] ?? "var(--color-brand-400)",
-                color: "var(--color-night-foreground)",
-                background: `color-mix(in srgb, ${WORLD_ACCENTS[interest] ?? "var(--color-brand-400)"} 14%, transparent)`,
-              }}
+              className="text-[11px] font-bold tracking-wide"
+              style={{ color: state.interests.length ? "var(--color-feedback-success-dark-surface)" : "var(--color-night-muted-foreground)" }}
             >
-              {interest}
+              {state.interests.length} of 2
             </span>
-          ))}
-          <span
-            className="ml-auto text-[12.5px] font-semibold"
-            style={{ color: state.interests.length ? "var(--color-feedback-success-dark-surface)" : "var(--color-night-muted-foreground)" }}
-          >
-            {state.interests.length} of 2 selected
-          </span>
+          </div>
+          <div className="mt-1.5 flex min-h-[26px] flex-col gap-0.5">
+            {state.interests.length === 0 && <span className="text-[13px] font-medium text-[var(--color-night-muted-foreground)]">Pick up to two worlds below.</span>}
+            {state.interests.map((interest) => (
+              <span
+                key={interest}
+                className={`${bricolage.className} text-[17px] leading-snug font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[19px]`}
+                style={{ color: WORLD_ACCENTS[interest] ?? "var(--color-brand-400)", textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENTS[interest] ?? "var(--color-brand-400)"} 40%, transparent)` }}
+              >
+                {interest}
+              </span>
+            ))}
+          </div>
         </div>
         <ChipGrid
           options={INTEREST_WORLDS.map((world) => world.label)}
@@ -176,6 +177,20 @@ function VibeButtonRow({
   );
 }
 
+// Chosen values render as prominent Bricolage statements (per direct
+// feedback: selected items show up vibrantly, no chips).
+function SetupValue({ value, placeholder }: { value: string | null; placeholder: string }) {
+  if (!value) return <span className="text-[13.5px] font-semibold text-[var(--color-night-muted-foreground)]">{placeholder}</span>;
+  return (
+    <span
+      className={`${bricolage.className} text-[17px] leading-tight font-extrabold text-[var(--color-brand-300)] motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[18px]`}
+      style={{ textShadow: "0 0 18px color-mix(in srgb, var(--color-brand-400) 45%, transparent)" }}
+    >
+      {value}
+    </span>
+  );
+}
+
 export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, phase }: StepProps) {
   const variant = useVariant();
   const glass = variant === "glass";
@@ -187,12 +202,14 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, pha
       <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
       {glass ? (
         <div className="mt-2 hidden flex-col gap-1.5 lg:flex">
-          <span className="text-[13.5px] font-semibold text-[var(--color-night-foreground)]">{state.energy ?? "Energy…"}</span>
-          <span className="text-[13.5px] font-semibold text-[var(--color-night-foreground)]">{state.teamStyle ?? "Team…"}</span>
+          <SetupValue value={state.energy} placeholder="Energy…" />
+          <SetupValue value={state.teamStyle} placeholder="Team…" />
         </div>
       ) : null}
-      <p className={`mt-0.5 text-[14px] font-semibold text-[var(--color-night-foreground)] ${glass ? "lg:hidden" : ""}`}>
-        {state.energy ?? "Energy…"} · {state.teamStyle ?? "Team…"}
+      <p className={`mt-0.5 flex items-baseline gap-2 ${glass ? "lg:hidden" : ""}`}>
+        <SetupValue value={state.energy} placeholder="Energy…" />
+        <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>
+        <SetupValue value={state.teamStyle} placeholder="Team…" />
       </p>
     </div>
   );

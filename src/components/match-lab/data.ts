@@ -21,6 +21,9 @@ export type Career = {
   skills: string;
   workStyle: string;
   pathway: string;
+  /** Future Tradeoff sub-card — PROTOTYPE copy drafted for the lab (the
+   * wireframe had no tradeoff lines); replace with vetted taxonomy copy. */
+  tradeoff: string;
   photo: string;
 };
 
@@ -39,6 +42,7 @@ export const DECK: Career[] = [
     skills: "Financial Analysis, Valuation Modeling, Quantitative Reasoning, Client Negotiation, Presentation Design",
     workStyle: "Fast Pace · Large Deal Crew · High Stakes Project Sprints",
     pathway: "4-Year Bachelor's in Finance/Economics + Summer Analyst Pipeline",
+    tradeoff: "The pay is top-tier, but the hours can own your calendar.",
     photo: "/images/career-investment-banking-2.jpg",
   },
   {
@@ -56,6 +60,7 @@ export const DECK: Career[] = [
     skills: "Game Engine Scripting (Unity/Unreal), Level Design, UX Flow, Rapid Prototyping, Systems Balancing",
     workStyle: "Creative Focus · Small Agile Squad · Iterative Sprints",
     pathway: "2–4 Years Game Design/CompSci or Direct Portfolio Track",
+    tradeoff: "You build worlds people love, but crunch seasons are real.",
     photo: "/images/matchflow/mf-video-game-designer.png",
   },
   {
@@ -72,6 +77,7 @@ export const DECK: Career[] = [
     skills: "Chemical Sensory Analysis, Lab Equipment Calibration, Quality Assurance, Product Formulation",
     workStyle: "Steady & Calm · Small Research Team · Clean Lab Environment",
     pathway: "4-Year Bachelor's in Food Science, Chemistry, or Bio-Engineering",
+    tradeoff: "Steady, meaningful work — breakthroughs take patience.",
     photo: "/images/career-food-scientist.jpg",
   },
   {
@@ -88,6 +94,7 @@ export const DECK: Career[] = [
     skills: "Concept Sketching, CAD Modeling, Color Theory, Ergonomic Testing, Trend Forecasting",
     workStyle: "Creative & Hands-On · Collaborative Studio · Studio Vibe",
     pathway: "4-Year BFA in Industrial Design, Product Design, or Fashion",
+    tradeoff: "Your ideas ship worldwide, but trends move fast and so must you.",
     photo: "/images/career-product-designer.jpg",
   },
   {
@@ -104,6 +111,7 @@ export const DECK: Career[] = [
     skills: "Emergency Triage, Airway Management, Critical Pharmacology, Rapid Decision Making Under Pressure",
     workStyle: "High Stakes · Ultra-Tight Crew (Pilot + Medic) · Dynamic Horizon",
     pathway: "BSN Nursing Degree + 3–5 Yrs ICU/ER Experience + CFRN Certification",
+    tradeoff: "Every shift matters, and the intensity is not for everyone.",
     photo: "/images/trending/trending-nurse.png",
   },
   {
@@ -123,6 +131,7 @@ export const DECK: Career[] = [
     pathway: "~2-Year FAA-Approved Part 147 School / Airframe & Powerplant (A&P) License",
     // Closest trade imagery in the design system's browse set (no aviation-tech
     // card exists yet) — flagged as placeholder art, swap when one lands.
+    tradeoff: "Great stability without a 4-year degree, but precision is non-negotiable.",
     photo: "/images/matchflow/mf-electrician.png",
   },
 ];

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, Briefcase, ChevronDown, ChevronUp, ChevronsDown, GraduationCap, Pencil, RotateCcw, ThumbsUp, Wrench, X, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { HomeButton } from "@/components/flow/HomeButton";
@@ -14,7 +14,7 @@ import { LocalBurst } from "@/components/build/DreamyGuide";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
-import { DECK, MAX_SLOTS, TOTAL_PATHS, type Career } from "./data";
+import { DECK, MAX_SLOTS, type Career } from "./data";
 
 // v3 PROTOTYPE — the match flow, rebuilt from the user's wireframe
 // (MATCH FLOW.html) + Figma template 3241-9530, in the design system's own
@@ -56,11 +56,12 @@ export function MatchLab() {
   const [slotPops, setSlotPops] = useState<number[]>([0, 0, 0]);
 
   const decisionShown = useRef(false);
+  const idleShown = useRef(false);
+  const [idleOpen, setIdleOpen] = useState(false);
   const pointerActive = useRef(false);
-  const horizontal = useRef(false);
   const startX = useRef(0);
-  const startY = useRef(0);
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const dragLive = useRef<{ like: () => void; pass: () => void; exiting: boolean }>({ like: () => {}, pass: () => {}, exiting: false });
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const top = exiting ? roundDeck[deckIndex] : roundDeck[deckIndex];
@@ -166,40 +167,104 @@ export function MatchLab() {
     // but they can re-fill and lock in from the slots or the end panel.
   }
 
-  // ---- gestures: vertical stays native (card content scrolls), horizontal is ours ----
-  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (!top || exiting) return;
-    pointerActive.current = true;
-    horizontal.current = false;
-    startX.current = e.clientX;
-    startY.current = e.clientY;
-  }
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!pointerActive.current) return;
-    const dx = e.clientX - startX.current;
-    const dy = e.clientY - startY.current;
-    if (!horizontal.current) {
-      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
-        horizontal.current = true;
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } else if (Math.abs(dy) > 10) {
-        pointerActive.current = false; // vertical intent — let the card scroll
-        return;
-      }
-    }
-    if (horizontal.current) setDragX(dx);
-  }
-  function onPointerUp() {
-    if (!pointerActive.current) return;
-    pointerActive.current = false;
-    if (!horizontal.current) return;
-    const dx = dragX;
+  // ---- gestures, Tinder/Bumble-style coexistence ----
+  // The card CONTENT scrolls natively (touch-action: pan-y). Touch swipes are
+  // handled by NATIVE listeners (React's synthetic touch handlers are passive
+  // and cannot preventDefault): the first ~12px decides the axis. Vertical ->
+  // we release the gesture entirely and the browser scrolls. Horizontal -> we
+  // claim it and preventDefault every subsequent move, so the browser CANNOT
+  // also scroll — the exact ambiguity ("tries to scroll and swipe, neither
+  // happens") reported on device. Mouse drags use pointer events (no scroll
+  // conflict exists for mouse; the wheel scrolls the card).
+  function commitDrag(dx: number) {
     if (dx > SWIPE_COMMIT_PX) like();
     else if (dx < -SWIPE_COMMIT_PX) pass();
     else setDragX(0);
-    horizontal.current = false;
     if (Math.abs(dx) <= SWIPE_COMMIT_PX) setDragX(0);
   }
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "touch") return; // native touch listeners own touch
+    if (!top || exiting) return;
+    pointerActive.current = true;
+    startX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "touch" || !pointerActive.current) return;
+    setDragX(e.clientX - startX.current);
+  }
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "touch" || !pointerActive.current) return;
+    pointerActive.current = false;
+    commitDrag(dragX);
+  }
+
+  const topId = top?.id;
+  const dragXRef = useRef(0);
+  // Idle escape hatch: if the guide is closed and they haven't swiped on
+  // ANYTHING for a while, offer Explore warmly — not deciding is a valid
+  // answer, and browsing is the gentler mode. Once per visit.
+  useEffect(() => {
+    if (guideOpen || idleShown.current || history.length > 0 || liked.length > 0 || deckIndex > 0) return;
+    const t = setTimeout(() => {
+      idleShown.current = true;
+      setIdleOpen(true);
+    }, 20000);
+    return () => clearTimeout(t);
+  }, [guideOpen, history.length, liked.length, deckIndex]);
+
+  // keep the native listeners' handle fresh without re-binding them
+  useEffect(() => {
+    dragLive.current = { like, pass, exiting: !!exiting };
+  });
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || !topId) return;
+    let sx = 0;
+    let sy = 0;
+    let claimed: "h" | "v" | null = null;
+    function onStart(e: TouchEvent) {
+      if (dragLive.current.exiting) return;
+      claimed = null;
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    }
+    function onMove(e: TouchEvent) {
+      const dx = e.touches[0].clientX - sx;
+      const dy = e.touches[0].clientY - sy;
+      if (!claimed) {
+        if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) claimed = "h";
+        else if (Math.abs(dy) > 12) claimed = "v"; // browser scrolls; we stand down
+        else return;
+      }
+      if (claimed === "h") {
+        if (e.cancelable) e.preventDefault();
+        dragXRef.current = dx;
+        setDragX(dx);
+      }
+    }
+    function onEnd() {
+      if (claimed === "h") {
+        const dx = dragXRef.current;
+        dragXRef.current = 0;
+        if (dx > SWIPE_COMMIT_PX) dragLive.current.like();
+        else if (dx < -SWIPE_COMMIT_PX) dragLive.current.pass();
+        else setDragX(0);
+        if (Math.abs(dx) <= SWIPE_COMMIT_PX) setDragX(0);
+      }
+      claimed = null;
+    }
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd);
+    el.addEventListener("touchcancel", onEnd);
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
+  }, [topId]);
 
   return (
     <ThemeProvider>
@@ -215,13 +280,13 @@ export function MatchLab() {
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
           {/* ---- header: title + live counter ---- */}
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
-            <h1 className={`${bricolage.className} text-[17px] font-extrabold text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
+            <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
             <span
-              className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold text-[var(--color-night-muted-foreground)] backdrop-blur"
+              className="flex flex-none items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
               style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
             >
               <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${"#33c78c"}` }} />
-              {remaining} in this stack · {TOTAL_PATHS} paths open
+              {remaining} in the stack
             </span>
           </div>
 
@@ -284,7 +349,7 @@ export function MatchLab() {
           {/* ---- deck ---- */}
           <div className="relative min-h-0 w-full flex-1">
             {deckDone ? (
-              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={toReport} onManage={() => setManageOpen(true)} />
+              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={toReport} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
             ) : (
               roundDeck.slice(deckIndex, deckIndex + 3).map((career, depth) => {
                 const isTop = depth === 0;
@@ -299,7 +364,7 @@ export function MatchLab() {
                   <div
                     key={career.id}
                     ref={isTop ? cardRef : undefined}
-                    className={`absolute inset-0 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab touch-pan-y select-none active:cursor-grabbing" : "pointer-events-none"}`}
+                    className={`absolute inset-0 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"}`}
                     style={{
                       background: "var(--color-night-card)",
                       borderColor: "var(--color-glass-border)",
@@ -354,8 +419,8 @@ export function MatchLab() {
               lab build 3
             </span>
             <div className="flex w-full flex-col gap-3">
-              <GuideRow icon={<ChevronsDown className="h-5 w-5 motion-safe:animate-bounce" />} color="var(--color-brand-400)">
-                <b>Swipe up on a card</b> to see classes, skills, work style & pathway.
+              <GuideRow icon={<ChevronsUp className="h-5 w-5 motion-safe:animate-bounce" />} color="var(--color-brand-400)">
+                <b>Swipe up on a card</b> to flip through daily work, skills, work style, pathway & tradeoffs.
               </GuideRow>
               <GuideRow icon={<ThumbsUp className="h-5 w-5" />} color={SUCCESS}>
                 <b>Swipe right</b> or tap the thumbs-up to save a career to your Top 3.
@@ -386,6 +451,26 @@ export function MatchLab() {
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
+              </Button>
+            </div>
+          </div>
+        </Sheet>
+      )}
+
+      {/* ---- idle sheet: gentle route to Explore ---- */}
+      {idleOpen && (
+        <Sheet onClose={() => setIdleOpen(false)}>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Not feeling these yet?</h2>
+            <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
+              Totally fine — there&apos;s no wrong pace here. Browse careers freely in Explore, and come back to matching whenever one catches your eye.
+            </p>
+            <div className="flex w-full flex-col gap-2.5">
+              <Button variant="primary" size="large" onClick={() => router.push("/#explore")} type="button">
+                Take me to Explore
+              </Button>
+              <Button variant="secondary" onClick={() => setIdleOpen(false)} type="button">
+                I&apos;ll keep swiping
               </Button>
             </div>
           </div>
@@ -477,8 +562,8 @@ export function MatchLab() {
 
 function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dragX: number }) {
   return (
-    <div className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]" style={{ touchAction: "pan-y" }}>
-      {/* stamps */}
+    <div className="relative h-full w-full">
+      {/* stamps live at card level, above the scroll */}
       {isTop && (
         <>
           <Stamp side="right" color={SUCCESS} opacity={dragX > 30 ? Math.min(1, (dragX - 30) / 70) : 0}>
@@ -490,72 +575,115 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
         </>
       )}
 
-      {/* hero pane — the Career Poster Card, full height */}
-      <div className="relative flex w-full flex-col justify-end" style={{ height: "100%", minHeight: 420 }}>
-        <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 94vw, 440px" className="object-cover" draggable={false} priority={isTop} />
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(5,7,15,0.08) 0%, rgba(5,7,15,0.35) 55%, rgba(5,7,15,0.94) 100%)" }} />
-        <div className="relative z-[1] flex flex-col gap-1.5 p-5 pb-4 text-center">
-          <div className="mb-0.5 flex items-center justify-between gap-2">
+      {/* the dating-app profile scroll: full-height poster first, sections below */}
+      <div className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]" style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}>
+        {/* ---- HERO: the Browse Card face, exactly — poster art, DS text
+           scrim, title in the world's own face, world label beneath.
+           Employers + salary sit as matched quiet chips in the top corners. ---- */}
+        <div className="relative flex w-full flex-col justify-end" style={{ height: "100%", minHeight: 420 }}>
+          <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 94vw, 440px" className="object-cover" draggable={false} priority={isTop} />
+          <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4">
             <span
-              className="rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] uppercase"
-              style={{ color: career.color, borderColor: `color-mix(in srgb, ${career.color} 45%, transparent)`, background: `color-mix(in srgb, ${career.color} 14%, transparent)` }}
+              className="max-w-[60%] truncate rounded-full border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
+              style={{ background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)", borderColor: "var(--color-glass-border)" }}
             >
-              {career.world}
+              {career.employers}
             </span>
             <span
-              className="rounded-full border px-2.5 py-1 text-[12px] font-bold"
-              style={{ color: SUCCESS, borderColor: "color-mix(in srgb, #33c78c 35%, transparent)", background: "color-mix(in srgb, #33c78c 14%, transparent)" }}
+              className="flex-none rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
+              style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)" }}
             >
               {career.salary}
             </span>
           </div>
-          <p
-            className="uppercase"
-            style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 30, lineHeight: 1.12, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}
+          <div
+            className="relative z-[1] flex flex-col items-center gap-1.5 px-2 pt-16 pb-4 text-center uppercase"
+            style={{
+              // gradient/text-scrim — the Browse Card component's own stops
+              background: "linear-gradient(180deg, rgba(5,7,15,0) 0%, rgba(5,7,15,0.5) 30%, rgba(5,7,15,0.75) 51%, rgb(5,7,15) 100%)",
+            }}
           >
-            {career.title}
-          </p>
-          <p className="text-[12px] font-semibold text-[var(--color-night-muted-foreground)]">{career.employers}</p>
-          <div className="mt-1 flex items-center justify-center">
+            <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 28, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.03em", color: "var(--color-night-foreground)" }}>
+              {career.title}
+            </p>
+            <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
+              {career.world}
+            </p>
             <span
-              className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md motion-safe:animate-bounce"
-              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "var(--color-glass-border)" }}
+              className="mt-1 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold normal-case backdrop-blur-md motion-safe:animate-bounce"
+              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
             >
-              <ChevronsDown className="h-3.5 w-3.5" style={{ color: career.color }} />
-              Swipe up for the full breakdown
+              <ChevronsUp className="h-3.5 w-3.5" style={{ color: career.color }} />
+              Scroll for the breakdown
             </span>
           </div>
         </div>
-      </div>
 
-      {/* details pane */}
-      <div className="flex flex-col gap-3 border-t p-4 pb-6" style={{ background: "var(--color-night-card)", borderColor: "var(--color-glass-border)" }}>
-        <p className={`${bricolage.className} text-[12px] font-bold tracking-[0.1em] text-[var(--color-night-muted-foreground)] uppercase`}>Career Breakdown</p>
-        <div className="flex items-start gap-3 rounded-xl border px-3.5 py-3" style={{ background: `color-mix(in srgb, ${career.color} 8%, var(--color-glass-surface-1))`, borderColor: "var(--color-glass-border)" }}>
-          <Briefcase className="mt-0.5 h-4 w-4 flex-none" style={{ color: career.color }} />
-          <p className="text-[12.5px] leading-relaxed font-medium text-[var(--color-night-foreground)]">{career.hook}</p>
+        {/* ---- Career Breakdown: one continuous panel, information-first.
+           Hierarchy: caption labels whisper (Montserrat micro-caps, muted,
+           world-tinted icon), content speaks (left-aligned, 14px/1.6). The
+           hook leads at a heavier weight; the tradeoff closes as an
+           editorial aside (accent bar + italic). Hairline dividers give
+           rhythm without box-in-box clutter. ---- */}
+        <div className="flex flex-col px-5 pt-5 pb-8" style={{ background: "var(--color-night-card)" }}>
+          <p className={`${bricolage.className} mb-4 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>Career Breakdown</p>
+
+          <BreakdownSection icon={<BookOpen className="h-4 w-4" />} color={career.color} label="Daily Work">
+            <p className="text-[15px] leading-[1.55] font-semibold text-[var(--color-night-foreground)]">{career.hook}</p>
+          </BreakdownSection>
+
+          <BreakdownDivider />
+
+          <BreakdownSection icon={<Wrench className="h-4 w-4" />} color={career.color} label="Skills & Subjects">
+            <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.skills}</p>
+            <p className="mt-2.5 text-[9.5px] font-bold tracking-[0.1em] text-[var(--color-night-muted-foreground)] uppercase">Classes that help</p>
+            <p className="mt-1 text-[12.5px] leading-[1.55] font-medium text-[var(--color-night-muted-foreground)]">{career.classes}</p>
+          </BreakdownSection>
+
+          <BreakdownDivider />
+
+          <BreakdownSection icon={<Laptop className="h-4 w-4" />} color={career.color} label="Work Style">
+            <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.workStyle}</p>
+          </BreakdownSection>
+
+          <BreakdownDivider />
+
+          <BreakdownSection icon={<GraduationCap className="h-4 w-4" />} color={career.color} label="Pathway Fit">
+            <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.pathway}</p>
+          </BreakdownSection>
+
+          <BreakdownDivider />
+
+          <BreakdownSection icon={<Sparkles className="h-4 w-4" />} color={career.color} label="Future Tradeoff">
+            <p
+              className="text-[13.5px] leading-[1.6] font-medium text-[var(--color-night-foreground)] italic"
+              style={{ borderLeft: `3px solid color-mix(in srgb, ${career.color} 65%, transparent)`, paddingLeft: 12 }}
+            >
+              {career.tradeoff}
+            </p>
+          </BreakdownSection>
         </div>
-        <AttributeRow icon={<BookOpen className="h-4 w-4" />} color={career.color} label="Recommended Classes & Subjects" value={career.classes} />
-        <AttributeRow icon={<Wrench className="h-4 w-4" />} color={career.color} label="Core Skills Used" value={career.skills} />
-        <AttributeRow icon={<Zap className="h-4 w-4" />} color={career.color} label="Work Style & Environment" value={career.workStyle} />
-        <AttributeRow icon={<GraduationCap className="h-4 w-4" />} color={career.color} label="Pathway & Schooling" value={career.pathway} />
       </div>
     </div>
   );
 }
 
-function AttributeRow({ icon, color, label, value }: { icon: React.ReactNode; color: string; label: string; value: string }) {
+function BreakdownSection({ icon, color, label, children }: { icon: React.ReactNode; color: string; label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border px-3.5 py-3" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
-      <span className="mt-0.5 flex-none" style={{ color }}>
-        {icon}
-      </span>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[9.5px] font-bold tracking-[0.08em] text-[var(--color-night-muted-foreground)] uppercase">{label}</span>
-        <span className="text-[12.5px] leading-snug font-semibold text-[var(--color-night-foreground)]">{value}</span>
+    <section>
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="flex-none" style={{ color }}>
+          {icon}
+        </span>
+        <h3 className="text-[10.5px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase">{label}</h3>
       </div>
-    </div>
+      <div className="mt-2 text-left">{children}</div>
+    </section>
   );
+}
+
+function BreakdownDivider() {
+  return <hr aria-hidden className="my-4 border-0" style={{ height: 1, background: "var(--color-glass-border)" }} />;
 }
 
 function Stamp({ side, color, opacity, children }: { side: "left" | "right"; color: string; opacity: number; children: React.ReactNode }) {
@@ -693,27 +821,31 @@ function FlyGhost({ career, from, to }: { career: Career; from: DOMRect; to: DOM
   );
 }
 
-function EndPanel({ likedCount, liked, onRestart, onReport, onManage }: { likedCount: number; liked: Career[]; onRestart: () => void; onReport: () => void; onManage: () => void }) {
+function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore }: { likedCount: number; liked: Career[]; onRestart: () => void; onReport: () => void; onManage: () => void; onExplore: () => void }) {
   return (
     <div
       className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center backdrop-blur-xl"
       style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
     >
       <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>
-        {likedCount === MAX_SLOTS ? "Your Top 3 is set!" : likedCount > 0 ? `You've seen the stack — ${likedCount} saved` : "You've seen the stack"}
+        {likedCount === MAX_SLOTS ? "Your Top 3 is set!" : likedCount > 0 ? `You've seen the stack — ${likedCount} saved` : "Nothing clicked — and that's okay"}
       </h2>
-      <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+      <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
           ? "Lock them in to build your personalized Career Report."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
-            : "No saves yet — run the stack again whenever you're ready."}
+            : "Knowing what's NOT for you is real progress. Wander through Explore — hundreds of paths, no pressure — and come back when one sparks."}
       </p>
       {likedCount > 0 && <MiniRanking liked={liked} />}
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">
-        {likedCount > 0 && (
+        {likedCount > 0 ? (
           <Button variant="primary" size="large" onClick={onReport} type="button">
             {likedCount === MAX_SLOTS ? "View Career Report" : `Continue with ${likedCount}`}
+          </Button>
+        ) : (
+          <Button variant="primary" size="large" onClick={onExplore} type="button">
+            Explore careers instead
           </Button>
         )}
         {likedCount > 0 && likedCount < MAX_SLOTS && (
