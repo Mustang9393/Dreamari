@@ -1,0 +1,65 @@
+/* ============================================================
+   Dreamari shadcn-adapter.css — SNAPSHOT 2026-08-19
+   Completes shadcn/ui's theming contract on top of the live
+   Figma Variables pull. The 13 direct-name tokens (background,
+   foreground, card, primary(-foreground), secondary(-foreground),
+   muted(-foreground), accent, destructive, border) come straight
+   from your pull — this file defines ONLY what Figma doesn't
+   have yet, with prototype-snapshot fallbacks so nothing blocks.
+   Regenerate/replace lines as the gap variables land in Figma.
+
+   Load order: tokens.css (your pull) -> this file -> shadcn.
+   Dark mode: pair with @custom-variant dark (&:is(.dark *)).
+   NOTE the product is dark-first — decide whether admin roots
+   get class="dark" by default.
+   ============================================================ */
+
+:root {
+  /* --- foreground companions (alias to existing semantics) --- */
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+  --destructive-foreground: #f4f7ff; /* VERIFY landed as a variable (#F04438 correction pair) */
+
+  /* --- form + focus --- */
+  --input: var(--glass-surface-2);
+  --ring: color-mix(in srgb, var(--primary) 50%, transparent);
+
+  /* --- charts: positional 5-set from existing primitives.
+     NOT world colors (identity), NOT stretched to 15 (shadcn's
+     contract is 5 slots). World-keyed charts color series with
+     world tokens directly, bypassing chart-*. --- */
+  --chart-1: #2f6bf2; /* brand blue  */
+  --chart-2: #1fc76e; /* green       */
+  --chart-3: #ffb81f; /* amber       */
+  --chart-4: #8b5cf6; /* purple      */
+  --chart-5: #00c8dc; /* cyan        */
+
+  /* --- sidebar family --- */
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--glass-border, var(--border));
+  --sidebar-ring: var(--ring);
+
+  /* --- radius: override shadcn's single-base derivation with the
+     DS's real discrete scale (radius-* from your pull) --- */
+  --radius: var(--radius-lg, 16px);
+  --radius-sm: var(--radius-sm-alt, 5px);
+  --radius-md: var(--radius-md, 12px);
+  --radius-lg: var(--radius-lg, 16px);
+  --radius-xl: var(--radius-xl, 20px);
+
+  /* --- type --- */
+  --font-sans: var(--font-body, "Montserrat", sans-serif);
+}
+
+/* All aliases above reference pull variables that flip under .dark on
+   their own. Only literals need dark overrides: */
+.dark {
+  --destructive-foreground: #f4f7ff;
+}

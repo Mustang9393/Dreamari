@@ -1,0 +1,75 @@
+/* ============================================================
+   Dreamari bridge.css — SNAPSHOT 2026-08-19
+   Re-addresses the live Figma Variables pull to the --color-*
+   names consumed by the two code-canonical surfaces (landing
+   page + build flow). Include AFTER the generated token CSS.
+
+   Ideally: make your Style Dictionary pipeline emit this file
+   as a second output (same mapping, live values) instead of
+   shipping this snapshot. Every line has a fallback literal
+   from the prototype's pipeline, so the surfaces render
+   correctly even before a gap variable lands in Figma —
+   VERIFY tags mark names to confirm against your pull.
+   ============================================================ */
+
+:root {
+  /* glass (CONFIRMED in file) */
+  --color-glass-surface-1: var(--glass-surface-1, rgb(0 0 0 / 0.031));
+  --color-glass-surface-2: var(--glass-surface-2, rgb(0 0 0 / 0.09));
+  --color-glass-surface-3: var(--glass-surface-3, rgb(255 255 255 / 0.72));
+  --color-glass-border: var(--glass-border, rgb(0 0 0 / 0.12));
+  --color-glass-stroke: var(--glass-stroke, rgb(0 0 0 / 0.28)); /* VERIFY */
+  --color-glass-hover: var(--glass-hover, rgb(0 0 0 / 0.14)); /* VERIFY */
+
+  /* night surfaces (VERIFY names on pull — from the dev handoff docs) */
+  --color-night-background: var(--night-background, #f4f7ff);
+  --color-night-card: var(--night-card, #d8dbe8);
+  --color-night-foreground: var(--night-foreground, #05070f);
+  --color-night-muted-foreground: var(--night-muted-foreground, #4a4f6d);
+
+  /* brand ramp (primitives — VERIFY exact primitive naming, e.g.
+     --primitive-color-brand-400) */
+  --color-brand-300: var(--brand-300, #7fa8ff);
+  --color-brand-400: var(--brand-400, #4a82ff);
+  --color-brand-500: var(--brand-500, #2f6bf2);
+  --color-brand-900: var(--brand-900, #0c2560);
+
+  /* accents + feedback (accent-subtle/decorative CONFIRMED; others VERIFY) */
+  --color-accent-purple: var(--accent-purple, #7d5cff);
+  --color-accent-subtle: var(--accent-subtle, #8b7bff);
+  --color-decorative-pink-glow: var(--decorative-pink-glow, #ff5d7d);
+  --color-feedback-success-dark-surface: var(--feedback-success-dark-surface, #33c78c);
+
+  /* the 15 worlds (CONFIRMED, same value both modes) */
+  --color-world-arts-media-sport: var(--world-arts-media-sport, #ff4585);
+  --color-world-building-construction: var(--world-building-construction, #ff9640);
+  --color-world-business-money-office: var(--world-business-money-office, #ffb81f);
+  --color-world-driving-flying-shipping: var(--world-driving-flying-shipping, #3b82f6);
+  --color-world-factories-making-things: var(--world-factories-making-things, #c2703d);
+  --color-world-farming-animals-nature: var(--world-farming-animals-nature, #7c9a5e);
+  --color-world-fixing-machines-engines: var(--world-fixing-machines-engines, #64748b);
+  --color-world-food-farming-nature: var(--world-food-farming-nature, #1fc76e);
+  --color-world-health-medicine: var(--world-health-medicine, #14b8a6);
+  --color-world-helping-human-services: var(--world-helping-human-services, #c05fa6);
+  --color-world-law-safety-government: var(--world-law-safety-government, #e5484d);
+  --color-world-personal-care-community-services: var(--world-personal-care-community-services, #e8a0bf);
+  --color-world-science-research: var(--world-science-research, #00c8dc);
+  --color-world-teaching-learning: var(--world-teaching-learning, #8b5cf6);
+  --color-world-tech-engineering-design: var(--world-tech-engineering-design, #6366f1);
+}
+
+/* Dark-mode FALLBACKS only. If your pull emits .dark overrides for the
+   source names (it should), the var() references above already flip and
+   these fallbacks never engage. */
+.dark {
+  --color-glass-surface-1: var(--glass-surface-1, rgb(255 255 255 / 0.031));
+  --color-glass-surface-2: var(--glass-surface-2, rgb(255 255 255 / 0.09));
+  --color-glass-surface-3: var(--glass-surface-3, rgb(12 16 35 / 0.8));
+  --color-glass-border: var(--glass-border, rgb(255 255 255 / 0.09));
+  --color-glass-stroke: var(--glass-stroke, rgb(255 255 255 / 0.3));
+  --color-glass-hover: var(--glass-hover, rgb(255 255 255 / 0.18));
+  --color-night-background: var(--night-background, #05070f);
+  --color-night-card: var(--night-card, #0e0f18);
+  --color-night-foreground: var(--night-foreground, #f4f7ff);
+  --color-night-muted-foreground: var(--night-muted-foreground, rgb(255 255 255 / 0.62));
+}
