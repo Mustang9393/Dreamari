@@ -49,7 +49,7 @@ aliases so nothing blocks day one:
 | `--destructive-foreground` | `#f4f7ff` per handoff correction — confirm it landed as a variable | |
 | `--input` | `glass-surface-2` | the DS's input-field fill (matches FormInput) |
 | `--ring` | `primary` at 50% (`color-mix(in srgb, var(--primary) 50%, transparent)`) | focus ring = brand |
-| `--chart-1..5` | `category-classes`, `category-skills`, `category-workstyle`, `category-earning-potential`, `category-future-fit` | the DS already HAS a 5-color categorical set — the match category colors. Don't invent a chart palette |
+| `--chart-1..5` | five well-spaced PRIMITIVES: `#2f6bf2` (brand blue), `#1fc76e` (green), `#ffb81f` (amber), `#8b5cf6` (purple), `#00c8dc` (cyan) | positional palette for arbitrary admin data — distinct hue families, no new colors. Do NOT use world colors positionally (they carry identity), and don't stretch to 15: shadcn's contract is 5 slots |
 | `--sidebar` | `surface-navigation` (nav surface) | |
 | `--sidebar-foreground` | `foreground` | |
 | `--sidebar-primary` | `primary` | |
@@ -58,6 +58,15 @@ aliases so nothing blocks day one:
 | `--sidebar-accent-foreground` | `foreground` | |
 | `--sidebar-border` | `glass-border` | |
 | `--sidebar-ring` | same as `--ring` | |
+
+## 2b. Charting world data — bypass chart-* entirely
+
+When a chart's series ARE career worlds (signups by world, top explored
+worlds), color each series with its world token directly — the world
+colors are identity, and world data should wear them everywhere. The
+`chart-1..5` slots are only for arbitrary positional series. Both sets
+flow through the same pipeline, so the admin app has the 15 world
+variables available regardless.
 
 ## 3. Mode wiring
 
