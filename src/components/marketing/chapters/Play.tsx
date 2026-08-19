@@ -42,6 +42,7 @@ export function PlayChapter() {
       title="Play"
       color="#3b82f6"
       oneliner="a day-in-the-life situation where every instinct pays off."
+      wide
       flip
       graphicRef={graphicRef}
       playing={false}
@@ -83,7 +84,12 @@ function PlayDemo() {
   return (
       <div
         className={`mkt-play-card relative z-[1] flex h-full max-w-full flex-col overflow-hidden ${pickedIndex !== null ? "mkt-play-feedback" : ""}`}
-        style={{ width: "clamp(300px, 100cqw, 480px)", aspectRatio: "168 / 290", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
+        // Wide-frame lane (same as Explore's, per feedback that the boxed
+        // graphics should sit at similar width to the unboxed one): the card
+        // fills the frame and the scene goes widescreen — the visual-novel
+        // composition reads MORE cinematic in landscape, and the aspect lock
+        // is gone since h-full + the frame now govern both dimensions.
+        style={{ width: "clamp(300px, 100cqw, 760px)", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
       >
         {/* The art itself — full color, uncovered, the dominant element. flex-1
            (not a fixed percentage): the choice panel below sizes to its own
