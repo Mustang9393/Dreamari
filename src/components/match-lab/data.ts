@@ -78,7 +78,7 @@ export const DECK: Career[] = [
     workStyle: "Steady & Calm · Small Research Team · Clean Lab Environment",
     pathway: "4-Year Bachelor's in Food Science, Chemistry, or Bio-Engineering",
     tradeoff: "Steady, meaningful work — breakthroughs take patience.",
-    photo: "/images/career-food-scientist.jpg",
+    photo: "/images/matchflow/mf-food-scientist-poster.png",
   },
   {
     id: "DES-004",
@@ -95,7 +95,9 @@ export const DECK: Career[] = [
     workStyle: "Creative & Hands-On · Collaborative Studio · Studio Vibe",
     pathway: "4-Year BFA in Industrial Design, Product Design, or Fashion",
     tradeoff: "Your ideas ship worldwide, but trends move fast and so must you.",
-    photo: "/images/career-product-designer.jpg",
+    // Stand-in: Figma Section 2 has no footwear poster; this is the Fashion
+    // Designer studio image (same world) until a footwear one is generated.
+    photo: "/images/matchflow/mf-footwear-designer-poster.png",
   },
   {
     id: "HLTH-005",

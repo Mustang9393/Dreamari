@@ -6,6 +6,22 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 match-lab poster photos: Food Scientist + Footwear Designer (v3, LOCAL)
+
+- Both careers wore "For You"-style photos; replaced with Browse-poster-style
+  images from Figma Section 2 (node 3282-9044, the poster template library).
+  Food Scientist = exact match (node 3282:8729, lab/pipette shot) →
+  public/images/matchflow/mf-food-scientist-poster.png. Footwear Designer has
+  NO poster in Section 2 (most Arts & Media templates are image-less); wired
+  the Fashion Designer studio image (node 3282:8711, same world) as a flagged
+  stand-in → mf-footwear-designer-poster.png. No image-generation tool exists
+  in this environment — a real footwear image must be generated Figma/ChatGPT
+  side and dropped in. data.ts carries a comment marking the stand-in.
+  Verified in browser (both cards render, no 404s). v3 stays local — no push.
+- Still pending: Aviation Maintenance Tech uses mf-electrician.png
+  (placeholder); TEMP debug aids (LAB BUILD pill, error-trap script in
+  src/app/match-lab/page.tsx) await removal after phone confirmation.
+
 ### 2026-08-20 A/B verdict: cinematic wins — glass build-flow variant purged
 
 - Per the user's A/B result, variant B (cinematic/boxless) IS the build
