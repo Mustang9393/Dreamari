@@ -2,8 +2,8 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState } from "react";
-import { BookOpen, Flame, Sparkle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { HOME_PICKS } from "./catalog";
@@ -150,6 +150,7 @@ function CometStar() {
 function HeroBanner() {
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (paused) return;
@@ -157,11 +158,23 @@ function HeroBanner() {
     return () => clearInterval(timer);
   }, [paused]);
 
+  const step = (delta: number) => setPanel((current) => (current + delta + 3) % 3);
+
   return (
     <section
       aria-label="Highlights"
       className="relative h-[430px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[360px] sm:rounded-[var(--radius-2xl)]"
       style={{ borderColor: "var(--glass-border)" }}
+      onTouchStart={(event) => {
+        touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+      }}
+      onTouchEnd={(event) => {
+        if (!touchStart.current) return;
+        const dx = event.changedTouches[0].clientX - touchStart.current.x;
+        const dy = event.changedTouches[0].clientY - touchStart.current.y;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) step(dx < 0 ? 1 : -1);
+        touchStart.current = null;
+      }}
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]">
         {SPACE_ACCENTS.map((dot, index) => (
@@ -272,6 +285,26 @@ function HeroBanner() {
           <WorldArt portrait="/images/app/portrait-ux-researcher.png" fadeRight />
         </PanelShell>
       </div>
+
+      {/* Desktop prev/next — skip without waiting for the timer */}
+      <button
+        type="button"
+        aria-label="Previous highlight"
+        onClick={() => step(-1)}
+        className="absolute top-1/2 left-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
+        style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        aria-label="Next highlight"
+        onClick={() => step(1)}
+        className="absolute top-1/2 right-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
+        style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
 
       {/* Carousel dots + pause — right-anchored on desktop, centered on the
          mobile frame */}
@@ -457,7 +490,7 @@ export function HomeExperience() {
               {"View all activity  →"}
             </button>
           </div>
-          <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:gap-[var(--space-6)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
+          <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (
               <ActivityCard key={activity.title} activity={activity} />
             ))}
@@ -468,7 +501,7 @@ export function HomeExperience() {
           <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Careers Picked for You
           </h2>
-          <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
+          <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {HOME_PICKS.map((career) => (
               <PosterCard key={career.title} career={career} />
             ))}

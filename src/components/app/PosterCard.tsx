@@ -52,13 +52,32 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
 
 // Trending rail slot: giant background-colored numeral silhouetted against the
 // starfield behind a 175×250 CareerCard (Figma "Ranked N" frames, 220×250).
+
+// The 175px card is narrower than the standard poster: long single words
+// (ENTREPRENEUR) step the title size down so nothing breaks mid-word.
+function rankedTitleSize(title: string): { fontSize: number; lineHeight: string } {
+  const longest = Math.max(...title.split(/\s+/).map((word) => word.length));
+  if (longest >= 12) return { fontSize: 17, lineHeight: "21px" };
+  if (longest >= 10) return { fontSize: 20, lineHeight: "24px" };
+  return { fontSize: 24, lineHeight: "28px" };
+}
+
 export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank: number }) {
+  const titleSize = rankedTitleSize(career.title);
   return (
     <div className="relative h-[250px] w-[220px] flex-none">
       <p
         aria-hidden
         className="absolute top-[40px] left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] font-extrabold tracking-[-5px] whitespace-nowrap select-none"
-        style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}
+        style={{
+          fontFamily: "var(--font-display)",
+          fontVariationSettings: '"opsz" 14, "wdth" 100',
+          color: "var(--background)",
+          // The mobile Browse frame draws the rank as a hollow outlined digit;
+          // the light stroke also keeps it legible over the darker stretches
+          // of Background Space (fill stays the frame's background color).
+          WebkitTextStroke: "1.5px color-mix(in srgb, var(--foreground) 18%, transparent)",
+        }}
       >
         {rank}
       </p>
@@ -71,7 +90,10 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
           style={{ backgroundImage: TEXT_SCRIM }}
         >
-          <span className="w-full text-[24px] leading-[28px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
+          <span
+            className="w-full [overflow-wrap:normal] [word-break:keep-all]"
+            style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
+          >
             {career.title}
           </span>
           <span

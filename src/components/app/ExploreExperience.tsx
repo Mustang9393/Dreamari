@@ -72,7 +72,7 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
           </p>
         )}
       </div>
-      <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -90,101 +90,114 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
 const SORT_OPTIONS = ["Recommended", "A – Z", "Salary"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
+function FilterPill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className="flex-none cursor-pointer rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap transition-colors"
+      style={{
+        fontFamily: "var(--font-body)",
+        background: selected ? "var(--primary)" : "var(--glass-surface-1)",
+        borderColor: selected ? "var(--primary)" : "var(--glass-border)",
+        color: selected ? "var(--primary-foreground)" : "var(--foreground)",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolean }) {
   const [world, setWorld] = useState<string>("All");
-  const [sortMode, setSortMode] = useState(false);
   const [sort, setSort] = useState<SortOption>("Recommended");
 
-  const pillStyle = (isSelected: boolean) => ({
-    fontFamily: "var(--font-body)",
-    background: isSelected ? "var(--primary)" : "var(--glass-surface-1)",
-    borderColor: isSelected ? "var(--primary)" : "var(--glass-border)",
-    color: isSelected ? "var(--primary-foreground)" : "var(--foreground)",
-  });
+  // When the search (and with it the pill rows) is closed, the catalog view
+  // derives back to unfiltered — nothing stays silently filtered; reopening
+  // restores the previous selection.
+  const effectiveWorld = filtersOpen ? world : "All";
+  const effectiveSort: SortOption = filtersOpen ? sort : "Recommended";
+  const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, query, effectiveSort);
+  const recommended = view(BROWSE_RECOMMENDED);
+  const becauseLiked = view(BROWSE_BECAUSE_LIKED);
+  const trending = view(BROWSE_TRENDING);
+  const worldRail = view(BROWSE_WORLD_RAIL);
+  const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
+  const typicalPay = view(BROWSE_TYPICAL_PAY);
 
   return (
     <>
-      {/* Filter row — revealed by the search button: world pills + Sort by;
-         tapping Sort by swaps the row to sort pills. */}
+      {/* Search reveals the whole filter block: the world pills row scrolls
+         edge-to-edge, and the sort row sits beneath it — filter and sort
+         work together, no mode switching. */}
       {filtersOpen && (
-        <div className="flex w-full items-start gap-[8px]">
-          <div className="flex min-w-0 flex-1 gap-[8px] overflow-x-auto pb-1 [scrollbar-width:none]">
-            {sortMode
-              ? SORT_OPTIONS.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    aria-pressed={sort === option}
-                    onClick={() => setSort(option)}
-                    className="flex-none cursor-pointer rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
-                    style={pillStyle(sort === option)}
-                  >
-                    {option}
-                  </button>
-                ))
-              : WORLD_LABELS.map((label) => (
-                  <button
-                    key={label}
-                    type="button"
-                    aria-pressed={world === label}
-                    onClick={() => setWorld(label)}
-                    className="flex-none cursor-pointer rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
-                    style={pillStyle(world === label)}
-                  >
-                    {label}
-                  </button>
-                ))}
-          </div>
-          <button
-            type="button"
-            aria-pressed={sortMode}
-            onClick={() => setSortMode((value) => !value)}
-            className="flex flex-none cursor-pointer items-center gap-[6px] rounded-[14px] border px-[12px] py-[6px] text-[13px]"
-            style={{
-              background: sortMode ? "var(--primary)" : "var(--glass-surface-1)",
-              borderColor: sortMode ? "var(--primary)" : "var(--glass-border)",
-              color: sortMode ? "var(--primary-foreground)" : "var(--foreground)",
-              fontFamily: "var(--font-body)",
-            }}
+        <div className="filters-reveal flex w-full flex-col gap-[var(--space-3)]">
+          <div
+            className="-mx-5 flex gap-[8px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]"
+            style={{ touchAction: "pan-x pan-y" }}
           >
-            <span aria-hidden className="text-[12px]">↕</span>
-            <span className="font-medium">{sortMode ? "Filters" : "Sort by"}</span>
-          </button>
+            {WORLD_LABELS.map((label) => (
+              <FilterPill key={label} label={label} selected={world === label} onClick={() => setWorld(label)} />
+            ))}
+          </div>
+          <div className="flex items-center gap-[10px]">
+            <span className="flex items-center gap-[6px] text-[10px] leading-[14px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+              <span aria-hidden className="text-[12px] normal-case">↕</span> Sort by
+            </span>
+            <div className="flex gap-[8px] overflow-x-auto [scrollbar-width:none]" style={{ touchAction: "pan-x pan-y" }}>
+              {SORT_OPTIONS.map((option) => (
+                <FilterPill key={option} label={option} selected={sort === option} onClick={() => setSort(option)} />
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      <Rail title="Recommended for You" subtitle="A mix across your Industry Interests">
-        <PosterRail careers={applyCatalogView(BROWSE_RECOMMENDED, world, query, sort)} />
-      </Rail>
+      {recommended.length > 0 && (
+        <Rail title="Recommended for You" subtitle="A mix across your Industry Interests">
+          <PosterRail careers={recommended} />
+        </Rail>
+      )}
 
-      <Rail title="Because You Liked Business & Money">
-        <PosterRail careers={applyCatalogView(BROWSE_BECAUSE_LIKED, world, query, sort)} />
-      </Rail>
+      {becauseLiked.length > 0 && (
+        <Rail title="Because You Liked Business & Money">
+          <PosterRail careers={becauseLiked} />
+        </Rail>
+      )}
 
-      <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
-        <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-          Top 5 Trending Careers Among Gen Z
-        </h2>
-        <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:gap-[57px] md:px-0" style={{ touchAction: "pan-x pan-y" }}>
-          {applyCatalogView(BROWSE_TRENDING, world, query, sort).map((career) => (
-            <RankedPosterCard key={career.title} career={career} rank={BROWSE_TRENDING.indexOf(career) + 1} />
-          ))}
-        </div>
-      </section>
+      {trending.length > 0 && (
+        <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
+          <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+            Top 5 Trending Careers Among Gen Z
+          </h2>
+          <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+            {trending.map((career) => (
+              <RankedPosterCard key={career.title} career={career} rank={BROWSE_TRENDING.indexOf(career) + 1} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Section header is the frame's own (its rail carries the farming +
          building set in the design; ported verbatim). */}
-      <Rail title="Tech & Engineering">
-        <PosterRail careers={applyCatalogView(BROWSE_WORLD_RAIL, world, query, sort)} />
-      </Rail>
+      {worldRail.length > 0 && (
+        <Rail title="Tech & Engineering">
+          <PosterRail careers={worldRail} />
+        </Rail>
+      )}
 
-      <Rail title="Careers You Might Not Know">
-        <PosterRail careers={applyCatalogView(BROWSE_MIGHT_NOT_KNOW, world, query, sort)} />
-      </Rail>
+      {mightNotKnow.length > 0 && (
+        <Rail title="Careers You Might Not Know">
+          <PosterRail careers={mightNotKnow} />
+        </Rail>
+      )}
 
-      <Rail title="Typical Pay: $100K +">
-        <PosterRail careers={applyCatalogView(BROWSE_TYPICAL_PAY, world, query, sort)} />
-      </Rail>
+      {typicalPay.length > 0 && (
+        <Rail title="Typical Pay: $100K +">
+          <PosterRail careers={typicalPay} />
+        </Rail>
+      )}
     </>
   );
 }
@@ -469,42 +482,49 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
             <h1 className="text-[32px] leading-[38px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Explore
             </h1>
-            <div className="flex items-center gap-[var(--space-6)]">
-              {searchOpen ? (
-                <div
-                  className="flex h-12 w-[480px] items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] backdrop-blur-[10px]"
-                  style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
-                >
-                  <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
-                  <input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search careers, skills, worlds..."
-                    className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
-                    style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-                  />
+            <div className="flex min-w-0 items-center gap-[var(--space-6)]">
+              {/* Search grows from icon to input; the toggle folds away while
+                 it is open. */}
+              <div
+                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{
+                  width: searchOpen ? "min(480px, 44vw)" : 40,
+                  background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
+                  borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
+                }}
+              >
+                <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
+                  <Search className="h-4 w-4" />
+                </button>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onFocus={() => setSearchOpen(true)}
+                  placeholder="Search careers, skills, worlds..."
+                  aria-hidden={!searchOpen}
+                  tabIndex={searchOpen ? 0 : -1}
+                  className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
+                  style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
+                />
+                {searchOpen && (
                   <button
                     type="button"
-                    aria-label="Clear search"
+                    aria-label="Close search"
                     onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-                    className="flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+                    className="flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
                     style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
                   >
                     <X className="h-3 w-3" />
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  aria-label="Search"
-                  onClick={() => setSearchOpen(true)}
-                  className="flex h-12 cursor-pointer items-center rounded-[999px] border px-[var(--space-4)] backdrop-blur-[10px]"
-                  style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              )}
-              <ForYouBrowseToggle tab={tab} onTab={switchTab} />
+                )}
+              </div>
+              {/* Toggle collapses while search is open */}
+              <div
+                className="overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
+              >
+                <ForYouBrowseToggle tab={tab} onTab={switchTab} />
+              </div>
             </div>
           </div>
         </div>
@@ -512,7 +532,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         {/* Mobile search input (the desktop header is hidden below md) */}
         {tab === "browse" && searchOpen && (
           <div
-            className="flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] backdrop-blur-[10px] md:hidden"
+            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] backdrop-blur-[10px] md:hidden"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
           >
             <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />

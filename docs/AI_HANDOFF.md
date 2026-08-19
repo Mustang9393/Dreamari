@@ -6,6 +6,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Explore header redesign + rank numerals + hero controls (PUSHED)
+
+- Explore/Browse search now expands from the 40px icon (matching the
+  For You/Browse All toggle's height/radius) with a 300ms ease; the
+  toggle folds away while search is open. Filters became two clean
+  stacked rows: world pills (full-bleed scroll) + a SORT BY row
+  (Recommended / A-Z / Salary) — filter and sort compose; closing
+  search derives the view back to unfiltered (no silent filtering) and
+  empty rails hide while filtering. Rails on Home + Explore now bleed
+  to the screen/column edge on ALL breakpoints so partial cards signal
+  scrollability.
+- Trending rank numerals: hollow outlined digits (fill = background +
+  1.5px light stroke) per the mobile Browse frame — visible on any
+  backdrop; opsz 14 set. NOTE: stroke value approximated from the
+  frame render (Figma tab was inactive); verify against UI/Rank Number
+  when convenient. Ranked 175px cards scale titles by longest word
+  (ENTREPRENEUR-class words step 24->17px, keep-all) so nothing breaks
+  mid-word.
+- Home hero: swipeable on touch (50px threshold, axis-checked) and
+  desktop prev/next chevrons that wrap around; autoplay unchanged.
+
 ### 2026-08-20 Mobile polish round: hero 430, full-bleed rails, fades, scroll fixes
 
 - Per phone feedback + the Figma mobile frame (01 Directive — Mobile,
