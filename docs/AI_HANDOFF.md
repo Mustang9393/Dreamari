@@ -6,6 +6,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Mobile polish round: hero 430, full-bleed rails, fades, scroll fixes
+
+- Per phone feedback + the Figma mobile frame (01 Directive — Mobile,
+  7:1749): hero card is now the frame's 430px/radius-20 with its OWN
+  compact comet-trail geometry (bars/particles at exact mobile coords)
+  and radius-md full-width CTA; "Continue Where You Left Off" title now
+  sits above the fold. Activity cards use the mobile variant (304 wide,
+  art 132, inner left-15, track 160@123). All horizontal rails go
+  full-bleed on phones (-mx-5 px-5) so neighbor cards peek, and carry
+  touch-action: pan-x pan-y so vertical swipes always pan the page
+  (the "can't scroll past Tech & Engineering" report). Hero art fades
+  are now soft masks on the whole art block instead of hard overlay
+  strips. Background-space SVGs (2602/3355px) are wrapped in
+  absolute-inset-0 overflow-hidden so iOS can't extend scroll past the
+  content ("scrolls forever" tail). tsc/eslint/build green; verified
+  at 375px and desktop.
+
 ### 2026-08-20 Build → new match flow; old MatchExperience DELETED; quick links
 
 - CompletionScreen's "See My Matches" now bridges through the 1.8s

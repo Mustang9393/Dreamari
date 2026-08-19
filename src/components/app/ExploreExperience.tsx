@@ -72,7 +72,7 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
           </p>
         )}
       </div>
-      <div className="flex gap-[var(--space-6)] overflow-x-auto pb-1 [scrollbar-width:none]">{children}</div>
+      <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -165,7 +165,7 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
           Top 5 Trending Careers Among Gen Z
         </h2>
-        <div className="flex gap-[57px] overflow-x-auto pb-1 [scrollbar-width:none]">
+        <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:gap-[57px] md:px-0" style={{ touchAction: "pan-x pan-y" }}>
           {applyCatalogView(BROWSE_TRENDING, world, query, sort).map((career) => (
             <RankedPosterCard key={career.title} career={career} rank={BROWSE_TRENDING.indexOf(career) + 1} />
           ))}
@@ -424,7 +424,9 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
 
   return (
     <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <img alt="" src="/images/app/background-space-explore.svg" className="pointer-events-none absolute top-0 left-0 h-[3355px] w-full max-w-none object-cover" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <img alt="" src="/images/app/background-space-explore.svg" className="absolute top-0 left-0 h-[3355px] w-full max-w-none object-cover" />
+      </div>
 
       <DesktopNavigation active="Explore" />
 

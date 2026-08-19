@@ -39,6 +39,21 @@ const COMET_PARTICLES = [
   { left: 310, top: 130, size: 7 },
 ];
 
+// Mobile frame's trail (01 Directive — Mobile: its own smaller bars).
+const MOBILE_TRAIL = [
+  { left: 126, top: 111.33, box: 126.67, boxH: 124.61, w: 126.12, h: 51.6, opacity: 0.85 },
+  { left: 164.48, top: 90.99, box: 102.19, boxH: 100.45, w: 103.19, h: 40.13, opacity: 0.7 },
+  { left: 208.05, top: 76.97, box: 77.72, boxH: 76.29, w: 80.26, h: 28.66, opacity: 0.55 },
+  { left: 245.3, top: 72, box: 49.11, boxH: 48.16, w: 50.5, h: 16.8, opacity: 0.4 },
+];
+
+const MOBILE_PARTICLES = [
+  { left: 223.41, top: 104.05, size: 6 },
+  { left: 246.41, top: 121.05, size: 5 },
+  { left: 263.41, top: 107.05, size: 4 },
+  { left: 208.41, top: 127.05, size: 6 },
+];
+
 // Comet trail bars (Figma trail-core/mid/tip/wisp, all rotated -43.88deg).
 const COMET_TRAIL = [
   { left: 110.59, top: 82.53, w: 220, h: 90, opacity: 0.85, box: 220.958 },
@@ -67,15 +82,21 @@ function PanelShell({ from, children }: { from: string; children: React.ReactNod
 }
 
 function WorldArt({ portrait, fadeRight = false }: { portrait: string; fadeRight?: boolean }) {
+  // The whole art block feathers out via mask (left always; right on the
+  // fadeRight panels; soft top/bottom) — no hard overlay edges.
+  const horizontal = fadeRight ? "linear-gradient(90deg, transparent 0%, #000 45%, #000 72%, transparent 100%)" : "linear-gradient(90deg, transparent 0%, #000 55%)";
+  const vertical = "linear-gradient(180deg, transparent 0%, #000 18%, #000 88%, transparent 100%)";
+  const mask = `${horizontal}, ${vertical}`;
   return (
-    <div className="absolute right-0 bottom-0 h-[320px] w-[240px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[344px] lg:opacity-100">
+    <div
+      className="absolute right-0 bottom-0 h-[320px] w-[240px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[344px] lg:opacity-100"
+      style={{ maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
+    >
       <div className="absolute top-[-30px] left-[24px] size-[170px]">
         <img alt="" src="/images/app/world-glow-pink.svg" className="absolute inset-[-12.94%] block max-w-none" style={{ width: "126%", height: "126%" }} />
       </div>
       <img alt="" src="/images/app/world-symbol-creative-media.svg" className="absolute inset-[3%_5%_10%_5.5%] block h-[87%] w-[89%] mix-blend-screen" />
       <img alt="" src={portrait} className="absolute top-[24px] left-[58px] h-[335px] w-[223px] object-cover opacity-[0.78]" />
-      <div aria-hidden className="absolute top-0 left-0 h-full w-[280px]" style={{ background: "linear-gradient(90deg, var(--background), var(--scrim-transparent))" }} />
-      {fadeRight && <div aria-hidden className="absolute top-0 right-0 h-full w-[120px]" style={{ background: "linear-gradient(270deg, var(--background), var(--scrim-transparent))" }} />}
     </div>
   );
 }
@@ -85,7 +106,7 @@ function HeroCta({ children, display = false, fullOnMobile = false }: { children
     <button
       type="button"
       className={`cursor-pointer px-[var(--space-6)] py-[var(--space-4)] transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${
-        fullOnMobile ? "w-full rounded-[999px] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
+        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
       }`}
       style={{ background: "var(--foreground)", color: "var(--background)" }}
     >
@@ -99,7 +120,7 @@ function HeroCta({ children, display = false, fullOnMobile = false }: { children
   );
 }
 
-function CometStar() {
+function CometTrailOnly() {
   return (
     <>
       {COMET_TRAIL.map((bar, index) => (
@@ -110,6 +131,14 @@ function CometStar() {
       {COMET_PARTICLES.map((particle, index) => (
         <span key={index} className="absolute rounded-full" style={{ left: particle.left, top: particle.top, width: particle.size, height: particle.size, background: "var(--primary-foreground)", opacity: 0.8 }} />
       ))}
+    </>
+  );
+}
+
+function CometStar() {
+  return (
+    <>
+      <CometTrailOnly />
       <div className="absolute top-[137px] left-[30px] size-[220px]">
         <img alt="" src="/images/app/star-character.svg" className="block size-full max-w-none" />
         <img alt="" src="/images/app/star-face.svg" className="absolute top-[calc(50%+10px)] left-1/2 size-[140px] -translate-x-1/2 -translate-y-1/2" />
@@ -131,7 +160,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
-      className="relative h-[560px] w-full overflow-hidden rounded-[var(--radius-2xl)] border sm:h-[360px]"
+      className="relative h-[430px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[360px] sm:rounded-[var(--radius-2xl)]"
       style={{ borderColor: "var(--glass-border)" }}
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]">
@@ -143,7 +172,7 @@ function HeroBanner() {
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
         {/* Panel 1 — Today's Drop */}
         <PanelShell from="var(--hero-accent-purple)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-6)] pb-[38px] sm:p-[var(--space-10)]">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--chart-3)">TODAY&apos;S DROP</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
@@ -154,15 +183,6 @@ function HeroBanner() {
                 <span className="sm:hidden">One tiny mystery, about 20 seconds. Answer to reveal it, keep your streak alive, and save it for later.</span>
                 <span className="hidden sm:inline">One tiny mystery, about 20 seconds. Answer to reveal it, keep your streak alive, and add it to My Sky.</span>
               </p>
-            </div>
-            {/* Mobile: the star rides in-flow between copy and CTA, as the
-               mobile frame composes it. */}
-            <div aria-hidden className="pointer-events-none relative mx-auto h-[230px] w-full max-w-[340px] sm:hidden">
-              {/* Offset centers the STAR (box x140,y247) in the band, comet
-                 trailing up-right — the mobile frame's composition. */}
-              <div className="absolute top-1/2 left-1/2 h-[350px] w-[550px]" style={{ transform: "translate(calc(-50% + 78px), calc(-50% - 42px)) scale(0.58)" }}>
-                <CometStar />
-              </div>
             </div>
             <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
               <HeroCta display fullOnMobile>
@@ -180,11 +200,31 @@ function HeroBanner() {
           <div aria-hidden className="pointer-events-none absolute top-[-40px] left-[58%] hidden h-[350px] w-[550px] sm:block">
             <CometStar />
           </div>
+          {/* Mobile: the mobile frame's own composition — trail 408x260 at
+             (46,37), star 122px at (118,190), inside the 430px card. */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 sm:hidden">
+            {/* The mobile frame's own compact trail (bars + particles at its
+               exact coordinates inside the 46,37 wrapper). */}
+            <div className="absolute top-[37px] left-[46px] h-[260px] w-[408px]">
+              {MOBILE_TRAIL.map((bar, index) => (
+                <div key={index} className="absolute flex items-center justify-center" style={{ left: bar.left, top: bar.top, width: bar.box, height: bar.boxH }}>
+                  <span className="block flex-none rotate-[-43.88deg] rounded-full" style={{ width: bar.w, height: bar.h, opacity: bar.opacity, background: "var(--primary-foreground)" }} />
+                </div>
+              ))}
+              {MOBILE_PARTICLES.map((particle, index) => (
+                <span key={index} className="absolute rounded-full" style={{ left: particle.left, top: particle.top, width: particle.size, height: particle.size, background: "var(--primary-foreground)", opacity: 0.8 }} />
+              ))}
+            </div>
+            <div className="absolute top-[190px] left-[118px] size-[122px]">
+              <img alt="" src="/images/app/star-character.svg" className="block size-full max-w-none" />
+              <img alt="" src="/images/app/star-face.svg" className="absolute top-[calc(50%+6px)] left-1/2 size-[78px] -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </div>
         </PanelShell>
 
         {/* Panel 2 — Continue Where You Left Off */}
         <PanelShell from="var(--hero-accent-pink)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-6)] pb-[38px] sm:p-[var(--space-10)]">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--chart-2)">CONTINUE WHERE YOU LEFT OFF</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
@@ -212,7 +252,7 @@ function HeroBanner() {
 
         {/* Panel 3 — Trending Now */}
         <PanelShell from="var(--hero-accent-teal)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-6)] pb-[38px] sm:p-[var(--space-10)]">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--accent-subtle)">TRENDING NOW</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
@@ -235,7 +275,7 @@ function HeroBanner() {
 
       {/* Carousel dots + pause — right-anchored on desktop, centered on the
          mobile frame */}
-      <div className="absolute inset-x-0 bottom-[12px] z-[3] flex items-center justify-center gap-[var(--space-3)] sm:inset-x-auto sm:right-[39px] sm:bottom-[23px] sm:justify-start">
+      <div className="absolute inset-x-0 bottom-[11px] z-[3] flex items-center justify-center gap-[var(--space-3)] sm:inset-x-auto sm:right-[39px] sm:bottom-[23px] sm:justify-start">
         <div className="flex items-center gap-[var(--space-2)]">
           {[0, 1, 2].map((index) => (
             <button
@@ -327,31 +367,31 @@ const ACTIVITIES: Activity[] = [
 function ActivityCard({ activity }: { activity: Activity }) {
   return (
     <article
-      className="relative h-[190px] w-[421px] flex-none overflow-hidden rounded-[var(--radius-xl)] border"
+      className="relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:w-[421px]"
       style={{ borderColor: "var(--glass-border)", background: "linear-gradient(90deg, var(--card) 0%, var(--background) 62%, var(--background) 100%)" }}
     >
       <span
-        className="absolute top-[17px] left-[19px] rounded-[999px] border px-[var(--space-3)] py-[5px] text-[10px] leading-[14px] font-semibold"
+        className="absolute top-[17px] left-[15px] rounded-[999px] sm:left-[19px] border px-[var(--space-3)] py-[5px] text-[10px] leading-[14px] font-semibold"
         style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-3)", borderColor: activity.badgeColor, color: activity.badgeColor }}
       >
         {activity.badge}
       </span>
-      <p className="absolute top-[51px] left-[19px] w-[226px] text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <p className="absolute top-[51px] left-[15px] w-[164px] text-[19px] leading-[24px] font-bold sm:left-[19px] sm:w-[226px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {activity.title}
       </p>
-      <p className="absolute top-[79px] left-[19px] w-[215px] text-[10px] leading-[14px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+      <p className="absolute top-[103px] left-[15px] w-[150px] text-[10px] leading-[14px] sm:top-[79px] sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
         {activity.sub}
       </p>
-      <div className="absolute top-[109px] left-[19px] h-[5px] w-[200px] rounded-[999px]" style={{ background: "var(--glass-surface-2)" }}>
+      <div className="absolute top-[123px] left-[15px] h-[5px] w-[160px] rounded-[999px] sm:top-[109px] sm:left-[19px] sm:w-[200px]" style={{ background: "var(--glass-surface-2)" }}>
         <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
       </div>
-      <p className="absolute top-[119px] left-[19px] text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+      <p className="absolute top-[133px] left-[15px] text-[10px] leading-[14px] font-semibold sm:top-[119px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
         {activity.stat}
       </p>
-      <p className="absolute top-[150px] left-[19px] text-[10px] leading-[14px] font-semibold whitespace-pre" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+      <p className="absolute top-[158px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[150px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         {activity.cta}
       </p>
-      <div aria-hidden className="absolute top-0 right-0 h-full w-[181px] overflow-hidden">
+      <div aria-hidden className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]">
         <img alt="" src={activity.glow} className="absolute top-[-52px] left-0 block w-[214px] max-w-none" />
         {activity.symbol === "creative" ? (
           <img alt="" src="/images/app/world-symbol-creative-media-sm.svg" className="absolute top-[-10px] left-[10px] block w-[120px] mix-blend-screen" />
@@ -372,7 +412,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
         )}
         <div
           className="absolute inset-0"
-          style={{ maskImage: "url(/images/app/activity-portrait-mask.svg)", WebkitMaskImage: "url(/images/app/activity-portrait-mask.svg)", maskSize: "181px 190px", WebkitMaskSize: "181px 190px" }}
+          style={{ maskImage: "url(/images/app/activity-portrait-mask.svg)", WebkitMaskImage: "url(/images/app/activity-portrait-mask.svg)", maskSize: "100% 190px", WebkitMaskSize: "100% 190px" }}
         >
           <img alt="" src={activity.portrait} className="absolute inset-0 h-full w-full object-cover" />
         </div>
@@ -384,7 +424,9 @@ function ActivityCard({ activity }: { activity: Activity }) {
 export function HomeExperience() {
   return (
     <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <img alt="" src="/images/app/background-space.svg" className="pointer-events-none absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <img alt="" src="/images/app/background-space.svg" className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
+      </div>
 
       <DesktopNavigation active="Home" />
 
@@ -415,7 +457,7 @@ export function HomeExperience() {
               {"View all activity  →"}
             </button>
           </div>
-          <div className="flex gap-[var(--space-6)] overflow-x-auto pb-1 [scrollbar-width:none]">
+          <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:gap-[var(--space-6)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (
               <ActivityCard key={activity.title} activity={activity} />
             ))}
@@ -426,7 +468,7 @@ export function HomeExperience() {
           <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Careers Picked for You
           </h2>
-          <div className="flex gap-[var(--space-6)] overflow-x-auto pb-1 [scrollbar-width:none]">
+          <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
             {HOME_PICKS.map((career) => (
               <PosterCard key={career.title} career={career} />
             ))}
