@@ -6,7 +6,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { cascade, useVariant } from "./variant";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 // Shared primitives for the build flow, variant-aware (see variant.tsx): the same
 // step implementations render the "glass" treatment (Figma card structure, glass
@@ -277,6 +277,7 @@ export function ChipGrid({
   const expanded = expandedBy !== null || mustExpand;
   const visibleOptions = collapsible && !expanded ? options.slice(0, PREVIEW) : options;
 
+  const gridRef = useRef<HTMLDivElement | null>(null);
   const atMax = selected.length >= max;
 
   function toggle(option: string, e: React.MouseEvent) {
@@ -294,7 +295,7 @@ export function ChipGrid({
 
   return (
     <div>
-      <div className={`grid auto-rows-fr gap-2 ${columns}`}>
+      <div ref={gridRef} className={`grid auto-rows-fr gap-2 ${columns}`}>
         {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
         const isLocked = atMax && !isSelected;
@@ -357,6 +358,26 @@ export function ChipGrid({
         >
           Show all {options.length}
           <ChevronDown aria-hidden className="h-4 w-4" />
+        </button>
+      )}
+      {/* Way back up — hidden if a pick lives in the tail (collapsing would
+         hide a selection; mustExpand keeps it open regardless). */}
+      {collapsible && expanded && !mustExpand && (
+        <button
+          type="button"
+          onClick={() => {
+            setExpandedBy(null);
+            gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
+          style={{
+            background: "var(--color-glass-surface-2)",
+            borderColor: "var(--color-glass-border)",
+            color: "var(--color-night-muted-foreground)",
+          }}
+        >
+          Show less
+          <ChevronUp aria-hidden className="h-4 w-4" />
         </button>
       )}
     </div>
