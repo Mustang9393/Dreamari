@@ -12,7 +12,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   from the user: v3 NEVER merges and NEVER deploys unless explicitly
   asked — and since Vercel auto-builds previews from any pushed branch,
   v3 is never pushed at all. Local commits only.
-- Scaffold: /match-lab mounts the current production MatchExperience
+- BUILT (2026-08-19, local-only): /match-lab is now the full new match
+  flow from the user's wireframe + Figma 3241-9530: Career Poster Card
+  deck (per-world faces incl. newly-loaded Lora/Fraunces/Heebo; two new
+  Figma poster assets in public/images/matchflow/), swipe/scroll gesture
+  split with axis lock, stamps, fly-to-slot FLIP ghost + slot pops,
+  gesture guide sheet, decision sheet at 3, swap sheet when full, rank/
+  reorder/remove manage sheet, undo (pass/like/swap), tailored end
+  panels (0/1/2/3), restart excludes liked. All verified in-browser,
+  desktop + mobile.
+- Previous scaffold note: /match-lab originally mounted the production MatchExperience
   standalone (src/components/match-lab/MatchLab.tsx) so the match flow
   can be iterated without walking the eight build steps first.
 
