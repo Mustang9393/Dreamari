@@ -95,7 +95,7 @@ export const DECK: Career[] = [
     workStyle: "Creative & Hands-On · Collaborative Studio · Studio Vibe",
     pathway: "4-Year BFA in Fashion Design, Apparel Design, or Textiles",
     tradeoff: "Your ideas ship worldwide, but trends move fast and so must you.",
-    photo: "/images/matchflow/mf-fashion-designer-poster.png",
+    photo: "/images/matchflow/mf-fashion-designer-poster-2.png",
   },
   {
     id: "HLTH-005",

@@ -6,6 +6,18 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Fashion Designer gets its designated poster; v3 → main PUSHED
+
+- User pointed at Figma node 3284:9051 as THE Fashion Designer image —
+  the properly-composed poster crop of the studio scene. Downloaded to
+  mf-fashion-designer-poster-2.png (396×594, the asset server's export
+  size — max available; slightly soft on 3x phones, fine for prototype),
+  old file removed, data.ts updated. Verified on the card in browser.
+- User then said "push to main when done" — explicit authorization, so
+  v3 was merged into main and pushed (Vercel deploy). TEMP match-lab
+  debug aids (LAB BUILD pill + error-trap script) intentionally ride
+  along — they await the user's phone-swipe confirmation before removal.
+
 ### 2026-08-20 build flow: picks/setup panels unified (v3, LOCAL)
 
 - Interests "Your picks" panel now matches Work Vibe's "Your Setup"
