@@ -49,7 +49,7 @@ the prototype's, which mirrored the dev handoff docs):
 | `night-muted-foreground` | `#4a4f6d` | `rgba(255,255,255,0.62)` |
 | `glass-stroke` | `rgba(0,0,0,0.28)` | `rgba(255,255,255,0.30)` |
 | `glass-hover` | `rgba(0,0,0,0.14)` | `rgba(255,255,255,0.18)` |
-| `accent-purple` | `#7d5cff` (alias `accent`) | same |
+| `accent-purple` | DONE — points directly at purple/600 (`#7d5cff`), deliberately NOT aliasing `accent` (which moved to brand blue 2026-08-19) | same |
 | `feedback-success-dark-surface` | `#33c78c` | `#33c78c` |
 | brand ramp exposure (`brand-300/400/500/900`) | `#7fa8ff` / `#4a82ff` / `#2f6bf2` / `#0c2560` | same — likely exist as primitives; confirm the primitive naming the pull emits |
 

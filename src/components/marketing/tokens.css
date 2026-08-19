@@ -18,7 +18,7 @@
   --primary-foreground: #ffffff; /* white */
   --secondary: #ffffff17; /* white-alpha.9 */
   --secondary-foreground: #f4f7ff; /* neutral.50 */
-  --accent: #7d5cff; /* purple.600 */
+  --accent: #2f6bf2; /* blue.600 — accent family moved to brand blue 2026-08-19; purple identity preserved in accent-purple */
   --destructive: #ef4444; /* red.550 */
   --glass-surface-1: #ffffff08; /* white-alpha.3 */
   --glass-surface-2: #ffffff17; /* white-alpha.9 */

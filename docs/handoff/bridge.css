@@ -35,8 +35,8 @@
   --color-brand-900: var(--brand-900, #0c2560);
 
   /* accents + feedback (accent-subtle/decorative CONFIRMED; others VERIFY) */
-  --color-accent-purple: var(--accent-purple, #7d5cff);
-  --color-accent-subtle: var(--accent-subtle, #8b7bff);
+  --color-accent-purple: var(--accent-purple, #7d5cff); /* preserved purple identity — now points at purple/600 directly */
+  --color-accent-subtle: var(--accent-subtle, #3894ff); /* accent family is BLUE as of 2026-08-19 */
   --color-decorative-pink-glow: var(--decorative-pink-glow, #ff5d7d);
   --color-feedback-success-dark-surface: var(--feedback-success-dark-surface, #33c78c);
 

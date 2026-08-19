@@ -11,7 +11,7 @@ a copy) containing five ordinary layers:
 | Layer | What it is | Recreate as |
 |---|---|---|
 | Blue Nebula | 864×864 ellipse, fill `primary` (#2f6bf2), opacity 30%, layer blur 180 | CSS |
-| Violet Nebula | 1008×1008 ellipse, fill `accent-subtle` (#8b7bff), opacity 20%, blur 200 | CSS |
+| Violet Nebula | 1008×1008 ellipse — was bound to `accent-subtle`, but the accent family moved to BLUE (2026-08-19); to stay violet it must bind `accent-purple` (#7d5cff), opacity 20%, blur 200 | CSS |
 | Pink Nebula | 720×720 ellipse, fill `decorative-pink-glow` (#ff5d7d), opacity 10%, blur 160 | CSS |
 | Spotlight | 1152×576 ellipse, white, opacity 6%, blur 120 | CSS |
 | Grain Texture | flat white rectangle at 5% opacity — NOT a real noise asset | CSS (or your own noise tile) |
@@ -61,8 +61,11 @@ invisible blobs at 375px — learned the hard way).
   aspect-ratio: 1;
   left: min(-30vw, -220px);
   top: 40vh;
+  /* accent-purple, NOT accent-subtle: the accent family moved to brand
+     blue (2026-08-19) and accent-subtle is now #3894ff — binding it here
+     would turn the violet band blue. accent-purple preserves #7d5cff. */
   background: radial-gradient(circle,
-    color-mix(in srgb, var(--accent-subtle, #8b7bff) 24%, transparent) 0%,
+    color-mix(in srgb, var(--accent-purple, #7d5cff) 24%, transparent) 0%,
     transparent 66%);
 }
 .bg-pink-nebula {

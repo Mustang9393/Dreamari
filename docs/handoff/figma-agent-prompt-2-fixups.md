@@ -41,7 +41,17 @@ the alias with the literal `#8B5CF6` instead. Rationale: chart colors
 must not follow a world's identity if that world is ever re-tinted.
 Report the new definition.
 
-## STEP 4 — Final table
+## STEP 4 — Re-bind the Violet Nebula layers (accent moved to blue)
+
+The `accent` family moved to brand blue, so any layer still bound to
+`accent-subtle` that is MEANT to be violet now renders blue. Find every
+layer named "Violet Nebula" across all pages (they live inside frames
+named "Background Space"). Report the count and each one's current fill
+binding. For every one bound to `accent-subtle`, re-bind the fill to
+`accent-purple`. Change nothing else about them (size, opacity, blur).
+Report before/after per layer.
+
+## STEP 5 — Final table
 
 Re-output the full table of the ~28 variables from round 1 plus these
 fixes, with per-mode RESOLVED values and, for each, whether each mode

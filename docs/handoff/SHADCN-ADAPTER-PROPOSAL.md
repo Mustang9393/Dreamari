@@ -22,7 +22,7 @@ Dictionary output target ("shadcn.css"), never hand-maintain it.
 | `--secondary-foreground` | `secondary-foreground` | `#f4f7ff` |
 | `--muted` | `muted` | `#ffffff08` |
 | `--muted-foreground` | `muted-foreground` | `#ffffff9e` |
-| `--accent` | `accent` | `#7d5cff` |
+| `--accent` | `accent` | `#2f6bf2` dark / `#1e4fcc` light (moved to brand blue 2026-08-19; purple identity lives in `accent-purple`) |
 | `--destructive` | `destructive` | `#F04438` — CONFIRM live: correction from `#ef4444` was in progress at handoff time |
 | `--border` | `border` / `glass-border` | `#ffffff17` |
 | `--font-sans` | `font-body` (Montserrat) | — |

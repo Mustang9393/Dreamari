@@ -6,6 +6,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "career-card-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8935", "--directory", "/private/tmp/claude-501/-Users-chandump-dreamari/e5cd33ca-bbfb-438b-a5ef-a074265aee16/scratchpad"],
+      "port": 8935
+    },
+    {
+      "name": "reference-html",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "/private/tmp/claude-501/-Users-chandump-dreamari/21ae439e-04ee-43be-a3c3-191a9ae695e5/scratchpad"],
+      "port": 8791
     }
   ]
 }

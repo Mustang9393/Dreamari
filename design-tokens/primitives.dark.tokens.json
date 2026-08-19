@@ -185,13 +185,13 @@
         "$value": {
           "colorSpace": "srgb",
           "components": [
-            0.545098,
-            0.482353,
+            0.2196078431372549,
+            0.5803921568627451,
             1.0
           ],
-          "hex": "#8b7bff"
+          "hex": "#3894ff"
         },
-        "$description": "Figma var(--accent-subtle) - the violet nebula color."
+        "$description": "accent-subtle — brand-aligned blue (was #8b7bff purple; accent family moved to blue 2026-08-19; purple identity lives in accent.purple)"
       }
     },
     "ink": {
