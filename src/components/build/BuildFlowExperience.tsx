@@ -145,7 +145,7 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
            the viewport, and the whole group centers when it is not. The CTA
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
-        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] pb-3 sm:py-5">
+        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:py-5">
           <div className={`flex min-h-0 w-full flex-1 flex-col justify-center ${variant === "cinematic" ? "max-w-[860px]" : "max-w-[680px]"}`}>
             {phase === "build" && dreamy && (
               <div className={`w-full flex-none px-5 sm:px-10 ${variant === "cinematic" ? "mb-3" : ""}`}>

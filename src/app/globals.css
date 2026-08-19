@@ -469,11 +469,28 @@ body {
    visible edge anywhere. Desktop steps always fit, so neither applies there. */
 @media (max-width: 639px) {
   .flow-sticky-footer {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    background: color-mix(in srgb, var(--color-night-background) 55%, transparent);
-    -webkit-mask-image: linear-gradient(to top, black 55%, transparent);
-    mask-image: linear-gradient(to top, black 55%, transparent);
+    /* Full bleed: eat the scroll container's 16px side padding and reach the
+       true screen bottom (the section drops its own bottom padding on phones)
+       so the fade has no floating edges — it spans edge to edge and fades out
+       upward only. The blur/fade lives on ::before so the mask never dims the
+       buttons themselves. */
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 28px;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 14px);
+  }
+  .flow-sticky-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    background: linear-gradient(to top, color-mix(in srgb, var(--color-night-background) 62%, transparent), transparent);
+    -webkit-mask-image: linear-gradient(to top, black 40%, transparent);
+    mask-image: linear-gradient(to top, black 40%, transparent);
   }
   .flow-scroll-fade {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 14px, black 100%);
