@@ -78,7 +78,15 @@ export function Mascot({ heroRef }: MascotProps) {
       // definition, on every screen size, and only tucks away while the reader
       // can SEE what he's making room for.
       const buildTop = document.getElementById("build")?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
-      const progress = Math.min(1, Math.max(0, (vh - buildTop) / (stage.offsetHeight * 0.5)));
+      // Fade span is 70% of the VIEWPORT, not half a stage-height: the old
+      // 0.5*stage span finished the duck when Build had barely peeked over the
+      // fold (~230px in), leaving the rest of the approach blank again (third
+      // report of the void, both scroll directions). Now progress hits 1 only
+      // once Build's top has climbed 70% of the screen — Dreamy stays visibly
+      // present for the entire traversal and hands off exactly as Build's
+      // content takes over the viewport. Symmetric by construction on the way
+      // back up.
+      const progress = Math.min(1, Math.max(0, (vh - buildTop) / (vh * 0.7)));
       const sinkPx = progress * stage.offsetHeight * VISIBLE_FRACTION;
       stage.style.opacity = String(1 - progress);
       stage.style.transform = `translate(-50%, ${(1 - VISIBLE_FRACTION) * 100}%) translateY(${sinkPx}px)`;
