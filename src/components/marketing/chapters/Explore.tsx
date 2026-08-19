@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
-import { bricolage } from "@/components/build/fonts";
 
 // The Explore chapter graphic is a miniature of the app's actual Browse page
 // (Figma node 3185-17011): page header, the world-filter chip band, and the
@@ -34,28 +33,14 @@ const WORLD_COLORS: Record<string, string> = {
   "Driving, Flying & Shipping": "var(--world-driving-flying-shipping)",
 };
 
-type BrowseItem = { photo: string; title: string; world: string; rank: number };
+type BrowseItem = { photo: string; title: string; world: string };
 
 const BROWSE_TOP5: BrowseItem[] = [
-  { photo: "/images/trending/trending-doctor.png", title: "Doctor", world: "Health & Medicine", rank: 1 },
-  { photo: "/images/trending/trending-software-engineer.png", title: "Software Engineer", world: "Tech & Engineering", rank: 2 },
-  { photo: "/images/trending/trending-nurse.png", title: "Nurse", world: "Health & Medicine", rank: 3 },
-  { photo: "/images/trending/trending-lawyer.png", title: "Lawyer", world: "Law, Safety & Justice", rank: 4 },
-  { photo: "/images/trending/trending-airline-pilot.png", title: "Airline Pilot", world: "Driving, Flying & Shipping", rank: 5 },
-];
-
-// The filter band's world names, straight off the Browse page's own chip row.
-const FILTER_CHIPS = [
-  "All",
-  "Tech & Engineering",
-  "Health & Medicine",
-  "Business & Money",
-  "Arts, Media & Sport",
-  "Science & Research",
-  "Teaching & Education",
-  "Building & Construction",
-  "Law, Safety & Justice",
-  "Food & Cooking",
+  { photo: "/images/trending/trending-doctor.png", title: "Doctor", world: "Health & Medicine" },
+  { photo: "/images/trending/trending-software-engineer.png", title: "Software Engineer", world: "Tech & Engineering" },
+  { photo: "/images/trending/trending-nurse.png", title: "Nurse", world: "Health & Medicine" },
+  { photo: "/images/trending/trending-lawyer.png", title: "Lawyer", world: "Law, Safety & Justice" },
+  { photo: "/images/trending/trending-airline-pilot.png", title: "Airline Pilot", world: "Driving, Flying & Shipping" },
 ];
 
 // Poster-title typeface per world, mirroring the Browse Cards component:
@@ -86,26 +71,6 @@ function browseTitleFont(world: string): React.CSSProperties {
 function BrowseTile({ item }: { item: BrowseItem }) {
   return (
     <div className="flex h-full flex-none items-end">
-      {/* Oversized outlined rank numeral tucked behind the card's left edge —
-         straight off the reference frame's "Top 5" row. */}
-      <span
-        aria-hidden
-        className={`${bricolage.className} relative select-none`}
-        style={{
-          // cqh against the rail band: the digit stays the component spec's
-          // fixed fraction of the CARD height (Figma: 155px digit on a 250px
-          // card, Bricolage ExtraBold, tight tracking) at every rail size.
-          fontSize: "clamp(64px, 62cqh, 320px)",
-          fontWeight: 800,
-          lineHeight: 0.86,
-          letterSpacing: "-0.028em",
-          marginRight: "clamp(-40px, -5cqh, -12px)",
-          color: "var(--background)",
-          WebkitTextStroke: "1.5px color-mix(in srgb, var(--foreground) 32%, transparent)",
-        }}
-      >
-        {item.rank}
-      </span>
       <div
         className="relative z-10 h-full flex-none overflow-hidden"
         style={{ aspectRatio: "2 / 3", borderRadius: "max(12px, calc(var(--mu) * 9px))", border: "1px solid var(--glass-border)" }}
@@ -181,40 +146,12 @@ function Marquee({ children, duration, reverse, className = "" }: { children: Re
     >
       <div
         className={`${manual ? "" : "mkt-rail-track"} flex h-full w-max items-center`}
-        style={{ gap: "clamp(10px, calc(var(--mu) * 8px), 16px)", animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal", paddingRight: "clamp(10px, calc(var(--mu) * 8px), 16px)" }}
+        style={{ gap: "clamp(8px, calc(var(--mu) * 6px), 12px)", animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal", paddingRight: "clamp(8px, calc(var(--mu) * 6px), 12px)" }}
       >
         {children}
         {!manual && children}
       </div>
     </div>
-  );
-}
-
-function FilterChip({ label }: { label: string }) {
-  const active = label === "All";
-  return (
-    <span
-      className="flex flex-none items-center rounded-full border font-semibold uppercase whitespace-nowrap"
-      style={{
-        gap: "clamp(5px, calc(var(--mu) * 4px), 7px)",
-        padding: "clamp(5px, calc(var(--mu) * 4px), 7px) clamp(11px, calc(var(--mu) * 9px), 15px)",
-        fontFamily: "var(--font-body)",
-        fontSize: "clamp(8.5px, calc(var(--mu) * 6.5px), 11px)",
-        letterSpacing: "0.06em",
-        background: active ? "var(--foreground)" : "var(--glass-surface-1)",
-        borderColor: active ? "var(--foreground)" : "var(--glass-border)",
-        color: active ? "var(--background)" : "var(--muted-foreground)",
-      }}
-    >
-      {label !== "All" && (
-        <span
-          aria-hidden
-          className="rounded-full"
-          style={{ width: "clamp(6px, calc(var(--mu) * 4.5px), 8px)", height: "clamp(6px, calc(var(--mu) * 4.5px), 8px)", background: WORLD_COLORS[label] }}
-        />
-      )}
-      {label}
-    </span>
   );
 }
 
@@ -243,24 +180,12 @@ export function ExploreChapter() {
 function BrowsePage() {
   return (
     <div className="flex h-full w-full flex-col justify-center" style={{ gap: "clamp(14px, calc(var(--mu) * 12px), 20px)" }}>
-      {/* World filter chips — drifting slowly the opposite way so the two bands
-         read as independent, alive surfaces rather than one conveyor belt. */}
-      <Marquee duration={70} reverse className="flex-none">
-        {FILTER_CHIPS.map((chip) => (
-          <FilterChip key={chip} label={chip} />
-        ))}
-      </Marquee>
-
-      {/* flex-none + an explicit width-proportional band height: with flex-1
-         here, tall phone frames dumped all their spare height into this block
-         and the group read as two islands with a dead gap between them. Now
-         chips, label, rail, and caption center together as one cluster. */}
       <div className="flex w-full flex-none flex-col" style={{ gap: "clamp(10px, calc(var(--mu) * 8px), 14px)" }}>
         <p
           className="w-full flex-none text-left"
           style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(12.5px, calc(var(--mu) * 9.5px), 17px)", color: "var(--foreground)" }}
         >
-          The Top 5 Trending Careers Among Gen Z
+          Top 5 Trending
         </p>
         {/* The rail band: tiles take their height FROM this band (h-full inside
            a definite flex-1 area, capped), so taller viewports grow the poster

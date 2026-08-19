@@ -6,6 +6,22 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-19
 
+### 2026-08-19 landing v2 line SHIPPED TO MAIN (was parked on v2 branch)
+
+- Full v2 redesign line merged to main per explicit authorization: Explore
+  as Browse miniature (Figma trending images, per-world poster faces),
+  mono->Montserrat caption sweep site-wide, compact chapter flow, wide
+  Explore frame, Match "Tap to see details" pill, slower Dreamy fade,
+  accent-family-to-brand-blue propagation, dev handoff package in
+  docs/handoff/.
+- Final round before ship: Explore rail simplified (filter pills removed,
+  label "Top 5 Trending", rank numerals removed, tighter gap) and a
+  graphic-width consistency pass — measured widths were Build 480 / Play
+  432 / Match card 346. Match's caption+buttons now OVERLAY the card foot
+  (poster title lifted 102mu clear), giving the card full frame height ->
+  445px wide; Play card widened to 100cqw/480. Explore stays wide (780) by
+  design.
+
 ### 2026-08-19 landing Explore chapter redesigned as Browse (v2 branch, NOT pushed)
 
 - Per stakeholder review: FYP-style swipe deck read as too-modern for older

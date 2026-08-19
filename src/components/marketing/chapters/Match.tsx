@@ -389,7 +389,10 @@ function MatchDemo() {
                         Tap to see details
                       </div>
 
-                      <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
+                      {/* bottom offset clears the overlaid caption + action
+                         buttons (which float in the same foot zone) so the
+                         poster title never sits under them. */}
+                      <div className="absolute inset-x-0 text-center uppercase" style={{ bottom: "calc(var(--mu) * 102px)", padding: "0 calc(var(--mu) * 14px)" }}>
                         <p style={{ fontFamily: "var(--font-poster)", lineHeight: 1.15, letterSpacing: "0.3px", color: "var(--foreground)", ...posterTitleStyle(card.title) }}>
                           {card.title}
                         </p>
@@ -442,58 +445,68 @@ function MatchDemo() {
               );
             })
           )}
-        </div>
 
-        {/* Nudge lives in normal flow between the card and the action buttons (not
-           absolutely positioned over the card), so it never overlaps the like/pass
-           icons below it. Two beats, keyed off whichever card is actually on top
-           (not likedCount/stack.length): "swipe left" while Operations (the demo
-           card) is up front, then "swipe right" once Investment Banking (the
-           guaranteed match) is. */}
-        {!matched && !exiting && top && (
-          <p className="text-center font-semibold" style={{ fontSize: "calc(var(--mu) * 10px)", color: "var(--muted-foreground)" }}>
-            {top.key === "ops" ? "Swipe left to see it's not a match" : "Swipe right to see a match"}
-          </p>
-        )}
-
-        {/* Same guarded, direction-locked logic the swipe path uses: each button
-           only commits when it matches the on-screen instruction for whichever
-           card is up — Pass is a no-op on Investment Banking, Like is a no-op on
-           Operations — so tapping behaves identically to swiping either way. */}
-        {!matched && (
-          <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
-            <button
-              type="button"
-              aria-label="Pass"
-              onClick={() => {
-                if (top?.key !== "iba") act("pass");
-              }}
-              className="flex items-center justify-center rounded-full border"
-              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Like"
-              onClick={() => {
-                if (top?.key !== "ops") act("like");
-              }}
-              className="flex items-center justify-center rounded-full border"
-              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
-            >
-              {/* Thumbs-up, not a heart — per direct feedback the heart read as too
-                 Tinder-like for a career-interest signal. */}
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                <path d="M7 10v12H4a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z" />
-                <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H9a2 2 0 0 1-2-2V11.24a2 2 0 0 1 .59-1.42l4.17-4.17a1 1 0 0 1 1.63.24Z" />
-              </svg>
-            </button>
+          {/* Caption + like/pass float at the card's foot (app-style overlay)
+             instead of stacking below it — stacking cost the card ~140px of
+             frame height and left it 346px wide next to Build's 480px box
+             (measured). Overlaid, the card takes the whole frame height and
+             lands ~445px: consistent width across the chapter graphics.
+             Same guarded, direction-locked logic as swiping: Pass is a no-op
+             on Investment Banking, Like is a no-op on Operations. */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-[300] flex flex-col items-center"
+            style={{ gap: "calc(var(--mu) * 8px)", paddingBottom: "calc(var(--mu) * 12px)" }}
+          >
+            {!matched && !exiting && top && (
+              <p
+                className="rounded-full border text-center font-semibold backdrop-blur-md"
+                style={{
+                  padding: "calc(var(--mu) * 4px) calc(var(--mu) * 11px)",
+                  fontSize: "calc(var(--mu) * 9.5px)",
+                  color: "var(--foreground)",
+                  background: "color-mix(in srgb, var(--background) 55%, transparent)",
+                  borderColor: "var(--glass-border)",
+                }}
+              >
+                {top.key === "ops" ? "Swipe left to see it's not a match" : "Swipe right to see a match"}
+              </p>
+            )}
+            {!matched && (
+              <div className="pointer-events-auto flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
+                <button
+                  type="button"
+                  aria-label="Pass"
+                  onClick={() => {
+                    if (top?.key !== "iba") act("pass");
+                  }}
+                  className="flex items-center justify-center rounded-full border backdrop-blur-md"
+                  style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "color-mix(in srgb, var(--background) 45%, var(--glass-surface-2))", borderColor: "var(--border)", color: "var(--foreground)" }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Like"
+                  onClick={() => {
+                    if (top?.key !== "ops") act("like");
+                  }}
+                  className="flex items-center justify-center rounded-full border"
+                  style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
+                >
+                  {/* Thumbs-up, not a heart — per direct feedback the heart read as too
+                     Tinder-like for a career-interest signal. */}
+                  <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
+                    <path d="M7 10v12H4a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z" />
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H9a2 2 0 0 1-2-2V11.24a2 2 0 0 1 .59-1.42l4.17-4.17a1 1 0 0 1 1.63.24Z" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
   );
 }
