@@ -361,25 +361,32 @@ function MatchDemo() {
                         Pass
                       </div>
 
-                      {/* Subtle flip affordance (review request): a quiet glass
-                         info chip — the whole card already flips on tap. */}
+                      {/* Flip affordance (review request, round two: say it in
+                         words) — a labeled glass pill in the DS caption style.
+                         The whole card flips on tap. */}
                       <div
                         aria-hidden
-                        className="absolute flex items-center justify-center rounded-full border"
+                        className="absolute flex items-center rounded-full border uppercase"
                         style={{
                           top: "calc(var(--mu) * 10px)",
                           right: "calc(var(--mu) * 10px)",
-                          width: "calc(var(--mu) * 20px)",
-                          height: "calc(var(--mu) * 20px)",
+                          gap: "calc(var(--mu) * 4px)",
+                          padding: "calc(var(--mu) * 4px) calc(var(--mu) * 9px)",
+                          fontFamily: "var(--font-body)",
+                          fontWeight: 600,
+                          fontSize: "calc(var(--mu) * 8px)",
+                          letterSpacing: "0.06em",
+                          color: "var(--foreground)",
                           background: "var(--glass-surface-1)",
                           borderColor: "var(--glass-border)",
                           backdropFilter: "blur(6px)",
                         }}
                       >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" style={{ width: "calc(var(--mu) * 11px)", height: "calc(var(--mu) * 11px)" }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" style={{ width: "calc(var(--mu) * 9px)", height: "calc(var(--mu) * 9px)", flex: "none" }}>
                           <circle cx="12" cy="12" r="10" />
                           <path d="M12 16v-4M12 8h.01" />
                         </svg>
+                        Tap to see details
                       </div>
 
                       <div className="absolute inset-x-0 bottom-0 text-center uppercase" style={{ padding: "calc(var(--mu) * 14px)" }}>
