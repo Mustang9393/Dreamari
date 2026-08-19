@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, GlassCard, InkText, QuestionHeading, StepFooter } from "./ui";
 import { LocalBurst } from "./DreamyGuide";
-import { BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, Globe, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, UserRound, Wrench, Zap } from "lucide-react";
+import { BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
-import { cascade, useVariant } from "./variant";
+import { cascade } from "./variant";
 import { playMilestoneChime } from "./sound";
 import {
   EDUCATION_OPTIONS,
@@ -40,12 +40,6 @@ export type StepProps = {
 
 const EDUCATION_ICONS = [Rocket, Wrench, GraduationCap, BookOpen, Sparkles];
 
-// Tiny hook wrapper so ProfileStep can gate its in-body heading (the boxed
-// version's header strip already carries the same words).
-function useVariantIsCinematic() {
-  return useVariant() === "cinematic";
-}
-
 // Per-subject icons per the Figma Subjects frame (3002:14277).
 const SUBJECT_ICONS: Record<string, React.ReactNode> = {
   Mathematics: <Calculator className="h-4 w-4" />,
@@ -68,7 +62,7 @@ export function InterestsStep({ state, patch, onNext, react, percent, phase }: S
   return (
     <div className="w-full">
       <CardHud percent={percent} phase={phase} />
-      <GlassCard header={{ icon: <Globe className="h-4 w-4" />, title: "Interests", constraint: "Choose up to 2" }}>
+      <GlassCard>
         <QuestionHeading title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — a composed panel, not a wrapping strip: caption
            row up top (label + counter), then each pick on its OWN line as a
@@ -117,7 +111,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, percent, pha
   return (
     <div className="w-full">
       <CardHud percent={percent} phase={phase} />
-      <GlassCard header={{ icon: <BookOpen className="h-4 w-4" />, title: "Favorite Subjects", constraint: "Choose up to 2" }}>
+      <GlassCard>
         <QuestionHeading title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
           options={SUBJECTS}
@@ -192,51 +186,25 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
 }
 
 export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, phase }: StepProps) {
-  const variant = useVariant();
-  const glass = variant === "glass";
-  const setupPanel = (
-    <div
-      className={`rounded-xl border px-3.5 py-2.5 ${glass ? "lg:w-[200px] lg:flex-none lg:self-start lg:px-4 lg:py-3" : "sm:col-span-2"}`}
-      style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
-    >
-      <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
-      {glass ? (
-        <div className="mt-2 hidden flex-col gap-1.5 lg:flex">
-          <SetupValue value={state.energy} placeholder="Energy…" />
-          <SetupValue value={state.teamStyle} placeholder="Team…" />
-        </div>
-      ) : null}
-      <p className={`mt-0.5 flex items-baseline gap-2 ${glass ? "lg:hidden" : ""}`}>
-        <SetupValue value={state.energy} placeholder="Energy…" />
-        <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>
-        <SetupValue value={state.teamStyle} placeholder="Team…" />
-      </p>
-    </div>
-  );
   return (
     <div className="w-full">
       <CardHud percent={percent} phase={phase} />
-      <GlassCard header={{ icon: <Zap className="h-4 w-4" />, title: "Work Vibe", constraint: "Pick one from each row" }}>
+      <GlassCard>
         <QuestionHeading title="Where do you work best?" subtitle="Pick one from each row." />
-        {glass ? (
-          /* Replit desktop layout: sliders stacked left, "Your Setup" as a side
-             panel filling the column vertically; stacks on phones. */
-          <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-start">
-            {setupPanel}
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
-              <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
-            </div>
+        {/* Pick-one rows — a slider suggests a continuum, but these are three
+           discrete choices; one tap beats drag-and-guess. */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
+          <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
+          <div className="rounded-xl border px-3.5 py-2.5 sm:col-span-2" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+            <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
+            <p className="mt-0.5 flex items-baseline gap-2">
+              <SetupValue value={state.energy} placeholder="Energy…" />
+              <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>
+              <SetupValue value={state.teamStyle} placeholder="Team…" />
+            </p>
           </div>
-        ) : (
-          /* Pick-one rows here too — a slider suggests a continuum, but these
-             are three discrete choices; one tap beats drag-and-guess. */
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
-            <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
-            {setupPanel}
-          </div>
-        )}
+        </div>
         <Citation>MIT CAPD Self Assessment + O*NET Work Styles</Citation>
       </GlassCard>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.energy || !state.teamStyle} />
@@ -245,11 +213,10 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, pha
 }
 
 export function EducationStep({ state, patch, onBack, onNext, react, percent, phase }: StepProps) {
-  const variant = useVariant();
   return (
     <div className="w-full">
       <CardHud percent={percent} phase={phase} />
-      <GlassCard header={{ icon: <GraduationCap className="h-4 w-4" />, title: "Education & Training", constraint: "Choose one" }}>
+      <GlassCard>
         <QuestionHeading title="How much school feels right for you?" />
         <div className="grid auto-rows-fr grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {EDUCATION_OPTIONS.map((option, optionIndex) => {
@@ -268,7 +235,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, ph
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-1))" : "var(--color-glass-surface-1)",
                   borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border)",
-                  ...cascade(variant, optionIndex),
+                  ...cascade(optionIndex),
                 }}
               >
                 {(() => { const Icon = EDUCATION_ICONS[optionIndex]; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
@@ -328,8 +295,8 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, phas
   return (
     <div className="w-full">
       <CardHud percent={percent} phase={phase} almostDone={almostDone} />
-      <GlassCard header={{ icon: <UserRound className="h-4 w-4" />, title: "Profile Basics", constraint: "Name, email, grade, and GPA" }}>
-        {useVariantIsCinematic() && <QuestionHeading title="Profile Basics" subtitle="Name, email, grade, and GPA" />}
+      <GlassCard>
+        <QuestionHeading title="Profile Basics" subtitle="Name, email, grade, and GPA" />
         <div className="flex flex-col gap-4">
           <input
             className={UNDERLINE_INPUT}
@@ -426,7 +393,6 @@ const PATH_ICONS: Record<string, React.ReactNode> = {
 };
 
 export function CompletionScreen({ state, patch, onSeeMatches }: { state: BuildState; patch: (u: Partial<BuildState>) => void; onSeeMatches: () => void }) {
-  const variant = useVariant();
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
     const chime = setTimeout(() => playMilestoneChime(), 200);
@@ -473,7 +439,7 @@ export function CompletionScreen({ state, patch, onSeeMatches }: { state: BuildS
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-1))" : "var(--color-glass-surface-1)",
                   borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border)",
                   color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)",
-                  ...cascade(variant, optionIndex),
+                  ...cascade(optionIndex),
                 }}
               >
                 {PATH_ICONS[option.id]}

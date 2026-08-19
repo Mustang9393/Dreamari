@@ -1,11 +1,7 @@
-import { BuildFlowExperience } from "@/components/build/BuildFlowExperience";
+import { permanentRedirect } from "next/navigation";
 
-// Variant B of the build-profile A/B test: the boxless cinematic treatment.
-// Same flow, same state, same copy — presentation only (see variant.tsx).
+// The A/B test is settled — the cinematic treatment IS /flow now. Old shared
+// links to the B-variant URL land on the real flow.
 export default function CinematicFlowPage() {
-  return (
-    <main>
-      <BuildFlowExperience initialVariant="cinematic" />
-    </main>
-  );
+  permanentRedirect("/flow");
 }

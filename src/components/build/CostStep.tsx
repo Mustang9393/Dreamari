@@ -1,7 +1,6 @@
 "use client";
 
 import { COST_STOPS } from "./types";
-import { Target } from "lucide-react";
 import { CardHud, Citation, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 
@@ -27,7 +26,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent }: StepP
   return (
     <div className="w-full">
       <CardHud percent={percent} />
-      <GlassCard header={{ icon: <Target className="h-4 w-4" />, title: "Education Cost", constraint: "Choose one" }}>
+      <GlassCard>
       <QuestionHeading title="What total school or training cost feels realistic?" subtitle="Select a range. You can change it later." />
 
       <div

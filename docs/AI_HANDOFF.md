@@ -4,7 +4,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-19
+- Date: 2026-08-20
+
+### 2026-08-20 A/B verdict: cinematic wins — glass build-flow variant purged
+
+- Per the user's A/B result, variant B (cinematic/boxless) IS the build
+  flow now. /flow renders it directly; /flow/cinematic 308-redirects to
+  /flow so shared links survive. The A/B pill, VariantContext/useVariant,
+  the glass GlassCard + gradient header strips, the glass Work Vibe side
+  panel, the glass Dreamy perch/bubble branch, and the header lucide
+  icons are all deleted (variant.tsx now exports only cascade(index)).
+  PhaseProgress and every shared piece (chips, footer, map, cost slider,
+  sounds) untouched. Verified: full walk to the 50% milestone, redirect,
+  lint/tsc/build green.
 
 ### 2026-08-19 v3 branch opened: match-flow prototyping (LOCAL-ONLY)
 

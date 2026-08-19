@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
-import { cascade, useVariant } from "./variant";
+import { cascade } from "./variant";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -34,47 +34,13 @@ export function InkText({ text, className = "", delay = 0 }: { text: string; cla
   );
 }
 
-export type CardHeader = { icon?: ReactNode; title: string; constraint?: string };
-
-export function GlassCard({ children, className = "", header }: { children: ReactNode; className?: string; header?: CardHeader }) {
-  const variant = useVariant();
-  if (variant === "cinematic") {
-    // Boxless: the space background IS the surface; content floats directly on it.
-    return <div className={`w-full px-1 ${className}`}>{children}</div>;
-  }
-  // Replit card structure: a gradient header strip (step icon, step title,
-  // constraint line) capping the box, content below. Gradient = the progress
-  // bar's blue -> purple -> pink ramp.
-  return (
-    <div
-      className="w-full overflow-hidden rounded-3xl border backdrop-blur-xl"
-      style={{
-        background: "var(--color-glass-surface-3)",
-        borderColor: "var(--color-glass-border)",
-        boxShadow: "0 24px 60px -28px rgba(0,0,0,0.6)",
-      }}
-    >
-      {header && (
-        <div
-          className="flex items-center gap-2.5 px-4 py-3 sm:px-6"
-          style={{ background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple), var(--color-world-arts-media-sport))" }}
-        >
-          {header.icon && (
-            <span aria-hidden className="flex-none text-white/90">
-              {header.icon}
-            </span>
-          )}
-          <span className={`${bricolage.className} text-[15px] font-bold text-white`}>{header.title}</span>
-          {header.constraint && <span className="ml-auto text-right text-[12px] font-semibold text-white/85">{header.constraint}</span>}
-        </div>
-      )}
-      <div className={`p-3.5 sm:p-6 ${className}`}>{children}</div>
-    </div>
-  );
+// The step container — boxless (the space background IS the surface), per
+// the A/B verdict: the cinematic treatment won.
+export function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`w-full px-1 ${className}`}>{children}</div>;
 }
 
-// In-card progress HUD (glass variant; the cinematic variant renders the same
-// PhaseProgress floating at the top of the screen instead). Speaks in PHASES per
+// The in-flow progress bar. Speaks in PHASES per
 // direct feedback - no "Step x of 8" counters, no BUILD badge repetition. When the
 // percent GROWS, the bar animates its fill, fires a spark fan off the leading edge
 // (Duolingo-style), and plays a short rising chime; module-level memory of the last
@@ -149,8 +115,7 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
   );
 }
 
-// Both variants carry the progress WITH the question block, rendered ABOVE the
-// box (Replit chrome) / above the heading (frameless frame 3214-7363).
+// Progress renders in-flow above the heading (frameless Figma frame 3214-7363).
 export function CardHud({ percent, phase, almostDone }: { percent: number; phase?: string; almostDone?: boolean }) {
   return (
     <div className="mb-3 sm:mb-5">
@@ -160,41 +125,27 @@ export function CardHud({ percent, phase, almostDone }: { percent: number; phase
 }
 
 export function QuestionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
-  const variant = useVariant();
-  if (variant === "cinematic") {
-    // Left-aligned per the frameless Figma frame (3214-7363) — big, but anchored
-    // to the same grid as the options below, not floating centered.
-    return (
-      <div className="mb-5 sm:mb-7">
-        <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
-          <InkText text={title} />
-        </h1>
-        {subtitle && (
-          <p
-            className="mt-2 text-[14px] font-medium text-[var(--color-night-muted-foreground)] opacity-0 motion-safe:animate-[fade-slide-up_0.5s_ease-out_forwards]"
-            style={{ animationDelay: "0.5s" }}
-          >
-            {subtitle}
-          </p>
-        )}
-      </div>
-    );
-  }
+  // Left-aligned per the frameless Figma frame (3214-7363) — big, anchored to
+  // the same grid as the options below.
   return (
-    <div className="mb-3 sm:mb-5">
-      <h1 className={`${bricolage.className} text-[17px] font-bold text-[var(--color-night-foreground)] sm:text-2xl`}>{title}</h1>
-      {subtitle && <p className="mt-1 text-[13px] font-medium text-[var(--color-night-muted-foreground)] sm:text-sm">{subtitle}</p>}
+    <div className="mb-5 sm:mb-7">
+      <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
+        <InkText text={title} />
+      </h1>
+      {subtitle && (
+        <p
+          className="mt-2 text-[14px] font-medium text-[var(--color-night-muted-foreground)] opacity-0 motion-safe:animate-[fade-slide-up_0.5s_ease-out_forwards]"
+          style={{ animationDelay: "0.5s" }}
+        >
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }
 
 export function Citation({ children }: { children: ReactNode }) {
-  const variant = useVariant();
-  return (
-    <p className={`mt-4 text-center text-[10.5px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] ${variant === "cinematic" ? "opacity-50" : "opacity-70"}`}>
-      {children}
-    </p>
-  );
+  return <p className="mt-4 text-center text-[10.5px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-50">{children}</p>;
 }
 
 export function StepFooter({
@@ -253,8 +204,6 @@ export function ChipGrid({
   columns?: string;
   onPick?: () => void;
 }) {
-  const variant = useVariant();
-
   // Progressive disclosure on phones: long lists show 6 options + one "Show
   // all N" reveal (never a second tier), so the CTA is visible without any
   // scrolling and the rest slides in on request. Desktop always fits, so it
@@ -319,7 +268,7 @@ export function ChipGrid({
               color: isSelected ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
               ...(expandedBy === "tap" && index >= PREVIEW
                 ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
-                : cascade(variant, index)),
+                : cascade(index)),
             }}
           >
             {icons?.[option] ? (

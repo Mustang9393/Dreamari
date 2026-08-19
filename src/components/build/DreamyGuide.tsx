@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { bricolage } from "./fonts";
-import { useVariant } from "./variant";
 import { InkText } from "./ui";
 
 // The flow's interactive Dreamy — gamified, Duolingo-style: he PERCHES on the
@@ -58,7 +57,6 @@ export function LocalBurst({ nonce }: { nonce: number }) {
 }
 
 export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.png" }: DreamyGuideProps) {
-  const variant = useVariant();
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const [reacting, setReacting] = useState(false);
   const [wiggling, setWiggling] = useState(false);
@@ -107,68 +105,10 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
     };
   }, []);
 
-  if (variant === "cinematic") {
-    // Boxless composition: Dreamy floats centered with his line as quiet,
-    // centered narration — no glass bubble, no perch (there is no card edge).
-    return (
-      <div className="relative z-20 flex w-full items-center gap-3">
-        <div
-          className="relative h-[72px] w-[72px] flex-none [perspective:600px] sm:h-[88px] sm:w-[88px]"
-          onMouseEnter={() => {
-            setWiggling(true);
-            setTimeout(() => setWiggling(false), 650);
-          }}
-        >
-          <div
-            aria-hidden
-            className="absolute inset-[-90%] rounded-full"
-            style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 30%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 9%, transparent) 42%, transparent 64%)" }}
-          />
-          <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
-            <div ref={tiltRef} className="relative h-full w-full [transition:transform_.06s_linear] [will-change:transform]">
-              <Image
-                key={reacting ? reactionSprite : sprite}
-                src={reacting ? reactionSprite : sprite}
-                alt="Dreamy"
-                fill
-                sizes="88px"
-                className="object-contain motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
-                priority
-              />
-            </div>
-          </div>
-          <LocalBurst nonce={reactionNonce} />
-        </div>
-        {/* Cinematic bubble: a frosted whisper-caption — near-black glass, a
-           faint gradient hairline, and the line materializing ink-style. Keyed
-           by line so each stage's coaching re-performs its entrance. */}
-        <div key={line} className="relative flex-1">
-          <div
-            aria-hidden
-            className="absolute top-1/2 -left-[6px] h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] backdrop-blur-md"
-            style={{ background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)", borderLeft: "1px solid var(--color-glass-border)", borderBottom: "1px solid var(--color-glass-border)" }}
-          />
-          <p
-            className={`${bricolage.className} relative rounded-2xl px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
-            style={{
-              background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)",
-              border: "1px solid var(--color-glass-border)",
-              boxShadow: "0 12px 40px -18px color-mix(in srgb, var(--color-accent-purple) 45%, transparent), inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent)",
-            }}
-          >
-            <InkText text={line} delay={0.15} />
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative z-20 flex w-full items-end gap-2.5 sm:gap-3">
-      {/* Negative bottom margin makes him PERCH OVER the card's top edge below —
-         gamified, physics-defying placement per direct request. */}
+    <div className="relative z-20 flex w-full items-center gap-3">
       <div
-        className="relative -mb-2 h-[80px] w-[80px] flex-none [perspective:600px] sm:-mb-3 sm:h-[104px] sm:w-[104px]"
+        className="relative h-[72px] w-[72px] flex-none [perspective:600px] sm:h-[88px] sm:w-[88px]"
         onMouseEnter={() => {
           setWiggling(true);
           setTimeout(() => setWiggling(false), 650);
@@ -177,7 +117,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
         <div
           aria-hidden
           className="absolute inset-[-90%] rounded-full"
-          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 34%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 10%, transparent) 42%, transparent 64%)" }}
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 30%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 9%, transparent) 42%, transparent 64%)" }}
         />
         <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
           <div ref={tiltRef} className="relative h-full w-full [transition:transform_.06s_linear] [will-change:transform]">
@@ -186,7 +126,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
               src={reacting ? reactionSprite : sprite}
               alt="Dreamy"
               fill
-              sizes="104px"
+              sizes="88px"
               className="object-contain motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
               priority
             />
@@ -194,24 +134,26 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
         </div>
         <LocalBurst nonce={reactionNonce} />
       </div>
-
-      {/* Speech bubble beside his head, above the card edge he perches on. */}
-      <div className="relative mb-4 flex-1 sm:mb-5">
+      {/* Cinematic bubble: a frosted whisper-caption — near-black glass, a
+         faint gradient hairline, and the line materializing ink-style. Keyed
+         by line so each stage's coaching re-performs its entrance. */}
+      <div key={line} className="relative flex-1">
         <div
           aria-hidden
-          className="absolute top-1/2 -left-[7px] h-3.5 w-3.5 -translate-y-1/2 rotate-45 rounded-[3px] border-b border-l backdrop-blur-xl"
-          style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
+          className="absolute top-1/2 -left-[6px] h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] backdrop-blur-md"
+          style={{ background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)", borderLeft: "1px solid var(--color-glass-border)", borderBottom: "1px solid var(--color-glass-border)" }}
         />
         <p
-          className={`${bricolage.className} relative rounded-2xl border px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] backdrop-blur-xl sm:text-[15px]`}
+          className={`${bricolage.className} relative rounded-2xl px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
           style={{
-            background: "var(--color-glass-surface-3)",
-            borderColor: "var(--color-glass-border)",
+            background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)",
+            border: "1px solid var(--color-glass-border)",
+            boxShadow: "0 12px 40px -18px color-mix(in srgb, var(--color-accent-purple) 45%, transparent), inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent)",
           }}
         >
-          {line}
+          <InkText text={line} delay={0.15} />
         </p>
       </div>
     </div>
-  );
+    );
 }

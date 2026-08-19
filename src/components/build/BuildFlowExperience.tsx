@@ -17,17 +17,15 @@ import { DreamyGuide } from "./DreamyGuide";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
-import { VariantContext, type FlowVariant } from "./variant";
 import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildState, type StageId } from "./types";
 
 // The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).
 // Design/layout/structure follow the Figma Build Flow frames (3009-15623):
 // Background Space nebulas + the reactive dot-matrix aurora curtain, a centered
 // glass card carrying its own phase HUD, the CTA row outside the card. Dreamy
-// perches over the card's top edge as an interactive, reacting guide. Two A/B
-// presentation variants share this one implementation (see variant.tsx): "glass"
-// at /flow, "cinematic" at /flow/cinematic, switchable mid-flow (state persists)
-// via the floating A/B pill.
+// floats above the question block as an interactive, reacting guide. The A/B
+// test is settled: the cinematic (boxless) treatment is THE flow; the boxed
+// glass variant was removed with its plumbing (see variant.tsx).
 
 const MATCH_LOADING_MS = 1800;
 const MATCH_ACCENT = "#2f6bf2";
@@ -51,9 +49,8 @@ function BackgroundSpace() {
   );
 }
 
-export function BuildFlowExperience({ initialVariant = "glass" }: { initialVariant?: FlowVariant }) {
+export function BuildFlowExperience() {
   const router = useRouter();
-  const [variant, setVariant] = useState<FlowVariant>(initialVariant);
   const [stageIndex, setStageIndex] = useState(0);
   const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
   const [phase, setPhase] = useState<Phase>("build");
@@ -98,7 +95,6 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
 
   return (
     <ThemeProvider>
-      <VariantContext.Provider value={variant}>
         <BackgroundSpace />
         {/* No accumulated per-step blobs (visitedAccents empty, per direct
            feedback); the single accent tracks the progress bar's gradient at the
@@ -110,31 +106,6 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
         <Confetti colors={[accent, "#8b5cf6", "#ff4585", "#2f6bf2"]} active={matchCelebrating} />
         <HomeButton />
         <ThemeToggle />
-
-        {/* A/B variant switcher — demo affordance for the A/B test, sits left of
-           the theme toggle. Switching preserves all answers (same state tree). */}
-        {phase === "build" && (
-          <div
-            className="fixed top-5 right-[4.5rem] z-20 flex overflow-hidden rounded-full border text-[11px] font-bold backdrop-blur"
-            style={{ borderColor: "var(--color-glass-border)", background: "var(--color-glass-surface-3)" }}
-          >
-            {(["glass", "cinematic"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={variant === option}
-                onClick={() => setVariant(option)}
-                className="px-3 py-2 capitalize transition-colors"
-                style={{
-                  background: variant === option ? "var(--color-brand-500)" : "transparent",
-                  color: variant === option ? "#ffffff" : "var(--color-night-muted-foreground)",
-                }}
-              >
-                {option === "glass" ? "A" : "B"}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's
            content exceeds the viewport (short landscape phones), the step column
@@ -150,12 +121,12 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">
             {phase === "build" && dreamy && (
-              <div className={`w-full flex-none px-5 sm:px-10 ${variant === "cinematic" ? "mb-3" : ""}`}>
+              <div className="mb-3 w-full flex-none px-5 sm:px-10">
                 <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
               </div>
             )}
             <div className="flow-scroll-fade flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
-              {phase === "build" && <StepTransition key={`${stageId}-${variant}`}>{content}</StepTransition>}
+              {phase === "build" && <StepTransition key={stageId}>{content}</StepTransition>}
               {phase === "loading" && (
                 <StepTransition key="match-loading">
                   <MatchLoadingScreen />
@@ -169,7 +140,6 @@ export function BuildFlowExperience({ initialVariant = "glass" }: { initialVaria
             </div>
           </div>
         </section>
-      </VariantContext.Provider>
     </ThemeProvider>
   );
 }

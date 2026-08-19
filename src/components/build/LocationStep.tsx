@@ -2,7 +2,6 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import usaMapModule from "@svg-maps/usa";
-import { MapPin } from "lucide-react";
 import { CardHud, Citation, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 
@@ -101,7 +100,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   return (
     <div className="w-full">
       <CardHud percent={percent} almostDone={almostDone} />
-      <GlassCard header={{ icon: <MapPin className="h-4 w-4" />, title: "Location", constraint: "Choose up to 3 states" }}>
+      <GlassCard>
       <QuestionHeading title="Where are you open to going?" subtitle="Choose up to 3 states. Your first choice is your top preference." />
 
       {/* Map | List segmented toggle. */}
