@@ -24,16 +24,20 @@ especially "pull tokens live from the Variables API, never hand-type."
 
 The Figma file passed a full integrity audit and fix pass on
 2026-08-19: **154 semantic variables, zero broken alias chains in
-either mode, zero orphaned styles, zero ghost component references,
-zero raw gradient fills on any build-target surface.** Pull with
-confidence. Additions since your bootstrap prompt was written:
+either mode, zero orphaned styles, zero ghost component references.**
+Pull with confidence. File facts newer than your bootstrap prompt:
 
-- `gradient/card-surface-transparent` — a semi-transparent sibling of
-  `gradient/card-surface` (stops at a=0.3/0.7/0.85) used by the Career
-  Poster Card roots of 4 worlds (Business & Money, Arts Media & Sport,
-  Driving Flying & Shipping, Factories & Making Things) for stronger
-  image bleed-through. All 15 worlds share the same structure: image
-  in a `Career Image` child frame, gradient style on the root.
+- **Career Poster Card has TWO deliberate structures.** 11 worlds:
+  gradient-only root bound to `gradient/card-surface`. 4 worlds
+  (Business & Money, Arts Media & Sport, Driving Flying & Shipping,
+  Factories & Making Things): image fill + a semi-transparent gradient
+  (stops a=0.3/0.7/0.85) stacked directly on the root for image
+  bleed-through. Those 12 variants are intentionally NOT style-bound —
+  Figma cannot mix a paint style with an image fill on one node, and
+  restructuring them breaks per-instance photo overrides (verified the
+  hard way, then restored). The reference style
+  `gradient/card-surface-transparent` documents the exact stop values;
+  expect it to show zero usages, by design. Build both patterns.
 - `UI/Rank Number` (desktop, 180px) and `UI/Rank Number (Mobile)`
   (200px) text styles now bind the ranked-card digits.
 - The `accent` family is brand blue (`#2f6bf2` dark / `#1e4fcc`
