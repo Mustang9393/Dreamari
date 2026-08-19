@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 import { bricolage } from "@/components/build/fonts";
@@ -132,10 +132,23 @@ function BrowseTile({ item }: { item: BrowseItem }) {
 // -50%, so the loop is seamless. Pauses on hover; disabled under
 // prefers-reduced-motion (see globals.css).
 function Marquee({ children, duration, reverse, className = "" }: { children: React.ReactNode; duration: number; reverse?: boolean; className?: string }) {
-  // Hover pauses the drift (CSS). The first real drag or horizontal wheel
-  // hands the rail over to the user entirely: animation off, single sequence,
-  // native touch/trackpad scrolling — browse it yourself, like any app rail.
+  // Hover pauses the drift (pure CSS — resumes the instant the pointer
+  // leaves). A real DRAG or horizontal wheel hands the rail over to native
+  // scrolling, but only temporarily: the drift resumes when the mouse leaves,
+  // or a beat after a touch ends. Never a permanent stop.
   const [manual, setManual] = useState(false);
+  const downX = useRef<number | null>(null);
+  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    },
+    [],
+  );
+  function scheduleResume(ms: number) {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setManual(false), ms);
+  }
   return (
     <div
       className={`w-full ${manual ? "overflow-x-auto [scrollbar-width:none]" : "overflow-hidden"} ${className}`}
@@ -143,9 +156,27 @@ function Marquee({ children, duration, reverse, className = "" }: { children: Re
         maskImage: "linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%)",
       }}
-      onPointerDown={() => setManual(true)}
+      onPointerDown={(e) => {
+        downX.current = e.clientX;
+        if (resumeTimer.current) clearTimeout(resumeTimer.current);
+      }}
+      onPointerMove={(e) => {
+        // Drag intent only — a plain click/press never hijacks the drift.
+        if (downX.current !== null && Math.abs(e.clientX - downX.current) > 6) setManual(true);
+      }}
+      onPointerUp={() => {
+        downX.current = null;
+        scheduleResume(2500);
+      }}
+      onPointerLeave={() => {
+        downX.current = null;
+        setManual(false);
+      }}
       onWheel={(e) => {
-        if (Math.abs(e.deltaX) > 2) setManual(true);
+        if (Math.abs(e.deltaX) > 2) {
+          setManual(true);
+          scheduleResume(2500);
+        }
       }}
     >
       <div
