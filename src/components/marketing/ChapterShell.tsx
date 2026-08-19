@@ -17,6 +17,10 @@ type ChapterShellProps = {
   // meant scrolling through mostly-empty space before the next chapter's snap point.
   // compact caps the frame at content-appropriate height instead.
   compact?: boolean;
+  // Explore's browse rail wants a WIDER window (more cards visible at once)
+  // without growing the cards: raises the frame's width ceiling. Card-deck
+  // chapters must NOT use this — their --mu-scaled chrome is tuned to 480px.
+  wide?: boolean;
   graphicRef: RefObject<HTMLDivElement | null>;
   playing: boolean;
   graphicRevealed: boolean;
@@ -30,6 +34,7 @@ export function ChapterShell({
   oneliner,
   flip = false,
   compact = false,
+  wide = false,
   graphicRef,
   playing,
   graphicRevealed,
@@ -169,7 +174,7 @@ export function ChapterShell({
             // the original values, which keep that proportion correct.
             className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
             style={{
-              width: "min(94cqw, 480px)",
+              width: wide ? "min(96cqw, 780px)" : "min(94cqw, 480px)",
               height: compact ? "auto" : "min(74dvh, 680px)",
               maxHeight: compact ? "min(72dvh, 620px)" : undefined,
             }}

@@ -150,7 +150,7 @@ function Marquee({ children, duration, reverse, className = "" }: { children: Re
     >
       <div
         className={`${manual ? "" : "mkt-rail-track"} flex h-full w-max items-center`}
-        style={{ gap: "max(10px, calc(var(--mu) * 8px))", animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal", paddingRight: "max(10px, calc(var(--mu) * 8px))" }}
+        style={{ gap: "clamp(10px, calc(var(--mu) * 8px), 16px)", animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal", paddingRight: "clamp(10px, calc(var(--mu) * 8px), 16px)" }}
       >
         {children}
         {!manual && children}
@@ -165,10 +165,10 @@ function FilterChip({ label }: { label: string }) {
     <span
       className="flex flex-none items-center rounded-full border font-semibold uppercase whitespace-nowrap"
       style={{
-        gap: "max(5px, calc(var(--mu) * 4px))",
-        padding: "max(5px, calc(var(--mu) * 4px)) max(11px, calc(var(--mu) * 9px))",
+        gap: "clamp(5px, calc(var(--mu) * 4px), 7px)",
+        padding: "clamp(5px, calc(var(--mu) * 4px), 7px) clamp(11px, calc(var(--mu) * 9px), 15px)",
         fontFamily: "var(--font-body)",
-        fontSize: "max(8.5px, calc(var(--mu) * 6.5px))",
+        fontSize: "clamp(8.5px, calc(var(--mu) * 6.5px), 11px)",
         letterSpacing: "0.06em",
         background: active ? "var(--foreground)" : "var(--glass-surface-1)",
         borderColor: active ? "var(--foreground)" : "var(--glass-border)",
@@ -179,7 +179,7 @@ function FilterChip({ label }: { label: string }) {
         <span
           aria-hidden
           className="rounded-full"
-          style={{ width: "max(6px, calc(var(--mu) * 4.5px))", height: "max(6px, calc(var(--mu) * 4.5px))", background: WORLD_COLORS[label] }}
+          style={{ width: "clamp(6px, calc(var(--mu) * 4.5px), 8px)", height: "clamp(6px, calc(var(--mu) * 4.5px), 8px)", background: WORLD_COLORS[label] }}
         />
       )}
       {label}
@@ -197,6 +197,7 @@ export function ExploreChapter() {
       color="#1fc76e"
       oneliner="careers, companies, and pathways with depth."
       compact
+      wide
       graphicRef={graphicRef}
       playing={false}
       graphicRevealed={graphicRevealed}
@@ -210,7 +211,7 @@ export function ExploreChapter() {
 
 function BrowsePage() {
   return (
-    <div className="flex h-full w-full flex-col justify-center" style={{ gap: "max(14px, calc(var(--mu) * 12px))" }}>
+    <div className="flex h-full w-full flex-col justify-center" style={{ gap: "clamp(14px, calc(var(--mu) * 12px), 20px)" }}>
       {/* World filter chips — drifting slowly the opposite way so the two bands
          read as independent, alive surfaces rather than one conveyor belt. */}
       <Marquee duration={70} reverse className="flex-none">
@@ -223,10 +224,10 @@ function BrowsePage() {
          here, tall phone frames dumped all their spare height into this block
          and the group read as two islands with a dead gap between them. Now
          chips, label, rail, and caption center together as one cluster. */}
-      <div className="flex w-full flex-none flex-col" style={{ gap: "max(10px, calc(var(--mu) * 8px))" }}>
+      <div className="flex w-full flex-none flex-col" style={{ gap: "clamp(10px, calc(var(--mu) * 8px), 14px)" }}>
         <p
           className="w-full flex-none text-left"
-          style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "max(12.5px, calc(var(--mu) * 9.5px))", color: "var(--foreground)" }}
+          style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(12.5px, calc(var(--mu) * 9.5px), 17px)", color: "var(--foreground)" }}
         >
           The Top 5 Trending Careers Among Gen Z
         </p>
