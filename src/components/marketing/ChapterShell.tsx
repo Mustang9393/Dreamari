@@ -172,9 +172,9 @@ export function ChapterShell({
             // the card (which should be the dominant, most prominent element in every
             // chapter) ended up looking small relative to its own UI chrome. Back to
             // the original values, which keep that proportion correct.
-            className="mkt-graphic-scale relative z-[1] flex items-center justify-center"
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center ${wide ? "mkt-wide" : ""}`}
             style={{
-              width: wide ? "min(96cqw, 780px)" : "min(94cqw, 480px)",
+              width: wide ? "min(96cqw, 780px)" : "min(94cqw, 480px)", // one shared wide lane
               height: compact ? "auto" : "min(74dvh, 680px)",
               maxHeight: compact ? "min(72dvh, 620px)" : undefined,
             }}

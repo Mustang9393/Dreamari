@@ -29,6 +29,16 @@
    off the frame's own (capped-at-480px) width instead of the outer wrapper's — see the
    long comment in ChapterShell.tsx for why the outer version alone let text balloon on
    wide screens. */
+/* Wide-lane frames: the container grows to 780px but --mu freezes at the
+   480-frame ceiling (1.5), so mu-scaled text, buttons, and padding render
+   at exactly the size they were tuned for — only the main object (card,
+   board, rail) actually gets wider. Without this, mu hit its 2.3 cap and
+   inflated every secondary element ~53% (the documented reason earlier
+   ceiling raises were reverted). */
+.mkt-graphic-scale.mkt-wide {
+  --mu: clamp(1, calc(100cqw / 320px), 1.5);
+}
+
 .mkt-graphic-scale {
   container-type: inline-size;
   --mu: clamp(1, calc(100cqw / 320px), 2.3);
