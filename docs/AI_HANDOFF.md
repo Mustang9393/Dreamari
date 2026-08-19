@@ -6,6 +6,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 build flow: picks/setup panels unified (v3, LOCAL)
+
+- Interests "Your picks" panel now matches Work Vibe's "Your Setup"
+  treatment exactly (px-3.5 py-2.5 panel, 0.14em caption tracking,
+  Bricolage 17/18 values) and lays picks HORIZONTALLY with a dot
+  separator (flex-wrap, so two long world names break cleanly on
+  phones). Work Vibe's "Your Setup" moved ABOVE the option rows,
+  full-width, mirroring the interests composition. Both per direct
+  user request. Verified both screens in browser; tsc + eslint green.
+
 ### 2026-08-20 match-lab poster photos: Food Scientist + Footwear Designer (v3, LOCAL)
 
 - Both careers wore "For You"-style photos; replaced with Browse-poster-style

@@ -64,13 +64,13 @@ export function InterestsStep({ state, patch, onNext, react, percent, phase }: S
       <CardHud percent={percent} phase={phase} />
       <GlassCard>
         <QuestionHeading title="What sounds interesting?" subtitle="Choose up to 2" />
-        {/* "Your picks" — a composed panel, not a wrapping strip: caption
-           row up top (label + counter), then each pick on its OWN line as a
-           big Bricolage statement in its world color. Stacked lines stay
-           composed at every width; long names wrap within their own line. */}
-        <div className="mb-3 rounded-xl border px-4 py-3" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+        {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
+           caption row (label + counter), then the picks side by side as
+           Bricolage statements in their world colors, separated by a dot.
+           flex-wrap lets two long names break onto a second line cleanly. */}
+        <div className="mb-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[10.5px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
+            <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
               className="text-[11px] font-bold tracking-wide"
               style={{ color: state.interests.length ? "var(--color-feedback-success-dark-surface)" : "var(--color-night-muted-foreground)" }}
@@ -78,18 +78,20 @@ export function InterestsStep({ state, patch, onNext, react, percent, phase }: S
               {state.interests.length} of 2
             </span>
           </div>
-          <div className="mt-1.5 flex min-h-[26px] flex-col gap-0.5">
-            {state.interests.length === 0 && <span className="text-[13px] font-medium text-[var(--color-night-muted-foreground)]">Pick up to two worlds below.</span>}
-            {state.interests.map((interest) => (
-              <span
-                key={interest}
-                className={`${bricolage.className} text-[17px] leading-snug font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[19px]`}
-                style={{ color: WORLD_ACCENTS[interest] ?? "var(--color-brand-400)", textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENTS[interest] ?? "var(--color-brand-400)"} 40%, transparent)` }}
-              >
-                {interest}
+          <p className="mt-0.5 flex min-h-[24px] flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            {state.interests.length === 0 && <span className="text-[13.5px] font-semibold text-[var(--color-night-muted-foreground)]">Pick up to two worlds below.</span>}
+            {state.interests.map((interest, pickIndex) => (
+              <span key={interest} className="flex items-baseline gap-2">
+                {pickIndex > 0 && <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>}
+                <span
+                  className={`${bricolage.className} text-[17px] leading-tight font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[18px]`}
+                  style={{ color: WORLD_ACCENTS[interest] ?? "var(--color-brand-400)", textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENTS[interest] ?? "var(--color-brand-400)"} 40%, transparent)` }}
+                >
+                  {interest}
+                </span>
               </span>
             ))}
-          </div>
+          </p>
         </div>
         <ChipGrid
           options={INTEREST_WORLDS.map((world) => world.label)}
@@ -191,19 +193,21 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, pha
       <CardHud percent={percent} phase={phase} />
       <GlassCard>
         <QuestionHeading title="Where do you work best?" subtitle="Pick one from each row." />
-        {/* Pick-one rows — a slider suggests a continuum, but these are three
-           discrete choices; one tap beats drag-and-guess. */}
+        {/* "Your Setup" leads (mirrors the interests screen's "Your picks"
+           panel sitting above its options), then the pick-one rows — a slider
+           suggests a continuum, but these are three discrete choices; one tap
+           beats drag-and-guess. */}
+        <div className="mb-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+          <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
+          <p className="mt-0.5 flex items-baseline gap-2">
+            <SetupValue value={state.energy} placeholder="Energy…" />
+            <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>
+            <SetupValue value={state.teamStyle} placeholder="Team…" />
+          </p>
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
           <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
-          <div className="rounded-xl border px-3.5 py-2.5 sm:col-span-2" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
-            <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
-            <p className="mt-0.5 flex items-baseline gap-2">
-              <SetupValue value={state.energy} placeholder="Energy…" />
-              <span aria-hidden className="text-[13px] font-bold text-[var(--color-night-muted-foreground)]">·</span>
-              <SetupValue value={state.teamStyle} placeholder="Team…" />
-            </p>
-          </div>
         </div>
         <Citation>MIT CAPD Self Assessment + O*NET Work Styles</Citation>
       </GlassCard>
