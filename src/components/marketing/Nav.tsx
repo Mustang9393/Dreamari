@@ -13,6 +13,13 @@ const LINKS = [
   { label: "Career worlds", href: "#explore" },
 ];
 
+// Demo quick-links (v3): jump straight into the interactive prototypes without
+// scrolling for a CTA — Build = the profile flow, Match = the match-flow lab.
+const QUICK_LINKS = [
+  { label: "Build", href: "/flow" },
+  { label: "Match", href: "/match-lab" },
+];
+
 // Re-imagined per direct feedback ("it doesn't need to be this complicated...
 // something modern and out of the box"): a floating frosted-glass island instead of
 // the old full-width sticky bar. "Sign in" is gone entirely and the CTA slimmed to
@@ -32,6 +39,7 @@ const LINKS = [
 export function Nav({ onSchoolsClick }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Hide-on-scroll-down / reveal-on-scroll-up — added after the floating island
   // was reported covering chapter titles (PLAY especially) on mobile: the chapters
@@ -64,7 +72,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
       style={{ transform: hidden ? "translateY(calc(-100% - 16px))" : "translateY(0)" }}
     >
       <div
-        className="flex w-full max-w-[1040px] items-center justify-between rounded-full py-2 pr-2 pl-5 transition-all duration-300 sm:py-2.5 sm:pr-2.5 sm:pl-6"
+        className="relative flex w-full max-w-[1040px] items-center justify-between rounded-full py-2 pr-2 pl-5 transition-all duration-300 sm:py-2.5 sm:pr-2.5 sm:pl-6"
         style={{
           background: scrolled ? "color-mix(in srgb, var(--background) 58%, transparent)" : "transparent",
           backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
@@ -81,6 +89,11 @@ export function Nav({ onSchoolsClick }: NavProps) {
         {/* Links stay desktop-only (same 900px tier as before — below that there's no
            room without wrapping, and the page is a single scroll anyway). */}
         <nav className="hidden gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
+          {QUICK_LINKS.map((link) => (
+            <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]" style={{ color: "var(--primary-tint)" }}>
+              {link.label}
+            </Link>
+          ))}
           {LINKS.map((link) => (
             <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]">
               {link.label}
@@ -91,17 +104,86 @@ export function Nav({ onSchoolsClick }: NavProps) {
           </button>
         </nav>
 
-        <Link
-          href="/flow"
-          className="rounded-full px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
-          style={{
-            background: "linear-gradient(180deg, #4a82ff, var(--primary))",
-            color: "var(--primary-foreground)",
-            boxShadow: "0 6px 18px -6px rgba(47,107,242,.65)",
-          }}
-        >
-          Get started
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/flow"
+            className="rounded-full px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
+            style={{
+              background: "linear-gradient(180deg, #4a82ff, var(--primary))",
+              color: "var(--primary-foreground)",
+              boxShadow: "0 6px 18px -6px rgba(47,107,242,.65)",
+            }}
+          >
+            Get started
+          </Link>
+          {/* Hamburger: phones/tablets only — quick route into the demos
+             without hunting for CTAs mid-pitch. */}
+          <button
+            type="button"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-10 w-10 items-center justify-center rounded-full border min-[900px]:hidden"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5">
+              {menuOpen ? (
+                <>
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </>
+              ) : (
+                <>
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h16" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile menu panel */}
+        {menuOpen && (
+          <div
+            className="absolute top-[calc(100%+8px)] right-0 flex w-60 flex-col gap-1 rounded-2xl border p-2 min-[900px]:hidden"
+            style={{
+              background: "color-mix(in srgb, var(--background) 88%, transparent)",
+              backdropFilter: "blur(18px) saturate(1.6)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.6)",
+              borderColor: "var(--glass-border)",
+              boxShadow: "0 16px 40px -16px rgba(0,0,0,0.6)",
+            }}
+          >
+            {QUICK_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl px-4 py-2.5 text-[14px] font-bold"
+                style={{ color: "var(--primary-tint)", background: "var(--glass-surface-1)" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            {LINKS.map((link) => (
+              <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                {link.label}
+              </Link>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                onSchoolsClick();
+              }}
+              className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold"
+              style={{ color: "var(--foreground)" }}
+            >
+              For schools
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

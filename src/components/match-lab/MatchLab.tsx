@@ -211,7 +211,7 @@ export function MatchLab() {
       <HomeButton />
       <ThemeToggle />
 
-      <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 sm:pt-5 sm:pb-5">
+      <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-5 sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
           {/* ---- header: title + live counter ---- */}
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
@@ -639,16 +639,20 @@ function MiniRanking({ liked }: { liked: Career[] }) {
 function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-5 backdrop-blur-xl"
-      style={{ background: "color-mix(in srgb, var(--color-night-background) 78%, transparent)" }}
-      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-5 backdrop-blur-xl select-none"
+      style={{ background: "color-mix(in srgb, var(--color-night-background) 78%, transparent)", WebkitTapHighlightColor: "transparent" }}
+      onPointerUp={(e) => {
+        // Backdrop-only dismiss, via pointerup with a self-target check —
+        // click on a bare div is unreliable on iOS, and a tap that begins
+        // on the card must never dismiss.
+        if (e.target === e.currentTarget) onClose();
+      }}
       role="dialog"
       aria-modal="true"
     >
       <div
         className="w-full max-w-[440px] rounded-3xl border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
-        onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
