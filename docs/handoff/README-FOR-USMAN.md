@@ -20,6 +20,27 @@ especially "pull tokens live from the Variables API, never hand-type."
 | `background-space-extraction.md` | Why the atmospheric background can't be "extracted" (it's five blurred ellipses, not a token) + the production-ready, WebKit-safe CSS to use instead. |
 | `figma-agent-prompt.md` | Micro-stepped prompt for the Figma AI agent to add all missing variables and run the approved cleanup — the design side runs this, then you re-pull. |
 
+## Certification — 2026-08-19
+
+The Figma file passed a full integrity audit and fix pass on
+2026-08-19: **154 semantic variables, zero broken alias chains in
+either mode, zero orphaned styles, zero ghost component references,
+zero raw gradient fills on any build-target surface.** Pull with
+confidence. Additions since your bootstrap prompt was written:
+
+- `gradient/card-surface-transparent` — a semi-transparent sibling of
+  `gradient/card-surface` (stops at a=0.3/0.7/0.85) used by the Career
+  Poster Card roots of 4 worlds (Business & Money, Arts Media & Sport,
+  Driving Flying & Shipping, Factories & Making Things) for stronger
+  image bleed-through. All 15 worlds share the same structure: image
+  in a `Career Image` child frame, gradient style on the root.
+- `UI/Rank Number` (desktop, 180px) and `UI/Rank Number (Mobile)`
+  (200px) text styles now bind the ranked-card digits.
+- The `accent` family is brand blue (`#2f6bf2` dark / `#1e4fcc`
+  light; `accent-subtle` `#3894ff`); the purple identity lives in
+  `accent-purple` (`#7d5cff`). Violet Nebula layers bind
+  `accent-purple`.
+
 ## Architecture in one paragraph
 
 One Style Dictionary pipeline, fed by the live Figma Variables pull,
