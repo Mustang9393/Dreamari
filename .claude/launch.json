@@ -4,19 +4,47 @@
     {
       "name": "dreamari-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "dreamari-shadcn",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3001"
+      ],
+      "port": 3001,
+      "cwd": "/Users/chandump/dreamari-shadcn"
     },
     {
       "name": "career-card-preview",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8935", "--directory", "/private/tmp/claude-501/-Users-chandump-dreamari/e5cd33ca-bbfb-438b-a5ef-a074265aee16/scratchpad"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8935",
+        "--directory",
+        "/private/tmp/claude-501/-Users-chandump-dreamari/e5cd33ca-bbfb-438b-a5ef-a074265aee16/scratchpad"
+      ],
       "port": 8935
     },
     {
       "name": "reference-html",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "/private/tmp/claude-501/-Users-chandump-dreamari/21ae439e-04ee-43be-a3c3-191a9ae695e5/scratchpad"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8791",
+        "--directory",
+        "/private/tmp/claude-501/-Users-chandump-dreamari/21ae439e-04ee-43be-a3c3-191a9ae695e5/scratchpad"
+      ],
       "port": 8791
     }
   ]

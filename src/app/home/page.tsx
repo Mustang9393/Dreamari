@@ -8,8 +8,7 @@ export const metadata: Metadata = {
   description: "Continue your Dreamari journey, discover careers and build career-ready skills.",
 };
 
-// Home — v2.1 (Figma 2099:3423 / mobile 7:1749). The previous tabbed
-// StudentHomeExperience is superseded by this design.
+// Home — v2.1 (Figma 2099:3423 / mobile 7:1749).
 export default function HomePage() {
   return (
     <>

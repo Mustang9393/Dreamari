@@ -6,6 +6,30 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 shadcn worktree + theme fixes + legacy purge
+
+- PARALLEL WORKFLOW: new git worktree at ../dreamari-shadcn on branch
+  `shadcn` (own node_modules, dev on port 3001 via launch.json entry
+  "dreamari-shadcn"; NOTE preview_start can't launch external-cwd
+  configs, start it with `npm run dev -- -p 3001` in the worktree).
+  Design work continues in /Users/chandump/dreamari on v4 at :3000 —
+  the two never touch each other; merge `shadcn` deliberately later.
+- shadcn branch: real shadcn/ui installed (radix base, nova preset),
+  16 components in src/components/shadcn (ui alias re-pointed; legacy
+  ui/Button untouched), /theme-lab there renders the REAL components
+  on the Dreamari contract. Init clobbered the legacy dark :root theme
+  (restored, declared last) and added a Geist next/font/google import
+  (reverted — that pattern broke Vercel builds before).
+- Theme fixes (v4): adapter aliases re-declared per scope (:root-only
+  aliases froze --card-foreground to the OLD app's #edeff3 — light
+  mode dialogs were near-white-on-light); --card lightened #0e0f18 →
+  #151829 (re-point the Figma variable).
+- LEGACY PURGE (v4): deleted StudentHomeExperience, layout/Navbar,
+  flow/match leftovers (MatchDeck/ActionButtons/ProgressPanel/Toast),
+  and 23 unreferenced assets (~6MB: images/home/*, old mascots, dead
+  career jpgs). dreamari-logo.svg KEPT (unreferenced but brand asset).
+  .DS_Store ignored. Build green after purge.
+
 ### 2026-08-20 /theme-lab: shadcn recipes on Dreamari tokens (v4 LOCAL)
 
 - New /theme-lab renders shadcn/ui's own component recipes (Button
