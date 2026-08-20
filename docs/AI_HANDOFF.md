@@ -6,6 +6,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 utility views + locker peek
+
+- Locker and Settings are full VIEWS now: opening either replaces
+  everything under the identity header (Top 3 strip + tab bar hidden);
+  X returns to Overview. Settings went from modal sheet to inline view
+  (SettingsView); TabId gained "settings".
+- Overview: the trailing locker strip is gone; a collapsible "Locker ·
+  N saved" peek row sits directly under My Top 3 (Overview only),
+  expanding to the mini poster strip + "Open full Locker".
+
 ### 2026-08-20 My Path full rethink (Replit parity) + IA rework
 
 - ROUTE_DETAILS added to profile data (data.ts): per-route pitch, fit
