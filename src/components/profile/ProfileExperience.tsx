@@ -204,6 +204,8 @@ export function ProfileExperience() {
             </div>
           )}
           {focus && <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${WORLD_COLORS[focus.world]} 10%, transparent) 0%, transparent 45%)` }} />}
+          {/* Progress-blue backdrop, left to right, so the streak + readiness signals stay legible over the art */}
+          <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 30%, color-mix(in srgb, var(--primary) 16%, color-mix(in srgb, var(--background) 88%, transparent)) 62%, color-mix(in srgb, var(--primary) 30%, var(--background)) 100%)" }} />
           <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-[var(--space-4)]">
               <label className="group relative size-16 flex-none cursor-pointer" aria-label="Change profile photo">
@@ -457,7 +459,10 @@ function OverviewTab({
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <section className="flex flex-col gap-[var(--space-3)]">
-        <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Focus</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
+          <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap a card to set your focus</span>
+        </div>
         <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onGoLocker={onGoLocker} />
       </section>
 
@@ -645,7 +650,7 @@ function PathTab(props: {
     <div className="flex flex-col gap-[var(--space-8)]">
       {/* ---- 1. Top 3 ---- */}
       <section className="flex flex-col gap-[var(--space-4)]">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3</h2>
+        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
         {top3.length === 0 ? (
           <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
             <p className="text-[15px] font-bold">No picks yet</p>
@@ -1025,8 +1030,8 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         <span className="flex flex-wrap items-center gap-[var(--space-2)]">
           {(
             [
-              { key: "receipts", label: "Receipts" },
-              { key: "route", label: "Route" },
+              { key: "receipts", label: "Engagement" },
+              { key: "route", label: "Pathway" },
               { key: "plan", label: "Plan" },
             ] as const
           ).map((section) => (
@@ -1057,9 +1062,10 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
       <div className="print-report mx-auto my-6 w-[min(720px,92vw)] rounded-[8px] bg-white p-10 text-[#111827] shadow-2xl print:my-0 print:w-full print:rounded-none print:shadow-none">
         <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
           <div>
-            <p className="text-[11px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Report</p>
+            <p className="text-[11px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Interest Report</p>
             <p className="mt-1 text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</p>
             <p className="text-[13px] text-[#6b7280]">{career.world}</p>
+            <p className="mt-1 text-[11.5px] text-[#6b7280]">Prepared for counselors, school staff, and family</p>
           </div>
           <div className="text-right text-[12px] text-[#6b7280]">
             <p className="font-bold text-[#111827]">{STUDENT.name}</p>
@@ -1070,10 +1076,10 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           {[
-            ["Match score", `${career.match}% (${matchTier(career.match)}), from activity in Dreamari`],
-            ["Readiness", `${STUDENT.readiness} / 100 (${STUDENT.readinessStatus})`],
-            ["Selected route", `${route.type}: ${route.program}`],
-            ["Plan progress", `${progress.complete}/${progress.total} tasks (${progress.pct}%)`],
+            ["Match strength", `${career.match}% (${matchTier(career.match)}), derived from logged in-app activity`],
+            ["Readiness index", `${STUDENT.readiness} / 100 (${STUDENT.readinessStatus})`],
+            ["Selected pathway", `${route.type}: ${route.program}`],
+            ["Plan progress", `${progress.complete} of ${progress.total} planned actions complete (${progress.pct}%)`],
           ].map(([label, value]) => (
             <div key={label} className="rounded-[6px] border border-[#e5e7eb] px-3 py-2">
               <p className="text-[10px] font-bold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
@@ -1083,7 +1089,8 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         </div>
 
         {sections.receipts && (
-          <ReportSection title="Receipts">
+          <ReportSection title="Demonstrated engagement">
+            <p className="mb-2 text-[12px] leading-[18px] text-[#6b7280]">Logged automatically from {STUDENT.name.split(" ")[0]}&apos;s activity in Dreamari. Sustained, self-directed engagement is the primary signal behind the match strength above.</p>
             <ul className="list-disc pl-5 text-[13px] leading-[20px]">
               {career.receipts.map((receipt) => (
                 <li key={receipt.label}>{receipt.value} · {receipt.label}</li>
@@ -1093,7 +1100,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         )}
 
         {sections.route && (
-        <ReportSection title="Chosen route">
+        <ReportSection title="Selected pathway">
           <div className="grid grid-cols-3 gap-x-4 gap-y-2 text-[12.5px]">
             {[
               ["Program", route.program],
@@ -1115,7 +1122,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         )}
 
         {sections.plan && (
-        <ReportSection title="The plan">
+        <ReportSection title="Action plan">
           {career.plan.map((horizon) => (
             <div key={horizon.id} className="mb-3">
               <p className="text-[12px] font-bold">{horizon.title} <span className="font-normal text-[#6b7280]">· {horizon.subtitle}</span></p>
@@ -1126,12 +1133,20 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
               </ul>
             </div>
           ))}
-          {next && <p className="mt-2 text-[12.5px] font-semibold">Next up: {next.label} ({next.minutes} min)</p>}
+          {next && <p className="mt-2 text-[12.5px] font-semibold">Immediate next step: {next.label} ({next.minutes} min)</p>}
         </ReportSection>
         )}
 
+        <ReportSection title="For the advising conversation">
+          <ul className="list-disc pl-5 text-[12.5px] leading-[19px]">
+            <li>Review the {route.type.toLowerCase()} pathway together, including total cost ({route.cost}), typical starting pay ({route.salary}), and the estimated loan payoff window ({route.loanPayoff}).</li>
+            <li>Ask {STUDENT.name.split(" ")[0]} which activity felt most engaging. Interest built through repeated, voluntary practice is a stronger indicator than a single assessment.</li>
+            <li>If interest holds over the next grading period, help with the concrete next step: {route.nextStep}.</li>
+          </ul>
+        </ReportSection>
+
         <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[10.5px] leading-[15px] text-[#6b7280]">
-          Interest and Readiness reflect what {STUDENT.name.split(" ")[0]} actually does in Dreamari. Shared only with {STUDENT.name.split(" ")[0]}&apos;s consent.
+          Match strength and the readiness index summarize {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. They are engagement indicators intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
         </p>
       </div>
     </div>
