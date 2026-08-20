@@ -6,6 +6,31 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 /profile round 3: match rings, poster focus, custom plan/report (v4 LOCAL)
+
+- Scores made legible: interest is now MATCH language everywhere. New
+  MatchRing (ring graph, percentage centered, tier tooltip "from your
+  activity"); tier words: Strong/Solid/Early match, Low signal. Rings
+  replace all bars: report Match cell (48px ring + tier + "From your
+  activity"), focus cards (34px), locker cards (36px + tier), overview
+  strip (26px). Readiness ring replaced by ReadinessMeter: labeled
+  journey bar with stage ticks (Building / Pipeline Ready / Opted In,
+  doc 22 labels) + n/100.
+- Focus picker is now real Browse poster cards (148x210, approved
+  per-world poster fonts via posterTitleFont + world label + text
+  scrim, rank chip, FOCUS badge, dimmed/scaled unselected). Locker grid
+  + overview strip titles also use the poster faces.
+- CUSTOMIZABLE PLAN: each unlocked horizon has "Add your own step"
+  (custom tasks get a YOURS chip, deletable; counted in all progress
+  math incl. gates + report). CUSTOMIZABLE REPORT: export overlay has
+  Receipts/Route/Plan section toggles; print honors them; plan export
+  includes student-added steps marked "(added by student)".
+- Chrome: avatar photo now lives in both navs and links to /profile
+  (desktop right panel + mobile bottom-nav last tab w/ accent ring when
+  active). New BackButton (router.back w/ fallback) on /colleges
+  (mobile header + desktop). Profile tab bar is full-width equal-split.
+- 10/10 browser assertions passed; build green. Still LOCAL on v4.
+
 ### 2026-08-20 /profile round 2: visual-first, compare charts, /colleges (v4 LOCAL)
 
 - Copy pass: no paragraphs, no em dashes in student-facing text. Evidence

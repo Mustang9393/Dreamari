@@ -32,6 +32,7 @@ export type PlanTask = {
   minutes: number;
   action: "Play" | "Explore" | "Join" | "Build";
   href: string;
+  custom?: boolean; // student-added step
 };
 
 export type PlanHorizon = {

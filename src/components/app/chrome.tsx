@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CirclePlay, Compass, Flame, House, Menu, Sparkle, User, Users, X } from "lucide-react";
+import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Sparkle, Users, X } from "lucide-react";
+
+// The student's avatar photo doubles as the Profile entry point in both navs.
+const AVATAR_SRC = "/images/avatar-jordan.jpg";
 
 // App chrome, ported from the Figma "Desktop Navigation" component
 // (2570:4916: logo, center pill nav tabs, streak counter, XP, user avatar —
@@ -27,6 +31,24 @@ const QUICK_LINKS = [
   { label: "Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
 ] as const;
+
+export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      aria-label="Go back"
+      onClick={() => {
+        if (window.history.length > 1) router.back();
+        else router.push(fallback);
+      }}
+      className={`flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
+      style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+    >
+      <ArrowLeft className="h-5 w-5" />
+    </button>
+  );
+}
 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
@@ -118,11 +140,10 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
             15,980 XP
           </span>
         </span>
-        <span
-          aria-label="Your profile"
-          className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px]"
-          style={{ borderColor: "var(--accent)", background: "linear-gradient(90deg, #3861ff, #8b7bff)" }}
-        />
+        <Link href="/profile" aria-label="My Profile">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+        </Link>
         <QuickLinksMenu />
       </div>
     </header>
@@ -134,7 +155,6 @@ const MOBILE_ITEMS = [
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "#", Icon: CirclePlay },
   { label: "Connect", href: "#", Icon: Users },
-  { label: "Profile", href: "/profile", Icon: User },
 ] as const;
 
 export function MobileNav({ active }: { active: string }) {
@@ -158,6 +178,20 @@ export function MobileNav({ active }: { active: string }) {
           </Link>
         );
       })}
+      <Link
+        href="/profile"
+        aria-label="My Profile"
+        aria-current={active === "Profile" ? "page" : undefined}
+        className="flex h-11 w-11 items-center justify-center"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={AVATAR_SRC}
+          alt=""
+          className="size-7 rounded-full border-[1.5px] object-cover"
+          style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
+        />
+      </Link>
     </nav>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, MapPin, Search } from "lucide-react";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
-import { DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -34,9 +34,16 @@ export default function CollegesPage() {
 
         <DesktopNavigation active="Profile" />
         <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-          <Link href="/" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</Link>
+          <span className="flex items-center gap-[var(--space-3)]">
+            <BackButton fallback="/profile" />
+            <Link href="/" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</Link>
+          </span>
           <QuickLinksMenu />
         </header>
+
+        <div className="relative z-10 mx-auto mt-4 hidden w-full max-w-[860px] px-5 md:block">
+          <BackButton fallback="/profile" />
+        </div>
 
         <main className="relative z-10 mx-auto flex w-full max-w-[860px] flex-col items-center gap-[var(--space-6)] px-5 pt-[48px] pb-[140px] text-center md:pt-[96px]">
           <span className="rounded-full border px-[14px] py-[5px] text-[10px] font-bold tracking-[0.6px] uppercase" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>In the works</span>

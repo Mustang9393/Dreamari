@@ -21,6 +21,7 @@ import {
   GraduationCap,
   Lock,
   Pencil,
+  Plus,
   Printer,
   Target,
   Trophy,
@@ -28,7 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
-import { WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
 
 // My Profile, round 2: scannable and visual. No paragraphs, no em dashes.
@@ -53,11 +54,11 @@ function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
 }
 
-function interestTier(score: number): string {
-  if (score >= 75) return "Strong";
-  if (score >= 50) return "Active";
-  if (score >= 25) return "Emerging";
-  return "Low";
+function matchTier(score: number): string {
+  if (score >= 75) return "Strong match";
+  if (score >= 50) return "Solid match";
+  if (score >= 25) return "Early match";
+  return "Low signal";
 }
 
 const CAPTION = "text-[10px] leading-[14px] font-semibold tracking-[0.6px] uppercase";
@@ -72,32 +73,55 @@ export function ProfileExperience() {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
+  const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
 
   const focus = careerById(focusId);
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
+  // Suggested tasks plus the student's own steps for a horizon.
+  const tasksFor = (career: ProfileCareer, horizonId: string) => {
+    const horizon = career.plan.find((item) => item.id === horizonId)!;
+    return [...horizon.tasks, ...(customTasks[`${career.id}:${horizonId}`] ?? [])];
+  };
 
   const horizonProgress = (career: ProfileCareer, index: number) => {
-    const horizon = career.plan[index];
-    const complete = horizon.tasks.filter((task) => doneSet(career.id).has(task.id)).length;
-    return { complete, total: horizon.tasks.length, pct: horizon.tasks.length ? complete / horizon.tasks.length : 0 };
+    const tasks = tasksFor(career, career.plan[index].id);
+    const complete = tasks.filter((task) => doneSet(career.id).has(task.id)).length;
+    return { complete, total: tasks.length, pct: tasks.length ? complete / tasks.length : 0 };
   };
   const horizonUnlocked = (career: ProfileCareer, index: number) => index === 0 || horizonProgress(career, index - 1).pct >= 0.4;
   const planProgress = (career: ProfileCareer) => {
-    const total = career.plan.reduce((sum, horizon) => sum + horizon.tasks.length, 0);
-    const complete = career.plan.reduce((sum, horizon) => sum + horizon.tasks.filter((task) => doneSet(career.id).has(task.id)).length, 0);
+    let total = 0;
+    let complete = 0;
+    career.plan.forEach((horizon) => {
+      const tasks = tasksFor(career, horizon.id);
+      total += tasks.length;
+      complete += tasks.filter((task) => doneSet(career.id).has(task.id)).length;
+    });
     return { complete, total, pct: total ? Math.round((complete / total) * 100) : 0 };
   };
   const nextTask = (career: ProfileCareer): PlanTask | null => {
     for (let index = 0; index < career.plan.length; index++) {
       if (!horizonUnlocked(career, index)) break;
-      const open = career.plan[index].tasks.find((task) => !doneSet(career.id).has(task.id));
+      const open = tasksFor(career, career.plan[index].id).find((task) => !doneSet(career.id).has(task.id));
       if (open) return open;
     }
     return null;
   };
+
+  function addCustomTask(careerId: string, horizonId: string, label: string) {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const task: PlanTask = { id: `custom-${Date.now()}`, label: trimmed, minutes: 10, action: "Build", href: "#", custom: true };
+    setCustomTasks((current) => ({ ...current, [`${careerId}:${horizonId}`]: [...(current[`${careerId}:${horizonId}`] ?? []), task] }));
+  }
+
+  function removeCustomTask(careerId: string, horizonId: string, taskId: string) {
+    setCustomTasks((current) => ({ ...current, [`${careerId}:${horizonId}`]: (current[`${careerId}:${horizonId}`] ?? []).filter((task) => task.id !== taskId) }));
+    setDone((current) => ({ ...current, [careerId]: (current[careerId] ?? []).filter((id) => id !== taskId) }));
+  }
 
   function toggleTask(careerId: string, taskId: string) {
     setDone((current) => {
@@ -193,13 +217,13 @@ export function ProfileExperience() {
                   <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
                 </span>
               </span>
-              <ReadinessRing value={STUDENT.readiness} label={STUDENT.readinessStatus} />
+              <ReadinessMeter value={STUDENT.readiness} />
             </div>
           </div>
         </section>
 
         {/* ---- Tabs ---- */}
-        <div className="flex items-center gap-[var(--space-1)] self-start rounded-[var(--radius-xl)] border p-[var(--space-1)]" style={GLASS}>
+        <div className="flex w-full items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[var(--space-1)]" style={GLASS}>
           {(
             [
               { id: "overview", label: "Overview" },
@@ -208,7 +232,7 @@ export function ProfileExperience() {
               { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
-            <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
+            <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[7px] text-center text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
               {item.label}
             </button>
           ))}
@@ -218,7 +242,7 @@ export function ProfileExperience() {
           <OverviewTab top3={top3} focus={focus} setFocusId={setFocusId} locker={locker} chosenRoute={chosenRoute} planProgress={planProgress} nextTask={nextTask} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoLocker={() => setTab("locker")} />
         )}
         {tab === "path" && (
-          <PathTab top3={top3} focusId={focusId} setFocusId={setFocusId} focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} removeFromTop3={removeFromTop3} move={move} onGoLocker={() => setTab("locker")} />
+          <PathTab top3={top3} focusId={focusId} setFocusId={setFocusId} focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} removeFromTop3={removeFromTop3} move={move} onGoLocker={() => setTab("locker")} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} />
         )}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} />}
         {tab === "resume" && <ResumeTab />}
@@ -252,28 +276,61 @@ export function ProfileExperience() {
         </div>
       )}
 
-      {reportOpen && focus && <ReportOverlay career={focus} route={chosenRoute(focus)} progress={planProgress(focus)} next={nextTask(focus)} onClose={() => setReportOpen(false)} />}
+      {reportOpen && focus && <ReportOverlay career={focus} route={chosenRoute(focus)} progress={planProgress(focus)} next={nextTask(focus)} tasksFor={tasksFor} onClose={() => setReportOpen(false)} />}
     </div>
   );
 }
 
 // ------------------------------------------------------------- pieces ----
 
-function ReadinessRing({ value, label }: { value: number; label: string }) {
-  const radius = 24;
+// Match ring: percentage in the middle, "match" language around it. The
+// score reflects what the student actually does in Dreamari (doc 14).
+function MatchRing({ score, size = 44 }: { score: number; size?: number }) {
+  const stroke = size >= 40 ? 4 : 3;
+  const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   return (
-    <span className="flex items-center gap-[10px]">
-      <span className="relative inline-flex size-14 items-center justify-center">
-        <svg viewBox="0 0 56 56" className="absolute inset-0 -rotate-90">
-          <circle cx="28" cy="28" r={radius} fill="none" stroke="var(--glass-surface-2)" strokeWidth="5" />
-          <circle cx="28" cy="28" r={radius} fill="none" stroke="var(--accent-subtle)" strokeWidth="5" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
-        </svg>
-        <span className="text-[14px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{value}</span>
-      </span>
-      <span className="flex flex-col">
-        <span className="text-[13px] leading-[18px] font-bold">{label}</span>
+    <span title={`${matchTier(score)}: from your activity in Dreamari`} className="relative inline-flex flex-none items-center justify-center" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--glass-surface-2)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--accent-subtle)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - score / 100)} />
+      </svg>
+      <span className="font-extrabold" style={{ fontFamily: "var(--font-display)", fontSize: size >= 44 ? 12 : size >= 36 ? 10.5 : 8.5 }}>{score}%</span>
+    </span>
+  );
+}
+
+// Readiness journey: where the student stands on the road to real
+// opportunities (doc 22 status labels), not an unexplained ring.
+const READINESS_STAGES = [
+  { label: "Building", at: 25 },
+  { label: "Pipeline Ready", at: 75 },
+  { label: "Opted In", at: 100 },
+];
+
+function ReadinessMeter({ value }: { value: number }) {
+  return (
+    <span className="flex w-[210px] flex-col gap-[6px]">
+      <span className="flex items-baseline justify-between">
         <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Readiness</span>
+        <span className="text-[13px] leading-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{value}<span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100</span></span>
+      </span>
+      <span className="relative h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${value}%`, background: "var(--accent-subtle)" }} />
+        {READINESS_STAGES.slice(0, 2).map((stage) => (
+          <span key={stage.label} aria-hidden className="absolute top-[-2px] h-[10px] w-[2px] rounded-full" style={{ left: `${stage.at}%`, background: "var(--glass-stroke, rgba(255,255,255,0.3))" }} />
+        ))}
+      </span>
+      <span className="flex justify-between">
+        {READINESS_STAGES.map((stage) => {
+          const reached = value >= (stage.at === 25 ? 25 : stage.at);
+          const current = value >= 25 && value < 75 ? stage.at === 25 : value >= 75 && value < 100 ? stage.at === 75 : stage.at === 100 && value >= 100;
+          return (
+            <span key={stage.label} className="text-[8.5px] leading-[11px] font-bold tracking-[0.3px] uppercase" style={{ color: current ? "var(--accent-subtle)" : reached ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {stage.label}
+            </span>
+          );
+        })}
       </span>
     </span>
   );
@@ -282,18 +339,30 @@ function ReadinessRing({ value, label }: { value: number; label: string }) {
 function FocusPicker({ top3, focus, setFocusId }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void }) {
   if (top3.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-[var(--space-2)]">
+    <div className="flex gap-[var(--space-3)] overflow-x-auto pb-1 [scrollbar-width:none]" style={{ touchAction: "pan-x pan-y" }}>
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const isFocus = focus?.id === id;
         return (
-          <button key={id} type="button" aria-pressed={isFocus} onClick={() => setFocusId(id)} className="flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-lg)] border py-[6px] pr-[var(--space-4)] pl-[6px] transition-colors" style={{ background: isFocus ? "color-mix(in srgb, var(--primary) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)" }}>
-            <span className="relative h-9 w-7 overflow-hidden rounded-[6px]">
-              <Image src={career.photo} alt="" fill sizes="28px" className="object-cover" />
+          <button
+            key={id}
+            type="button"
+            aria-pressed={isFocus}
+            onClick={() => setFocusId(id)}
+            className="relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase transition-all"
+            style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)" }}
+          >
+            <Image src={career.photo} alt="" fill sizes="148px" className="object-cover" />
+            <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+            {isFocus && (
+              <span className="absolute top-2 right-2 rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.6px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>
+            )}
+            <span className="absolute right-2 bottom-[64px] flex items-center justify-center rounded-full p-[3px]" style={{ background: "var(--glass-surface-3)" }}>
+              <MatchRing score={career.match} size={34} />
             </span>
-            <span className="flex flex-col items-start">
-              <span className="text-[13px] leading-[16px] font-bold">{career.title}</span>
-              <span className="text-[10px] leading-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>#{index + 1} · {career.match}</span>
+            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px]" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "34px" }}>
+              <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
+              <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
             </span>
           </button>
         );
@@ -375,9 +444,25 @@ function OverviewTab({
         <p className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
 
         <div className="grid grid-cols-1 divide-y overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3 sm:divide-x sm:divide-y-0" style={{ borderColor: "var(--glass-border)" }}>
-          <ReportStat label="Interest" big={String(focus.match)} small={`${interestTier(focus.match)} signal`} />
+          <span className="flex items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+            <MatchRing score={focus.match} size={48} />
+            <span className="flex min-w-0 flex-col gap-[1px]">
+              <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
+              <span className="text-[13px] leading-[17px] font-bold">{matchTier(focus.match)}</span>
+              <span className="text-[10px] leading-[13px]" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
+            </span>
+          </span>
           <ReportStat label="Route" big={route.type} small={route.program} />
-          <ReportStat label="Plan" big={progress.complete === 0 ? "Ready" : `${progress.pct}%`} small={progress.complete === 0 ? "First task: 10 min" : `${progress.complete} of ${progress.total} done`} />
+          <span className="flex flex-col gap-[6px] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan</span>
+            <span className="flex items-baseline justify-between">
+              <span className="text-[15px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{progress.complete === 0 ? "Ready" : `${progress.pct}%`}</span>
+              <span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{progress.complete === 0 ? "10 min start" : `${progress.complete}/${progress.total}`}</span>
+            </span>
+            <span className="relative h-[6px] w-full overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+              <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
+            </span>
+          </span>
         </div>
 
         <div className="flex flex-col gap-[var(--space-2)]">
@@ -425,9 +510,11 @@ function OverviewTab({
             {locker.map((career) => (
               <button key={career.id} type="button" onClick={onGoLocker} className="relative h-[150px] w-[106px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
                 <Image src={career.photo} alt="" fill sizes="106px" className="object-cover" />
-                <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[1px] p-[8px]" style={{ background: "linear-gradient(180deg, transparent, var(--scrim-heavy) 55%)" }}>
-                  <span className="text-[11px] leading-[14px] font-bold text-white">{career.title}</span>
-                  <span className="text-[9px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{career.match}</span>
+                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[2px] px-1 pb-[8px] text-center uppercase" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "24px" }}>
+                  <span className="w-full text-[10.5px] leading-[12px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
+                  <span className="flex items-center justify-center rounded-full p-[2px]" style={{ background: "var(--glass-surface-3)" }}>
+                    <MatchRing score={career.match} size={26} />
+                  </span>
                 </span>
               </button>
             ))}
@@ -487,15 +574,19 @@ function PathTab(props: {
   removeFromTop3: (id: string) => void;
   move: (id: string, delta: number) => void;
   onGoLocker: () => void;
+  tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
+  addCustomTask: (careerId: string, horizonId: string, label: string) => void;
+  removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
 }) {
-  const { top3, focusId, setFocusId, focus, chosenRoute, setRouteChoice, horizonProgress, horizonUnlocked, doneSet, toggleTask, removeFromTop3, move, onGoLocker } = props;
+  const { top3, focusId, setFocusId, focus, chosenRoute, setRouteChoice, horizonProgress, horizonUnlocked, doneSet, toggleTask, removeFromTop3, move, onGoLocker, tasksFor, addCustomTask, removeCustomTask } = props;
+  const [draftTask, setDraftTask] = useState("");
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
   const [openHorizon, setOpenHorizon] = useState<string | null>(null);
 
   const currentHorizonId = (career: ProfileCareer) => {
     for (let index = 0; index < career.plan.length; index++) {
       if (!horizonUnlocked(career, index)) break;
-      if (career.plan[index].tasks.some((task) => !doneSet(career.id).has(task.id))) return career.plan[index].id;
+      if (tasksFor(career, career.plan[index].id).some((task) => !doneSet(career.id).has(task.id))) return career.plan[index].id;
     }
     return career.plan[0].id;
   };
@@ -526,7 +617,7 @@ function PathTab(props: {
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-bold">{career.title}</span>
-                    <span className="truncate text-[11px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {career.match}</span>
+                    <span className="truncate text-[11px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {matchTier(career.match)}</span>
                   </span>
                   <button type="button" onClick={() => setFocusId(id)} aria-pressed={isFocus} className="flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] font-bold" style={{ background: isFocus ? "var(--primary)" : "transparent", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", color: isFocus ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>
                     {isFocus ? "In focus" : "Set focus"}
@@ -650,7 +741,7 @@ function PathTab(props: {
                     </button>
                     {isOpen && (
                       <div className="filters-reveal flex flex-col gap-[var(--space-2)] border-t p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                        {horizon.tasks.map((task) => {
+                        {tasksFor(focus, horizon.id).map((task) => {
                           const complete = doneSet(focus.id).has(task.id);
                           const TaskIcon = ACTION_ICON[task.action];
                           return (
@@ -659,15 +750,45 @@ function PathTab(props: {
                                 {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                               </button>
                               <span className={`min-w-0 flex-1 text-[12.5px] leading-[17px] font-semibold ${complete ? "line-through" : ""}`}>{task.label}</span>
+                              {task.custom && (
+                                <span className="flex-none rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
+                              )}
                               <span className="flex-none text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
-                              {!complete && (
+                              {!complete && !task.custom && (
                                 <Link href={task.href} className="flex flex-none items-center gap-[3px] text-[11px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                                   <TaskIcon className="h-3 w-3" /> {task.action}
                                 </Link>
                               )}
+                              {task.custom && (
+                                <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="flex-none cursor-pointer rounded p-[2px]" style={{ color: "var(--muted-foreground)" }}>
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              )}
                             </div>
                           );
                         })}
+                        {/* Add your own step */}
+                        <form
+                          className="flex items-center gap-[8px] rounded-[var(--radius-md)] border border-dashed px-[var(--space-3)] py-[var(--space-2)]"
+                          style={{ borderColor: "var(--glass-border)" }}
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            addCustomTask(focus.id, horizon.id, draftTask);
+                            setDraftTask("");
+                          }}
+                        >
+                          <Plus className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
+                          <input
+                            value={draftTask}
+                            onChange={(event) => setDraftTask(event.target.value)}
+                            placeholder="Add your own step"
+                            className="min-w-0 flex-1 bg-transparent text-[12.5px] font-semibold outline-none placeholder:text-[color:var(--muted-foreground)]"
+                            style={{ color: "var(--foreground)" }}
+                          />
+                          <button type="submit" disabled={!draftTask.trim()} className="flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
+                            Add
+                          </button>
+                        </form>
                       </div>
                     )}
                   </div>
@@ -719,15 +840,18 @@ function LockerTab({ locker, top3Count, addToTop3 }: { locker: ProfileCareer[]; 
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <Image src={career.photo} alt="" fill sizes="220px" className="object-cover" />
-                <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[2px] p-[10px]" style={{ background: "linear-gradient(180deg, transparent, var(--scrim-heavy) 60%)" }}>
-                  <span className="text-[13px] leading-[16px] font-bold text-white">{career.title}</span>
-                  <span className="text-[9.5px] font-semibold tracking-[0.4px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "30px" }}>
+                  <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
+                  <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>
               </span>
               <span className="flex items-center justify-between gap-[var(--space-2)] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
-                <span className="flex min-w-0 flex-col">
-                  <span className="text-[13px] leading-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.match}</span>
-                  <span className="text-[9px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{interestTier(career.match)}</span>
+                <span className="flex min-w-0 flex-1 items-center gap-[8px]">
+                  <MatchRing score={career.match} size={36} />
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate text-[10.5px] leading-[13px] font-bold">{matchTier(career.match)}</span>
+                    <span className="text-[8.5px] leading-[11px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
+                  </span>
                 </span>
                 <button type="button" onClick={() => addToTop3(career.id)} className="flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] font-bold" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
                   {top3Count >= 3 ? "Swap in" : "Add"}
@@ -765,13 +889,38 @@ function ResumeTab() {
 
 // ---- Export overlay ----
 
-function ReportOverlay({ career, route, progress, next, onClose }: { career: ProfileCareer; route: ProfileCareer["routes"][number]; progress: { complete: number; total: number; pct: number }; next: PlanTask | null; onClose: () => void }) {
+function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { career: ProfileCareer; route: ProfileCareer["routes"][number]; progress: { complete: number; total: number; pct: number }; next: PlanTask | null; tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[]; onClose: () => void }) {
   const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  // Customizable export: the student picks which sections go in.
+  const [sections, setSections] = useState({ receipts: true, route: true, plan: true });
+  const toggle = (key: keyof typeof sections) => setSections((current) => ({ ...current, [key]: !current[key] }));
   return (
     <div className="print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
-      <div className="no-print sticky top-0 z-10 flex items-center justify-between px-5 py-3 backdrop-blur-[10px]" style={{ background: "var(--glass-surface-3)" }}>
+      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[10px]" style={{ background: "var(--glass-surface-3)" }}>
         <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
-        <span className="flex gap-[var(--space-2)]">
+        <span className="flex flex-wrap items-center gap-[var(--space-2)]">
+          {(
+            [
+              { key: "receipts", label: "Receipts" },
+              { key: "route", label: "Route" },
+              { key: "plan", label: "Plan" },
+            ] as const
+          ).map((section) => (
+            <button
+              key={section.key}
+              type="button"
+              aria-pressed={sections[section.key]}
+              onClick={() => toggle(section.key)}
+              className="cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold"
+              style={{
+                background: sections[section.key] ? "color-mix(in srgb, var(--primary) 24%, transparent)" : "transparent",
+                borderColor: sections[section.key] ? "var(--primary)" : "var(--glass-border)",
+                color: sections[section.key] ? "var(--foreground)" : "var(--muted-foreground)",
+              }}
+            >
+              {section.label}
+            </button>
+          ))}
           <button type="button" onClick={() => window.print()} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Printer className="h-4 w-4" /> Print / Save PDF
           </button>
@@ -797,7 +946,7 @@ function ReportOverlay({ career, route, progress, next, onClose }: { career: Pro
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           {[
-            ["Interest signal", `${career.match} / 100 (${interestTier(career.match)})`],
+            ["Match score", `${career.match}% (${matchTier(career.match)}), from activity in Dreamari`],
             ["Readiness", `${STUDENT.readiness} / 100 (${STUDENT.readinessStatus})`],
             ["Selected route", `${route.type}: ${route.program}`],
             ["Plan progress", `${progress.complete}/${progress.total} tasks (${progress.pct}%)`],
@@ -809,14 +958,17 @@ function ReportOverlay({ career, route, progress, next, onClose }: { career: Pro
           ))}
         </div>
 
-        <ReportSection title="Receipts">
-          <ul className="list-disc pl-5 text-[13px] leading-[20px]">
-            {career.receipts.map((receipt) => (
-              <li key={receipt.label}>{receipt.value} · {receipt.label}</li>
-            ))}
-          </ul>
-        </ReportSection>
+        {sections.receipts && (
+          <ReportSection title="Receipts">
+            <ul className="list-disc pl-5 text-[13px] leading-[20px]">
+              {career.receipts.map((receipt) => (
+                <li key={receipt.label}>{receipt.value} · {receipt.label}</li>
+              ))}
+            </ul>
+          </ReportSection>
+        )}
 
+        {sections.route && (
         <ReportSection title="Chosen route">
           <div className="grid grid-cols-3 gap-x-4 gap-y-2 text-[12.5px]">
             {[
@@ -836,20 +988,23 @@ function ReportOverlay({ career, route, progress, next, onClose }: { career: Pro
             ))}
           </div>
         </ReportSection>
+        )}
 
+        {sections.plan && (
         <ReportSection title="The plan">
           {career.plan.map((horizon) => (
             <div key={horizon.id} className="mb-3">
               <p className="text-[12px] font-bold">{horizon.title} <span className="font-normal text-[#6b7280]">· {horizon.subtitle}</span></p>
               <ul className="mt-1 list-disc pl-5 text-[12.5px] leading-[19px]">
-                {horizon.tasks.map((task) => (
-                  <li key={task.id}>{task.label} · {task.minutes} min</li>
+                {tasksFor(career, horizon.id).map((task) => (
+                  <li key={task.id}>{task.label} · {task.minutes} min{task.custom ? " (added by student)" : ""}</li>
                 ))}
               </ul>
             </div>
           ))}
           {next && <p className="mt-2 text-[12.5px] font-semibold">Next up: {next.label} ({next.minutes} min)</p>}
         </ReportSection>
+        )}
 
         <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[10.5px] leading-[15px] text-[#6b7280]">
           Interest and Readiness reflect what {STUDENT.name.split(" ")[0]} actually does in Dreamari. Shared only with {STUDENT.name.split(" ")[0]}&apos;s consent.
