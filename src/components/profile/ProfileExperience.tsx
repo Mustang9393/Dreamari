@@ -788,10 +788,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* Three ALTERNATE ways in, side by side */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div>
-          <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
-          <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{focus.routes.length} alternate routes · pick the one that fits your goals, budget, and lifestyle</p>
-        </div>
+        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
         <div className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[3px]" style={GLASS}>
           {(["cards", "compare"] as const).map((view) => (
             <button key={view} type="button" aria-pressed={routeView === view} onClick={() => setRouteView(view)} className="cursor-pointer rounded-[var(--radius-md-alt)] px-[14px] py-[5px] text-[12px] font-bold capitalize" style={{ background: routeView === view ? "var(--primary)" : "transparent", color: routeView === view ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>
