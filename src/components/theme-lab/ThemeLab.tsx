@@ -49,11 +49,39 @@ const TOKEN_BOARD: { name: string; bg: string; fg?: string }[] = [
   { name: "chart-5", bg: "var(--chart-5, #00c8dc)" },
 ];
 
-function Section({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+// Where each shadcn primitive shows up in the product. This is the dev's
+// shopping list: install these, theme with tokens.css + shadcn-adapter.css,
+// and every surface listed here is covered.
+const INVENTORY: { name: string; usedIn: string }[] = [
+  { name: "Button", usedIn: "every CTA: Export report, Find schools, Play Game / More Info, Start Study" },
+  { name: "Badge", usedIn: "world labels, SIMULATION / GLOSSARY / GAME chips, readiness status, YOURS chip" },
+  { name: "Tabs", usedIn: "Profile tab bar, Explore For You | Browse All, Routes Cards | Compare" },
+  { name: "ToggleGroup", usedIn: "Explore filter + sort pills, build-flow chip picks" },
+  { name: "Card", usedIn: "Career Report, route cards, activity cards, Glossary banner, college previews" },
+  { name: "Accordion", usedIn: "Plan horizons, route card disclosure" },
+  { name: "Input", usedIn: "Explore search, Add your own step, resume forms" },
+  { name: "Checkbox", usedIn: "plan tasks" },
+  { name: "Switch", usedIn: "Talent Pipeline opt-in, settings" },
+  { name: "RadioGroup", usedIn: "build-flow single-choice steps" },
+  { name: "Select", usedIn: "college lookup filters, location picks" },
+  { name: "Slider", usedIn: "build flow cost step" },
+  { name: "Dialog", usedIn: "swap sheet + career preview on desktop" },
+  { name: "Sheet", usedIn: "same flows on mobile, match-lab guide + rank sheets" },
+  { name: "DropdownMenu", usedIn: "quick-links hamburger, avatar menu" },
+  { name: "Tooltip", usedIn: "icon-only controls (focus target, grip handle)" },
+  { name: "Avatar", usedIn: "nav avatars, profile header, Connect posts" },
+  { name: "Alert", usedIn: "readiness updates, system notices" },
+  { name: "Progress", usedIn: "plan + glossary progress, readiness track" },
+  { name: "Skeleton", usedIn: "loading rails and reports" },
+  { name: "Separator", usedIn: "report stat dividers, menu separators" },
+];
+
+function Section({ title, note, usedIn, children }: { title: string; note?: string; usedIn?: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex items-baseline gap-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+        {usedIn && <span className="text-[11px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Used in: <span style={{ color: V.mutedFg }}>{usedIn}</span></span>}
         {note && <span className="text-[11px] font-semibold" style={{ color: V.mutedFg }}>{note}</span>}
       </div>
       <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-xl)] border p-5" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -130,6 +158,21 @@ export function ThemeLab() {
             </button>
           </div>
 
+          {/* Inventory: what the dev needs and where each piece appears */}
+          <Section title="What the dev build needs" note="21 shadcn primitives cover the whole app; the shadcn branch lab renders them all for real">
+            <div className="grid w-full grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+              {INVENTORY.map((item) => (
+                <div key={item.name} className="flex items-baseline gap-2 text-[12px]">
+                  <span className="w-[108px] flex-none font-bold">{item.name}</span>
+                  <span style={{ color: V.mutedFg }}>{item.usedIn}</span>
+                </div>
+              ))}
+            </div>
+            <p className="w-full text-[11.5px]" style={{ color: V.mutedFg }}>
+              Stays bespoke (not shadcn): Career Poster Card, Env Card, MatchRing, ReadinessMeter, compare bars, hero art. See docs/handoff/COMPONENT-MAP.md.
+            </p>
+          </Section>
+
           {/* Token board */}
           <Section title="Contract tokens" note="the variables every shadcn component reads">
             <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
@@ -145,7 +188,7 @@ export function ThemeLab() {
             </div>
           </Section>
 
-          <Section title="Button" note="default / secondary / outline / ghost / destructive / link · sm / default / lg">
+          <Section title="Button" usedIn="Export report, Find schools, Play Game, Start Study" note="default / secondary / outline / ghost / destructive / link · sm / default / lg">
             <SButton>Continue</SButton>
             <SButton variant="secondary">Secondary</SButton>
             <SButton variant="outline">Outline</SButton>
@@ -156,14 +199,14 @@ export function ThemeLab() {
             <SButton size="lg">Large</SButton>
           </Section>
 
-          <Section title="Badge">
+          <Section title="Badge" usedIn="world labels, activity chips, readiness status, YOURS chip">
             <SBadge>Default</SBadge>
             <SBadge variant="secondary">Secondary</SBadge>
             <SBadge variant="outline">Outline</SBadge>
             <SBadge variant="destructive">Destructive</SBadge>
           </Section>
 
-          <Section title="Tabs" note="TabsList bg-muted, active trigger bg-background">
+          <Section title="Tabs" usedIn="Profile tab bar, For You | Browse All, Cards | Compare" note="TabsList bg-muted, active trigger bg-background">
             <div className="inline-flex h-9 items-center justify-center rounded-[var(--radius-lg)] p-1" style={{ background: V.muted }}>
               {["account", "password", "team"].map((id) => (
                 <button
@@ -179,7 +222,7 @@ export function ThemeLab() {
             </div>
           </Section>
 
-          <Section title="Card">
+          <Section title="Card" usedIn="Career Report, route cards, activity cards, college previews">
             <div className="w-full max-w-[360px] rounded-[var(--radius-xl)] border" style={{ background: V.card, borderColor: V.border, color: V.cardFg }}>
               <div className="flex flex-col gap-1 p-6 pb-3">
                 <p className="text-[15px] font-semibold">Create project</p>
@@ -200,7 +243,7 @@ export function ThemeLab() {
             </div>
           </Section>
 
-          <Section title="Form controls" note="checkbox / switch / select trigger">
+          <Section title="Form controls" usedIn="plan tasks, Talent Pipeline opt-in, college lookup filters" note="checkbox / switch / select trigger">
             <label className="flex cursor-pointer items-center gap-2 text-[14px]">
               <button
                 type="button"
@@ -229,7 +272,7 @@ export function ThemeLab() {
             </button>
           </Section>
 
-          <Section title="Overlays" note="dialog + dropdown panels, rendered inline for review">
+          <Section title="Overlays" usedIn="swap sheet, career preview, quick-links + avatar menus" note="dialog + dropdown panels, rendered inline for review">
             <div className="w-full max-w-[380px] rounded-[var(--radius-xl)] border p-6 shadow-2xl" style={{ background: V.popover, borderColor: V.border, color: V.cardFg }}>
               <p className="text-[15px] font-semibold">Swap out a career?</p>
               <p className="mt-1 text-[13px]" style={{ color: V.mutedFg }}>Private Equity goes back to your locker. Nothing is lost.</p>
@@ -249,7 +292,7 @@ export function ThemeLab() {
             </div>
           </Section>
 
-          <Section title="Feedback" note="alert / progress / skeleton">
+          <Section title="Feedback" usedIn="readiness updates, plan progress, loading rails" note="alert / progress / skeleton">
             <div className="flex w-full max-w-[420px] items-start gap-3 rounded-[var(--radius-lg)] border p-4" style={{ background: V.card, borderColor: V.border }}>
               <Info className="mt-0.5 h-4 w-4 flex-none" style={{ color: V.primary }} />
               <span className="flex flex-col gap-0.5">

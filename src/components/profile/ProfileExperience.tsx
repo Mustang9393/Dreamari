@@ -345,10 +345,11 @@ function ReadinessMeter({ value }: { value: number }) {
   );
 }
 
-function FocusPicker({ top3, focus, setFocusId }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void }) {
+function FocusPicker({ top3, focus, setFocusId, onGoLocker }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onGoLocker: () => void }) {
   if (top3.length === 0) return null;
+  const emptySlots = Math.max(0, 3 - top3.length);
   return (
-    <div className="flex gap-[var(--space-3)] overflow-x-auto pb-1 [scrollbar-width:none]" style={{ touchAction: "pan-x pan-y" }}>
+    <div className="flex gap-[var(--space-3)] overflow-x-auto pb-1 [scrollbar-width:none] md:grid md:grid-cols-3 md:gap-[var(--space-4)] md:overflow-visible md:pb-0" style={{ touchAction: "pan-x pan-y" }}>
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const isFocus = focus?.id === id;
@@ -358,24 +359,40 @@ function FocusPicker({ top3, focus, setFocusId }: { top3: string[]; focus: Profi
             type="button"
             aria-pressed={isFocus}
             onClick={() => setFocusId(id)}
-            className="relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase transition-all"
+            className="relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase transition-all md:aspect-[148/210] md:h-auto md:w-full"
             style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)" }}
           >
-            <Image src={career.photo} alt="" fill sizes="148px" className="object-cover" />
-            <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+            <Image src={career.photo} alt="" fill sizes="(min-width: 768px) 340px, 148px" className="object-cover" />
+            <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold md:top-3 md:left-3 md:size-8 md:text-[14px]" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
             {isFocus && (
-              <span className="absolute top-2 right-2 rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.6px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>
+              <span className="absolute top-2 right-2 rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.6px] md:top-3 md:right-3 md:px-[10px] md:py-[3px] md:text-[10px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>
             )}
-            <span className="absolute right-2 bottom-[64px] flex items-center justify-center rounded-full p-[3px]" style={{ background: "var(--glass-surface-3)" }}>
-              <MatchRing score={career.match} size={34} />
+            <span className="absolute right-2 bottom-[64px] flex items-center justify-center rounded-full p-[3px] md:right-3 md:bottom-[92px]" style={{ background: "var(--glass-surface-3)" }}>
+              <span className="md:hidden"><MatchRing score={career.match} size={34} /></span>
+              <span className="hidden md:block"><MatchRing score={career.match} size={46} /></span>
             </span>
-            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px]" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "34px" }}>
-              <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
-              <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
+            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pt-[34px] pb-[10px] md:px-3 md:pt-[64px] md:pb-[16px]" style={{ backgroundImage: TEXT_SCRIM }}>
+              <span className="w-full text-[14px] leading-[16px] md:text-[24px] md:leading-[27px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
+              <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px] md:text-[11px] md:leading-[14px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
             </span>
           </button>
         );
       })}
+      {Array.from({ length: emptySlots }).map((_, slot) => (
+        <button
+          key={`empty-${slot}`}
+          type="button"
+          onClick={onGoLocker}
+          className="flex h-[210px] w-[148px] flex-none cursor-pointer flex-col items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed transition-colors md:aspect-[148/210] md:h-auto md:w-full"
+          style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+        >
+          <span className="flex size-9 items-center justify-center rounded-full md:size-12" style={{ background: "var(--glass-surface-3)" }}>
+            <Plus className="h-4 w-4 md:h-5 md:w-5" style={{ color: "var(--accent-subtle)" }} />
+          </span>
+          <span className="px-3 text-[11.5px] leading-[15px] font-bold md:text-[14px] md:leading-[18px]" style={{ color: "var(--foreground)" }}>Add a career</span>
+          <span className="px-3 text-[10px] leading-[13px] font-semibold md:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Pick from your Locker</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -441,7 +458,7 @@ function OverviewTab({
     <div className="flex flex-col gap-[var(--space-6)]">
       <section className="flex flex-col gap-[var(--space-3)]">
         <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Focus</span>
-        <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} />
+        <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onGoLocker={onGoLocker} />
       </section>
 
       {/* Career Report */}

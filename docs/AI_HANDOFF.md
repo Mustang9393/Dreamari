@@ -6,6 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 theme-lab inventory + profile focus grid
+
+- /theme-lab (v4) now opens with a "What the dev build needs" inventory:
+  21 shadcn primitives, each with the product surfaces it covers, plus
+  a "stays bespoke" line (poster cards, MatchRing, etc.). Every recipe
+  section carries a "Used in:" annotation. The shadcn-branch lab
+  (worktree ../dreamari-shadcn, :3001) was rewritten to render ALL of
+  them REAL: added sheet/avatar/toggle-group/toggle/accordion/slider/
+  radio-group via CLI (23 files in src/components/shadcn) and gave every
+  section the same Used-in note.
+- PORTAL SCOPING FIX (shadcn branch lab): Radix portals mount on body,
+  outside .marketing-v2, so Dialog/Sheet/Select/Dropdown/Tooltip panels
+  rendered with shadcn's light :root defaults. Fix: while the lab is
+  mounted, hoist "marketing-v2" onto <html> and toggle "theme-light" on
+  <body> (descendant split keeps `.marketing-v2 .theme-light` working).
+  The dev build needs the same idea: theme scope at html/body level, or
+  portal containers inside the scope.
+- /profile Overview focus row: on md+ it is now a 3-column grid of
+  full-width posters (aspect 148/210, scaled type + 46px MatchRing);
+  mobile keeps the 148px scroll row. Empty Top-3 slots render a dashed
+  "Add a career / Pick from your Locker" placeholder that opens the
+  Locker tab (FocusPicker takes onGoLocker).
+- Validation: tsc clean both repos; both labs + /profile verified in
+  browser (dark + light, dialog portal light/dark, mobile row).
+- NOT pushed. Worktree commit is on branch `shadcn` only.
+
 ### 2026-08-20 shadcn worktree + theme fixes + legacy purge
 
 - PARALLEL WORKFLOW: new git worktree at ../dreamari-shadcn on branch
