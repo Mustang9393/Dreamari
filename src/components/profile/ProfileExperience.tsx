@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftRight,
-  Banknote,
   BookOpen,
   Bookmark,
   Check,
@@ -21,6 +20,7 @@ import {
   GraduationCap,
   GripVertical,
   Lock,
+  MapPin,
   Pencil,
   Plus,
   Printer,
@@ -983,16 +983,17 @@ function MiniBento({ label, value }: { label: string; value: string }) {
   );
 }
 
-// The route as a story: today, school, credential, first paycheck.
+// The route as a story. Each fact appears exactly once in the expanded card:
+// the header owns type + program, the bento owns the numbers, and this strip
+// owns the rest: where you are, where you go, what you earn.
 function RouteJourney({ route }: { route: ProfileCareer["routes"][number] }) {
   const steps = [
     { icon: Compass, big: "Today", small: "Grade 11" },
-    { icon: GraduationCap, big: route.short, small: `${route.duration} · ${route.location}` },
-    { icon: Trophy, big: route.credential, small: "You earn" },
-    { icon: Banknote, big: route.salary.split(",")[0], small: "First-year pay" },
+    { icon: MapPin, big: route.location, small: "Where" },
+    { icon: GraduationCap, big: route.credential, small: "Credential" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-[var(--space-3)] sm:flex sm:items-center sm:gap-0">
+    <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-center sm:gap-0">
       {steps.map((step, index) => (
         <span key={step.big} className="contents">
           {index > 0 && <span aria-hidden className="mx-[var(--space-2)] hidden h-[2px] flex-1 rounded-full sm:block" style={{ background: "color-mix(in srgb, var(--primary) 40%, transparent)" }} />}

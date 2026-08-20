@@ -101,9 +101,12 @@ Use the poster COMPONENT variants; they already carry these faces. Do not retype
    (one measure per chart, single hue: selected route solid `--accent-subtle`,
    others 45% mix; value labels; LOWER/HIGHER IS BETTER captions).
    The expanded card stacks three pieces, in order:
-   - **Journey strip**: Today → school → credential → first paycheck. Icon in a
-     `--glass-surface-2` circle, 13px bold label over 10.5px `--muted-foreground`
-     sub, connectors `--primary` at 40%. 2x2 grid on mobile, one line on desktop.
+   - **Journey strip**: Today (Grade 11) → Where (location) → Credential.
+     Deliberately carries ONLY the facts the header and bento do not (header
+     owns type + program, bento owns all numbers) so nothing repeats. Icon in
+     a `--glass-surface-2` circle, 13px bold label over 10.5px
+     `--muted-foreground` sub, connectors `--primary` at 40%. Stacked list on
+     mobile, one line on desktop.
    - **Bento stats**: tiles on `--glass-surface-2`, radius `--radius-xl`. TWO
      value sizes only, importance-ordered: First-year pay + Total cost 30/32
      display, Time + Loan payoff 20/24 display. Values use the GRADIENT NUMERAL
