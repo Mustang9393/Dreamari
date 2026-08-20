@@ -129,6 +129,9 @@ export function ThemeLab() {
   const [tab, setTab] = useState("account");
   const [checked, setChecked] = useState(true);
   const [switched, setSwitched] = useState(true);
+  const [world, setWorld] = useState("all");
+  const [radio, setRadio] = useState("uni");
+  const [accOpen, setAccOpen] = useState("h1");
 
   return (
     <div className="marketing-v2">
@@ -222,6 +225,28 @@ export function ThemeLab() {
             </div>
           </Section>
 
+          <Section title="ToggleGroup" usedIn="Explore filter + sort pills, build-flow chip picks" note="single-select, outline variant">
+            <div className="inline-flex flex-wrap gap-0 rounded-[var(--radius-md)] border" style={{ borderColor: V.border }}>
+              {[
+                { id: "all", label: "All" },
+                { id: "tech", label: "Tech & Engineering" },
+                { id: "health", label: "Health & Medicine" },
+                { id: "biz", label: "Business & Money" },
+              ].map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={world === item.id}
+                  onClick={() => setWorld(item.id)}
+                  className={`cursor-pointer px-3 py-1.5 text-[13px] font-medium ${index > 0 ? "border-l" : ""}`}
+                  style={{ borderColor: V.border, background: world === item.id ? V.accent : "transparent", color: world === item.id ? V.accentFg : V.fg }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </Section>
+
           <Section title="Card" usedIn="Career Report, route cards, activity cards, college previews">
             <div className="w-full max-w-[360px] rounded-[var(--radius-xl)] border" style={{ background: V.card, borderColor: V.border, color: V.cardFg }}>
               <div className="flex flex-col gap-1 p-6 pb-3">
@@ -243,7 +268,36 @@ export function ThemeLab() {
             </div>
           </Section>
 
-          <Section title="Form controls" usedIn="plan tasks, Talent Pipeline opt-in, college lookup filters" note="checkbox / switch / select trigger">
+          <Section title="Accordion" usedIn="Plan levels, route card disclosure" note="border-b rows, chevron rotates">
+            <div className="w-full max-w-[420px]">
+              {[
+                { id: "h1", title: "Next 3 Months · Foundation", body: "Finance glossary game · Explore 5 careers · IB mini game · Resume draft" },
+                { id: "h2", title: "Next 6 Months · Skills + people", body: "Glossary Level 7 · Freshman Finance sim · Compare programs" },
+              ].map((row) => (
+                <div key={row.id} className="border-b" style={{ borderColor: V.border }}>
+                  <button type="button" aria-expanded={accOpen === row.id} onClick={() => setAccOpen(accOpen === row.id ? "" : row.id)} className="flex w-full cursor-pointer items-center justify-between py-3 text-left text-[13.5px] font-semibold">
+                    {row.title}
+                    <ChevronDown className="h-4 w-4 transition-transform" style={{ color: V.mutedFg, transform: accOpen === row.id ? "rotate(180deg)" : "none" }} />
+                  </button>
+                  {accOpen === row.id && <p className="pb-3 text-[13px]" style={{ color: V.mutedFg }}>{row.body}</p>}
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Input + Label + Separator" usedIn="Explore search, Add your own step, resume forms; report stat dividers">
+            <div className="flex w-full max-w-[420px] flex-col gap-3">
+              <label className="text-[13px] font-medium">Search</label>
+              <input
+                placeholder="Search careers, skills, worlds..."
+                className="h-9 w-full rounded-[var(--radius-md)] border px-3 text-[14px] outline-none focus-visible:ring-[3px]"
+                style={{ background: "transparent", borderColor: V.input, color: V.fg, ["--tw-ring-color" as string]: V.ring } as React.CSSProperties}
+              />
+              <div className="h-px w-full" style={{ background: V.border }} />
+            </div>
+          </Section>
+
+          <Section title="Form controls" usedIn="plan tasks (Checkbox), Talent Pipeline opt-in (Switch), college lookup (Select), build-flow picks (RadioGroup) + cost step (Slider)" note="checkbox / switch / select / radio / slider">
             <label className="flex cursor-pointer items-center gap-2 text-[14px]">
               <button
                 type="button"
@@ -270,9 +324,30 @@ export function ThemeLab() {
             <button type="button" className="flex h-9 w-[200px] cursor-pointer items-center justify-between rounded-[var(--radius-md)] border px-3 text-[14px]" style={{ borderColor: V.input, color: V.mutedFg }}>
               Pick a career world <ChevronDown className="h-4 w-4 opacity-60" />
             </button>
+                      <span className="flex items-center gap-4" role="radiogroup" aria-label="Pathway type">
+              {[
+                { id: "uni", label: "University" },
+                { id: "cc", label: "Community college" },
+                { id: "trade", label: "Trade school" },
+              ].map((item) => (
+                <label key={item.id} className="flex cursor-pointer items-center gap-2 text-[13.5px]">
+                  <button type="button" role="radio" aria-checked={radio === item.id} onClick={() => setRadio(item.id)} className="flex size-4 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: radio === item.id ? V.primary : V.input }}>
+                    {radio === item.id && <span className="size-2 rounded-full" style={{ background: V.primary }} />}
+                  </button>
+                  {item.label}
+                </label>
+              ))}
+            </span>
+            <span className="flex w-full max-w-[300px] flex-col gap-2">
+              <span className="relative h-1.5 w-full rounded-full" style={{ background: V.secondary }}>
+                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: "40%", background: V.primary }} />
+                <span className="absolute top-1/2 left-[40%] size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2" style={{ background: V.bg, borderColor: V.primary }} />
+              </span>
+              <span className="text-[12px]" style={{ color: V.mutedFg }}>Slider · build flow cost step · up to $40K</span>
+            </span>
           </Section>
 
-          <Section title="Overlays" usedIn="swap sheet, career preview, quick-links + avatar menus" note="dialog + dropdown panels, rendered inline for review">
+          <Section title="Overlays" usedIn="swap sheet + preview (Dialog desktop, Sheet mobile), quick-links menu (DropdownMenu), icon-control hints (Tooltip)" note="panels rendered inline for review">
             <div className="w-full max-w-[380px] rounded-[var(--radius-xl)] border p-6 shadow-2xl" style={{ background: V.popover, borderColor: V.border, color: V.cardFg }}>
               <p className="text-[15px] font-semibold">Swap out a career?</p>
               <p className="mt-1 text-[13px]" style={{ color: V.mutedFg }}>Private Equity goes back to your locker. Nothing is lost.</p>
@@ -290,6 +365,20 @@ export function ThemeLab() {
               <div className="my-1 h-px" style={{ background: V.border }} />
               <div className="cursor-pointer rounded-[6px] px-2 py-1.5 text-[13.5px]" style={{ color: V.destructive }}>Log out</div>
             </div>
+                      <div className="w-full max-w-[380px] rounded-t-[var(--radius-xl)] border border-b-0 p-5 pb-8 shadow-2xl" style={{ background: V.popover, borderColor: V.border, color: V.cardFg }}>
+              <p className="text-[15px] font-semibold">Rank your Top 3</p>
+              <p className="mt-1 text-[13px]" style={{ color: V.mutedFg }}>Sheet (bottom) · the same flows on mobile. Drag to reorder; your first pick leads the report.</p>
+            </div>
+            <span className="flex items-center gap-3">
+              <SButton variant="ghost">Hover me</SButton>
+              <span className="rounded-[var(--radius-md)] px-3 py-1.5 text-[12px] font-medium" style={{ background: V.primary, color: V.primaryFg }}>Tooltip · match score comes from what you do</span>
+            </span>
+          </Section>
+
+          <Section title="Avatar" usedIn="nav avatars (desktop + mobile tab), profile header, Connect posts">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/avatar-jordan.jpg" alt="Jordan Rivera" className="size-10 rounded-full border object-cover" style={{ borderColor: V.border }} />
+            <span className="flex size-10 items-center justify-center rounded-full text-[13px] font-bold" style={{ background: V.muted, color: V.fg }}>MW</span>
           </Section>
 
           <Section title="Feedback" usedIn="readiness updates, plan progress, loading rails" note="alert / progress / skeleton">
