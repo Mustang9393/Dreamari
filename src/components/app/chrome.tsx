@@ -24,6 +24,7 @@ const QUICK_LINKS = [
   { label: "Explore", href: "/explore" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
+  { label: "Profile", href: "/profile" },
 ] as const;
 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
@@ -65,7 +66,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
   );
 }
 
-export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" }) {
+export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
   return (
     <header
       className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] backdrop-blur-[2px] md:flex"
@@ -132,7 +133,7 @@ const MOBILE_ITEMS = [
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "#", Icon: CirclePlay },
   { label: "Connect", href: "#", Icon: Users },
-  { label: "Profile", href: "#", Icon: User },
+  { label: "Profile", href: "/profile", Icon: User },
 ] as const;
 
 export function MobileNav({ active }: { active: string }) {

@@ -71,3 +71,18 @@
     animation: none;
   }
 }
+
+/* Career Report export: only the paper page prints */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+  }
+  .print-overlay {
+    position: static !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+}

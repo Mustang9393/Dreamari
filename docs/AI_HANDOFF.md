@@ -6,6 +6,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 /profile prototype on v4 branch (LOCAL-ONLY — do not push)
+
+- New branch v4 (off v3=main). Audited the Replit v2-my-profile + the
+  Career Intelligence Layer V3 doc (Downloads/Dreamari Career
+  Intelligence Layer V3.docx); audit delivered in chat. Built /profile:
+  three tabs (Overview / My Path / Resume — Career Crew cut per user).
+  FOCUS-DRIVEN: student picks one of their Top 3 and the Career Report,
+  Routes, and Plan all follow; per-career routes obey the doc's 1.7 rule
+  (IB=target uni/state/CC-transfer; Pilot=Part 141/aviation uni/military;
+  etc.), each w/ cost, duration, credential, salary, loan payoff.
+- Top 3 editing: add from Career Locker, reorder, remove; swap sheet
+  when full; focus falls back to #1 when its career is removed; empty
+  slots + zero-state CTAs to /match-lab + /explore; locker-empty state.
+- Plan: per-career task completion, 3/6/12-mo horizons gated at 40%,
+  progress hidden until first task, next-best-action card on Overview.
+- Export: per-focus Career Report overlay — paper-styled page (student,
+  date, interest/readiness/route/plan stats, evidence receipts, route
+  facts, full plan) with Print/Save PDF (print CSS: .no-print /
+  .print-overlay in app.css). Readiness ring + doc status labels; NO
+  vanity point totals (doc scoring rules). All copy = PROTOTYPE.
+- Known limits: state is in-memory (resets on reload — no persistence
+  yet); readiness/streak are static; Resume tab is a stub. 22 browser
+  assertions passed (focus switch, swap, gates, export, empty states);
+  build green. Files: src/app/profile/, src/components/profile/,
+  chrome.tsx (Profile in nav/quick links/mobile nav).
+
 ### 2026-08-20 For You fits the viewport; standard nav gap (PUSHED)
 
 - Explore For You (desktop) no longer scrolls: main is
