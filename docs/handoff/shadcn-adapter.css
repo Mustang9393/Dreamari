@@ -63,3 +63,25 @@
 .dark {
   --destructive-foreground: #f4f7ff;
 }
+
+
+/* ============================================================
+   MODE RE-DECLARATIONS (added 2026-08-20, theme-lab session)
+   Custom-property aliases compute at the element that declares
+   them: declared only on :root, --card-foreground freezes to
+   :root's --foreground and IGNORES any .dark/.theme-light
+   override below it. Re-declaring the aliases inside each theme
+   scope forces them to recompute against that scope's values.
+   Keep these blocks in sync with the :root aliases above.
+   ============================================================ */
+.marketing-v2,
+.dark,
+.theme-light {
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+  --input: var(--glass-surface-2);
+  --ring: color-mix(in srgb, var(--primary) 50%, transparent);
+  --sidebar: var(--card);
+}

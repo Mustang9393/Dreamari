@@ -10,7 +10,7 @@
   /* ---- Semantic colors (Semantic.Dark) ---- */
   --background: #05070f; /* neutral.900 */
   --foreground: #f4f7ff; /* neutral.50 */
-  --card: #0e0f18; /* neutral.800 */
+  --card: #151829; /* lightened from neutral.800 #0e0f18 per theme-lab review 2026-08-20; re-point the Figma variable to match */
   --muted: #ffffff08; /* white-alpha.3 */
   --muted-foreground: #ffffff9e; /* white-alpha.62 */
   --border: #ffffff17; /* white-alpha.9 */
