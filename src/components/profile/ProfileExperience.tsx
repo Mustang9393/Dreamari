@@ -986,7 +986,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
             { label: "First-year pay", value: route.salary.split(",")[0].replace(/ first year/i, "") },
           ].map((stat, index) => (
             <div key={stat.label} className={`flex flex-1 flex-col justify-center gap-[4px] ${index < 2 ? "border-b pb-[var(--space-3)]" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stat.label}</span>
               <span className="text-[30px] leading-[32px] font-extrabold md:text-[34px] md:leading-[36px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
             </div>
           ))}
@@ -997,7 +997,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
           {/* Lead stat: your odds of getting in */}
           <div className="flex flex-col gap-[4px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Acceptance</span>
             {detail.fit.acceptancePct !== undefined ? (
               <>
                 <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
@@ -1012,15 +1012,17 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           </div>
 
           {/* Placement as a stat, not a chip */}
-          <div className="flex flex-col gap-[2px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Job placement</span>
+          <div className="flex flex-col gap-[2px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Job placement</span>
             <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
           </div>
 
-          <FactRow label="Financial aid" value={detail.fit.aid} />
-          <FactRow label="Where you'd work" value={detail.fit.targets} />
+          <div className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <FactRow label="Financial aid" value={detail.fit.aid} />
+            <FactRow label="Where you'd work" value={detail.fit.targets} />
+          </div>
 
-          <span className="mt-auto text-[12px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
+          <span className="mt-auto border-t pt-[var(--space-3)] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
         </div>
       )}
 
@@ -1028,12 +1030,12 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
           {/* Lead: the vibe, set like a pull quote */}
           <div className="flex flex-col gap-[4px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>The vibe</span>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The vibe</span>
             <p className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
           </div>
 
-          <div className="flex flex-col gap-[var(--space-2)]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Student life</span>
+          <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Student life</span>
             <div className="flex flex-col gap-[6px]">
               {detail.life.clubs.map((club) => (
                 <span key={club} className="flex items-start gap-[8px] text-[12px] leading-[16px] font-semibold">
@@ -1045,7 +1047,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           </div>
 
           <div className="mt-auto flex flex-col gap-[2px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Study abroad</span>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Study abroad</span>
             <span className="text-[13px] leading-[17px] font-bold">{detail.life.abroad}</span>
           </div>
         </div>
@@ -1055,7 +1057,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
           {/* One stat leads; everything else hangs off it */}
           <div className="flex flex-col gap-[2px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
             <div className="flex items-baseline gap-[var(--space-2)]">
               <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
               <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
@@ -1064,8 +1066,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           </div>
 
           {/* Pay curve: amounts on bars; tap a year for its bonus math */}
-          <div className="flex flex-col gap-[6px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>What you make</span>
+          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you make</span>
             <div className="grid grid-cols-3 items-end gap-[var(--space-2)]">
               {(() => {
                 const values = detail.payoff.years.map((year) => parseInt(year.amount.replace(/[^0-9]/g, ""), 10) || 0);
@@ -1091,8 +1093,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           </div>
 
           {/* Budget: base lives in the caption, one-line legend */}
-          <div className="flex flex-col gap-[5px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Monthly budget · on {detail.payoff.budget.income}</span>
+          <div className="flex flex-col gap-[5px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Monthly budget · on {detail.payoff.budget.income}</span>
             <div className="flex h-[10px] w-full overflow-hidden rounded-full">
               <span style={{ width: `${Math.max(detail.payoff.budget.pct, 3)}%`, background: "var(--accent-subtle)" }} />
               <span className="flex-1" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} />
@@ -1103,7 +1105,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
             </div>
           </div>
 
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
+          <span className="border-t pt-[var(--space-3)] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
         </div>
       )}
 
