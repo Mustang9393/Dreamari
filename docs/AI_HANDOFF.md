@@ -6,6 +6,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 /theme-lab: shadcn recipes on Dreamari tokens (v4 LOCAL)
+
+- New /theme-lab renders shadcn/ui's own component recipes (Button
+  variants/sizes, Badge, Tabs, Card, Input, Checkbox, Switch, Select
+  trigger, Dialog + DropdownMenu panels, Alert, Progress, Skeleton)
+  resolved through tokens.css + docs/handoff/shadcn-adapter.css, plus a
+  contract-token swatch board (incl. chart-1..5) and a dark/light
+  toggle (.theme-light scope). Purpose: SEE what the dev's shadcn/Radix
+  screens will look like and refine by editing the two token files —
+  the page follows live. In quick links as "Theme Lab". Also committed
+  docs/handoff/COMPONENT-MAP.md (bespoke-to-shadcn mapping + the
+  chart-* drift note: Figma's live chart values differ from the
+  adapter's 08-19 placeholders; one must be regenerated).
+
 ### 2026-08-20 Top 3 interactions + icon pass (v4 LOCAL)
 
 - Top 3 rows: tap the career for a PREVIEW SHEET (poster hero in world

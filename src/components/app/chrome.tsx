@@ -30,6 +30,7 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-lab" },
   { label: "My Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
+  { label: "Theme Lab", href: "/theme-lab" },
 ] as const;
 
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
