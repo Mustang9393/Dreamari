@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   ArrowDown,
+  ArrowLeftRight,
   ArrowUp,
   BookOpen,
   Bookmark,
@@ -19,6 +20,7 @@ import {
   Flame,
   Gamepad2,
   GraduationCap,
+  GripVertical,
   Lock,
   Pencil,
   Plus,
@@ -164,6 +166,17 @@ export function ProfileExperience() {
     });
   }
 
+  function reorderTo(id: string, targetIndex: number) {
+    setTop3((current) => {
+      const from = current.indexOf(id);
+      if (from < 0 || targetIndex < 0 || targetIndex >= current.length || from === targetIndex) return current;
+      const next = [...current];
+      next.splice(from, 1);
+      next.splice(targetIndex, 0, id);
+      return next;
+    });
+  }
+
   return (
     <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -242,7 +255,7 @@ export function ProfileExperience() {
           <OverviewTab top3={top3} focus={focus} setFocusId={setFocusId} locker={locker} chosenRoute={chosenRoute} planProgress={planProgress} nextTask={nextTask} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoLocker={() => setTab("locker")} />
         )}
         {tab === "path" && (
-          <PathTab top3={top3} focusId={focusId} setFocusId={setFocusId} focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} removeFromTop3={removeFromTop3} move={move} onGoLocker={() => setTab("locker")} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} />
+          <PathTab top3={top3} focusId={focusId} setFocusId={setFocusId} focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} removeFromTop3={removeFromTop3} move={move} reorderTo={reorderTo} onGoLocker={() => setTab("locker")} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} />
         )}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} />}
         {tab === "resume" && <ResumeTab />}
@@ -573,12 +586,15 @@ function PathTab(props: {
   toggleTask: (careerId: string, taskId: string) => void;
   removeFromTop3: (id: string) => void;
   move: (id: string, delta: number) => void;
+  reorderTo: (id: string, targetIndex: number) => void;
   onGoLocker: () => void;
   tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
   addCustomTask: (careerId: string, horizonId: string, label: string) => void;
   removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
 }) {
-  const { top3, focusId, setFocusId, focus, chosenRoute, setRouteChoice, horizonProgress, horizonUnlocked, doneSet, toggleTask, removeFromTop3, move, onGoLocker, tasksFor, addCustomTask, removeCustomTask } = props;
+  const { top3, focusId, setFocusId, focus, chosenRoute, setRouteChoice, horizonProgress, horizonUnlocked, doneSet, toggleTask, removeFromTop3, move, reorderTo, onGoLocker, tasksFor, addCustomTask, removeCustomTask } = props;
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
   const [draftTask, setDraftTask] = useState("");
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
   const [openHorizon, setOpenHorizon] = useState<string | null>(null);
@@ -610,23 +626,45 @@ function PathTab(props: {
               const career = careerById(id)!;
               const isFocus = focusId === id;
               return (
-                <div key={id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-3)]" style={{ background: isFocus ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)" }}>
-                  <span className="w-7 text-center text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>#{index + 1}</span>
-                  <span className="relative h-14 w-10 flex-none overflow-hidden rounded-[8px]">
-                    <Image src={career.photo} alt="" fill sizes="40px" className="object-cover" />
+                <div
+                  key={id}
+                  draggable
+                  onDragStart={(event) => { setDragId(id); event.dataTransfer.effectAllowed = "move"; }}
+                  onDragOver={(event) => { event.preventDefault(); if (dragId && dragId !== id) reorderTo(dragId, index); }}
+                  onDragEnd={() => setDragId(null)}
+                  className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-3)] transition-opacity"
+                  style={{ background: isFocus ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: dragId === id ? 0.5 : 1 }}
+                >
+                  <span aria-hidden className="flex flex-none cursor-grab items-center active:cursor-grabbing" style={{ color: "var(--muted-foreground)" }}>
+                    <GripVertical className="h-4 w-4" />
                   </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-[15px] font-bold">{career.title}</span>
-                    <span className="truncate text-[11px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {matchTier(career.match)}</span>
-                  </span>
-                  <button type="button" onClick={() => setFocusId(id)} aria-pressed={isFocus} className="flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] font-bold" style={{ background: isFocus ? "var(--primary)" : "transparent", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", color: isFocus ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>
-                    {isFocus ? "In focus" : "Set focus"}
+                  <span className="w-6 text-center text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>#{index + 1}</span>
+                  {/* Tap the career itself for a preview */}
+                  <button type="button" onClick={() => setPreviewId(id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] text-left" aria-label={`Preview ${career.title}`}>
+                    <span className="relative h-14 w-10 flex-none overflow-hidden rounded-[8px]">
+                      <Image src={career.photo} alt="" fill sizes="40px" className="object-cover" />
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-[15px] font-bold">{career.title}</span>
+                      <span className="truncate text-[11px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {matchTier(career.match)}</span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFocusId(id)}
+                    aria-pressed={isFocus}
+                    aria-label={isFocus ? `${career.title} is in focus` : `Set ${career.title} as focus`}
+                    title={isFocus ? "In focus" : "Set focus"}
+                    className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+                    style={{ background: isFocus ? "var(--primary)" : "transparent", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", color: isFocus ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+                  >
+                    <Target className="h-4 w-4" />
                   </button>
                   <span className="flex flex-none flex-col gap-[2px]">
                     <button type="button" aria-label={`Move ${career.title} up`} disabled={index === 0} onClick={() => move(id, -1)} className="cursor-pointer rounded p-1 disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}><ArrowUp className="h-3.5 w-3.5" /></button>
                     <button type="button" aria-label={`Move ${career.title} down`} disabled={index === top3.length - 1} onClick={() => move(id, 1)} className="cursor-pointer rounded p-1 disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}><ArrowDown className="h-3.5 w-3.5" /></button>
                   </span>
-                  <button type="button" aria-label={`Remove ${career.title} from Top 3`} onClick={() => removeFromTop3(id)} className="flex-none cursor-pointer rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+                  <button type="button" aria-label={`Remove ${career.title} from Top 3`} title="Remove" onClick={() => removeFromTop3(id)} className="flex-none cursor-pointer rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -755,8 +793,8 @@ function PathTab(props: {
                               )}
                               <span className="flex-none text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
                               {!complete && !task.custom && (
-                                <Link href={task.href} className="flex flex-none items-center gap-[3px] text-[11px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                                  <TaskIcon className="h-3 w-3" /> {task.action}
+                                <Link href={task.href} aria-label={`${task.action}: ${task.label}`} title={task.action} className="flex flex-none items-center rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
+                                  <TaskIcon className="h-3.5 w-3.5" />
                                 </Link>
                               )}
                               {task.custom && (
@@ -798,6 +836,44 @@ function PathTab(props: {
           </section>
         </>
       )}
+
+      {/* ---- Career preview sheet ---- */}
+      {previewId && (() => {
+        const career = careerById(previewId)!;
+        const isFocus = focusId === previewId;
+        return (
+          <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setPreviewId(null); }}>
+            <div className="filters-reveal w-full max-w-[420px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+              <div className="relative h-[240px] w-full">
+                <Image src={career.photo} alt="" fill sizes="420px" className="object-cover" />
+                <button type="button" aria-label="Close preview" onClick={() => setPreviewId(null)} className="absolute top-3 right-3 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)" }}>
+                  <X className="h-4 w-4" />
+                </button>
+                <span className="absolute right-3 bottom-3 flex items-center justify-center rounded-full p-[3px]" style={{ background: "var(--glass-surface-3)" }}>
+                  <MatchRing score={career.match} size={40} />
+                </span>
+                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-2 pb-[12px] text-center uppercase" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "48px" }}>
+                  <span className="w-full text-[20px] leading-[23px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
+                  <span className="w-full text-[9px] leading-[12px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                </span>
+              </div>
+              <div className="flex flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+                <ReceiptTiles receipts={career.receipts} />
+                <div className="flex gap-[var(--space-2)]">
+                  {!isFocus && (
+                    <button type="button" onClick={() => { setFocusId(career.id); setPreviewId(null); }} className="flex flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                      <Target className="h-4 w-4" /> Set focus
+                    </button>
+                  )}
+                  <button type="button" onClick={() => setPreviewId(null)} className="flex flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -853,8 +929,15 @@ function LockerTab({ locker, top3Count, addToTop3 }: { locker: ProfileCareer[]; 
                     <span className="text-[8.5px] leading-[11px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
                   </span>
                 </span>
-                <button type="button" onClick={() => addToTop3(career.id)} className="flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] font-bold" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
-                  {top3Count >= 3 ? "Swap in" : "Add"}
+                <button
+                  type="button"
+                  onClick={() => addToTop3(career.id)}
+                  aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
+                  title={top3Count >= 3 ? "Swap into Top 3" : "Add to Top 3"}
+                  className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
+                >
+                  {top3Count >= 3 ? <ArrowLeftRight className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                 </button>
               </span>
             </div>

@@ -6,6 +6,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 Top 3 interactions + icon pass (v4 LOCAL)
+
+- Top 3 rows: tap the career for a PREVIEW SHEET (poster hero in world
+  font, match ring, receipt tiles, Set focus / Close); drag to reorder
+  (HTML5 dnd w/ grip handle, live reorder on dragover) with the arrow
+  buttons KEPT for keyboard/touch accessibility; focus is an icon-only
+  Target button (aria-label + title, filled when active).
+- Consistent icon pass: plan task actions are icon-only (aria-label
+  carries the verb+task), locker Add/Swap became Plus/ArrowLeftRight
+  icon buttons w/ labels in aria+title. Primary CTAs (Export report,
+  Find schools) deliberately KEEP text: icon-only primaries hurt
+  comprehension (a11y pushback noted to user). 6/6 assertions passed.
+
 ### 2026-08-20 /profile round 3: match rings, poster focus, custom plan/report (v4 LOCAL)
 
 - Scores made legible: interest is now MATCH language everywhere. New
