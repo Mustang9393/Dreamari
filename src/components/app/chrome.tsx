@@ -28,7 +28,7 @@ const QUICK_LINKS = [
   { label: "Explore", href: "/explore" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
-  { label: "Profile", href: "/profile" },
+  { label: "My Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
 ] as const;
 

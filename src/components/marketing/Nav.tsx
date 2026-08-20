@@ -20,6 +20,7 @@ const QUICK_LINKS = [
   { label: "Explore", href: "/explore" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
+  { label: "My Profile", href: "/profile" },
 ];
 
 // Re-imagined per direct feedback ("it doesn't need to be this complicated...
