@@ -1,79 +1,96 @@
-# My Profile → Figma build pack
+# My Profile → Figma build pack (v2, 2026-08-20)
 
-Faithful reconstruction pack for the /profile experience (prototype, branch v4, 2026-08-20).
-Audience: the Figma agent (Codex). Goal: rebuild every screen below in the
-**Dreamari Design System v2.0** file using ONLY existing variables, text styles,
-and components. Nothing here requires a new token.
+Complete, audited replacement for the earlier pack. Everything below reflects
+the code on `main` as of this commit; every earlier README contradicted by
+this one is superseded. Audience: the Figma agent (Codex), building in
+**Dreamari Design System v2.0**.
+
+## Phase 0 rulings (confirmed, act on these)
+
+1. **`card` variable**: set Semantic.Dark `card` to raw `#151829` (keep the
+   Light alias on neutral/100). Add a variable description: "re-pointed
+   2026-08-20 per theme review; prototype tokens.css is the reference."
+2. **Match tiers come from the CODE**: 75+ "Strong match", 50-74 "Solid
+   match", 25-49 "Early match", under 25 "Low signal". (Airline Pilot at 75
+   renders "Strong match" in the shipped UI.)
+3. **Logo Identity and Quick Links**: componentize the existing artwork as
+   standalone components, exact geometry, no redrawing.
+4. **Gradient numeral style**: create ONE reusable Figma style. 2-stop linear
+   gradient at 100 degrees, `foreground` variable at 8% to `accent-subtle`
+   variable at 92%, clipped to the glyphs, display face extrabold. Used by
+   every stat numeral in this pack. Bind the variables, never hex.
+5. **Drag-lift elevation**: one scoped addition to the elevation family:
+   0 16px 40px, background color at 70% mix.
+6. **Semantic.Light additions** (recently completed in code, author the same):
+   secondary `#00000017`, secondary-foreground `#05070f` (neutral/900),
+   muted `#00000008`, glass-border `#00000017`, accent `#1e4fcc` (blue/700),
+   accent-subtle `#1e4fcc`. Also: accent-foreground pairs with
+   primary-foreground (white), NOT with foreground.
 
 ## Hard rules
 
-1. **No new variables, no raw values.** Every color, radius, and spacing in the
-   captures is written as `var(--token)` inline or as a Tailwind arbitrary like
-   `px-[var(--space-5)]`. Each `--token` exists in the certified DTCG export:
-   `src/components/marketing/tokens.css` lists the exact Figma source path for
-   every variable in a trailing comment (e.g. `--primary: #2f6bf2; /* blue.600 */`,
-   collections Primitives.Default / Semantic.Dark / Semantic.Light). Bind the
-   Figma variable with that path; never paste the hex.
-2. **Both modes.** Everything binds semantic variables so Semantic.Light resolves
-   automatically. Do not hand-pick light values.
-3. **Reuse components.** Where a capture shows a poster card, nav, tab bar, or
-   chip that already exists as a Figma component, place an INSTANCE and override
-   text/photo only. Only the genuinely new pieces (list under "New components")
-   become new components, and they are assembled from variables + existing styles.
-4. **No em dashes in any student-facing string.** Copy is final in the captures;
-   transcribe it exactly.
-5. One deviation already flagged for the design file: `--card` is `#151829` in
-   code (lightened from neutral.800 `#0e0f18` after theme review). Re-point the
-   Figma `card` variable to match; do not fork a second variable.
+1. **No new variables, no raw values.** Every color/radius/spacing in the
+   captures is a `var(--token)`; `src/components/marketing/tokens.css` maps
+   each token to its Figma variable path in a trailing comment. Bind
+   variables; never paste hex. Exceptions already ruled: the report page's
+   print grays (a light paper document, bind neutral primitives) and the
+   `#000` inside mask alpha ramps (transparency math, not color).
+2. **Both modes** resolve via Semantic Dark/Light. No hand-picked light values.
+3. **Instance existing components** (Career Poster Card 46-variant set,
+   Desktop Navigation, Mobile Nav); override photo/text only. New components
+   are listed below and built only from variables + existing text styles.
+4. **No em dashes** in student-facing strings. Copy in the captures is final.
 
-## Information architecture (2026-08-20 rework)
+## Information architecture
 
-My Top 3 is the GLOBAL context switcher: full-size poster cards above the tab
-bar; tapping a card refocuses every tab below it (cards are tabs for careers).
-Rank chips drag horizontally to reorder; dropping into slot 1 sets focus; X
-removes; the dashed slot opens the Add sheet in place (never a tab switch).
-Tabs are Overview / Path / Plan / Resume; the Career Locker and Settings are
-a utility icon cluster in the identity header (they do not depend on the
-Top 3), with the Locker view closing back to Overview. Path = the three ALTERNATE
-routes side by side (desktop 3 columns, mobile snap carousel) with the full
-Replit information set per route (pitch, money numbers, good-fit, student
-life, loan-payoff math) behind per-card disclosures, plus the Compare table
-with benefit tags. Plan = the levels. The old journey strip, expanded bento
-card, and row-list Top 3 are RETIRED.
+- The identity header holds: avatar (editable), name/grade/school, a
+  **utility pill row** (archive icon + "Locker", gear + "Settings"), then the
+  streak + ReadinessMeter row. Utility pills stack ABOVE the stats,
+  right-aligned on desktop, left on mobile. The focus career's poster art
+  fills the header's right side behind a progress-blue legibility gradient.
+- **My Top 3** sits above the tab bar: full-size poster cards that act as
+  career tabs. Tap = focus (report, routes, plan all follow). Drag the rank
+  chip horizontally to reorder; dropping into slot 1 also sets focus. X
+  removes. The dashed slot opens the **Add sheet** in place. Under the
+  cards (Overview only): the **Locker peek**, a collapsed row that expands
+  into the mini poster strip.
+- **Tabs: Overview / Path / Plan / Resume.** Locker and Settings are NOT
+  tabs: opening either replaces everything under the header (Top 3 and tab
+  bar hidden) with a full view that closes back to Overview.
+- **Path** = the 3 alternate routes side by side (desktop columns, mobile
+  snap carousel with a route-name pill switcher), plus a Compare view.
+- **Plan** = the levels for the chosen route.
 
-## The captures (desktop DOM, responsive classes included)
+## The captures (12 states, desktop DOM, responsive classes included)
 
-Each file is the full rendered `.marketing-v2` subtree of http://localhost:3000/profile
-in a given state. `md:` classes = desktop values, unprefixed = mobile values, so
-one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
-`/_next/image?url=%2Fimages%2F...` to the real asset path under `public/images/`
-(these are the certified Figma exports already in the file).
+Full rendered `.marketing-v2` subtree per state. `md:` classes = desktop,
+unprefixed = mobile; one file covers both breakpoints. Decode
+`/_next/image?url=...` to the asset path under `public/images/`.
 
-| File | State it freezes |
+| File | State |
 | --- | --- |
-| 01-overview-default.html | Default: header (identity + streak + readiness + Locker/Settings icon cluster), global My Top 3 (2 careers + Add slot) ABOVE the four tabs, Overview tab with Career Report, receipts, next action, readiness chips, Locker strip |
-| 02-career-report-overlay.html | Export overlay open: dark chrome bar (Engagement/Pathway/Plan toggles, Print) + the white counselor-facing report page |
-| 03-path-routes-cards.html | Path tab: three alternate route COLUMNS side by side (identity + pitch, pay/cost/time/payoff numbers, three disclosure sections, Continue CTA, next step) |
-| 04-path-routes-compare.html | Path tab, Compare view: category table with benefit tags + the four single-measure charts |
-| 05-plan-levels.html | Plan tab: Level 1 open with progress ring, Levels 2-3 locked, add-your-own-step row, "Change route" link |
-| 06-add-career-sheet.html | "Add to your Top 3" sheet open over the page: locker list with rings and Add buttons (no tab switch) |
-| 07-swap-sheet.html | "Top 3 is full" swap sheet (three Replace rows + Never mind) |
-| 08-locker.html | Locker tab: poster grid with match rings and Add/Swap actions |
-| 09-resume.html | Resume tab (stub state) |
-| 10-overview-empty.html | No Top 3: three dashed Add slots above the tabs + "Pick a Top 3 to start" |
-| 11-settings-sheet.html | Settings sheet from the header gear: profile photo hint, stub rows with SOON chips, sign out |
+| 01-overview-default.html | Header, Top 3 (2 careers + Add slot), collapsed Locker peek, tabs, Career Report with bento stat tiles + bento receipts, next action, readiness chips |
+| 02-career-report-overlay.html | Counselor-facing export overlay (chrome bar with section toggles + white report page) |
+| 03-path-routes-cards.html | Path tab: three route columns (identity, pitch, Time/Cost/Pay stats, three disclosures, CTA, next step) |
+| 04-path-routes-compare.html | Compare view: category table with benefit tags + four single-measure charts |
+| 05-plan-levels.html | Plan tab: Level 1 open with ring, 2-3 locked, add-your-own-step, Change route link |
+| 06-add-career-sheet.html | Add-to-Top-3 sheet: locker list with rings + Add buttons |
+| 07-swap-sheet.html | "Top 3 is full" swap sheet |
+| 08-locker.html | Locker full view (poster grid, Add/Swap, X back to Overview); Top 3 + tabs hidden |
+| 09-resume.html | Resume tab (stub) |
+| 10-overview-empty.html | No Top 3: three dashed Add slots + "Pick a Top 3 to start" |
+| 11-settings-view.html | Settings full view: photo hint, stub rows with SOON chips, sign out |
+| 12-overview-locker-peek.html | Overview with the Locker peek EXPANDED (mini poster strip + "Open full Locker") |
 
 ## Typography
 
-- `--font-display` = Dreamari display face (headings, numerals); `--font-body` =
-  body face. Use the existing text styles at the sizes shown; the captures'
-  pixel sizes map onto the type scale already in the file.
-- Poster/world title faces (focus cards, locker posters, preview hero) come from
-  the existing Browse poster variants, one face per world:
+`--font-display` for headings and every numeral; `--font-body` for body.
+Poster titles use the existing per-world faces already carried by the Career
+Poster Card variants:
 
 | World | Face (weight, tracking) |
 | --- | --- |
-| Business & Money | poster serif var `--font-poster` (400, 0.81px) |
+| Business & Money | `--font-poster` (400, 0.81px) |
 | Tech & Engineering | `--font-poster-science` (700, -2px) |
 | Health & Medicine | `--font-poster-nunito` (700, 0.81px) |
 | Arts, Media & Sport | Rozha One (400, 0.81px) |
@@ -85,95 +102,91 @@ one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
 | Counseling & Social Work | Zain (900, 0.81px) |
 | Driving, Flying & Shipping | `--font-poster-sekuya` (400, 0.72px) |
 
-Use the poster COMPONENT variants; they already carry these faces. Do not retype.
+## Component inventory
 
-## Existing Figma components to instance
+### Instance from the file (exists)
+- Career Poster Card (basis of Top 3 cards, locker posters, add-sheet thumbs)
+- Desktop Navigation, Mobile Nav
+- Logo Identity + Quick Links (componentize first, ruling 3)
+- World chips: bind `--world-*` variables
+- Text scrim: the Browse Card's own token-based gradient stops
 
-- **Career poster card** (Browse variants): basis for Locker posters, focus
-  cards, and the preview-sheet hero. Override photo, title, world label only.
-- **App navigation** (desktop top nav, mobile bottom nav incl. avatar tab),
-  **quick-links menu**, **Logo Identity mark** (the wordmark component).
-- **World color chips / labels**: bind `--world-*` variables listed in tokens.css.
-- **Text scrim**: the Browse Card's own gradient scrim stops (token-based), used
-  at the base of every poster/focus card.
+### Create (each from variables + the gradient style)
+1. **MatchRing**: track `--secondary`, progress `--primary`, percent centered
+   in display face. Sizes in use: 26, 32, 34, 38, 44, 52. Tier labels per
+   ruling 2.
+2. **ReadinessMeter**: "READINESS" caption, `46/100`, staged track with ticks
+   (Building 25 / Pipeline Ready 75 / Opted In 100).
+3. **Header** assembly: identity + utility pills (h32 pill, glass-surface-3
+   fill, glass-border; active = primary border + accent-subtle text) + stats
+   row + focus art with mask and the progress-blue gradient (90 degrees,
+   transparent 30% -> primary 16% over background 88% at 62% -> primary 30%
+   into background at 100%).
+4. **Top 3 card** (from the poster component): rank chip (glass-surface-3
+   circle, display face), FOCUS badge + X in one top-right cluster, MatchRing
+   in a glass circle above the title, focus state = primary border at
+   scale 1.0, unfocused = 72% opacity at scale 0.97. Variants: focus,
+   default, drag-lift (elevation ruling 5), dashed add-slot placeholder.
+5. **Locker peek**: collapsed row (archive icon, "Locker", count, chevron) +
+   expanded strip of 106x150 mini posters with MatchRing 26 and "Open full
+   Locker" link.
+6. **Bento stat tile**: `--glass-surface-2` fill, radius `--radius-xl`,
+   caption row (10px tracking uppercase, optional small icon right), value in
+   the gradient numeral style. Two sizes only wherever tiles sit together.
+   Used for: report stat band (Match/Route/Plan), receipts, route money
+   blocks (boxless variant: same hierarchy, no fill).
+7. **Route column**: type icon in glass circle + YOUR PATH chip (selected),
+   type caption, program title, credential + location line, pitch, money
+   block in decision order (Time, Total cost, First-year pay; boxless bento
+   rows on a `--glass-surface-1` panel), three disclosure rows:
+   - *Good fit*: tagline chip, ACCEPTANCE GAUGE (track accent-subtle 22%,
+     fill accent-subtle, % in gradient numerals, source text as caption),
+     aid + where-you-would-work fact rows, placement chip (High = feedback
+     success at 22% fill).
+   - *Student life*: three bullets, community feel, study abroad fact rows.
+   - *Loan payoff*: payoff numeral + tag chip, avg loan + starting salary
+     line, SALARY BAR CHART (3 bars, final year solid accent-subtle, earlier
+     years 45% mix, amounts above, year captions + bonus notes below),
+     MONTHLY BUDGET two-segment bar (loan solid / keep 22% mix) with legend
+     dots, takeaway line in accent-subtle.
+   Selected column: primary border, primary 10% wash, CTA "Open your plan
+   for this path"; unselected CTA "Continue with {short}". Next-step footer
+   line links to /colleges when the step is a program/school action,
+   otherwise carries a "DO THIS IRL" tag.
+8. **Route switcher pills** (mobile only): route.short pills above the
+   carousel; active pill = primary fill.
+9. **Compare table**: first column category labels, one column per route,
+   value + benefit tag chip (primary 18% fill, accent-subtle text) per cell,
+   selected column washed primary 7% with a YOURS chip.
+10. **Compare chart**: one measure per chart, single hue (selected solid
+    `--accent-subtle`, others 45% mix), value labels, LOWER/HIGHER IS BETTER
+    captions.
+11. **Plan level row**: number chip (primary when unlocked), LEVEL n caption,
+    title + subtitle, progress ring + chevron; locked = 55% opacity with
+    lock icon + "UNLOCKS AT 40% OF LEVEL n-1". Task rows with checkbox,
+    YOURS chip on custom steps, minutes, action icon; dashed add-your-own
+    input row.
+12. **Sheets**: Add-to-Top-3 (locker rows: thumb, title, world + tier,
+    MatchRing 32, Add button) and Swap ("Top 3 is full", Replace rows,
+    Never mind). Card fill on `--card`, backdrop = background at 78%.
+13. **Settings view + Locker view**: full-width views under the header
+    (no Top 3, no tabs) with an X back to Overview.
+14. **Report page** (02): light print document; bind neutral primitives.
+    Counselor-facing copy is final; transcribe exactly.
 
-## New components to create (from variables only)
+## Prototype wiring
 
-1. **MatchRing**: SVG ring, track `--secondary`, progress `--primary`, percent
-   centered in `--font-display`; sizes used: 26, 34, 44/46, 48. Tier label text:
-   75+ "Strong match", 50–74 "Solid match", 25–49 "Early match", under 25
-   "Low signal" (matches the shipped code; Airline Pilot at 75 renders
-   "Strong match").
-2. **ReadinessMeter** (header): caption "READINESS", value `46/100`,
-   track with stage ticks; stages Building (25) / Pipeline Ready (75) / Opted In
-   (100). Sits on the header's progress-blue backdrop: a 90° gradient,
-   transparent 30% → `--primary` 16% over `--background` 88% at 62% → `--primary`
-   30% mixed into `--background` at 100% (see 01 capture inline style; build it
-   as one gradient fill layer in the header component).
-3. **Receipt tile**: `--glass-surface-1` fill, icon in `--accent-subtle`, big
-   value in `--font-display`, caption in `--muted-foreground`.
-4. **Top 3 row** (grip / rank / thumb / title+meta / target / remove) + its
-   dashed "Open slot" and "Add a career" placeholder variants.
-5. **Route card** (collapsed + expanded disclosure) and **Compare bar chart**
-   (one measure per chart, single hue: selected route solid `--accent-subtle`,
-   others 45% mix; value labels; LOWER/HIGHER IS BETTER captions).
-   The expanded card stacks three pieces, in order:
-   - **Journey strip**: Today (Grade 11) → Where (location) → Credential.
-     Deliberately carries ONLY the facts the header and bento do not (header
-     owns type + program, bento owns all numbers) so nothing repeats. Icon in
-     a `--glass-surface-2` circle, 13px bold label over 10.5px
-     `--muted-foreground` sub, connectors `--primary` at 40%. Stacked list on
-     mobile, one line on desktop.
-   - **Bento stats**: tiles on `--glass-surface-2`, radius `--radius-xl`. TWO
-     value sizes only, importance-ordered: First-year pay + Total cost 30/32
-     display, Time + Loan payoff 20/24 display. Values use the GRADIENT NUMERAL
-     treatment (below). Caption row is the standard 10px tracking caption.
-   - **Next-step strip**: full-width row. If the step is a program/school action
-     it is a live link to /colleges with a "College lookup" trailing label in
-     `--accent-subtle` and a `--primary` 45% border; otherwise it is static with
-     a "DO THIS IRL" tag in `--muted-foreground`.
-   Collapsed cards show First-year pay / Total cost / Time as caption-over-
-   gradient-number clusters (17px), same hierarchy, NO tile chrome.
-6. **Plan level row** (open, summary, locked states): numbered chip (size 32,
-   `--primary` fill when unlocked, `--glass-surface-2` when locked), "LEVEL n"
-   caption in `--accent-subtle`, title + subtitle, right side a progress ring
-   (same ring component as MatchRing, % centered) and chevron; locked rows show
-   a lock icon + "UNLOCKS AT 40% OF LEVEL n-1". Plus the "Add your own step"
-   input row (custom steps get the YOURS chip).
+Tabs switch Overview/Path/Plan/Resume. Top 3 card tap -> focus swap across
+all tabs. Add slot -> 06. Locker pill -> 08; Settings pill -> 11; X on
+either -> 01. Route CTA -> selected state; selected CTA -> 05. Export ->
+02. Empty state (10) links to Match Lab / Add sheet. Locker peek row toggles
+12. Frames: 12 states x 2 breakpoints (desktop 1200 content, mobile 375).
 
-### Gradient numeral treatment (new pattern — add to the design file)
+## Mock data (transcribe as-is)
 
-Every bento/collapsed stat value uses a text-fill gradient:
-`linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)`,
-clipped to the glyphs (background-clip: text), font `--font-display` extrabold.
-Create it once in Figma as a reusable style (fill the text layer with that
-2-stop linear gradient using the foreground and accent-subtle VARIABLES, 100°)
-so both modes resolve automatically. Do not hardcode the stops as hex.
-
-### Top 3 drag interaction (prototype spec)
-
-Press the grip: the row lifts (scale 1.03 + shadow `0 16px 40px` background
-mix). It follows the pointer; other rows slide out of the way (160ms ease).
-Release commits the order. Dropping a row into slot 1 ALSO sets it as the
-focus career (report/routes/plan follow). Keyboard: arrow keys on the focused
-grip reorder; reaching slot 1 sets focus the same way. Text selection is
-suppressed on the rows (select-none, no touch callout).
-7. **Report page** (the white page in 02): this is a light print document, the
-   one place with fixed neutral grays; bind to the neutral primitives, not
-   Semantic.Dark. Counselor-facing copy is final; transcribe exactly.
-8. **Sheets/dialogs**: preview sheet, swap sheet ("Top 3 is full"), both on
-   `--glass-surface-3` panels with `--glass-border`.
-
-## Frame checklist
-
-Build desktop (1200 content width) + mobile (375) frames per capture: 9 states
-× 2 breakpoints. Wire prototype flows: tab bar between 01/03/07/08; focus-card
-tap swaps Career Report content; Export report → 02; row tap → 05; add-when-full
-→ 06; empty state 09 links to Swipe careers / Open Locker.
-
-## Data used in the mock (transcribe as-is)
-
-Student: Jordan Rivera, Grade 11, Westfield High School, 12-day streak,
-readiness 46/100 "Building Readiness". Top 3 default: Investment Banking (86%),
-Airline Pilot (75%), open slot. Locker: Private Equity 88, Software Engineer 84,
-Asset Management 80, Registered Nurse 78, Food Scientist 73.
+Jordan Rivera, Grade 11, Westfield High School, 12-day streak, readiness
+46/100 "Building Readiness". Top 3 default: Investment Banking 86, Airline
+Pilot 75, open slot. Locker: Private Equity 88, Software Engineer 84, Asset
+Management 80, Registered Nurse 78, Food Scientist 73. Route facts and the
+full fit/life/payoff details live in the captures (source:
+src/components/profile/data.ts, ROUTE_DETAILS).
