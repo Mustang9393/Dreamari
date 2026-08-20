@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { ChapterRail } from "./ChapterRail";
 import { BuildChapter } from "./chapters/Build";
 import { ConnectChapter } from "./chapters/Connect";
+import { GetHiredChapter } from "./chapters/GetHired";
 import { ExploreChapter } from "./chapters/Explore";
 import { MatchChapter } from "./chapters/Match";
 import { PlayChapter } from "./chapters/Play";
@@ -48,6 +49,7 @@ export function HowItWorks() {
         <ExploreChapter />
         <PlayChapter />
         <ConnectChapter />
+        <GetHiredChapter />
       </div>
     </>
   );

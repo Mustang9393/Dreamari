@@ -32,6 +32,7 @@
   --world-building-construction: #ff9640; /* orange.500 */
   --world-arts-media-sport: #ff4585; /* pink.600 */
   --world-food-farming-nature: #1fc76e; /* green.500 */
+  --world-farming-animals-nature: #1fc76e; /* green.500 — worlds.ts maps the "Farming, Animals & Nature" taxonomy name to this var; same Figma green as food-farming-nature */
   --world-science-research: #00c8dc; /* cyan.500 */
   --world-law-safety-government: #e5484d; /* red.500 */
   --world-driving-flying-shipping: #3b82f6;

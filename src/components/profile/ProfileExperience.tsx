@@ -35,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { MatchRing, matchTier } from "@/components/app/MatchRing";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, routeDetail, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
@@ -61,12 +62,6 @@ function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
 }
 
-function matchTier(score: number): string {
-  if (score >= 75) return "Strong match";
-  if (score >= 50) return "Solid match";
-  if (score >= 25) return "Early match";
-  return "Low signal";
-}
 
 const CAPTION = "text-[10px] leading-[14px] font-semibold tracking-[0.6px] uppercase";
 const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
@@ -187,27 +182,7 @@ export function ProfileExperience() {
     if (focusId === id) setFocusId(next[0] ?? null);
   }
 
-  function move(id: string, delta: number) {
-    setTop3((current) => {
-      const index = current.indexOf(id);
-      const target = index + delta;
-      if (index < 0 || target < 0 || target >= current.length) return current;
-      const next = [...current];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  }
 
-  function reorderTo(id: string, targetIndex: number) {
-    setTop3((current) => {
-      const from = current.indexOf(id);
-      if (from < 0 || targetIndex < 0 || targetIndex >= current.length || from === targetIndex) return current;
-      const next = [...current];
-      next.splice(from, 1);
-      next.splice(targetIndex, 0, id);
-      return next;
-    });
-  }
 
   return (
     <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -258,10 +233,10 @@ export function ProfileExperience() {
               {/* Utility pills: labeled so the Locker is findable, small so it
                   reads as an archive rather than a main destination. */}
               <span className="flex items-center gap-[var(--space-2)]">
-                <button type="button" aria-label="Open Career Locker" onClick={() => setTab("locker")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[11.5px] font-bold" style={{ background: "var(--glass-surface-3)", borderColor: tab === "locker" ? "var(--primary)" : "var(--glass-border)", color: tab === "locker" ? "var(--accent-subtle)" : "var(--foreground)" }}>
+                <button type="button" aria-label="Open Career Locker" onClick={() => setTab("locker")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   <Archive className="h-3.5 w-3.5" /> Locker
                 </button>
-                <button type="button" aria-label="Profile settings" onClick={() => setTab("settings")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[11.5px] font-bold" style={{ background: "var(--glass-surface-3)", borderColor: tab === "settings" ? "var(--primary)" : "var(--glass-border)", color: tab === "settings" ? "var(--accent-subtle)" : "var(--foreground)" }}>
+                <button type="button" aria-label="Profile settings" onClick={() => setTab("settings")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "settings" ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   <Settings className="h-3.5 w-3.5" /> Settings
                 </button>
               </span>
@@ -285,9 +260,9 @@ export function ProfileExperience() {
         <section className="flex flex-col gap-[var(--space-2)]">
           <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
             <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap to switch · drag the number to reorder</span>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap a card to switch focus</span>
           </div>
-          <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={removeFromTop3} reorderTo={reorderTo} move={move} />
+          <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={removeFromTop3} />
         </section>
 
         {/* ---- Tabs ---- */}
@@ -403,23 +378,6 @@ export function ProfileExperience() {
 
 // ------------------------------------------------------------- pieces ----
 
-// Match ring: percentage in the middle, "match" language around it. The
-// score reflects what the student actually does in Dreamari (doc 14).
-function MatchRing({ score, size = 44 }: { score: number; size?: number }) {
-  const stroke = size >= 40 ? 4 : 3;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  return (
-    <span title={`${matchTier(score)}: from your activity in Dreamari`} className="relative inline-flex flex-none items-center justify-center" style={{ width: size, height: size }}>
-      <svg viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--glass-surface-2)" strokeWidth={stroke} />
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--accent-subtle)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - score / 100)} />
-      </svg>
-      <span className="font-extrabold" style={{ fontFamily: "var(--font-display)", fontSize: size >= 44 ? 12 : size >= 36 ? 10.5 : 8.5 }}>{score}%</span>
-    </span>
-  );
-}
-
 // Readiness journey: where the student stands on the road to real
 // opportunities (doc 22 status labels), not an unexplained ring.
 const READINESS_STAGES = [
@@ -456,57 +414,7 @@ function ReadinessMeter({ value }: { value: number }) {
   );
 }
 
-function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, reorderTo, move, compact }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove?: (id: string) => void; reorderTo?: (id: string, targetIndex: number) => void; move?: (id: string, delta: number) => void; compact?: boolean }) {
-  // Horizontal pointer reorder on the rank chip (only when reorderTo given).
-  type DragState = { id: string; from: number; over: number; dx: number; startX: number; step: number };
-  const [drag, setDrag] = useState<DragState | null>(null);
-  const dragRef = useRef<DragState | null>(null);
-  const updateDrag = (value: DragState | null) => {
-    dragRef.current = value;
-    setDrag(value);
-  };
-  function onChipPointerDown(event: React.PointerEvent, id: string, index: number) {
-    if (!reorderTo) return;
-    event.preventDefault();
-    event.stopPropagation();
-    try {
-      (event.target as HTMLElement).setPointerCapture(event.pointerId);
-    } catch {
-      // capture can be unavailable (synthetic pointers); drag still works
-    }
-    const card = (event.currentTarget as HTMLElement).closest("[data-top3-card]") as HTMLElement;
-    const gap = parseFloat(getComputedStyle(card.parentElement as HTMLElement).columnGap) || 12;
-    updateDrag({ id, from: index, over: index, dx: 0, startX: event.clientX, step: card.getBoundingClientRect().width + gap });
-  }
-  useEffect(() => {
-    if (!drag || !reorderTo) return;
-    const onMove = (event: PointerEvent) => {
-      const current = dragRef.current;
-      if (!current) return;
-      const dx = event.clientX - current.startX;
-      const over = Math.min(top3.length - 1, Math.max(0, current.from + Math.round(dx / current.step)));
-      updateDrag({ ...current, dx, over });
-    };
-    const onUp = () => {
-      const current = dragRef.current;
-      if (!current) return;
-      if (current.over !== current.from) {
-        reorderTo(current.id, current.over);
-        if (current.over === 0) setFocusId(current.id);
-      }
-      updateDrag(null);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drag?.id]);
-
+function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, compact }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove?: (id: string) => void; compact?: boolean }) {
   const emptySlots = Math.max(0, 3 - top3.length);
   const containerClass = compact
     ? "flex gap-[var(--space-2)] overflow-x-auto pb-1 [scrollbar-width:none] md:gap-[var(--space-3)]"
@@ -514,21 +422,11 @@ function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, reorderTo, move
   const cardClass = compact
     ? "relative h-[148px] w-[104px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border-2 text-center uppercase select-none md:h-[184px] md:w-[132px]"
     : "relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase select-none md:aspect-[148/128] md:h-auto md:w-full";
-  const chipClass = compact
-    ? "absolute top-1.5 left-1.5 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold"
-    : "absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold md:top-3 md:left-3 md:size-8 md:text-[14px]";
   return (
     <div className={containerClass} style={{ touchAction: "pan-x pan-y" }}>
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const isFocus = focus?.id === id;
-        const lifted = drag?.id === id;
-        let dragTransform = "";
-        if (drag) {
-          if (lifted) dragTransform = ` translateX(${drag.dx}px)`;
-          else if (drag.from < index && index <= drag.over) dragTransform = ` translateX(-${drag.step}px)`;
-          else if (drag.over <= index && index < drag.from) dragTransform = ` translateX(${drag.step}px)`;
-        }
         return (
           <button
             key={id}
@@ -537,22 +435,10 @@ function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, reorderTo, move
             aria-pressed={isFocus}
             onClick={() => setFocusId(id)}
             className={cardClass}
-            style={{ containerType: "inline-size", borderColor: lifted ? "var(--accent-subtle)" : isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus || lifted ? 1 : 0.72, transform: `${lifted ? "scale(1.03)" : isFocus ? "scale(1)" : "scale(0.97)"}${dragTransform}`, transition: lifted ? "none" : "transform 160ms ease", zIndex: lifted ? 20 : undefined, WebkitUserSelect: "none", WebkitTouchCallout: "none" } as React.CSSProperties}
+            style={{ containerType: "inline-size", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)", transition: "transform 160ms ease", WebkitUserSelect: "none", WebkitTouchCallout: "none" } as React.CSSProperties}
           >
             <Image src={career.photo} alt="" fill sizes={compact ? "132px" : "(min-width: 768px) 340px, 148px"} className="object-cover" />
-            <span
-              role={reorderTo ? "button" : undefined}
-              tabIndex={reorderTo ? 0 : undefined}
-              aria-label={reorderTo ? `Rank ${index + 1}: drag sideways or press the arrow keys to reorder ${career.title}` : undefined}
-              onPointerDown={(event) => onChipPointerDown(event, id, index)}
-              onKeyDown={(event) => {
-                if (!move) return;
-                if (event.key === "ArrowLeft") { event.preventDefault(); event.stopPropagation(); move(id, -1); if (index === 1) setFocusId(id); }
-                if (event.key === "ArrowRight") { event.preventDefault(); event.stopPropagation(); move(id, 1); }
-              }}
-              className={`${chipClass} ${reorderTo ? "cursor-grab active:cursor-grabbing" : ""}`}
-              style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)", touchAction: reorderTo ? "none" : undefined }}
-            >
+            <span className={compact ? "absolute top-1.5 left-1.5 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" : "absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold md:top-3 md:left-3 md:size-8 md:text-[14px]"} style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
               {index + 1}
             </span>
             <span className={`absolute flex items-center ${compact ? "top-1.5 right-1.5 gap-[4px]" : "top-2 right-2 gap-[6px] md:top-3 md:right-3"}`}>
@@ -574,16 +460,6 @@ function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, reorderTo, move
               )}
             </span>
             <span className={`absolute inset-x-0 bottom-0 flex flex-col items-center px-1 ${compact ? "gap-[2px] pt-[18px] pb-[7px]" : "gap-[4px] pt-[26px] pb-[10px] md:px-3 md:pb-[14px]"}`} style={{ backgroundImage: TEXT_SCRIM }}>
-              <span className={`flex items-center justify-center rounded-full ${compact ? "mb-[1px] p-[2px]" : "mb-[2px] p-[3px]"}`} style={{ background: "var(--glass-surface-3)" }}>
-                {compact ? (
-                  <MatchRing score={career.match} size={26} />
-                ) : (
-                  <>
-                    <span className="md:hidden"><MatchRing score={career.match} size={34} /></span>
-                    <span className="hidden md:block"><MatchRing score={career.match} size={44} /></span>
-                  </>
-                )}
-              </span>
               <span className="w-full text-balance [overflow-wrap:normal]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)", fontSize: "clamp(11px, calc(7px + 4cqw), 22px)", lineHeight: 1.15 }}>{career.title}</span>
               <span className="w-full font-semibold" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world], fontSize: "clamp(7px, calc(4.5px + 2cqw), 11.5px)", lineHeight: 1.35, letterSpacing: "0.5px" }}>{career.world}</span>
             </span>
@@ -784,21 +660,12 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* Three ALTERNATE ways in, side by side */}
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
-        <div className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[3px]" style={GLASS}>
-          {(["cards", "compare"] as const).map((view) => (
-            <button key={view} type="button" aria-pressed={routeView === view} onClick={() => setRouteView(view)} className="cursor-pointer rounded-[var(--radius-md-alt)] px-[14px] py-[5px] text-[12px] font-bold capitalize" style={{ background: routeView === view ? "var(--primary)" : "transparent", color: routeView === view ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>
-              {view}
-            </button>
-          ))}
-        </div>
-      </div>
+      <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
 
       {routeView === "cards" ? (
         <>
-        {/* Route switcher: all the alternatives at a glance, one tap away */}
-        <div className="-mt-[6px] flex gap-[var(--space-2)]">
+        {/* ONE control row: route pills + the Compare view, nothing else */}
+        <div className="-mt-[6px] flex flex-wrap items-center gap-[var(--space-2)]">
           {focus.routes.map((routeOption, index) => (
             <button
               key={routeOption.id}
@@ -809,8 +676,8 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
                 card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
                 setVisibleRoute(index);
               }}
-              className="cursor-pointer rounded-full border px-[12px] py-[5px] text-[11.5px] font-bold"
-              style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", borderColor: visibleRoute === index ? "var(--primary)" : "var(--glass-border)", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+              className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
+              style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
             >
               <span className="flex items-center gap-[4px]">
                 {routeOption.recommended && <Sparkles className="h-3 w-3" style={{ color: visibleRoute === index ? "var(--primary-foreground)" : "var(--accent-subtle)" }} />}
@@ -818,6 +685,16 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
               </span>
             </button>
           ))}
+          <span aria-hidden className="h-[16px] w-px" style={{ background: "var(--glass-border)" }} />
+          <button
+            type="button"
+            aria-pressed={false}
+            onClick={() => setRouteView("compare")}
+            className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
+            style={{ background: "transparent", color: "var(--muted-foreground)" }}
+          >
+            Compare
+          </button>
         </div>
         <div className="relative">
           <div
@@ -865,6 +742,10 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
         </>
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
+          <div className="-mt-[6px] flex items-center gap-[var(--space-2)]">
+            <button type="button" onClick={() => setRouteView("cards")} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}>← Cards</button>
+            <span className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Compare</span>
+          </div>
           <CompareTable routes={focus.routes} selectedId={chosenRoute(focus).id} />
           <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
             <CompareChart title="Total cost" better="lower" unit={(value) => (value === 0 ? "$0" : `$${value}K`)} rows={focus.routes.map((r) => ({ id: r.id, name: r.short, value: r.costMidK }))} selectedId={chosenRoute(focus).id} />

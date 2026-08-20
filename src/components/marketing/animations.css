@@ -175,3 +175,22 @@
 .mkt-reply { opacity: 0; transform: translateY(8px); }
 .mkt-graphic[data-playing="true"] .mkt-reply { animation: mkt-reply-in 0.5s cubic-bezier(0.16, 0.84, 0.44, 1) 1 forwards; animation-delay: calc(var(--d) * 0.4s + 0.15s); }
 @keyframes mkt-reply-in { to { opacity: 1; transform: translateY(0); } }
+
+/* GET HIRED loop-closer: each stage materializes into the same window (echoes
+   the build flow's ink treatment: blur + overbright -> sharp), and the offer
+   card pops on the final beat. Short on purpose - the section is a clicker,
+   not a film. */
+@keyframes mkt-stage-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.98); filter: blur(8px) brightness(1.6); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+}
+.mkt-stage { animation: mkt-stage-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes mkt-offer-pop {
+  0% { opacity: 0; transform: translateY(16px) scale(0.9); }
+  60% { opacity: 1; transform: translateY(-3px) scale(1.03); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.mkt-offer { animation: mkt-offer-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
+@media (prefers-reduced-motion: reduce) {
+  .mkt-stage, .mkt-offer { animation: none; }
+}
