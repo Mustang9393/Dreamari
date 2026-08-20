@@ -85,7 +85,22 @@ export function Nav({ onSchoolsClick }: NavProps) {
         }}
       >
         <Link href="#" className="flex items-center gap-2 text-[17px] font-extrabold sm:text-[19px]" style={{ color: "var(--foreground)" }}>
-          <span className="h-[9px] w-[9px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 12px 2px var(--primary)" }} />
+          {/* Real Logo Identity mark (masked so it follows currentColor) */}
+          <span
+            aria-hidden
+            className="h-[13px] w-[22px] sm:h-[14px] sm:w-[24px]"
+            style={{
+              background: "currentColor",
+              maskImage: "url(/images/app/logo-mark.svg)",
+              WebkitMaskImage: "url(/images/app/logo-mark.svg)",
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
           DREAMARI
         </Link>
 
