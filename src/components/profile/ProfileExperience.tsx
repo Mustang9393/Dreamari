@@ -922,7 +922,6 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
-  const [payoffYear, setPayoffYear] = useState(2);
   const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
@@ -995,8 +994,13 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {detail && pane === "fit" && (
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
-          {/* Lead stat: your odds of getting in */}
+          {/* Lead: the thesis, set like Life's pull quote */}
           <div className="flex flex-col gap-[4px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The fit</span>
+            <p className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.tagline}</p>
+          </div>
+
+          <div className="flex flex-col gap-[4px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Acceptance</span>
             {detail.fit.acceptancePct !== undefined ? (
               <>
@@ -1022,7 +1026,6 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
             <FactRow label="Where you'd work" value={detail.fit.targets} />
           </div>
 
-          <span className="mt-auto border-t pt-[var(--space-3)] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
         </div>
       )}
 
@@ -1031,15 +1034,14 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           {/* Lead: the vibe, set like a pull quote */}
           <div className="flex flex-col gap-[4px]">
             <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The vibe</span>
-            <p className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
+            <p className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
           </div>
 
           <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Student life</span>
-            <div className="flex flex-col gap-[6px]">
-              {detail.life.clubs.map((club) => (
-                <span key={club} className="flex items-start gap-[8px] text-[12px] leading-[16px] font-semibold">
-                  <span className="mt-[6px] size-[5px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />
+            <div className="flex flex-col">
+              {detail.life.clubs.map((club, index) => (
+                <span key={club} className={`py-[7px] text-[12px] leading-[16px] font-semibold ${index < detail.life.clubs.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
                   {club}
                 </span>
               ))}
@@ -1065,31 +1067,36 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Avg loan {detail.payoff.avgLoan} · starting {detail.payoff.startSalary}</span>
           </div>
 
-          {/* Pay curve: amounts on bars; tap a year for its bonus math */}
+          {/* Pay curve: bonus lives IN the bar (stacked), not in a caption */}
           <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you make</span>
             <div className="grid grid-cols-3 items-end gap-[var(--space-2)]">
               {(() => {
-                const values = detail.payoff.years.map((year) => parseInt(year.amount.replace(/[^0-9]/g, ""), 10) || 0);
-                const max = Math.max(...values, 1);
-                return detail.payoff.years.map((year, index) => (
-                  <button
-                    key={year.label}
-                    type="button"
-                    aria-pressed={payoffYear === index}
-                    onClick={() => setPayoffYear(index)}
-                    className="flex cursor-pointer flex-col items-center gap-[3px]"
-                  >
+                const parsed = detail.payoff.years.map((year) => {
+                  const total = parseInt(year.amount.replace(/[^0-9]/g, ""), 10) || 0;
+                  const bonusMatch = year.note?.match(/\+\s*\$?(\d+)K/i);
+                  const bonus = bonusMatch ? parseInt(bonusMatch[1], 10) : 0;
+                  return { label: year.label, amount: year.amount, total, bonus, base: Math.max(total - bonus, 0) };
+                });
+                const max = Math.max(...parsed.map((year) => year.total), 1);
+                return parsed.map((year) => (
+                  <span key={year.label} className="flex flex-col items-center gap-[3px]">
                     <span className="text-[12.5px] leading-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
-                    <span className="w-full rounded-t-[5px] transition-colors" style={{ height: `${Math.max(Math.round((values[index] / max) * 52), 8)}px`, background: payoffYear === index ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} />
-                    <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: payoffYear === index ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{year.label}</span>
-                  </button>
+                    <span className="flex w-full flex-col overflow-hidden rounded-t-[5px]">
+                      {year.bonus > 0 && <span className="w-full" style={{ height: `${Math.max(Math.round((year.bonus / max) * 56), 4)}px`, background: "var(--accent-subtle)" }} />}
+                      <span className="w-full" style={{ height: `${Math.max(Math.round((year.base / max) * 56), 8)}px`, background: "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} />
+                    </span>
+                    <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
+                  </span>
                 ));
               })()}
             </div>
-            <span className="min-h-[14px] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              {detail.payoff.years[payoffYear]?.note ? `${detail.payoff.years[payoffYear].label}: ${detail.payoff.years[payoffYear].note}` : " "}
-            </span>
+            {detail.payoff.years.some((year) => /bonus/i.test(year.note ?? "")) && (
+              <div className="flex items-center gap-[var(--space-3)] text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} /> Base</span>
+                <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "var(--accent-subtle)" }} /> Bonus</span>
+              </div>
+            )}
           </div>
 
           {/* Budget: base lives in the caption, one-line legend */}

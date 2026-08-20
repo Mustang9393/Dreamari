@@ -86,37 +86,52 @@ export function GetHiredChapter() {
         {/* The stage window: fixed height, content swaps in place */}
         <div key={current.id} className="mkt-stage mt-5 flex h-[280px] flex-col justify-center sm:h-[300px]">
           {stage === 0 && (
-            <div className="grid h-full grid-cols-3 gap-2.5">
-              {TOP3.map((card, index) => (
-                <div key={card.title} className="relative overflow-hidden rounded-[14px] border-2 text-center uppercase" style={{ borderColor: index === 0 ? "var(--primary)" : "var(--border)", opacity: index === 0 ? 1 : 0.8 }}>
-                  <Image src={card.photo} alt="" fill sizes="150px" className="object-cover" />
-                  <span className="absolute top-2 left-2 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
-                  {index === 0 && <span className="absolute top-2 right-2 rounded-full px-[7px] py-[2px] text-[7.5px] font-bold tracking-[0.5px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>}
-                  <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1.5 pt-8 pb-2.5" style={{ backgroundImage: TEXT_SCRIM }}>
-                    <span className="w-full text-[12px] leading-[14px]" style={{ ...posterTitleFont(card.world), color: "var(--foreground)" }}>{card.title}</span>
-                    <span className="w-full text-[7px] leading-[10px] font-semibold tracking-[0.5px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[card.world] }}>{card.world}</span>
-                  </span>
-                </div>
-              ))}
+            <div className="relative flex h-full items-center justify-center">
+              {/* Stack, no tilt: the focus pick BIG and front, 2 and 3 straight
+                 behind, peeking from the sides. Sized to fill the window and
+                 allowed to overflow it a little rather than float tiny. */}
+              {TOP3.map((card, index) => {
+                const pose = [
+                  { x: 0, scale: 1, z: 3, o: 1 },
+                  { x: -100, scale: 0.82, z: 1, o: 0.5 },
+                  { x: 100, scale: 0.82, z: 2, o: 0.5 },
+                ][index];
+                return (
+                  <div
+                    key={card.title}
+                    className="absolute aspect-[148/210] w-[clamp(180px,62%,212px)] overflow-hidden rounded-[16px] border-2 text-center uppercase"
+                    style={{ borderColor: index === 0 ? "var(--primary)" : "var(--border)", transform: `translateX(${pose.x}px) scale(${pose.scale})`, zIndex: pose.z, opacity: pose.o }}
+                  >
+                    <Image src={card.photo} alt="" fill sizes="160px" className="object-cover" />
+                    <span className="absolute top-2 left-2 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+                    {index === 0 && <span className="absolute top-2 right-2 rounded-full px-[7px] py-[2px] text-[7.5px] font-bold tracking-[0.5px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>}
+                    <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1.5 pt-8 pb-2.5" style={{ backgroundImage: TEXT_SCRIM }}>
+                      <span className="w-full text-[15px] leading-[17px]" style={{ ...posterTitleFont(card.world), color: "var(--foreground)" }}>{card.title}</span>
+                      <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.5px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[card.world] }}>{card.world}</span>
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {stage === 1 && (
             <div className="flex h-full flex-col justify-center">
-              {/* Editorial level header: caption, display title, progress ring */}
-              <div className="flex items-center justify-between pb-3">
-                <span className="flex flex-col gap-[2px]">
-                  <span className="text-[9px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Level 1 · Foundation</span>
-                  <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
+              {/* Editorial level header: caption, display title, progress ring.
+                 Everything sized to FILL the window — same content, no voids. */}
+              <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="flex flex-col gap-[3px]">
+                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Level 1 · Foundation</span>
+                  <span className="text-[23px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
                 </span>
-                <MatchRing score={50} size={38} />
+                <MatchRing score={50} size={46} />
               </div>
               {/* Hairline task list: check circles, quiet strikeouts, minutes right */}
               {PLAN_TASKS.map((task, index) => (
-                <div key={task.label} className={`flex items-center gap-3 py-3 ${index < PLAN_TASKS.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="flex size-5 flex-none items-center justify-center rounded-full text-[11px] font-bold" style={task.done ? { background: "var(--color-feedback-success, #33c78c)", color: "#05070f" } : { border: "1.5px solid var(--border)", color: "transparent" }}>{task.done ? "✓" : ""}</span>
-                  <span className={`min-w-0 flex-1 truncate text-[13px] leading-[17px] font-semibold ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
-                  <span className="flex-none text-[9.5px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>{task.meta}</span>
+                <div key={task.label} className={`flex flex-1 items-center gap-3.5 ${index < PLAN_TASKS.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[12px] font-bold" style={task.done ? { background: "var(--color-feedback-success, #33c78c)", color: "#05070f" } : { border: "1.5px solid var(--border)", color: "transparent" }}>{task.done ? "✓" : ""}</span>
+                  <span className={`min-w-0 flex-1 text-[14px] leading-[18px] font-semibold line-clamp-2 ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
+                  <span className="flex-none text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>{task.meta}</span>
                 </div>
               ))}
             </div>
