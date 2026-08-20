@@ -72,8 +72,8 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     receipts: [
       { kind: "sim", value: "2x", label: "IB sim finished" },
       { kind: "level", value: "Lv 4", label: "Finance glossary" },
-      { kind: "saved", value: "3", label: "Finance careers saved" },
-      { kind: "streak", value: "5 days", label: "Came back for this" },
+      { kind: "saved", value: "3", label: "Careers saved" },
+      { kind: "streak", value: "5 days", label: "Return streak" },
     ],
     routes: [
       {
@@ -152,8 +152,8 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     match: 75,
     receipts: [
       { kind: "watched", value: "3x", label: "Pilot reel watched" },
-      { kind: "saved", value: "3", label: "Aviation careers saved" },
-      { kind: "scenario", value: "1st try", label: "Weather scenario pass" },
+      { kind: "saved", value: "3", label: "Careers saved" },
+      { kind: "scenario", value: "1st try", label: "Scenario passed" },
     ],
     routes: [
       {
@@ -230,9 +230,9 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     photo: "/images/app/poster-private-equity.png",
     match: 88,
     receipts: [
-      { kind: "watched", value: "Liked", label: "In the For You reel" },
+      { kind: "watched", value: "Liked", label: "For You likes" },
       { kind: "sim", value: "2x", label: "PE breakdown read" },
-      { kind: "scenario", value: "1st try", label: "Valuation scenario pass" },
+      { kind: "scenario", value: "1st try", label: "Scenario passed" },
     ],
     routes: [
       {
@@ -297,7 +297,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     world: "Tech & Engineering",
     photo: "/images/app/poster-software-engineer.png",
     match: 84,
-    receipts: [{ kind: "scenario", value: "Pass", label: "Debugging scenario" }, { kind: "saved", value: "2", label: "Tech careers saved" }],
+    receipts: [{ kind: "scenario", value: "Pass", label: "Debugging scenario" }, { kind: "saved", value: "2", label: "Careers saved" }],
     routes: [
       { id: "se-uni", short: "CS degree", type: "University", program: "Computer Science", location: "In-state", duration: "4 yrs", cost: "$45K–90K", credential: "BS in CS", salary: "$85K–130K first year", loanPayoff: "~1–2 yrs", nextStep: "Try a beginner coding game",   costMidK: 68,
         years: 4,
