@@ -104,3 +104,27 @@
   .seq-reveal > *:nth-child(7) { animation-delay: 0.33s; }
   .seq-reveal > *:nth-child(8) { animation-delay: 0.38s; }
 }
+
+/* One-shot tab-discovery cue: an underline glides across the in-card section
+   tabs when the focused route card mounts, then the real active underline
+   takes over. Wordless "these are tabs" hint; runs once, never loops. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes tab-hint-nudge {
+    0% { opacity: 1; transform: translateX(0); }
+    45% { opacity: 1; transform: translateX(52px); }
+    60% { opacity: 1; transform: translateX(52px); }
+    92% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(0); }
+  }
+  .tab-hint {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: 34px;
+    border-radius: 2px;
+    background: var(--primary);
+    animation: tab-hint-nudge 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.9s 1 both;
+    pointer-events: none;
+  }
+}

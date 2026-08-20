@@ -763,10 +763,10 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
 
       {/* Your roadmap: overall progress across every step */}
       <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)]" style={GLASS}>
-        <span className="flex flex-col gap-[4px]">
+        <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
           <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
-          <span className="relative h-[6px] w-[180px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
+          <span className="relative h-[6px] w-full max-w-[420px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
             <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(Math.round((doneCount / Math.max(allTasks.length, 1)) * 100), 2)}%`, background: "var(--accent-subtle)" }} />
           </span>
         </span>
@@ -910,7 +910,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {/* Hairline text tabs */}
       {detail && (
-        <div className="flex gap-[var(--space-5)] self-start border-b md:w-full md:[grid-area:tabs]" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="relative flex gap-[var(--space-5)] self-start border-b md:w-full md:[grid-area:tabs]" style={{ borderColor: "var(--glass-border)" }}>
+          {selected && <span aria-hidden className="tab-hint" />}
           {(
             [
               { id: "stats", label: "Stats" },
