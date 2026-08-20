@@ -58,10 +58,11 @@ this one is superseded. Audience: the Figma agent (Codex), building in
   tabs: opening either replaces everything under the header (Top 3 and tab
   bar hidden) with a full view that closes back to Overview.
 - **Path** = the 3 alternate routes side by side (desktop columns, mobile
-  snap carousel with a route-name pill switcher), plus a Compare view. A
-  GLOBAL facet switcher (Essentials / Good fit / Student life / Loan payoff)
-  swaps the same section into every column at once, so the cards never stack
-  accordions and the routes stay height-aligned and directly comparable.
+  snap carousel with a route-name pill switcher), plus a Compare view. Each
+  card carries its own in-card section tabs (Stats / Fit / Life / Payoff)
+  under the identity block; tapping swaps ONE content window in place, so a
+  card never stacks open sections or grows past a single pane. Cross-route
+  comparison of a single dimension lives in the Compare view.
 - **Plan** = the levels for the chosen route.
 
 ## The captures (12 states, desktop DOM, responsive classes included)
@@ -74,7 +75,7 @@ unprefixed = mobile; one file covers both breakpoints. Decode
 | --- | --- |
 | 01-overview-default.html | Header, Top 3 (2 careers + Add slot), collapsed Locker peek, tabs, Career Report with bento stat tiles + bento receipts, next action, readiness chips |
 | 02-career-report-overlay.html | Counselor-facing export overlay (chrome bar with section toggles + white report page) |
-| 03-path-routes-cards.html | Path tab: facet switcher + three route columns (identity, pitch, Time/Cost/Pay stats, CTA, next step); facet content for fit/life/payoff is in the DOM recipe below and in ROUTE_DETAILS |
+| 03-path-routes-cards.html | Path tab: three route columns, each with in-card Stats/Fit/Life/Payoff tabs and the Stats pane showing (identity, pitch, Time/Cost/Pay, CTA, next step); Fit/Life/Payoff pane contents are spec'd below and sourced from ROUTE_DETAILS |
 | 04-path-routes-compare.html | Compare view: category table with benefit tags + four single-measure charts |
 | 05-plan-levels.html | Plan tab: Level 1 open with ring, 2-3 locked, add-your-own-step, Change route link |
 | 06-add-career-sheet.html | Add-to-Top-3 sheet: locker list with rings + Add buttons |
@@ -141,9 +142,11 @@ Poster Card variants:
 7. **Route column**: type icon in glass circle + YOUR PATH chip (selected),
    type caption, program title, credential + location line, pitch, money
    block in decision order (Time, Total cost, First-year pay; boxless bento
-   rows on a `--glass-surface-1` panel), then ONE facet section driven by
-   the global switcher (chips: primary 22% fill + primary border when
-   active). Facet contents:
+   rows on a `--glass-surface-1` panel) as the default Stats pane. Under the
+   identity block sits a 4-segment in-card tab bar (glass-surface-2 track,
+   active segment primary fill + primary-foreground text, 10.5px bold:
+   Stats / Fit / Life / Payoff); tapping swaps the single content window.
+   Pane contents:
    - *Good fit*: tagline chip, ACCEPTANCE GAUGE (track accent-subtle 22%,
      fill accent-subtle, % in gradient numerals, source text as caption),
      aid + where-you-would-work fact rows, placement chip (High = feedback
@@ -154,7 +157,7 @@ Poster Card variants:
      years 45% mix, amounts above, year captions + bonus notes below),
      MONTHLY BUDGET two-segment bar (loan solid / keep 22% mix) with legend
      dots, takeaway line in accent-subtle.
-   Facets render without disclosure chrome (a top border, then content).
+   Panes render bare (no disclosure chrome).
    Selected column: primary border, primary 10% wash, CTA "Open your plan
    for this path"; unselected CTA "Continue with {short}". Next-step footer
    line links to /colleges when the step is a program/school action,

@@ -771,9 +771,6 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   onGoPlan: () => void;
 }) {
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
-  // One facet for ALL cards: switching it swaps every column to the same
-  // section, so the three routes stay aligned and comparable.
-  const [facet, setFacet] = useState<"essentials" | "fit" | "life" | "payoff">("essentials");
   // Mobile: the route the carousel is resting on, for the switcher pills.
   const [visibleRoute, setVisibleRoute] = useState(0);
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -806,28 +803,6 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 
       {routeView === "cards" ? (
         <>
-        {/* Facet switcher: swaps the SAME section into all three cards */}
-        <div className="-mt-[4px] flex flex-wrap gap-[var(--space-2)]">
-          {(
-            [
-              { id: "essentials", label: "Essentials" },
-              { id: "fit", label: "Good fit" },
-              { id: "life", label: "Student life" },
-              { id: "payoff", label: "Loan payoff" },
-            ] as const
-          ).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={facet === item.id}
-              onClick={() => setFacet(item.id)}
-              className="cursor-pointer rounded-full border px-[12px] py-[5px] text-[11.5px] font-bold"
-              style={{ background: facet === item.id ? "color-mix(in srgb, var(--primary) 22%, transparent)" : "transparent", borderColor: facet === item.id ? "var(--primary)" : "var(--glass-border)", color: facet === item.id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
         {/* Mobile switcher: all the alternatives at a glance, one tap away */}
         <div className="-mt-[6px] flex gap-[var(--space-2)] md:hidden">
           {focus.routes.map((routeOption, index) => (
@@ -862,7 +837,6 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
               key={routeOption.id}
               route={routeOption}
               selected={chosenRoute(focus).id === routeOption.id}
-              facet={facet}
               onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
               onGoPlan={onGoPlan}
             />
@@ -1033,12 +1007,13 @@ const routeTypeKey = (type: string): keyof typeof ROUTE_TYPE_ICONS => {
   return "school";
 };
 
-// One alternate route. The header + money block are always visible; the
-// facet section below swaps in sync across ALL columns (set in PathTab), so
-// the three routes stay the same height and directly comparable.
-function RouteColumn({ route, selected, facet, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; selected: boolean; facet: "essentials" | "fit" | "life" | "payoff"; onSelect: () => void; onGoPlan: () => void }) {
+// One alternate route. The identity stays put; the section tabs under it
+// swap ONE content window in place (stats by default), so the card never
+// stacks open sections or grows past a single pane.
+function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; selected: boolean; onSelect: () => void; onGoPlan: () => void }) {
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
+  const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
   return (
     <article
       className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:w-auto md:max-w-none"
@@ -1058,16 +1033,42 @@ function RouteColumn({ route, selected, facet, onSelect, onGoPlan }: { route: Pr
         {detail && <span className="mt-[2px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</span>}
       </div>
 
-      {/* Time & money, in decision order: how long, what it costs, what it pays */}
-      <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-xl)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-        <MiniBento label="Time" value={route.duration} />
-        <MiniBento label="Total cost" value={route.cost.split(",")[0]} />
-        <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
-      </div>
+      {/* In-card section tabs: the window below swaps, nothing stacks */}
+      {detail && (
+        <div className="grid grid-cols-4 gap-[2px] rounded-[var(--radius-md)] p-[3px]" style={{ background: "var(--glass-surface-2)" }}>
+          {(
+            [
+              { id: "stats", label: "Stats" },
+              { id: "fit", label: "Fit" },
+              { id: "life", label: "Life" },
+              { id: "payoff", label: "Payoff" },
+            ] as const
+          ).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={pane === item.id}
+              onClick={() => setPane(item.id)}
+              className="cursor-pointer rounded-[6px] py-[5px] text-center text-[10.5px] font-bold"
+              style={{ background: pane === item.id ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Facet section: same one on every card at any moment */}
-      {detail && facet === "fit" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      {/* Time & money, in decision order: how long, what it costs, what it pays */}
+      {(!detail || pane === "stats") && (
+        <div className="filters-reveal flex flex-col gap-[var(--space-2)] rounded-[var(--radius-xl)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+          <MiniBento label="Time" value={route.duration} />
+          <MiniBento label="Total cost" value={route.cost.split(",")[0]} />
+          <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
+        </div>
+      )}
+
+      {detail && pane === "fit" && (
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
           <span className="w-fit rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
           {detail.fit.acceptancePct !== undefined ? (
             <div className="flex flex-col gap-[4px]">
@@ -1091,8 +1092,8 @@ function RouteColumn({ route, selected, facet, onSelect, onGoPlan }: { route: Pr
           </div>
         </div>
       )}
-      {detail && facet === "life" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      {detail && pane === "life" && (
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
           <ul className="flex list-disc flex-col gap-[3px] pl-4 text-[11.5px] leading-[16px]" style={{ color: "var(--foreground)" }}>
             {detail.life.clubs.map((club) => <li key={club}>{club}</li>)}
           </ul>
@@ -1100,8 +1101,8 @@ function RouteColumn({ route, selected, facet, onSelect, onGoPlan }: { route: Pr
           <FactRow label="Study abroad" value={detail.life.abroad} />
         </div>
       )}
-      {detail && facet === "payoff" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      {detail && pane === "payoff" && (
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
           <div className="flex items-baseline gap-[var(--space-2)]">
             <span className="text-[24px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time}</span>
             <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
