@@ -6,9 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
-  ArrowDown,
   ArrowLeftRight,
-  ArrowUp,
   BookOpen,
   Bookmark,
   Check,
@@ -595,6 +593,27 @@ function PathTab(props: {
   const { top3, focusId, setFocusId, focus, chosenRoute, setRouteChoice, horizonProgress, horizonUnlocked, doneSet, toggleTask, removeFromTop3, move, reorderTo, onGoLocker, tasksFor, addCustomTask, removeCustomTask } = props;
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  // Pointer-based reorder (HTML5 dnd never fires on touch): the grip captures
+  // the pointer, rows live-reorder under it; the grip also takes arrow keys.
+  function onGripPointerDown(event: React.PointerEvent, id: string) {
+    event.preventDefault();
+    try {
+      (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    } catch {
+      // capture can be unavailable (synthetic pointers); drag still works
+    }
+    setDragId(id);
+  }
+  function onGripPointerMove(event: React.PointerEvent, id: string) {
+    if (dragId !== id) return;
+    const over = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-top3-index]");
+    if (!over) return;
+    const targetIndex = Number((over as HTMLElement).dataset.top3Index);
+    if (!Number.isNaN(targetIndex)) reorderTo(id, targetIndex);
+  }
+  function onGripPointerUp() {
+    setDragId(null);
+  }
   const [draftTask, setDraftTask] = useState("");
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
   const [openHorizon, setOpenHorizon] = useState<string | null>(null);
@@ -628,16 +647,27 @@ function PathTab(props: {
               return (
                 <div
                   key={id}
-                  draggable
-                  onDragStart={(event) => { setDragId(id); event.dataTransfer.effectAllowed = "move"; }}
-                  onDragOver={(event) => { event.preventDefault(); if (dragId && dragId !== id) reorderTo(dragId, index); }}
-                  onDragEnd={() => setDragId(null)}
-                  className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-3)] transition-opacity"
-                  style={{ background: isFocus ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: dragId === id ? 0.5 : 1 }}
+                  data-top3-index={index}
+                  className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-3)] transition-[opacity,transform]"
+                  style={{ background: isFocus ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: dragId === id ? "var(--accent-subtle)" : isFocus ? "var(--primary)" : "var(--glass-border)", opacity: dragId === id ? 0.6 : 1, transform: dragId === id ? "scale(1.01)" : "none" }}
                 >
-                  <span aria-hidden className="flex flex-none cursor-grab items-center active:cursor-grabbing" style={{ color: "var(--muted-foreground)" }}>
+                  <button
+                    type="button"
+                    aria-label={`Reorder ${career.title}: drag, or press the arrow keys`}
+                    title="Drag to reorder"
+                    onPointerDown={(event) => onGripPointerDown(event, id)}
+                    onPointerMove={(event) => onGripPointerMove(event, id)}
+                    onPointerUp={onGripPointerUp}
+                    onPointerCancel={onGripPointerUp}
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowUp") { event.preventDefault(); move(id, -1); }
+                      if (event.key === "ArrowDown") { event.preventDefault(); move(id, 1); }
+                    }}
+                    className="flex flex-none cursor-grab items-center rounded p-1 active:cursor-grabbing"
+                    style={{ color: "var(--muted-foreground)", touchAction: "none" }}
+                  >
                     <GripVertical className="h-4 w-4" />
-                  </span>
+                  </button>
                   <span className="w-6 text-center text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>#{index + 1}</span>
                   {/* Tap the career itself for a preview */}
                   <button type="button" onClick={() => setPreviewId(id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] text-left" aria-label={`Preview ${career.title}`}>
@@ -660,10 +690,6 @@ function PathTab(props: {
                   >
                     <Target className="h-4 w-4" />
                   </button>
-                  <span className="flex flex-none flex-col gap-[2px]">
-                    <button type="button" aria-label={`Move ${career.title} up`} disabled={index === 0} onClick={() => move(id, -1)} className="cursor-pointer rounded p-1 disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}><ArrowUp className="h-3.5 w-3.5" /></button>
-                    <button type="button" aria-label={`Move ${career.title} down`} disabled={index === top3.length - 1} onClick={() => move(id, 1)} className="cursor-pointer rounded p-1 disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}><ArrowDown className="h-3.5 w-3.5" /></button>
-                  </span>
                   <button type="button" aria-label={`Remove ${career.title} from Top 3`} title="Remove" onClick={() => removeFromTop3(id)} className="flex-none cursor-pointer rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                     <X className="h-3.5 w-3.5" />
                   </button>
