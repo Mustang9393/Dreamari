@@ -28,7 +28,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
 
@@ -186,9 +186,7 @@ export function ProfileExperience() {
       </div>
 
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-        <Link href="/" aria-label="Dreamari landing page" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          DREAMARI
-        </Link>
+        <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold">
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent)" }}>
             <Flame className="h-4 w-4" /> {STUDENT.streakDays}

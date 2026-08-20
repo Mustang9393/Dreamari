@@ -8,6 +8,30 @@ import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Sparkle, Users, X }
 // The student's avatar photo doubles as the Profile entry point in both navs.
 const AVATAR_SRC = "/images/avatar-jordan.jpg";
 
+// Brand wordmark (Figma "Logo Identity": 21x12 mark + DREAMARI in
+// UI/Dreamari Logo). The mark renders via CSS mask so it follows
+// currentColor instead of the asset's baked-in near-white fill.
+export function Wordmark({ href = "/" }: { href?: string }) {
+  return (
+    <Link href={href} aria-label="Dreamari" className="flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>
+      <span
+        aria-hidden
+        className="h-[12px] w-[21px] flex-none"
+        style={{
+          background: "currentColor",
+          maskImage: "url(/images/app/logo-mark.svg)",
+          WebkitMaskImage: "url(/images/app/logo-mark.svg)",
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+        }}
+      />
+      <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</span>
+    </Link>
+  );
+}
+
 // App chrome, ported from the Figma "Desktop Navigation" component
 // (2570:4916: logo, center pill nav tabs, streak counter, XP, user avatar —
 // "Use Selected to reflect the current screen") and the "Mobile Nav"
@@ -96,12 +120,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
       className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] backdrop-blur-[2px] md:flex"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
     >
-      <Link href="/" aria-label="Dreamari landing page" className="flex items-center gap-[var(--space-1)]">
-        <span aria-hidden className="h-[9px] w-[9px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 12px 2px var(--primary)" }} />
-        <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          DREAMARI
-        </span>
-      </Link>
+      <Wordmark />
 
       <nav
         className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-xl)] border px-[var(--space-2)] py-[6px]"

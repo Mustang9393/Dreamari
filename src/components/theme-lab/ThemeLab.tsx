@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Check, ChevronDown, Info, Moon, Sun } from "lucide-react";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 
 // shadcn/ui recipes on Dreamari tokens. Every rule below mirrors shadcn's own
 // component classes (new-york style), with color utilities written as
@@ -110,7 +109,7 @@ export function ThemeLab() {
         <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
           <span className="flex items-center gap-3">
             <BackButton fallback="/home" />
-            <Link href="/" className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</Link>
+            <Wordmark />
           </span>
           <QuickLinksMenu />
         </header>

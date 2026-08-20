@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, MapPin, Search } from "lucide-react";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -36,7 +36,7 @@ export default function CollegesPage() {
         <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
           <span className="flex items-center gap-[var(--space-3)]">
             <BackButton fallback="/profile" />
-            <Link href="/" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</Link>
+            <Wordmark />
           </span>
           <QuickLinksMenu />
         </header>
