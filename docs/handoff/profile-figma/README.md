@@ -84,7 +84,9 @@ Use the poster COMPONENT variants; they already carry these faces. Do not retype
 
 1. **MatchRing**: SVG ring, track `--secondary`, progress `--primary`, percent
    centered in `--font-display`; sizes used: 26, 34, 44/46, 48. Tier label text:
-   85+ "Strong match", 70–84 "Solid match", 50–69 "Early match", else "Low signal".
+   75+ "Strong match", 50–74 "Solid match", 25–49 "Early match", under 25
+   "Low signal" (matches the shipped code; Airline Pilot at 75 renders
+   "Strong match").
 2. **ReadinessMeter** (header): caption "READINESS", value `46/100`,
    track with stage ticks; stages Building (25) / Pipeline Ready (75) / Opted In
    (100). Sits on the header's progress-blue backdrop: a 90° gradient,
