@@ -1060,12 +1060,10 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           {/* One stat leads; the loan rides shotgun as a stat, not a sentence.
              (Starting salary is already the chart's Year 1 base segment.) */}
           <div className="flex items-start justify-between gap-[var(--space-3)]">
-            <div className="flex flex-col gap-[2px]">
+            <div className="flex min-w-0 flex-col gap-[4px]">
               <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
-              <div className="flex items-baseline gap-[var(--space-2)]">
-                <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
-                <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
-              </div>
+              <span className="text-[26px] leading-[28px] font-extrabold whitespace-nowrap" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
+              <span className="w-fit rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
             </div>
             <div className="flex flex-none flex-col items-end gap-[2px]">
               <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Loan</span>
