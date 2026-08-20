@@ -8,7 +8,7 @@ const CHAPTERS = [
   { id: "explore", label: "Explore", color: "#1fc76e" },
   { id: "play", label: "Play", color: "#3b82f6" },
   { id: "connect", label: "Connect", color: "#00c8dc" },
-  { id: "get-hired", label: "Get Hired", color: "#ff4585" },
+  { id: "get-hired", label: "Get Hired", color: "#ff9640" },
 ];
 
 type ChapterRailProps = {
