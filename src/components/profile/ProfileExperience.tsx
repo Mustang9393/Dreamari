@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftRight,
+  Backpack,
   BookOpen,
   Bookmark,
   Check,
@@ -23,6 +24,7 @@ import {
   Pencil,
   Plus,
   Printer,
+  Settings,
   Shield,
   Target,
   Trophy,
@@ -74,6 +76,7 @@ export function ProfileExperience() {
   const [done, setDone] = useState<Record<string, string[]>>({});
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
@@ -223,7 +226,7 @@ export function ProfileExperience() {
                 <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · {STUDENT.school}</span>
               </span>
             </div>
-            <div className="flex items-center gap-[var(--space-8)]">
+            <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
               <span className="flex items-center gap-[8px]">
                 <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
                 <span className="flex flex-col">
@@ -232,6 +235,16 @@ export function ProfileExperience() {
                 </span>
               </span>
               <ReadinessMeter value={STUDENT.readiness} />
+              {/* Utility cluster: the Locker and settings do not depend on the
+                  Top 3, so they live up here instead of the tab bar. */}
+              <span className="flex items-center gap-[var(--space-2)]">
+                <button type="button" aria-label="Open Career Locker" title="Career Locker" onClick={() => setTab("locker")} className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-3)", borderColor: tab === "locker" ? "var(--primary)" : "var(--glass-border)", color: tab === "locker" ? "var(--accent-subtle)" : "var(--foreground)" }}>
+                  <Backpack className="h-4 w-4" />
+                </button>
+                <button type="button" aria-label="Profile settings" title="Settings" onClick={() => setSettingsOpen(true)} className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  <Settings className="h-4 w-4" />
+                </button>
+              </span>
             </div>
           </div>
         </section>
@@ -253,7 +266,6 @@ export function ProfileExperience() {
               { id: "overview", label: "Overview" },
               { id: "path", label: "Path" },
               { id: "plan", label: "Plan" },
-              { id: "locker", label: "Locker" },
               { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
@@ -272,7 +284,7 @@ export function ProfileExperience() {
         {tab === "plan" && (
           <PlanTab focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} onGoPath={() => setTab("path")} />
         )}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} />}
+        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
         {tab === "resume" && <ResumeTab />}
       </main>
 
@@ -341,6 +353,35 @@ export function ProfileExperience() {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---- Settings sheet: profile-level utilities, prototype stubs ---- */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-[65] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSettingsOpen(false); }}>
+          <div className="filters-reveal w-full max-w-[420px] rounded-t-[var(--radius-2xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <div className="flex items-start justify-between gap-[var(--space-3)]">
+              <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Settings</p>
+              <button type="button" aria-label="Close settings" onClick={() => setSettingsOpen(false)} className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-2)]">
+              <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-3)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+                <span className="text-[13px] font-semibold">Profile photo</span>
+                <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap your avatar to change it</span>
+              </div>
+              {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
+                <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-3)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+                  <span className="text-[13px] font-semibold">{item}</span>
+                  <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
+                </div>
+              ))}
+              <button type="button" className="cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
+                Sign out
+              </button>
             </div>
           </div>
         </div>
@@ -1118,12 +1159,17 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
 
 // ---- Locker tab: rich poster grid ----
 
-function LockerTab({ locker, top3Count, addToTop3 }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void }) {
+function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
         <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Locker</h2>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
+        <span className="flex items-center gap-[var(--space-3)]">
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
+          <button type="button" aria-label="Close Locker" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <X className="h-4 w-4" />
+          </button>
+        </span>
       </div>
       {locker.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>

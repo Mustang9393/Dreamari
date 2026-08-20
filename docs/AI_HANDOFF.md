@@ -31,8 +31,12 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   charts. Journey strip / bento expanded card / Top 3 rows RETIRED.
 - Figma pack: captures renumbered 01-10 (new: 05 plan levels, 06 add
   sheet; preview sheet flow removed), README IA section added.
-- NEXT (user-directed): move Locker out of the tab bar into a header
-  icon cluster with profile settings.
+- DONE same session: Locker moved out of the tab bar into a header
+  utility cluster (Backpack icon; Settings gear opens a stub sheet:
+  photo hint, Notifications / Privacy / Talent Pipeline / school
+  account with SOON chips, Sign out). Tabs are now Overview / Path /
+  Plan / Resume; LockerTab gained an X that returns to Overview.
+  Figma pack recaptured (01-11, new 11-settings-sheet).
 
 ### 2026-08-20 My Path polish round 2
 

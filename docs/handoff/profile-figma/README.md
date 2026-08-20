@@ -32,7 +32,9 @@ My Top 3 is the GLOBAL context switcher: full-size poster cards above the tab
 bar; tapping a card refocuses every tab below it (cards are tabs for careers).
 Rank chips drag horizontally to reorder; dropping into slot 1 sets focus; X
 removes; the dashed slot opens the Add sheet in place (never a tab switch).
-Tabs are Overview / Path / Plan / Locker / Resume. Path = the three ALTERNATE
+Tabs are Overview / Path / Plan / Resume; the Career Locker and Settings are
+a utility icon cluster in the identity header (they do not depend on the
+Top 3), with the Locker view closing back to Overview. Path = the three ALTERNATE
 routes side by side (desktop 3 columns, mobile snap carousel) with the full
 Replit information set per route (pitch, money numbers, good-fit, student
 life, loan-payoff math) behind per-card disclosures, plus the Compare table
@@ -49,7 +51,7 @@ one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
 
 | File | State it freezes |
 | --- | --- |
-| 01-overview-default.html | Default: header, global My Top 3 (2 careers + Add slot) ABOVE the five tabs, Overview tab with Career Report, receipts, next action, readiness chips, Locker strip |
+| 01-overview-default.html | Default: header (identity + streak + readiness + Locker/Settings icon cluster), global My Top 3 (2 careers + Add slot) ABOVE the four tabs, Overview tab with Career Report, receipts, next action, readiness chips, Locker strip |
 | 02-career-report-overlay.html | Export overlay open: dark chrome bar (Engagement/Pathway/Plan toggles, Print) + the white counselor-facing report page |
 | 03-path-routes-cards.html | Path tab: three alternate route COLUMNS side by side (identity + pitch, pay/cost/time/payoff numbers, three disclosure sections, Continue CTA, next step) |
 | 04-path-routes-compare.html | Path tab, Compare view: category table with benefit tags + the four single-measure charts |
@@ -59,6 +61,7 @@ one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
 | 08-locker.html | Locker tab: poster grid with match rings and Add/Swap actions |
 | 09-resume.html | Resume tab (stub state) |
 | 10-overview-empty.html | No Top 3: three dashed Add slots above the tabs + "Pick a Top 3 to start" |
+| 11-settings-sheet.html | Settings sheet from the header gear: profile photo hint, stub rows with SOON chips, sign out |
 
 ## Typography
 
