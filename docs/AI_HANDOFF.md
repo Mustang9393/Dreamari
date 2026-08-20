@@ -6,6 +6,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 route card viz round + header pills
+
+- Header utilities are labeled pills now (Archive icon + "Locker",
+  gear + "Settings"), stacked above the streak/readiness row so
+  nothing collides at tablet widths; stats row wraps on mobile.
+  Name stays "Locker" (product term app-wide); icon reads as archive.
+- Route cards: money block reordered to decision priority (Time,
+  Total cost, First-year pay); loan payoff now lives ONLY in its
+  accordion (repeat removed). Fit accordion: acceptance rendered as a
+  gauge (acceptancePct added to ROUTE_DETAILS) with the text as
+  caption. Payoff accordion: salary years are a mini bar chart
+  (final year solid accent, priors 45%), monthly budget is a
+  two-segment bar with legend dots. Copy pass: shorter, punchier
+  detail strings.
+- Mobile routes: pill switcher (route.short) above the snap carousel,
+  synced both ways (tap scrolls, scroll updates the pill).
+
 ### 2026-08-20 utility views + locker peek
 
 - Locker and Settings are full VIEWS now: opening either replaces

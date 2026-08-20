@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftRight,
-  Backpack,
+  Archive,
   BookOpen,
   Bookmark,
   Check,
@@ -226,25 +226,27 @@ export function ProfileExperience() {
                 <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · {STUDENT.school}</span>
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
-              <span className="flex items-center gap-[8px]">
-                <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
-                <span className="flex flex-col">
-                  <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
-                  <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
-                </span>
-              </span>
-              <ReadinessMeter value={STUDENT.readiness} />
-              {/* Utility cluster: the Locker and settings do not depend on the
-                  Top 3, so they live up here instead of the tab bar. */}
+            <div className="flex flex-col items-start gap-[var(--space-3)] sm:items-end">
+              {/* Utility pills: labeled so the Locker is findable, small so it
+                  reads as an archive rather than a main destination. */}
               <span className="flex items-center gap-[var(--space-2)]">
-                <button type="button" aria-label="Open Career Locker" title="Career Locker" onClick={() => setTab("locker")} className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-3)", borderColor: tab === "locker" ? "var(--primary)" : "var(--glass-border)", color: tab === "locker" ? "var(--accent-subtle)" : "var(--foreground)" }}>
-                  <Backpack className="h-4 w-4" />
+                <button type="button" aria-label="Open Career Locker" onClick={() => setTab("locker")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[11.5px] font-bold" style={{ background: "var(--glass-surface-3)", borderColor: tab === "locker" ? "var(--primary)" : "var(--glass-border)", color: tab === "locker" ? "var(--accent-subtle)" : "var(--foreground)" }}>
+                  <Archive className="h-3.5 w-3.5" /> Locker
                 </button>
-                <button type="button" aria-label="Profile settings" title="Settings" onClick={() => setTab("settings")} className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-3)", borderColor: tab === "settings" ? "var(--primary)" : "var(--glass-border)", color: tab === "settings" ? "var(--accent-subtle)" : "var(--foreground)" }}>
-                  <Settings className="h-4 w-4" />
+                <button type="button" aria-label="Profile settings" onClick={() => setTab("settings")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[11.5px] font-bold" style={{ background: "var(--glass-surface-3)", borderColor: tab === "settings" ? "var(--primary)" : "var(--glass-border)", color: tab === "settings" ? "var(--accent-subtle)" : "var(--foreground)" }}>
+                  <Settings className="h-3.5 w-3.5" /> Settings
                 </button>
               </span>
+              <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
+                <span className="flex items-center gap-[8px]">
+                  <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
+                  <span className="flex flex-col">
+                    <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
+                    <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
+                  </span>
+                </span>
+                <ReadinessMeter value={STUDENT.readiness} />
+              </div>
             </div>
           </div>
         </section>
@@ -266,7 +268,7 @@ export function ProfileExperience() {
             <div className="overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <button type="button" aria-expanded={lockerPeek} onClick={() => setLockerPeek((value) => !value)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)] text-left">
                 <span className="flex items-center gap-[8px]">
-                  <Backpack className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
+                  <Archive className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
                   <span className="text-[12.5px] font-bold">Locker</span>
                   <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
                 </span>
@@ -773,6 +775,9 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   onGoPlan: () => void;
 }) {
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
+  // Mobile: the route the carousel is resting on, for the switcher pills.
+  const [visibleRoute, setVisibleRoute] = useState(0);
+  const railRef = useRef<HTMLDivElement | null>(null);
 
   if (!focus) {
     return (
@@ -801,7 +806,36 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       </div>
 
       {routeView === "cards" ? (
-        <div className="-mx-5 flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0" style={{ touchAction: "pan-x pan-y" }}>
+        <>
+        {/* Mobile switcher: all the alternatives at a glance, one tap away */}
+        <div className="-mt-[6px] flex gap-[var(--space-2)] md:hidden">
+          {focus.routes.map((routeOption, index) => (
+            <button
+              key={routeOption.id}
+              type="button"
+              aria-pressed={visibleRoute === index}
+              onClick={() => {
+                const card = railRef.current?.children[index] as HTMLElement | undefined;
+                card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                setVisibleRoute(index);
+              }}
+              className="cursor-pointer rounded-full border px-[12px] py-[5px] text-[11.5px] font-bold"
+              style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", borderColor: visibleRoute === index ? "var(--primary)" : "var(--glass-border)", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+            >
+              {routeOption.short}
+            </button>
+          ))}
+        </div>
+        <div
+          ref={railRef}
+          onScroll={(event) => {
+            const rail = event.currentTarget;
+            const step = rail.scrollWidth / focus.routes.length;
+            setVisibleRoute(Math.min(focus.routes.length - 1, Math.max(0, Math.round(rail.scrollLeft / step))));
+          }}
+          className="-mx-5 flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0"
+          style={{ touchAction: "pan-x pan-y" }}
+        >
           {focus.routes.map((routeOption) => (
             <RouteColumn
               key={routeOption.id}
@@ -812,6 +846,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             />
           ))}
         </div>
+        </>
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
           <CompareTable routes={focus.routes} selectedId={chosenRoute(focus).id} />
@@ -1002,14 +1037,11 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         {detail && <span className="mt-[2px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</span>}
       </div>
 
-      {/* Time & money */}
+      {/* Time & money, in decision order: how long, what it costs, what it pays */}
       <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-xl)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-        <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
+        <MiniBento label="Time" value={route.duration} />
         <MiniBento label="Total cost" value={route.cost.split(",")[0]} />
-        <div className="grid grid-cols-2 gap-[var(--space-2)]">
-          <MiniBento label="Time" value={route.duration} />
-          <MiniBento label="Loan payoff" value={route.loanPayoff.split(" at ")[0]} />
-        </div>
+        <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
       </div>
 
       {/* Progressive disclosure: the Replit depth, one section at a time */}
@@ -1017,7 +1049,20 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         <div className="flex flex-col">
           <RouteDisclosure label="Is this a good fit for you?" open={openSection === "fit"} onToggle={() => toggle("fit")}>
             <span className="w-fit rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
-            <FactRow label="Acceptance" value={detail.fit.acceptance} />
+            {detail.fit.acceptancePct !== undefined ? (
+              <div className="flex flex-col gap-[4px]">
+                <div className="flex items-baseline justify-between gap-[var(--space-2)]">
+                  <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
+                  <span className="text-[16px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
+                </div>
+                <div className="relative h-[7px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
+                  <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.fit.acceptancePct, 3)}%`, background: "var(--accent-subtle)" }} />
+                </div>
+                <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail.fit.acceptance}</span>
+              </div>
+            ) : (
+              <FactRow label="Acceptance" value={detail.fit.acceptance} />
+            )}
             <FactRow label="Financial aid" value={detail.fit.aid} />
             <FactRow label="Where you'd work" value={detail.fit.targets} />
             <div className="flex items-center justify-between gap-[var(--space-2)]">
@@ -1038,20 +1083,34 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
               <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
             </div>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Average loan {detail.payoff.avgLoan} · starting salary {detail.payoff.startSalary}</span>
-            <div className="grid grid-cols-3 gap-[var(--space-2)]">
-              {detail.payoff.years.map((year) => (
-                <span key={year.label} className="flex flex-col gap-[1px] rounded-[var(--radius-md)] p-[var(--space-2)]" style={{ background: "var(--glass-surface-2)" }}>
-                  <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
-                  <span className="text-[14px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
-                  {year.note && <span className="text-[8.5px] leading-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{year.note}</span>}
-                </span>
-              ))}
-            </div>
-            <div className="flex flex-col gap-[4px]">
-              <div className="relative h-[8px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 26%, transparent)" }}>
-                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.payoff.budget.pct, 2)}%`, background: "var(--accent-subtle)" }} />
+            <div className="flex flex-col gap-[3px]">
+              <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>What you make, year by year</span>
+              <div className="grid grid-cols-3 items-end gap-[var(--space-2)]">
+                {(() => {
+                  const values = detail.payoff.years.map((year) => parseInt(year.amount.replace(/[^0-9]/g, ""), 10) || 0);
+                  const max = Math.max(...values, 1);
+                  return detail.payoff.years.map((year, index) => (
+                    <span key={year.label} className="flex flex-col items-center gap-[3px]">
+                      <span className="text-[12.5px] leading-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
+                      <span className="w-full rounded-t-[5px]" style={{ height: `${Math.max(Math.round((values[index] / max) * 56), 8)}px`, background: index === detail.payoff.years.length - 1 ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 45%, transparent)" }} />
+                      <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
+                      {year.note && <span className="text-center text-[8.5px] leading-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{year.note}</span>}
+                    </span>
+                  ));
+                })()}
               </div>
-              <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Loan {detail.payoff.budget.loan} ({detail.payoff.budget.pct}%) · keep {detail.payoff.budget.keep} · based on {detail.payoff.budget.income}</span>
+            </div>
+            <div className="flex flex-col gap-[5px]">
+              <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>Monthly budget</span>
+              <div className="flex h-[10px] w-full overflow-hidden rounded-full">
+                <span style={{ width: `${Math.max(detail.payoff.budget.pct, 3)}%`, background: "var(--accent-subtle)" }} />
+                <span className="flex-1" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan {detail.payoff.budget.loan} ({detail.payoff.budget.pct}%)</span>
+                <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} /> Keep {detail.payoff.budget.keep}</span>
+                <span>of {detail.payoff.budget.income}</span>
+              </div>
             </div>
             <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
           </RouteDisclosure>

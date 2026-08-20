@@ -411,7 +411,7 @@ export const STUDENT = {
 
 export type RouteDetail = {
   pitch: string;
-  fit: { tagline: string; acceptance: string; aid: string; targets: string; placement: "High" | "Medium" };
+  fit: { tagline: string; acceptance: string; acceptancePct?: number; aid: string; targets: string; placement: "High" | "Medium" };
   life: { clubs: string[]; feel: string; abroad: string };
   payoff: {
     time: string;
@@ -428,56 +428,56 @@ export type RouteDetail = {
 export const ROUTE_DETAILS: Record<string, RouteDetail> = {
   "ib-uni-target": {
     pitch: "Target top finance roles at elite firms.",
-    fit: { tagline: "Best for elite finance jobs", acceptance: "~20% acceptance, competitive", aid: "Strong aid from large endowments", targets: "JPMorgan, Goldman Sachs, Blackstone", placement: "High" },
-    life: { clubs: ["500+ clubs, finance societies, Women in Business", "ALFA, LatinX, BSU, Asian Student Assoc.", "Active fraternities and sororities"], feel: "Large, diverse campus with many ways to find your people", abroad: "Extensive options worldwide (London, Shanghai, Abu Dhabi)" },
-    payoff: { time: "~4-6 yrs", tag: "Bonuses speed it up", avgLoan: "$280K", startSalary: "$103K", years: [{ label: "Year 1", amount: "$133K", note: "$103K + $30K bonus" }, { label: "Year 2", amount: "$170K", note: "$120K + $50K bonus" }, { label: "Year 3", amount: "$225K", note: "$145K + $80K bonus" }], budget: { income: "$8,583/mo", loan: "$1,290/mo", keep: "$7,293/mo", pct: 15 }, takeaway: "With aggressive bonus payments, many analysts pay it off in 5 or 6 years." },
+    fit: { tagline: "Best for elite finance jobs", acceptance: "~20% acceptance, competitive", acceptancePct: 20, aid: "Big endowments, real aid packages", targets: "JPMorgan, Goldman Sachs, Blackstone", placement: "High" },
+    life: { clubs: ["500+ clubs, finance societies, Women in Business", "ALFA, LatinX, BSU, Asian Student Assoc.", "Active fraternities and sororities"], feel: "Huge and diverse, easy to find your people", abroad: "Extensive options worldwide (London, Shanghai, Abu Dhabi)" },
+    payoff: { time: "~4-6 yrs", tag: "Bonuses speed it up", avgLoan: "$280K", startSalary: "$103K", years: [{ label: "Year 1", amount: "$133K", note: "$103K + $30K bonus" }, { label: "Year 2", amount: "$170K", note: "$120K + $50K bonus" }, { label: "Year 3", amount: "$225K", note: "$145K + $80K bonus" }], budget: { income: "$8,583/mo", loan: "$1,290/mo", keep: "$7,293/mo", pct: 15 }, takeaway: "Stack your bonuses and it is gone in 5 or 6 years." },
     tags: { salary: "Highest earning", cost: "Premium", access: "Elite network", abroad: "Global campuses", community: "500+ clubs" },
   },
   "ib-uni-state": {
     pitch: "Strong finance jobs without the elite price tag.",
-    fit: { tagline: "Best value for finance", acceptance: "~60-80% acceptance at most flagships", aid: "In-state tuition plus merit scholarships", targets: "Regional banks, Big 4, corporate finance", placement: "High" },
+    fit: { tagline: "Best value for finance", acceptance: "~60-80% acceptance at most flagships", acceptancePct: 70, aid: "In-state tuition plus merit scholarships", targets: "Regional banks, Big 4, corporate finance", placement: "High" },
     life: { clubs: ["Finance club, student investment fund, case teams", "Cultural orgs and honor societies", "Big sports weekends and Greek life"], feel: "Big school energy at an affordable price", abroad: "Solid exchange options" },
     payoff: { time: "~2-3 yrs", tag: "Balanced", avgLoan: "$68K", startSalary: "$82K", years: [{ label: "Year 1", amount: "$82K" }, { label: "Year 2", amount: "$88K" }, { label: "Year 3", amount: "$95K" }], budget: { income: "$6,833/mo", loan: "$640/mo", keep: "$6,193/mo", pct: 9 }, takeaway: "Strong pay with a fraction of the debt of a target school." },
     tags: { cost: "Great value", salary: "Strong", access: "Accessible", payoff: "Fast" },
   },
   "ib-cc-transfer": {
     pitch: "Two cheap years, then the same degree on your resume.",
-    fit: { tagline: "Best for lowest debt", acceptance: "Open enrollment, everyone is accepted", aid: "Pell grants and local scholarships", targets: "Transfer to a 4-year, then the same doors open", placement: "Medium" },
-    life: { clubs: ["Business club, honor societies, career groups", "Latino Student Assoc., BSU, Asian Pacific Club", "Limited Greek life at most CCs"], feel: "Local and diverse, working students supporting each other", abroad: "Limited options at some schools" },
-    payoff: { time: "~1-2 yrs", tag: "Very fast", avgLoan: "$13K", startSalary: "$82K after transfer", years: [{ label: "Year 1", amount: "$82K" }, { label: "Year 2", amount: "$88K" }, { label: "Year 3", amount: "$95K" }], budget: { income: "$6,833/mo", loan: "$575/mo", keep: "$6,258/mo", pct: 8 }, takeaway: "Pay off fast, then start building wealth in your early 20s." },
+    fit: { tagline: "Best for lowest debt", acceptance: "Open enrollment, everyone is accepted", acceptancePct: 100, aid: "Pell grants and local scholarships", targets: "Transfer to a 4-year, then the same doors open", placement: "Medium" },
+    life: { clubs: ["Business club, honor societies, career groups", "Latino Student Assoc., BSU, Asian Pacific Club", "Limited Greek life at most CCs"], feel: "Local, diverse, everyone hustles together", abroad: "Limited options at some schools" },
+    payoff: { time: "~1-2 yrs", tag: "Very fast", avgLoan: "$13K", startSalary: "$82K after transfer", years: [{ label: "Year 1", amount: "$82K" }, { label: "Year 2", amount: "$88K" }, { label: "Year 3", amount: "$95K" }], budget: { income: "$6,833/mo", loan: "$575/mo", keep: "$6,258/mo", pct: 8 }, takeaway: "Debt gone fast, wealth building starts in your early 20s." },
     tags: { cost: "Most affordable", payoff: "Fastest", access: "Open enrollment" },
   },
   "pilot-part141": {
     pitch: "Get in the cockpit fastest and build hours for pay.",
-    fit: { tagline: "Best for hands-on learners", acceptance: "~90% of applicants accepted", aid: "Aviation grants and financing programs", targets: "Regional airlines, then majors at 1,500 hours", placement: "High" },
+    fit: { tagline: "Best for hands-on learners", acceptance: "~90% of applicants accepted", acceptancePct: 90, aid: "Aviation grants and financing programs", targets: "Regional airlines, then majors at 1,500 hours", placement: "High" },
     life: { clubs: ["Aviation clubs, Women in Aviation", "Small cohorts, limited campus life", "No Greek life at flight academies"], feel: "Close-knit, small classes, mentorship", abroad: "Limited or none" },
     payoff: { time: "~4-5 yrs", tag: "Steady climb", avgLoan: "$98K", startSalary: "$52K instructing", years: [{ label: "Year 1", amount: "$52K", note: "CFI, building hours" }, { label: "Year 2", amount: "$90K", note: "regional first officer" }, { label: "Year 3", amount: "$110K" }], budget: { income: "$4,333/mo", loan: "$980/mo", keep: "$3,353/mo", pct: 23 }, takeaway: "Lean years while instructing, then pay jumps at the regionals." },
     tags: { time: "Fastest to cockpit", salary: "Jumps at regionals" },
   },
   "pilot-uni": {
     pitch: "A degree plus wings, with airline cadet pipelines.",
-    fit: { tagline: "Best for airline-sponsored pipelines", acceptance: "~60-70% acceptance", aid: "Aviation scholarships and ROTC options", targets: "Delta, United and American cadet programs", placement: "High" },
+    fit: { tagline: "Best for airline-sponsored pipelines", acceptance: "~60-70% acceptance", acceptancePct: 65, aid: "Aviation scholarships and ROTC options", targets: "Delta, United and American cadet programs", placement: "High" },
     life: { clubs: ["Flight teams and aviation fraternities", "Big-school clubs and intramurals", "Active Greek life"], feel: "Aviation-obsessed campus, everyone talks planes", abroad: "Some exchange programs" },
-    payoff: { time: "~5-7 yrs", tag: "Higher debt, earlier airlines", avgLoan: "$210K", startSalary: "$90K regional", years: [{ label: "Year 1", amount: "$90K", note: "regional airline" }, { label: "Year 2", amount: "$105K" }, { label: "Year 3", amount: "$200K+", note: "major airline" }], budget: { income: "$7,500/mo", loan: "$1,450/mo", keep: "$6,050/mo", pct: 19 }, takeaway: "Costs more, but the 1,000-hour R-ATP break gets you to the airlines sooner." },
+    payoff: { time: "~5-7 yrs", tag: "Higher debt, earlier airlines", avgLoan: "$210K", startSalary: "$90K regional", years: [{ label: "Year 1", amount: "$90K", note: "regional airline" }, { label: "Year 2", amount: "$105K" }, { label: "Year 3", amount: "$200K+", note: "major airline" }], budget: { income: "$7,500/mo", loan: "$1,450/mo", keep: "$6,050/mo", pct: 19 }, takeaway: "Costs more, but the 1,000-hour R-ATP break gets you hired sooner." },
     tags: { salary: "Majors sooner", cost: "Premium", access: "Cadet pipelines" },
   },
   "pilot-military": {
     pitch: "Serve first, fly free, leave with elite training.",
-    fit: { tagline: "Best if you want to serve and fly free", acceptance: "Flight slots are highly selective", aid: "$0 cost, they pay you", targets: "Air Force or Navy, then any airline", placement: "High" },
+    fit: { tagline: "Best if you want to serve and fly free", acceptance: "Flight slots are highly selective", acceptancePct: 15, aid: "$0 cost, they pay you", targets: "Air Force or Navy, then any airline", placement: "High" },
     life: { clubs: ["Squadron culture and tight crews", "Base life, moves every few years", "Strong veteran network afterward"], feel: "Discipline and camaraderie, a family for a decade", abroad: "Stationed worldwide" },
-    payoff: { time: "None", tag: "No debt at all", avgLoan: "$0", startSalary: "$70K in service", years: [{ label: "Year 1", amount: "$70K" }, { label: "Year 2", amount: "$80K" }, { label: "Year 3", amount: "$90K" }], budget: { income: "$6,250/mo", loan: "$0/mo", keep: "$6,250/mo", pct: 0 }, takeaway: "An 8-10 year commitment trades time for zero debt and elite training." },
+    payoff: { time: "None", tag: "No debt at all", avgLoan: "$0", startSalary: "$70K in service", years: [{ label: "Year 1", amount: "$70K" }, { label: "Year 2", amount: "$80K" }, { label: "Year 3", amount: "$90K" }], budget: { income: "$6,250/mo", loan: "$0/mo", keep: "$6,250/mo", pct: 0 }, takeaway: "Zero debt, elite training. The trade: 8 to 10 years of service." },
     tags: { payoff: "No debt", access: "Selective" },
   },
   "pe-uni-target": {
     pitch: "The classic 2-year IB analyst route into PE.",
-    fit: { tagline: "Best for the classic PE track", acceptance: "~20% acceptance, competitive", aid: "Strong aid from large endowments", targets: "Blackstone, KKR, Apollo after an IB stint", placement: "High" },
+    fit: { tagline: "Best for the classic PE track", acceptance: "~20% acceptance, competitive", acceptancePct: 20, aid: "Big endowments, real aid packages", targets: "Blackstone, KKR, Apollo after an IB stint", placement: "High" },
     life: { clubs: ["Finance societies and PE/VC clubs", "Case competitions and pitch nights", "Active fraternities and sororities"], feel: "Ambitious, networked, always recruiting", abroad: "Extensive options worldwide" },
     payoff: { time: "~4-6 yrs", tag: "Bonuses speed it up", avgLoan: "$280K", startSalary: "$110K", years: [{ label: "Year 1", amount: "$140K", note: "IB analyst + bonus" }, { label: "Year 2", amount: "$180K" }, { label: "Year 3", amount: "$300K+", note: "PE associate" }], budget: { income: "$9,166/mo", loan: "$1,290/mo", keep: "$7,876/mo", pct: 14 }, takeaway: "The debt is heavy but PE associate pay clears it quickly." },
     tags: { salary: "Highest ceiling", cost: "Premium", access: "Elite network" },
   },
   "pe-uni-state": {
     pitch: "Prove yourself in banking first, then jump to PE.",
-    fit: { tagline: "Best underdog route", acceptance: "~60-80% acceptance at most flagships", aid: "In-state tuition plus merit scholarships", targets: "Middle-market PE after regional IB", placement: "Medium" },
+    fit: { tagline: "Best underdog route", acceptance: "~60-80% acceptance at most flagships", acceptancePct: 70, aid: "In-state tuition plus merit scholarships", targets: "Middle-market PE after regional IB", placement: "Medium" },
     life: { clubs: ["Student investment fund, finance club", "Cultural orgs and honor societies", "Big sports and Greek life"], feel: "Big school energy at an affordable price", abroad: "Solid exchange options" },
     payoff: { time: "~2-3 yrs", tag: "Balanced", avgLoan: "$68K", startSalary: "$85K", years: [{ label: "Year 1", amount: "$85K" }, { label: "Year 2", amount: "$100K" }, { label: "Year 3", amount: "$140K", note: "if you land the PE seat" }], budget: { income: "$7,083/mo", loan: "$640/mo", keep: "$6,443/mo", pct: 9 }, takeaway: "Less debt buys you patience for the longer climb into PE." },
     tags: { cost: "Great value", payoff: "Fast", access: "Accessible" },
