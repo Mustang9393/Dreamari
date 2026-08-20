@@ -1110,8 +1110,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
               <span className="flex-1" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} />
             </div>
             <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan {detail.payoff.budget.loan}</span>
-              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} /> Keep {detail.payoff.budget.keep}</span>
+              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan</span>
+              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} /> In hand</span>
             </div>
           </div>
 
