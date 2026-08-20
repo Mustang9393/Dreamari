@@ -1057,14 +1057,20 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {detail && pane === "payoff" && (
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
-          {/* One stat leads; everything else hangs off it */}
-          <div className="flex flex-col gap-[2px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
-            <div className="flex items-baseline gap-[var(--space-2)]">
-              <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
-              <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
+          {/* One stat leads; the loan rides shotgun as a stat, not a sentence.
+             (Starting salary is already the chart's Year 1 base segment.) */}
+          <div className="flex items-start justify-between gap-[var(--space-3)]">
+            <div className="flex flex-col gap-[2px]">
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
+              <div className="flex items-baseline gap-[var(--space-2)]">
+                <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
+                <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
+              </div>
             </div>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Avg loan {detail.payoff.avgLoan} · starting {detail.payoff.startSalary}</span>
+            <div className="flex flex-none flex-col items-end gap-[2px]">
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Loan</span>
+              <span className="text-[16px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{detail.payoff.avgLoan}</span>
+            </div>
           </div>
 
           {/* Pay curve: bonus lives IN the bar (stacked), not in a caption */}
@@ -1091,7 +1097,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
                 ));
               })()}
             </div>
-            {detail.payoff.years.some((year) => /bonus/i.test(year.note ?? "")) && (
+            {detail.payoff.years.some((year) => /\+\s*\$?\d+K/i.test(year.note ?? "")) && (
               <div className="flex items-center gap-[var(--space-3)] text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                 <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} /> Base</span>
                 <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "var(--accent-subtle)" }} /> Bonus</span>

@@ -473,7 +473,7 @@ export const ROUTE_DETAILS: Record<string, RouteDetail> = {
     pitch: "The classic 2-year IB analyst route into PE.",
     fit: { tagline: "Best for the classic PE track", acceptance: "~20% acceptance, competitive", acceptancePct: 20, aid: "Big endowments, real aid packages", targets: "Blackstone, KKR, Apollo after an IB stint", placement: "High" },
     life: { clubs: ["Finance societies and PE/VC clubs", "Case competitions and pitch nights", "Active fraternities and sororities"], feel: "Ambitious, networked, always recruiting", abroad: "Extensive options worldwide" },
-    payoff: { time: "~4-6 yrs", tag: "Bonuses melt it fast", avgLoan: "$280K", startSalary: "$110K", years: [{ label: "Year 1", amount: "$140K", note: "IB analyst + bonus" }, { label: "Year 2", amount: "$180K" }, { label: "Year 3", amount: "$300K+", note: "PE associate" }], budget: { income: "$9,166/mo", loan: "$1,290/mo", keep: "$7,876/mo", pct: 14 }, takeaway: "The debt is heavy but PE associate pay clears it quickly." },
+    payoff: { time: "~4-6 yrs", tag: "Bonuses melt it fast", avgLoan: "$280K", startSalary: "$110K", years: [{ label: "Year 1", amount: "$140K", note: "$110K + $30K bonus" }, { label: "Year 2", amount: "$180K", note: "$135K + $45K bonus" }, { label: "Year 3", amount: "$300K+", note: "PE associate" }], budget: { income: "$9,166/mo", loan: "$1,290/mo", keep: "$7,876/mo", pct: 14 }, takeaway: "The debt is heavy but PE associate pay clears it quickly." },
     tags: { salary: "Highest ceiling", cost: "Premium", access: "Elite network" },
   },
   "pe-uni-state": {
