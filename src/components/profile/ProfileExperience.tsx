@@ -16,13 +16,13 @@ import {
   Flame,
   Gamepad2,
   Lock,
+  Pencil,
   Printer,
-  Sparkle,
   Users,
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
-import { posterTitleFont, WORLD_COLORS, TEXT_SCRIM } from "@/components/app/worlds";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, STUDENT, type PlanTask, type ProfileCareer } from "./data";
 
 // My Profile — prototype per the Career Intelligence Layer V3 doc.
@@ -56,6 +56,7 @@ export function ProfileExperience() {
   const [done, setDone] = useState<Record<string, string[]>>({});
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
 
   const focus = careerById(focusId);
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
@@ -151,26 +152,53 @@ export function ProfileExperience() {
       </header>
 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        {/* ---- Identity header ---- */}
-        <section className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between" style={glassCard}>
-          <div className="flex items-center gap-[var(--space-4)]">
-            <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-full border-[1.5px] text-[19px] font-bold" style={{ borderColor: "var(--accent)", background: "linear-gradient(90deg, #3861ff, #8b7bff)", fontFamily: "var(--font-display)", color: "#fff" }}>
-              {STUDENT.name.split(" ").map((part) => part[0]).join("")}
-            </span>
-            <span className="flex flex-col gap-[2px]">
-              <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
-              <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · {STUDENT.school}</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-[var(--space-6)]">
-            <span className="flex items-center gap-[8px]">
-              <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
-              <span className="flex flex-col">
-                <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
-                <span className={caption} style={{ color: "var(--muted-foreground)" }}>Streak</span>
+        {/* ---- Identity header — immersive: the focus career's art bleeds
+           in from the right and follows the focus switch. ---- */}
+        <section className="relative overflow-hidden rounded-[var(--radius-2xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          {focus && (
+            <div
+              aria-hidden
+              className="absolute inset-y-0 right-0 w-[75%] opacity-80 sm:w-[58%]"
+              style={{ maskImage: "linear-gradient(90deg, transparent 0%, #000 45%)", WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 45%)" }}
+            >
+              <Image src={focus.photo} alt="" fill sizes="420px" priority className="object-cover object-[center_35%]" />
+            </div>
+          )}
+          {focus && (
+            <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${WORLD_COLORS[focus.world]} 10%, transparent) 0%, transparent 45%)` }} />
+          )}
+          <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-[var(--space-4)]">
+              <label className="group relative size-16 flex-none cursor-pointer" aria-label="Change profile photo">
+                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-16 rounded-full border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+                <span className="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--primary)", borderColor: "var(--background)", color: "var(--primary-foreground)" }}>
+                  <Pencil className="h-3 w-3" />
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) setAvatarUrl(URL.createObjectURL(file));
+                  }}
+                />
+              </label>
+              <span className="flex flex-col gap-[2px]">
+                <span className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
+                <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · {STUDENT.school}</span>
               </span>
-            </span>
-            <ReadinessRing value={STUDENT.readiness} label={STUDENT.readinessStatus} />
+            </div>
+            <div className="flex items-center gap-[var(--space-8)]">
+              <span className="flex items-center gap-[8px]">
+                <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
+                <span className="flex flex-col">
+                  <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
+                  <span className={caption} style={{ color: "var(--muted-foreground)" }}>Streak</span>
+                </span>
+              </span>
+              <ReadinessRing value={STUDENT.readiness} label={STUDENT.readinessStatus} />
+            </div>
           </div>
         </section>
 
@@ -379,82 +407,65 @@ function OverviewTab({
         <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} />
       </section>
 
-      {/* Live Career Report */}
-      <section className="overflow-hidden rounded-[var(--radius-2xl)] border" style={glassCard}>
-        <div className="flex flex-col gap-[var(--space-5)] p-[var(--space-6)] sm:flex-row sm:items-stretch">
-          <div className="relative h-[170px] w-[120px] flex-none overflow-hidden rounded-[var(--radius-lg)] border max-sm:hidden" style={{ borderColor: "var(--glass-border)" }}>
-            <Image src={focus.photo} alt="" fill sizes="120px" className="object-cover" />
-            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-2 text-center uppercase" style={{ backgroundImage: TEXT_SCRIM }}>
-              <span className="px-1 text-[11px] leading-[13px]" style={{ ...posterTitleFont(focus.world), color: "var(--foreground)" }}>{focus.title}</span>
-            </span>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
-            <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)]">
-              <span className="flex items-center gap-[var(--space-2)]">
-                <span className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Report</span>
-                <span className="rounded-full border px-[10px] py-[3px] text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ borderColor: WORLD_COLORS[focus.world], color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
-              </span>
-              <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Updated today</span>
-            </div>
-            <p className="text-[24px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
-            <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
-              <ReportStat label="Interest signal" value={`${focus.match} · ${interestTier(focus.match)}`} />
-              <ReportStat label="Selected route" value={route.type} />
-              <ReportStat label="Plan progress" value={progress.complete === 0 ? "Ready to start" : `${progress.pct}% · ${progress.complete}/${progress.total} done`} />
-              <ReportStat label="Next step" value={next ? next.label : "Plan complete — ask Dreamy what's next"} />
-            </div>
-            <div>
-              <span className={caption} style={{ color: "var(--muted-foreground)" }}>Why this is in your signal</span>
-              <ul className="mt-1 flex flex-col gap-[4px]">
-                {focus.evidence.map((item) => (
-                  <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
-                    <Check className="mt-[2px] h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} /> {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-auto flex flex-wrap gap-[var(--space-3)] pt-1">
-              <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                <FileDown className="h-4 w-4" /> Export Career Report
-              </button>
-              <button type="button" onClick={onGoPath} className="flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
-                Open My Path <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+      {/* Live Career Report — one card: headline, three honest stats,
+         evidence, actions. The header above already carries the art. */}
+      <section className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={glassCard}>
+        <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
+          <span className={caption} style={{ color: "var(--muted-foreground)" }}>Career Report · Updated today</span>
+          <span className="text-[11px] font-semibold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
+        </div>
+        <p className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
+
+        <div className="grid grid-cols-1 divide-y overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3 sm:divide-x sm:divide-y-0" style={{ borderColor: "var(--glass-border)", ["--tw-divide-opacity" as string]: 1 } as React.CSSProperties}>
+          <ReportStat label="Interest" big={String(focus.match)} small={interestTier(focus.match)} />
+          <ReportStat label="Route" big={route.type} small={route.program} />
+          <ReportStat label="Plan" big={progress.complete === 0 ? "Ready" : `${progress.pct}%`} small={progress.complete === 0 ? "First task takes 10 minutes" : `${progress.complete} of ${progress.total} tasks done`} />
+        </div>
+
+        <div>
+          <span className={caption} style={{ color: "var(--muted-foreground)" }}>Why this is in your signal</span>
+          <ul className="mt-1.5 flex flex-col gap-[5px]">
+            {focus.evidence.map((item) => (
+              <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]">
+                <Check className="mt-[2px] h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} /> {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-wrap gap-[var(--space-3)]">
+          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            <FileDown className="h-4 w-4" /> Export Career Report
+          </button>
+          <button type="button" onClick={onGoPath} className="flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
+            Open My Path <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </section>
 
-      {/* Next best action + readiness hint */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
-        {next && (
-          <section className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className={caption} style={{ color: "var(--accent-subtle)" }}>Do this next · {next.minutes} min</span>
-              <span className="text-[15px] leading-[20px] font-bold">{next.label}</span>
-            </span>
-            <Link href={next.href} className="flex flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
-              <NextIcon className="h-4 w-4" /> {next.action}
-            </Link>
-          </section>
-        )}
-        <section className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={glassCard}>
+      {/* One next best action — full width, nothing competing with it. */}
+      {next && (
+        <section className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
           <span className="flex min-w-0 flex-col gap-[2px]">
-            <span className={caption} style={{ color: "var(--muted-foreground)" }}>{STUDENT.readinessStatus}</span>
-            <span className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>{STUDENT.readinessNext}</span>
+            <span className={caption} style={{ color: "var(--accent-subtle)" }}>Do this next · {next.minutes} min</span>
+            <span className="text-[15px] leading-[20px] font-bold">{next.label}</span>
           </span>
-          <Sparkle className="h-5 w-5 flex-none" style={{ color: "var(--accent-subtle)" }} />
+          <Link href={next.href} className="flex flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <NextIcon className="h-4 w-4" /> {next.action}
+          </Link>
         </section>
-      </div>
+      )}
+      <p className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.readinessStatus}: {STUDENT.readinessNext}</p>
     </div>
   );
 }
 
-function ReportStat({ label, value }: { label: string; value: string }) {
+function ReportStat({ label, big, small }: { label: string; big: string; small: string }) {
   return (
-    <span className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <span className="flex flex-col gap-[2px] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
       <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="truncate text-[13px] leading-[18px] font-semibold" title={value}>{value}</span>
+      <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{big}</span>
+      <span className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{small}</span>
     </span>
   );
 }
@@ -545,7 +556,7 @@ function PathTab(props: {
           ) : (
             <div className="grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-2">
               {locker.map((career) => (
-                <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] py-[var(--space-2)]" style={glassCard}>
+                <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
                   <span className="relative h-11 w-8 flex-none overflow-hidden rounded-[6px]">
                     <Image src={career.photo} alt="" fill sizes="32px" className="object-cover" />
                   </span>
@@ -640,7 +651,7 @@ function PathTab(props: {
                         const complete = doneSet(focus.id).has(task.id);
                         const TaskIcon = ACTION_ICON[task.action];
                         return (
-                          <div key={task.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", opacity: complete ? 0.65 : 1 }}>
+                          <div key={task.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", opacity: complete ? 0.6 : 1 }}>
                             <button
                               type="button"
                               aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`}

@@ -6,6 +6,22 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 /profile polish: photo avatar, immersive header, de-clutter (v4 LOCAL)
+
+- Avatar is now a photo (avatar-jordan.jpg) with an edit pencil badge —
+  file picker swaps it in-session (object URL; no persistence yet).
+- Identity header is immersive: the FOCUS career's poster art bleeds in
+  from the right (masked, world-color tint) and swaps with the focus.
+  NOTE for this dev tab: one Next/Image width bucket (w=1920) stalled in
+  the preview proxy; header art uses sizes="420px" + priority which
+  loads fine (prod optimizer unaffected).
+- Overview de-cluttered: report card is one block — caption row, big
+  title, a single divided 3-stat band (Interest / Route / Plan, no
+  truncation), evidence receipts, two actions; the duplicate Next-step
+  stat and the separate readiness-hint card are gone (hint is now one
+  quiet line under the next-action card). Locker + plan task rows
+  dropped their borders (surface-only).
+
 ### 2026-08-20 /profile prototype on v4 branch (LOCAL-ONLY — do not push)
 
 - New branch v4 (off v3=main). Audited the Replit v2-my-profile + the

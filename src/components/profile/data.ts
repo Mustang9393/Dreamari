@@ -325,6 +325,7 @@ export const ALL_PROFILE_CAREERS: ProfileCareer[] = [...PROFILE_CAREERS, ...LOCK
 // doc's student-facing status labels (section 22), never a vanity total.
 export const STUDENT = {
   name: "Jordan Rivera",
+  avatar: "/images/avatar-jordan.jpg",
   grade: "Grade 11",
   school: "Westfield High School",
   streakDays: 12,
