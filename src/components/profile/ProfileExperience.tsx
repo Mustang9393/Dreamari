@@ -1135,41 +1135,58 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {detail && pane === "fit" && (
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
-          <p className="text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{detail.fit.tagline}</p>
-          {detail.fit.acceptancePct !== undefined ? (
-            <div className="flex flex-col gap-[4px]">
-              <div className="flex items-baseline justify-between gap-[var(--space-2)]">
-                <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
-                <span className="text-[20px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
-              </div>
-              <div className="relative h-[7px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
-                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.fit.acceptancePct, 3)}%`, background: "var(--accent-subtle)" }} />
-              </div>
-              <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail.fit.acceptance}</span>
-            </div>
-          ) : (
-            <FactRow label="Acceptance" value={detail.fit.acceptance} />
-          )}
+          {/* Lead stat: your odds of getting in */}
+          <div className="flex flex-col gap-[4px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
+            {detail.fit.acceptancePct !== undefined ? (
+              <>
+                <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
+                <div className="relative h-[7px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
+                  <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.fit.acceptancePct, 3)}%`, background: "var(--accent-subtle)" }} />
+                </div>
+                <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail.fit.acceptance}</span>
+              </>
+            ) : (
+              <span className="text-[13px] leading-[17px] font-semibold">{detail.fit.acceptance}</span>
+            )}
+          </div>
+
+          {/* Placement as a stat, not a chip */}
+          <div className="flex flex-col gap-[2px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Job placement</span>
+            <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
+          </div>
+
           <FactRow label="Financial aid" value={detail.fit.aid} />
           <FactRow label="Where you'd work" value={detail.fit.targets} />
-          <div className="flex items-center justify-between gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Job placement</span>
-            <span className="rounded-full px-[10px] py-[2px] text-[10px] font-bold" style={{ background: detail.fit.placement === "High" ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 22%, transparent)" : "var(--glass-surface-2)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
-          </div>
+
+          <span className="mt-auto text-[12px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
         </div>
       )}
 
       {detail && pane === "life" && (
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
-          <p className="border-l-2 pl-[var(--space-3)] text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", borderColor: "var(--accent-subtle)" }}>{detail.life.feel}</p>
+          {/* Lead: the vibe, set like a pull quote */}
+          <div className="flex flex-col gap-[4px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>The vibe</span>
+            <p className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
+          </div>
+
           <div className="flex flex-col gap-[var(--space-2)]">
             <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Student life</span>
-            <ul className="flex list-disc flex-col gap-[5px] pl-4 text-[12px] leading-[16px]">
-              {detail.life.clubs.map((club) => <li key={club}>{club}</li>)}
-            </ul>
+            <div className="flex flex-col gap-[6px]">
+              {detail.life.clubs.map((club) => (
+                <span key={club} className="flex items-start gap-[8px] text-[12px] leading-[16px] font-semibold">
+                  <span className="mt-[6px] size-[5px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />
+                  {club}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <FactRow label="Study abroad" value={detail.life.abroad} />
+
+          <div className="mt-auto flex flex-col gap-[2px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Study abroad</span>
+            <span className="text-[13px] leading-[17px] font-bold">{detail.life.abroad}</span>
           </div>
         </div>
       )}
