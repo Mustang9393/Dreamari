@@ -63,7 +63,7 @@ export function GetHiredChapter() {
         {/* Stage header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: last ? WORLD_COLOR : "var(--primary-tint)" }}>{current.kicker}</div>
+            <div className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: WORLD_COLOR }}>{current.kicker}</div>
             <div className="mt-[4px] truncate text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{current.label}</div>
           </div>
           <div className="flex flex-none items-center gap-[6px]">
@@ -121,7 +121,7 @@ export function GetHiredChapter() {
                  Everything sized to FILL the window — same content, no voids. */}
               <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex flex-col gap-[3px]">
-                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Level 1 · Foundation</span>
+                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Level 1 · Foundation</span>
                   <span className="text-[23px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
                 </span>
                 <MatchRing score={50} size={46} />
@@ -147,7 +147,7 @@ export function GetHiredChapter() {
                   <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Class of 2027</span>
                 </div>
                 <div className="flex flex-col gap-[5px] border-b py-2.5" style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Experience</span>
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Experience</span>
                   <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
                     <span className="font-semibold" style={{ color: "var(--foreground)" }}>Volunteer tutor · City Library</span>
                     <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>120 hrs</span>
@@ -158,7 +158,7 @@ export function GetHiredChapter() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-[5px] py-2.5">
-                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Clubs and leadership</span>
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Clubs and leadership</span>
                   <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
                     <span className="font-semibold" style={{ color: "var(--foreground)" }}>DECA · Treasurer</span>
                     <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>2 yrs</span>
@@ -167,10 +167,10 @@ export function GetHiredChapter() {
                 </div>
                 {/* The trailing edge: hinted, half-faded structure — reads as
                    "there's more of you on this page," never as a finished template */}
-                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Skills</span>
+                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Skills</span>
                 <span className="mt-[6px] h-[6px] w-2/3 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
                 <span className="mt-[5px] h-[6px] w-1/2 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
-                <span className="mt-[10px] text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Awards</span>
+                <span className="mt-[10px] text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Awards</span>
                 <span className="mt-[6px] h-[6px] w-3/5 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
                 <span className="mt-[5px] h-[6px] w-3/4 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
               </div>
