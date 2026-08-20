@@ -4,7 +4,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-20
+- Date: 2026-08-21
+
+### 2026-08-21 GET HIRED landing chapter + profile de-clutter (merged from landing-get-hired)
+
+- New 6th chapter after Connect: the loop-closer per founder voice notes.
+  One frame, staged Next/Back + dots: My Top 3 (browse poster art,
+  approved per-world faces, no rings) -> My Plan (editorial hairline
+  task list, in-app + IRL steps; the DECA step reappears on the resume)
+  -> Resume (realistic high-schooler concept that FADES OUT at the
+  bottom, deliberately unfinished, no send button) -> Hire-ready
+  (photo + "Your resume, ready to send." - prep, never a hiring or
+  auto-share promise). Gold accent (world-building-construction);
+  mkt-stage-in / mkt-offer-pop animations; rail dot added.
+- MatchRing extracted to src/components/app/MatchRing.tsx (shared by
+  profile + landing). tokens.css gained --world-farming-animals-nature
+  (was undefined; Food Scientist world labels rendered colorless).
+- Profile de-clutter: Top 3 rings AND the entire drag-reorder mechanic
+  removed (tap = focus, X = remove); Cards|Compare toggle merged into
+  the route pill row as a trailing Compare pill ("<- Cards" inside the
+  compare view); header utility pills + inactive route pills went ghost
+  (ink only on active states).
 
 ### 2026-08-20 route card viz round + header pills
 
