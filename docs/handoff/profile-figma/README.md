@@ -46,8 +46,7 @@ this one is superseded. Audience: the Figma agent (Codex), building in
 - The identity header holds: avatar (editable), name/grade/school, a
   **utility pill row** (archive icon + "Locker", gear + "Settings"), then the
   streak stat. Pills stack ABOVE the streak, right-aligned on desktop, left
-  on mobile. The ReadinessMeter does NOT live in the header: it sits in the
-  Plan tab's roadmap strip (the macro journey next to the micro steps). The focus career's poster art
+  on mobile. Readiness is RETIRED from the product (2026-08-21): no meter, no chips, no report stat. The focus career's poster art
   fills the header's right side behind a progress-blue legibility gradient.
 - **My Top 3** sits above the tab bar: full-size poster cards that act as
   career tabs. Tap = focus (report, routes, plan all follow). Drag the rank
@@ -119,10 +118,9 @@ Poster Card variants:
 1. **MatchRing**: track `--secondary`, progress `--primary`, percent centered
    in display face. Sizes in use: 26, 32, 34, 38, 44, 52. Tier labels per
    ruling 2.
-2. **ReadinessMeter**: "READINESS" caption, `46/100`, staged track with ticks
-   (Building 25 / Pipeline Ready 75 / Opted In 100). Lives in the Plan tab's
-   "Your roadmap" strip, beside the overall steps-done stat (gradient numeral
-   `n/N steps done` + slim progress bar), not in the header.
+2. **Roadmap strip** (Plan tab): "Your roadmap" caption, gradient numeral
+   `n/N steps done`, slim progress bar. (ReadinessMeter is retired; do not
+   build it.)
 3. **Header** assembly: identity + utility pills (h32 pill, glass-surface-3
    fill, glass-border; active = primary border + accent-subtle text) + stats
    row + focus art with mask and the progress-blue gradient (90 degrees,

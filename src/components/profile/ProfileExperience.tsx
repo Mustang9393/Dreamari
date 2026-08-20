@@ -213,7 +213,7 @@ export function ProfileExperience() {
             </div>
           )}
           {focus && <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${WORLD_COLORS[focus.world]} 10%, transparent) 0%, transparent 45%)` }} />}
-          {/* Progress-blue backdrop, left to right, so the streak + readiness signals stay legible over the art */}
+          {/* Progress-blue backdrop, left to right, so the header signals stay legible over the art */}
           <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 30%, color-mix(in srgb, var(--primary) 16%, color-mix(in srgb, var(--background) 88%, transparent)) 62%, color-mix(in srgb, var(--primary) 30%, var(--background)) 100%)" }} />
           <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-[var(--space-4)]">
@@ -377,42 +377,6 @@ export function ProfileExperience() {
 }
 
 // ------------------------------------------------------------- pieces ----
-
-// Readiness journey: where the student stands on the road to real
-// opportunities (doc 22 status labels), not an unexplained ring.
-const READINESS_STAGES = [
-  { label: "Building", at: 25 },
-  { label: "Pipeline Ready", at: 75 },
-  { label: "Opted In", at: 100 },
-];
-
-function ReadinessMeter({ value }: { value: number }) {
-  return (
-    <span className="flex w-[210px] flex-col gap-[6px]">
-      <span className="flex items-baseline justify-between">
-        <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Readiness</span>
-        <span className="text-[13px] leading-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{value}<span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100</span></span>
-      </span>
-      <span className="relative h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${value}%`, background: "var(--accent-subtle)" }} />
-        {READINESS_STAGES.slice(0, 2).map((stage) => (
-          <span key={stage.label} aria-hidden className="absolute top-[-2px] h-[10px] w-[2px] rounded-full" style={{ left: `${stage.at}%`, background: "var(--glass-stroke, rgba(255,255,255,0.3))" }} />
-        ))}
-      </span>
-      <span className="flex justify-between">
-        {READINESS_STAGES.map((stage) => {
-          const reached = value >= (stage.at === 25 ? 25 : stage.at);
-          const current = value >= 25 && value < 75 ? stage.at === 25 : value >= 75 && value < 100 ? stage.at === 75 : stage.at === 100 && value >= 100;
-          return (
-            <span key={stage.label} className="text-[8.5px] leading-[11px] font-bold tracking-[0.3px] uppercase" style={{ color: current ? "var(--accent-subtle)" : reached ? "var(--foreground)" : "var(--muted-foreground)" }}>
-              {stage.label}
-            </span>
-          );
-        })}
-      </span>
-    </span>
-  );
-}
 
 function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, compact }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove?: (id: string) => void; compact?: boolean }) {
   const emptySlots = Math.max(0, 3 - top3.length);
@@ -601,12 +565,6 @@ function OverviewTab({
           </Link>
         </section>
       )}
-
-      {/* Readiness chips */}
-      <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-        <span className="rounded-full border px-[12px] py-[5px] text-[11px] font-bold" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>{STUDENT.readinessStatus}</span>
-        <span className="rounded-full px-[12px] py-[5px] text-[11px] font-semibold" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>Next: {STUDENT.readinessNext}</span>
-      </div>
 
     </div>
   );
@@ -803,7 +761,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
         <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route →</button>
       </div>
 
-      {/* Your roadmap: the macro journey (readiness) next to the micro one (steps) */}
+      {/* Your roadmap: overall progress across every step */}
       <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)]" style={GLASS}>
         <span className="flex flex-col gap-[4px]">
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
@@ -812,7 +770,6 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
             <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(Math.round((doneCount / Math.max(allTasks.length, 1)) * 100), 2)}%`, background: "var(--accent-subtle)" }} />
           </span>
         </span>
-        <ReadinessMeter value={STUDENT.readiness} />
       </section>
       <div className="flex flex-col gap-[var(--space-3)]">
         {focus.plan.map((horizon, index) => {
@@ -1296,7 +1253,6 @@ function ResumeTab() {
         <button type="button" className="w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Continue
         </button>
-        <span className="rounded-full px-[12px] py-[5px] text-[11px] font-semibold" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>Feeds Readiness</span>
       </div>
     </section>
   );
@@ -1363,7 +1319,6 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         <div className="mt-5 grid grid-cols-2 gap-3">
           {[
             ["Match strength", `${career.match}% (${matchTier(career.match)}), derived from logged in-app activity`],
-            ["Readiness index", `${STUDENT.readiness} / 100 (${STUDENT.readinessStatus})`],
             ["Selected pathway", `${route.type}: ${route.program}`],
             ["Plan progress", `${progress.complete} of ${progress.total} planned actions complete (${progress.pct}%)`],
           ].map(([label, value]) => (
@@ -1432,7 +1387,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         </ReportSection>
 
         <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[10.5px] leading-[15px] text-[#6b7280]">
-          Match strength and the readiness index summarize {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. They are engagement indicators intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
+          Match strength summarizes {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. It is an engagement indicator intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
         </p>
       </div>
     </div>

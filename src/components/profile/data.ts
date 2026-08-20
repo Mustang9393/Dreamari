@@ -400,9 +400,6 @@ export const STUDENT = {
   grade: "Grade 11",
   school: "Westfield High School",
   streakDays: 12,
-  readiness: 46, // 0-100 — "Building Readiness" band
-  readinessStatus: "Building Readiness",
-  readinessNext: "Pass 1 scenario first try",
 };
 
 // ---- Rich route detail (Replit v2-my-profile parity) ----
