@@ -79,7 +79,6 @@ export function ProfileExperience() {
   const [done, setDone] = useState<Record<string, string[]>>({});
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [lockerPeek, setLockerPeek] = useState(false);
   // "Updated" pulses on every tab whose content just changed (focus swap
   // touches report + routes + plan; a route choice touches report + plan).
   // The tab currently in view is skipped: the change is visible live there.
@@ -292,37 +291,6 @@ export function ProfileExperience() {
             <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap to switch · drag the number to reorder</span>
           </div>
           <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={removeFromTop3} reorderTo={reorderTo} move={move} />
-          {/* Locker peek: collapsed by default, expands the saved careers */}
-          {tab === "overview" && locker.length > 0 && (
-            <div className="overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <button type="button" aria-expanded={lockerPeek} onClick={() => setLockerPeek((value) => !value)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)] text-left">
-                <span className="flex items-center gap-[8px]">
-                  <Archive className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
-                  <span className="text-[12.5px] font-bold">Locker</span>
-                  <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
-                </span>
-                <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: lockerPeek ? "rotate(180deg)" : "none" }} />
-              </button>
-              {lockerPeek && (
-                <div className="filters-reveal flex flex-col gap-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-                  <div className="flex gap-[var(--space-3)] overflow-x-auto pb-1 [scrollbar-width:none]" style={{ touchAction: "pan-x pan-y" }}>
-                    {locker.map((career) => (
-                      <button key={career.id} type="button" onClick={() => setTab("locker")} className="relative h-[150px] w-[106px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
-                        <Image src={career.photo} alt="" fill sizes="106px" className="object-cover" />
-                        <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[2px] px-1 pb-[8px] text-center uppercase" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "24px" }}>
-                          <span className="w-full text-[10.5px] leading-[12px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
-                          <span className="flex items-center justify-center rounded-full p-[2px]" style={{ background: "var(--glass-surface-3)" }}>
-                            <MatchRing score={career.match} size={26} />
-                          </span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  <button type="button" onClick={() => setTab("locker")} className="cursor-pointer self-end text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Open full Locker →</button>
-                </div>
-              )}
-            </div>
-          )}
         </section>
 
         {/* ---- Tabs ---- */}
@@ -708,13 +676,13 @@ function OverviewTab({
         <p key={focus.id} className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
 
         <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
-          <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+          <span className="relative flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)] pr-[68px]" style={{ background: "var(--glass-surface-2)" }}>
             <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
-            <span className="flex items-center gap-[var(--space-3)]">
-              <MatchRing score={focus.match} size={44} />
-              <span className="min-w-0 truncate text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{matchTier(focus.match)}</span>
-            </span>
+            <span className="min-w-0 truncate text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{matchTier(focus.match)}</span>
             <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
+            <span className="absolute top-1/2 right-[var(--space-4)] -translate-y-1/2">
+              <MatchRing score={focus.match} size={46} />
+            </span>
           </span>
           <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
             <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Route</span>

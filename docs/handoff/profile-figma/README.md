@@ -21,7 +21,7 @@ this one is superseded. Audience: the Figma agent (Codex), building in
    every stat numeral in this pack. Bind the variables, never hex.
 5. **Drag-lift elevation**: one scoped addition to the elevation family:
    0 16px 40px, background color at 70% mix.
-6. **Semantic.Light additions** (recently completed in code, author the same):
+5. **Semantic.Light additions** (recently completed in code, author the same):
    secondary `#00000017`, secondary-foreground `#05070f` (neutral/900),
    muted `#00000008`, glass-border `#00000017`, accent `#1e4fcc` (blue/700),
    accent-subtle `#1e4fcc`. Also: accent-foreground pairs with
@@ -51,9 +51,8 @@ this one is superseded. Audience: the Figma agent (Codex), building in
 - **My Top 3** sits above the tab bar: full-size poster cards that act as
   career tabs. Tap = focus (report, routes, plan all follow). Drag the rank
   chip horizontally to reorder; dropping into slot 1 also sets focus. X
-  removes. The dashed slot opens the **Add sheet** in place. Under the
-  cards (Overview only): the **Locker peek**, a collapsed row that expands
-  into the mini poster strip.
+  removes. The dashed slot opens the **Add sheet** in place. The Locker is
+  reachable ONLY from the header pill (no strip or peek under the Top 3).
 - **Tabs: Overview / Path / Plan / Resume.** Locker and Settings are NOT
   tabs: opening either replaces everything under the header (Top 3 and tab
   bar hidden) with a full view that closes back to Overview.
@@ -66,7 +65,7 @@ this one is superseded. Audience: the Figma agent (Codex), building in
   the card interior is two-column: identity + CTA left, tabs + pane right.
 - **Plan** = the levels for the chosen route.
 
-## The captures (12 states, desktop DOM, responsive classes included)
+## The captures (11 states, desktop DOM, responsive classes included)
 
 Full rendered `.marketing-v2` subtree per state. `md:` classes = desktop,
 unprefixed = mobile; one file covers both breakpoints. Decode
@@ -74,7 +73,7 @@ unprefixed = mobile; one file covers both breakpoints. Decode
 
 | File | State |
 | --- | --- |
-| 01-overview-default.html | Header, Top 3 (2 careers + Add slot), collapsed Locker peek, tabs, Career Report with bento stat tiles + bento receipts, next action, readiness chips |
+| 01-overview-default.html | Header, Top 3 (2 careers + Add slot), tabs, Career Report with bento stat tiles (Match ring right-aligned in its tile) + bento receipts, next action, readiness chips |
 | 02-career-report-overlay.html | Counselor-facing export overlay (chrome bar with section toggles + white report page) |
 | 03-path-routes-cards.html | Path tab: route-pill switcher + hero carousel (focused card, peeking neighbors, prev/next arrows) with in-card Stats/Fit/Life/Payoff tabs; Fit/Life/Payoff pane contents spec'd below and sourced from ROUTE_DETAILS |
 | 04-path-routes-compare.html | Compare view: category table with benefit tags + four single-measure charts |
@@ -85,7 +84,6 @@ unprefixed = mobile; one file covers both breakpoints. Decode
 | 09-resume.html | Resume tab (stub) |
 | 10-overview-empty.html | No Top 3: three dashed Add slots + "Pick a Top 3 to start" |
 | 11-settings-view.html | Settings full view: photo hint, stub rows with SOON chips, sign out |
-| 12-overview-locker-peek.html | Overview with the Locker peek EXPANDED (mini poster strip + "Open full Locker") |
 
 ## Typography
 
@@ -132,15 +130,12 @@ Poster Card variants:
    in a glass circle above the title, focus state = primary border at
    scale 1.0, unfocused = 72% opacity at scale 0.97. Variants: focus,
    default, drag-lift (elevation ruling 5), dashed add-slot placeholder.
-5. **Locker peek**: collapsed row (archive icon, "Locker", count, chevron) +
-   expanded strip of 106x150 mini posters with MatchRing 26 and "Open full
-   Locker" link.
 6. **Bento stat tile**: `--glass-surface-2` fill, radius `--radius-xl`,
    caption row (10px tracking uppercase, optional small icon right), value in
    the gradient numeral style. Two sizes only wherever tiles sit together.
    Used for: report stat band (Match/Route/Plan), receipts, route money
    blocks (boxless variant: same hierarchy, no fill).
-7. **Route column**: type icon in glass circle + YOUR PATH chip (selected),
+6. **Route column**: type icon in glass circle + YOUR PATH chip (selected),
    type caption, program title, credential + location line, pitch, money
    block in decision order (Time, Total cost, First-year pay; boxless bento
    rows on a `--glass-surface-1` panel) as the default Stats pane. Under the
@@ -181,7 +176,7 @@ Poster Card variants:
    for this path"; unselected CTA "Continue with {short}". Next-step footer
    line links to /colleges when the step is a program/school action,
    otherwise carries a "DO THIS IRL" tag.
-8. **Route switcher pills** (all breakpoints): route.short pills above the
+7. **Route switcher pills** (all breakpoints): route.short pills above the
    carousel, active pill = primary fill, synced with the scroll position; the
    recommended route's pill carries a sparkle icon. Desktop adds floating
    prev/next chevron buttons (size 40 glass circles, 30% opacity at ends).
@@ -192,23 +187,23 @@ Poster Card variants:
    section header and peeking neighbors are never clipped.
    PLAN PING: whenever focus or the chosen route changes, the Plan tab shows
    a brief "UPDATED" chip (accent-subtle fill, ~2.6s, reveal animation).
-9. **Compare table**: first column category labels, one column per route,
+8. **Compare table**: first column category labels, one column per route,
    value + benefit tag chip (primary 18% fill, accent-subtle text) per cell,
    selected column washed primary 7% with a YOURS chip.
-10. **Compare chart**: one measure per chart, single hue (selected solid
+9. **Compare chart**: one measure per chart, single hue (selected solid
     `--accent-subtle`, others 45% mix), value labels, LOWER/HIGHER IS BETTER
     captions.
-11. **Plan level row**: number chip (primary when unlocked), LEVEL n caption,
+10. **Plan level row**: number chip (primary when unlocked), LEVEL n caption,
     title + subtitle, progress ring + chevron; locked = 55% opacity with
     lock icon + "UNLOCKS AT 40% OF LEVEL n-1". Task rows with checkbox,
     YOURS chip on custom steps, minutes, action icon; dashed add-your-own
     input row.
-12. **Sheets**: Add-to-Top-3 (locker rows: thumb, title, world + tier,
+11. **Sheets**: Add-to-Top-3 (locker rows: thumb, title, world + tier,
     MatchRing 32, Add button) and Swap ("Top 3 is full", Replace rows,
     Never mind). Card fill on `--card`, backdrop = background at 78%.
-13. **Settings view + Locker view**: full-width views under the header
+12. **Settings view + Locker view**: full-width views under the header
     (no Top 3, no tabs) with an X back to Overview.
-14. **Report page** (02): light print document; bind neutral primitives.
+13. **Report page** (02): light print document; bind neutral primitives.
     Counselor-facing copy is final; transcribe exactly.
 
 ## Prototype wiring
@@ -216,8 +211,8 @@ Poster Card variants:
 Tabs switch Overview/Path/Plan/Resume. Top 3 card tap -> focus swap across
 all tabs. Add slot -> 06. Locker pill -> 08; Settings pill -> 11; X on
 either -> 01. Route CTA -> selected state; selected CTA -> 05. Export ->
-02. Empty state (10) links to Match Lab / Add sheet. Locker peek row toggles
-12. Frames: 12 states x 2 breakpoints (desktop 1200 content, mobile 375).
+02. Empty state (10) links to Match Lab / Add sheet.
+Frames: 11 states x 2 breakpoints (desktop 1200 content, mobile 375).
 
 ## Mock data (transcribe as-is)
 
