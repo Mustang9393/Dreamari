@@ -153,12 +153,26 @@ Poster Card variants:
      aid + where-you-would-work fact rows, placement chip (High = feedback
      success at 22% fill).
    - *Student life*: three bullets, community feel, study abroad fact rows.
-   - *Loan payoff*: payoff numeral + tag chip, avg loan + starting salary
-     line, SALARY BAR CHART (3 bars, final year solid accent-subtle, earlier
-     years 45% mix, amounts above, year captions + bonus notes below),
-     MONTHLY BUDGET two-segment bar (loan solid / keep 22% mix) with legend
-     dots, takeaway line in accent-subtle.
-   Panes render bare (no disclosure chrome).
+   - *Loan payoff*: "DEBT-FREE IN" caption over the payoff numeral (route
+     with no loans reads "DEBT-FREE / From day 1") + plain-language tag chip,
+     one sub line (avg loan + starting salary), SALARY BAR CHART (3 tappable
+     bars, selected solid accent-subtle, others 40% mix, amounts above, year
+     captions below, ONE note line under the chart showing the selected
+     year's bonus math), MONTHLY BUDGET two-segment bar with the income base
+     in its caption and a two-item legend, takeaway line in accent-subtle.
+   Panes render bare (no disclosure chrome). Tabs are hairline text tabs
+   (uppercase 10.5px tracked, active = foreground + 2px primary underline on
+   the shared hairline). The card masthead is editorial: status chips, kicker
+   (type icon + type), route.short as a 30/38px display headline set with the
+   build flow's ink-bleed InkText, pitch as the deck, then a hairline-topped
+   meta block (program / credential · location). Masthead and panes reveal
+   with the .seq-reveal stagger (fade-slide-up, 50ms steps); the Payoff pane
+   height (min 280/330px) is the fixed content-window height for all panes,
+   with Stats as the default pane (three pull-numbers spread to fill).
+   Prev/next carousel arrows sit OUTSIDE the content frame in the page
+   gutters (-48px), never over the focused card. "UPDATED" pings appear on
+   every tab whose content changed (focus: Overview+Path+Plan; route:
+   Overview+Plan; the active tab is skipped).
    Selected column: primary border, primary 10% wash, CTA "Open your plan
    for this path"; unselected CTA "Continue with {short}". Next-step footer
    line links to /colleges when the step is a program/school action,

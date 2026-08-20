@@ -35,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { InkText } from "@/components/build/ui";
 import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, routeDetail, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
 
@@ -79,18 +80,32 @@ export function ProfileExperience() {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [lockerPeek, setLockerPeek] = useState(false);
-  // "Plan updated" pulse on the Plan tab whenever focus or route changes.
-  const [planPing, setPlanPing] = useState(false);
-  const planPingMounted = useRef(false);
+  // "Updated" pulses on every tab whose content just changed (focus swap
+  // touches report + routes + plan; a route choice touches report + plan).
+  // The tab currently in view is skipped: the change is visible live there.
+  const [pings, setPings] = useState<Partial<Record<TabId, boolean>>>({});
+  const pingTimer = useRef<number | null>(null);
+  const tabRef = useRef<TabId>("overview");
   useEffect(() => {
-    if (!planPingMounted.current) {
-      planPingMounted.current = true;
+    tabRef.current = tab;
+  }, [tab]);
+  const pingMounted = useRef(false);
+  const pingTabs = (targets: TabId[]) => {
+    setPings(Object.fromEntries(targets.filter((target) => target !== tabRef.current).map((target) => [target, true])));
+    if (pingTimer.current) window.clearTimeout(pingTimer.current);
+    pingTimer.current = window.setTimeout(() => setPings({}), 2600);
+  };
+  useEffect(() => {
+    if (!pingMounted.current) return;
+    pingTabs(["overview", "path", "plan"]);
+  }, [focusId]);
+  useEffect(() => {
+    if (!pingMounted.current) {
+      pingMounted.current = true;
       return;
     }
-    setPlanPing(true);
-    const timer = window.setTimeout(() => setPlanPing(false), 2600);
-    return () => window.clearTimeout(timer);
-  }, [focusId, routeChoice]);
+    pingTabs(["overview", "plan"]);
+  }, [routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
@@ -322,7 +337,7 @@ export function ProfileExperience() {
           ).map((item) => (
             <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[7px] text-center text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
               {item.label}
-              {item.id === "plan" && planPing && (
+              {pings[item.id] && (
                 <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
               )}
             </button>
@@ -631,7 +646,7 @@ function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, reorderTo, move
 
 function ReceiptTiles({ receipts }: { receipts: Receipt[] }) {
   return (
-    <div className="grid grid-cols-2 gap-[var(--space-2)] sm:grid-cols-4">
+    <div className="seq-reveal grid grid-cols-2 gap-[var(--space-2)] sm:grid-cols-4">
       {receipts.map((receipt) => {
         const ReceiptIcon = RECEIPT_ICON[receipt.kind];
         return (
@@ -692,7 +707,7 @@ function OverviewTab({
         </div>
         <p className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
 
-        <div className="grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
+        <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
           <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
             <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
             <span className="flex items-center gap-[var(--space-3)]">
@@ -869,7 +884,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             aria-label="Previous route"
             disabled={visibleRoute === 0}
             onClick={() => { const card = railRef.current?.children[visibleRoute - 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="absolute top-1/2 left-1 z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            className="absolute top-1/2 -left-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
             style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -879,7 +894,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             aria-label="Next route"
             disabled={visibleRoute >= focus.routes.length - 1}
             onClick={() => { const card = railRef.current?.children[visibleRoute + 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="absolute top-1/2 right-1 z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            className="absolute top-1/2 -right-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
             style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
           >
             <ChevronRight className="h-5 w-5" />
@@ -1031,16 +1046,6 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
   );
 }
 
-// Collapsed-card stat: caption over a gradient display number, boxless.
-function MiniBento({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="flex min-w-0 flex-col gap-[2px]">
-      <span className="truncate text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="truncate text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{value}</span>
-    </span>
-  );
-}
-
 const ROUTE_TYPE_ICONS = { military: Shield, flight: Plane, community: BookOpen, trade: Wrench, school: GraduationCap } as const;
 const routeTypeKey = (type: string): keyof typeof ROUTE_TYPE_ICONS => {
   if (/military/i.test(type)) return "military";
@@ -1050,42 +1055,46 @@ const routeTypeKey = (type: string): keyof typeof ROUTE_TYPE_ICONS => {
   return "school";
 };
 
-// One alternate route. The identity stays put; the section tabs under it
-// swap ONE content window in place (stats by default), so the card never
-// stacks open sections or grows past a single pane.
+// One alternate route, editorial: the path name is the headline, the data
+// pane on the right is the feature. Payoff (the tallest pane) is the default
+// and sets the height; the other panes are designed to fill the same space.
 function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; selected: boolean; onSelect: () => void; onGoPlan: () => void }) {
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
+  const [payoffYear, setPayoffYear] = useState(2);
+  const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
-      className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:grid md:w-[86%] md:max-w-[880px] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'icon_tabs'_'identity_pane'_'decide_pane']"
+      className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:grid md:w-[86%] md:max-w-[880px] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane']"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
-      {/* Identity */}
-      <div className="flex items-start justify-between gap-[var(--space-2)] md:[grid-area:icon]">
-        <span className="flex size-10 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-          <Icon className="h-5 w-5" style={{ color: "var(--accent-subtle)" }} />
-        </span>
-        <span className="flex items-center gap-[6px]">
-          {route.recommended && (
-            <span className="flex items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
-              <Sparkles className="h-3 w-3" /> Recommended
-            </span>
-          )}
-          {selected && <span className="rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
-        </span>
-      </div>
-      <div className="flex flex-col gap-[3px] md:self-start md:[grid-area:identity]">
-        <span className={CAPTION} style={{ color: selected ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{route.type}</span>
-        <span className="text-[16px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.program}</span>
-        <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential} · {route.location}</span>
-        {detail && <span className="mt-[2px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</span>}
+      {/* Status chips */}
+      <div className="flex items-center gap-[6px] md:[grid-area:chips]">
+        {route.recommended && (
+          <span className="flex items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+            <Sparkles className="h-3 w-3" /> Recommended
+          </span>
+        )}
+        {selected && <span className="rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
       </div>
 
-      {/* In-card section tabs: the window below swaps, nothing stacks */}
+      {/* Editorial masthead: kicker, headline, deck, meta */}
+      <div className="seq-reveal flex flex-col gap-[var(--space-2)] md:self-start md:[grid-area:head]">
+        <span className="flex items-center gap-[6px] text-[10px] font-bold tracking-[1.2px] uppercase" style={{ color: selected ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+          <Icon className="h-3.5 w-3.5" /> {route.type}
+        </span>
+        <h3 className="text-[30px] leading-[32px] font-extrabold md:text-[38px] md:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={route.short} /></h3>
+        {detail && <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</p>}
+        <div className="mt-[2px] flex flex-col gap-[2px] border-t pt-[var(--space-2)] text-[11px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+          <span>{route.program}</span>
+          <span>{route.credential} · {route.location}</span>
+        </div>
+      </div>
+
+      {/* Hairline text tabs */}
       {detail && (
-        <div className="grid grid-cols-4 gap-[2px] self-start rounded-[var(--radius-md)] p-[3px] md:[grid-area:tabs]" style={{ background: "var(--glass-surface-2)" }}>
+        <div className="flex gap-[var(--space-5)] self-start border-b md:w-full md:[grid-area:tabs]" style={{ borderColor: "var(--glass-border)" }}>
           {(
             [
               { id: "stats", label: "Stats" },
@@ -1099,8 +1108,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
               type="button"
               aria-pressed={pane === item.id}
               onClick={() => setPane(item.id)}
-              className="cursor-pointer rounded-[6px] py-[5px] text-center text-[10.5px] font-bold"
-              style={{ background: pane === item.id ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+              className="-mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[10.5px] font-bold tracking-[1px] uppercase"
+              style={{ borderColor: pane === item.id ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {item.label}
             </button>
@@ -1108,23 +1117,30 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         </div>
       )}
 
-      {/* Time & money, in decision order: how long, what it costs, what it pays */}
+      {/* Stats: three pull-numbers, spread to fill the payoff-sized window */}
       {(!detail || pane === "stats") && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-2)] self-start rounded-[var(--radius-xl)] bg-[var(--glass-surface-1)] p-[var(--space-3)] md:w-full md:gap-[var(--space-4)] md:bg-transparent md:p-0 md:pt-[var(--space-2)] md:[grid-area:pane]">
-          <MiniBento label="Time" value={route.duration} />
-          <MiniBento label="Total cost" value={route.cost.split(",")[0]} />
-          <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
+        <div className={`seq-reveal flex flex-col justify-between gap-[var(--space-3)] self-start md:w-full md:[grid-area:pane] ${PANE_MIN}`}>
+          {[
+            { label: "Time", value: route.duration },
+            { label: "Total cost", value: route.cost.split(",")[0] },
+            { label: "First-year pay", value: route.salary.split(",")[0].replace(/ first year/i, "") },
+          ].map((stat, index) => (
+            <div key={stat.label} className={`flex flex-1 flex-col justify-center gap-[4px] ${index < 2 ? "border-b pb-[var(--space-3)]" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+              <span className="text-[30px] leading-[32px] font-extrabold md:text-[34px] md:leading-[36px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+            </div>
+          ))}
         </div>
       )}
 
       {detail && pane === "fit" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
-          <span className="w-fit rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
+        <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
+          <p className="text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{detail.fit.tagline}</p>
           {detail.fit.acceptancePct !== undefined ? (
             <div className="flex flex-col gap-[4px]">
               <div className="flex items-baseline justify-between gap-[var(--space-2)]">
-                <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
-                <span className="text-[16px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
+                <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Acceptance</span>
+                <span className="text-[20px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
               </div>
               <div className="relative h-[7px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
                 <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.fit.acceptancePct, 3)}%`, background: "var(--accent-subtle)" }} />
@@ -1136,58 +1152,81 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           )}
           <FactRow label="Financial aid" value={detail.fit.aid} />
           <FactRow label="Where you'd work" value={detail.fit.targets} />
-          <div className="flex items-center justify-between gap-[var(--space-2)]">
-            <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>Job placement</span>
+          <div className="flex items-center justify-between gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Job placement</span>
             <span className="rounded-full px-[10px] py-[2px] text-[10px] font-bold" style={{ background: detail.fit.placement === "High" ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 22%, transparent)" : "var(--glass-surface-2)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
           </div>
         </div>
       )}
+
       {detail && pane === "life" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
-          <ul className="flex list-disc flex-col gap-[3px] pl-4 text-[11.5px] leading-[16px]" style={{ color: "var(--foreground)" }}>
-            {detail.life.clubs.map((club) => <li key={club}>{club}</li>)}
-          </ul>
-          <FactRow label="Community feel" value={detail.life.feel} />
-          <FactRow label="Study abroad" value={detail.life.abroad} />
+        <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
+          <p className="border-l-2 pl-[var(--space-3)] text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", borderColor: "var(--accent-subtle)" }}>{detail.life.feel}</p>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Student life</span>
+            <ul className="flex list-disc flex-col gap-[5px] pl-4 text-[12px] leading-[16px]">
+              {detail.life.clubs.map((club) => <li key={club}>{club}</li>)}
+            </ul>
+          </div>
+          <div className="border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <FactRow label="Study abroad" value={detail.life.abroad} />
+          </div>
         </div>
       )}
+
       {detail && pane === "payoff" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
-          <div className="flex items-baseline gap-[var(--space-2)]">
-            <span className="text-[24px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time}</span>
-            <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
+        <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
+          {/* One stat leads; everything else hangs off it */}
+          <div className="flex flex-col gap-[2px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
+            <div className="flex items-baseline gap-[var(--space-2)]">
+              <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
+              <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold whitespace-nowrap" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
+            </div>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Avg loan {detail.payoff.avgLoan} · starting {detail.payoff.startSalary}</span>
           </div>
-          <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Average loan {detail.payoff.avgLoan} · starting salary {detail.payoff.startSalary}</span>
-          <div className="flex flex-col gap-[3px]">
-            <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>What you make, year by year</span>
+
+          {/* Pay curve: amounts on bars; tap a year for its bonus math */}
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>What you make</span>
             <div className="grid grid-cols-3 items-end gap-[var(--space-2)]">
               {(() => {
                 const values = detail.payoff.years.map((year) => parseInt(year.amount.replace(/[^0-9]/g, ""), 10) || 0);
                 const max = Math.max(...values, 1);
                 return detail.payoff.years.map((year, index) => (
-                  <span key={year.label} className="flex flex-col items-center gap-[3px]">
+                  <button
+                    key={year.label}
+                    type="button"
+                    aria-pressed={payoffYear === index}
+                    onClick={() => setPayoffYear(index)}
+                    className="flex cursor-pointer flex-col items-center gap-[3px]"
+                  >
                     <span className="text-[12.5px] leading-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
-                    <span className="w-full rounded-t-[5px]" style={{ height: `${Math.max(Math.round((values[index] / max) * 56), 8)}px`, background: index === detail.payoff.years.length - 1 ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 45%, transparent)" }} />
-                    <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
-                    {year.note && <span className="text-center text-[8.5px] leading-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{year.note}</span>}
-                  </span>
+                    <span className="w-full rounded-t-[5px] transition-colors" style={{ height: `${Math.max(Math.round((values[index] / max) * 52), 8)}px`, background: payoffYear === index ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} />
+                    <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: payoffYear === index ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{year.label}</span>
+                  </button>
                 ));
               })()}
             </div>
+            <span className="min-h-[14px] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {detail.payoff.years[payoffYear]?.note ? `${detail.payoff.years[payoffYear].label}: ${detail.payoff.years[payoffYear].note}` : " "}
+            </span>
           </div>
+
+          {/* Budget: base lives in the caption, one-line legend */}
           <div className="flex flex-col gap-[5px]">
-            <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>Monthly budget</span>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Monthly budget · on {detail.payoff.budget.income}</span>
             <div className="flex h-[10px] w-full overflow-hidden rounded-full">
               <span style={{ width: `${Math.max(detail.payoff.budget.pct, 3)}%`, background: "var(--accent-subtle)" }} />
               <span className="flex-1" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} />
             </div>
             <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan {detail.payoff.budget.loan} ({detail.payoff.budget.pct}%)</span>
+              <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan {detail.payoff.budget.loan}</span>
               <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} /> Keep {detail.payoff.budget.keep}</span>
-              <span>of {detail.payoff.budget.income}</span>
             </div>
           </div>
-          <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
+
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
         </div>
       )}
 

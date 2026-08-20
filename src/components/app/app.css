@@ -86,3 +86,21 @@
     background: #ffffff !important;
   }
 }
+
+/* Editorial sequence: children materialize top-to-bottom (fade-slide-up from
+   globals.css), 50ms apart, capped short so nothing feels slow. Pairs with the
+   build flow's ink-bleed InkText on display headlines. */
+@media (prefers-reduced-motion: no-preference) {
+  .seq-reveal > * {
+    opacity: 0;
+    animation: fade-slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .seq-reveal > *:nth-child(1) { animation-delay: 0.03s; }
+  .seq-reveal > *:nth-child(2) { animation-delay: 0.08s; }
+  .seq-reveal > *:nth-child(3) { animation-delay: 0.13s; }
+  .seq-reveal > *:nth-child(4) { animation-delay: 0.18s; }
+  .seq-reveal > *:nth-child(5) { animation-delay: 0.23s; }
+  .seq-reveal > *:nth-child(6) { animation-delay: 0.28s; }
+  .seq-reveal > *:nth-child(7) { animation-delay: 0.33s; }
+  .seq-reveal > *:nth-child(8) { animation-delay: 0.38s; }
+}
