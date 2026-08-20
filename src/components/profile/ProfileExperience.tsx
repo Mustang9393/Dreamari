@@ -618,10 +618,12 @@ function ReceiptTiles({ receipts }: { receipts: Receipt[] }) {
       {receipts.map((receipt) => {
         const ReceiptIcon = RECEIPT_ICON[receipt.kind];
         return (
-          <span key={receipt.label} className="flex flex-col gap-[4px] rounded-[var(--radius-lg)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-            <ReceiptIcon className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
-            <span className="text-[17px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{receipt.value}</span>
-            <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{receipt.label}</span>
+          <span key={receipt.label} className="flex flex-col gap-[6px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+            <span className="flex items-center justify-between">
+              <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{receipt.label}</span>
+              <ReceiptIcon className="h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} />
+            </span>
+            <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{receipt.value}</span>
           </span>
         );
       })}
@@ -673,23 +675,27 @@ function OverviewTab({
         </div>
         <p className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
 
-        <div className="grid grid-cols-1 divide-y overflow-hidden rounded-[var(--radius-lg)] border sm:grid-cols-3 sm:divide-x sm:divide-y-0" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="flex items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-            <MatchRing score={focus.match} size={48} />
+        <div className="grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
+          <span className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+            <MatchRing score={focus.match} size={52} />
             <span className="flex min-w-0 flex-col gap-[1px]">
-              <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
-              <span className="text-[13px] leading-[17px] font-bold">{matchTier(focus.match)}</span>
-              <span className="text-[10px] leading-[13px]" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
+              <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
+              <span className="text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{matchTier(focus.match)}</span>
+              <span className="text-[10px] leading-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
             </span>
           </span>
-          <ReportStat label="Route" big={route.type} small={route.program} />
-          <span className="flex flex-col gap-[6px] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-            <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan</span>
+          <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+            <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Route</span>
+            <span className="text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{route.type}</span>
+            <span className="truncate text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.program}</span>
+          </span>
+          <span className="flex flex-col gap-[5px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
             <span className="flex items-baseline justify-between">
-              <span className="text-[15px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{progress.complete === 0 ? "Ready" : `${progress.pct}%`}</span>
+              <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan</span>
               <span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{progress.complete === 0 ? "10 min start" : `${progress.complete}/${progress.total}`}</span>
             </span>
-            <span className="relative h-[6px] w-full overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+            <span className="text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{progress.complete === 0 ? "Ready" : `${progress.pct}%`}</span>
+            <span className="relative h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
             </span>
           </span>
@@ -730,16 +736,6 @@ function OverviewTab({
       </div>
 
     </div>
-  );
-}
-
-function ReportStat({ label, big, small }: { label: string; big: string; small: string }) {
-  return (
-    <span className="flex flex-col gap-[2px] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      <span className="text-[9.5px] leading-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{big}</span>
-      <span className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{small}</span>
-    </span>
   );
 }
 
