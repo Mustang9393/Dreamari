@@ -6,6 +6,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 My Path polish round 2
+
+- Gradient numerals now fade across the FULL value width
+  (linear-gradient(100deg, --foreground 8%, --accent-subtle 92%),
+  background-clip text) so short values like "4 yrs" get the treatment
+  too; applied in BentoStat and MiniBento. Flagged in the Figma pack as
+  a new pattern to author as a reusable style (variables, not hex).
+- Dragging a Top 3 row into slot 1 now also sets it as focus (same for
+  keyboard ArrowUp reaching slot 1); verified in browser (routes
+  heading follows). Next-step strip stacks on mobile.
+- Design-system audit: new work is 100% tokens; only raw values in the
+  file are the print-report grays (intentional light document) and the
+  pre-existing feedback-success fallback + a #000 alpha mask ramp.
+- Figma pack: README rewritten for the new My Path anatomy (journey,
+  bento hierarchy, gradient recipe, level rows, drag spec incl.
+  drop-to-focus); captures 03/04/05 regenerated.
+
 ### 2026-08-20 My Path redesign: journey + bento + levels
 
 - Route cards (expanded): a journey strip (Today → school → credential →

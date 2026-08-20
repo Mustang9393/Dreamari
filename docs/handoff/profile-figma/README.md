@@ -38,7 +38,7 @@ one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
 | --- | --- |
 | 01-overview-default.html | Overview tab: header, tab bar, My Top 3 cards (2 careers + "Add a career" dashed slot), Career Report card, receipts, next-action banner, readiness chips, Locker strip |
 | 02-career-report-overlay.html | Export overlay open: dark chrome bar (Engagement/Pathway/Plan toggles, Print) + the white counselor-facing report page |
-| 03-path-top3-routes-plan.html | My Path tab: My Top 3 rows (grip, rank, focus target, remove, open slot row), Routes cards view (one expanded), Plan accordion (horizon 1 open, 2–3 locked) |
+| 03-path-top3-routes-plan.html | My Path tab: My Top 3 rows (grip, rank, thumb, match ring, focus target, remove, open slot row), Routes cards view (one expanded: journey strip + bento stats + next-step strip), Plan levels (Level 1 open with ring, 2–3 locked) |
 | 04-path-routes-compare.html | My Path with Routes toggled to Compare: four single-measure bar charts |
 | 05-top3-preview-sheet.html | Career preview sheet open over My Path (poster hero, receipts, Set focus) |
 | 06-swap-sheet.html | "Top 3 is full" swap sheet over the Locker (three Replace rows + Never mind) |
@@ -98,8 +98,44 @@ Use the poster COMPONENT variants; they already carry these faces. Do not retype
 5. **Route card** (collapsed + expanded disclosure) and **Compare bar chart**
    (one measure per chart, single hue: selected route solid `--accent-subtle`,
    others 45% mix; value labels; LOWER/HIGHER IS BETTER captions).
-6. **Plan horizon accordion row** (open, summary, locked-with-% states) and the
-   "Add your own step" input row (custom steps get the YOURS chip).
+   The expanded card stacks three pieces, in order:
+   - **Journey strip**: Today → school → credential → first paycheck. Icon in a
+     `--glass-surface-2` circle, 13px bold label over 10.5px `--muted-foreground`
+     sub, connectors `--primary` at 40%. 2x2 grid on mobile, one line on desktop.
+   - **Bento stats**: tiles on `--glass-surface-2`, radius `--radius-xl`. TWO
+     value sizes only, importance-ordered: First-year pay + Total cost 30/32
+     display, Time + Loan payoff 20/24 display. Values use the GRADIENT NUMERAL
+     treatment (below). Caption row is the standard 10px tracking caption.
+   - **Next-step strip**: full-width row. If the step is a program/school action
+     it is a live link to /colleges with a "College lookup" trailing label in
+     `--accent-subtle` and a `--primary` 45% border; otherwise it is static with
+     a "DO THIS IRL" tag in `--muted-foreground`.
+   Collapsed cards show First-year pay / Total cost / Time as caption-over-
+   gradient-number clusters (17px), same hierarchy, NO tile chrome.
+6. **Plan level row** (open, summary, locked states): numbered chip (size 32,
+   `--primary` fill when unlocked, `--glass-surface-2` when locked), "LEVEL n"
+   caption in `--accent-subtle`, title + subtitle, right side a progress ring
+   (same ring component as MatchRing, % centered) and chevron; locked rows show
+   a lock icon + "UNLOCKS AT 40% OF LEVEL n-1". Plus the "Add your own step"
+   input row (custom steps get the YOURS chip).
+
+### Gradient numeral treatment (new pattern — add to the design file)
+
+Every bento/collapsed stat value uses a text-fill gradient:
+`linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)`,
+clipped to the glyphs (background-clip: text), font `--font-display` extrabold.
+Create it once in Figma as a reusable style (fill the text layer with that
+2-stop linear gradient using the foreground and accent-subtle VARIABLES, 100°)
+so both modes resolve automatically. Do not hardcode the stops as hex.
+
+### Top 3 drag interaction (prototype spec)
+
+Press the grip: the row lifts (scale 1.03 + shadow `0 16px 40px` background
+mix). It follows the pointer; other rows slide out of the way (160ms ease).
+Release commits the order. Dropping a row into slot 1 ALSO sets it as the
+focus career (report/routes/plan follow). Keyboard: arrow keys on the focused
+grip reorder; reaching slot 1 sets focus the same way. Text selection is
+suppressed on the rows (select-none, no touch callout).
 7. **Report page** (the white page in 02): this is a light print document, the
    one place with fixed neutral grays; bind to the neutral primitives, not
    Semantic.Dark. Counselor-facing copy is final; transcribe exactly.

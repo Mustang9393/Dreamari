@@ -650,7 +650,10 @@ function PathTab(props: {
     const onUp = () => {
       const current = dragRef.current;
       if (!current) return;
-      if (current.over !== current.from) reorderTo(current.id, current.over);
+      if (current.over !== current.from) {
+        reorderTo(current.id, current.over);
+        if (current.over === 0) setFocusId(current.id);
+      }
       updateDrag(null);
     };
     window.addEventListener("pointermove", onMove);
@@ -722,7 +725,7 @@ function PathTab(props: {
                     title="Drag to reorder"
                     onPointerDown={(event) => onGripPointerDown(event, id, index)}
                     onKeyDown={(event) => {
-                      if (event.key === "ArrowUp") { event.preventDefault(); move(id, -1); }
+                      if (event.key === "ArrowUp") { event.preventDefault(); move(id, -1); if (index === 1) setFocusId(id); }
                       if (event.key === "ArrowDown") { event.preventDefault(); move(id, 1); }
                     }}
                     className="flex flex-none cursor-grab items-center rounded p-1 active:cursor-grabbing"
@@ -975,7 +978,7 @@ function MiniBento({ label, value }: { label: string; value: string }) {
   return (
     <span className="flex min-w-0 flex-col gap-[2px]">
       <span className="truncate text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="truncate text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(115deg, var(--foreground) 35%, var(--accent-subtle))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{value}</span>
+      <span className="truncate text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{value}</span>
     </span>
   );
 }
@@ -1016,7 +1019,7 @@ function BentoStat({ label, value, sub, size, span }: { label: string; value: st
       <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>{label}</span>
       <span
         className={`font-extrabold ${size === "lg" ? "text-[30px] leading-[32px]" : "text-[20px] leading-[24px]"}`}
-        style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(115deg, var(--foreground) 35%, var(--accent-subtle))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+        style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
       >
         {value}
       </span>
