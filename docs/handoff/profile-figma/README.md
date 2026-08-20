@@ -45,8 +45,9 @@ this one is superseded. Audience: the Figma agent (Codex), building in
 
 - The identity header holds: avatar (editable), name/grade/school, a
   **utility pill row** (archive icon + "Locker", gear + "Settings"), then the
-  streak + ReadinessMeter row. Utility pills stack ABOVE the stats,
-  right-aligned on desktop, left on mobile. The focus career's poster art
+  streak stat. Pills stack ABOVE the streak, right-aligned on desktop, left
+  on mobile. The ReadinessMeter does NOT live in the header: it sits in the
+  Plan tab's roadmap strip (the macro journey next to the micro steps). The focus career's poster art
   fills the header's right side behind a progress-blue legibility gradient.
 - **My Top 3** sits above the tab bar: full-size poster cards that act as
   career tabs. Tap = focus (report, routes, plan all follow). Drag the rank
@@ -77,7 +78,7 @@ unprefixed = mobile; one file covers both breakpoints. Decode
 | 02-career-report-overlay.html | Counselor-facing export overlay (chrome bar with section toggles + white report page) |
 | 03-path-routes-cards.html | Path tab: route-pill switcher + hero carousel (focused card, peeking neighbors, prev/next arrows) with in-card Stats/Fit/Life/Payoff tabs; Fit/Life/Payoff pane contents spec'd below and sourced from ROUTE_DETAILS |
 | 04-path-routes-compare.html | Compare view: category table with benefit tags + four single-measure charts |
-| 05-plan-levels.html | Plan tab: Level 1 open with ring, 2-3 locked, add-your-own-step, Change route link |
+| 05-plan-levels.html | Plan tab: "Your roadmap" strip (steps done + ReadinessMeter), Level 1 open with ring, 2-3 locked, add-your-own-step, Change route link, motivational closer |
 | 06-add-career-sheet.html | Add-to-Top-3 sheet: locker list with rings + Add buttons |
 | 07-swap-sheet.html | "Top 3 is full" swap sheet |
 | 08-locker.html | Locker full view (poster grid, Add/Swap, X back to Overview); Top 3 + tabs hidden |
@@ -119,7 +120,9 @@ Poster Card variants:
    in display face. Sizes in use: 26, 32, 34, 38, 44, 52. Tier labels per
    ruling 2.
 2. **ReadinessMeter**: "READINESS" caption, `46/100`, staged track with ticks
-   (Building 25 / Pipeline Ready 75 / Opted In 100).
+   (Building 25 / Pipeline Ready 75 / Opted In 100). Lives in the Plan tab's
+   "Your roadmap" strip, beside the overall steps-done stat (gradient numeral
+   `n/N steps done` + slim progress bar), not in the header.
 3. **Header** assembly: identity + utility pills (h32 pill, glass-surface-3
    fill, glass-border; active = primary border + accent-subtle text) + stats
    row + focus art with mask and the progress-blue gradient (90 degrees,

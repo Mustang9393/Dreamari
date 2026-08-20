@@ -265,16 +265,13 @@ export function ProfileExperience() {
                   <Settings className="h-3.5 w-3.5" /> Settings
                 </button>
               </span>
-              <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
-                <span className="flex items-center gap-[8px]">
-                  <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
-                  <span className="flex flex-col">
-                    <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
-                    <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
-                  </span>
+              <span className="flex items-center gap-[8px]">
+                <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
+                <span className="flex flex-col">
+                  <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
+                  <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
                 </span>
-                <ReadinessMeter value={STUDENT.readiness} />
-              </div>
+              </span>
             </div>
           </div>
         </section>
@@ -912,16 +909,30 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
     }
     return career.plan[0].id;
   };
+  const allTasks = focus.plan.flatMap((horizon) => tasksFor(focus, horizon.id));
+  const doneCount = allTasks.filter((task) => doneSet(focus.id).has(task.id)).length;
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
         <div>
           <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
-          <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Built for the {chosenRoute(focus).short} route</p>
+          <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
         <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route →</button>
       </div>
+
+      {/* Your roadmap: the macro journey (readiness) next to the micro one (steps) */}
+      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)]" style={GLASS}>
+        <span className="flex flex-col gap-[4px]">
+          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
+          <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
+          <span className="relative h-[6px] w-[180px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
+            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(Math.round((doneCount / Math.max(allTasks.length, 1)) * 100), 2)}%`, background: "var(--accent-subtle)" }} />
+          </span>
+        </span>
+        <ReadinessMeter value={STUDENT.readiness} />
+      </section>
       <div className="flex flex-col gap-[var(--space-3)]">
         {focus.plan.map((horizon, index) => {
           const unlocked = horizonUnlocked(focus, index);
@@ -1007,6 +1018,9 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           );
         })}
       </div>
+      <p className="pt-[var(--space-2)] text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        You&apos;re building something real. <span style={{ color: "var(--accent-subtle)" }}>Every step brings your future closer.</span>
+      </p>
     </div>
   );
 }
