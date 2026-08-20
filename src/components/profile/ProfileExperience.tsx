@@ -359,21 +359,21 @@ function FocusPicker({ top3, focus, setFocusId, onGoLocker }: { top3: string[]; 
             type="button"
             aria-pressed={isFocus}
             onClick={() => setFocusId(id)}
-            className="relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase transition-all md:aspect-[148/210] md:h-auto md:w-full"
-            style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)" }}
+            className="relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase transition-all md:aspect-[148/128] md:h-auto md:w-full"
+            style={{ containerType: "inline-size", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)" }}
           >
             <Image src={career.photo} alt="" fill sizes="(min-width: 768px) 340px, 148px" className="object-cover" />
             <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold md:top-3 md:left-3 md:size-8 md:text-[14px]" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
             {isFocus && (
               <span className="absolute top-2 right-2 rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.6px] md:top-3 md:right-3 md:px-[10px] md:py-[3px] md:text-[10px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>
             )}
-            <span className="absolute right-2 bottom-[64px] flex items-center justify-center rounded-full p-[3px] md:right-3 md:bottom-[92px]" style={{ background: "var(--glass-surface-3)" }}>
-              <span className="md:hidden"><MatchRing score={career.match} size={34} /></span>
-              <span className="hidden md:block"><MatchRing score={career.match} size={46} /></span>
-            </span>
-            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pt-[34px] pb-[10px] md:px-3 md:pt-[64px] md:pb-[16px]" style={{ backgroundImage: TEXT_SCRIM }}>
-              <span className="w-full text-[14px] leading-[16px] md:text-[24px] md:leading-[27px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
-              <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px] md:text-[11px] md:leading-[14px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
+            <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[4px] px-1 pt-[26px] pb-[10px] md:px-3 md:pb-[14px]" style={{ backgroundImage: TEXT_SCRIM }}>
+              <span className="mb-[2px] flex items-center justify-center rounded-full p-[3px]" style={{ background: "var(--glass-surface-3)" }}>
+                <span className="md:hidden"><MatchRing score={career.match} size={34} /></span>
+                <span className="hidden md:block"><MatchRing score={career.match} size={44} /></span>
+              </span>
+              <span className="w-full text-balance [overflow-wrap:normal]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)", fontSize: "clamp(13px, calc(8px + 4cqw), 22px)", lineHeight: 1.15 }}>{career.title}</span>
+              <span className="w-full font-semibold" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world], fontSize: "clamp(8px, calc(5px + 2cqw), 11.5px)", lineHeight: 1.35, letterSpacing: "0.6px" }}>{career.world}</span>
             </span>
           </button>
         );
@@ -383,14 +383,14 @@ function FocusPicker({ top3, focus, setFocusId, onGoLocker }: { top3: string[]; 
           key={`empty-${slot}`}
           type="button"
           onClick={onGoLocker}
-          className="flex h-[210px] w-[148px] flex-none cursor-pointer flex-col items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed transition-colors md:aspect-[148/210] md:h-auto md:w-full"
-          style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+          className="flex h-[210px] w-[148px] flex-none cursor-pointer flex-col items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed transition-colors md:aspect-[148/128] md:h-auto md:w-full"
+          style={{ containerType: "inline-size", borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-9 items-center justify-center rounded-full md:size-12" style={{ background: "var(--glass-surface-3)" }}>
             <Plus className="h-4 w-4 md:h-5 md:w-5" style={{ color: "var(--accent-subtle)" }} />
           </span>
-          <span className="px-3 text-[11.5px] leading-[15px] font-bold md:text-[14px] md:leading-[18px]" style={{ color: "var(--foreground)" }}>Add a career</span>
-          <span className="px-3 text-[10px] leading-[13px] font-semibold md:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Pick from your Locker</span>
+          <span className="px-3 font-bold" style={{ color: "var(--foreground)", fontSize: "clamp(11.5px, calc(8px + 2.4cqw), 15px)", lineHeight: 1.3 }}>Add a career</span>
+          <span className="px-3 font-semibold" style={{ color: "var(--muted-foreground)", fontSize: "clamp(10px, calc(7px + 1.8cqw), 12px)", lineHeight: 1.3 }}>Pick from your Locker</span>
         </button>
       ))}
     </div>

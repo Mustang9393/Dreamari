@@ -24,10 +24,13 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   The dev build needs the same idea: theme scope at html/body level, or
   portal containers inside the scope.
 - /profile Overview focus row: on md+ it is now a 3-column grid of
-  full-width posters (aspect 148/210, scaled type + 46px MatchRing);
-  mobile keeps the 148px scroll row. Empty Top-3 slots render a dashed
-  "Add a career / Pick from your Locker" placeholder that opens the
-  Locker tab (FocusPicker takes onGoLocker).
+  full-width cards (aspect 148/128 so the Career Report MATCH/ROUTE/
+  PLAN band stays above the fold); mobile keeps the 148px scroll row.
+  MatchRing is centered above the title inside the scrim column, and
+  card text scales with the card via container queries (containerType:
+  inline-size + clamp(...cqw) font sizes, text-balance titles). Empty
+  Top-3 slots render a dashed "Add a career / Pick from your Locker"
+  placeholder that opens the Locker tab (FocusPicker takes onGoLocker).
 - Validation: tsc clean both repos; both labs + /profile verified in
   browser (dark + light, dialog portal light/dark, mobile row).
 - NOT pushed. Worktree commit is on branch `shadcn` only.
