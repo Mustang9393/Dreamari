@@ -59,12 +59,12 @@ export function GetHiredChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="w-full max-w-[480px] rounded-[24px] border p-5 sm:p-6" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="w-full max-w-[480px] rounded-[24px] border p-6 sm:p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         {/* Stage header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: last ? WORLD_COLOR : "var(--primary-tint)" }}>{current.kicker}</div>
-            <div className="truncate text-[17px] leading-[22px] font-extrabold" style={{ color: "var(--foreground)" }}>{current.label}</div>
+            <div className="mt-[4px] truncate text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{current.label}</div>
           </div>
           <div className="flex flex-none items-center gap-[6px]">
             {STAGES.map((item, index) => (
@@ -81,10 +81,10 @@ export function GetHiredChapter() {
           </div>
         </div>
 
-        <p className="mt-1 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{current.line}</p>
+        <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{current.line}</p>
 
         {/* The stage window: fixed height, content swaps in place */}
-        <div key={current.id} className="mkt-stage mt-3 flex h-[248px] flex-col justify-center sm:h-[268px]">
+        <div key={current.id} className="mkt-stage mt-5 flex h-[280px] flex-col justify-center sm:h-[300px]">
           {stage === 0 && (
             <div className="grid h-full grid-cols-3 gap-2.5">
               {TOP3.map((card, index) => (
@@ -177,7 +177,7 @@ export function GetHiredChapter() {
         </div>
 
         {/* Progression controls */}
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-6 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setStage((value) => Math.max(0, value - 1))}
