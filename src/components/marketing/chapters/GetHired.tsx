@@ -28,9 +28,9 @@ const STAGES = [
 // Existing landing photos; titles set in each world's approved poster face
 // (Viaoda / Nunito / Lora), so the trio shows the design system's range.
 const TOP3 = [
-  { title: "Investment Banking", world: "Business & Money", photo: "/images/career-investment-banking.jpg" },
-  { title: "Neurosurgeon", world: "Health & Medicine", photo: "/images/career-neurosurgeon.jpg" },
-  { title: "Food Scientist", world: "Farming, Animals & Nature", photo: "/images/career-food-scientist.jpg" },
+  { title: "Investment Banking", world: "Business & Money", photo: "/images/app/poster-investment-banking.png" },
+  { title: "Airline Pilot", world: "Driving, Flying & Shipping", photo: "/images/app/poster-airline-pilot-alt.png" },
+  { title: "Food Scientist", world: "Farming, Animals & Nature", photo: "/images/app/poster-food-scientist.png" },
 ];
 
 // Mixed like the product's real plans: in-app reps AND real-world moves.
@@ -123,39 +123,41 @@ export function GetHiredChapter() {
           )}
 
           {stage === 2 && (
-            <div className="flex h-full flex-col rounded-[14px] border p-4" style={{ background: "var(--glass-surface-1)", borderColor: "var(--border)" }}>
-              {/* Conceptual, not a full resume: the shape of a strong high-school
-                 resume (volunteering, a summer job, clubs), not platform stats. */}
-              <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Jordan Rivera</span>
-                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Class of 2027</span>
-              </div>
-              <div className="flex flex-col gap-[5px] border-b py-2.5" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Experience</span>
-                <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                  <span className="font-semibold" style={{ color: "var(--foreground)" }}>Volunteer tutor · City Library</span>
-                  <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>120 hrs</span>
-                </span>
-                <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                  <span className="font-semibold" style={{ color: "var(--foreground)" }}>Camp counselor · YMCA</span>
-                  <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>Summer</span>
-                </span>
-              </div>
-              <div className="flex flex-col gap-[5px] border-b py-2.5" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Clubs and leadership</span>
-                <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                  <span className="font-semibold" style={{ color: "var(--foreground)" }}>DECA · Treasurer</span>
-                  <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>2 yrs</span>
-                </span>
-                <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>Robotics Club</span>
-              </div>
-              <div className="flex items-center justify-between gap-2 pt-2.5">
-                <span className="flex flex-wrap gap-1.5">
-                  {["Spreadsheets", "Public speaking", "First aid"].map((skill) => (
-                    <span key={skill} className="rounded-full px-2 py-[3px] text-[9px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>{skill}</span>
-                  ))}
-                </span>
-                <span className="flex-none rounded-full px-3 py-[6px] text-[10.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Send to employers</span>
+            <div className="relative h-full">
+              {/* Conceptual, deliberately unfinished: the sheet fades out at the
+                 bottom so it reads as "there's more," never as THE template. */}
+              <div className="flex h-full flex-col gap-0 overflow-hidden rounded-[14px] border p-4" style={{ background: "var(--glass-surface-1)", borderColor: "var(--border)", maskImage: "linear-gradient(#000 62%, transparent 99%)", WebkitMaskImage: "linear-gradient(#000 62%, transparent 99%)" }}>
+                <div className="flex items-baseline justify-between border-b pb-2" style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Jordan Rivera</span>
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Class of 2027</span>
+                </div>
+                <div className="flex flex-col gap-[5px] border-b py-2.5" style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Experience</span>
+                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
+                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>Volunteer tutor · City Library</span>
+                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>120 hrs</span>
+                  </span>
+                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
+                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>Camp counselor · YMCA</span>
+                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>Summer</span>
+                  </span>
+                </div>
+                <div className="flex flex-col gap-[5px] py-2.5">
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Clubs and leadership</span>
+                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
+                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>DECA · Treasurer</span>
+                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>2 yrs</span>
+                  </span>
+                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>Robotics Club</span>
+                </div>
+                {/* The trailing edge: hinted, half-faded structure — reads as
+                   "there's more of you on this page," never as a finished template */}
+                <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Skills</span>
+                <span className="mt-[6px] h-[6px] w-2/3 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
+                <span className="mt-[5px] h-[6px] w-1/2 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
+                <span className="mt-[10px] text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Awards</span>
+                <span className="mt-[6px] h-[6px] w-3/5 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
+                <span className="mt-[5px] h-[6px] w-3/4 rounded-full" style={{ background: "var(--glass-surface-2)" }} />
               </div>
             </div>
           )}
@@ -168,7 +170,7 @@ export function GetHiredChapter() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(transparent 30%, rgba(5,7,15,0.9))" }} />
               <div className="mkt-offer absolute inset-x-3 bottom-3 rounded-[14px] border p-3" style={{ background: "rgba(5,7,15,0.82)", borderColor: WORLD_COLOR }}>
                 <div className="text-[9.5px] font-bold tracking-[0.14em] uppercase" style={{ color: WORLD_COLOR }}>Hire-ready</div>
-                <div className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Your resume is out there.</div>
+                <div className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Your resume, ready to send.</div>
               </div>
             </div>
           )}
