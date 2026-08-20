@@ -12,6 +12,7 @@ import {
   Bookmark,
   Check,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Compass,
   Eye,
@@ -26,6 +27,7 @@ import {
   Printer,
   Settings,
   Shield,
+  Sparkles,
   Target,
   Trophy,
   Users,
@@ -77,6 +79,18 @@ export function ProfileExperience() {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [lockerPeek, setLockerPeek] = useState(false);
+  // "Plan updated" pulse on the Plan tab whenever focus or route changes.
+  const [planPing, setPlanPing] = useState(false);
+  const planPingMounted = useRef(false);
+  useEffect(() => {
+    if (!planPingMounted.current) {
+      planPingMounted.current = true;
+      return;
+    }
+    setPlanPing(true);
+    const timer = window.setTimeout(() => setPlanPing(false), 2600);
+    return () => window.clearTimeout(timer);
+  }, [focusId, routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
@@ -306,8 +320,11 @@ export function ProfileExperience() {
               { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
-            <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[7px] text-center text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
+            <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[7px] text-center text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
               {item.label}
+              {item.id === "plan" && planPing && (
+                <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
+              )}
             </button>
           ))}
         </div>
@@ -803,8 +820,8 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 
       {routeView === "cards" ? (
         <>
-        {/* Mobile switcher: all the alternatives at a glance, one tap away */}
-        <div className="-mt-[6px] flex gap-[var(--space-2)] md:hidden">
+        {/* Route switcher: all the alternatives at a glance, one tap away */}
+        <div className="-mt-[6px] flex gap-[var(--space-2)]">
           {focus.routes.map((routeOption, index) => (
             <button
               key={routeOption.id}
@@ -818,29 +835,55 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
               className="cursor-pointer rounded-full border px-[12px] py-[5px] text-[11.5px] font-bold"
               style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", borderColor: visibleRoute === index ? "var(--primary)" : "var(--glass-border)", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
             >
-              {routeOption.short}
+              <span className="flex items-center gap-[4px]">
+                {routeOption.recommended && <Sparkles className="h-3 w-3" style={{ color: visibleRoute === index ? "var(--primary-foreground)" : "var(--accent-subtle)" }} />}
+                {routeOption.short}
+              </span>
             </button>
           ))}
         </div>
-        <div
-          ref={railRef}
-          onScroll={(event) => {
-            const rail = event.currentTarget;
-            const step = rail.scrollWidth / focus.routes.length;
-            setVisibleRoute(Math.min(focus.routes.length - 1, Math.max(0, Math.round(rail.scrollLeft / step))));
-          }}
-          className="-mx-5 flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0"
-          style={{ touchAction: "pan-x pan-y" }}
-        >
-          {focus.routes.map((routeOption) => (
-            <RouteColumn
-              key={routeOption.id}
-              route={routeOption}
-              selected={chosenRoute(focus).id === routeOption.id}
-              onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
-              onGoPlan={onGoPlan}
-            />
-          ))}
+        <div className="relative">
+          <div
+            ref={railRef}
+            onScroll={(event) => {
+              const rail = event.currentTarget;
+              const step = rail.scrollWidth / focus.routes.length;
+              setVisibleRoute(Math.min(focus.routes.length - 1, Math.max(0, Math.round(rail.scrollLeft / step))));
+            }}
+            className="-mx-5 flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:-mx-[calc((100vw-100%)/2)] md:gap-[var(--space-4)] md:px-[calc((100vw-100%)/2)]"
+            style={{ touchAction: "pan-x pan-y" }}
+          >
+            {focus.routes.map((routeOption) => (
+              <RouteColumn
+                key={routeOption.id}
+                route={routeOption}
+                selected={chosenRoute(focus).id === routeOption.id}
+                onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
+                onGoPlan={onGoPlan}
+              />
+            ))}
+          </div>
+          {/* Desktop: previous / next route */}
+          <button
+            type="button"
+            aria-label="Previous route"
+            disabled={visibleRoute === 0}
+            onClick={() => { const card = railRef.current?.children[visibleRoute - 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
+            className="absolute top-1/2 left-1 z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next route"
+            disabled={visibleRoute >= focus.routes.length - 1}
+            onClick={() => { const card = railRef.current?.children[visibleRoute + 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
+            className="absolute top-1/2 right-1 z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
         </div>
         </>
       ) : (
@@ -1016,17 +1059,24 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
   return (
     <article
-      className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:w-auto md:max-w-none"
+      className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:grid md:w-[86%] md:max-w-[880px] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'icon_tabs'_'identity_pane'_'decide_pane']"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       {/* Identity */}
-      <div className="flex items-start justify-between gap-[var(--space-2)]">
+      <div className="flex items-start justify-between gap-[var(--space-2)] md:[grid-area:icon]">
         <span className="flex size-10 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)" }}>
           <Icon className="h-5 w-5" style={{ color: "var(--accent-subtle)" }} />
         </span>
-        {selected && <span className="rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
+        <span className="flex items-center gap-[6px]">
+          {route.recommended && (
+            <span className="flex items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+              <Sparkles className="h-3 w-3" /> Recommended
+            </span>
+          )}
+          {selected && <span className="rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
+        </span>
       </div>
-      <div className="flex flex-col gap-[3px]">
+      <div className="flex flex-col gap-[3px] md:self-start md:[grid-area:identity]">
         <span className={CAPTION} style={{ color: selected ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{route.type}</span>
         <span className="text-[16px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.program}</span>
         <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential} · {route.location}</span>
@@ -1035,7 +1085,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {/* In-card section tabs: the window below swaps, nothing stacks */}
       {detail && (
-        <div className="grid grid-cols-4 gap-[2px] rounded-[var(--radius-md)] p-[3px]" style={{ background: "var(--glass-surface-2)" }}>
+        <div className="grid grid-cols-4 gap-[2px] self-start rounded-[var(--radius-md)] p-[3px] md:[grid-area:tabs]" style={{ background: "var(--glass-surface-2)" }}>
           {(
             [
               { id: "stats", label: "Stats" },
@@ -1060,7 +1110,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {/* Time & money, in decision order: how long, what it costs, what it pays */}
       {(!detail || pane === "stats") && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-2)] rounded-[var(--radius-xl)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+        <div className="filters-reveal flex flex-col gap-[var(--space-2)] self-start rounded-[var(--radius-xl)] bg-[var(--glass-surface-1)] p-[var(--space-3)] md:w-full md:gap-[var(--space-4)] md:bg-transparent md:p-0 md:pt-[var(--space-2)] md:[grid-area:pane]">
           <MiniBento label="Time" value={route.duration} />
           <MiniBento label="Total cost" value={route.cost.split(",")[0]} />
           <MiniBento label="First-year pay" value={route.salary.split(",")[0].replace(/ first year/i, "")} />
@@ -1068,7 +1118,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
       )}
 
       {detail && pane === "fit" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
           <span className="w-fit rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{detail.fit.tagline}</span>
           {detail.fit.acceptancePct !== undefined ? (
             <div className="flex flex-col gap-[4px]">
@@ -1093,7 +1143,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         </div>
       )}
       {detail && pane === "life" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
           <ul className="flex list-disc flex-col gap-[3px] pl-4 text-[11.5px] leading-[16px]" style={{ color: "var(--foreground)" }}>
             {detail.life.clubs.map((club) => <li key={club}>{club}</li>)}
           </ul>
@@ -1102,7 +1152,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
         </div>
       )}
       {detail && pane === "payoff" && (
-        <div className="filters-reveal flex flex-col gap-[var(--space-3)]">
+        <div className="filters-reveal flex flex-col gap-[var(--space-3)] md:self-start md:[grid-area:pane]">
           <div className="flex items-baseline gap-[var(--space-2)]">
             <span className="text-[24px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time}</span>
             <span className="rounded-full px-[8px] py-[2px] text-[9.5px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>{detail.payoff.tag}</span>
@@ -1142,7 +1192,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
       )}
 
       {/* Decide */}
-      <div className="mt-auto flex flex-col gap-[var(--space-2)]">
+      <div className="mt-auto flex flex-col gap-[var(--space-2)] md:self-end md:[grid-area:decide]">
         <button
           type="button"
           onClick={selected ? onGoPlan : onSelect}
@@ -1194,6 +1244,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
           {routes.map((route) => (
             <span key={route.id} className="border-b p-[var(--space-3)] text-[13px] font-extrabold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-display)", color: route.id === selectedId ? "var(--accent-subtle)" : "var(--foreground)" }}>
               {route.short}
+              {route.recommended && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>Recommended</span>}
               {route.id === selectedId && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           ))}

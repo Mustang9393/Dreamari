@@ -18,6 +18,7 @@ export type PathwayRoute = {
   salary: string;
   loanPayoff: string;
   nextStep: string;
+  recommended?: boolean; // Dreamari's suggested route for this student
   short: string; // short label for the compare charts
   // numeric midpoints for the compare charts
   costMidK: number;
@@ -93,7 +94,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
         payoffYears: 5,
       },
       {
-        id: "ib-uni-state", short: "State flagship",
+        id: "ib-uni-state", recommended: true, short: "State flagship",
         type: "University",
         program: "Economics at your state flagship",
         location: "In-state",
@@ -157,7 +158,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     ],
     routes: [
       {
-        id: "pilot-part141", short: "Flight school",
+        id: "pilot-part141", recommended: true, short: "Flight school",
         type: "Flight School",
         program: "Part 141 accelerated flight academy",
         location: "Phoenix, AZ (or nearest academy)",
@@ -252,7 +253,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
         payoffYears: 2.5,
       },
       {
-        id: "pe-uni-state", short: "State flagship",
+        id: "pe-uni-state", recommended: true, short: "State flagship",
         type: "University",
         program: "Honors Finance at your state flagship",
         location: "In-state",

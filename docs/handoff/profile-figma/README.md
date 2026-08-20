@@ -57,12 +57,13 @@ this one is superseded. Audience: the Figma agent (Codex), building in
 - **Tabs: Overview / Path / Plan / Resume.** Locker and Settings are NOT
   tabs: opening either replaces everything under the header (Top 3 and tab
   bar hidden) with a full view that closes back to Overview.
-- **Path** = the 3 alternate routes side by side (desktop columns, mobile
-  snap carousel with a route-name pill switcher), plus a Compare view. Each
-  card carries its own in-card section tabs (Stats / Fit / Life / Payoff)
-  under the identity block; tapping swaps ONE content window in place, so a
-  card never stacks open sections or grows past a single pane. Cross-route
-  comparison of a single dimension lives in the Compare view.
+- **Path** = a ONE-AT-A-TIME route carousel on every breakpoint: the focused
+  card centered with neighbors peeking in from the edges, route-name pills
+  above (synced both ways), and floating prev/next chevrons on desktop.
+  Cards = deep-dive one route; the Compare view owns side-by-side. Each card
+  carries its own section tabs (Stats / Fit / Life / Payoff); tapping swaps
+  ONE content window in place, so a card never stacks sections. On desktop
+  the card interior is two-column: identity + CTA left, tabs + pane right.
 - **Plan** = the levels for the chosen route.
 
 ## The captures (12 states, desktop DOM, responsive classes included)
@@ -75,7 +76,7 @@ unprefixed = mobile; one file covers both breakpoints. Decode
 | --- | --- |
 | 01-overview-default.html | Header, Top 3 (2 careers + Add slot), collapsed Locker peek, tabs, Career Report with bento stat tiles + bento receipts, next action, readiness chips |
 | 02-career-report-overlay.html | Counselor-facing export overlay (chrome bar with section toggles + white report page) |
-| 03-path-routes-cards.html | Path tab: three route columns, each with in-card Stats/Fit/Life/Payoff tabs and the Stats pane showing (identity, pitch, Time/Cost/Pay, CTA, next step); Fit/Life/Payoff pane contents are spec'd below and sourced from ROUTE_DETAILS |
+| 03-path-routes-cards.html | Path tab: route-pill switcher + hero carousel (focused card, peeking neighbors, prev/next arrows) with in-card Stats/Fit/Life/Payoff tabs; Fit/Life/Payoff pane contents spec'd below and sourced from ROUTE_DETAILS |
 | 04-path-routes-compare.html | Compare view: category table with benefit tags + four single-measure charts |
 | 05-plan-levels.html | Plan tab: Level 1 open with ring, 2-3 locked, add-your-own-step, Change route link |
 | 06-add-career-sheet.html | Add-to-Top-3 sheet: locker list with rings + Add buttons |
@@ -162,8 +163,17 @@ Poster Card variants:
    for this path"; unselected CTA "Continue with {short}". Next-step footer
    line links to /colleges when the step is a program/school action,
    otherwise carries a "DO THIS IRL" tag.
-8. **Route switcher pills** (mobile only): route.short pills above the
-   carousel; active pill = primary fill.
+8. **Route switcher pills** (all breakpoints): route.short pills above the
+   carousel, active pill = primary fill, synced with the scroll position; the
+   recommended route's pill carries a sparkle icon. Desktop adds floating
+   prev/next chevron buttons (size 40 glass circles, 30% opacity at ends).
+   One route per career is RECOMMENDED (data flag): its card gets a sparkle
+   "Recommended" chip (accent-subtle 18% fill) next to "Your path", and its
+   Compare column header gets the same tag. The rail is full-bleed to the
+   viewport with padding back to the content edge, so card 1 aligns with the
+   section header and peeking neighbors are never clipped.
+   PLAN PING: whenever focus or the chosen route changes, the Plan tab shows
+   a brief "UPDATED" chip (accent-subtle fill, ~2.6s, reveal animation).
 9. **Compare table**: first column category labels, one column per route,
    value + benefit tag chip (primary 18% fill, accent-subtle text) per cell,
    selected column washed primary 7% with a YOURS chip.
