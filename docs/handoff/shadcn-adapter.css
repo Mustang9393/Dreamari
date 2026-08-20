@@ -19,7 +19,7 @@
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --accent-foreground: var(--foreground);
+  --accent-foreground: var(--primary-foreground); /* accent is brand blue since 2026-08-19; needs the white pairing, not --foreground (dark-on-blue in light mode) */
   --destructive-foreground: #f4f7ff; /* VERIFY landed as a variable (#F04438 correction pair) */
 
   /* --- form + focus --- */
@@ -80,7 +80,7 @@
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --accent-foreground: var(--foreground);
+  --accent-foreground: var(--primary-foreground);
   --input: var(--glass-surface-2);
   --ring: color-mix(in srgb, var(--primary) 50%, transparent);
   --sidebar: var(--card);

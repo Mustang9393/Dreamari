@@ -192,6 +192,16 @@
   --muted-foreground: #4a4f6d; /* neutral.400 */
   --border: #b0b4c7; /* neutral.200 */
   --primary: #1e4fcc; /* blue.700 */
+  /* Light completions 2026-08-20: these five inherited their DARK values
+     (white-alpha fills + near-white text = illegible on light). Mirrored to
+     the light block's black-alpha convention / blue.700 family; author the
+     same values in Figma Semantic.Light. */
+  --secondary: #00000017; /* black-alpha.9 (mirror of dark white-alpha.9) */
+  --secondary-foreground: #05070f; /* neutral.900 */
+  --muted: #00000008; /* black-alpha.3 */
+  --glass-border: #00000017; /* black-alpha.9 */
+  --accent: #1e4fcc; /* blue.700, follows primary */
+  --accent-subtle: #1e4fcc; /* blue.700; dark's #3894ff fails contrast on neutral.50 */
   --glass-surface-1: #00000008; /* black-alpha.3 */
   --glass-surface-2: #00000017; /* black-alpha.9 */
   --glass-surface-3: #05081466; /* black-alpha.40 */
