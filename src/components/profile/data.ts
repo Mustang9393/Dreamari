@@ -114,7 +114,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
         program: "Business at community college, transfer junior year",
         location: "Local",
         duration: "2 + 2 yrs",
-        cost: "$6K–20K, then in-state",
+        cost: "$6K–20K, then in-state tuition for the last 2 yrs",
         credential: "BS via transfer",
         salary: "$70K–95K first year",
         loanPayoff: "~1–2 yrs",

@@ -6,6 +6,33 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 My Path redesign: journey + bento + levels
+
+- Route cards (expanded): a journey strip (Today → school → credential →
+  first paycheck, icons + connectors) followed by keynote-style bento
+  stats — two sizes only, importance-ordered (First-year pay and Total
+  cost at 30px with a foreground→accent-subtle gradient clip; Time and
+  Loan payoff at 20px), then a Next-step strip: program/school steps
+  link to /colleges ("College lookup →"), real-world steps are marked
+  "Do this IRL". Collapsed cards show pay/cost/time with the same
+  caption-over-gradient-number hierarchy, no tile chrome. CC-transfer
+  cost copy clarified ("then in-state tuition for the last 2 yrs" as a
+  sub line; collapsed shows the number only).
+- Plan horizons are now Levels: numbered chip + "LEVEL n" caption,
+  progress ring (MatchRing) instead of the 5px bar, lock copy
+  "Unlocks at 40% of Level n-1".
+- Top 3 rows: bigger thumbs (64x46), MatchRing on sm+, rank without
+  hashtags. DRAG REWRITE: pressed row lifts (scale+shadow) and follows
+  the pointer; other rows slide; commit on release. Window-level
+  pointermove/up listeners + a dragRef (pointer events outrun React
+  state; grip-only handlers lost the drag when capture failed) —
+  verified end-to-end in browser. select-none + touch-callout none
+  kill the long-press selection bug.
+- Tried and REMOVED per user: 1-2-3 path spine ("too much clutter"),
+  bento boxes in collapsed cards ("just the hierarchy").
+- Figma pack captures 03-06 regenerated (temp /api/dev-capture route
+  re-added then deleted).
+
 ### 2026-08-20 theme-lab inventory + profile focus grid
 
 - /theme-lab (v4) now opens with a "What the dev build needs" inventory:
