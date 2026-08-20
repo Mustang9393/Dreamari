@@ -879,6 +879,23 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
+  // Tab-discovery nudge: runs once, only when the tabs are actually in view,
+  // and moves THE underline (the static one hides while it travels).
+  const [hint, setHint] = useState<"idle" | "run" | "done">("idle");
+  const tabBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!selected || !detail || hint !== "idle" || !tabBarRef.current) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setHint("run");
+        window.setTimeout(() => setHint("done"), 1900);
+        observer.disconnect();
+      }
+    }, { threshold: 0.9 });
+    observer.observe(tabBarRef.current);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, hint]);
   const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
@@ -910,8 +927,8 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
 
       {/* Hairline text tabs */}
       {detail && (
-        <div className="relative flex gap-[var(--space-5)] self-start border-b md:w-full md:[grid-area:tabs]" style={{ borderColor: "var(--glass-border)" }}>
-          {selected && <span aria-hidden className="tab-hint" />}
+        <div ref={tabBarRef} className="relative flex gap-[var(--space-5)] self-start border-b md:w-full md:[grid-area:tabs]" style={{ borderColor: "var(--glass-border)" }}>
+          {hint === "run" && <span aria-hidden className="tab-hint" />}
           {(
             [
               { id: "stats", label: "Stats" },
@@ -926,7 +943,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
               aria-pressed={pane === item.id}
               onClick={() => setPane(item.id)}
               className="-mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[10.5px] font-bold tracking-[1px] uppercase"
-              style={{ borderColor: pane === item.id ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
+              style={{ borderColor: pane === item.id && !(hint === "run" && pane === "stats") ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {item.label}
             </button>

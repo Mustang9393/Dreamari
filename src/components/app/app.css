@@ -110,11 +110,10 @@
    takes over. Wordless "these are tabs" hint; runs once, never loops. */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes tab-hint-nudge {
-    0% { opacity: 1; transform: translateX(0); }
-    45% { opacity: 1; transform: translateX(52px); }
-    60% { opacity: 1; transform: translateX(52px); }
-    92% { opacity: 1; transform: translateX(0); }
-    100% { opacity: 0; transform: translateX(0); }
+    0% { transform: translateX(0); }
+    45% { transform: translateX(52px); }
+    58% { transform: translateX(52px); }
+    100% { transform: translateX(0); }
   }
   .tab-hint {
     position: absolute;
@@ -124,7 +123,7 @@
     width: 34px;
     border-radius: 2px;
     background: var(--primary);
-    animation: tab-hint-nudge 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.9s 1 both;
+    animation: tab-hint-nudge 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s 1 both;
     pointer-events: none;
   }
 }
