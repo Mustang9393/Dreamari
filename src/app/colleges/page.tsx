@@ -1,0 +1,73 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { GraduationCap, MapPin, Search } from "lucide-react";
+import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
+import { DesktopNavigation, MobileNav, QuickLinksMenu } from "@/components/app/chrome";
+import "@/components/marketing/tokens.css";
+import "@/components/app/app.css";
+
+export const metadata: Metadata = {
+  title: "College Lookup — Dreamari",
+  description: "Find schools and programs that fit your route. In the works.",
+};
+
+// College Lookup shell (feature in the works). Reachable from route cards on
+// /profile and from the quick-links menu; deliberately NOT a primary navbar
+// tab until the full feature ships.
+const PREVIEW = [
+  { name: "State Flagship University", meta: "In-state · 4 yr", tag: "$9K/yr in-state" },
+  { name: "City Community College", meta: "Local · 2 yr", tag: "$3K/yr" },
+  { name: "Technical Institute", meta: "Regional · 18 mo", tag: "Certificate" },
+];
+
+export default function CollegesPage() {
+  return (
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
+      <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="" src="/images/app/background-space.svg" className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
+        </div>
+
+        <DesktopNavigation active="Profile" />
+        <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+          <Link href="/" className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</Link>
+          <QuickLinksMenu />
+        </header>
+
+        <main className="relative z-10 mx-auto flex w-full max-w-[860px] flex-col items-center gap-[var(--space-6)] px-5 pt-[48px] pb-[140px] text-center md:pt-[96px]">
+          <span className="rounded-full border px-[14px] py-[5px] text-[10px] font-bold tracking-[0.6px] uppercase" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>In the works</span>
+          <h1 className="text-[34px] leading-[38px] font-extrabold sm:text-[44px] sm:leading-[48px]" style={{ fontFamily: "var(--font-display)" }}>College Lookup</h1>
+          <p className="max-w-[420px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Real schools and programs, matched to your route and budget.</p>
+
+          <div className="flex h-12 w-full max-w-[480px] items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] opacity-70" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+            <Search className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
+            <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Search schools, programs, cities</span>
+          </div>
+
+          <div className="grid w-full grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+            {PREVIEW.map((school) => (
+              <div key={school.name} className="flex flex-col items-start gap-[var(--space-2)] rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left opacity-80" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+                <GraduationCap className="h-5 w-5" style={{ color: "var(--accent-subtle)" }} />
+                <span className="text-[14px] leading-[18px] font-bold">{school.name}</span>
+                <span className="flex items-center gap-[4px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <MapPin className="h-3 w-3" /> {school.meta}
+                </span>
+                <span className="rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>{school.tag}</span>
+              </div>
+            ))}
+          </div>
+
+          <Link href="/profile" className="rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
+            Back to My Profile
+          </Link>
+        </main>
+
+        <MobileNav active="Profile" />
+      </div>
+    </>
+  );
+}

@@ -25,6 +25,7 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
   { label: "Profile", href: "/profile" },
+  { label: "Colleges", href: "/colleges" },
 ] as const;
 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {

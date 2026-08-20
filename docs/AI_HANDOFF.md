@@ -6,6 +6,29 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 /profile round 2: visual-first, compare charts, /colleges (v4 LOCAL)
+
+- Copy pass: no paragraphs, no em dashes in student-facing text. Evidence
+  sentences became RECEIPT TILES (icon + big value + micro label, e.g.
+  "2x / IB sim finished"); readiness hint is a chip; empty states are one
+  line each; horizon subtitles are 1-3 words.
+- Progressive disclosure: route cards collapse to type + program + Cost/
+  Pay ministats, expand on select (full facts + "Find schools" CTA);
+  Plan opens only the current horizon, others are summary rows with a
+  progress sliver or a lock chip.
+- Compare view: Cards|Compare toggle on Routes. Four labeled single-hue
+  bar charts (Total cost / Years to job / First-year pay / Loan payoff),
+  "lower/higher is better" captions, value labels on every bar, selected
+  route at full accent, others 45%; routes carry short names + numeric
+  midpoints in data.ts (dataviz-skill compliant: one measure per chart,
+  identity via row label not hue).
+- Locker: its own tab (2-4 col poster grid w/ interest + tier + Add/
+  Swap-in) AND a compact poster strip LAST on Overview.
+- /colleges NEW: College Lookup shell ("In the works" badge, disabled
+  search, preview cards). CTAs from expanded route cards + quick-links
+  menu. Deliberately NOT a primary navbar tab until the feature ships
+  (recommendation given to user).
+
 ### 2026-08-20 /profile polish: photo avatar, immersive header, de-clutter (v4 LOCAL)
 
 - Avatar is now a photo (avatar-jordan.jpg) with an edit pencil badge —
