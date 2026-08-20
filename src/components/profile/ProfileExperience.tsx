@@ -705,7 +705,7 @@ function OverviewTab({
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Career Report · Today</span>
           <span className="text-[11px] font-semibold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
         </div>
-        <p className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</p>
+        <p key={focus.id} className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
 
         <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
           <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
@@ -821,7 +821,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       {/* Three ALTERNATE ways in, side by side */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <div>
-          <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ways into {focus.title}</h2>
+          <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
           <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{focus.routes.length} alternate routes · pick the one that fits your goals, budget, and lifestyle</p>
         </div>
         <div className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[3px]" style={GLASS}>
@@ -952,7 +952,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
     <div className="flex flex-col gap-[var(--space-3)]">
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
         <div>
-          <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Plan · {focus.title}</h2>
+          <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
           <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Built for the {chosenRoute(focus).short} route</p>
         </div>
         <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route →</button>

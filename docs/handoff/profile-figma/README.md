@@ -166,7 +166,11 @@ Poster Card variants:
    (type icon + type), route.short as a 30/38px display headline set with the
    build flow's ink-bleed InkText, pitch as the deck, then a hairline-topped
    meta block (program / credential · location). Masthead and panes reveal
-   with the .seq-reveal stagger (fade-slide-up, 50ms steps); the Payoff pane
+   with the .seq-reveal stagger (fade-slide-up, 50ms steps); the ink-bleed
+   word effect (build flow's InkText) is reserved for the identity-rewrite
+   moments only: the route.short card headline, the Overview report title,
+   and the "Ways into X" / "Plan · X" headings, all re-inking on focus
+   change and never on tab or pane switches; the Payoff pane
    height (min 280/330px) is the fixed content-window height for all panes,
    with Stats as the default pane (three pull-numbers spread to fill).
    Prev/next carousel arrows sit OUTSIDE the content frame in the page
