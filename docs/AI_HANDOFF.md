@@ -6,6 +6,34 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-20
 
+### 2026-08-20 My Path full rethink (Replit parity) + IA rework
+
+- ROUTE_DETAILS added to profile data (data.ts): per-route pitch, fit
+  (tagline/acceptance/aid/targets/placement), student life (clubs/feel/
+  abroad), loan-payoff math (time/avg loan/salary-by-year with bonus
+  notes/monthly budget split/takeaway), and compare benefit tags, for
+  all 8 routes of the three default careers. Locker-extra careers
+  degrade gracefully (sections hidden until authored).
+- IA: My Top 3 (full-size poster cards) hoisted ABOVE the tab bar as
+  the global context switcher; tabs are now Overview / Path / Plan /
+  Locker / Resume (Path and Plan split, mirroring the Replit's
+  My Pathways / My Plan). Cards: tap = focus everything, drag rank
+  chip horizontally to reorder (drop in slot 1 = focus), X removes,
+  dashed slot opens the in-place Add-from-Locker sheet (modal list
+  with rings; never navigates to the Locker tab). FOCUS badge + X
+  share one top-right cluster.
+- Path tab: routes render as three side-by-side COLUMNS (mobile: snap
+  carousel) with type icon, pitch, boxless gradient money numbers, and
+  three disclosures (good fit / student life / loan payoff incl.
+  year-by-year tiles and budget bar). Selected column: YOUR PATH chip,
+  CTA becomes "Open your plan for this path" -> Plan tab. Compare view:
+  Replit-style category table with per-cell benefit tags + the four
+  charts. Journey strip / bento expanded card / Top 3 rows RETIRED.
+- Figma pack: captures renumbered 01-10 (new: 05 plan levels, 06 add
+  sheet; preview sheet flow removed), README IA section added.
+- NEXT (user-directed): move Locker out of the tab bar into a header
+  icon cluster with profile settings.
+
 ### 2026-08-20 My Path polish round 2
 
 - Gradient numerals now fade across the FULL value width

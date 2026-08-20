@@ -26,6 +26,19 @@ and components. Nothing here requires a new token.
    code (lightened from neutral.800 `#0e0f18` after theme review). Re-point the
    Figma `card` variable to match; do not fork a second variable.
 
+## Information architecture (2026-08-20 rework)
+
+My Top 3 is the GLOBAL context switcher: full-size poster cards above the tab
+bar; tapping a card refocuses every tab below it (cards are tabs for careers).
+Rank chips drag horizontally to reorder; dropping into slot 1 sets focus; X
+removes; the dashed slot opens the Add sheet in place (never a tab switch).
+Tabs are Overview / Path / Plan / Locker / Resume. Path = the three ALTERNATE
+routes side by side (desktop 3 columns, mobile snap carousel) with the full
+Replit information set per route (pitch, money numbers, good-fit, student
+life, loan-payoff math) behind per-card disclosures, plus the Compare table
+with benefit tags. Plan = the levels. The old journey strip, expanded bento
+card, and row-list Top 3 are RETIRED.
+
 ## The captures (desktop DOM, responsive classes included)
 
 Each file is the full rendered `.marketing-v2` subtree of http://localhost:3000/profile
@@ -36,15 +49,16 @@ one file yields both breakpoints. Ignore `<script>`/Next.js internals; decode
 
 | File | State it freezes |
 | --- | --- |
-| 01-overview-default.html | Overview tab: header, tab bar, My Top 3 cards (2 careers + "Add a career" dashed slot), Career Report card, receipts, next-action banner, readiness chips, Locker strip |
+| 01-overview-default.html | Default: header, global My Top 3 (2 careers + Add slot) ABOVE the five tabs, Overview tab with Career Report, receipts, next action, readiness chips, Locker strip |
 | 02-career-report-overlay.html | Export overlay open: dark chrome bar (Engagement/Pathway/Plan toggles, Print) + the white counselor-facing report page |
-| 03-path-top3-routes-plan.html | My Path tab: My Top 3 rows (grip, rank, thumb, match ring, focus target, remove, open slot row), Routes cards view (one expanded: journey strip + bento stats + next-step strip), Plan levels (Level 1 open with ring, 2–3 locked) |
-| 04-path-routes-compare.html | My Path with Routes toggled to Compare: four single-measure bar charts |
-| 05-top3-preview-sheet.html | Career preview sheet open over My Path (poster hero, receipts, Set focus) |
-| 06-swap-sheet.html | "Top 3 is full" swap sheet over the Locker (three Replace rows + Never mind) |
-| 07-locker.html | Locker tab: poster grid with match rings and Add/Swap actions |
-| 08-resume.html | Resume tab (stub state) |
-| 09-overview-empty.html | Overview with no Top 3: "Pick a Top 3 to start" empty state |
+| 03-path-routes-cards.html | Path tab: three alternate route COLUMNS side by side (identity + pitch, pay/cost/time/payoff numbers, three disclosure sections, Continue CTA, next step) |
+| 04-path-routes-compare.html | Path tab, Compare view: category table with benefit tags + the four single-measure charts |
+| 05-plan-levels.html | Plan tab: Level 1 open with progress ring, Levels 2-3 locked, add-your-own-step row, "Change route" link |
+| 06-add-career-sheet.html | "Add to your Top 3" sheet open over the page: locker list with rings and Add buttons (no tab switch) |
+| 07-swap-sheet.html | "Top 3 is full" swap sheet (three Replace rows + Never mind) |
+| 08-locker.html | Locker tab: poster grid with match rings and Add/Swap actions |
+| 09-resume.html | Resume tab (stub state) |
+| 10-overview-empty.html | No Top 3: three dashed Add slots above the tabs + "Pick a Top 3 to start" |
 
 ## Typography
 
