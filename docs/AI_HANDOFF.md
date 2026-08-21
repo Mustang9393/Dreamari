@@ -6,6 +6,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 FINAL DEPLOYMENT MAP (corrected + verified by curl)
+
+- dreamari.vercel.app = PRODUCTION: full app incl. Daily Drop. Source:
+  github.com/Mustang9393/Dreamari, branch main.
+- dreamari-demo.vercel.app = MAISHA'S DEMO: rebuilt deterministically as
+  main MINUS Daily Drop MINUS flow theme toggle — nothing else differs.
+  Source: github.com/Mustang9393/dreamari-demo (repo renamed from
+  dreamari-main), branch main; also mirrored as Dreamari branch "demo"
+  (rebuild recipe: reset demo to main, strip drop from HomeExperience,
+  git rm motion-lab route+components, remove ThemeToggle).
+- dreamari-ab.vercel.app = A/B experiments (parked per user).
+- Vercel notes: project renamed dreamari-main->dreamari-demo via REST API
+  (CLI has no rename); the <name>.vercel.app domain does NOT follow a
+  rename — added via POST /v10/projects/:id/domains. CLI git-authored
+  deploys get REJECTED ("not a member of the team") because commit author
+  email != Vercel account — deploy from a git-less tree (git archive ->
+  vercel link --project dreamari-demo -> vercel deploy --prod). Archive
+  branches on dreamari-demo repo: with-daily-drop (pre-strip snapshot),
+  four-tab-experiment.
+
+
 ### 2026-08-21 Joshua content order + backgrounds + wide-screen type (DEPLOYED)
 
 - Explore Browse rails = Joshua's canonical list verbatim: merged rail
