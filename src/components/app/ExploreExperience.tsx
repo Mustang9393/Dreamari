@@ -281,12 +281,14 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
           <button
             type="button"
             className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--border)" }}
+            /* solid dark glass in BOTH themes: the faint white-alpha surface
+               disappeared against the photos (founder feedback) */
+            style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
           >
-            <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--secondary-foreground)" }}>
+            <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
               Play Game
             </span>
-            <Play aria-hidden className="h-4 w-4" style={{ color: "var(--secondary-foreground)" }} />
+            <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
           </button>
           <button
             type="button"
@@ -395,6 +397,9 @@ function ForYouFace() {
          mobile; the Env Card frame (390×672) on desktop. */}
       <div
         ref={feedRef}
+        /* night scene: the reel is always photo-on-dark; its ui keeps dark
+           tokens in light mode (see tokens.css) */
+        data-night-scene
         className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
       >
         {FOR_YOU_REEL.map((career, index) => (
@@ -457,7 +462,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
       <DesktopNavigation active="Explore" />
 
       {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-center gap-[20px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
+      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-center gap-[20px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
         <button
           type="button"
           onClick={() => switchTab("foryou")}

@@ -193,6 +193,22 @@ html.light .marketing-v2.themeable [data-space-backdrop] {
   display: none;
 }
 
+/* Night scenes (the For You photo reel and its floating chrome) keep the
+   DARK ui tokens in light mode — their ground is always a full-bleed photo
+   with dark scrims, so flipping text to ink breaks them. Values mirror the
+   .marketing-v2 dark scope exactly. */
+html.light .marketing-v2.themeable [data-night-scene] {
+  --foreground: #f4f7ff;
+  --background: #05070f;
+  --muted-foreground: #ffffff9e;
+  --border: #ffffff17;
+  --secondary-foreground: #f4f7ff;
+  --glass-surface-1: #ffffff08;
+  --glass-surface-2: #ffffff17;
+  --glass-surface-3: #0c1023cc;
+  --glass-border: #ffffff17;
+}
+
 /* Signal banner wash: the dark theme's screen-blended purple turns muddy
    violet-gray over a light page — light gets a plain pale sweep instead.
    !important because the dark gradient is an inline style. */

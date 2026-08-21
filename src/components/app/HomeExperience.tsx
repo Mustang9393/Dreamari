@@ -556,7 +556,9 @@ export function HomeExperience() {
                 fontFamily: "var(--font-body)",
                 borderColor: "var(--glass-border)",
                 background: "linear-gradient(90deg, var(--accent), var(--primary))",
-                color: "var(--foreground)",
+                /* white in BOTH themes: --foreground flips to ink in light,
+                   which is unreadable on the blue gradient */
+                color: "#FFFFFF",
                 filter: "drop-shadow(0px 8px 9px rgba(31,82,255,0.32))",
               }}
             >
