@@ -556,6 +556,28 @@ body {
   :root { --vz: 1.25; }
 }
 
+/* Light-mode CTA remap (2026-08-22): the component.cta tokens ship dark-theme
+   values only (light "foreground surface" + white-alpha glass), which is
+   white-on-white in light mode — the flow's Previous button was invisible.
+   In chosen-light the foreground surface IS ink; secondary mirrors to the
+   black-alpha convention. Scoped to html.light (explicit choice) so the
+   pre-hydration default (no class = dark) never flashes these. Author the
+   same values in the token source as component.cta light variants. */
+/* body paints the ground behind every surface (overscroll, short pages) */
+html.light body { background: #f4f7ff; }
+
+html.light {
+  --component-cta-primary-background: #05070f;
+  --component-cta-primary-text: #f4f7ff;
+  --component-cta-primary-hover-background: rgb(12 16 35 / 0.85);
+  --component-cta-primary-hover-text: #f4f7ff;
+  --component-cta-secondary-background: rgb(0 0 0 / 0.06);
+  --component-cta-secondary-border: rgb(0 0 0 / 0.16);
+  --component-cta-secondary-text: #05070f;
+  --component-cta-secondary-hover-background: rgb(0 0 0 / 0.1);
+  --component-cta-secondary-hover-text: #05070f;
+}
+
 /* Zoom-compensated viewport heights (body prefix outranks the utilities
    regardless of source order; --vz is 1 when no zoom applies). */
 body .h-dvh { height: calc(100dvh / var(--vz)); }

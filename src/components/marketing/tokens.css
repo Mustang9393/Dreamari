@@ -186,8 +186,12 @@
 }
 
 /* Schools/Enterprise audience: light mode (Semantic.Light), resolved the same way. */
+/* html.light themes only surfaces that opt in with `themeable` — the LANDING
+   deliberately stays dark (its chapters are art-directed dark-only; a light
+   pass there is real design work, not a token flip). */
 .marketing-v2 .theme-light,
-.marketing-v2.theme-light {
+.marketing-v2.theme-light,
+html.light .marketing-v2.themeable {
   --background: #f4f7ff; /* neutral.50 */
   --foreground: #05070f; /* neutral.900 */
   --card: #d8dbe8; /* neutral.100 */
@@ -204,6 +208,32 @@
   --glass-border: #00000017; /* black-alpha.9 */
   --accent: #1e4fcc; /* blue.700, follows primary */
   --accent-subtle: #1e4fcc; /* blue.700; dark's #3894ff fails contrast on neutral.50 */
+  /* Wash accents: the dark values (#2e2466/#0f474d) are ink-dark and smear the
+     light background washes near-black — light gets pale tints of the same hues */
+  --hero-accent-purple: #cfc6f5;
+  --hero-accent-teal: #bfe9ee;
+  /* World palette, light rungs (2026-08-22): the dark-theme world colors are
+     bright accents tuned for near-black — on neutral.50 the lightest of them
+     (amber/green/cyan) measure 1.2-2:1. Same hues stepped down mechanically
+     (55% color / 45% black lands the lightest ones at ~4.5-5:1 on #f4f7ff);
+     author real light rungs in Figma when the ramp exists. Poster cards are
+     unaffected — their labels sit on the theme-independent dark scrim. */
+  --world-business-money-office: color-mix(in srgb, #ffb81f 48%, black); /* 48%: also passes on --card (#d8dbe8) */
+  --amber-400: color-mix(in srgb, #ffc94d 45%, black);
+  --world-health-medicine: color-mix(in srgb, #14b8a6 62%, black);
+  --world-tech-engineering-design: color-mix(in srgb, #6366f1 78%, black);
+  --world-building-construction: color-mix(in srgb, #ff9640 55%, black);
+  --world-arts-media-sport: color-mix(in srgb, #ff4585 68%, black);
+  --world-food-farming-nature: color-mix(in srgb, #1fc76e 55%, black);
+  --world-farming-animals-nature: color-mix(in srgb, #1fc76e 55%, black);
+  --world-science-research: color-mix(in srgb, #00c8dc 55%, black);
+  --world-law-safety-government: color-mix(in srgb, #e5484d 78%, black);
+  --world-driving-flying-shipping: color-mix(in srgb, #3b82f6 78%, black);
+  --world-factories-making-things: color-mix(in srgb, #c2703d 68%, black);
+  --world-fixing-machines-engines: color-mix(in srgb, #64748b 72%, black);
+  --world-helping-human-services: color-mix(in srgb, #c05fa6 70%, black);
+  --world-teaching-learning: color-mix(in srgb, #8b5cf6 75%, black);
+  --chart-3: color-mix(in srgb, #ff9640 50%, black);
   --glass-surface-1: #00000008; /* black-alpha.3 */
   --glass-surface-2: #00000017; /* black-alpha.9 */
   --glass-surface-3: #05081466; /* black-alpha.40 */

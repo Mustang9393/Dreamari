@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Sparkle, Users, X } from "lucide-react";
+import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
+import { useGlobalTheme } from "./theme";
 
 // The student's avatar photo doubles as the Profile entry point in both navs.
 const AVATAR_SRC = "/images/avatar-jordan.jpg";
@@ -76,6 +77,7 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
+  const { theme, toggle } = useGlobalTheme();
   return (
     <div className={className ?? "relative"}>
       <button
@@ -106,6 +108,16 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
                 {link.label}
               </Link>
             ))}
+            {/* Theme choice rides in the same menu on every app screen */}
+            <button
+              type="button"
+              onClick={toggle}
+              className="mt-[2px] flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border-t px-[var(--space-4)] py-[var(--space-2h,10px)] pt-[12px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+              style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", borderColor: "var(--glass-border)" }}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
           </nav>
         </>
       )}

@@ -31,19 +31,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // DARK is the default everywhere (per user): apply it on first visit
   // unless the visitor explicitly chose light via the toggle before.
   useEffect(() => {
+    // Mirror the global scheme (see components/app/theme.tsx): light is an
+    // EXPLICIT class too, so CSS can target chosen-light without also
+    // matching the pre-hydration default state (no class = dark).
+    let next: Theme = "dark";
     try {
-      if (localStorage.getItem(STORAGE_KEY) !== "light") {
-        document.documentElement.classList.add("dark");
-      }
+      if (localStorage.getItem(STORAGE_KEY) === "light") next = "light";
     } catch {
-      document.documentElement.classList.add("dark");
+      // fall through to dark
     }
+    document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.classList.toggle("light", next === "light");
   }, []);
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggleTheme = useCallback(() => {
     const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
     document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.classList.toggle("light", next === "light");
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import localFont from "next/font/local";
+import { ThemeBoot } from "@/components/app/theme";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -41,7 +42,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col"><ThemeBoot />{children}</body>
     </html>
   );
 }
