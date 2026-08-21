@@ -155,7 +155,9 @@ function HeroBanner() {
         touchStart.current = null;
       }}
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]">
+      {/* star dots are night decor — as var(--foreground) they turned into
+         ink specks on the light hero, so light mode drops them too */}
+      <div aria-hidden data-space-backdrop className="pointer-events-none absolute inset-0 z-[1]">
         {SPACE_ACCENTS.map((dot, index) => (
           <span key={index} className="absolute rounded-full" style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, background: "var(--foreground)" }} />
         ))}
