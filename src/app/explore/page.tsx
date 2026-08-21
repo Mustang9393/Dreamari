@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 export default async function ExplorePage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
   const params = await searchParams;
   const requested = Array.isArray(params.tab) ? params.tab[0] : params.tab;
-  const initialTab = requested === "browse" ? "browse" : "foryou";
+  // Browse is the default view (per user 2026-08-21); the reel stays one tap away.
+  const initialTab = requested === "foryou" ? "foryou" : "browse";
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
