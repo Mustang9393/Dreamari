@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
-import { HOME_PICKS } from "./catalog";
+import { BROWSE_RECOMMENDED } from "./catalog";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
@@ -201,10 +201,11 @@ function HeroBanner() {
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--chart-2)">CONTINUE WHERE YOU LEFT OFF</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Brand Crisis Room
+                The $30B Deal
               </p>
               <p className="max-w-[480px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Lead the response team through a high-stakes media crisis. Manage public relations, alignment, and coordinate emergency PR.
+                Step into the deal room at Colbalt Capital. Brief your team, win over the client, and close the
+                biggest mandate of your career.
               </p>
             </div>
             <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
@@ -220,7 +221,7 @@ function HeroBanner() {
               <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
             </div>
           </div>
-          <PanelPhoto photo="/images/app/poster-public-relations-manager.png" />
+          <PanelPhoto photo="/images/app/activity-ib-dossier-hero.png" />
         </PanelShell>
 
         {/* Panel 3 — Trending Now */}
@@ -321,12 +322,12 @@ const ACTIVITIES: Activity[] = [
   {
     badge: "SIMULATION",
     badgeColor: "var(--chart-2)",
-    title: "Brand Crisis Room",
-    sub: "Lead the response team",
+    title: "The $30B Deal",
+    sub: "Close the mandate at Colbalt Capital",
     fill: 62,
     stat: "62% · 18 min left",
     cta: "Resume simulation",
-    photo: "/images/app/poster-public-relations-manager.png",
+    photo: "/images/app/activity-ib-dossier.png",
   },
   {
     badge: "GLOSSARY",
@@ -336,17 +337,17 @@ const ACTIVITIES: Activity[] = [
     fill: 60,
     stat: "Set 3 of 5",
     cta: "Continue glossary",
-    photo: "/images/app/poster-investment-banking.png",
+    photo: "/images/app/activity-ib-desk.png",
   },
   {
     badge: "GAME",
     badgeColor: "var(--world-business-money-office)",
-    title: "Market Match",
-    sub: "Build the strongest portfolio",
+    title: "Deal Team Kickoff",
+    sub: "Draft the squad, win the pitch",
     fill: 48,
     stat: "Round 3 of 5",
     cta: "Keep playing",
-    photo: "/images/app/poster-private-equity.png",
+    photo: "/images/app/activity-ib-kickoff.png",
   },
 ];
 
@@ -433,12 +434,20 @@ export function HomeExperience() {
           </div>
         </section>
 
-        <section aria-label="Careers picked for you" className="flex w-full flex-col gap-[var(--space-6)]">
-          <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            Careers Picked for You
-          </h2>
+        {/* Mirrors Explore Browse-All's "Recommended for You" rail (same
+           title, subtitle, and cards — one source of truth), replacing the
+           old "Careers Picked for You" per user direction. */}
+        <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-6)]">
+          <div className="flex flex-col gap-[var(--space-1)]">
+            <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              Recommended for You
+            </h2>
+            <p className="text-[12px] leading-[16px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+              A mix across your Industry Interests
+            </p>
+          </div>
           <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {HOME_PICKS.map((career) => (
+            {BROWSE_RECOMMENDED.map((career) => (
               <PosterCard key={career.title} career={career} />
             ))}
           </div>

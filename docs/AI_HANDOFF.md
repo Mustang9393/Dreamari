@@ -6,6 +6,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 IB sim journey + home recommended rail (DEPLOYED)
+
+- User supplied "Investment Banking.zip" (21 cel-shaded Colbalt Capital
+  sim scenes, unnamed ChatGPT renders — contact-sheeted to pick). Five
+  placed as /images/app/activity-ib-*.png (dossier, dossier-hero, kickoff,
+  warroom [unused yet], desk).
+- "Continue your journey" rewritten around the IB sim per user ("use these
+  for all things games and simulation oriented"): hero panel 2 = "The $30B
+  Deal" (Colbalt Capital deal-room copy, dossier-hero art); activity cards:
+  SIMULATION "The $30B Deal" (dossier), GLOSSARY "Finance Essentials"
+  (late-night desk art), GAME "Deal Team Kickoff" (whiteboard art;
+  replaces Market Match). Brand Crisis Room fully retired.
+- Home rail: "Careers Picked for You" REPLACED by Explore Browse-All's
+  "Recommended for You" (same title/subtitle/cards — BROWSE_RECOMMENDED
+  is the shared source). HOME_PICKS is now unused (kept in catalog).
+- NOTE: hyphenated poster titles wrap via zero-width space after hyphens
+  (breakableTitle in PosterCard) — fixed INDUSTRIAL-ORGANIZATIONAL clip.
+
+
 ### 2026-08-21 Build-flow feedback round + WCAG pass (DEPLOYED)
 
 - Work Vibe: options left, chosen words rise on the RIGHT panel (Replit
