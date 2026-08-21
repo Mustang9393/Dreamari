@@ -8,13 +8,12 @@ import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "./worlds";
 // gradient-shimmer Bricolage figure in the top-right, exactly as the
 // "Typical Pay" rail's cards carry it.
 
-// Long single words (CONTROLLER, PSYCHOLOGIST) step the title size down so
-// nothing clips inside the 210px card — same idea as the ranked cards.
+// Exactly TWO title sizes, chosen by rule (not per career/world): the
+// standard 24, or one fixed compact 19 when the longest word is 10+ chars
+// (CONTROLLER, PSYCHOLOGIST) so nothing clips. Short titles never shrink.
 function posterTitleSize(title: string): { fontSize: number; lineHeight: string } {
   const longest = Math.max(...title.split(/[\s-]+/).map((word) => word.length));
-  if (longest >= 13) return { fontSize: 17, lineHeight: "21px" };
-  if (longest >= 11) return { fontSize: 19, lineHeight: "23px" };
-  if (longest >= 10) return { fontSize: 21, lineHeight: "25px" };
+  if (longest >= 10) return { fontSize: 19, lineHeight: "23px" };
   return { fontSize: 24, lineHeight: "28px" };
 }
 
@@ -28,25 +27,21 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
     >
       <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
       {career.salary && (
-        /* dark glass pill guarantees contrast on any photo; the gradient
-           shimmer stays as the text fill (screen blend retired — it washed
-           out over bright imagery) */
+        /* gradient shimmer text; a layered dark drop-shadow halo (filter —
+           text-shadow can't paint under bg-clipped text) keeps it legible
+           on any photo without a pill */
         <span
-          className="absolute top-2 right-2 z-[1] rounded-full border px-[10px] py-[3px] backdrop-blur-[8px]"
-          style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}
+          className="absolute top-2 right-2 z-[1] text-[16px] leading-[22px] font-extrabold"
+          style={{
+            fontFamily: "var(--font-display)",
+            backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.88) 84.286%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.9)) drop-shadow(0 2px 5px rgba(0,0,0,0.6)) drop-shadow(0 4px 14px rgba(0,0,0,0.45))",
+          }}
         >
-          <span
-            className="text-[15px] leading-[20px] font-extrabold"
-            style={{
-              fontFamily: "var(--font-display)",
-              backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.85) 84.286%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {career.salary}
-          </span>
+          {career.salary}
         </span>
       )}
       <span
