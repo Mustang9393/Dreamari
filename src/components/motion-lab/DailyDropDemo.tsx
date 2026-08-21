@@ -338,7 +338,7 @@ function StatChip({ label, color, children }: { label: string; color: string; ch
   return (
     <motion.div
       variants={popIn}
-      className="relative rounded-2xl px-5 pt-4 pb-3"
+      className="relative rounded-2xl px-5 pt-4 pb-3 text-center"
       style={{ border: `2px solid ${color}`, background: V.card }}
     >
       <span
@@ -347,7 +347,7 @@ function StatChip({ label, color, children }: { label: string; color: string; ch
       >
         {label}
       </span>
-      <span className="flex items-center gap-1.5 text-[17px] font-extrabold" style={{ color }}>
+      <span className="flex items-center justify-center gap-1.5 text-[17px] font-extrabold" style={{ color }}>
         {children}
       </span>
     </motion.div>
@@ -642,28 +642,21 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         initial={{ scale: 0, rotate: -6, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={popAt(0.7)}
-        className="relative z-[2] flex w-[290px] flex-col items-center gap-1.5 rounded-3xl px-6 py-5"
+        className="relative z-[2] flex w-full max-w-[340px] flex-col items-center gap-1.5 rounded-3xl px-6 py-5"
         style={{
           background: `linear-gradient(160deg, color-mix(in srgb, ${V.primary} 40%, ${V.card}), ${V.card})`,
           border: `1px solid color-mix(in srgb, ${V.primary} 55%, ${V.border})`,
           boxShadow: `0 0 44px color-mix(in srgb, ${V.primary} 35%, transparent)`,
         }}
       >
-        <span className="text-[10px] font-extrabold uppercase" style={{ letterSpacing: "0.16em", color: V.muted }}>
-          Cyber World · No. 005 / 193
+        <span
+          className="text-[10px] font-extrabold uppercase"
+          style={{ letterSpacing: "0.16em", color: "var(--world-tech-engineering-design)" }}
+        >
+          Tech &amp; Engineering
         </span>
         <span className="text-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: V.fg }}>
           Ethical Hacker
-        </span>
-        <span
-          className="rounded-full px-3 py-0.5 text-[10px] font-extrabold uppercase"
-          style={{
-            letterSpacing: "0.14em",
-            background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.violet}, ${NEON.magenta})`,
-            color: "var(--background)",
-          }}
-        >
-          Prismatic
         </span>
         <span className="mt-1 text-[12.5px] leading-[18px]" style={{ color: V.muted }}>
           Ethical Hackers help companies find weak spots before criminals do. They hack with permission to make
@@ -671,15 +664,17 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         </span>
       </motion.div>
 
-      <motion.div className="relative z-[2] flex items-end gap-3 pt-1" variants={chipRow} initial="hidden" animate="shown">
+      <motion.div
+        className="relative z-[2] grid w-full max-w-[340px] grid-cols-2 items-end gap-3 pt-1"
+        variants={chipRow}
+        initial="hidden"
+        animate="shown"
+      >
         <StatChip label="Starting pay" color={V.gold}>
           <Banknote size={16} strokeWidth={3} aria-hidden /> $80K
         </StatChip>
         <StatChip label="Top earners" color={NEON.blue}>
           <TrendingUp size={16} strokeWidth={3} aria-hidden /> $150K+
-        </StatChip>
-        <StatChip label="Streak" color="var(--chart-2)">
-          <Flame size={16} strokeWidth={3} aria-hidden /> 13
         </StatChip>
       </motion.div>
 

@@ -196,10 +196,12 @@ function HeroBanner() {
         </PanelShell>
 
         {/* Panel 2 — Continue Where You Left Off */}
-        <PanelShell from="var(--hero-accent-pink)">
+        {/* wash derived from the content's world (Business & Money) so the
+           whole panel obeys the system, not the old pink rotation */}
+        <PanelShell from="color-mix(in srgb, var(--world-business-money-office) 22%, var(--background))">
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--chart-2)">CONTINUE WHERE YOU LEFT OFF</CaptionLabel>
+              <CaptionLabel color="var(--world-business-money-office)">CONTINUE WHERE YOU LEFT OFF</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 The $30B Deal
               </p>
@@ -211,10 +213,10 @@ function HeroBanner() {
             <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
               <div className="flex items-center justify-between text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
                 <span style={{ color: "var(--muted-foreground)" }}>62% COMPLETE</span>
-                <span style={{ color: "var(--chart-2)" }}>18 min left</span>
+                <span style={{ color: "var(--world-business-money-office)" }}>18 min left</span>
               </div>
               <div className="relative h-[6px] w-full rounded-[var(--radius-full,999px)]" style={{ background: "var(--glass-surface-2)" }}>
-                <div className="absolute inset-y-0 left-0 w-[62%] rounded-[999px]" style={{ background: "var(--chart-2)", boxShadow: "0 0 9px rgba(239,93,168,0.5)" }} />
+                <div className="absolute inset-y-0 left-0 w-[62%] rounded-[999px]" style={{ background: "var(--world-business-money-office)", boxShadow: "0 0 9px color-mix(in srgb, var(--world-business-money-office) 50%, transparent)" }} />
               </div>
             </div>
             <div>
@@ -321,7 +323,7 @@ type Activity = {
 const ACTIVITIES: Activity[] = [
   {
     badge: "SIMULATION",
-    badgeColor: "var(--chart-2)",
+    badgeColor: "var(--world-business-money-office)",
     title: "The $30B Deal",
     sub: "Close the mandate at Colbalt Capital",
     fill: 62,
