@@ -95,7 +95,9 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
           <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default" />
           <nav
             className={`filters-reveal absolute z-50 mt-2 flex min-w-[180px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
-            style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}
+            /* near-solid: the old glass-surface let page content bleed through
+               and made rows illegible in both themes */
+            style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}
           >
             {QUICK_LINKS.map((link) => (
               <Link

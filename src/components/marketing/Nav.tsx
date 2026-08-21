@@ -161,7 +161,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
           <div
             className="absolute top-[calc(100%+8px)] right-0 flex w-60 flex-col gap-1 rounded-2xl border p-2"
             style={{
-              background: "color-mix(in srgb, var(--background) 88%, transparent)",
+              background: "color-mix(in srgb, var(--background) 97%, var(--foreground))",
               backdropFilter: "blur(18px) saturate(1.6)",
               WebkitBackdropFilter: "blur(18px) saturate(1.6)",
               borderColor: "var(--glass-border)",
