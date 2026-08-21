@@ -44,13 +44,18 @@ export const HOME_PICKS: CatalogCareer[] = [
 // Mika's approved batches first, then only the strongest existing browse
 // posters (retired from rails as too-AI: nurse [garden photo], entrepreneur
 // [motion blur], investment-banking v1 + private-equity [fisheye]).
+// "A mix across your Industry Interests" — and the demo persona's
+// interests are established app-wide (Signal chips: Business & Money 11 ·
+// Tech & Engineering 9 · Health & Medicine 4; "Because You Liked Business
+// & Money"). This rail draws ONLY from those three worlds so every
+// personalization surface tells the same story.
 export const BROWSE_RECOMMENDED: CatalogCareer[] = [
-  C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.png"),
-  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-  C("Journalist", "Arts, Media & Sport", "/images/app/poster-journalist.png"),
-  C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.png"),
-  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.png"),
-  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
+  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
+  C("Asset Management", "Business & Money", "/images/app/poster-asset-management.png"),
+  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
+  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png"),
+  C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.png"),
+  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
 ];
 
 // Congruent with its own heading: Business & Money careers only.
