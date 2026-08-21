@@ -165,7 +165,6 @@ export function ExploreChapter() {
       color="#1fc76e"
       oneliner="careers, companies, and pathways with depth."
       compact
-      wide
       graphicRef={graphicRef}
       playing={false}
       graphicRevealed={graphicRevealed}
@@ -185,7 +184,7 @@ function BrowsePage() {
           className="w-full flex-none text-left"
           style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(12.5px, calc(var(--mu) * 9.5px), 17px)", color: "var(--foreground)" }}
         >
-          Top 5 Trending
+          Recommended for You
         </p>
         {/* The rail band: tiles take their height FROM this band (h-full inside
            a definite flex-1 area, capped), so taller viewports grow the poster
