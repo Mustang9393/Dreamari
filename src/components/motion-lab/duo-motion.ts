@@ -3,6 +3,12 @@ import type { Transition, Variants } from "framer-motion";
 // Duolingo-style motion primitives. This file is the single source for the
 // lab's movement language; pages that adopt an animation import from here so
 // the physics stay identical everywhere.
+//
+// RULE: springs support only TWO keyframes — never pair a spring transition
+// with a keyframe array like scale:[0,1.1,1] (runtime throws). The spring's
+// own overshoot already provides the mid-frame; animate to the end value and
+// let the physics do the bounce. Multi-frame arrays (e.g. SQUISH) must use a
+// duration/ease tween.
 
 // Snappy, elastic movement — entrances, taps, rewards landing.
 export const SPRING_BOUNCY: Transition = {

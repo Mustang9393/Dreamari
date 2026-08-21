@@ -6,6 +6,36 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 /motion-lab Sequence 01: Daily Drop banner + fullscreen takeover
+
+- Built from 3 Duolingo lesson-complete reference videos the user supplied
+  (frames extracted via ffmpeg; shared grammar: character streaks across a
+  diagonal band -> settle scene -> headline pop -> stat chips pop one-by-one
+  -> CTA rises). DailyDropDemo.tsx now lives on the lab stage.
+- BANNER: purple-gradient card; star (star-character.svg + star-face.svg,
+  the home hero's own art) flies in once on SPRING_BOUNCY with Dreamy
+  (dreamy/v2/dreamy-happy.png) popping in beside it; then ONLY the star's
+  soft-spring bob and the trail flow keep looping (bars/particles streaming
+  away, framer repeat loops) — per user: "one reveal, then it stays flowing."
+- TAKEOVER (click, AnimatePresence overlay): phase A "streak" — full-bleed
+  -13deg primary band scales in from the left, star + trail + chasing Dreamy
+  cross the screen (1.15s), gold "Today's Drop!" pops; auto-advance at
+  1.65s. Phase B "reveal" — dreamy-party.png pops center (origin bottom) w/
+  staggered gold diamond sparkles, "Drop unlocked!" headline, glowing drop
+  card (Robotics Engineer), 3 Duolingo-style stat chips (label riding the
+  top border; gold/blue/chart-2) staggered via container variants, tactile
+  SAVE TO MY SKY rises last. Esc + X close; useReducedMotion gates loops and
+  skips the streak.
+- LESSON captured in duo-motion.ts: framer springs support only TWO
+  keyframes — scale:[0,1.1,1] + spring THROWS at runtime ("Only two
+  keyframes... spring"). Let the spring overshoot instead; multi-frame
+  arrays must be tweens. Also: variant-defined transitions override the
+  element transition prop, so delayed pops use inline popAt(delay).
+- Verified in browser: banner composition, streak phase (held w/ a temp
+  long timer to beat rAF throttle, then restored), full click-through
+  (reveal + chips render, zero window.onerror), Esc close. tsc green;
+  eslint only <img> warnings (same pattern as HomeExperience).
+
 ### 2026-08-21 /motion-lab: Duolingo-style motion sandbox (v4 LOCAL, standalone)
 
 - NEW standalone sandbox at /motion-lab — deliberately NOT linked from any

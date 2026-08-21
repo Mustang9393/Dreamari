@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, useAnimate, useReducedMotion } from "framer-motion";
 import { CloudMoon, Play, RotateCcw, Star, Zap } from "lucide-react";
+import { DailyDropDemo } from "./DailyDropDemo";
 import {
   SPRING_BOUNCY,
   SQUISH_KEYFRAMES,
@@ -208,12 +209,19 @@ export function MotionLab() {
           </div>
 
           <section
-            className="rounded-3xl min-h-[420px] flex flex-col items-center justify-center gap-3"
+            className="rounded-3xl flex flex-col gap-5 p-5 sm:p-8"
             style={{ border: `2px dashed ${V.border}`, background: `color-mix(in srgb, ${V.card} 45%, transparent)` }}
           >
-            <Play size={28} strokeWidth={2} style={{ color: V.muted }} aria-hidden />
-            <p className="text-[13px] font-semibold uppercase" style={{ letterSpacing: "0.14em", color: V.muted }}>
-              Stage — awaiting first sequence
+            <header className="flex items-center gap-2">
+              <Play size={14} strokeWidth={2.5} style={{ color: V.muted }} aria-hidden />
+              <p className="text-[13px] font-semibold uppercase" style={{ letterSpacing: "0.14em", color: V.muted }}>
+                Stage · Sequence 01 — Daily Drop
+              </p>
+            </header>
+            <DailyDropDemo />
+            <p className="text-[12px]" style={{ color: V.muted }}>
+              Banner plays one reveal, then only the star&apos;s float and the trail keep flowing. Click it for the
+              fullscreen takeover.
             </p>
           </section>
         </div>
