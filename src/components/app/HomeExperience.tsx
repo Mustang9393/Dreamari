@@ -396,7 +396,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
 export function HomeExperience() {
   return (
-    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "radial-gradient(1100px 700px at 88% -8%, color-mix(in srgb, var(--hero-accent-purple) 62%, transparent), transparent 62%), radial-gradient(950px 680px at -8% 28%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%), radial-gradient(1000px 720px at 72% 112%, color-mix(in srgb, var(--hero-accent-teal) 52%, transparent), transparent 62%), var(--background)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <img alt="" src="/images/app/background-space.svg" className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
       </div>

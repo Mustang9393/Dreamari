@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -24,10 +24,21 @@ function getSnapshot(): Theme {
 }
 
 function getServerSnapshot(): Theme {
-  return "light";
+  return "dark";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // DARK is the default everywhere (per user): apply it on first visit
+  // unless the visitor explicitly chose light via the toggle before.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(STORAGE_KEY) !== "light") {
+        document.documentElement.classList.add("dark");
+      }
+    } catch {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggleTheme = useCallback(() => {
