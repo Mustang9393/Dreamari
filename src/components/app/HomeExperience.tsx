@@ -512,7 +512,9 @@ export function HomeExperience() {
           className="relative w-full overflow-hidden rounded-[var(--radius-2xl)] border p-[27px] sm:min-h-[216px]"
           style={{ borderColor: "var(--glass-border)" }}
         >
-          <div aria-hidden className="pointer-events-none absolute inset-0 mix-blend-screen" style={{ background: "linear-gradient(90deg, rgba(59,46,158,0.42) 0%, rgba(10,13,33,0.1) 46%, var(--background) 100%)" }} />
+          {/* screen-blend purple is night-tuned; light mode swaps it via the
+             data-signal-wash rule in tokens.css (turns muddy violet otherwise) */}
+          <div aria-hidden data-signal-wash className="pointer-events-none absolute inset-0 mix-blend-screen" style={{ background: "linear-gradient(90deg, rgba(59,46,158,0.42) 0%, rgba(10,13,33,0.1) 46%, var(--background) 100%)" }} />
           <div className="relative flex h-full flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-8)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <span

@@ -193,6 +193,14 @@ html.light .marketing-v2.themeable [data-space-backdrop] {
   display: none;
 }
 
+/* Signal banner wash: the dark theme's screen-blended purple turns muddy
+   violet-gray over a light page — light gets a plain pale sweep instead.
+   !important because the dark gradient is an inline style. */
+html.light .marketing-v2.themeable [data-signal-wash] {
+  mix-blend-mode: normal;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--hero-accent-purple) 60%, var(--background)) 0%, var(--background) 62%) !important;
+}
+
 /* html.light themes only surfaces that opt in with `themeable` — the LANDING
    deliberately stays dark (its chapters are art-directed dark-only; a light
    pass there is real design work, not a token flip). */
