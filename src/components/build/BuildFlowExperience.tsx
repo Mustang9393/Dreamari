@@ -9,7 +9,6 @@ import { MatchBackdrop } from "@/components/flow/match/MatchBackdrop";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -100,7 +99,6 @@ export function BuildFlowExperience() {
         <AuroraBackground accent={accent} visitedAccents={[]} finale={isComplete} lightning={false} />
         {phase !== "build" && <MatchBackdrop />}
         <HomeButton />
-        <ThemeToggle />
 
         {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's
            content exceeds the viewport (short landscape phones), the step column
