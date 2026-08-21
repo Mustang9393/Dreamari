@@ -575,7 +575,7 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
         {/* ---- HERO: the Browse Card face, exactly — poster art, DS text
            scrim, title in the world's own face, world label beneath.
            Employers + salary sit as matched quiet chips in the top corners. ---- */}
-        <div className="relative flex w-full flex-col justify-end" style={{ height: "100%", minHeight: 420 }}>
+        <div className="relative flex w-full flex-col justify-end" style={{ height: "100%", minHeight: "min(420px, 100%)" }}>
           <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 94vw, 440px" className="object-cover" draggable={false} priority={isTop} />
           <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4">
             <span

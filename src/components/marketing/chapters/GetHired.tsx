@@ -180,9 +180,7 @@ export function GetHiredChapter() {
 
           {stage === 3 && (
             <div className="relative h-full overflow-hidden rounded-[14px] border" style={{ borderColor: "var(--border)" }}>
-              {/* TODO(asset): swap for the rights-cleared career-fair handshake
-                  photo when supplied. Stand-in from the existing set until then. */}
-              <Image src="/images/career-operations.jpg" alt="" fill sizes="480px" className="object-cover object-[center_30%]" />
+              <Image src="/images/app/stage-hire-ready.png" alt="" fill sizes="480px" className="object-cover object-[center_30%]" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(transparent 30%, rgba(5,7,15,0.9))" }} />
               <div className="mkt-offer absolute inset-x-3 bottom-3 rounded-[14px] border p-3" style={{ background: "rgba(5,7,15,0.82)", borderColor: WORLD_COLOR }}>
                 <div className="text-[9.5px] font-bold tracking-[0.14em] uppercase" style={{ color: WORLD_COLOR }}>Hire-ready</div>

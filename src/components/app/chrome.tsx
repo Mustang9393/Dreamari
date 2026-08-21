@@ -133,7 +133,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
               key={item.label}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className="rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] transition-colors"
+              className="rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase transition-colors"
               style={{
                 background: isActive ? "var(--primary)" : "transparent",
                 color: isActive ? "var(--primary-foreground)" : "var(--foreground)",

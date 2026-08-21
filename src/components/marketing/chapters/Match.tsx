@@ -23,10 +23,10 @@ import { usePlayingOnScroll } from "../scrollHooks";
 const CARDS = [
   {
     key: "ops",
-    photo: "/images/career-operations.jpg",
-    title: "Operations",
-    blurb: "Keeps the day-to-day running of a business working.",
-    salary: "$65K-110K",
+    photo: "/images/app/poster-management-analyst.png",
+    title: "Management Analyst",
+    blurb: "Figures out how a business can run better, then makes it happen.",
+    salary: "$75K-125K",
     major: "Business & Management",
   },
   {
@@ -34,7 +34,7 @@ const CARDS = [
     // -2 suffix: same asset as career-investment-banking.jpg's final version —
     // renamed for cache busting, since this file was overwritten in place twice and
     // browsers/optimizers that had cached the URL kept showing an old photo.
-    photo: "/images/career-investment-banking-2.jpg",
+    photo: "/images/app/poster-investment-banking-analyst.png",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
     salary: "$85K-150K",

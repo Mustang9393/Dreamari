@@ -542,9 +542,12 @@ body {
    so it covers every surface (app, build flow, landing). calc() length
    division needs a modern engine; older browsers fall back to steps. */
 @media (min-width: 1441px) {
-  body { zoom: calc(100vw / 1440); }
+  /* scale only when BOTH axes afford it (720px design height), never
+     below 1, capped at 1.5 so huge monitors don't balloon */
+  body { zoom: clamp(1, min(calc(100vw / 1440), calc(100vh / 720)), 1.5); }
 }
 @supports not (zoom: calc(100vw / 1440)) {
-  @media (min-width: 1441px) { body { zoom: 1.1; } }
-  @media (min-width: 1800px) { body { zoom: 1.25; } }
+  /* height guards mirror the clamp: don't scale when the window is short */
+  @media (min-width: 1441px) and (min-height: 800px) { body { zoom: 1.1; } }
+  @media (min-width: 1800px) and (min-height: 900px) { body { zoom: 1.25; } }
 }
