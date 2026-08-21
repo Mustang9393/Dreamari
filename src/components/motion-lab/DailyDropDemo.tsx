@@ -27,8 +27,15 @@ const V = {
   purple: "var(--hero-accent-purple)",
 };
 
-// Super-frame palette accents (illustrative, lab-only)
-const NEON = { cyan: "#6EE7FF", violet: "#A78BFA", magenta: "#FF7ACF", mint: "#46E3C8" };
+// Super-frame accents resolved through EXISTING tokens: brand accent for
+// light/glow, world colors + chart primitives for the prismatic/celebration
+// moments. No new tokens.
+const NEON = {
+  cyan: "var(--world-science-research)",
+  violet: "var(--world-tech-engineering-design)",
+  magenta: "var(--chart-2)",
+  blue: "var(--accent-subtle)",
+};
 
 const popAt = (delay: number): Transition => ({
   ...SPRING_BOUNCY,
@@ -41,7 +48,7 @@ const chipRow: Variants = {
   shown: { transition: { staggerChildren: 0.14, delayChildren: 1.0 } },
 };
 
-const SKY = `linear-gradient(155deg, color-mix(in srgb, ${V.purple} 72%, #10134a) 0%, color-mix(in srgb, ${V.purple} 35%, ${V.bg}) 55%, ${V.bg} 100%)`;
+const SKY = `linear-gradient(155deg, color-mix(in srgb, ${V.purple} 78%, ${V.primary}) 0%, color-mix(in srgb, ${V.purple} 35%, ${V.bg}) 55%, ${V.bg} 100%)`;
 
 // ——— The light band: the thick SOLID trail from the Super frames. Bright
 // rounded head tucked under the character, long tail fading out. Grows in
@@ -69,7 +76,7 @@ function LightBand({ length = 560, thickness = 120, delay = 0 }: { length?: numb
       <div
         className="relative size-full overflow-hidden rounded-full"
         style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${NEON.violet} 34%, transparent) 20%, color-mix(in srgb, #ffffff 66%, ${NEON.cyan}) 58%, #FFFFFF 82%)`,
+          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${NEON.blue} 34%, transparent) 20%, color-mix(in srgb, #ffffff 70%, ${NEON.blue}) 58%, #FFFFFF 82%)`,
         }}
       >
         {/* flow: soft streaks born at the head, racing down the tail */}
@@ -199,7 +206,7 @@ function AuroraHorizon() {
       />
       <motion.div
         className="h-[3px]"
-        style={{ background: `linear-gradient(90deg, ${NEON.mint}, ${NEON.cyan}, ${NEON.violet}, ${NEON.magenta})` }}
+        style={{ background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.blue}, ${NEON.violet}, ${NEON.magenta})` }}
         animate={reduced ? undefined : { opacity: [0.55, 1, 0.55], backgroundPositionX: ["0%", "100%"] }}
         transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -242,15 +249,15 @@ function NeonStreaks() {
 
 // ——— Confetti for the reveal.
 const CONFETTI = [
-  { x: -150, w: 9, h: 14, c: "#FFC95C", d: 0, r: 40 },
+  { x: -150, w: 9, h: 14, c: "var(--chart-3)", d: 0, r: 40 },
   { x: -96, w: 7, h: 7, c: NEON.magenta, d: 0.5, r: -70, round: true },
-  { x: -48, w: 8, h: 13, c: NEON.mint, d: 1.1, r: 120 },
-  { x: 6, w: 10, h: 10, c: "#FFC95C", d: 0.3, r: -50, round: true },
-  { x: 58, w: 8, h: 14, c: NEON.cyan, d: 0.8, r: 90 },
+  { x: -48, w: 8, h: 13, c: NEON.cyan, d: 1.1, r: 120 },
+  { x: 6, w: 10, h: 10, c: "var(--chart-3)", d: 0.3, r: -50, round: true },
+  { x: 58, w: 8, h: 14, c: NEON.blue, d: 0.8, r: 90 },
   { x: 112, w: 7, h: 7, c: NEON.magenta, d: 1.4, r: -110, round: true },
-  { x: 156, w: 9, h: 13, c: NEON.mint, d: 0.15, r: 60 },
+  { x: 156, w: 9, h: 13, c: NEON.cyan, d: 0.15, r: 60 },
   { x: -180, w: 7, h: 12, c: NEON.violet, d: 1.7, r: -80 },
-  { x: 188, w: 8, h: 8, c: "#FFC95C", d: 1.0, r: 100, round: true },
+  { x: 188, w: 8, h: 8, c: "var(--chart-3)", d: 1.0, r: 100, round: true },
 ];
 function Confetti() {
   const reduced = useReducedMotion();
@@ -535,17 +542,17 @@ function QuizPhase({ onSolve }: { onSolve: (clues: number) => void }) {
                 transition={isWrong || isPicked ? { duration: 0.4 } : popAt(0.55 + index * 0.08)}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-bold cursor-pointer ${TACTILE_PRESS}`}
                 style={{
-                  background: isPicked ? NEON.mint : V.card,
-                  color: isPicked ? "#0b3a33" : V.fg,
+                  background: isPicked ? V.primary : "var(--glass-surface-2)",
+                  color: isPicked ? V.primaryFg : V.fg,
                   borderColor: isPicked
-                    ? `color-mix(in srgb, ${NEON.mint} 55%, black)`
+                    ? `color-mix(in srgb, ${V.primary} 55%, black)`
                     : `color-mix(in srgb, black 45%, ${V.card})`,
-                  boxShadow: `inset 0 0 0 1px ${V.border}`,
+                  boxShadow: "inset 0 0 0 1px var(--glass-border)",
                 }}
               >
                 <span
                   className="flex size-7 flex-none items-center justify-center rounded-full text-[12px] font-extrabold"
-                  style={{ background: isPicked ? "#0b3a33" : V.bg, color: isPicked ? NEON.mint : V.gold }}
+                  style={{ background: isPicked ? "color-mix(in srgb, black 30%, var(--primary))" : V.bg, color: isPicked ? V.primaryFg : V.gold }}
                 >
                   {o.key}
                 </span>
@@ -653,7 +660,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
           style={{
             letterSpacing: "0.14em",
             background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.violet}, ${NEON.magenta})`,
-            color: "#10134a",
+            color: "var(--background)",
           }}
         >
           Prismatic
@@ -668,7 +675,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         <StatChip label="Starting pay" color={V.gold}>
           <Banknote size={16} strokeWidth={3} aria-hidden /> $80K
         </StatChip>
-        <StatChip label="Top earners" color={NEON.cyan}>
+        <StatChip label="Top earners" color={NEON.blue}>
           <TrendingUp size={16} strokeWidth={3} aria-hidden /> $150K+
         </StatChip>
         <StatChip label="Streak" color="var(--chart-2)">

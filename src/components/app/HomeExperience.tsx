@@ -99,15 +99,20 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // phones: Dreamy holds the banner's central band, trail near-horizontal
-  // and exiting the right edge; larger screens: the diagonal descent
+  // phones: Dreamy holds the banner's central band, trail near-horizontal.
+  // larger screens: Dreamy is the attraction — anchored to the middle of
+  // the free zone RIGHT of the text column (never over it), scaling up
+  // with the panel; the trail fades off toward the right edge.
   const phone = w > 0 && w < 480;
-  const dreamy = phone ? Math.max(96, Math.min(140, w * 0.3)) : Math.max(96, Math.min(200, w * 0.24));
+  const dreamy = phone ? Math.max(96, Math.min(140, w * 0.3)) : Math.max(120, Math.min(240, w * 0.24));
+  const textEdge = Math.min(520, w * 0.55);
+  const freeCenter = textEdge + (w - textEdge) * 0.42;
+  const rightOffset = phone ? (w - dreamy) / 2 : Math.max(14, w - (freeCenter + dreamy / 2));
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        className="absolute top-[49%] -translate-y-1/2 sm:top-[53%]"
-        style={{ right: phone ? (w - dreamy) / 2 : Math.max(14, w * 0.07) }}
+        className="absolute top-[50.5%] -translate-y-1/2 sm:top-[53%]"
+        style={{ right: rightOffset }}
       >
         {w > 0 && (
           <DailyDropFlight
