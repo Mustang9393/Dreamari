@@ -45,22 +45,19 @@ function PanelShell({ from, children }: { from: string; children: React.ReactNod
   );
 }
 
-function WorldArt({ portrait, fadeRight = false }: { portrait: string; fadeRight?: boolean }) {
-  // The whole art block feathers out via mask (left always; right on the
-  // fadeRight panels; soft top/bottom) — no hard overlay edges.
+function PanelPhoto({ photo, fadeRight = false }: { photo: string; fadeRight?: boolean }) {
+  // Browse-card photo treatment for the hero panels: the full-bleed image
+  // feathers into the panel via mask (left always; right on fadeRight
+  // panels; soft top/bottom). The retired glow/symbol icon layers are gone.
   const horizontal = fadeRight ? "linear-gradient(90deg, transparent 0%, #000 45%, #000 72%, transparent 100%)" : "linear-gradient(90deg, transparent 0%, #000 55%)";
-  const vertical = "linear-gradient(180deg, transparent 0%, #000 18%, #000 88%, transparent 100%)";
+  const vertical = "linear-gradient(180deg, transparent 0%, #000 12%, #000 92%, transparent 100%)";
   const mask = `${horizontal}, ${vertical}`;
   return (
     <div
-      className="absolute right-0 bottom-0 h-[320px] w-[240px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[344px] lg:opacity-100"
+      className="absolute right-0 bottom-0 h-[320px] w-[260px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[400px] lg:opacity-100"
       style={{ maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
     >
-      <div className="absolute top-[-30px] left-[24px] size-[170px]">
-        <img alt="" src="/images/app/world-glow-pink.svg" className="absolute inset-[-12.94%] block max-w-none" style={{ width: "126%", height: "126%" }} />
-      </div>
-      <img alt="" src="/images/app/world-symbol-creative-media.svg" className="absolute inset-[3%_5%_10%_5.5%] block h-[87%] w-[89%] mix-blend-screen" />
-      <img alt="" src={portrait} className="absolute top-[24px] left-[58px] h-[335px] w-[223px] object-cover opacity-[0.78]" />
+      <img alt="" src={photo} className="absolute inset-0 h-full w-full object-cover object-top" />
     </div>
   );
 }
@@ -223,7 +220,7 @@ function HeroBanner() {
               <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
             </div>
           </div>
-          <WorldArt portrait="/images/app/activity-portrait-creative-media.png" />
+          <PanelPhoto photo="/images/app/poster-public-relations-manager.png" />
         </PanelShell>
 
         {/* Panel 3 — Trending Now */}
@@ -245,7 +242,7 @@ function HeroBanner() {
               </span>
             </div>
           </div>
-          <WorldArt portrait="/images/app/portrait-ux-researcher.png" fadeRight />
+          <PanelPhoto photo="/images/app/poster-uiux-designer.png" fadeRight />
         </PanelShell>
       </div>
 
@@ -315,9 +312,7 @@ type Activity = {
   fill: number;
   stat: string;
   cta: string;
-  portrait: string;
-  glow: string;
-  symbol: "creative" | "dollar";
+  photo: string;
 };
 
 // Active Activity Cards (Figma 2537:4570/4587/4603) — copy, colors, progress
@@ -331,9 +326,7 @@ const ACTIVITIES: Activity[] = [
     fill: 62,
     stat: "62% · 18 min left",
     cta: "Resume simulation",
-    portrait: "/images/app/portrait-brand-crisis.png",
-    glow: "/images/app/world-glow-pink.svg",
-    symbol: "creative",
+    photo: "/images/app/poster-public-relations-manager.png",
   },
   {
     badge: "GLOSSARY",
@@ -343,9 +336,7 @@ const ACTIVITIES: Activity[] = [
     fill: 60,
     stat: "Set 3 of 5",
     cta: "Continue glossary",
-    portrait: "/images/app/poster-investment-banking.png",
-    glow: "/images/app/world-glow-amber.svg",
-    symbol: "dollar",
+    photo: "/images/app/poster-investment-banking.png",
   },
   {
     badge: "GAME",
@@ -355,9 +346,7 @@ const ACTIVITIES: Activity[] = [
     fill: 48,
     stat: "Round 3 of 5",
     cta: "Keep playing",
-    portrait: "/images/app/poster-private-equity.png",
-    glow: "/images/app/world-glow-amber.svg",
-    symbol: "dollar",
+    photo: "/images/app/poster-private-equity.png",
   },
 ];
 
@@ -388,31 +377,15 @@ function ActivityCard({ activity }: { activity: Activity }) {
       <p className="absolute top-[158px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[150px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         <span className="inline-flex items-center gap-[4px]">{activity.cta}<ArrowRight size={11} strokeWidth={3} aria-hidden /></span>
       </p>
-      <div aria-hidden className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]">
-        <img alt="" src={activity.glow} className="absolute top-[-52px] left-0 block w-[214px] max-w-none" />
-        {activity.symbol === "creative" ? (
-          <img alt="" src="/images/app/world-symbol-creative-media-sm.svg" className="absolute top-[-10px] left-[10px] block w-[120px] mix-blend-screen" />
-        ) : (
-          <span
-            className="absolute top-[-24px] left-[45px] text-[190px] leading-[190px] font-extrabold mix-blend-screen"
-            style={{
-              fontFamily: "var(--font-body)",
-              opacity: 0.34,
-              backgroundImage: "linear-gradient(94.5deg, rgba(255,232,140,0.72) 10.669%, rgba(255,171,31,0.64) 47.979%, rgba(133,87,255,0.3) 106.63%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            $
-          </span>
-        )}
-        <div
-          className="absolute inset-0"
-          style={{ maskImage: "url(/images/app/activity-portrait-mask.svg)", WebkitMaskImage: "url(/images/app/activity-portrait-mask.svg)", maskSize: "100% 190px", WebkitMaskSize: "100% 190px" }}
-        >
-          <img alt="" src={activity.portrait} className="absolute inset-0 h-full w-full object-cover" />
-        </div>
+      <div
+        aria-hidden
+        className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]"
+        style={{
+          maskImage: "linear-gradient(90deg, transparent 0%, #000 38%)",
+          WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 38%)",
+        }}
+      >
+        <img alt="" src={activity.photo} className="absolute inset-0 h-full w-full object-cover object-top" />
       </div>
     </article>
   );
@@ -471,10 +444,13 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* Career Signal Banner */}
+        {/* Career Signal Banner — the loop-closer: evidence from the user's
+           own activity (Locker saves, streak) -> the pattern it forms ->
+           the action (their plan). Chips are the app's own worlds with real
+           counts, so the claim is checkable, and the CTA goes somewhere. */}
         <section
           aria-label="Your signal"
-          className="relative w-full overflow-hidden rounded-[var(--radius-2xl)] border p-[27px] sm:h-[216px]"
+          className="relative w-full overflow-hidden rounded-[var(--radius-2xl)] border p-[27px] sm:min-h-[216px]"
           style={{ borderColor: "var(--glass-border)" }}
         >
           <div aria-hidden className="pointer-events-none absolute inset-0 mix-blend-screen" style={{ background: "linear-gradient(90deg, rgba(59,46,158,0.42) 0%, rgba(10,13,33,0.1) 46%, var(--background) 100%)" }} />
@@ -487,26 +463,33 @@ export function HomeExperience() {
                 YOUR SIGNAL
               </span>
               <p className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                You&apos;re a People-First Problem Solver.
+                27 cards in, a pattern is forming.
               </p>
-              <p className="text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Your activity points to careers that blend empathy, strategy and making.
+              <p className="max-w-[520px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                Your saves cluster in three worlds — careers that mix analysis with building things. Your plan
+                updates as you save, play, and crack daily drops.
               </p>
               <div className="flex flex-wrap gap-[var(--space-2)]">
-                {["Design", "Research", "Product"].map((tag) => (
+                {[
+                  { tag: "Business & Money", count: 11, color: "var(--world-business-money-office)" },
+                  { tag: "Tech & Engineering", count: 9, color: "var(--world-tech-engineering-design)" },
+                  { tag: "Health & Medicine", count: 4, color: "var(--world-health-medicine)" },
+                ].map(({ tag, count, color }) => (
                   <span
                     key={tag}
-                    className="rounded-[999px] border px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold backdrop-blur-[10px]"
-                    style={{ fontFamily: "var(--font-display)", background: "var(--secondary)", borderColor: "var(--border)", color: "var(--secondary-foreground)" }}
+                    className="inline-flex items-center gap-[var(--space-2)] rounded-[999px] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
+                    style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                   >
+                    <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
                     {tag}
+                    <span style={{ color: "var(--muted-foreground)" }}>{count}</span>
                   </span>
                 ))}
               </div>
             </div>
-            <button
-              type="button"
-              className="h-[42px] w-full flex-none cursor-pointer rounded-[var(--radius-md)] border text-center text-[13px] leading-[18px] font-semibold sm:w-[198px]"
+            <a
+              href="/career-report"
+              className="flex h-[42px] w-full flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-center text-[13px] leading-[18px] font-semibold sm:w-[198px]"
               style={{
                 fontFamily: "var(--font-body)",
                 borderColor: "var(--glass-border)",
@@ -516,7 +499,8 @@ export function HomeExperience() {
               }}
             >
               View My Plan
-            </button>
+              <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
+            </a>
           </div>
         </section>
 

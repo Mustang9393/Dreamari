@@ -6,6 +6,37 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Content batch 08-19/08-21 + home refresh (DEPLOYED)
+
+- Explore Browse: "Typical Pay: $100K +" = the user's 10-career salary list
+  (08-19 archive posters, center-cropped 1024sq into /images/app/poster-*;
+  the unnamed "ChatGPT Image" in the zip is the Pediatric Surgeon; Airline
+  Pilot reuses poster-airline-pilot-alt). Sorted by pay desc. Salary badge
+  now sits in a dark glass pill (glass-surface-3 + glass-border) — the old
+  mix-blend screen text washed out on bright photos.
+- "Careers You Might Not Know" runs the 08-21 archive careers for now; the
+  user's intended 8 (Flavor Chemist, Beauty Product Developer, Ethical
+  Hacker, Drone Pilot, Animal Nutrition Scientist, Game QA Tester, Shopper
+  Insights Analyst, Genetic Counselor) have NO images yet — staged in a
+  catalog comment; wire them when their batch lands.
+- "Tech & Engineering" rail now actually tech-only (frame's farming fill
+  was a design-file quirk; corrected per user).
+- HOME_PICKS += 5 of the new batch. PosterCard titles auto-shrink for long
+  words (CONTROLLER/PSYCHOLOGIST clipping).
+- Home hero panels 2-3 + activity cards: RETIRED the portrait+world-glow+
+  symbol composite (WorldArt) — replaced with browse-poster photos feathered
+  via CSS mask (PanelPhoto). Brand Crisis Room uses the PR Manager poster.
+  IMPORTANT: browse/home surfaces use poster-* images ONLY, never the
+  env-* "For You" reel set (user directive).
+- Career Signal banner reworked (user: persona line made no sense, CTA was
+  dead): now evidence -> pattern -> action: "27 cards in, a pattern is
+  forming." + world chips with counts (world-color dots, glass pills) +
+  View My Plan LINKS to /career-report. "Sky" terminology purged site-wide
+  (Locker is the collection term).
+- macOS NOTE: this session could not read ~/Downloads (TCC) — user copies
+  batch archives into the repo root; extract in scratchpad, rm archives.
+
+
 ### 2026-08-21 Daily Drop v4.1: free-zone composition + token compliance (DEPLOYED)
 
 - Hero flight COMPOSED, not edge-pinned: ResponsiveFlight anchors Dreamy to

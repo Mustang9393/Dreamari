@@ -8,7 +8,18 @@ import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "./worlds";
 // gradient-shimmer Bricolage figure in the top-right, exactly as the
 // "Typical Pay" rail's cards carry it.
 
+// Long single words (CONTROLLER, PSYCHOLOGIST) step the title size down so
+// nothing clips inside the 210px card — same idea as the ranked cards.
+function posterTitleSize(title: string): { fontSize: number; lineHeight: string } {
+  const longest = Math.max(...title.split(/[\s-]+/).map((word) => word.length));
+  if (longest >= 13) return { fontSize: 17, lineHeight: "21px" };
+  if (longest >= 11) return { fontSize: 19, lineHeight: "23px" };
+  if (longest >= 10) return { fontSize: 21, lineHeight: "25px" };
+  return { fontSize: 24, lineHeight: "28px" };
+}
+
 export function PosterCard({ career, className = "" }: { career: CatalogCareer; className?: string }) {
+  const titleSize = posterTitleSize(career.title);
   return (
     <button
       type="button"
@@ -17,26 +28,35 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
     >
       <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
       {career.salary && (
+        /* dark glass pill guarantees contrast on any photo; the gradient
+           shimmer stays as the text fill (screen blend retired — it washed
+           out over bright imagery) */
         <span
-          className="absolute top-2 right-2 z-[1] text-[16px] leading-[22px] font-extrabold"
-          style={{
-            fontFamily: "var(--font-display)",
-            mixBlendMode: "screen",
-            backgroundImage: "linear-gradient(157deg, rgba(255,255,255,0.72) 12.857%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.32) 84.286%)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-            textShadow: "0px 4px 6px rgba(0,0,0,0.5)",
-          }}
+          className="absolute top-2 right-2 z-[1] rounded-full border px-[10px] py-[3px] backdrop-blur-[8px]"
+          style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}
         >
-          {career.salary}
+          <span
+            className="text-[15px] leading-[20px] font-extrabold"
+            style={{
+              fontFamily: "var(--font-display)",
+              backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.85) 84.286%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            {career.salary}
+          </span>
         </span>
       )}
       <span
         className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
         style={{ backgroundImage: TEXT_SCRIM }}
       >
-        <span className="w-full text-[24px] leading-[28px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
+        <span
+          className="w-full [overflow-wrap:normal] [word-break:keep-all]"
+          style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
+        >
           {career.title}
         </span>
         <span
