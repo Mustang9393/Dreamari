@@ -174,8 +174,11 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
         <button
           type="button"
           onClick={onEnter}
-          className="mt-6 flex w-full items-center justify-center rounded-full font-bold text-white"
+          /* dark label: white on this teal measured 2.04:1 (needs 3:1) —
+             near-black clears 10:1 */
+          className="mt-6 flex w-full items-center justify-center rounded-full font-bold"
           style={{
+            color: "#05070f",
             gap: "calc(var(--mu) * 8px)",
             padding: "calc(var(--mu) * 13px) calc(var(--mu) * 20px)",
             fontSize: "calc(var(--mu) * 13px)",

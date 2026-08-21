@@ -525,7 +525,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
                   placeholder="Search careers, skills, worlds..."
                   aria-hidden={!searchOpen}
                   tabIndex={searchOpen ? 0 : -1}
-                  className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
+                  className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
                   style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
                 />
                 {searchOpen && (
@@ -562,7 +562,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search careers, skills, worlds..."
-              className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
+              className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
               style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
             />
             <button
