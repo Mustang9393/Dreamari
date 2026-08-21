@@ -39,32 +39,16 @@ export const HOME_PICKS: CatalogCareer[] = [
   C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
 ];
 
-// Explore-Browse rails, in the design's section order. Congruence pass
-// (2026-08-21): every rail's careers match its heading's world; images are
-// Mika's approved batches first, then only the strongest existing browse
-// posters (retired from rails as too-AI: nurse [garden photo], entrepreneur
-// [motion blur], investment-banking v1 + private-equity [fisheye]).
-// "A mix across your Industry Interests" — and the demo persona's
-// interests are established app-wide (Signal chips: Business & Money 11 ·
-// Tech & Engineering 9 · Health & Medicine 4; "Because You Liked Business
-// & Money"). This rail draws ONLY from those three worlds so every
-// personalization surface tells the same story.
-export const BROWSE_RECOMMENDED: CatalogCareer[] = [
-  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
-  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
-  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
-  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png"),
-  C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.png"),
-  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-];
-
-// Congruent with its own heading: Business & Money careers only.
+// Explore-Browse rails — content, titles, and order per Joshua (2026-08-21).
+// Rail 1 (merged Recommended + Because-You-Liked; content + order per
+// Joshua 2026-08-21): "Recommended Because You Liked Business & Money".
 export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
-  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.png"),
-  C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png"),
-  C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png"),
+  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
+  C("Private Equity", "Business & Money", "/images/app/poster-private-equity-v2.png"),
+  C("Quant", "Business & Money", "/images/app/poster-quant.png"),
   C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
-  C("Investment Banking Analyst", "Business & Money", "/images/app/poster-investment-banking-analyst.png"),
+  C("Management Analyst", "Business & Money", "/images/app/poster-management-analyst.png"),
+  C("Administrative Assistant", "Business & Money", "/images/app/poster-administrative-assistant.png"),
 ];
 
 // "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
@@ -83,38 +67,34 @@ export const BROWSE_TRENDING: CatalogCareer[] = [
 // Rail headed "Tech & Engineering" — tech/engineering careers only (the
 // frame's farming+building fill was a design-file quirk, corrected per user).
 export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
+  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
+  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
+  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
+  C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png"),
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
-  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-  C("Architectural & Engineering Manager", "Tech & Engineering", "/images/app/poster-architectural-engineering-manager.png"),
-  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
-  C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png"),
 ];
 
-// Content batch 08-21. NOTE: the next content list for this rail is
-// (Flavor Chemist, Beauty Product Developer, Ethical Hacker, Drone Pilot,
-// Animal Nutrition Scientist, Game QA Tester, Shopper Insights Analyst,
-// Genetic Counselor) — no poster images were supplied for those yet; wire
-// them in as soon as their image batch lands. Until then the rail runs the
-// 08-21 archive careers, which all have browse posters.
+// Careers You Might Not Know — content + order per Joshua 2026-08-21.
+// (His earlier 8-career list still lacks images for Flavor Chemist, Beauty
+// Product Developer, Ethical Hacker, Animal Nutrition Scientist, Game QA
+// Tester, Shopper Insights Analyst, Genetic Counselor.)
 export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller.png"),
-  C("Industrial-Organizational Psychologist", "Science & Research", "/images/app/poster-industrial-organizational-psychologist.png"),
+  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
+  C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.png"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
-  C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.png"),
+  C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.png"),
+  C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.png"),
+  C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.png"),
 ];
 
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
   C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.png", "$559K"),
-  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png", "$496K"),
-  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.png", "$335K"),
-  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.png", "$236K"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.png", "$232K"),
   C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png", "$148K"),
+  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png", "$496K"),
   C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png", "$146K"),
-  C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png", "$139K"),
   C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.png", "$130K"),
-  C("Art Director", "Arts, Media & Sport", "/images/app/poster-art-director.png", "$114K"),
 ];
 
 // Explore — For You reel: all 8 Env Card variants (section 2530:46431,

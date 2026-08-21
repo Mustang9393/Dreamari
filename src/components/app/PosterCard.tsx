@@ -35,21 +35,24 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
     >
       <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
       {career.salary && (
-        /* gradient shimmer text; a layered dark drop-shadow halo (filter —
-           text-shadow can't paint under bg-clipped text) keeps it legible
-           on any photo without a pill */
+        /* dark glass chip (approved) + large gradient figure — legible on
+           any photo at a glance */
         <span
-          className="absolute top-2 right-2 z-[1] text-[16px] leading-[22px] font-extrabold"
-          style={{
-            fontFamily: "var(--font-display)",
-            backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.88) 84.286%)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-            filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.9)) drop-shadow(0 2px 5px rgba(0,0,0,0.6)) drop-shadow(0 4px 14px rgba(0,0,0,0.45))",
-          }}
+          className="absolute top-2 right-2 z-[1] rounded-full border px-[12px] py-[4px] backdrop-blur-[10px]"
+          style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
         >
-          {career.salary}
+          <span
+            className="text-[19px] leading-[24px] font-extrabold"
+            style={{
+              fontFamily: "var(--font-display)",
+              backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.92) 84.286%)",
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            {career.salary}
+          </span>
         </span>
       )}
       <span
@@ -58,7 +61,7 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
       >
         <span
           className="w-full [overflow-wrap:normal] [word-break:keep-all]"
-          style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
+          style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "#F4F7FF" }}
         >
           {breakableTitle(career.title)}
         </span>
@@ -115,7 +118,7 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
         >
           <span
             className="w-full [overflow-wrap:normal] [word-break:keep-all]"
-            style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
+            style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "#F4F7FF" }}
           >
             {breakableTitle(career.title)}
           </span>

@@ -187,7 +187,7 @@ export function ProfileExperience() {
 
 
   return (
-    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "radial-gradient(1100px 700px at 88% -8%, color-mix(in srgb, var(--hero-accent-purple) 62%, transparent), transparent 62%), radial-gradient(950px 680px at -8% 28%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%), radial-gradient(1000px 720px at 72% 112%, color-mix(in srgb, var(--hero-accent-teal) 52%, transparent), transparent 62%), var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <img alt="" src="/images/app/background-space.svg" className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
       </div>

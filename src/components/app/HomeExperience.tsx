@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
-import { BROWSE_RECOMMENDED } from "./catalog";
+import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
@@ -396,7 +396,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
 export function HomeExperience() {
   return (
-    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "radial-gradient(1100px 700px at 88% -8%, color-mix(in srgb, var(--hero-accent-purple) 62%, transparent), transparent 62%), radial-gradient(950px 680px at -8% 28%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%), radial-gradient(1000px 720px at 72% 112%, color-mix(in srgb, var(--hero-accent-teal) 52%, transparent), transparent 62%), var(--background)", color: "var(--foreground)" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <img alt="" src="/images/app/background-space.svg" className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
       </div>
@@ -442,14 +442,11 @@ export function HomeExperience() {
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-6)]">
           <div className="flex flex-col gap-[var(--space-1)]">
             <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Recommended for You
+              Recommended Because You Liked Business &amp; Money
             </h2>
-            <p className="text-[12px] leading-[16px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-              A mix across your Industry Interests
-            </p>
           </div>
           <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {BROWSE_RECOMMENDED.map((career) => (
+            {BROWSE_BECAUSE_LIKED.map((career) => (
               <PosterCard key={career.title} career={career} />
             ))}
           </div>

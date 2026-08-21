@@ -11,7 +11,6 @@ import { PosterCard, RankedPosterCard } from "./PosterCard";
 import {
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
-  BROWSE_RECOMMENDED,
   BROWSE_TRENDING,
   BROWSE_TYPICAL_PAY,
   BROWSE_WORLD_RAIL,
@@ -119,7 +118,6 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
   const effectiveWorld = filtersOpen ? world : "All";
   const effectiveSort: SortOption = filtersOpen ? sort : "Recommended";
   const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, query, effectiveSort);
-  const recommended = view(BROWSE_RECOMMENDED);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
   const trending = view(BROWSE_TRENDING);
   const worldRail = view(BROWSE_WORLD_RAIL);
@@ -154,15 +152,17 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         </div>
       )}
 
-      {recommended.length > 0 && (
-        <Rail title="Recommended for You" subtitle="A mix across your Industry Interests">
-          <PosterRail careers={recommended} />
+      {/* Rail order + content per Joshua (2026-08-21): merged recommended
+         rail, then Tech, Top 5, Might Not Know, Typical Pay. */}
+      {becauseLiked.length > 0 && (
+        <Rail title="Recommended Because You Liked Business & Money">
+          <PosterRail careers={becauseLiked} />
         </Rail>
       )}
 
-      {becauseLiked.length > 0 && (
-        <Rail title="Because You Liked Business & Money">
-          <PosterRail careers={becauseLiked} />
+      {worldRail.length > 0 && (
+        <Rail title="Tech & Engineering">
+          <PosterRail careers={worldRail} />
         </Rail>
       )}
 
@@ -177,14 +177,6 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
             ))}
           </div>
         </section>
-      )}
-
-      {/* Section header is the frame's own (its rail carries the farming +
-         building set in the design; ported verbatim). */}
-      {worldRail.length > 0 && (
-        <Rail title="Tech & Engineering">
-          <PosterRail careers={worldRail} />
-        </Rail>
       )}
 
       {mightNotKnow.length > 0 && (
@@ -460,10 +452,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
   }
 
   return (
-    <div className="marketing-v2 relative min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img alt="" src="/images/app/background-space-explore.svg" className="absolute top-0 left-0 h-[3355px] w-full max-w-none object-cover" />
-      </div>
+    <div className="marketing-v2 theme-light relative min-h-dvh w-full" style={{ background: "radial-gradient(1100px 700px at 88% -8%, color-mix(in srgb, var(--hero-accent-purple) 14%, transparent), transparent 62%), radial-gradient(950px 680px at -8% 28%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 60%), radial-gradient(1000px 720px at 72% 112%, color-mix(in srgb, var(--hero-accent-teal) 16%, transparent), transparent 62%), var(--background)", color: "var(--foreground)" }}>
 
       <DesktopNavigation active="Explore" />
 

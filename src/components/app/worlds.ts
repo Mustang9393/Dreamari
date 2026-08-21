@@ -78,5 +78,7 @@ export function posterTitleFont(world: string): CSSProperties {
 }
 
 // gradient/text-scrim — the Browse Card component's own stops, via tokens.
+// Theme-independent: the poster is a self-contained dark-scrimmed object —
+// on the light Explore the scrim must NOT resolve to the light background.
 export const TEXT_SCRIM =
-  "linear-gradient(180deg, var(--scrim-transparent) 0%, var(--scrim-medium) 30%, var(--scrim-heavy) 51%, var(--background) 100%)";
+  "linear-gradient(180deg, rgba(5,7,15,0) 0%, rgba(5,7,15,0.55) 30%, rgba(5,7,15,0.86) 51%, #05070f 100%)";

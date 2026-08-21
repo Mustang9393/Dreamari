@@ -186,7 +186,8 @@
 }
 
 /* Schools/Enterprise audience: light mode (Semantic.Light), resolved the same way. */
-.marketing-v2 .theme-light {
+.marketing-v2 .theme-light,
+.marketing-v2.theme-light {
   --background: #f4f7ff; /* neutral.50 */
   --foreground: #05070f; /* neutral.900 */
   --card: #d8dbe8; /* neutral.100 */
@@ -215,4 +216,17 @@
   color: var(--foreground);
   min-height: 100%;
   transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+/* Wide-screen readability (2026-08-21, per Usman): the app's type is fixed
+   px transcribed from 1440px Figma frames and never scaled past design
+   width — on large monitors everything reads small. zoom scales type,
+   spacing, and layout uniformly (rail geometry stays proportionally exact),
+   which fits a px-based prototype far better than a rem retrofit. */
+@media (min-width: 1720px) {
+  .marketing-v2 { zoom: 1.1; }
+}
+@media (min-width: 2100px) {
+  .marketing-v2 { zoom: 1.22; }
 }
