@@ -7,6 +7,7 @@ import type { Transition, Variants } from "framer-motion";
 import { ArrowRight, Banknote, Flame, TrendingUp, X } from "lucide-react";
 import { SPRING_BOUNCY, TACTILE_PRESS, popIn } from "./duo-motion";
 import { DreamyRig } from "./characters/DreamyRig";
+import { PosterCard } from "@/components/app/PosterCard";
 
 // Sequence 01 — Daily Drop, Super-Duolingo style (ref: Nick Parente's Super
 // campaign frames): deep indigo night, Dreamy FLYING solo with a thick solid
@@ -42,6 +43,36 @@ const popAt = (delay: number): Transition => ({
   delay,
   opacity: { duration: 0.15, delay },
 });
+
+// The drop's career as browse-card data. TODO(asset): swap photo for
+// poster-ethical-hacker.png when the Might-Not-Know image batch lands.
+const DROP_CAREER = {
+  title: "Ethical Hacker",
+  world: "Tech & Engineering",
+  photo: "/images/app/poster-cyber-security.png",
+};
+// Match taxonomy: strong | stretch | wildcard (wildcards get the foil)
+const DROP_TIER: "strong" | "stretch" | "wildcard" = "wildcard";
+
+// The landing's Wildcard "rare pull" foil, scoped for the takeover: rotating
+// conic border + diagonal sheen sweep (see marketing/animations.css).
+const FOIL_CSS = `
+@property --dd-holo-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes dd-holo-spin { to { --dd-holo-angle: 360deg; } }
+.dd-holo-border {
+  background: conic-gradient(from var(--dd-holo-angle), #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700, #8b5cf6);
+  animation: dd-holo-spin 2.2s linear infinite;
+}
+@keyframes dd-holo-sheen-sweep { 0% { background-position: 160% 160%; } 100% { background-position: -60% -60%; } }
+.dd-holo-sheen {
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.4) 45%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.4) 55%, transparent 70%);
+  background-size: 250% 250%;
+  background-repeat: no-repeat;
+  animation: dd-holo-sheen-sweep 3.4s ease-in-out infinite;
+  mix-blend-mode: overlay;
+}
+@media (prefers-reduced-motion: reduce) { .dd-holo-border, .dd-holo-sheen { animation: none; } }
+`;
 
 const chipRow: Variants = {
   hidden: {},
@@ -642,26 +673,39 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         initial={{ scale: 0, rotate: -6, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={popAt(0.7)}
-        className="relative z-[2] flex w-full max-w-[340px] flex-col items-center gap-1.5 rounded-3xl px-6 py-5"
-        style={{
-          background: `linear-gradient(160deg, color-mix(in srgb, ${V.primary} 40%, ${V.card}), ${V.card})`,
-          border: `1px solid color-mix(in srgb, ${V.primary} 55%, ${V.border})`,
-          boxShadow: `0 0 44px color-mix(in srgb, ${V.primary} 35%, transparent)`,
-        }}
+        className="relative z-[2] flex flex-col items-center gap-3"
       >
+        <style>{FOIL_CSS}</style>
+        {/* tier chip — our match taxonomy; wildcards carry the foil hues */}
         <span
-          className="text-[10px] font-extrabold uppercase"
-          style={{ letterSpacing: "0.16em", color: "var(--world-tech-engineering-design)" }}
+          className="rounded-full px-3.5 py-1 text-[10.5px] font-extrabold uppercase"
+          style={
+            DROP_TIER === "wildcard"
+              ? {
+                  letterSpacing: "0.14em",
+                  background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700)",
+                  color: V.bg,
+                }
+              : {
+                  letterSpacing: "0.14em",
+                  background: DROP_TIER === "strong" ? "var(--accent-subtle)" : V.gold,
+                  color: V.bg,
+                }
+          }
         >
-          Tech &amp; Engineering
+          {DROP_TIER === "wildcard" ? "Wildcard" : DROP_TIER === "strong" ? "Strong Match" : "Stretch"}
         </span>
-        <span className="text-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: V.fg }}>
-          Ethical Hacker
-        </span>
-        <span className="mt-1 text-[12.5px] leading-[18px]" style={{ color: V.muted }}>
+        {/* the career's browse card, foil-wrapped when it's a wildcard pull */}
+        <div className={`relative rounded-[19px] ${DROP_TIER === "wildcard" ? "dd-holo-border p-[3px]" : ""}`}>
+          <PosterCard career={DROP_CAREER} className="pointer-events-none" />
+          {DROP_TIER === "wildcard" && (
+            <span aria-hidden className="dd-holo-sheen pointer-events-none absolute inset-[3px] rounded-[16px]" />
+          )}
+        </div>
+        <p className="max-w-[320px] text-[12.5px] leading-[18px]" style={{ color: V.muted }}>
           Ethical Hackers help companies find weak spots before criminals do. They hack with permission to make
           systems safer.
-        </span>
+        </p>
       </motion.div>
 
       <motion.div

@@ -6,6 +6,22 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Daily Drop reveal: browse card + match taxonomy + foil (DEPLOYED)
+
+- Reveal shows the career's real BROWSE PosterCard (poster face + world
+  label) with a match-tier chip above: strong (accent-subtle) / stretch
+  (gold) / WILDCARD — wildcards wrap the card in the landing's rare-pull
+  foil (rotating conic border + sheen), resurrected from
+  marketing/animations.css as scoped dd-holo-* classes inside
+  DailyDropDemo (a <style> block, since /home doesn't import
+  animations.css). Rarity/numbering language is gone (Prismatic was the
+  Replit reference's collectible tier — not our taxonomy).
+- TODO(asset): DROP_CAREER photo uses poster-cyber-security.png as the
+  Ethical Hacker stand-in until Mika's Might-Not-Know posters land.
+- Reveal container scrolls (overflow-y-auto) — taller card content must
+  not clip short viewports. CTA row: View Career Details + quiet Close.
+
+
 ### 2026-08-21 IB sim journey + home recommended rail (DEPLOYED)
 
 - User supplied "Investment Banking.zip" (21 cel-shaded Colbalt Capital
