@@ -18,11 +18,13 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // than redrawn approximations.
 const WORLD_COLOR = "var(--world-building-construction)";
 
+// Each stage: clear title + one-sentence explanation with a visible
+// outcome (per direct feedback — the story, not just product pieces).
 const STAGES = [
-  { id: "top3", label: "My Top 3", line: "Narrow it to three." },
-  { id: "plan", label: "My Plan", line: "Lock in one. Follow the plan." },
-  { id: "resume", label: "Resume", line: "Put your resume out there." },
-  { id: "hired", label: "Hire-ready", line: "What all of it is for." },
+  { id: "top3", label: "My Top 3", line: "Save your top 3 career paths to compare your best-fit options." },
+  { id: "plan", label: "My Plan", line: "Choose one path and get a step-by-step plan with actions, milestones, and experiences to build toward it." },
+  { id: "resume", label: "Resume Builder", line: "Turn your experiences, skills, and activities into a polished resume you can share with employers." },
+  { id: "hired", label: "Hire-Ready", line: "Use your plan and resume to become opportunity-ready for internships, mentors, and future employers." },
 ] as const;
 
 // Existing landing photos; titles set in each world's approved poster face
@@ -53,7 +55,7 @@ export function GetHiredChapter() {
       id="get-hired"
       title="Get hired"
       color={WORLD_COLOR}
-      oneliner="Top 3. One plan. One resume. Hire-ready."
+      oneliner="Narrow your path. Build a plan. Strengthen your resume. Get career-ready."
       centered
       graphicRef={graphicRef}
       playing={playing}
