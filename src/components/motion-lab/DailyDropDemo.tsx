@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Transition, Variants } from "framer-motion";
@@ -602,16 +602,57 @@ function QuizPhase({ onSolve }: { onSolve: (clues: number) => void }) {
 // and CTA stage in (copy per the Replit daily-drop flow).
 function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number }) {
   const reduced = useReducedMotion();
+  // Fit-to-viewport: the celebration stack (Dreamy + heading + poster card +
+  // stats + CTAs) is ~880px tall — taller than most laptop windows, which
+  // used to clip it behind a scrollbar. Measure the unscaled content against
+  // the takeover's height and scale the whole column down proportionally
+  // (floor 0.6 for legibility; only below that does scrolling return).
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const columnRef = useRef<HTMLDivElement | null>(null);
+  const [fit, setFit] = useState(1);
+  const [columnHeight, setColumnHeight] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const shell = shellRef.current;
+      const column = columnRef.current;
+      if (!shell || !column) return;
+      const h = column.scrollHeight; // layout height — transform-independent
+      setColumnHeight(h);
+      // 16px safety margin absorbs subpixel rounding and late font metrics
+      setFit(Math.max(0.6, Math.min(1, (shell.clientHeight - 16) / h)));
+    };
+    measure();
+    // fonts/poster image can settle a beat after mount and change the height
+    const settle = setTimeout(measure, 600);
+    window.addEventListener("resize", measure);
+    return () => { clearTimeout(settle); window.removeEventListener("resize", measure); };
+  }, []);
   return (
     <div
-      className="absolute inset-0 overflow-y-auto"
-      style={{ background: `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${V.purple} 78%, #10134a), ${V.bg} 64%)` }}
+      ref={shellRef}
+      className="absolute inset-0"
+      style={{
+        // decorations (specks/diamonds) poke past the fold and used to leave a
+        // phantom 10px scroll — scrolling only returns at the 0.6 fit floor,
+        // where content genuinely can't fit
+        overflowY: fit <= 0.6 ? "auto" : "hidden",
+        background: `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${V.purple} 78%, #10134a), ${V.bg} 64%)`,
+      }}
     >
       <NightSpecks />
       <FloatingDiamonds />
       <ImpactBurst />
       <Confetti />
-      <div className="relative mx-auto flex min-h-full w-full max-w-[460px] flex-col items-center justify-center gap-4 px-6 py-12 text-center">
+      {/* middle wrapper carries the SCALED layout height so the scroll
+         container sees content that genuinely fits (transform alone
+         wouldn't shrink the layout box) */}
+      <div className="relative flex min-h-full items-center justify-center">
+      <div style={fit < 1 && columnHeight ? { height: columnHeight * fit, width: "100%" } : { width: "100%" }}>
+      <div
+        ref={columnRef}
+        className="relative mx-auto flex w-full max-w-[460px] flex-col items-center justify-center gap-4 px-6 py-12 text-center"
+        style={{ transform: fit < 1 ? `scale(${fit})` : undefined, transformOrigin: "top center" }}
+      >
 
       <div className="relative">
         <SunRays />
@@ -752,6 +793,8 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
           Close
         </button>
       </motion.div>
+      </div>
+      </div>
       </div>
     </div>
   );
