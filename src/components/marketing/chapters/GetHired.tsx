@@ -54,7 +54,7 @@ export function GetHiredChapter() {
       title="Get hired"
       color={WORLD_COLOR}
       oneliner="Top 3. One plan. One resume. Hire-ready."
-      flip
+      centered
       graphicRef={graphicRef}
       playing={playing}
       graphicRevealed={graphicRevealed}

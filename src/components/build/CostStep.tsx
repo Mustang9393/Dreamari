@@ -12,7 +12,7 @@ import type { StepProps } from "./steps";
 
 const AMBER = "var(--color-world-business-money-office)";
 
-export function CostStep({ state, patch, onBack, onNext, react, percent }: StepProps) {
+export function CostStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   const index = state.costIndex;
   const touched = index >= 0;
   const value = touched ? index : 0;
@@ -27,7 +27,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent }: StepP
     <div className="w-full">
       <CardHud percent={percent} />
       <GlassCard>
-      <QuestionHeading title="What total school or training cost feels realistic?" subtitle="Select a range. You can change it later." />
+      <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" subtitle="Select a range. You can change it later." />
 
       <div
         className="rounded-2xl border px-4 py-5 sm:px-6"
@@ -90,9 +90,10 @@ export function CostStep({ state, patch, onBack, onNext, react, percent }: StepP
           />
         </div>
 
-        {/* Stop labels double as jump targets — two-line splits mirror the
-           reference's own line breaks. */}
-        <div className="grid grid-cols-3 gap-y-2 sm:grid-cols-6">
+        {/* Stop labels double as jump targets, positioned at the SAME
+           percentages as the tick dots so the thumb sits right over the
+           selected words (edges clamp inward to stay inside the card). */}
+        <div className="relative h-[38px]">
           {(
             [
               ["As little as", "possible"],
@@ -104,16 +105,26 @@ export function CostStep({ state, patch, onBack, onNext, react, percent }: StepP
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;
+            const stopPercent = (i / (COST_STOPS.length - 1)) * 100;
+            const isFirst = i === 0;
+            const isLast = i === COST_STOPS.length - 1;
             return (
               <button
                 key={COST_STOPS[i]}
                 type="button"
                 onClick={() => setIndex(i)}
-                className="px-1 text-center text-[11px] leading-tight font-semibold transition-colors sm:text-[11.5px]"
-                style={{ color: isActive ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)", opacity: isActive ? 1 : 0.75 }}
+                className={`absolute top-0 max-w-[92px] text-[11px] leading-tight font-semibold transition-colors sm:text-[11.5px] ${
+                  isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
+                }`}
+                style={{
+                  left: isLast ? undefined : `${stopPercent}%`,
+                  right: isLast ? 0 : undefined,
+                  color: isActive ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 78%, transparent)",
+                  opacity: isActive ? 1 : 0.8,
+                }}
               >
                 {top}
-                {bottom && <span className="block text-[10px] font-medium opacity-80">{bottom}</span>}
+                {bottom && <span className="block text-[10px] font-medium opacity-85">{bottom}</span>}
               </button>
             );
           })}

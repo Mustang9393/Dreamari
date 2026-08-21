@@ -56,8 +56,6 @@ export function MatchLab() {
   const [slotPops, setSlotPops] = useState<number[]>([0, 0, 0]);
 
   const decisionShown = useRef(false);
-  const idleShown = useRef(false);
-  const [idleOpen, setIdleOpen] = useState(false);
   const pointerActive = useRef(false);
   const startX = useRef(0);
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -201,18 +199,6 @@ export function MatchLab() {
 
   const topId = top?.id;
   const dragXRef = useRef(0);
-  // Idle escape hatch: if the guide is closed and they haven't swiped on
-  // ANYTHING for a while, offer Explore warmly — not deciding is a valid
-  // answer, and browsing is the gentler mode. Once per visit.
-  useEffect(() => {
-    if (guideOpen || idleShown.current || history.length > 0 || liked.length > 0 || deckIndex > 0) return;
-    const t = setTimeout(() => {
-      idleShown.current = true;
-      setIdleOpen(true);
-    }, 20000);
-    return () => clearTimeout(t);
-  }, [guideOpen, history.length, liked.length, deckIndex]);
-
   // keep the native listeners' handle fresh without re-binding them
   useEffect(() => {
     dragLive.current = { like, pass, exiting: !!exiting };
@@ -453,26 +439,6 @@ export function MatchLab() {
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
-              </Button>
-            </div>
-          </div>
-        </Sheet>
-      )}
-
-      {/* ---- idle sheet: gentle route to Explore ---- */}
-      {idleOpen && (
-        <Sheet onClose={() => setIdleOpen(false)}>
-          <div className="flex flex-col items-center gap-4 text-center">
-            <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Not feeling these yet?</h2>
-            <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
-              Totally fine — there&apos;s no wrong pace here. Browse careers freely in Explore, and come back to matching whenever one catches your eye.
-            </p>
-            <div className="flex w-full flex-col gap-2.5">
-              <Button variant="primary" size="large" onClick={() => router.push("/#explore")} type="button">
-                Take me to Explore
-              </Button>
-              <Button variant="secondary" onClick={() => setIdleOpen(false)} type="button">
-                I&apos;ll keep swiping
               </Button>
             </div>
           </div>

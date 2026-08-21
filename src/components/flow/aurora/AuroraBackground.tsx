@@ -315,7 +315,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
     // cheap globalAlpha multiplier on the (already-rendered) blit, not a gradient recompute.
     function redrawBlobLayers(isDark: boolean) {
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
-      const blobAlpha = isDark ? 0.16 : 0.28;
+      const blobAlpha = isDark ? 0.11 : 0.22;
       const size = Math.max(1, Math.ceil(blobRadius * 2 * dpr));
 
       blobLayersRef.current = blobsRef.current.map((blob) => {

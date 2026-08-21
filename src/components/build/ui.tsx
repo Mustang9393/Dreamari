@@ -66,16 +66,16 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
     <div>
       <div className="flex items-center gap-2.5">
         {phase && (
-          <span className="text-[11px] font-bold tracking-wide" style={{ color: "var(--color-brand-300)" }}>
+          <span className="text-[11px] font-bold tracking-wide" style={{ color: "color-mix(in srgb, var(--color-brand-400) 55%, var(--color-night-foreground))" }}>
             {phase}
           </span>
         )}
         {almostDone && (
-          <span className="text-[11px] font-bold" style={{ color: "var(--color-feedback-success-dark-surface)" }}>
+          <span className="text-[11px] font-bold" style={{ color: "color-mix(in srgb, var(--color-feedback-success-dark-surface) 55%, var(--color-night-foreground))" }}>
             Almost done
           </span>
         )}
-        <span className="ml-auto text-[12px] font-extrabold" style={{ color: "var(--color-feedback-success-dark-surface)" }}>
+        <span className="ml-auto text-[12px] font-extrabold" style={{ color: "color-mix(in srgb, var(--color-feedback-success-dark-surface) 55%, var(--color-night-foreground))" }}>
           {percent}% Complete
         </span>
       </div>
@@ -124,28 +124,39 @@ export function CardHud({ percent, phase, almostDone }: { percent: number; phase
   );
 }
 
-export function QuestionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+export function QuestionHeading({ title, subtitle, sprite }: { title: string; subtitle?: string; sprite?: string }) {
   // Left-aligned per the frameless Figma frame (3214-7363) — big, anchored to
-  // the same grid as the options below.
+  // the same grid as the options below. Dreamy sits beside the question,
+  // ASKING it (the old speech-bubble row is retired to free vertical space).
   return (
-    <div className="mb-5 sm:mb-7">
+    <div className="mb-5 flex items-center gap-3 sm:mb-7 sm:gap-4">
+      {sprite && (
+        <img
+          src={sprite}
+          alt=""
+          aria-hidden
+          className="h-[52px] w-[52px] flex-none object-contain motion-safe:animate-[dreamy-celebrate_3.2s_ease-in-out_infinite] sm:h-[72px] sm:w-[72px]"
+        />
+      )}
+      <div>
       <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
         <InkText text={title} />
       </h1>
       {subtitle && (
         <p
-          className="mt-2 text-[14px] font-medium text-[var(--color-night-muted-foreground)] opacity-0 motion-safe:animate-[fade-slide-up_0.5s_ease-out_forwards]"
-          style={{ animationDelay: "0.5s" }}
+          className="mt-2 text-[14.5px] font-medium opacity-0 motion-safe:animate-[fade-slide-up_0.5s_ease-out_forwards]"
+          style={{ color: "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)", animationDelay: "0.5s" }}
         >
           {subtitle}
         </p>
       )}
+      </div>
     </div>
   );
 }
 
 export function Citation({ children }: { children: ReactNode }) {
-  return <p className="mt-4 text-center text-[10.5px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-50">{children}</p>;
+  return <p className="mt-4 text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-80">{children}</p>;
 }
 
 export function StepFooter({
@@ -265,7 +276,7 @@ export function ChipGrid({
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
               borderColor: isSelected ? accent : "var(--color-glass-border)",
-              color: isSelected ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
+              color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
               ...(expandedBy === "tap" && index >= PREVIEW
                 ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
                 : cascade(index)),

@@ -10,7 +10,6 @@ import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
-import { DreamyGuide } from "./DreamyGuide";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -53,14 +52,13 @@ export function BuildFlowExperience() {
   const [stageIndex, setStageIndex] = useState(0);
   const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
   const [phase, setPhase] = useState<Phase>("build");
-  const [reactionNonce, setReactionNonce] = useState(0);
 
   const stage = STAGES[stageIndex];
   const stageId: StageId = stage.id;
 
   const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
   const back = () => setStageIndex((current) => Math.max(current - 1, 0));
-  const react = () => setReactionNonce((n) => n + 1);
+  const react = () => {}; // Dreamy reactions retired with the bubble row
   const seeMatches = () => setPhase("loading");
 
   useEffect(() => {
@@ -76,7 +74,8 @@ export function BuildFlowExperience() {
   const accent = phase === "build" ? STAGE_ACCENTS[stageId] : MATCH_ACCENT;
   const isComplete = stageId === "complete" && phase === "build";
 
-  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, phase: stage.phase, almostDone: stage.almostDone };
+  const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
+  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, phase: stage.phase, almostDone: stage.almostDone, sprite: dreamy?.sprite };
 
   let content: ReactNode = null;
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;
@@ -87,9 +86,8 @@ export function BuildFlowExperience() {
   else if (stageId === "cost") content = <CostStep {...stepProps} onBack={back} />;
   else if (stageId === "location") content = <LocationStep {...stepProps} onBack={back} />;
   else if (stageId === "profile") content = <ProfileStep {...stepProps} onBack={back} />;
-  else if (stageId === "complete") content = <CompletionScreen state={state} patch={patch} onSeeMatches={seeMatches} />;
+  else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} />;
 
-  const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
 
   return (
     <ThemeProvider>
@@ -113,15 +111,10 @@ export function BuildFlowExperience() {
            the viewport, and the whole group centers when it is not. The CTA
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
-        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:py-5">
+        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
           {/* Same 860px column for BOTH variants — per direct feedback the framed
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">
-            {phase === "build" && dreamy && (
-              <div className="mb-3 w-full flex-none px-5 sm:px-10">
-                <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
-              </div>
-            )}
             <div className="flow-scroll-fade flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
               {phase === "build" && <StepTransition key={stageId}>{content}</StepTransition>}
               {phase === "loading" && (

@@ -49,7 +49,7 @@ const STATE_CODES: Record<string, string> = {
 
 const GREEN = "var(--color-world-food-farming-nature)";
 
-export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone }: StepProps) {
+export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
   const [view, setView] = useState<"map" | "list">("map");
   const selected = state.states;
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -101,7 +101,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
     <div className="w-full">
       <CardHud percent={percent} almostDone={almostDone} />
       <GlassCard>
-      <QuestionHeading title="Where are you open to going?" subtitle="Choose up to 3 states. Your first choice is your top preference." />
+      <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose up to 3 states. Your first choice is your top preference." />
 
       {/* Map | List segmented toggle. */}
       <div

@@ -21,6 +21,10 @@ type ChapterShellProps = {
   // without growing the cards: raises the frame's width ceiling. Card-deck
   // chapters must NOT use this — their --mu-scaled chrome is tuned to 480px.
   wide?: boolean;
+  // Centered: copy stacked ABOVE the graphic, both centered — no side column
+  // (per feedback the closing Get Hired chapter anchors the page centered
+  // rather than continuing the zig-zag).
+  centered?: boolean;
   graphicRef: RefObject<HTMLDivElement | null>;
   playing: boolean;
   graphicRevealed: boolean;
@@ -35,6 +39,7 @@ export function ChapterShell({
   flip = false,
   compact = false,
   wide = false,
+  centered = false,
   graphicRef,
   playing,
   graphicRevealed,
@@ -70,15 +75,17 @@ export function ChapterShell({
          specifically; sm:/lg: (tablet and up) keep their own larger padding
          untouched since the chip issue is a phone-only concern. */}
       <div
-        className={`mx-auto flex w-full max-w-[1200px] items-center gap-6 px-6 pt-6 pb-6 max-[900px]:flex-col max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 min-[901px]:gap-[60px] lg:pt-14 lg:pb-14 ${flip ? "flex-row-reverse" : "flex-row"}`}
+        className={`mx-auto flex w-full max-w-[1200px] items-center px-6 pt-6 pb-6 max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
+          centered ? "flex-col gap-8" : `gap-6 max-[900px]:flex-col min-[901px]:gap-[60px] ${flip ? "flex-row-reverse" : "flex-row"}`
+        }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
-          className="flex-none text-center transition-all duration-700 ease-out min-[901px]:max-w-[360px] min-[901px]:flex-[0_0_320px] min-[901px]:text-left"
+          className={`flex-none text-center transition-all duration-700 ease-out ${centered ? "max-w-[560px]" : "min-[901px]:max-w-[360px] min-[901px]:flex-[0_0_320px] min-[901px]:text-left"}`}
           style={{
             opacity: copyRevealed ? 1 : 0,
-            transform: copyRevealed ? "translateX(0)" : `translateX(${flip ? "42px" : "-42px"})`,
+            transform: copyRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "42px" : "-42px"})`,
           }}
         >
           <h2
@@ -112,10 +119,10 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className="mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 flex-1 items-center justify-center transition-all delay-[120ms] duration-700 ease-out max-[900px]:w-full"
+          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${centered ? "w-full" : "flex-1 max-[900px]:w-full"}`}
           style={{
             opacity: graphicRevealed ? 1 : 0,
-            transform: graphicRevealed ? "translateX(0)" : `translateX(${flip ? "-42px" : "42px"})`,
+            transform: graphicRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "-42px" : "42px"})`,
             ["--c" as string]: color,
           }}
         >

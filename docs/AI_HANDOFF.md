@@ -6,6 +6,36 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Build-flow feedback round + WCAG pass (DEPLOYED)
+
+- Work Vibe: options left, chosen words rise on the RIGHT panel (Replit
+  pattern, per user; adds layout variation between steps).
+- Education: all 5 choices on ONE horizontal line (scrolls on phones).
+- Cost slider: stop labels absolutely positioned at the same percentages as
+  the tick dots — the thumb sits directly over the selected words (edge
+  labels clamp inward).
+- Profile: grade + GPA are now styled native <select> dropdowns
+  (SelectField) — the pill walls read as information overload.
+- Completion screen: ONLY Congratulations + "See matches" (path picker
+  College/Trades/Both REMOVED — state.path still exists in types but
+  nothing sets it now).
+- Dreamy speech-bubble row RETIRED; Dreamy renders beside the question
+  heading (QuestionHeading sprite prop; sprite threaded via StepProps).
+  Dreamy reactions (reactionNonce hearts) retired with it — react() is a
+  no-op. Section top padding sm:pt-16 so the HUD clears the fixed home btn.
+- WCAG AA AUDIT (both modes, computed): dark mode passed everywhere
+  (7.5:1+). Light mode FAILED on brand-300 labels (2.19) and success-green
+  text (2.02). Fix: adaptive mixes color-mix(55% brand-400/success, 45%
+  night-foreground) — passes both modes (5.5-12.6). Aurora blobAlpha
+  0.16→0.11 dark / 0.28→0.22 light (softer wash), idle option text lifted
+  to an 80% night-foreground mix, citations opacity 50→80.
+- Match deck: the 20s idle "Not feeling these yet?" auto-sheet REMOVED
+  entirely per user (state+effect+sheet).
+- Landing: ChapterShell gained `centered` mode; GET HIRED now renders
+  centered (copy above card) instead of the zig-zag flip. Other chapters
+  keep the deliberate alternation.
+
+
 ### 2026-08-21 Content batch 08-19/08-21 + home refresh (DEPLOYED)
 
 - Explore Browse: "Typical Pay: $100K +" = the user's 10-career salary list
