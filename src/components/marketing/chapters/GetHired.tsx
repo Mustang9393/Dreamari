@@ -19,10 +19,10 @@ import { usePlayingOnScroll } from "../scrollHooks";
 const WORLD_COLOR = "var(--world-building-construction)";
 
 const STAGES = [
-  { id: "top3", kicker: "Prep to get hired", label: "My Top 3", line: "Narrow it to three." },
-  { id: "plan", kicker: "Prep to get hired", label: "My Plan", line: "Lock in one. Follow the plan." },
-  { id: "resume", kicker: "Prep to get hired", label: "Resume", line: "Put your resume out there." },
-  { id: "hired", kicker: "Get hired", label: "Hire-ready", line: "What all of it is for." },
+  { id: "top3", label: "My Top 3", line: "Narrow it to three." },
+  { id: "plan", label: "My Plan", line: "Lock in one. Follow the plan." },
+  { id: "resume", label: "Resume", line: "Put your resume out there." },
+  { id: "hired", label: "Hire-ready", line: "What all of it is for." },
 ] as const;
 
 // Existing landing photos; titles set in each world's approved poster face
@@ -63,8 +63,7 @@ export function GetHiredChapter() {
         {/* Stage header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: WORLD_COLOR }}>{current.kicker}</div>
-            <div className="mt-[4px] truncate text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{current.label}</div>
+            <div className="truncate text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{current.label}</div>
           </div>
           <div className="flex flex-none items-center gap-[6px]">
             {STAGES.map((item, index) => (
@@ -202,11 +201,7 @@ export function GetHiredChapter() {
           >
             Back
           </button>
-          {last ? (
-            <a href="/flow" className="rounded-full px-5 py-2 text-[12px] font-bold" style={{ background: WORLD_COLOR, color: "#05070f" }}>
-              Start your story
-            </a>
-          ) : (
+          {last ? null : (
             <button
               type="button"
               onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}

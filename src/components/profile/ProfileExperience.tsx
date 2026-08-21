@@ -354,7 +354,6 @@ export function ProfileExperience() {
                     <span className="truncate text-[13.5px] font-bold">{career.title}</span>
                     <span className="truncate text-[10.5px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {matchTier(career.match)}</span>
                   </span>
-                  <MatchRing score={career.match} size={32} />
                   <button
                     type="button"
                     onClick={() => { addToTop3(career.id); if (top3.length >= 2) setAddOpen(false); }}

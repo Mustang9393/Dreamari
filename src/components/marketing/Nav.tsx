@@ -107,11 +107,6 @@ export function Nav({ onSchoolsClick }: NavProps) {
         {/* Links stay desktop-only (same 900px tier as before — below that there's no
            room without wrapping, and the page is a single scroll anyway). */}
         <nav className="hidden gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
-          {QUICK_LINKS.map((link) => (
-            <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]" style={{ color: "var(--primary-tint)" }}>
-              {link.label}
-            </Link>
-          ))}
           {LINKS.map((link) => (
             <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]">
               {link.label}
@@ -141,7 +136,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border min-[900px]:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5">
@@ -164,7 +159,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
         {/* Mobile menu panel */}
         {menuOpen && (
           <div
-            className="absolute top-[calc(100%+8px)] right-0 flex w-60 flex-col gap-1 rounded-2xl border p-2 min-[900px]:hidden"
+            className="absolute top-[calc(100%+8px)] right-0 flex w-60 flex-col gap-1 rounded-2xl border p-2"
             style={{
               background: "color-mix(in srgb, var(--background) 88%, transparent)",
               backdropFilter: "blur(18px) saturate(1.6)",
@@ -185,7 +180,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
               </Link>
             ))}
             {LINKS.map((link) => (
-              <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+              <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-[14px] font-semibold min-[900px]:hidden" style={{ color: "var(--foreground)" }}>
                 {link.label}
               </Link>
             ))}
@@ -195,7 +190,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
                 setMenuOpen(false);
                 onSchoolsClick();
               }}
-              className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold"
+              className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold min-[900px]:hidden"
               style={{ color: "var(--foreground)" }}
             >
               For schools
