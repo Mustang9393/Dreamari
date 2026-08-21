@@ -195,13 +195,13 @@ function HeroBanner() {
           <ResponsiveFlight onOpen={() => setDropOpen(true)} />
         </PanelShell>
 
-        {/* Panel 2 — Continue Where You Left Off */}
+        {/* Panel 2 — Continue Learning & Playing */}
         {/* wash derived from the content's world (Business & Money) so the
            whole panel obeys the system, not the old pink rotation */}
         <PanelShell from="color-mix(in srgb, var(--world-business-money-office) 22%, var(--background))">
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--world-business-money-office)">CONTINUE WHERE YOU LEFT OFF</CaptionLabel>
+              <CaptionLabel color="var(--world-business-money-office)">CONTINUE PLAY MODE</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 The $30B Deal
               </p>
@@ -220,7 +220,7 @@ function HeroBanner() {
               </div>
             </div>
             <div>
-              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
+              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Career Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
             </div>
           </div>
           <PanelPhoto photo="/images/app/activity-ib-dossier-hero.png" />
@@ -311,35 +311,42 @@ type Activity = {
   badge: string;
   badgeColor: string;
   title: string;
+  /** the specific simulation/chapter name, shown italic under the title */
+  chapter?: string;
   sub: string;
   fill: number;
   stat: string;
   cta: string;
-  photo: string;
+  photo?: string;
+  /** "glossary" renders a vocabulary visual instead of a photo (per
+      feedback: the glossary game must not wear career-sim imagery) */
+  art?: "glossary";
 };
 
 // Active Activity Cards (Figma 2537:4570/4587/4603) — copy, colors, progress
 // widths straight from the frame.
 const ACTIVITIES: Activity[] = [
   {
-    badge: "SIMULATION",
+    badge: "CAREER SIMULATION",
     badgeColor: "var(--world-business-money-office)",
-    title: "The $30B Deal",
-    sub: "Close the mandate at Colbalt Capital",
+    title: "Day in the Life: Investment Banker",
+    chapter: "The $30B Deal",
+    sub: "",
     fill: 62,
     stat: "62% · 18 min left",
-    cta: "Resume simulation",
+    cta: "Resume Simulation",
     photo: "/images/app/activity-ib-dossier.png",
   },
   {
-    badge: "GLOSSARY",
+    badge: "GLOSSARY GAME",
     badgeColor: "var(--world-business-money-office)",
     title: "Finance Essentials",
-    sub: "6 of 10 terms mastered",
+    chapter: "Learn key finance terms",
+    sub: "",
     fill: 60,
-    stat: "Set 3 of 5",
-    cta: "Continue glossary",
-    photo: "/images/app/activity-ib-desk.png",
+    stat: "6 of 10 terms mastered",
+    cta: "Continue Glossary Game",
+    art: "glossary",
   },
   {
     badge: "GAME",
@@ -365,11 +372,14 @@ function ActivityCard({ activity }: { activity: Activity }) {
       >
         {activity.badge}
       </span>
-      <p className="absolute top-[51px] left-[15px] w-[164px] text-[19px] leading-[24px] font-bold sm:left-[19px] sm:w-[226px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <p
+        className="absolute top-[47px] left-[15px] w-[164px] font-bold sm:left-[19px] sm:w-[226px]"
+        style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", fontSize: activity.title.length > 24 ? 15 : 19, lineHeight: activity.title.length > 24 ? "19px" : "24px" }}
+      >
         {activity.title}
       </p>
-      <p className="absolute top-[103px] left-[15px] w-[150px] text-[10px] leading-[14px] sm:top-[79px] sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-        {activity.sub}
+      <p className="absolute top-[88px] left-[15px] w-[150px] text-[10.5px] leading-[14px] italic sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+        {activity.chapter ?? activity.sub}
       </p>
       <div className="absolute top-[123px] left-[15px] h-[5px] w-[160px] rounded-[999px] sm:top-[109px] sm:left-[19px] sm:w-[200px]" style={{ background: "var(--glass-surface-2)" }}>
         <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
@@ -383,12 +393,32 @@ function ActivityCard({ activity }: { activity: Activity }) {
       <div
         aria-hidden
         className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]"
-        style={{
-          maskImage: "linear-gradient(90deg, transparent 0%, #000 38%)",
-          WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 38%)",
-        }}
+        style={
+          activity.art === "glossary"
+            ? undefined
+            : { maskImage: "linear-gradient(90deg, transparent 0%, #000 38%)", WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 38%)" }
+        }
       >
-        <img alt="" src={activity.photo} className="absolute inset-0 h-full w-full object-cover object-top" />
+        {activity.art === "glossary" ? (
+          /* vocabulary-learning visual — flashcards, not career-sim photos */
+          <div className="relative h-full w-full" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--background))" }}>
+            <div className="absolute top-[26px] right-[52px] w-[92px] rotate-[-7deg] rounded-[10px] border p-2 text-center" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+              <p className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>EQUITY</p>
+              <p className="text-[8px] leading-[10px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>ownership in a company</p>
+            </div>
+            <div className="absolute top-[84px] right-[22px] w-[92px] rotate-[5deg] rounded-[10px] border p-2 text-center" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--world-business-money-office) 60%, var(--glass-border))" }}>
+              <p className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>BOND</p>
+              <p className="text-[8px] leading-[10px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>a loan you can trade</p>
+            </div>
+            <div className="absolute right-[38px] bottom-[14px] flex gap-[5px]">
+              {[1, 1, 1, 1, 1, 1, 0, 0, 0, 0].map((done, i) => (
+                <span key={i} className="size-[6px] rounded-full" style={{ background: done ? "var(--world-business-money-office)" : "var(--glass-surface-2)" }} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <img alt="" src={activity.photo} className="absolute inset-0 h-full w-full object-cover object-top" />
+        )}
       </div>
     </article>
   );
@@ -420,10 +450,10 @@ export function HomeExperience() {
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
         <HeroBanner />
 
-        <section aria-label="Continue where you left off" className="flex w-full flex-col gap-[var(--space-5)]">
+        <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-5)]">
           <div className="flex items-start justify-between gap-[var(--space-4)]">
             <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Continue Where You Left Off
+              Continue Learning & Playing
             </h2>
             <button type="button" className="mt-[2px] flex-none cursor-pointer text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
               <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
@@ -441,9 +471,24 @@ export function HomeExperience() {
            old "Careers Picked for You" per user direction. */}
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-6)]">
           <div className="flex flex-col gap-[var(--space-1)]">
-            <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Recommended Because You Liked Business &amp; Money
-            </h2>
+            <div className="flex items-end justify-between gap-[var(--space-4)]">
+              <div className="flex flex-col gap-[2px]">
+                <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                  Explore Recommended Careers
+                </h2>
+                <p className="text-[12px] leading-[16px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                  Based on your interests
+                </p>
+              </div>
+              <a
+                href="/explore?tab=browse"
+                className="inline-flex flex-none items-center gap-[6px] text-[13px] leading-[18px] font-semibold"
+                style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}
+              >
+                Explore All Careers
+                <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
+              </a>
+            </div>
           </div>
           <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {BROWSE_BECAUSE_LIKED.map((career) => (

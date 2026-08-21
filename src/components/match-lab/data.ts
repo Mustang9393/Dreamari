@@ -43,7 +43,7 @@ export const DECK: Career[] = [
     workStyle: "Fast Pace · Large Deal Crew · High Stakes Project Sprints",
     pathway: "4-Year Bachelor's in Finance/Economics + Summer Analyst Pipeline",
     tradeoff: "The pay is top-tier, but the hours can own your calendar.",
-    photo: "/images/career-investment-banking-2.jpg",
+    photo: "/images/app/poster-investment-banking-analyst.png",
   },
   {
     id: "TECH-002",

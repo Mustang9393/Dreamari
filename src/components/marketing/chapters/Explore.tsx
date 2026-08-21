@@ -36,11 +36,13 @@ const WORLD_COLORS: Record<string, string> = {
 type BrowseItem = { photo: string; title: string; world: string };
 
 const BROWSE_TOP5: BrowseItem[] = [
-  { photo: "/images/trending/trending-doctor.png", title: "Doctor", world: "Health & Medicine" },
-  { photo: "/images/trending/trending-software-engineer.png", title: "Software Engineer", world: "Tech & Engineering" },
-  { photo: "/images/trending/trending-nurse.png", title: "Nurse", world: "Health & Medicine" },
-  { photo: "/images/trending/trending-lawyer.png", title: "Lawyer", world: "Law, Safety & Justice" },
-  { photo: "/images/trending/trending-airline-pilot.png", title: "Airline Pilot", world: "Driving, Flying & Shipping" },
+  { photo: "/images/app/poster-asset-manager.png", title: "Asset Manager", world: "Business & Money" },
+  { photo: "/images/app/poster-accountant.png", title: "Accountant", world: "Business & Money" },
+  { photo: "/images/app/poster-fashion-buyer.png", title: "Fashion Buyer", world: "Business & Money" },
+  { photo: "/images/app/poster-food-scientist.png", title: "Food Scientist", world: "Farming, Animals & Nature" },
+  { photo: "/images/app/poster-video-game-designer.png", title: "Video Game Designer", world: "Tech & Engineering" },
+  { photo: "/images/app/poster-art-director.png", title: "Art Director", world: "Arts, Media & Sport" },
+  { photo: "/images/app/poster-nurse-anesthetist.png", title: "Nurse Anesthetist", world: "Health & Medicine" },
 ];
 
 // Poster-title typeface per world, mirroring the Browse Cards component:
