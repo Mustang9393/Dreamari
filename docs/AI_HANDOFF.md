@@ -6,6 +6,35 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 /motion-lab: Duolingo-style motion sandbox (v4 LOCAL, standalone)
+
+- NEW standalone sandbox at /motion-lab — deliberately NOT linked from any
+  nav/quick-links; proven animations get lifted into product pages later by
+  importing from the config, per user direction.
+- framer-motion@13.1.1 added to deps (verified exports + spring API match
+  the familiar surface). tailwindcss + lucide-react were already in.
+- src/components/motion-lab/duo-motion.ts is the single motion source:
+  SPRING_BOUNCY (400/15/0.8), SPRING_SOFT (150/12), popIn variants,
+  bobAnimate/bobTransition (mirrored soft-spring ambient loop — gate on
+  useReducedMotion at call sites), SQUISH_KEYFRAMES/TRANSITION + squish
+  variants (scaleY 0.85 / scaleX 1.15, overshoot, settle; transform-origin
+  bottom), TACTILE_PRESS Tailwind string (border-b-4 → active:border-b-0 +
+  translate-y-[4px]; active:mb-[4px] refunds the border height so siblings
+  don't shift).
+- MotionLab.tsx: four demo stations (bouncy pop-in w/ replay, soft bob,
+  useAnimate drop→squish sequence, CSS-only tactile buttons) + an empty
+  dashed STAGE container awaiting the first real sequence (user will
+  direct). Tokens via .marketing-v2 scope, same page pattern as /theme-lab.
+- Validation: tsc + eslint green; verified at :3002 in browser (all four
+  stations settle correctly, squish sequence completes, no console errors).
+  NOTE: the headless preview pane throttles rAF (~1 tick/500ms) so springs
+  look frozen in mid-flight captures — environment artifact, not a bug.
+- launch.json gained "dreamari-motion" (npm run dev -- -p 3002) because
+  another session held :3000; Next 16 refuses two dev servers per dir (had
+  to kill the stale PID).
+- NEXT: user will specify the first animation sequence to build on the
+  stage.
+
 ### 2026-08-21 GET HIRED landing chapter + profile de-clutter (merged from landing-get-hired)
 
 - New 6th chapter after Connect: the loop-closer per founder voice notes.
