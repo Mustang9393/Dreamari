@@ -123,13 +123,17 @@ function HeroBanner() {
         <PanelShell from="color-mix(in srgb, var(--world-business-money-office) 22%, var(--background))">
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--world-business-money-office)">CONTINUE PLAY MODE</CaptionLabel>
-              <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              {/* Same copy as the Continue Learning & Playing card below —
+                 one activity, one set of words, hero-sized */}
+              <CaptionLabel color="var(--world-business-money-office)">CAREER SIMULATION</CaptionLabel>
+              <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[30px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                Day in the Life: Investment Banker
+              </p>
+              <p className="text-[15px] leading-[20px] italic" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
                 The $30B Deal
               </p>
               <p className="max-w-[480px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Step into the deal room at Colbalt Capital. Brief your team, win over the client, and close the
-                biggest mandate of your career.
+                Brief your team, pitch the client, and close the deal.
               </p>
             </div>
             <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
@@ -142,7 +146,7 @@ function HeroBanner() {
               </div>
             </div>
             <div>
-              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Career Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
+              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
             </div>
           </div>
           <PanelPhoto photo="/images/app/activity-ib-dossier-hero.png" />
