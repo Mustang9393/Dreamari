@@ -39,35 +39,39 @@ export const HOME_PICKS: CatalogCareer[] = [
   C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
 ];
 
-// Explore-Browse rails, in the design's section order.
+// Explore-Browse rails, in the design's section order. Congruence pass
+// (2026-08-21): every rail's careers match its heading's world; images are
+// Mika's approved batches first, then only the strongest existing browse
+// posters (retired from rails as too-AI: nurse [garden photo], entrepreneur
+// [motion blur], investment-banking v1 + private-equity [fisheye]).
 export const BROWSE_RECOMMENDED: CatalogCareer[] = [
-  C("Asset Management", "Business & Money", "/images/app/poster-asset-management.png"),
-  C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
-  C("Private Equity", "Business & Money", "/images/app/poster-private-equity.png"),
-  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v2.png"),
-  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
+  C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.png"),
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-];
-
-export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
-  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
-  C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.png"),
-  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-  C("Robotics Engineer", "Tech & Engineering", "/images/app/poster-robotics-engineer.png"),
-  C("Film Director", "Arts, Media & Sport", "/images/app/poster-film-director.png"),
   C("Journalist", "Arts, Media & Sport", "/images/app/poster-journalist.png"),
+  C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.png"),
+  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.png"),
+  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
 ];
 
-// "Top 5 Trending Careers Among Gen Z" — the design's ranked rail runs to 7.
-// Image bindings are the frame's own (rank 3 NURSE carries the ranch photo in
-// the design; ported as-is).
+// Congruent with its own heading: Business & Money careers only.
+export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
+  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.png"),
+  C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png"),
+  C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png"),
+  C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
+  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v2.png"),
+];
+
+// "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
+// frame bound Doctor to the food-scientist photo and Nurse to a gardening
+// photo — replaced with Mika's Emergency Medicine Doctor / Nurse
+// Anesthetist so every image shows its own career.
 export const BROWSE_TRENDING: CatalogCareer[] = [
-  C("Doctor", "Health & Medicine", "/images/app/poster-food-scientist.png"),
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-  C("Nurse", "Health & Medicine", "/images/app/poster-nurse.png"),
+  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.png"),
+  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.png"),
   C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.png"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.png"),
-  C("Entrepreneur", "Business & Money", "/images/app/poster-entrepreneur.png"),
   C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.png"),
 ];
 
@@ -80,7 +84,6 @@ export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
   C("Robotics Engineer", "Tech & Engineering", "/images/app/poster-robotics-engineer.png"),
   C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
   C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png"),
-  C("Architectural & Engineering Manager", "Tech & Engineering", "/images/app/poster-architectural-engineering-manager.png"),
 ];
 
 // Content batch 08-21. NOTE: the next content list for this rail is
@@ -94,8 +97,6 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Industrial-Organizational Psychologist", "Science & Research", "/images/app/poster-industrial-organizational-psychologist.png"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
   C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.png"),
-  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.png"),
-  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
   C("Architectural & Engineering Manager", "Tech & Engineering", "/images/app/poster-architectural-engineering-manager.png"),
 ];
 
