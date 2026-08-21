@@ -220,8 +220,8 @@ export function MotionLab() {
             </header>
             <DailyDropDemo />
             <p className="text-[12px]" style={{ color: V.muted }}>
-              Banner plays one reveal, then only the star&apos;s float and the trail keep flowing. Click it for the
-              fullscreen takeover.
+              Banner plays one flight reveal, then holds: the light band pulses, diamonds drift, and Dreamy stays
+              alive (breath, gaze, blinks). Click it for the fullscreen takeover.
             </p>
           </section>
         </div>

@@ -6,6 +6,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Daily Drop v2: Super-Duolingo style, traced vector Dreamy
+
+- STYLE REFERENCE (user-supplied): nickparente.work/duolingo-v2 — the Super
+  Duolingo campaign frames. Grammar adopted: deep indigo night, character
+  flying with a THICK SOLID light band trailing (the band IS the graphic),
+  neon speed streaks, floating glowing diamonds, aurora horizon line.
+  User also supplied 3 Duolingo lesson-end videos + style frames (analyzed
+  via ffmpeg contact sheets in the session scratchpad).
+- DREAMY IS NOW A TRACED VECTOR RIG: characters/DreamyRig.tsx holds exact
+  potrace bezier outlines of dreamy-happy.png (body silhouette, night-sky
+  eyes with catchlights/star-flecks preserved as path holes, open smile,
+  tongue) in the PNG's own 640x640 space, under TF="translate(0,640)
+  scale(0.1,-0.1)". Regenerate with scratchpad trace_dreamy.py (PIL masks →
+  potrace; NOTE: PBM = potrace traces BLACK, so paint the character 0 on a
+  1 background or you get the inverted-rectangle bug). Rig: breath from the
+  base, 7s gaze cycle, blinks on an offset clock, gentle tilt; mood="joy"
+  = arc eyes + wide smile; halo prop = white outline (Super style);
+  brightened palette (body white→#8FC4F4, eyes #132D66, tongue #2E7CFF).
+  The user's auto-vectorized SVG (Downloads/1 2 [Vectorized].svg, 166
+  posterized paths) was evaluated and REJECTED — unriggable, not flat-2D.
+- LightBand: rounded solid band, bright head TUCKED INSIDE Dreamy's
+  silhouette (user: trail must begin from the borders), internal highlight
+  streaks racing head→tail + sparkles peeling off (user: must visibly flow).
+- Takeover restaged per user: character DECELERATES INTO CENTER and holds
+  (camera fixed); environment carries speed (streaks/diamonds/band).
+  Reveal keeps flash + shockwave rings + rotating sunburst + confetti.
+- StarRig (hand-drawn sparkle star w/ face, blink, glints) exists in
+  characters/ but is currently UNUSED in the sequence — user direction
+  moved from "Dreamy rides a star" to "Dreamy flying solo, Super style."
+- BROWSER-PANE GOTCHA: screenshots of a background tab go STALE (Chromium
+  stops painting hidden tabs) — tabs_select the dev tab before screenshots.
+- framer LESSON (documented in duo-motion.ts): springs accept only TWO
+  keyframes; multi-frame arrays must be tweens. Variant transitions override
+  the element transition prop (delays need inline animate objects).
+
 ### 2026-08-21 /motion-lab Sequence 01: Daily Drop banner + fullscreen takeover
 
 - Built from 3 Duolingo lesson-complete reference videos the user supplied
