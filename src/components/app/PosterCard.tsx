@@ -17,6 +17,14 @@ function posterTitleSize(title: string): { fontSize: number; lineHeight: string 
   return { fontSize: 24, lineHeight: "28px" };
 }
 
+// Hyphenated compounds (INDUSTRIAL-ORGANIZATIONAL) don't reliably wrap at
+// the hyphen under keep-all — a zero-width space after each hyphen gives an
+// explicit, invisible break opportunity so the compound folds instead of
+// clipping past the card edge.
+function breakableTitle(title: string): string {
+  return title.replace(/-/g, "-\u200B");
+}
+
 export function PosterCard({ career, className = "" }: { career: CatalogCareer; className?: string }) {
   const titleSize = posterTitleSize(career.title);
   return (
@@ -52,7 +60,7 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
           className="w-full [overflow-wrap:normal] [word-break:keep-all]"
           style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
         >
-          {career.title}
+          {breakableTitle(career.title)}
         </span>
         <span
           className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]"
@@ -109,7 +117,7 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
             className="w-full [overflow-wrap:normal] [word-break:keep-all]"
             style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--foreground)" }}
           >
-            {career.title}
+            {breakableTitle(career.title)}
           </span>
           <span
             className="w-full text-[10px] leading-[14px] font-semibold tracking-[0.6px]"
