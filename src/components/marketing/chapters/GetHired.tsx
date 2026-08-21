@@ -27,22 +27,23 @@ const STAGES = [
   { id: "hired", label: "Hire-Ready", line: "Use your plan and resume to become opportunity-ready for internships, mentors, and future employers." },
 ] as const;
 
-// Text-only comparison columns (per direct feedback): no photos here — images
-// are reserved for browse and other critical moments. Titles still wear each
-// world's approved poster face; the MatchRing score is the compare metric.
+// Text-only comparison cards (per direct feedback): no photos, no match
+// scores — the valuable stuff, side by side. Figures are the founder-supplied
+// card content, verbatim. Titles still wear each world's approved poster face.
 const TOP3 = [
-  { title: "Investment Banking", world: "Business & Money", match: 94 },
-  { title: "Accountant", world: "Business & Money", match: 89 },
-  { title: "Video Game Designer", world: "Tech & Engineering", match: 86 },
+  { title: "Investment Banking", world: "Business & Money", duration: "4 yrs", cost: "$150K+", salary: "$285K/year" },
+  { title: "Accountant", world: "Business & Money", duration: "4 yrs", cost: "$55K+", salary: "$81K/year" },
+  { title: "Video Game Designer", world: "Tech & Engineering", duration: "4 yrs", cost: "$130K+", salary: "$104K/year" },
 ];
 
-// Mixed like the product's real plans: in-app reps AND real-world moves.
-// The DECA step completed here is the DECA line on the resume one stage
-// later - the loop inside the loop.
+// Founder-simplified plan copy, verbatim. Mixed like the product's real
+// plans: in-app reps AND real-world moves (the DECA step completed here is
+// the DECA line on the resume one stage later — the loop inside the loop).
 const PLAN_TASKS = [
-  { label: "Complete the finance glossary game", meta: "10 min", done: true },
-  { label: "Join your school's DECA chapter", meta: "IRL", done: true },
-  { label: "Email a local bank about job shadowing", meta: "IRL", done: false },
+  { label: "Complete Finance Glossary Game", meta: "10 min · In app", done: true },
+  { label: "Join your school's DECA chapter", meta: "Real world", done: true },
+  { label: "Contact a local bank about job shadowing", meta: "Real world", done: false },
+  { label: "Connect with an investment banker", meta: "Dreamari Connect", done: false },
 ];
 
 export function GetHiredChapter() {
@@ -88,40 +89,77 @@ export function GetHiredChapter() {
         {/* The stage window: fixed height, content swaps in place */}
         <div key={current.id} className="mkt-stage mt-5 flex h-[280px] flex-col justify-center sm:h-[300px]">
           {stage === 0 && (
-            <div className="grid h-full grid-cols-3 items-stretch gap-2.5">
-              {/* Three equal columns side by side — the layout itself says
-                 "comparing options." Text and the MatchRing carry it; no
-                 photos, so browse stays the image moment. */}
-              {TOP3.map((card, index) => (
-                <div
-                  key={card.title}
-                  className="flex flex-col items-center justify-between rounded-[16px] border-2 px-1.5 py-3 text-center"
-                  style={{ borderColor: index === 0 ? "var(--primary)" : "var(--border)", background: "var(--glass-surface-1)" }}
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <span className="flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
-                    {index === 0 && <span className="rounded-full px-[7px] py-[2px] text-[7.5px] font-bold tracking-[0.5px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>}
+            <div className="relative flex h-full items-center justify-center">
+              {/* Same stack the photo cards had — focus pick BIG and front,
+                 2 and 3 straight behind peeking from the sides (allowed to
+                 overflow the panel edges a little) — but the photo area now
+                 holds the comparison: University -> Duration / Cost / Median
+                 Salary, identical row structure on every card. */}
+              {TOP3.map((card, index) => {
+                /* side offset is min(160px, 30vw): full spread on desktop
+                   (edges just past the panel), scaled down on phones so the
+                   peeking cards stay on-screen */
+                const pose = [
+                  { x: "0px", scale: 1, z: 3, o: 1 },
+                  { x: "calc(-1 * min(160px, 30vw))", scale: 0.82, z: 1, o: 0.55 },
+                  { x: "min(160px, 30vw)", scale: 0.82, z: 2, o: 0.55 },
+                ][index];
+                return (
+                  <div
+                    key={card.title}
+                    /* the right-hand card mirrors its text to the outer edge —
+                       otherwise the focus card overlaps the start of its title */
+                    className={`absolute flex aspect-[148/200] w-[clamp(180px,62%,212px)] flex-col rounded-[16px] border-2 px-3.5 py-3 ${index === 2 ? "text-right" : ""}`}
+                    style={{
+                      borderColor: index === 0 ? "var(--primary)" : "var(--border)",
+                      /* opaque base under the glass tint so the focus card
+                         fully occludes the cards tucked behind it */
+                      background: "linear-gradient(var(--glass-surface-1), var(--glass-surface-1)), var(--background)",
+                      transform: `translateX(${pose.x}) scale(${pose.scale})`,
+                      zIndex: pose.z,
+                      opacity: pose.o,
+                    }}
+                  >
+                    <div className={`flex w-full items-center ${index === 2 ? "justify-end" : "justify-between"}`}>
+                      <span className="flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+                      {index === 0 && <span className="rounded-full px-[7px] py-[2px] text-[7.5px] font-bold tracking-[0.5px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>}
+                    </div>
+                    {/* Fixed-height title zone so every card's rows start on
+                       the same line no matter how the title wraps */}
+                    <div className="mt-2 flex h-[68px] w-full flex-col gap-[3px] uppercase">
+                      <span
+                        /* focus title enlarged; side titles a step smaller.
+                           The right card breaks one word per line, since line
+                           STARTS are what the focus card overlaps. Poster
+                           tracking is spec'd at 24px — scale it with the size
+                           (em) so small titles don't inherit 24px gaps. */
+                        className={`w-full leading-[1.15] [overflow-wrap:normal] [word-break:keep-all] ${index === 0 ? "text-[19px]" : "text-[15px]"}`}
+                        style={{
+                          ...posterTitleFont(card.world),
+                          color: "var(--foreground)",
+                          letterSpacing: card.world === "Tech & Engineering" ? "-0.04em" : "0.03em",
+                          whiteSpace: index === 2 ? "pre-line" : undefined,
+                        }}
+                      >
+                        {index === 2 ? card.title.replace(/ /g, "\n") : card.title}
+                      </span>
+                      <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.5px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[card.world] }}>{card.world}</span>
+                    </div>
+                    <div className="border-t pt-[7px] text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: WORLD_COLORS[card.world] }}>University</div>
+                    {[
+                      { label: "Duration", value: card.duration },
+                      { label: "Cost", value: card.cost },
+                      { label: "Median salary", value: card.salary },
+                    ].map((row) => (
+                      <div key={row.label} className="flex flex-1 flex-col justify-center gap-[1px] border-b" style={{ borderColor: "var(--glass-border)" }}>
+                        <span className="text-[7.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{row.label}</span>
+                        <span className="text-[14px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{row.value}</span>
+                      </div>
+                    ))}
+                    <span className="pt-[7px] text-[10px] leading-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+ more</span>
                   </div>
-                  {/* flex-1 center + fixed-height title zone: the rings and the
-                     row labels land on the SAME lines across all three columns,
-                     so the eye reads them as comparable rows. */}
-                  <div className="flex flex-1 flex-col items-center justify-center gap-[3px]">
-                    <MatchRing score={card.match} size={52} />
-                    <span className="text-[8px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
-                  </div>
-                  <div className="flex h-[72px] w-full flex-col justify-end gap-[4px] uppercase">
-                    <span
-                      className="w-full text-[clamp(10px,2.8vw,15px)] leading-[1.2] [overflow-wrap:normal] [word-break:keep-all]"
-                      /* poster tracking is spec'd at 24px — scale it with the
-                         size (em) so small titles don't inherit 24px gaps */
-                      style={{ ...posterTitleFont(card.world), color: "var(--foreground)", letterSpacing: card.world === "Tech & Engineering" ? "-0.04em" : "0.03em" }}
-                    >
-                      {card.title}
-                    </span>
-                    <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.5px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[card.world] }}>{card.world}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -129,19 +167,24 @@ export function GetHiredChapter() {
             <div className="flex h-full flex-col justify-center">
               {/* Editorial level header: caption, display title, progress ring.
                  Everything sized to FILL the window — same content, no voids. */}
-              <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "var(--glass-border)" }}>
+              <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex flex-col gap-[3px]">
-                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Level 1 · Foundation</span>
+                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Investment Banking</span>
                   <span className="text-[23px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
+                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>2 of 4 complete</span>
                 </span>
                 <MatchRing score={50} size={46} />
               </div>
-              {/* Hairline task list: check circles, quiet strikeouts, minutes right */}
+              {/* Hairline task list: check circles, quiet strikeouts, and a
+                 where-it-happens chip under each task (In app / Real world /
+                 Dreamari Connect) */}
               {PLAN_TASKS.map((task, index) => (
-                <div key={task.label} className={`flex flex-1 items-center gap-3.5 ${index < PLAN_TASKS.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="flex size-[22px] flex-none items-center justify-center rounded-full text-[12px] font-bold" style={task.done ? { background: "var(--color-feedback-success, #33c78c)", color: "#05070f" } : { border: "1.5px solid var(--border)", color: "transparent" }}>{task.done ? "✓" : ""}</span>
-                  <span className={`min-w-0 flex-1 text-[14px] leading-[18px] font-semibold line-clamp-2 ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
-                  <span className="flex-none text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>{task.meta}</span>
+                <div key={task.label} className={`flex flex-1 items-center gap-3 ${index < PLAN_TASKS.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-bold" style={task.done ? { background: "var(--color-feedback-success, #33c78c)", color: "#05070f" } : { border: "1.5px solid var(--border)", color: "transparent" }}>{task.done ? "✓" : ""}</span>
+                  <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px]">
+                    <span className={`text-[13px] leading-[16px] font-semibold line-clamp-1 ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
+                    <span className="rounded-[5px] px-[6px] py-[1.5px] text-[8.5px] font-bold tracking-[0.08em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{task.meta}</span>
+                  </span>
                 </div>
               ))}
             </div>
