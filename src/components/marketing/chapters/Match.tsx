@@ -18,7 +18,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // open swipe: Operations goes first as the "how to pass" demo card (liking it never
 // actually matches — see onExitTransitionEnd), and Investment Banking is the deck's
 // guaranteed final match (passing it is absorbed rather than dismissing it — see
-// onCardPointerUp). Operations Manager stays in the stack purely for the peeking-card
+// onCardPointerUp). Private Equity stays in the stack purely for the peeking-card
 // depth effect; it's not reachable in the normal guided flow.
 const CARDS = [
   {
@@ -41,14 +41,15 @@ const CARDS = [
     major: "Business & Management",
   },
   {
-    // Figma browse cards have no Project Manager — Operations Manager (3282:8531)
-    // is the same job family and keeps this peek-only card on Figma art.
-    key: "pm",
-    photo: "/images/app/poster-operations-manager.png",
-    title: "Operations Manager",
-    blurb: "Keeps a project on schedule and everyone talking to each other.",
-    salary: "$70K-115K",
-    major: "Business & Management",
+    // Peek-only card (not reachable in the guided flow): Private Equity, using
+    // the founder-supplied "Private Equity.png"; blurb/salary from the app's
+    // canonical Private Equity Analyst copy in catalog.ts.
+    key: "pe",
+    photo: "/images/app/poster-private-equity.png",
+    title: "Private Equity",
+    blurb: "Helps investors buy, improve, and sell companies for long-term returns.",
+    salary: "$95K-250K+",
+    major: "Finance or Economics",
   },
 ];
 
