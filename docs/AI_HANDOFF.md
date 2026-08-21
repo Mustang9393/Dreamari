@@ -6,6 +6,37 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Joshua content order + backgrounds + wide-screen type (DEPLOYED)
+
+- Explore Browse rails = Joshua's canonical list verbatim: merged rail
+  "Recommended Because You Liked Business & Money" (Asset Manager, Private
+  Equity, Quant, Accountant, Management Analyst, Administrative Assistant)
+  -> Tech & Engineering (his order) -> Top 5 Trending -> Might Not Know
+  (Food Scientist, Sound Engineering Technician, Sports Medicine Doctor,
+  Agricultural Technician, Drone Pilot, Jewelry Designer) -> Typical Pay
+  (his 6, his order). BROWSE_RECOMMENDED retired; Home mirrors the merged
+  rail. New posters pulled from Mika's world folders + the Figma taxonomy
+  board (Drone Pilot 3282:7909, Jewelry Designer 3282:8011, Management
+  Analyst 3282:8537 — download_assets on the card's image child).
+- BACKGROUNDS: dark stays the default EVERYWHERE (user corrected my
+  light-mode misread). All app pages (Home/Explore/Profile/Colleges) use a
+  %-BASED color wash (purple/primary/teal radials + tinted linear base) —
+  scales to any viewport, no black voids at edges/bottom. Explore's dark
+  space art svg retired. Flow now DEFAULTS DARK (ThemeProvider adds .dark
+  unless stored choice = light); demo branch removed the toggle entirely.
+- Poster cards: TEXT_SCRIM is theme-independent dark; titles fixed #F4F7FF;
+  salary = big 19px gradient figure in a dark glass chip (user-approved).
+- Wide screens (Usman): app type is fixed px from 1440 Figma frames —
+  added .marketing-v2 zoom steps (1.1 @1720px, 1.22 @2100px).
+- tokens.css: .marketing-v2.theme-light same-element selector added.
+- Landing: strict rail geometry (480px columns to outer rails); Get Hired
+  explicit step copy; Explore chapter mini-rail renamed Recommended for
+  You. REPO MAP: Dreamari/main = prod (with drop) -> dreamari.vercel.app;
+  Dreamari/demo = Maisha (no drop, no theme toggle) ->
+  dreamari-git-demo-chandump14-3961s-projects.vercel.app; dreamari-main =
+  mirror (+with-daily-drop, four-tab-experiment); dreamari-ab = A/B.
+
+
 ### 2026-08-21 Daily Drop reveal: browse card + match taxonomy + foil (DEPLOYED)
 
 - Reveal shows the career's real BROWSE PosterCard (poster face + world
