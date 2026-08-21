@@ -166,6 +166,12 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         </Rail>
       )}
 
+      {mightNotKnow.length > 0 && (
+        <Rail title="Careers You Might Not Know">
+          <PosterRail careers={mightNotKnow} />
+        </Rail>
+      )}
+
       {trending.length > 0 && (
         <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
           <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
@@ -177,12 +183,6 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
             ))}
           </div>
         </section>
-      )}
-
-      {mightNotKnow.length > 0 && (
-        <Rail title="Careers You Might Not Know">
-          <PosterRail careers={mightNotKnow} />
-        </Rail>
       )}
 
       {typicalPay.length > 0 && (
