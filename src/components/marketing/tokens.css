@@ -186,6 +186,13 @@
 }
 
 /* Schools/Enterprise audience: light mode (Semantic.Light), resolved the same way. */
+/* The Background Space starfield is a DARK night sheet layered over the page
+   wash — invisible against dark, but in light mode it painted the whole
+   ground near-black (ink text became unreadable on it). Light mode drops it. */
+html.light .marketing-v2.themeable [data-space-backdrop] {
+  display: none;
+}
+
 /* html.light themes only surfaces that opt in with `themeable` — the LANDING
    deliberately stays dark (its chapters are art-directed dark-only; a light
    pass there is real design work, not a token flip). */
@@ -212,6 +219,9 @@ html.light .marketing-v2.themeable {
      light background washes near-black — light gets pale tints of the same hues */
   --hero-accent-purple: #cfc6f5;
   --hero-accent-teal: #bfe9ee;
+  /* hero panel mid-stop: the dark #0c0d26 turned every hero panel's right
+     half near-black under ink text in light mode */
+  --hero-mid: #dfe4f4;
   /* World palette, light rungs (2026-08-22): the dark-theme world colors are
      bright accents tuned for near-black — on neutral.50 the lightest of them
      (amber/green/cyan) measure 1.2-2:1. Same hues stepped down mechanically
