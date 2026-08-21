@@ -47,6 +47,10 @@ export function MatchLab() {
   const [liked, setLiked] = useState<Career[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [dragX, setDragX] = useState(0);
+  const startY = useRef(0);
+  const pointerAxis = useRef<"h" | "v" | null>(null);
+  const grabScroller = useRef<HTMLElement | null>(null);
+  const grabScrollTop = useRef(0);
   const [exiting, setExiting] = useState<{ id: string; dir: 1 | -1 } | null>(null);
   const [guideOpen, setGuideOpen] = useState(true);
   const [decisionOpen, setDecisionOpen] = useState(false);
@@ -180,21 +184,44 @@ export function MatchLab() {
     else setDragX(0);
     if (Math.abs(dx) <= SWIPE_COMMIT_PX) setDragX(0);
   }
+  // Desktop mouse drags axis-lock exactly like touch (per direct feedback:
+  // users who don't know they can wheel-scroll click-drag upward expecting
+  // scroll): the first ~12px decides — horizontal claims the swipe, vertical
+  // becomes grab-to-scroll on the card's internal scroller.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "touch") return; // native touch listeners own touch
     if (!top || exiting) return;
     pointerActive.current = true;
+    pointerAxis.current = null;
     startX.current = e.clientX;
+    startY.current = e.clientY;
+    const scroller = e.currentTarget.querySelector<HTMLElement>("[data-card-scroller]");
+    grabScroller.current = scroller;
+    grabScrollTop.current = scroller ? scroller.scrollTop : 0;
     e.currentTarget.setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "touch" || !pointerActive.current) return;
-    setDragX(e.clientX - startX.current);
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
+    if (!pointerAxis.current) {
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) pointerAxis.current = "h";
+      else if (Math.abs(dy) > 12) pointerAxis.current = "v";
+      else return;
+    }
+    if (pointerAxis.current === "h") {
+      setDragX(dx);
+    } else if (grabScroller.current) {
+      // drag up -> content scrolls down, like grabbing the page
+      grabScroller.current.scrollTop = grabScrollTop.current - dy;
+    }
   }
   function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "touch" || !pointerActive.current) return;
     pointerActive.current = false;
-    commitDrag(dragX);
+    if (pointerAxis.current === "h") commitDrag(dragX);
+    pointerAxis.current = null;
+    grabScroller.current = null;
   }
 
   const topId = top?.id;
@@ -544,7 +571,7 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
       )}
 
       {/* the dating-app profile scroll: full-height poster first, sections below */}
-      <div className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]" style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}>
+      <div data-card-scroller className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]" style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}>
         {/* ---- HERO: the Browse Card face, exactly — poster art, DS text
            scrim, title in the world's own face, world label beneath.
            Employers + salary sit as matched quiet chips in the top corners. ---- */}
