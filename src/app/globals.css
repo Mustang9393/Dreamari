@@ -94,12 +94,12 @@
      where the width ceiling happened to be the constraint. Every font size, padding, and
      gap below is a calc() fraction of this SAME value, so they all shrink right along
      with it automatically — no separate per-property adjustment needed. */
-  --match-card-size: min(calc(min(380px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
+  --match-card-size: min(calc(min(380px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
   @media (min-width: 1280px) {
-    --match-card-size: min(calc(min(440px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
+    --match-card-size: min(calc(min(440px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
   }
   @media (min-width: 1536px) {
-    --match-card-size: min(calc(min(500px, calc(100dvh - 224px)) / 1.2), calc(100vw - 48px));
+    --match-card-size: min(calc(min(500px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
   }
   /* Removing the MATCHES eyebrow recovers roughly one line plus its former gap. Give
      that space to the decision surface itself: the card becomes deliberately taller,
@@ -541,13 +541,26 @@ body {
    and layout keep the base screen's proportions together. Applied on body
    so it covers every surface (app, build flow, landing). calc() length
    division needs a modern engine; older browsers fall back to steps. */
-@media (min-width: 1441px) {
-  /* scale only when BOTH axes afford it (720px design height), never
-     below 1, capped at 1.5 so huge monitors don't balloon */
-  body { zoom: clamp(1, min(calc(100vw / 1440), calc(100vh / 720)), 1.5); }
+/* Stepped scale with height guards (don't scale short windows). --vz mirrors
+   the zoom factor so viewport-height math can divide it back out: `zoom`
+   multiplies EVERY length including dvh units, so a `height: 100dvh` screen
+   would render 110% of the window tall — content "sits low" and the bottom
+   clips. Every exact-height surface below divides by --vz to compensate. */
+:root { --vz: 1; }
+@media (min-width: 1441px) and (min-height: 800px) {
+  body { zoom: 1.1; }
+  :root { --vz: 1.1; }
 }
-@supports not (zoom: calc(100vw / 1440)) {
-  /* height guards mirror the clamp: don't scale when the window is short */
-  @media (min-width: 1441px) and (min-height: 800px) { body { zoom: 1.1; } }
-  @media (min-width: 1800px) and (min-height: 900px) { body { zoom: 1.25; } }
+@media (min-width: 1800px) and (min-height: 900px) {
+  body { zoom: 1.25; }
+  :root { --vz: 1.25; }
+}
+
+/* Zoom-compensated viewport heights (body prefix outranks the utilities
+   regardless of source order; --vz is 1 when no zoom applies). */
+body .h-dvh { height: calc(100dvh / var(--vz)); }
+body .min-h-dvh { min-height: calc(100dvh / var(--vz)); }
+body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
+@media (min-width: 768px) {
+  body .md\:h-\[calc\(100dvh-62px\)\] { height: calc((100dvh / var(--vz)) - 62px); }
 }

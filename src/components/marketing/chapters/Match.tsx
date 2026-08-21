@@ -18,7 +18,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // open swipe: Operations goes first as the "how to pass" demo card (liking it never
 // actually matches — see onExitTransitionEnd), and Investment Banking is the deck's
 // guaranteed final match (passing it is absorbed rather than dismissing it — see
-// onCardPointerUp). Project Manager stays in the stack purely for the peeking-card
+// onCardPointerUp). Operations Manager stays in the stack purely for the peeking-card
 // depth effect; it's not reachable in the normal guided flow.
 const CARDS = [
   {
@@ -41,9 +41,11 @@ const CARDS = [
     major: "Business & Management",
   },
   {
+    // Figma browse cards have no Project Manager — Operations Manager (3282:8531)
+    // is the same job family and keeps this peek-only card on Figma art.
     key: "pm",
-    photo: "/images/career-project-manager.jpg",
-    title: "Project Manager",
+    photo: "/images/app/poster-operations-manager.png",
+    title: "Operations Manager",
     blurb: "Keeps a project on schedule and everyone talking to each other.",
     salary: "$70K-115K",
     major: "Business & Management",
