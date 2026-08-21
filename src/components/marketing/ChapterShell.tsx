@@ -74,15 +74,22 @@ export function ChapterShell({
          extra max-[640px] bottom padding adds real safe-area room on phones
          specifically; sm:/lg: (tablet and up) keep their own larger padding
          untouched since the chip issue is a phone-only concern. */}
+      {/* Strict two-column geometry (per direct feedback): every section
+         shares the SAME 50/50 grid, the same gutter, and the same anchor
+         positions — a flip only swaps column order, never the geometry. The
+         copy always aligns to its column's start edge; the visual always
+         centers in its half. No per-section drift. */}
       <div
-        className={`mx-auto flex w-full max-w-[1200px] items-center px-6 pt-6 pb-6 max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
-          centered ? "flex-col gap-8" : `gap-6 max-[900px]:flex-col min-[901px]:gap-[60px] ${flip ? "flex-row-reverse" : "flex-row"}`
+        className={`mx-auto w-full max-w-[1200px] items-center px-6 pt-6 pb-6 max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
+          centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-2 min-[901px]:gap-[64px]"
         }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
-          className={`flex-none text-center transition-all duration-700 ease-out ${centered ? "max-w-[560px]" : "min-[901px]:max-w-[360px] min-[901px]:flex-[0_0_320px] min-[901px]:text-left"}`}
+          className={`text-center transition-all duration-700 ease-out ${
+            centered ? "max-w-[560px]" : `min-[901px]:max-w-[440px] min-[901px]:justify-self-start min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
+          }`}
           style={{
             opacity: copyRevealed ? 1 : 0,
             transform: copyRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "42px" : "-42px"})`,
@@ -119,7 +126,7 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${centered ? "w-full" : "flex-1 max-[900px]:w-full"}`}
+          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 w-full items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${centered ? "" : flip ? "min-[901px]:order-1" : ""}`}
           style={{
             opacity: graphicRevealed ? 1 : 0,
             transform: graphicRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "-42px" : "42px"})`,
