@@ -224,9 +224,15 @@
    width — on large monitors everything reads small. zoom scales type,
    spacing, and layout uniformly (rail geometry stays proportionally exact),
    which fits a px-based prototype far better than a rem retrofit. */
-@media (min-width: 1720px) {
-  .marketing-v2 { zoom: 1.1; }
+/* Thresholds tuned for real hardware: 15" laptops report ~1530-1728 CSS px
+   on physically small panels (15" MacBook Air = 1710 — previously one step
+   BELOW the old 1720 cutoff, which is exactly the gap Usman hit). */
+@media (min-width: 1530px) {
+  .marketing-v2 { zoom: 1.08; }
 }
-@media (min-width: 2100px) {
-  .marketing-v2 { zoom: 1.22; }
+@media (min-width: 1800px) {
+  .marketing-v2 { zoom: 1.15; }
+}
+@media (min-width: 2200px) {
+  .marketing-v2 { zoom: 1.24; }
 }
