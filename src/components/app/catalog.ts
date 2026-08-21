@@ -86,7 +86,7 @@ export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
   C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-  C("Robotics Engineer", "Tech & Engineering", "/images/app/poster-robotics-engineer.png"),
+  C("Architectural & Engineering Manager", "Tech & Engineering", "/images/app/poster-architectural-engineering-manager.png"),
   C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
   C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png"),
 ];
@@ -102,7 +102,6 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Industrial-Organizational Psychologist", "Science & Research", "/images/app/poster-industrial-organizational-psychologist.png"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
   C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.png"),
-  C("Architectural & Engineering Manager", "Tech & Engineering", "/images/app/poster-architectural-engineering-manager.png"),
 ];
 
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
