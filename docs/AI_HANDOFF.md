@@ -6,6 +6,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 DEMO STRIP: Daily Drop removed from main (Maisha client demo)
+
+- Per user: live Vercel (this repo's main) = Maisha's client demo, WITHOUT
+  the Daily Drop. Hero carousel is now 2 panels (Continue / Trending),
+  drop banner + takeover + /motion-lab route + motion-lab components
+  removed from main.
+- NOTHING IS LOST: the full pre-strip main (incl. Daily Drop, complete
+  history) lives at github.com/Mustang9393/dreamari-main. The home/no-home
+  A/B experiment lives at github.com/Mustang9393/dreamari-ab (local branch
+  four-tab here, working copy ~/dreamari-ab). Daily Drop development
+  continues from dreamari-main or the local v4/four-tab branches.
+
+
 ### 2026-08-21 Daily Drop reveal: browse card + match taxonomy + foil (DEPLOYED)
 
 - Reveal shows the career's real BROWSE PosterCard (poster face + world
