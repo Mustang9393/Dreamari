@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { CatalogCareer } from "./catalog";
-import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "./worlds";
+import { posterTitleFont, WORLD_COLORS } from "./worlds";
 
 // Career Poster Card, ported 1:1 from the Figma component (210×297, radius-xl,
 // glass border, gradient/text-scrim, per-world title face at 24/28, world
@@ -57,11 +57,11 @@ export function PosterCard({ career, className = "" }: { career: CatalogCareer; 
       )}
       <span
         className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
-        style={{ backgroundImage: TEXT_SCRIM }}
+        style={{ backgroundImage: "var(--poster-scrim)" }}
       >
         <span
           className="w-full [overflow-wrap:normal] [word-break:keep-all]"
-          style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "#F4F7FF" }}
+          style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--poster-title)" }}
         >
           {breakableTitle(career.title)}
         </span>
@@ -114,11 +114,11 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
         <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
         <span
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
-          style={{ backgroundImage: TEXT_SCRIM }}
+          style={{ backgroundImage: "var(--poster-scrim)" }}
         >
           <span
             className="w-full [overflow-wrap:normal] [word-break:keep-all]"
-            style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "#F4F7FF" }}
+            style={{ ...posterTitleFont(career.world), fontSize: titleSize.fontSize, lineHeight: titleSize.lineHeight, color: "var(--poster-title)" }}
           >
             {breakableTitle(career.title)}
           </span>

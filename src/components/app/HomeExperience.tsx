@@ -437,13 +437,14 @@ export function HomeExperience() {
         <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
       </div>
 
+      <h1 className="sr-only">Home</h1>
       <DesktopNavigation active="Home" />
 
       {/* Mobile header (logo + streak/XP, per the mobile frame) */}
       <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold" style={{ fontFamily: "var(--font-body)" }}>
-          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent)" }}>
+          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
             <Flame className="h-4 w-4" /> 12
           </span>
           <span className="flex items-center gap-[6px]" style={{ color: "var(--world-business-money-office)" }}>

@@ -193,6 +193,16 @@ html.light .marketing-v2.themeable [data-space-backdrop] {
   display: none;
 }
 
+/* Poster card scrim + title: theme-aware on app surfaces (per founder — the
+   Match card's scrim flipping white in light mode "is amazing", Browse should
+   match). Dark default lives on the .marketing-v2 scope; light flips to a
+   white scrim + ink title, and the world labels' darkened light rungs are
+   then correct on it. The landing (non-themeable) keeps the dark scrim. */
+.marketing-v2 {
+  --poster-scrim: linear-gradient(180deg, rgba(5, 7, 15, 0) 0%, rgba(5, 7, 15, 0.55) 30%, rgba(5, 7, 15, 0.86) 51%, #05070f 100%);
+  --poster-title: #f4f7ff;
+}
+
 /* Night scenes (the For You photo reel and its floating chrome) keep the
    DARK ui tokens in light mode — their ground is always a full-bleed photo
    with dark scrims, so flipping text to ink breaks them. Values mirror the
@@ -246,6 +256,9 @@ html.light .marketing-v2.themeable {
   /* hero panel mid-stop: the dark #0c0d26 turned every hero panel's right
      half near-black under ink text in light mode */
   --hero-mid: #dfe4f4;
+  /* poster cards flip to a white scrim + ink title in light (matches Match) */
+  --poster-scrim: linear-gradient(180deg, rgba(244, 247, 255, 0) 0%, rgba(244, 247, 255, 0.62) 30%, rgba(244, 247, 255, 0.9) 51%, #f4f7ff 100%);
+  --poster-title: #05070f;
   /* World palette, light rungs (2026-08-22): the dark-theme world colors are
      bright accents tuned for near-black — on neutral.50 the lightest of them
      (amber/green/cyan) measure 1.2-2:1. Same hues stepped down mechanically

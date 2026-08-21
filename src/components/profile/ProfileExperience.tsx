@@ -39,7 +39,7 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { MatchRing, matchTier } from "@/components/app/MatchRing";
 import { InkText } from "@/components/build/ui";
-import { posterTitleFont, TEXT_SCRIM, WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, routeDetail, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
 
 // My Profile, round 2: scannable and visual. No paragraphs, no em dashes.
@@ -196,10 +196,11 @@ export function ProfileExperience() {
         <DesktopNavigation active="Profile" />
       </div>
 
+      <h1 className="sr-only">My Profile</h1>
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold">
-          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent)" }}>
+          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
             <Flame className="h-4 w-4" /> {STUDENT.streakDays}
           </span>
           <QuickLinksMenu />
@@ -424,7 +425,7 @@ function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, compact }: { to
                 </span>
               )}
             </span>
-            <span className={`absolute inset-x-0 bottom-0 flex flex-col items-center px-1 ${compact ? "gap-[2px] pt-[18px] pb-[7px]" : "gap-[4px] pt-[26px] pb-[10px] md:px-3 md:pb-[14px]"}`} style={{ backgroundImage: TEXT_SCRIM }}>
+            <span className={`absolute inset-x-0 bottom-0 flex flex-col items-center px-1 ${compact ? "gap-[2px] pt-[18px] pb-[7px]" : "gap-[4px] pt-[26px] pb-[10px] md:px-3 md:pb-[14px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
               <span className="w-full text-balance [overflow-wrap:normal]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)", fontSize: "clamp(11px, calc(7px + 4cqw), 22px)", lineHeight: 1.15 }}>{career.title}</span>
               <span className="w-full font-semibold" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world], fontSize: "clamp(7px, calc(4.5px + 2cqw), 11.5px)", lineHeight: 1.35, letterSpacing: "0.5px" }}>{career.world}</span>
             </span>
@@ -1194,7 +1195,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <Image src={career.photo} alt="" fill sizes="220px" className="object-cover" />
-                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: TEXT_SCRIM, paddingTop: "30px" }}>
+                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
                   <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
                   <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>

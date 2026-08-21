@@ -35,7 +35,10 @@ type HistoryEntry =
   | { type: "like"; career: Career; prevDeckIndex: number }
   | { type: "swap"; career: Career; replaced: Career; slot: number; prevDeckIndex: number };
 
-const SUCCESS = "var(--color-feedback-success-dark-surface)";
+/* theme-following success green: the -dark-surface variant is #33c78c in BOTH
+   themes and measured 1.8:1 on the light card — the base token carries the
+   proper light rung (#007a55) */
+const SUCCESS = "var(--color-feedback-success)";
 const PASS_COLOR = "var(--color-world-arts-media-sport)";
 const UNDO_COLOR = "var(--color-world-business-money-office)";
 
@@ -580,13 +583,13 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
           <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4">
             <span
               className="max-w-[60%] truncate rounded-full border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
-              style={{ background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)", borderColor: "var(--color-glass-border)" }}
+              style={{ background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)", borderColor: "var(--color-glass-border)" }}
             >
               {career.employers}
             </span>
             <span
               className="flex-none rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
-              style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)" }}
+              style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)" }}
             >
               {career.salary}
             </span>

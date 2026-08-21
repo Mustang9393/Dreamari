@@ -566,6 +566,32 @@ body {
 /* body paints the ground behind every surface (overscroll, short pages) */
 html.light body { background: #f4f7ff; }
 
+/* World palette light rungs for the NIGHT-token surfaces (match, flow): the
+   generated tokens carry one bright value tuned for dark scrims — on the
+   light theme's white scrims the yellow/green/cyan measured under 2:1.
+   Same mechanical darkening as the marketing scope's light block; author
+   real rungs in the token source when the light ramp exists. */
+html.light {
+  /* flow option tiles / panels: the black-alpha film reads muddy over the
+     pastel aurora — frosted white is the light-theme glass */
+  --color-glass-surface-1: rgb(255 255 255 / 0.62);
+  --color-world-business-money-office: color-mix(in srgb, #ffb81f 48%, black);
+  --color-world-building-construction: color-mix(in srgb, #ff9640 50%, black);
+  --color-world-arts-media-sport: color-mix(in srgb, #ff4585 68%, black);
+  --color-world-food-farming-nature: color-mix(in srgb, #1fc76e 55%, black);
+  --color-world-farming-animals-nature: color-mix(in srgb, #7c9a5e 62%, black);
+  --color-world-health-medicine: color-mix(in srgb, #14b8a6 62%, black);
+  --color-world-science-research: color-mix(in srgb, #00c8dc 55%, black);
+  --color-world-driving-flying-shipping: color-mix(in srgb, #3b82f6 78%, black);
+  --color-world-tech-engineering-design: color-mix(in srgb, #6366f1 78%, black);
+  --color-world-teaching-learning: color-mix(in srgb, #8b5cf6 75%, black);
+  --color-world-law-safety-government: color-mix(in srgb, #e5484d 78%, black);
+  --color-world-helping-human-services: color-mix(in srgb, #c05fa6 70%, black);
+  --color-world-factories-making-things: color-mix(in srgb, #c2703d 68%, black);
+  --color-world-fixing-machines-engines: color-mix(in srgb, #64748b 72%, black);
+  --color-world-personal-care-community-services: color-mix(in srgb, #e8a0bf 55%, black);
+}
+
 html.light {
   --component-cta-primary-background: #05070f;
   --component-cta-primary-text: #f4f7ff;
