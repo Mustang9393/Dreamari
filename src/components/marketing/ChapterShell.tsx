@@ -74,21 +74,23 @@ export function ChapterShell({
          extra max-[640px] bottom padding adds real safe-area room on phones
          specifically; sm:/lg: (tablet and up) keep their own larger padding
          untouched since the chip issue is a phone-only concern. */}
-      {/* Strict two-column geometry (per direct feedback): every section
-         shares the SAME 50/50 grid, the same gutter, and the same anchor
-         positions — a flip only swaps column order, never the geometry. The
-         copy always aligns to its column's start edge; the visual always
-         centers in its half. No per-section drift. */}
+      {/* Rail geometry (per direct feedback, with guide lines): two fixed
+         480px columns spread to the page's outer rails. Every occupant —
+         box or text — spans/anchors to its column's boundaries, so all
+         sections share four exact vertical lines: outer-left, inner-left,
+         inner-right, outer-right. Boxes' EDGES sit on the rails (glows may
+         bleed); text starts on its column's start rail and wraps at its end
+         rail. A flip swaps columns, never the geometry. */}
       <div
         className={`mx-auto w-full max-w-[1200px] items-center px-6 pt-6 pb-6 max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
-          centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-2 min-[901px]:gap-[64px]"
+          centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
         }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
           className={`text-center transition-all duration-700 ease-out ${
-            centered ? "max-w-[560px]" : `min-[901px]:max-w-[440px] min-[901px]:justify-self-start min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
+            centered ? "max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
           }`}
           style={{
             opacity: copyRevealed ? 1 : 0,
@@ -126,7 +128,9 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 w-full items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${centered ? "" : flip ? "min-[901px]:order-1" : ""}`}
+          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 w-full items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${
+            centered ? "" : flip ? "min-[901px]:order-1" : ""
+          }`}
           style={{
             opacity: graphicRevealed ? 1 : 0,
             transform: graphicRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "-42px" : "42px"})`,
@@ -188,7 +192,7 @@ export function ChapterShell({
             // the original values, which keep that proportion correct.
             className={`mkt-graphic-scale relative z-[1] flex items-center justify-center ${wide ? "mkt-wide" : ""}`}
             style={{
-              width: wide ? "min(96cqw, 780px)" : "min(94cqw, 480px)", // one shared wide lane
+              width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               height: compact ? "auto" : "min(74dvh, 680px)",
               maxHeight: compact ? "min(72dvh, 620px)" : undefined,
             }}
