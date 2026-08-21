@@ -6,6 +6,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Daily Drop v3: capsule quiz flow + HOME hero integration (DEPLOYED)
+
+- FLOW now mirrors the user's Replit reference (dceeai.replit.app/daily-drop),
+  copy verbatim: banner "Open the Capsule" (+streak line) -> flight intro ->
+  CRACK THE CAPSULE quiz (9s ring timer, hook + question + A-D tactile
+  options; wrong pick dims+shakes and burns a clue, timeout = 2 clues) ->
+  reveal "Capsule cracked!" (Cyber World / Ethical Hacker / No. 005 / 193 /
+  PRISMATIC chip / pay chips $80K & $150K+ / streak / Save to My Profile).
+- Dreamy polish round: crisp cel-shade layer (offset-silhouette technique:
+  shade tone + body redrawn shifted up inside the body clip), per-eye radial
+  gradients (#5B86FF->#0B1B4D), whiter body, brighter tongue; irid prop =
+  iridescent trail-light wash (used in flight); speed micro-vibration
+  wrapper in FlyingDreamy; LightBand head tucked INSIDE the silhouette with
+  internal flow streaks + peeling sparkles; SunRays got a DONUT mask so rays
+  never overlap the character; lucide ArrowRight replaces all "→" chars I
+  added (per user).
+- DailyDropDemo now exports DailyDropFlight (band+Dreamy art group) and
+  DailyDropTakeover (portal overlay w/ phases). TakeoverStage owns
+  phase/clues state and REMOUNTS per open (lint: no setState-in-effect
+  resets; mounted flag via useSyncExternalStore).
+- HOME INTEGRATION: HeroBanner Panel 1 (Today's Drop) CTA = "Open the
+  Capsule" opening the takeover; carousel pauses while open; CometStar +
+  mobile trail art DELETED (replaced by DailyDropFlight desktop right /
+  mobile air-gap above CTA). HeroCta gained onClick.
+- TWO REAL BUGS: (1) duplicate SVG ids across DreamyRig instances — the
+  hidden (display:none) desktop copy's defs won url(#...) resolution and
+  KILLED the mobile clip (giant unclipped rect) -> all rig ids now unique
+  via useId. (2) overlay trapped under app chrome by ancestor stacking
+  contexts -> takeover portals to document.body, carrying the
+  .marketing-v2 class so tokens resolve (the handoff's portal-scoping
+  lesson applies to ALL fixed overlays inside app pages).
+- DEPLOY: user explicitly ordered "deploy that version" — feature PORTED to
+  main (motion-lab dir + HomeExperience + framer-motion dep), v4 itself
+  stays unmerged/local per standing rule.
+
 ### 2026-08-21 Daily Drop v2: Super-Duolingo style, traced vector Dreamy
 
 - STYLE REFERENCE (user-supplied): nickparente.work/duolingo-v2 — the Super

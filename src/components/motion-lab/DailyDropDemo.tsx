@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Transition, Variants } from "framer-motion";
-import { Clock3, Flame, Sparkle, X } from "lucide-react";
+import { ArrowRight, Banknote, Flame, TrendingUp, X } from "lucide-react";
 import { SPRING_BOUNCY, TACTILE_PRESS, popIn } from "./duo-motion";
 import { DreamyRig } from "./characters/DreamyRig";
 
@@ -104,7 +105,8 @@ function LightBand({ length = 560, thickness = 120, delay = 0 }: { length?: numb
 }
 
 // ——— Dreamy in flight: leaning into the band's direction, riding its bright
-// head, with a soft bob layered over whatever path the parent runs.
+// head. A soft bob carries the float; a high-frequency micro-vibration
+// signifies speed; the trail's light washes the body (irid).
 function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: boolean }) {
   const reduced = useReducedMotion();
   return (
@@ -112,9 +114,14 @@ function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: 
       animate={reduced ? undefined : { y: [0, -8, 0], rotate: [0, 2.5, 0] }}
       transition={{ duration: urgent ? 0.55 : 3.2, repeat: Infinity, ease: "easeInOut" }}
     >
-      <div className="rotate-[8deg]">
-        <DreamyRig size={size} lookX={14} shadow={false} />
-      </div>
+      <motion.div
+        animate={reduced ? undefined : { y: [0, -(urgent ? 2.5 : 1.2), urgent ? 2.5 : 1.2, 0] }}
+        transition={{ duration: urgent ? 0.12 : 0.18, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="rotate-[8deg]">
+          <DreamyRig size={size} lookX={14} shadow={false} irid />
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -296,7 +303,8 @@ function ImpactBurst() {
 
 function SunRays() {
   const reduced = useReducedMotion();
-  const mask = "radial-gradient(circle, black 0%, transparent 66%)";
+  // donut mask: rays only exist OUTSIDE the character's footprint
+  const mask = "radial-gradient(circle, transparent 0%, transparent 26%, black 34%, black 46%, transparent 66%)";
   return (
     <motion.div
       className="pointer-events-none absolute left-1/2 top-1/2 size-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -402,9 +410,157 @@ function StreakPhase() {
   );
 }
 
-// ——— Phase B: the landing. Flash + shockwave + sunburst sell the impact;
-// Dreamy holds a grounded squash-stretch joy hop; card, chips, CTA stage in.
-function RevealPhase({ onClose }: { onClose: () => void }) {
+// ——— Phase B: CRACK THE CAPSULE (the Replit flow's quiz). 9s timer, hook,
+// question, four options; a wrong pick burns a clue, timeout counts as two.
+const QUIZ = {
+  seconds: 9,
+  hook: "Some people get paid to hack legally.",
+  question: "What job gets paid to break into company systems before criminals do?",
+  options: [
+    { key: "A", label: "Ethical Hacker", correct: true },
+    { key: "B", label: "Video Editor" },
+    { key: "C", label: "Bank Teller" },
+    { key: "D", label: "Mechanic" },
+  ],
+};
+
+function QuizPhase({ onSolve }: { onSolve: (clues: number) => void }) {
+  const reduced = useReducedMotion();
+  const [left, setLeft] = useState(QUIZ.seconds);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [wrong, setWrong] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (picked) return;
+    if (left <= 0) {
+      const t = setTimeout(() => onSolve(2), 400);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setLeft((l) => l - 1), 1000);
+    return () => clearTimeout(t);
+  }, [left, picked, onSolve]);
+
+  const pick = (key: string, correct?: boolean) => {
+    if (picked) return;
+    if (correct) {
+      setPicked(key);
+      setTimeout(() => onSolve(wrong.length > 0 ? 2 : 1), 700);
+    } else if (!wrong.includes(key)) {
+      setWrong((w) => [...w, key]);
+    }
+  };
+
+  const C = 2 * Math.PI * 17;
+  return (
+    <div className="absolute inset-0 overflow-y-auto" style={{ background: SKY }}>
+      <NightSpecks />
+      <FloatingDiamonds />
+      <div className="relative z-[2] mx-auto flex min-h-full w-full max-w-[440px] flex-col items-center justify-center gap-4 px-6 py-10 text-center">
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={popAt(0.05)}
+        >
+          <DreamyRig size={100} lookX={0} shadow={false} />
+        </motion.div>
+
+        <motion.div
+          className="flex items-center gap-3"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={popAt(0.15)}
+        >
+          <span className="text-[13px] font-extrabold uppercase" style={{ letterSpacing: "0.2em", color: V.gold }}>
+            Crack the Capsule
+          </span>
+          <span className="relative flex size-10 items-center justify-center">
+            <svg width="40" height="40" viewBox="0 0 40 40" className="absolute -rotate-90" aria-hidden>
+              <circle cx="20" cy="20" r="17" stroke={V.border} strokeWidth="3" fill="none" />
+              <motion.circle
+                cx="20"
+                cy="20"
+                r="17"
+                stroke={V.gold}
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={C}
+                initial={{ strokeDashoffset: 0 }}
+                animate={{ strokeDashoffset: reduced ? 0 : C }}
+                transition={{ duration: QUIZ.seconds, ease: "linear" }}
+              />
+            </svg>
+            <span className="text-[14px] font-extrabold tabular-nums" style={{ color: V.fg }}>
+              {left}
+            </span>
+          </span>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+          className="text-[14px]"
+          style={{ color: V.muted }}
+        >
+          {QUIZ.hook}
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.42, duration: 0.3 }}
+          className="text-[21px] leading-[1.25] font-extrabold"
+          style={{ fontFamily: "var(--font-display)", color: V.fg }}
+        >
+          {QUIZ.question}
+        </motion.p>
+
+        <div className="mt-2 grid w-full gap-3 sm:grid-cols-2">
+          {QUIZ.options.map((o, index) => {
+            const isWrong = wrong.includes(o.key);
+            const isPicked = picked === o.key;
+            return (
+              <motion.button
+                key={o.key}
+                type="button"
+                onClick={() => pick(o.key, o.correct)}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{
+                  scale: isPicked ? [1, 1.08, 1] : 1,
+                  opacity: isWrong ? 0.35 : 1,
+                  x: isWrong ? [0, -8, 8, -5, 0] : 0,
+                }}
+                transition={isWrong || isPicked ? { duration: 0.4 } : popAt(0.55 + index * 0.08)}
+                className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-bold cursor-pointer ${TACTILE_PRESS}`}
+                style={{
+                  background: isPicked ? NEON.mint : V.card,
+                  color: isPicked ? "#0b3a33" : V.fg,
+                  borderColor: isPicked
+                    ? `color-mix(in srgb, ${NEON.mint} 55%, black)`
+                    : `color-mix(in srgb, black 45%, ${V.card})`,
+                  boxShadow: `inset 0 0 0 1px ${V.border}`,
+                }}
+              >
+                <span
+                  className="flex size-7 flex-none items-center justify-center rounded-full text-[12px] font-extrabold"
+                  style={{ background: isPicked ? "#0b3a33" : V.bg, color: isPicked ? NEON.mint : V.gold }}
+                >
+                  {o.key}
+                </span>
+                {o.label}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ——— Phase C: the landing. Flash + shockwave + sunburst sell the impact;
+// Dreamy holds a grounded squash-stretch joy hop; the career card, stats,
+// and CTA stage in (copy per the Replit daily-drop flow).
+function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number }) {
   const reduced = useReducedMotion();
   return (
     <div
@@ -460,23 +616,23 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
         className="relative z-[2] text-[32px] font-extrabold sm:text-[40px]"
         style={{ fontFamily: "var(--font-display)", color: V.gold, textShadow: `0 4px 30px color-mix(in srgb, ${V.gold} 40%, transparent)` }}
       >
-        Drop unlocked!
+        Capsule cracked!
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.3 }}
-        className="relative z-[2] max-w-[340px] text-[14px]"
+        className="relative z-[2] max-w-[340px] text-[13px]"
         style={{ color: V.muted }}
       >
-        A new career just landed in your sky.
+        Solved with {clues} clue{clues > 1 ? "s" : ""} · streak +1
       </motion.p>
 
       <motion.div
         initial={{ scale: 0, rotate: -6, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={popAt(0.7)}
-        className="relative z-[2] flex w-[250px] flex-col items-center gap-1 rounded-3xl px-6 py-5"
+        className="relative z-[2] flex w-[290px] flex-col items-center gap-1.5 rounded-3xl px-6 py-5"
         style={{
           background: `linear-gradient(160deg, color-mix(in srgb, ${V.primary} 40%, ${V.card}), ${V.card})`,
           border: `1px solid color-mix(in srgb, ${V.primary} 55%, ${V.border})`,
@@ -484,22 +640,36 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
         }}
       >
         <span className="text-[10px] font-extrabold uppercase" style={{ letterSpacing: "0.16em", color: V.muted }}>
-          Science &amp; Space
+          Cyber World · No. 005 / 193
         </span>
-        <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: V.fg }}>
-          Robotics Engineer
+        <span className="text-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: V.fg }}>
+          Ethical Hacker
+        </span>
+        <span
+          className="rounded-full px-3 py-0.5 text-[10px] font-extrabold uppercase"
+          style={{
+            letterSpacing: "0.14em",
+            background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.violet}, ${NEON.magenta})`,
+            color: "#10134a",
+          }}
+        >
+          Prismatic
+        </span>
+        <span className="mt-1 text-[12.5px] leading-[18px]" style={{ color: V.muted }}>
+          Ethical Hackers help companies find weak spots before criminals do. They hack with permission to make
+          systems safer.
         </span>
       </motion.div>
 
       <motion.div className="relative z-[2] flex items-end gap-3 pt-1" variants={chipRow} initial="hidden" animate="shown">
-        <StatChip label="Streak" color={V.gold}>
-          <Flame size={16} strokeWidth={3} aria-hidden /> 13
+        <StatChip label="Starting pay" color={V.gold}>
+          <Banknote size={16} strokeWidth={3} aria-hidden /> $80K
         </StatChip>
-        <StatChip label="Drop" color={V.primary}>
-          <Sparkle size={16} strokeWidth={3} aria-hidden /> NEW
+        <StatChip label="Top earners" color={NEON.cyan}>
+          <TrendingUp size={16} strokeWidth={3} aria-hidden /> $150K+
         </StatChip>
-        <StatChip label="Time" color="var(--chart-2)">
-          <Clock3 size={16} strokeWidth={3} aria-hidden /> 0:20
+        <StatChip label="Streak" color="var(--chart-2)">
+          <Flame size={16} strokeWidth={3} aria-hidden /> 5
         </StatChip>
       </motion.div>
 
@@ -512,42 +682,130 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className={`w-full rounded-2xl px-6 py-3.5 text-[15px] font-extrabold uppercase tracking-wide cursor-pointer ${TACTILE_PRESS}`}
+          className={`flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-[15px] font-extrabold uppercase tracking-wide cursor-pointer ${TACTILE_PRESS}`}
           style={{
             background: V.primary,
             color: V.primaryFg,
             borderColor: `color-mix(in srgb, ${V.primary} 55%, black)`,
           }}
         >
-          Save to My Sky
+          Save to My Profile
+          <ArrowRight size={16} strokeWidth={3} aria-hidden />
         </button>
       </motion.div>
     </div>
   );
 }
 
+// ——— The flight group (band + flying Dreamy), reusable in any banner.
+export function DailyDropFlight({
+  size = 128,
+  band = 420,
+  thickness = 88,
+  tilt = -16,
+}: {
+  size?: number;
+  band?: number;
+  thickness?: number;
+  tilt?: number;
+}) {
+  const reduced = useReducedMotion();
+  return (
+    <div className="relative" style={{ transform: `rotate(${tilt}deg)` }}>
+      <div className="absolute right-[34%] top-1/2 -translate-y-1/2">
+        <LightBand length={band} thickness={thickness} delay={0.5} />
+      </div>
+      <motion.div
+        animate={reduced ? undefined : { x: [0, 8, 0, -8, 0], y: [0, -9, 0, 7, 0] }}
+        transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      >
+        <FlyingDreamy size={size} />
+      </motion.div>
+    </div>
+  );
+}
+
+// ——— The fullscreen takeover, reusable from any surface (lab stage, home
+// hero): flight intro -> capsule quiz -> reveal.
+function TakeoverStage({ onClose }: { onClose: () => void }) {
+  const reduced = useReducedMotion();
+  // mounts fresh on every open, so initial state IS the reset
+  const [phase, setPhase] = useState<"streak" | "quiz" | "reveal">(reduced ? "quiz" : "streak");
+  const [clues, setClues] = useState(1);
+
+  useEffect(() => {
+    if (phase !== "streak") return;
+    const t = setTimeout(() => setPhase("quiz"), reduced ? 200 : 1750);
+    return () => clearTimeout(t);
+  }, [phase, reduced]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <>
+      {phase === "streak" ? (
+        <StreakPhase />
+      ) : phase === "quiz" ? (
+        <QuizPhase
+          onSolve={(c) => {
+            setClues(c);
+            setPhase("reveal");
+          }}
+        />
+      ) : (
+        <RevealPhase clues={clues} onClose={onClose} />
+      )}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-5 right-5 z-[2] flex size-9 items-center justify-center rounded-full"
+        style={{ border: `1px solid ${V.border}`, color: V.muted, background: V.card }}
+      >
+        <X size={16} strokeWidth={2.5} aria-hidden />
+      </button>
+    </>
+  );
+}
+
+export function DailyDropTakeover({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // portal to <body>: host pages wrap banners in transformed/stacked
+  // ancestors (carousels, sticky navs) that would trap the overlay under
+  // app chrome otherwise
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  if (!mounted) return null;
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="marketing-v2 fixed inset-0 z-[100]"
+          style={{ background: V.bg, color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <TakeoverStage onClose={onClose} />
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
 export function DailyDropDemo() {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
-  const [phase, setPhase] = useState<"streak" | "reveal">("streak");
 
-  useEffect(() => {
-    if (!open || phase !== "streak") return;
-    const t = setTimeout(() => setPhase("reveal"), reduced ? 200 : 1750);
-    return () => clearTimeout(t);
-  }, [open, phase, reduced]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  const launch = () => {
-    setPhase(reduced ? "reveal" : "streak");
-    setOpen(true);
-  };
+  const launch = () => setOpen(true);
 
   return (
     <>
@@ -572,10 +830,15 @@ export function DailyDropDemo() {
             A new career is falling into view.
           </span>
           <span
-            className="mt-2 inline-flex w-fit items-center rounded-full px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide"
+            className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide"
             style={{ background: V.primary, color: V.primaryFg }}
           >
-            Open today&apos;s drop →
+            Open the Capsule
+            <ArrowRight size={14} strokeWidth={3} aria-hidden />
+          </span>
+          <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: V.gold }}>
+            <Flame size={13} strokeWidth={2.5} aria-hidden /> 4 day streak
+            <span style={{ color: V.muted }}>· 3 days to golden</span>
           </span>
         </div>
 
@@ -588,44 +851,11 @@ export function DailyDropDemo() {
           animate={{ x: 0, y: 0, opacity: 1 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], opacity: { duration: 0.25 } }}
         >
-          <div className="relative -rotate-[16deg]">
-            <div className="absolute right-[34%] top-1/2 -translate-y-1/2">
-              <LightBand length={420} thickness={88} delay={0.5} />
-            </div>
-            <motion.div
-              animate={reduced ? undefined : { x: [0, 8, 0, -8, 0], y: [0, -9, 0, 7, 0] }}
-              transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            >
-              <FlyingDreamy size={128} />
-            </motion.div>
-          </div>
+          <DailyDropFlight size={128} band={420} thickness={88} />
         </motion.div>
       </button>
 
-      {/* ——— The fullscreen takeover ——— */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-[100]"
-            style={{ background: V.bg }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {phase === "streak" ? <StreakPhase /> : <RevealPhase onClose={() => setOpen(false)} />}
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="absolute top-5 right-5 z-[2] flex size-9 items-center justify-center rounded-full"
-              style={{ border: `1px solid ${V.border}`, color: V.muted, background: V.card }}
-            >
-              <X size={16} strokeWidth={2.5} aria-hidden />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <DailyDropTakeover open={open} onClose={() => setOpen(false)} />
     </>
   );
 }

@@ -3,10 +3,11 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { HOME_PICKS } from "./catalog";
+import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Today's Drop / Continue / Trending), Continue rail of
@@ -23,43 +24,6 @@ const SPACE_ACCENTS = [
   { left: 580, top: 80, size: 3 },
   { left: 720, top: 220, size: 2 },
   { left: 940, top: 140, size: 2 },
-];
-
-// Comet particles ("particle-1"…"particle-10"), same treatment.
-const COMET_PARTICLES = [
-  { left: 280, top: 70, size: 11 },
-  { left: 320, top: 100, size: 9 },
-  { left: 300, top: 45, size: 8 },
-  { left: 350, top: 75, size: 7 },
-  { left: 255, top: 110, size: 10 },
-  { left: 370, top: 55, size: 6 },
-  { left: 330, top: 125, size: 8 },
-  { left: 390, top: 90, size: 5 },
-  { left: 240, top: 85, size: 9 },
-  { left: 310, top: 130, size: 7 },
-];
-
-// Mobile frame's trail (01 Directive — Mobile: its own smaller bars).
-const MOBILE_TRAIL = [
-  { left: 126, top: 111.33, box: 126.67, boxH: 124.61, w: 126.12, h: 51.6, opacity: 0.85 },
-  { left: 164.48, top: 90.99, box: 102.19, boxH: 100.45, w: 103.19, h: 40.13, opacity: 0.7 },
-  { left: 208.05, top: 76.97, box: 77.72, boxH: 76.29, w: 80.26, h: 28.66, opacity: 0.55 },
-  { left: 245.3, top: 72, box: 49.11, boxH: 48.16, w: 50.5, h: 16.8, opacity: 0.4 },
-];
-
-const MOBILE_PARTICLES = [
-  { left: 223.41, top: 104.05, size: 6 },
-  { left: 246.41, top: 121.05, size: 5 },
-  { left: 263.41, top: 107.05, size: 4 },
-  { left: 208.41, top: 127.05, size: 6 },
-];
-
-// Comet trail bars (Figma trail-core/mid/tip/wisp, all rotated -43.88deg).
-const COMET_TRAIL = [
-  { left: 110.59, top: 82.53, w: 220, h: 90, opacity: 0.85, box: 220.958 },
-  { left: 177.7, top: 47.05, w: 180, h: 70, opacity: 0.7, box: 178.263 },
-  { left: 253.7, top: 22.58, w: 140, h: 50, opacity: 0.55, box: 135.569 },
-  { left: 318.7, top: 13.92, w: 90, h: 30, opacity: 0.4, box: 85.666 },
 ];
 
 function CaptionLabel({ color, children }: { color: string; children: React.ReactNode }) {
@@ -101,10 +65,11 @@ function WorldArt({ portrait, fadeRight = false }: { portrait: string; fadeRight
   );
 }
 
-function HeroCta({ children, display = false, fullOnMobile = false }: { children: React.ReactNode; display?: boolean; fullOnMobile?: boolean }) {
+function HeroCta({ children, display = false, fullOnMobile = false, onClick }: { children: React.ReactNode; display?: boolean; fullOnMobile?: boolean; onClick?: () => void }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={`cursor-pointer px-[var(--space-6)] py-[var(--space-4)] transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${
         fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
       }`}
@@ -120,43 +85,17 @@ function HeroCta({ children, display = false, fullOnMobile = false }: { children
   );
 }
 
-function CometTrailOnly() {
-  return (
-    <>
-      {COMET_TRAIL.map((bar, index) => (
-        <div key={index} className="absolute flex items-center justify-center" style={{ left: bar.left, top: bar.top, width: bar.box, height: bar.box }}>
-          <span className="block flex-none rotate-[-43.88deg] rounded-full" style={{ width: bar.w, height: bar.h, opacity: bar.opacity, background: "var(--primary-foreground)" }} />
-        </div>
-      ))}
-      {COMET_PARTICLES.map((particle, index) => (
-        <span key={index} className="absolute rounded-full" style={{ left: particle.left, top: particle.top, width: particle.size, height: particle.size, background: "var(--primary-foreground)", opacity: 0.8 }} />
-      ))}
-    </>
-  );
-}
-
-function CometStar() {
-  return (
-    <>
-      <CometTrailOnly />
-      <div className="absolute top-[137px] left-[30px] size-[220px]">
-        <img alt="" src="/images/app/star-character.svg" className="block size-full max-w-none" />
-        <img alt="" src="/images/app/star-face.svg" className="absolute top-[calc(50%+10px)] left-1/2 size-[140px] -translate-x-1/2 -translate-y-1/2" />
-      </div>
-    </>
-  );
-}
-
 function HeroBanner() {
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || dropOpen) return;
     const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 7000);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, dropOpen]);
 
   const step = (delta: number) => setPanel((current) => (current + delta + 3) % 3);
 
@@ -198,8 +137,11 @@ function HeroBanner() {
               </p>
             </div>
             <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
-              <HeroCta display fullOnMobile>
-                Open Today&apos;s Drop →
+              <HeroCta display fullOnMobile onClick={() => setDropOpen(true)}>
+                <span className="inline-flex items-center gap-[6px]">
+                  Open the Capsule
+                  <ArrowRight size={16} strokeWidth={3} aria-hidden />
+                </span>
               </HeroCta>
               <span className="flex items-center gap-[var(--space-3)] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)" }}>
                 <span style={{ color: "var(--chart-3)" }}>12-day streak</span>
@@ -209,28 +151,15 @@ function HeroBanner() {
               </span>
             </div>
           </div>
-          {/* Desktop: comet + star overlay on the right (frame's own art) */}
-          <div aria-hidden className="pointer-events-none absolute top-[-40px] left-[58%] hidden h-[350px] w-[550px] sm:block">
-            <CometStar />
+          {/* Desktop: Dreamy in flight with the light band (motion-lab
+             Daily Drop art) riding the panel's right side */}
+          <div aria-hidden className="pointer-events-none absolute top-[38%] right-[4%] hidden -translate-y-1/2 sm:block">
+            <DailyDropFlight size={140} band={400} thickness={92} />
           </div>
-          {/* Mobile: the mobile frame's own composition — trail 408x260 at
-             (46,37), star 122px at (118,190), inside the 430px card. */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 sm:hidden">
-            {/* The mobile frame's own compact trail (bars + particles at its
-               exact coordinates inside the 46,37 wrapper). */}
-            <div className="absolute top-[37px] left-[46px] h-[260px] w-[408px]">
-              {MOBILE_TRAIL.map((bar, index) => (
-                <div key={index} className="absolute flex items-center justify-center" style={{ left: bar.left, top: bar.top, width: bar.box, height: bar.boxH }}>
-                  <span className="block flex-none rotate-[-43.88deg] rounded-full" style={{ width: bar.w, height: bar.h, opacity: bar.opacity, background: "var(--primary-foreground)" }} />
-                </div>
-              ))}
-              {MOBILE_PARTICLES.map((particle, index) => (
-                <span key={index} className="absolute rounded-full" style={{ left: particle.left, top: particle.top, width: particle.size, height: particle.size, background: "var(--primary-foreground)", opacity: 0.8 }} />
-              ))}
-            </div>
-            <div className="absolute top-[190px] left-[118px] size-[122px]">
-              <img alt="" src="/images/app/star-character.svg" className="block size-full max-w-none" />
-              <img alt="" src="/images/app/star-face.svg" className="absolute top-[calc(50%+6px)] left-1/2 size-[78px] -translate-x-1/2 -translate-y-1/2" />
+          {/* Mobile: same flight, compact, in the air gap above the CTA */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden sm:hidden">
+            <div className="absolute top-[51%] right-[8px]">
+              <DailyDropFlight size={96} band={250} thickness={68} tilt={-12} />
             </div>
           </div>
         </PanelShell>
@@ -339,6 +268,7 @@ function HeroBanner() {
           )}
         </button>
       </div>
+      <DailyDropTakeover open={dropOpen} onClose={() => setDropOpen(false)} />
     </section>
   );
 }

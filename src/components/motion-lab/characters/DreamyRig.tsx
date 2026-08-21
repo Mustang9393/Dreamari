@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 // Vector Dreamy — traced 1:1 from the character art with potrace
@@ -37,6 +38,7 @@ export function DreamyRig({
   lookX = 12,
   shadow = true,
   halo = true,
+  irid = false,
 }: {
   size?: number;
   mood?: DreamyMood;
@@ -46,22 +48,44 @@ export function DreamyRig({
   shadow?: boolean;
   /** white outline halo (Super-style); turn off on light backgrounds */
   halo?: boolean;
+  /** iridescent trail-light wash from behind (Super flying scenes) */
+  irid?: boolean;
 }) {
   const reduced = useReducedMotion();
   const joy = mood === "joy";
+  // unique per instance: duplicate SVG ids across mounted copies make
+  // url(#...) resolve into display:none subtrees and kill clips/gradients
+  const uid = useId();
+  const id = (name: string) => `${name}-${uid}`;
 
   return (
     <svg width={size} height={size} viewBox="0 0 640 640" fill="none" overflow="visible" aria-hidden>
       <defs>
-        <linearGradient id="dreamyBody" gradientUnits="userSpaceOnUse" x1="320" y1="90" x2="320" y2="590">
+        <linearGradient id={id("dreamyBody")} gradientUnits="userSpaceOnUse" x1="320" y1="90" x2="320" y2="590">
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="55%" stopColor="#EAF6FF" />
-          <stop offset="100%" stopColor="#8FC4F4" />
+          <stop offset="60%" stopColor="#FBFDFF" />
+          <stop offset="100%" stopColor="#DCEBFD" />
         </linearGradient>
-        <filter id="dreamySoft" x="-40%" y="-40%" width="180%" height="180%">
+        <radialGradient id={id("dreamyEyeL")} gradientUnits="userSpaceOnUse" cx="206" cy="316" r="70">
+          <stop offset="0%" stopColor="#5B86FF" />
+          <stop offset="45%" stopColor="#2B50C8" />
+          <stop offset="100%" stopColor="#0B1B4D" />
+        </radialGradient>
+        <radialGradient id={id("dreamyEyeR")} gradientUnits="userSpaceOnUse" cx="411" cy="316" r="70">
+          <stop offset="0%" stopColor="#5B86FF" />
+          <stop offset="45%" stopColor="#2B50C8" />
+          <stop offset="100%" stopColor="#0B1B4D" />
+        </radialGradient>
+        <linearGradient id={id("dreamyIrid")} gradientUnits="userSpaceOnUse" x1="0" y1="340" x2="620" y2="280">
+          <stop offset="0%" stopColor="#6EE7FF" stopOpacity="0.95" />
+          <stop offset="32%" stopColor="#A78BFA" stopOpacity="0.55" />
+          <stop offset="68%" stopColor="#FF7ACF" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#FF7ACF" stopOpacity="0" />
+        </linearGradient>
+        <filter id={id("dreamySoft")} x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="16" />
         </filter>
-        <clipPath id="dreamyClip">
+        <clipPath id={id("dreamyClip")}>
           <g transform={TF}>
             <path d={BODY_D} />
           </g>
@@ -100,13 +124,26 @@ export function DreamyRig({
             {halo && (
               <path d={BODY_D} fill="#FFFFFF" stroke="#FFFFFF" strokeWidth={240} strokeLinejoin="round" opacity={0.96} />
             )}
-            <path d={BODY_D} fill="url(#dreamyBody)" />
+            <path d={BODY_D} fill={`url(#${id("dreamyBody")})`} />
           </g>
-          {/* soft belly shade + crown light, clipped to the silhouette */}
-          <g clipPath="url(#dreamyClip)">
-            <ellipse cx="320" cy="540" rx="260" ry="90" fill="#6FA9E8" opacity={0.5} filter="url(#dreamySoft)" />
-            <ellipse cx="300" cy="130" rx="170" ry="60" fill="#FFFFFF" opacity={0.85} filter="url(#dreamySoft)" />
+          {/* crisp cel shade: paint the shade tone, then re-draw the body
+             shifted up — a clean crescent of color hugs the lower contour */}
+          <g clipPath={`url(#${id("dreamyClip")})`}>
+            <rect x="0" y="0" width="640" height="640" fill="#9EC3FA" />
+            <g transform="translate(0,-48)">
+              <g transform={TF}>
+                <path d={BODY_D} fill={`url(#${id("dreamyBody")})`} />
+              </g>
+            </g>
+            <ellipse cx="300" cy="130" rx="170" ry="60" fill="#FFFFFF" opacity={0.85} filter={`url(#${id("dreamySoft")})`} />
           </g>
+
+          {/* trail light washing over the body from behind */}
+          {irid && (
+            <g clipPath={`url(#${id("dreamyClip")})`}>
+              <rect x="0" y="0" width="640" height="640" fill={`url(#${id("dreamyIrid")})`} opacity={0.5} />
+            </g>
+          )}
 
           {/* face: gaze cycle — look, hold, wander back */}
           <motion.g
@@ -126,9 +163,9 @@ export function DreamyRig({
                 transition={{ duration: 6.2, times: [0, 0.3, 0.33, 0.36, 0.68, 0.82, 0.85, 0.88], repeat: Infinity }}
                 style={{ transformBox: "fill-box", transformOrigin: "50% 50%" }}
               >
-                <g transform={TF} fill="#132D66">
+                <g transform={TF}>
                   {EYES_D.map((p, index) => (
-                    <path key={index} d={p} />
+                    <path key={index} d={p} fill={index === 0 ? `url(#${id("dreamyEyeL")})` : `url(#${id("dreamyEyeR")})`} />
                   ))}
                 </g>
               </motion.g>
