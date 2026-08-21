@@ -689,6 +689,8 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         animate={{ y: 0, opacity: 1 }}
         transition={popAt(1.45)}
       >
+        {/* Neutral exit: the card opens to details where like/dislike/save
+           live — never force a save on a career they haven't judged yet */}
         <button
           type="button"
           onClick={onClose}
@@ -699,8 +701,16 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
             borderColor: `color-mix(in srgb, ${V.primary} 55%, black)`,
           }}
         >
-          Save to My Profile
+          View Career Details
           <ArrowRight size={16} strokeWidth={3} aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mx-auto mt-1 w-fit cursor-pointer rounded-full px-4 py-2 text-[12.5px] font-semibold"
+          style={{ color: V.muted }}
+        >
+          Close
         </button>
       </motion.div>
       </div>
