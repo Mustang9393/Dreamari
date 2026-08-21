@@ -20,18 +20,9 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // band's own height (h-full inside a capped flex-1 area), so a taller frame
 // grows the poster art instead of accumulating dead space above and below it.
 
-const WORLD_COLORS: Record<string, string> = {
-  "Business & Money": "var(--world-business-money-office)",
-  "Science & Research": "var(--world-science-research)",
-  "Tech & Engineering": "var(--world-tech-engineering-design)",
-  "Health & Medicine": "var(--world-health-medicine)",
-  "Arts, Media & Sport": "var(--world-arts-media-sport)",
-  "Teaching & Education": "var(--world-teaching-learning)",
-  "Building & Construction": "var(--world-building-construction)",
-  "Law, Safety & Justice": "var(--world-law-safety-government)",
-  "Food & Cooking": "var(--world-food-farming-nature)",
-  "Driving, Flying & Shipping": "var(--world-driving-flying-shipping)",
-};
+// Shared app map — a page-local copy here once missed "Farming, Animals &
+// Nature", leaving Food Scientist's label fallback-white.
+import { WORLD_COLORS } from "@/components/app/worlds";
 
 type BrowseItem = { photo: string; title: string; world: string };
 
