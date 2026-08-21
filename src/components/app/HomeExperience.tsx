@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_RECOMMENDED } from "./catalog";
+import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Today's Drop / Continue / Trending), Continue rail of
@@ -81,18 +82,62 @@ function HeroCta({ children, display = false, fullOnMobile = false, onClick }: {
   );
 }
 
+// The hero flight, scaled to its panel: Dreamy ~24% of the panel width
+// (clamped 96-200px), trail proportional so it always crosses a good run of
+// the frame before bleeding off the top-right corner. The cloud stays fully
+// visible at every size.
+function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => setW(entries[0].contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // phones: Dreamy holds the banner's central band, trail near-horizontal.
+  // larger screens: Dreamy is the attraction — anchored to the middle of
+  // the free zone RIGHT of the text column (never over it), scaling up
+  // with the panel; the trail fades off toward the right edge.
+  const phone = w > 0 && w < 480;
+  const dreamy = phone ? Math.max(96, Math.min(140, w * 0.3)) : Math.max(120, Math.min(240, w * 0.24));
+  const textEdge = Math.min(520, w * 0.55);
+  const freeCenter = textEdge + (w - textEdge) * 0.42;
+  const rightOffset = phone ? (w - dreamy) / 2 : Math.max(14, w - (freeCenter + dreamy / 2));
+  return (
+    <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        className="absolute top-[50.5%] -translate-y-1/2 sm:top-[53%]"
+        style={{ right: rightOffset }}
+      >
+        {w > 0 && (
+          <DailyDropFlight
+            size={dreamy}
+            band={dreamy * 3.4}
+            thickness={dreamy * 0.72}
+            tilt={phone ? -4 : -14}
+            onOpen={onOpen}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function HeroBanner() {
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    if (paused) return;
-    const timer = setInterval(() => setPanel((current) => (current + 1) % 2), 7000);
+    if (paused || dropOpen) return;
+    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 7000);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, dropOpen]);
 
-  const step = (delta: number) => setPanel((current) => (current + delta + 2) % 2);
+  const step = (delta: number) => setPanel((current) => (current + delta + 3) % 3);
 
   return (
     <section
@@ -117,6 +162,39 @@ function HeroBanner() {
       </div>
 
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
+        {/* Panel 1 — Today's Drop */}
+        <PanelShell from="var(--hero-accent-purple)">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
+            <div className="flex flex-col gap-[var(--space-3)]">
+              <CaptionLabel color="var(--chart-3)">TODAY&apos;S DROP</CaptionLabel>
+              <p className="max-w-[420px] text-[26px] leading-[1.2] font-extrabold text-balance sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                Today&apos;s card is dropping in.
+              </p>
+              <p className="max-w-[400px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                One question, 20 seconds. Solve it to catch today&apos;s career card and keep your streak.
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
+              <HeroCta display fullOnMobile onClick={() => setDropOpen(true)}>
+                <span className="inline-flex items-center gap-[6px]">
+                  Catch the drop
+                  <ArrowRight size={16} strokeWidth={3} aria-hidden />
+                </span>
+              </HeroCta>
+              <span className="flex items-center gap-[var(--space-3)] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)" }}>
+                <span style={{ color: "var(--chart-3)" }}>12-day streak</span>
+                <span aria-hidden className="h-1 w-1 rounded-[2px]" style={{ background: "var(--muted-foreground)" }} />
+                <span className="sm:hidden" style={{ color: "var(--foreground)" }}>27 cards collected</span>
+                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 cards in your Locker</span>
+              </span>
+            </div>
+          </div>
+          {/* Dreamy descending from the top right, sized to the panel
+             (cloud fully visible, trail streaming off the corner); the
+             cloud itself is clickable */}
+          <ResponsiveFlight onOpen={() => setDropOpen(true)} />
+        </PanelShell>
+
         {/* Panel 2 — Continue Where You Left Off */}
         {/* wash derived from the content's world (Business & Money) so the
            whole panel obeys the system, not the old pink rotation */}
@@ -195,7 +273,7 @@ function HeroBanner() {
          mobile frame */}
       <div className="absolute inset-x-0 bottom-[11px] z-[3] flex items-center justify-center gap-[var(--space-3)] sm:inset-x-auto sm:right-[39px] sm:bottom-[23px] sm:justify-start">
         <div className="flex items-center gap-[var(--space-2)]">
-          {[0, 1].map((index) => (
+          {[0, 1, 2].map((index) => (
             <button
               key={index}
               type="button"
@@ -224,6 +302,7 @@ function HeroBanner() {
           )}
         </button>
       </div>
+      <DailyDropTakeover open={dropOpen} onClose={() => setDropOpen(false)} />
     </section>
   );
 }
