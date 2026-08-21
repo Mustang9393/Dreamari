@@ -30,7 +30,7 @@ const STAGES = [
 // Existing landing photos; titles set in each world's approved poster face
 // (Viaoda / Nunito / Lora), so the trio shows the design system's range.
 const TOP3 = [
-  { title: "Investment Banking", world: "Business & Money", photo: "/images/app/poster-investment-banking.png" },
+  { title: "Investment Banking Analyst", world: "Business & Money", photo: "/images/app/poster-investment-banking-analyst.png" },
   { title: "Airline Pilot", world: "Driving, Flying & Shipping", photo: "/images/app/poster-airline-pilot-alt.png" },
   { title: "Food Scientist", world: "Farming, Animals & Nature", photo: "/images/app/poster-food-scientist.png" },
 ];
