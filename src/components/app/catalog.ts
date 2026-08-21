@@ -15,7 +15,7 @@ const C = (title: string, world: string, photo: string, salary?: string): Catalo
 
 // "Careers Picked for You" (Home) — 14 posters in the design's order.
 export const HOME_PICKS: CatalogCareer[] = [
-  C("Asset Management", "Business & Money", "/images/app/poster-asset-management.png"),
+  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
   C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
   C("Private Equity", "Business & Money", "/images/app/poster-private-equity.png"),
   C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking.png"),
@@ -51,7 +51,7 @@ export const HOME_PICKS: CatalogCareer[] = [
 // personalization surface tells the same story.
 export const BROWSE_RECOMMENDED: CatalogCareer[] = [
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
-  C("Asset Management", "Business & Money", "/images/app/poster-asset-management.png"),
+  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
   C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
   C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png"),
   C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.png"),
@@ -64,7 +64,7 @@ export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
   C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png"),
   C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png"),
   C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
-  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v2.png"),
+  C("Investment Banking Analyst", "Business & Money", "/images/app/poster-investment-banking-analyst.png"),
 ];
 
 // "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
