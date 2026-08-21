@@ -122,8 +122,11 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
     >
       <Wordmark />
 
+      {/* Absolutely centered on the viewport — the wordmark and the wider
+         streak/XP cluster are unequal, so flex centering would sit left of
+         true center. */}
       <nav
-        className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-xl)] border px-[var(--space-2)] py-[6px]"
+        className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-xl)] border px-[var(--space-2)] py-[6px]"
         style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
       >
         {NAV_ITEMS.map((item) => {
@@ -148,13 +151,15 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
       </nav>
 
       <div className="flex items-center gap-[var(--space-5)]">
-        <span className="flex items-center gap-[6px]">
+        {/* Streak/XP yield below lg so the dead-centered nav pill never
+           collides with them on narrow desktop widths. */}
+        <span className="hidden items-center gap-[6px] lg:flex">
           <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
           <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
             12
           </span>
         </span>
-        <span className="flex items-center gap-[6px]">
+        <span className="hidden items-center gap-[6px] lg:flex">
           <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
           <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
             15,980 XP
