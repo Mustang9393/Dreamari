@@ -533,3 +533,18 @@ body {
     animation: none;
   }
 }
+
+
+/* Proportional wide-screen scaling (2026-08-21): the design base is the
+   1440px Figma frames. Above that, the whole document zooms so every
+   screen lays out exactly like a 1440 screen scaled up — type, spacing,
+   and layout keep the base screen's proportions together. Applied on body
+   so it covers every surface (app, build flow, landing). calc() length
+   division needs a modern engine; older browsers fall back to steps. */
+@media (min-width: 1441px) {
+  body { zoom: calc(100vw / 1440); }
+}
+@supports not (zoom: calc(100vw / 1440)) {
+  @media (min-width: 1441px) { body { zoom: 1.1; } }
+  @media (min-width: 1800px) { body { zoom: 1.25; } }
+}
