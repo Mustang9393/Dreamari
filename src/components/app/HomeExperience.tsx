@@ -99,16 +99,22 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const dreamy = Math.max(96, Math.min(200, w * 0.24));
+  // phones: Dreamy holds the banner's central band, trail near-horizontal
+  // and exiting the right edge; larger screens: the diagonal descent
+  const phone = w > 0 && w < 480;
+  const dreamy = phone ? Math.max(96, Math.min(140, w * 0.3)) : Math.max(96, Math.min(200, w * 0.24));
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute top-[40%] -translate-y-1/2 sm:top-[53%]" style={{ right: Math.max(14, w * 0.07) }}>
+      <div
+        className="absolute top-[49%] -translate-y-1/2 sm:top-[53%]"
+        style={{ right: phone ? (w - dreamy) / 2 : Math.max(14, w * 0.07) }}
+      >
         {w > 0 && (
           <DailyDropFlight
             size={dreamy}
             band={dreamy * 3.4}
             thickness={dreamy * 0.72}
-            tilt={-14}
+            tilt={phone ? -4 : -14}
             onOpen={onOpen}
           />
         )}
