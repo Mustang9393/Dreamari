@@ -436,7 +436,8 @@ export function HomeExperience() {
             <div className="flex flex-col gap-[var(--space-3)]">
               <span
                 className="w-fit rounded-[99px] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
-                style={{ fontFamily: "var(--font-body)", background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-ghost)" }}
+                /* white on primary measures 4.8:1; the ghost tint failed at 2.56 */
+                style={{ fontFamily: "var(--font-body)", background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }}
               >
                 YOUR SIGNAL
               </span>

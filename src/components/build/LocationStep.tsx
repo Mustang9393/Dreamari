@@ -183,7 +183,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                       toggleState(name);
                     }
                   }}
-                  className="cursor-pointer outline-none transition-[fill] duration-150"
+                  className="cursor-pointer outline-none transition-[fill] duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand-300)]"
                   style={{
                     fill: isSelected
                       ? "var(--color-brand-400)"

@@ -844,7 +844,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                       value={draftTask}
                       onChange={(event) => setDraftTask(event.target.value)}
                       placeholder="Add your own step"
-                      className="min-w-0 flex-1 bg-transparent text-[12.5px] font-semibold outline-none placeholder:text-[color:var(--muted-foreground)]"
+                      className="min-w-0 flex-1 bg-transparent text-[12.5px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
                       style={{ color: "var(--foreground)" }}
                     />
                     <button type="submit" disabled={!draftTask.trim()} className="flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
