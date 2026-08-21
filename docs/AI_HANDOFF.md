@@ -6,6 +6,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Daily Drop v4.1: free-zone composition + token compliance (DEPLOYED)
+
+- Hero flight COMPOSED, not edge-pinned: ResponsiveFlight anchors Dreamy to
+  the middle of the free zone right of the text column (textEdge =
+  min(520, 55%w); center at textEdge + 42% of remainder), scales to 240px
+  on wide panels — on ultrawide screens he sits ~65% across as the main
+  attraction instead of hugging the edge. Phone: centered in the banner's
+  middle band, near-horizontal trail, top 50.5% (gap to description == gap
+  to CTA).
+- TOKEN COMPLIANCE (user directive: no invented tokens): the takeover's
+  neon hardcodes now resolve through existing tokens — accent-subtle
+  (band tint, top-earners chip), world-science-research +
+  world-tech-engineering-design + chart-2 (diamonds, aurora, prismatic
+  chip, confetti + chart-3), SKY mixes purple+primary only. Quiz options
+  follow the build-flow glass language (glass-surface-2 + glass-border,
+  gold letter badges) with the correct state in brand primary/
+  primary-foreground. Character rig art keeps its own palette (like
+  poster art).
+
 ### 2026-08-21 Daily Drop v4: editorial hero, descent direction, drop language (DEPLOYED)
 
 - FLIGHT REVERSED per user: Dreamy now DESCENDS from the top right (it's a
