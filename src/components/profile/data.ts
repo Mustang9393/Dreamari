@@ -111,7 +111,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       },
       {
         id: "ib-cc-transfer", short: "CC transfer",
-        type: "Community College → Transfer",
+        type: "Community College Transfer",
         program: "Business at community college, transfer junior year",
         location: "Local",
         duration: "2 + 2 yrs",

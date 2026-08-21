@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { SchoolsFinalCTA } from "./FinalCTAs";
@@ -125,8 +126,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               Instead of managing multiple disconnected tools, Dreamari brings career exploration, counselor
               tracking, college planning, student engagement, and reporting into one platform.
             </p>
-            <a href="#" className="mt-3.5 inline-block text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
-              Learn more about the platform →
+            <a href="#" className="mt-3.5 inline-flex items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
+              Learn more about the platform<ArrowRight size={14} strokeWidth={2.75} aria-hidden />
             </a>
           </div>
         </div>
@@ -176,8 +177,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           ))}
         </div>
         <div className="mx-auto max-w-[1200px]">
-          <a href="#" className="mt-[22px] inline-block text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
-            Explore the student experience →
+          <a href="#" className="mt-[22px] inline-flex items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
+            Explore the student experience<ArrowRight size={14} strokeWidth={2.75} aria-hidden />
           </a>
         </div>
       </section>
@@ -234,8 +235,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           ))}
         </div>
         <div className="mx-auto max-w-[1200px]">
-          <a href="#" className="mt-[22px] inline-block text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
-            Explore the counselor dashboard →
+          <a href="#" className="mt-[22px] inline-flex items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
+            Explore the counselor dashboard<ArrowRight size={14} strokeWidth={2.75} aria-hidden />
           </a>
         </div>
       </section>
@@ -251,8 +252,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           ))}
         </div>
         <div className="mx-auto max-w-[1200px]">
-          <a href="#" className="mt-[22px] inline-block text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
-            Explore reporting →
+          <a href="#" className="mt-[22px] inline-flex items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
+            Explore reporting<ArrowRight size={14} strokeWidth={2.75} aria-hidden />
           </a>
         </div>
       </section>
@@ -272,8 +273,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           ))}
         </div>
         <div className="mx-auto max-w-[1200px]">
-          <a href="#" className="mt-[22px] inline-block text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
-            Learn more about organization solutions →
+          <a href="#" className="mt-[22px] inline-flex items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--foreground)", opacity: 0.75 }}>
+            Learn more about organization solutions<ArrowRight size={14} strokeWidth={2.75} aria-hidden />
           </a>
         </div>
       </section>

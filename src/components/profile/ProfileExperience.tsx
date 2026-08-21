@@ -6,7 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
   ArrowLeftRight,
+  ArrowRight,
   Archive,
   BookOpen,
   Bookmark,
@@ -700,7 +702,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
           <div className="-mt-[6px] flex items-center gap-[var(--space-2)]">
-            <button type="button" onClick={() => setRouteView("cards")} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}>← Cards</button>
+            <button type="button" onClick={() => setRouteView("cards")} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}><span className="inline-flex items-center gap-[4px]"><ArrowLeft size={12} strokeWidth={2.75} aria-hidden />Cards</span></button>
             <span className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Compare</span>
           </div>
           <CompareTable routes={focus.routes} selectedId={chosenRoute(focus).id} />
@@ -757,7 +759,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
           <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
-        <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route →</button>
+        <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
       </div>
 
       {/* Your roadmap: overall progress across every step */}

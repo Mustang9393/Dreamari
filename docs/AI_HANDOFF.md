@@ -6,6 +6,35 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-21
 
+### 2026-08-21 Daily Drop v4: editorial hero, descent direction, drop language (DEPLOYED)
+
+- FLIGHT REVERSED per user: Dreamy now DESCENDS from the top right (it's a
+  "drop" — the ascent fought the metaphor); trail streams up-right and
+  bleeds off the banner corner, which structurally cleared the copy-overlap
+  problems on tablet/mobile. StreakPhase enters from top-right; neon
+  streaks whoosh bottom-left->top-right.
+- Home hero art is now ResponsiveFlight: measures the panel
+  (ResizeObserver), Dreamy = 24% of panel width clamped 96-200px, trail
+  proportional (3.4x), right offset 7% — cloud always fully visible, trail
+  always crosses a good run of frame. Dreamy itself is CLICKABLE
+  (DailyDropFlight onOpen wraps the cloud in a button).
+- COPY: capsule language dropped ("doesn't make sense" — no capsule
+  visual). Now drop/card language: "Today's card is dropping in." /
+  "Catch the drop" / quiz "Crack the clue" / reveal "Drop caught!";
+  streak line "27 cards in your Locker" (My Sky retired); reveal streak
+  chip 13 (12+1, consistent with the banner).
+- Site-wide ARROW SWEEP: every keyboard-arrow char (→ ←) in UI strings
+  replaced with sized lucide ArrowRight/ArrowLeft (Home rails+ctas,
+  SchoolsView links, build steps Continue/Finish/See Matches, onboarding,
+  profile Cards/Change-route, data.ts route type reworded). Section header
+  rows: title flex-1 text-balance + nowrap "View all" (mobile short label)
+  so nothing wraps oddly or collides.
+- Reveal phase is height-responsive (overflow-y-auto + min-h-full column,
+  Dreamy 170, rays 520) — was clipping on phones. Perf pass for phone
+  stutter: transform-gpu/will-change on band + flight, ambient
+  specks/diamonds halved on <sm screens.
+- StepFooter nextLabel widened to ReactNode (icon labels).
+
 ### 2026-08-21 Daily Drop v3: capsule quiz flow + HOME hero integration (DEPLOYED)
 
 - FLOW now mirrors the user's Replit reference (dceeai.replit.app/daily-drop),

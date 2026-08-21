@@ -151,7 +151,7 @@ function SquishStation() {
 // the depth, pressing removes it and drops the face 4px.
 function TactileStation() {
   return (
-    <Station title="Tactile press" note="border-b-4 → active:border-b-0 + translate-y-[4px], CSS only">
+    <Station title="Tactile press" note="border-b-4 to active:border-b-0 + translate-y-[4px], CSS only">
       <div className="flex items-center gap-4">
         <button
           type="button"

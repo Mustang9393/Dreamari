@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, GlassCard, InkText, QuestionHeading, StepFooter } from "./ui";
 import { LocalBurst } from "./DreamyGuide";
-import { BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime } from "./sound";
@@ -333,7 +333,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, phas
           </div>
         </div>
       </GlassCard>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel="Finish →" />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }
@@ -369,7 +369,7 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
       </GlassCard>
       <div className="mt-5 flex justify-center">
         <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e); onNext(); }} type="button">
-          Continue →
+          <span className="inline-flex items-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
         </Button>
       </div>
     </div>
@@ -456,7 +456,7 @@ export function CompletionScreen({ state, patch, onSeeMatches }: { state: BuildS
       </GlassCard>
       <div className="mt-5 flex justify-center">
         <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e); onSeeMatches(); }} disabled={!state.path} type="button">
-          See Matches →
+          <span className="inline-flex items-center gap-[6px]">See Matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
         </Button>
       </div>
     </div>

@@ -56,6 +56,7 @@ function LightBand({ length = 560, thickness = 120, delay = 0 }: { length?: numb
   const reduced = useReducedMotion();
   return (
     <motion.div
+      className="transform-gpu will-change-transform"
       style={{ width: length, height: thickness, transformOrigin: "100% 50%" }}
       initial={reduced ? false : { scaleX: 0, opacity: 0 }}
       animate={reduced ? { opacity: 0.9 } : { scaleX: 1, opacity: 1, scaleY: [1, 1.05, 1] }}
@@ -111,6 +112,7 @@ function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: 
   const reduced = useReducedMotion();
   return (
     <motion.div
+      className="transform-gpu will-change-transform"
       animate={reduced ? undefined : { y: [0, -8, 0], rotate: [0, 2.5, 0] }}
       transition={{ duration: urgent ? 0.55 : 3.2, repeat: Infinity, ease: "easeInOut" }}
     >
@@ -118,7 +120,7 @@ function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: 
         animate={reduced ? undefined : { y: [0, -(urgent ? 2.5 : 1.2), urgent ? 2.5 : 1.2, 0] }}
         transition={{ duration: urgent ? 0.12 : 0.18, repeat: Infinity, ease: "linear" }}
       >
-        <div className="rotate-[8deg]">
+        <div className="-rotate-[6deg]">
           <DreamyRig size={size} lookX={14} shadow={false} irid />
         </div>
       </motion.div>
@@ -142,7 +144,7 @@ function FloatingDiamonds() {
       {DIAMONDS.map((p, index) => (
         <motion.span
           key={index}
-          className="absolute rotate-45 rounded-[1px]"
+          className={`absolute rotate-45 rounded-[1px] ${index % 2 ? "hidden sm:block" : ""}`}
           style={{ left: p.left, top: p.top, width: p.s, height: p.s, background: p.c, boxShadow: `0 0 12px ${p.c}` }}
           animate={reduced ? { opacity: 0.5 } : { y: [0, -14, 0], opacity: [0.35, 0.95, 0.35], rotate: [45, 90, 45] }}
           transition={{ duration: 3.4, delay: p.d, repeat: Infinity, ease: "easeInOut" }}
@@ -172,7 +174,7 @@ function NightSpecks() {
       {SPECKS.map((p, index) => (
         <motion.span
           key={index}
-          className="absolute rounded-full"
+          className={`absolute rounded-full ${index % 2 ? "hidden sm:block" : ""}`}
           style={{ left: p.left, top: p.top, width: p.s, height: p.s, background: "#EAF2FE" }}
           animate={reduced ? { opacity: 0.5 } : { opacity: [0.15, 0.9, 0.15], scale: [1, 1.5, 1] }}
           transition={{ duration: 2.6, delay: p.d, repeat: Infinity, ease: "easeInOut" }}
@@ -229,8 +231,8 @@ function NeonStreaks() {
             background: `linear-gradient(90deg, transparent, ${index % 2 ? NEON.magenta : NEON.cyan}, ${NEON.violet}, transparent)`,
             opacity: 0.8,
           }}
-          initial={{ x: "115vw" }}
-          animate={{ x: "-35vw" }}
+          initial={{ x: "-35vw" }}
+          animate={{ x: "115vw" }}
           transition={{ duration: l.dur, delay: l.d, repeat: Infinity, ease: "linear" }}
         />
       ))}
@@ -307,7 +309,7 @@ function SunRays() {
   const mask = "radial-gradient(circle, transparent 0%, transparent 26%, black 34%, black 46%, transparent 66%)";
   return (
     <motion.div
-      className="pointer-events-none absolute left-1/2 top-1/2 size-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+      className="pointer-events-none absolute left-1/2 top-1/2 size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full"
       style={{
         background: `repeating-conic-gradient(from 0deg, color-mix(in srgb, ${V.gold} 20%, transparent) 0deg 9deg, transparent 9deg 30deg)`,
         maskImage: mask,
@@ -471,7 +473,7 @@ function QuizPhase({ onSolve }: { onSolve: (clues: number) => void }) {
           transition={popAt(0.15)}
         >
           <span className="text-[13px] font-extrabold uppercase" style={{ letterSpacing: "0.2em", color: V.gold }}>
-            Crack the Capsule
+            Crack the clue
           </span>
           <span className="relative flex size-10 items-center justify-center">
             <svg width="40" height="40" viewBox="0 0 40 40" className="absolute -rotate-90" aria-hidden>
@@ -564,13 +566,14 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
   const reduced = useReducedMotion();
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center"
+      className="absolute inset-0 overflow-y-auto"
       style={{ background: `radial-gradient(circle at 50% 28%, color-mix(in srgb, ${V.purple} 78%, #10134a), ${V.bg} 64%)` }}
     >
       <NightSpecks />
       <FloatingDiamonds />
       <ImpactBurst />
       <Confetti />
+      <div className="relative mx-auto flex min-h-full w-full max-w-[460px] flex-col items-center justify-center gap-4 px-6 py-12 text-center">
 
       <div className="relative">
         <SunRays />
@@ -604,7 +607,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
             transition={{ duration: 1.5, times: [0, 0.2, 0.5, 0.8, 1], repeat: Infinity, repeatDelay: 0.7, ease: "easeInOut", delay: 1.1 }}
             style={{ transformOrigin: "50% 100%" }}
           >
-            <DreamyRig size={220} mood="joy" />
+            <DreamyRig size={170} mood="joy" />
           </motion.div>
         </motion.div>
       </div>
@@ -616,7 +619,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
         className="relative z-[2] text-[32px] font-extrabold sm:text-[40px]"
         style={{ fontFamily: "var(--font-display)", color: V.gold, textShadow: `0 4px 30px color-mix(in srgb, ${V.gold} 40%, transparent)` }}
       >
-        Capsule cracked!
+        Drop caught!
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 12 }}
@@ -669,7 +672,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
           <TrendingUp size={16} strokeWidth={3} aria-hidden /> $150K+
         </StatChip>
         <StatChip label="Streak" color="var(--chart-2)">
-          <Flame size={16} strokeWidth={3} aria-hidden /> 5
+          <Flame size={16} strokeWidth={3} aria-hidden /> 13
         </StatChip>
       </motion.div>
 
@@ -693,6 +696,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
           <ArrowRight size={16} strokeWidth={3} aria-hidden />
         </button>
       </motion.div>
+      </div>
     </div>
   );
 }
@@ -703,24 +707,41 @@ export function DailyDropFlight({
   band = 420,
   thickness = 88,
   tilt = -16,
+  onOpen,
 }: {
   size?: number;
   band?: number;
   thickness?: number;
   tilt?: number;
+  /** makes the cloud itself clickable (parent may stay pointer-events-none) */
+  onOpen?: () => void;
 }) {
   const reduced = useReducedMotion();
+  const drift = (
+    <motion.div
+      animate={reduced ? undefined : { x: [0, 8, 0, -8, 0], y: [0, -9, 0, 7, 0] }}
+      transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+    >
+      <FlyingDreamy size={size} />
+    </motion.div>
+  );
   return (
     <div className="relative" style={{ transform: `rotate(${tilt}deg)` }}>
-      <div className="absolute right-[34%] top-1/2 -translate-y-1/2">
+      <div aria-hidden className="absolute left-[30%] top-1/2 -translate-y-1/2 -scale-x-100">
         <LightBand length={band} thickness={thickness} delay={0.5} />
       </div>
-      <motion.div
-        animate={reduced ? undefined : { x: [0, 8, 0, -8, 0], y: [0, -9, 0, 7, 0] }}
-        transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-      >
-        <FlyingDreamy size={size} />
-      </motion.div>
+      {onOpen ? (
+        <button
+          type="button"
+          aria-label="Catch the drop"
+          onClick={onOpen}
+          className="pointer-events-auto block cursor-pointer rounded-full"
+        >
+          {drift}
+        </button>
+      ) : (
+        drift
+      )}
     </div>
   );
 }
@@ -827,18 +848,18 @@ export function DailyDropDemo() {
             className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]"
             style={{ fontFamily: "var(--font-display)", color: V.fg }}
           >
-            A new career is falling into view.
+            Today&apos;s card is dropping in.
           </span>
           <span
             className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide"
             style={{ background: V.primary, color: V.primaryFg }}
           >
-            Open the Capsule
+            Catch the drop
             <ArrowRight size={14} strokeWidth={3} aria-hidden />
           </span>
           <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: V.gold }}>
-            <Flame size={13} strokeWidth={2.5} aria-hidden /> 4 day streak
-            <span style={{ color: V.muted }}>· 3 days to golden</span>
+            <Flame size={13} strokeWidth={2.5} aria-hidden /> 12-day streak
+            <span style={{ color: V.muted }}>· 27 cards in your Locker</span>
           </span>
         </div>
 

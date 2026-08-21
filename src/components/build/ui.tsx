@@ -157,7 +157,7 @@ export function StepFooter({
   onBack?: () => void;
   onNext: () => void;
   nextDisabled?: boolean;
-  nextLabel?: string;
+  nextLabel?: React.ReactNode;
 }) {
   return (
     // Sticky to the step column's scroll container: on phones where a stage

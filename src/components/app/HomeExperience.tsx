@@ -85,6 +85,38 @@ function HeroCta({ children, display = false, fullOnMobile = false, onClick }: {
   );
 }
 
+// The hero flight, scaled to its panel: Dreamy ~24% of the panel width
+// (clamped 96-200px), trail proportional so it always crosses a good run of
+// the frame before bleeding off the top-right corner. The cloud stays fully
+// visible at every size.
+function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => setW(entries[0].contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const dreamy = Math.max(96, Math.min(200, w * 0.24));
+  return (
+    <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute top-[40%] -translate-y-1/2 sm:top-[53%]" style={{ right: Math.max(14, w * 0.07) }}>
+        {w > 0 && (
+          <DailyDropFlight
+            size={dreamy}
+            band={dreamy * 3.4}
+            thickness={dreamy * 0.72}
+            tilt={-14}
+            onOpen={onOpen}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function HeroBanner() {
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -127,41 +159,32 @@ function HeroBanner() {
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--chart-3)">TODAY&apos;S DROP</CaptionLabel>
-              <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                A new career is falling into view.
+              <p className="max-w-[420px] text-[26px] leading-[1.2] font-extrabold text-balance sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                Today&apos;s card is dropping in.
               </p>
-              <p className="max-w-[480px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                {/* Mobile frame's copy variant vs desktop's (both are the design's own) */}
-                <span className="sm:hidden">One tiny mystery, about 20 seconds. Answer to reveal it, keep your streak alive, and save it for later.</span>
-                <span className="hidden sm:inline">One tiny mystery, about 20 seconds. Answer to reveal it, keep your streak alive, and add it to My Sky.</span>
+              <p className="max-w-[400px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                One question, 20 seconds. Solve it to catch today&apos;s career card and keep your streak.
               </p>
             </div>
             <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
               <HeroCta display fullOnMobile onClick={() => setDropOpen(true)}>
                 <span className="inline-flex items-center gap-[6px]">
-                  Open the Capsule
+                  Catch the drop
                   <ArrowRight size={16} strokeWidth={3} aria-hidden />
                 </span>
               </HeroCta>
               <span className="flex items-center gap-[var(--space-3)] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)" }}>
                 <span style={{ color: "var(--chart-3)" }}>12-day streak</span>
                 <span aria-hidden className="h-1 w-1 rounded-[2px]" style={{ background: "var(--muted-foreground)" }} />
-                <span className="sm:hidden" style={{ color: "var(--foreground)" }}>27 careers saved</span>
-                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 cards in My Sky</span>
+                <span className="sm:hidden" style={{ color: "var(--foreground)" }}>27 cards collected</span>
+                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 cards in your Locker</span>
               </span>
             </div>
           </div>
-          {/* Desktop: Dreamy in flight with the light band (motion-lab
-             Daily Drop art) riding the panel's right side */}
-          <div aria-hidden className="pointer-events-none absolute top-[38%] right-[4%] hidden -translate-y-1/2 sm:block">
-            <DailyDropFlight size={140} band={400} thickness={92} />
-          </div>
-          {/* Mobile: same flight, compact, in the air gap above the CTA */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden sm:hidden">
-            <div className="absolute top-[51%] right-[8px]">
-              <DailyDropFlight size={96} band={250} thickness={68} tilt={-12} />
-            </div>
-          </div>
+          {/* Dreamy descending from the top right, sized to the panel
+             (cloud fully visible, trail streaming off the corner); the
+             cloud itself is clickable */}
+          <ResponsiveFlight onOpen={() => setDropOpen(true)} />
         </PanelShell>
 
         {/* Panel 2 — Continue Where You Left Off */}
@@ -186,7 +209,7 @@ function HeroBanner() {
               </div>
             </div>
             <div>
-              <HeroCta>Resume Simulation →</HeroCta>
+              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
             </div>
           </div>
           <WorldArt portrait="/images/app/activity-portrait-creative-media.png" />
@@ -205,7 +228,7 @@ function HeroBanner() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-8)]">
-              <HeroCta>Explore this career →</HeroCta>
+              <HeroCta><span className="inline-flex items-center gap-[6px]">Explore this career<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
               <span className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>
                 Featured in 3 Career Worlds
               </span>
@@ -296,7 +319,7 @@ const ACTIVITIES: Activity[] = [
     sub: "Lead the response team",
     fill: 62,
     stat: "62% · 18 min left",
-    cta: "Resume simulation  →",
+    cta: "Resume simulation",
     portrait: "/images/app/portrait-brand-crisis.png",
     glow: "/images/app/world-glow-pink.svg",
     symbol: "creative",
@@ -308,7 +331,7 @@ const ACTIVITIES: Activity[] = [
     sub: "6 of 10 terms mastered",
     fill: 60,
     stat: "Set 3 of 5",
-    cta: "Continue glossary  →",
+    cta: "Continue glossary",
     portrait: "/images/app/poster-investment-banking.png",
     glow: "/images/app/world-glow-amber.svg",
     symbol: "dollar",
@@ -320,7 +343,7 @@ const ACTIVITIES: Activity[] = [
     sub: "Build the strongest portfolio",
     fill: 48,
     stat: "Round 3 of 5",
-    cta: "Keep playing  →",
+    cta: "Keep playing",
     portrait: "/images/app/poster-private-equity.png",
     glow: "/images/app/world-glow-amber.svg",
     symbol: "dollar",
@@ -352,7 +375,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
         {activity.stat}
       </p>
       <p className="absolute top-[158px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[150px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-        {activity.cta}
+        <span className="inline-flex items-center gap-[4px]">{activity.cta}<ArrowRight size={11} strokeWidth={3} aria-hidden /></span>
       </p>
       <div aria-hidden className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]">
         <img alt="" src={activity.glow} className="absolute top-[-52px] left-0 block w-[214px] max-w-none" />
@@ -411,12 +434,12 @@ export function HomeExperience() {
         <HeroBanner />
 
         <section aria-label="Continue where you left off" className="flex w-full flex-col gap-[var(--space-5)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          <div className="flex items-start justify-between gap-[var(--space-4)]">
+            <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Continue Where You Left Off
             </h2>
-            <button type="button" className="cursor-pointer text-[14px] leading-[20px] font-bold whitespace-pre" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-              {"View all activity  →"}
+            <button type="button" className="mt-[2px] flex-none cursor-pointer text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+              <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
             </button>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>

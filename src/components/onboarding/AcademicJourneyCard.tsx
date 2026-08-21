@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { SubjectChip } from "./SubjectChip";
 
@@ -89,7 +90,7 @@ export function AcademicJourneyCard() {
         type="button"
         className="w-full rounded-xl bg-gradient-to-r from-gold-400 to-orange-500 py-3.5 text-sm font-bold text-white"
       >
-        Continue →
+        <span className="inline-flex items-center justify-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
       </button>
 
       <p className="text-center text-xs text-slate-500/70">

@@ -90,6 +90,13 @@ export function DreamyRig({
             <path d={BODY_D} />
           </g>
         </clipPath>
+        <clipPath id={id("dreamyEyesClip")}>
+          <g transform={TF}>
+            {EYES_D.map((p, index) => (
+              <path key={index} d={p} />
+            ))}
+          </g>
+        </clipPath>
       </defs>
 
       {/* ground shadow, breathing against the body */}
@@ -167,6 +174,16 @@ export function DreamyRig({
                   {EYES_D.map((p, index) => (
                     <path key={index} d={p} fill={index === 0 ? `url(#${id("dreamyEyeL")})` : `url(#${id("dreamyEyeR")})`} />
                   ))}
+                </g>
+                {/* depth layers inside the eye shapes: deep upper shade +
+                   bright lower reflection (palette from the vectorized ref) */}
+                <g clipPath={`url(#${id("dreamyEyesClip")})`}>
+                  <ellipse cx="218" cy="300" rx="46" ry="27" fill="#061939" opacity={0.5} />
+                  <ellipse cx="425" cy="300" rx="46" ry="27" fill="#061939" opacity={0.5} />
+                  <ellipse cx="218" cy="356" rx="38" ry="20" fill="#4B91E0" opacity={0.55} />
+                  <ellipse cx="425" cy="356" rx="38" ry="20" fill="#4B91E0" opacity={0.55} />
+                  <ellipse cx="218" cy="368" rx="28" ry="11" fill="#7FB8F2" opacity={0.5} />
+                  <ellipse cx="425" cy="368" rx="28" ry="11" fill="#7FB8F2" opacity={0.5} />
                 </g>
               </motion.g>
             )}
