@@ -483,3 +483,199 @@ export const ROUTE_DETAILS: Record<string, RouteDetail> = {
 };
 
 export const routeDetail = (routeId: string): RouteDetail | undefined => ROUTE_DETAILS[routeId];
+
+// ---- Career Report data (per the 2026-08-22 Career Report handoff) ----
+// Everything the Report tab and counselor export show, per career. No fit
+// scores, no raw percentages: qualitative interest + explainable evidence.
+// Salary bands are rough estimates; every figure carries source/year/location.
+// PROTOTYPE COPY: 8th-grade language, no em dashes. College bands use
+// Likely / Possible / Reach (soft language, never admissions certainty).
+
+export type CareerReport = {
+  hook: string;
+  traits: string[]; // "Why this matches you" chips
+  snapshot: { doing: string; industries: string; style: string; education: string };
+  duties: string[]; // first 3 shown, rest behind "Show all"
+  salary: {
+    median: string;
+    growth: string;
+    ladder: { label: string; range: string }[];
+    source: string;
+    year: string;
+    location: string;
+  };
+  educationPath: { common: string; alternatives: string[] };
+  majors: string[];
+  colleges: { name: string; band: "Likely" | "Possible" | "Reach"; reason: string }[];
+};
+
+export const CAREER_REPORTS: Record<string, CareerReport> = {
+  "investment-banking": {
+    hook: "Help companies raise money and make huge deals happen.",
+    traits: ["Numbers and money", "Competitive drive", "Fast pace", "Deal making"],
+    snapshot: {
+      doing: "Analyze companies and build the models behind big deals.",
+      industries: "Banks, advisory firms, corporate finance teams.",
+      style: "Team deal sprints with long, focused hours.",
+      education: "Bachelor's in finance, economics, or business.",
+    },
+    duties: [
+      "Build financial models in Excel",
+      "Research companies and industries",
+      "Prepare pitch decks for clients",
+      "Support live deals like mergers and IPOs",
+      "Check numbers until they are airtight",
+      "Present findings to senior bankers",
+    ],
+    salary: {
+      median: "$135,000",
+      growth: "Faster than average",
+      ladder: [
+        { label: "Entry", range: "$85K-$120K" },
+        { label: "Mid-career", range: "$150K-$250K" },
+        { label: "Senior", range: "$300K+" },
+      ],
+      source: "BLS + industry comps",
+      year: "2025",
+      location: "United States",
+    },
+    educationPath: { common: "Bachelor's degree in Finance, Economics, or Business.", alternatives: ["State school + strong internships", "Community college transfer", "Any major + a finance minor"] },
+    majors: ["Finance", "Economics", "Accounting"],
+    colleges: [
+      { name: "Wharton (UPenn)", band: "Reach", reason: "The most direct Wall Street pipeline." },
+      { name: "NYU Stern", band: "Reach", reason: "In the middle of the finance world." },
+      { name: "UT Austin McCombs", band: "Possible", reason: "Top-ranked public business school." },
+      { name: "Indiana Kelley", band: "Possible", reason: "Strong banking placement for a public school." },
+      { name: "Baruch College", band: "Likely", reason: "NYC location and finance-focused." },
+      { name: "Rutgers", band: "Likely", reason: "Big alumni network near New York." },
+    ],
+  },
+  "airline-pilot": {
+    hook: "Fly people across the country and the world safely.",
+    traits: ["Focus under pressure", "Procedures and precision", "Loves travel", "Hands-on skill"],
+    snapshot: {
+      doing: "Fly aircraft and manage every phase of flight.",
+      industries: "Airlines, cargo, charter, flight schools.",
+      style: "Crew teamwork with schedules that change weekly.",
+      education: "Flight training and FAA licenses; a degree helps.",
+    },
+    duties: [
+      "Run pre-flight checks and flight plans",
+      "Fly commercial routes as part of a crew",
+      "Make weather and fuel decisions",
+      "Communicate with air traffic control",
+      "Log hours to qualify for bigger aircraft",
+      "Train and re-certify every year",
+    ],
+    salary: {
+      median: "$219,140",
+      growth: "Faster than average",
+      ladder: [
+        { label: "Entry", range: "$75K-$100K" },
+        { label: "Mid-career", range: "$120K-$200K" },
+        { label: "Senior", range: "$250K-$400K+" },
+      ],
+      source: "BLS",
+      year: "2025",
+      location: "United States",
+    },
+    educationPath: { common: "Flight school to commercial license, then build hours to 1,500.", alternatives: ["Aviation university (R-ATP at 1,000 hours)", "Military flight training", "Part-time training while working"] },
+    majors: ["Aeronautical Science", "Aviation Management", "Any degree + flight training"],
+    colleges: [
+      { name: "Embry-Riddle", band: "Possible", reason: "The biggest name in aviation degrees." },
+      { name: "Purdue", band: "Possible", reason: "Respected flight program at a big campus." },
+      { name: "University of North Dakota", band: "Likely", reason: "Huge aviation program, strong value." },
+      { name: "Auburn", band: "Likely", reason: "Solid program with airline partnerships." },
+      { name: "ATP Flight School", band: "Likely", reason: "Fastest structured path to the airlines." },
+    ],
+  },
+  "private-equity": {
+    hook: "Buy companies, improve them, and sell them for more.",
+    traits: ["Numbers and money", "Strategy", "Long-game thinking", "Deal making"],
+    snapshot: {
+      doing: "Find companies worth buying and make them better.",
+      industries: "PE firms, growth funds, family offices.",
+      style: "Small teams, deep analysis, high stakes.",
+      education: "Bachelor's in finance or economics, often after banking.",
+    },
+    duties: [
+      "Screen companies worth investing in",
+      "Model what a company could become",
+      "Meet founders and management teams",
+      "Support deals from offer to close",
+      "Track how portfolio companies perform",
+      "Present to investment committees",
+    ],
+    salary: {
+      median: "$170,000",
+      growth: "Faster than average",
+      ladder: [
+        { label: "Entry", range: "$100K-$150K" },
+        { label: "Mid-career", range: "$150K-$300K" },
+        { label: "Senior", range: "$400K+" },
+      ],
+      source: "Industry comps",
+      year: "2025",
+      location: "United States",
+    },
+    educationPath: { common: "Bachelor's in Finance or Economics, usually via two years in banking.", alternatives: ["Consulting first, then PE", "State school + top internships", "MBA later for a reset"] },
+    majors: ["Finance", "Economics", "Business Administration"],
+    colleges: [
+      { name: "Wharton (UPenn)", band: "Reach", reason: "Feeder to the biggest funds." },
+      { name: "Harvard", band: "Reach", reason: "Unmatched finance network." },
+      { name: "Michigan Ross", band: "Possible", reason: "Elite placement from a public school." },
+      { name: "UVA McIntire", band: "Possible", reason: "Tight-knit program, strong finance ties." },
+      { name: "Indiana Kelley", band: "Likely", reason: "Investment banking workshop opens PE doors." },
+    ],
+  },
+  "software-engineer": {
+    hook: "Build the technology people use every day. Design and improve digital systems.",
+    traits: ["Problem solving", "Analytical thinking", "Technology interest", "Independent focus"],
+    snapshot: {
+      doing: "Design, build, and test software applications.",
+      industries: "Tech, finance, healthcare, entertainment, government.",
+      style: "Mix of deep focus and team collaboration.",
+      education: "Bachelor's degree in CS or a related field.",
+    },
+    duties: [
+      "Build new software features",
+      "Write and test code",
+      "Fix bugs and technical problems",
+      "Design how software systems should work",
+      "Review teammates' code",
+      "Work with designers, product managers, and other engineers",
+    ],
+    salary: {
+      median: "$133,080",
+      growth: "Much faster than average",
+      ladder: [
+        { label: "Entry", range: "$75K-$100K" },
+        { label: "Mid-career", range: "$110K-$150K" },
+        { label: "Senior", range: "$150K-$200K+" },
+      ],
+      source: "BLS",
+      year: "2025",
+      location: "United States",
+    },
+    educationPath: { common: "Bachelor's in Computer Science, Software Engineering, or related.", alternatives: ["2-year college then transfer", "Apprenticeship", "Technical training + portfolio"] },
+    majors: ["Computer Science", "Software Engineering", "Computer Engineering"],
+    colleges: [
+      { name: "Carnegie Mellon", band: "Reach", reason: "World-renowned computing programs." },
+      { name: "Georgia Tech", band: "Reach", reason: "Top public school in a thriving tech city." },
+      { name: "University of Washington", band: "Possible", reason: "Strong ties to major tech companies." },
+      { name: "Rutgers", band: "Possible", reason: "Strong regional network, accessible entry." },
+      { name: "San Jose State", band: "Likely", reason: "In Silicon Valley with exceptional connections." },
+      { name: "UMass Lowell", band: "Likely", reason: "Excellent ROI and co-op opportunities." },
+    ],
+  },
+};
+
+export const careerReport = (careerId: string): CareerReport | undefined => CAREER_REPORTS[careerId];
+
+// Interest tier in plain words: qualitative, never a raw percentage.
+export const interestTier = (score: number): string => {
+  if (score >= 75) return "Strong interest";
+  if (score >= 50) return "Growing interest";
+  if (score >= 25) return "Early interest";
+  return "Just exploring";
+};

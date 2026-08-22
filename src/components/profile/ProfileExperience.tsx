@@ -19,10 +19,11 @@ import {
   Compass,
   Eye,
   FileDown,
+  FileText,
   Flame,
   Gamepad2,
   GraduationCap,
-  Lock,
+  MoreVertical,
   Plane,
   Pencil,
   Plus,
@@ -37,10 +38,9 @@ import {
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
-import { MatchRing, matchTier } from "@/components/app/MatchRing";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { ALL_PROFILE_CAREERS, routeDetail, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
+import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, type Receipt } from "./data";
 
 // My Profile, round 2: scannable and visual. No paragraphs, no em dashes.
 // Evidence renders as receipt tiles, routes disclose progressively with a
@@ -48,7 +48,7 @@ import { ALL_PROFILE_CAREERS, routeDetail, STUDENT, type PlanTask, type ProfileC
 // horizon, and the Career Locker is its own tab plus a strip at the end of
 // Overview. College Lookup CTAs point at /colleges (feature in the works).
 
-type TabId = "overview" | "path" | "plan" | "locker" | "resume" | "settings";
+type TabId = "report" | "path" | "plan" | "evidence" | "locker" | "resume" | "settings";
 
 const ACTION_ICON = { Play: Gamepad2, Explore: Compass, Join: Users, Build: BookOpen } as const;
 const RECEIPT_ICON: Record<Receipt["kind"], typeof Check> = {
@@ -69,19 +69,22 @@ const CAPTION = "text-[10px] leading-[14px] font-semibold tracking-[0.6px] upper
 const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
 
 export function ProfileExperience() {
-  const [tab, setTab] = useState<TabId>("overview");
+  const [tab, setTab] = useState<TabId>("report");
+  // Screen-reader announcement when the focused career changes (a11y brief).
+  const [announce, setAnnounce] = useState("");
   const [top3, setTop3] = useState<string[]>(["investment-banking", "airline-pilot"]);
   const [focusId, setFocusId] = useState<string | null>("investment-banking");
   const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
   const [done, setDone] = useState<Record<string, string[]>>({});
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   // "Updated" pulses on every tab whose content just changed (focus swap
   // touches report + routes + plan; a route choice touches report + plan).
   // The tab currently in view is skipped: the change is visible live there.
   const [pings, setPings] = useState<Partial<Record<TabId, boolean>>>({});
   const pingTimer = useRef<number | null>(null);
-  const tabRef = useRef<TabId>("overview");
+  const tabRef = useRef<TabId>("report");
   useEffect(() => {
     tabRef.current = tab;
   }, [tab]);
@@ -93,14 +96,19 @@ export function ProfileExperience() {
   };
   useEffect(() => {
     if (!pingMounted.current) return;
-    pingTabs(["overview", "path", "plan"]);
+    pingTabs(["report", "path", "plan", "evidence"]);
+    const career = ALL_PROFILE_CAREERS.find((item) => item.id === focusId);
+    if (career) {
+      const timer = window.setTimeout(() => setAnnounce(`Showing ${career.title} report, path, and plan.`), 0);
+      return () => window.clearTimeout(timer);
+    }
   }, [focusId]);
   useEffect(() => {
     if (!pingMounted.current) {
       pingMounted.current = true;
       return;
     }
-    pingTabs(["overview", "plan"]);
+    pingTabs(["report", "plan"]);
   }, [routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
@@ -239,6 +247,9 @@ export function ProfileExperience() {
                 <button type="button" aria-label="Open Career Locker" onClick={() => setTab("locker")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   <Archive className="h-3.5 w-3.5" /> Locker
                 </button>
+                <button type="button" aria-label="Resume builder" onClick={() => setTab("resume")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "resume" ? "var(--glass-surface-3)" : "transparent", color: tab === "resume" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                  <FileText className="h-3.5 w-3.5" /> Resume
+                </button>
                 <button type="button" aria-label="Profile settings" onClick={() => setTab("settings")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "settings" ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   <Settings className="h-3.5 w-3.5" /> Settings
                 </button>
@@ -254,31 +265,60 @@ export function ProfileExperience() {
           </div>
         </section>
 
-        {/* Utility views (Locker, Settings) take over everything under the
-            header; the Top 3 and tabs belong to the career-facing views. */}
-        {(tab === "locker" || tab === "settings") ? null : (
+        {/* SR announcement for focus changes */}
+        <span aria-live="polite" className="sr-only">{announce}</span>
+
+        {/* Utility views (Locker, Settings, Resume) take over everything under
+            the header; the Top 3 and tabs belong to the career-facing views. */}
+        {(tab === "locker" || tab === "settings" || tab === "resume") ? null : (
         <>
         {/* ---- My Top 3: the profile's context switcher, above the tabs.
              Tap a card and every tab below shows that career. ---- */}
         <section className="flex flex-col gap-[var(--space-2)]">
-          <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
-            <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap a card to switch focus</span>
-          </div>
-          <FocusPicker top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={removeFromTop3} />
+          <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
+          <CompactSwitcher top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)} />
         </section>
 
-        {/* ---- Tabs ---- */}
-        <div className="flex w-full items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[var(--space-1)]" style={GLASS}>
+        {/* ---- Tabs: real tablist semantics, 44px targets ---- */}
+        <div
+          role="tablist"
+          aria-label="Career sections"
+          onKeyDown={(event) => {
+            const order: TabId[] = ["report", "path", "plan", "evidence"];
+            const index = order.indexOf(tab);
+            if (index === -1) return;
+            let next: TabId | null = null;
+            if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
+            if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
+            if (next) {
+              event.preventDefault();
+              setTab(next);
+              document.getElementById(`profile-tab-${next}`)?.focus();
+            }
+          }}
+          className="flex w-full items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[var(--space-1)]"
+          style={GLASS}
+        >
           {(
             [
-              { id: "overview", label: "Overview" },
+              { id: "report", label: "Report" },
               { id: "path", label: "Path" },
               { id: "plan", label: "Plan" },
-              { id: "resume", label: "Resume" },
+              { id: "evidence", label: "Evidence" },
             ] as const
           ).map((item) => (
-            <button key={item.id} type="button" aria-pressed={tab === item.id} onClick={() => setTab(item.id)} className="relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[7px] text-center text-[13px] leading-[18px] font-bold" style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}>
+            <button
+              key={item.id}
+              id={`profile-tab-${item.id}`}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              aria-controls={`profile-panel-${item.id}`}
+              tabIndex={tab === item.id ? 0 : -1}
+              onClick={() => setTab(item.id)}
+              className="relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[13px] leading-[18px] font-bold"
+              style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
+            >
               {item.label}
               {pings[item.id] && (
                 <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
@@ -289,18 +329,29 @@ export function ProfileExperience() {
         </>
         )}
 
-        {tab === "overview" && (
-          <OverviewTab focus={focus} chosenRoute={chosenRoute} planProgress={planProgress} nextTask={nextTask} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoLocker={() => setTab("locker")} />
+        {tab === "report" && (
+          <div role="tabpanel" id="profile-panel-report" aria-labelledby="profile-tab-report">
+            <ReportTab focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoEvidence={() => setTab("evidence")} onGoLocker={() => setTab("locker")} />
+          </div>
         )}
         {tab === "path" && (
-          <PathTab focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} onGoPlan={() => setTab("plan")} />
+          <div role="tabpanel" id="profile-panel-path" aria-labelledby="profile-tab-path">
+            <PathTab focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} onGoPlan={() => setTab("plan")} />
+          </div>
         )}
         {tab === "plan" && (
-          <PlanTab focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} onGoPath={() => setTab("path")} />
+          <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
+            <PlanTab focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} onGoPath={() => setTab("path")} />
+          </div>
         )}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
-        {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
-        {tab === "resume" && <ResumeTab />}
+        {tab === "evidence" && (
+          <div role="tabpanel" id="profile-panel-evidence" aria-labelledby="profile-tab-evidence">
+            <EvidenceTab focus={focus} />
+          </div>
+        )}
+        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("report")} />}
+        {tab === "settings" && <SettingsView onClose={() => setTab("report")} />}
+        {tab === "resume" && <ResumeView onClose={() => setTab("report")} />}
       </main>
 
       <div className="no-print">
@@ -331,6 +382,20 @@ export function ProfileExperience() {
         </div>
       )}
 
+      {/* ---- Remove confirm: destructive actions always confirm ---- */}
+      {confirmRemove && (
+        <div className="no-print fixed inset-0 z-[66] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
+          <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
+            <p className="mt-1 text-[13px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Locker. Nothing is lost.</p>
+            <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
+              <button type="button" onClick={() => setConfirmRemove(null)} className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Cancel</button>
+              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---- Add-from-Locker sheet: pick right here, no tab switch ---- */}
       {addOpen && (
         <div className="fixed inset-0 z-[65] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setAddOpen(false); }}>
@@ -355,7 +420,7 @@ export function ProfileExperience() {
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[13.5px] font-bold">{career.title}</span>
-                    <span className="truncate text-[10.5px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {matchTier(career.match)}</span>
+                    <span className="truncate text-[10.5px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {interestTier(career.match)}</span>
                   </span>
                   <button
                     type="button"
@@ -380,73 +445,81 @@ export function ProfileExperience() {
 
 // ------------------------------------------------------------- pieces ----
 
-function FocusPicker({ top3, focus, setFocusId, onAdd, onRemove, compact }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove?: (id: string) => void; compact?: boolean }) {
-  const emptySlots = Math.max(0, 3 - top3.length);
-  const containerClass = compact
-    ? "flex gap-[var(--space-2)] overflow-x-auto pb-1 [scrollbar-width:none] md:gap-[var(--space-3)]"
-    : "flex gap-[var(--space-3)] overflow-x-auto pb-1 [scrollbar-width:none] md:grid md:grid-cols-3 md:gap-[var(--space-4)] md:overflow-visible md:pb-0";
-  const cardClass = compact
-    ? "relative h-[148px] w-[104px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border-2 text-center uppercase select-none md:h-[184px] md:w-[132px]"
-    : "relative h-[210px] w-[148px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-xl)] border-2 text-center uppercase select-none md:aspect-[148/128] md:h-auto md:w-full";
+// Compact career switcher (2026-08-22 report handoff): the selector is a
+// small control row, not the page's hero. Thumbnail + name + world; the whole
+// card selects; removal lives behind a per-card overflow menu with a confirm.
+// Full-bleed poster art stays in Explore and the Locker.
+function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove: (id: string) => void }) {
+  const [menuFor, setMenuFor] = useState<string | null>(null);
   return (
-    <div className={containerClass} style={{ touchAction: "pan-x pan-y" }}>
+    <div role="group" aria-label="My Top 3 careers" className="-mx-5 flex snap-x gap-[var(--space-3)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0" style={{ touchAction: "pan-x pan-y" }}>
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const isFocus = focus?.id === id;
         return (
-          <button
+          <div
             key={id}
-            data-top3-card
-            type="button"
-            aria-pressed={isFocus}
-            onClick={() => setFocusId(id)}
-            className={cardClass}
-            style={{ containerType: "inline-size", borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", opacity: isFocus ? 1 : 0.72, transform: isFocus ? "scale(1)" : "scale(0.97)", transition: "transform 160ms ease", WebkitUserSelect: "none", WebkitTouchCallout: "none" } as React.CSSProperties}
+            className="relative flex h-[80px] w-[248px] flex-none snap-start items-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 pr-[var(--space-1)] pl-[var(--space-3)] md:h-[104px] md:w-auto md:pl-[var(--space-4)]"
+            style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", background: isFocus ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)" }}
           >
-            <Image src={career.photo} alt="" fill sizes={compact ? "132px" : "(min-width: 768px) 340px, 148px"} className="object-cover" />
-            <span className={compact ? "absolute top-1.5 left-1.5 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" : "absolute top-2 left-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold md:top-3 md:left-3 md:size-8 md:text-[14px]"} style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
-              {index + 1}
-            </span>
-            <span className={`absolute flex items-center ${compact ? "top-1.5 right-1.5 gap-[4px]" : "top-2 right-2 gap-[6px] md:top-3 md:right-3"}`}>
-              {isFocus && !compact && (
-                <span className="rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.6px] md:px-[10px] md:py-[3px] md:text-[10px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>
-              )}
-              {onRemove && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Remove ${career.title} from Top 3`}
-                  onClick={(event) => { event.stopPropagation(); onRemove(id); }}
-                  onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); onRemove(id); } }}
-                  className={`flex cursor-pointer items-center justify-center rounded-full ${compact ? "size-5" : "size-6"}`}
-                  style={{ background: "var(--glass-surface-3)", color: "var(--muted-foreground)" }}
-                >
-                  <X className="h-3 w-3" />
-                </span>
-              )}
-            </span>
-            <span className={`absolute inset-x-0 bottom-0 flex flex-col items-center px-1 ${compact ? "gap-[2px] pt-[18px] pb-[7px]" : "gap-[4px] pt-[26px] pb-[10px] md:px-3 md:pb-[14px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
-              <span className="w-full text-balance [overflow-wrap:normal]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)", fontSize: "clamp(11px, calc(7px + 4cqw), 22px)", lineHeight: 1.15 }}>{career.title}</span>
-              <span className="w-full font-semibold" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world], fontSize: "clamp(7px, calc(4.5px + 2cqw), 11.5px)", lineHeight: 1.35, letterSpacing: "0.5px" }}>{career.world}</span>
-            </span>
-          </button>
+            <button
+              type="button"
+              aria-pressed={isFocus}
+              onClick={() => setFocusId(id)}
+              className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] text-left"
+            >
+              <span className="relative size-[56px] flex-none overflow-hidden rounded-[var(--radius-md)] md:size-[64px]">
+                <Image src={career.photo} alt="" fill sizes="64px" className="object-cover" />
+                <span className="absolute top-[3px] left-[3px] flex size-[16px] items-center justify-center rounded-full text-[9px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+              </span>
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <span className="truncate text-[14px] leading-[18px] font-bold">{career.title}</span>
+                <span className="truncate text-[10px] leading-[13px] font-semibold tracking-[0.5px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                {isFocus && <span className="text-[10px] leading-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Current focus</span>}
+              </span>
+            </button>
+            {/* Overflow: destructive actions live OUTSIDE the selection target */}
+            <button
+              type="button"
+              aria-label={`More options for ${career.title}`}
+              aria-expanded={menuFor === id}
+              onClick={() => setMenuFor(menuFor === id ? null : id)}
+              className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+            {menuFor === id && (
+              <>
+                <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
+                <div className="absolute top-[calc(100%+4px)] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
+                  <button
+                    type="button"
+                    onClick={() => { setMenuFor(null); onRemove(id); }}
+                    className="w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[13px] font-semibold"
+                    style={{ color: "var(--destructive)" }}
+                  >
+                    Remove from Top 3
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         );
       })}
-      {Array.from({ length: emptySlots }).map((_, slot) => (
+      {top3.length < 3 && (
         <button
-          key={`empty-${slot}`}
           type="button"
           onClick={onAdd}
-          className={`flex flex-none cursor-pointer flex-col items-center justify-center border-2 border-dashed transition-colors ${compact ? "h-[148px] w-[104px] gap-[6px] rounded-[var(--radius-lg)] md:h-[184px] md:w-[132px]" : "h-[210px] w-[148px] gap-[var(--space-2)] rounded-[var(--radius-xl)] md:aspect-[148/128] md:h-auto md:w-full"}`}
-          style={{ containerType: "inline-size", borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+          className="flex h-[80px] w-[248px] flex-none cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed md:h-[104px] md:w-auto"
+          style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
-          <span className={`flex items-center justify-center rounded-full ${compact ? "size-8" : "size-9 md:size-12"}`} style={{ background: "var(--glass-surface-3)" }}>
-            <Plus className={compact ? "h-3.5 w-3.5" : "h-4 w-4 md:h-5 md:w-5"} style={{ color: "var(--accent-subtle)" }} />
+          <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
+            <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
           </span>
-          <span className="px-2 font-bold" style={{ color: "var(--foreground)", fontSize: "clamp(10.5px, calc(8px + 2.4cqw), 15px)", lineHeight: 1.3 }}>Add a career</span>
-          <span className="px-2 font-semibold" style={{ color: "var(--muted-foreground)", fontSize: "clamp(9px, calc(7px + 1.8cqw), 12px)", lineHeight: 1.3 }}>From your Locker</span>
+          <span className="text-[13px] font-bold">Add a career</span>
         </button>
-      ))}
+      )}
     </div>
   );
 }
@@ -470,23 +543,26 @@ function ReceiptTiles({ receipts }: { receipts: Receipt[] }) {
   );
 }
 
-function OverviewTab({
+function ReportTab({
   focus,
   chosenRoute,
-  planProgress,
   nextTask,
   onExport,
   onGoPath,
+  onGoEvidence,
   onGoLocker,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
-  planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
   nextTask: (career: ProfileCareer) => PlanTask | null;
   onExport: () => void;
   onGoPath: () => void;
+  onGoEvidence: () => void;
   onGoLocker: () => void;
 }) {
+  const [allDuties, setAllDuties] = useState(false);
+  const [schoolsOpen, setSchoolsOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
@@ -500,62 +576,34 @@ function OverviewTab({
   }
 
   const route = chosenRoute(focus);
-  const progress = planProgress(focus);
   const next = nextTask(focus);
   const NextIcon = next ? ACTION_ICON[next.action] : Compass;
+  const report = careerReport(focus.id);
+  const ladderTop = (range: string) => Math.max(...(range.match(/\d+/g) ?? ["1"]).map(Number));
+  const ladderMax = report ? Math.max(...report.salary.ladder.map((step) => ladderTop(step.range))) : 1;
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      {/* Career Report */}
-      <section className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* 1. Title, status, selected path (doc 9: never bury these) */}
+      <section className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
         <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
-          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Career Report · Today</span>
+          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Career Report</span>
           <span className="text-[11px] font-semibold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
         </div>
-        <p key={focus.id} className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
-
-        <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
-          <span className="relative flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)] pr-[68px]" style={{ background: "var(--glass-surface-2)" }}>
-            <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
-            <span className="min-w-0 truncate text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{matchTier(focus.match)}</span>
-            <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
-            <span className="absolute top-1/2 right-[var(--space-4)] -translate-y-1/2">
-              <MatchRing score={focus.match} size={46} />
-            </span>
-          </span>
-          <span className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
-            <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Route</span>
-            <span className="text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{route.type}</span>
-            <span className="truncate text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.program}</span>
-          </span>
-          <span className="flex flex-col gap-[5px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
-            <span className="flex items-baseline justify-between">
-              <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan</span>
-              <span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{progress.complete === 0 ? "10 min start" : `${progress.complete}/${progress.total}`}</span>
-            </span>
-            <span className="text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{progress.complete === 0 ? "Ready" : `${progress.pct}%`}</span>
-            <span className="relative h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
-              <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
-            </span>
-          </span>
+        <div className="flex flex-col gap-[4px]">
+          <p key={focus.id} className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
+          {report && <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{report.hook}</p>}
         </div>
-
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your receipts</span>
-          <ReceiptTiles receipts={focus.receipts} />
-        </div>
-
-        <div className="flex flex-wrap gap-[var(--space-3)]">
-          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <FileDown className="h-4 w-4" /> Export report
-          </button>
-          <button type="button" onClick={onGoPath} className="flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
-            My Path <ChevronRight className="h-4 w-4" />
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="flex min-w-0 flex-col gap-[2px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Selected path</span>
+            <span className="text-[16px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short} · {route.type}</span>
+          </span>
+          <button type="button" onClick={onGoPath} className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[12px] font-bold" style={{ borderColor: "var(--border)", color: "var(--foreground)" }}>Change path</button>
         </div>
       </section>
 
-      {/* Next action */}
+      {/* 2. ONE next action, right after the headline facts */}
       {next && (
         <section className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
           <span className="flex min-w-0 flex-col gap-[2px]">
@@ -568,6 +616,154 @@ function OverviewTab({
         </section>
       )}
 
+      {/* 3. Interest: qualitative + explainable, never a raw percentage */}
+      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Interest signals</span>
+        <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{interestTier(focus.match)}</span>
+        {report && (
+          <div className="flex flex-wrap gap-[var(--space-2)]">
+            {report.traits.map((trait) => (
+              <span key={trait} className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{trait}</span>
+            ))}
+          </div>
+        )}
+        <p className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Based on what you explored and completed. Not a final decision.</p>
+      </section>
+
+      {report && (
+        <>
+          {/* 4. Career snapshot */}
+          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career snapshot</span>
+            <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-2">
+              {[
+                { label: "What you do", value: report.snapshot.doing },
+                { label: "Where you could work", value: report.snapshot.industries },
+                { label: "Work style", value: report.snapshot.style },
+                { label: "Typical entry", value: report.snapshot.education },
+              ].map((tile) => (
+                <span key={tile.label} className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+                  <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{tile.label}</span>
+                  <span className="text-[13px] leading-[18px] font-semibold">{tile.value}</span>
+                </span>
+              ))}
+            </div>
+            {/* What you'd do: three items, then show all (doc 6) */}
+            <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+              <span className="pb-[6px] text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you&apos;d actually do</span>
+              {(allDuties ? report.duties : report.duties.slice(0, 3)).map((duty, index, list) => (
+                <span key={duty} className={`py-[8px] text-[13px] leading-[17px] font-semibold ${index < list.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>{duty}</span>
+              ))}
+              <button type="button" onClick={() => setAllDuties((value) => !value)} className="mt-[6px] w-fit cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                {allDuties ? "Show less" : `Show all ${report.duties.length}`}
+              </button>
+            </div>
+          </section>
+
+          {/* 5. Majors and schools */}
+          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors to explore</span>
+            <div className="flex flex-wrap gap-[var(--space-2)]">
+              {report.majors.map((major) => (
+                <span key={major} className="rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)" }}>{major}</span>
+              ))}
+            </div>
+            <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+              <button type="button" aria-expanded={schoolsOpen} onClick={() => setSchoolsOpen((value) => !value)} className="flex w-full cursor-pointer items-center justify-between py-[4px] text-left">
+                <span className="flex flex-col gap-[2px]">
+                  <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Schools to discuss</span>
+                  <span className="text-[13px] font-bold">{report.colleges.length} programs · {report.educationPath.common}</span>
+                </span>
+                <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--muted-foreground)", transform: schoolsOpen ? "rotate(180deg)" : "none" }} />
+              </button>
+              {schoolsOpen && (
+                <div className="filters-reveal flex flex-col pt-[var(--space-2)]">
+                  {report.colleges.map((college, index) => (
+                    <div key={college.name} className={`flex items-start justify-between gap-[var(--space-3)] py-[9px] ${index < report.colleges.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                      <span className="flex min-w-0 flex-col gap-[1px]">
+                        <span className="text-[13px] leading-[17px] font-bold">{college.name}</span>
+                        <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{college.reason}</span>
+                      </span>
+                      <span className="flex-none rounded-full px-[9px] py-[2px] text-[9.5px] font-bold tracking-[0.4px] uppercase" style={{ background: college.band === "Reach" ? "color-mix(in srgb, var(--chart-3) 20%, transparent)" : college.band === "Possible" ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: college.band === "Reach" ? "var(--chart-3)" : college.band === "Possible" ? "var(--accent-subtle)" : "var(--color-feedback-success, #33c78c)" }}>{college.band}</span>
+                    </div>
+                  ))}
+                  <p className="pt-[var(--space-2)] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Bands are rough estimates from typical admit rates, not predictions. Other paths: {report.educationPath.alternatives.join(" · ")}.</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* 6. Salary and outlook, always sourced */}
+          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Salary and outlook</span>
+            <div className="flex flex-wrap items-baseline gap-[var(--space-3)]">
+              <span className="text-[30px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{report.salary.median}<span className="text-[15px]">/yr</span></span>
+              <span className="rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: "var(--color-feedback-success, #33c78c)" }}>{report.salary.growth}</span>
+            </div>
+            <div className="flex flex-col gap-[8px]">
+              {report.salary.ladder.map((step) => {
+                const value = ladderTop(step.range);
+                return (
+                  <div key={step.label} className="flex items-center gap-[10px]">
+                    <span className="w-[86px] flex-none text-[10.5px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{step.label}</span>
+                    <span className="relative h-[10px] min-w-0 flex-1">
+                      <span className="absolute inset-y-0 left-0 rounded-r-[4px]" style={{ width: `${Math.max((value / ladderMax) * 100, 6)}%`, background: "color-mix(in srgb, var(--accent-subtle) 45%, transparent)" }} />
+                    </span>
+                    <span className="w-[96px] flex-none text-right text-[12px] font-bold">{step.range}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.salary.location} median · {report.salary.source} {report.salary.year} · estimates vary by location.</p>
+          </section>
+        </>
+      )}
+
+      {/* 7. Share, then evidence collapsed last (doc 9 ordering) */}
+      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <div className="flex flex-wrap gap-[var(--space-3)]">
+          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            <FileDown className="h-4 w-4" /> Share with counselor
+          </button>
+          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
+            Download report
+          </button>
+        </div>
+        <div className="border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+          <button type="button" aria-expanded={evidenceOpen} onClick={() => setEvidenceOpen((value) => !value)} className="flex w-full cursor-pointer items-center justify-between text-left">
+            <span className="text-[13px] font-bold">Evidence · {focus.receipts.length} signals</span>
+            <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: evidenceOpen ? "rotate(180deg)" : "none" }} />
+          </button>
+          {evidenceOpen && (
+            <div className="filters-reveal flex flex-col gap-[var(--space-3)] pt-[var(--space-3)]">
+              <ReceiptTiles receipts={focus.receipts} />
+              <button type="button" onClick={onGoEvidence} className="w-fit cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Open Evidence tab →</button>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ---- Evidence: what Dreamari observed, never hidden scoring ----
+
+function EvidenceTab({ focus }: { focus: ProfileCareer | null }) {
+  if (!focus) return null;
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence · {focus.title}</span>
+        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Everything here is something you actually did. No hidden scores.</p>
+        <ReceiptTiles receipts={focus.receipts} />
+      </section>
+      <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What counts as evidence</span>
+        {["Finishing simulations and scenarios", "Glossary levels you reach", "Careers you save and come back to", "Plan steps you complete"].map((item, index, list) => (
+          <span key={item} className={`py-[8px] text-[13px] leading-[17px] font-semibold ${index < list.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>{item}</span>
+        ))}
+        <p className="pt-[var(--space-1)] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Scrolling and clicking around do not count. Doing things does.</p>
+      </section>
     </div>
   );
 }
@@ -777,10 +973,12 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
         {focus.plan.map((horizon, index) => {
           const unlocked = horizonUnlocked(focus, index);
           const stats = horizonProgress(focus, index);
-          const isOpen = unlocked && (openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id);
+          // Visibility is never gated (report handoff 11.2): every level opens;
+          // only CHECKING OFF waits for the earlier steps.
+          const isOpen = openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id;
           return (
-            <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.55 }}>
-              <button type="button" aria-expanded={isOpen} disabled={!unlocked} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left disabled:cursor-default">
+            <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
+              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left">
                 <span className="flex min-w-0 items-center gap-[var(--space-3)]">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
                   <span className="flex min-w-0 flex-col">
@@ -791,15 +989,11 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                 </span>
                 <span className="flex flex-none items-center gap-[var(--space-3)]">
                   {unlocked ? (
-                    <>
-                      <MatchRing score={Math.round(stats.pct * 100)} size={38} />
-                      <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
-                    </>
+                    <span className="text-[12px] font-bold" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total} done</span>
                   ) : (
-                    <span className="flex items-center gap-[6px] text-[10px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>
-                      <Lock className="h-3.5 w-3.5" /> Unlocks at 40% of Level {index}
-                    </span>
+                    <span className="text-[10px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}</span>
                   )}
+                  <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
                 </span>
               </button>
               {isOpen && (
@@ -809,7 +1003,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                     const TaskIcon = ACTION_ICON[task.action];
                     return (
                       <div key={task.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", opacity: complete ? 0.6 : 1 }}>
-                        <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} onClick={() => toggleTask(focus.id, task.id)} className="flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
+                        <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
                           {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                         </button>
                         <span className={`min-w-0 flex-1 text-[12.5px] leading-[17px] font-semibold ${complete ? "line-through" : ""}`}>{task.label}</span>
@@ -1201,12 +1395,9 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                 </span>
               </span>
               <span className="flex items-center justify-between gap-[var(--space-2)] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
-                <span className="flex min-w-0 flex-1 items-center gap-[8px]">
-                  <MatchRing score={career.match} size={36} />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-[10.5px] leading-[13px] font-bold">{matchTier(career.match)}</span>
-                    <span className="text-[8.5px] leading-[11px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Match</span>
-                  </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                  <span className="truncate text-[11.5px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
+                  <span className="text-[8.5px] leading-[11px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
                 <button
                   type="button"
@@ -1257,10 +1448,15 @@ function SettingsView({ onClose }: { onClose: () => void }) {
   );
 }
 
-function ResumeTab() {
+function ResumeView({ onClose }: { onClose: () => void }) {
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-8)]" style={GLASS}>
-      <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
+        <button type="button" aria-label="Close resume builder" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          <X className="h-4 w-4" />
+        </button>
+      </div>
       <ol className="flex flex-col gap-[var(--space-3)]">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
           <li key={step} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={GLASS}>
@@ -1338,7 +1534,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           {[
-            ["Match strength", `${career.match}% (${matchTier(career.match)}), derived from logged in-app activity`],
+            ["Interest", `${interestTier(career.match)}, based on ${career.receipts.length} logged signals`],
             ["Selected pathway", `${route.type}: ${route.program}`],
             ["Plan progress", `${progress.complete} of ${progress.total} planned actions complete (${progress.pct}%)`],
           ].map(([label, value]) => (
@@ -1407,7 +1603,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         </ReportSection>
 
         <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[10.5px] leading-[15px] text-[#6b7280]">
-          Match strength summarizes {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. It is an engagement indicator intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
+          The interest level summarizes {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. It is an engagement indicator intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
         </p>
       </div>
     </div>
