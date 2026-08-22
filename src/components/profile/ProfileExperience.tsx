@@ -1104,47 +1104,61 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
   ];
   const RouteIcon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   return (
+    // The whole card opens the detail. A full-bleed button sits behind the
+    // content rather than wrapping it, so "Make this my route" stays a real
+    // sibling button instead of an invalid nested one.
     <div
-      className="dm-tap flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
+      className="dm-tap relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
-      <button type="button" onClick={onOpen} className="flex w-full cursor-pointer flex-col items-start gap-[var(--space-3)] text-left" aria-label={`Open details for ${route.short}`}>
-        <span className="flex w-full items-start justify-between gap-[var(--space-2)]">
-          <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
-            <RouteIcon className="h-4 w-4" aria-hidden />
-          </span>
-          <span className="flex flex-none items-center gap-[5px]">
-            {route.recommended && (
-              <span className="flex items-center gap-[3px] rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
-                <Sparkles className="h-2.5 w-2.5" aria-hidden /> Pick
-              </span>
-            )}
-            {selected && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
-          </span>
-        </span>
-        <span className="flex min-w-0 flex-col gap-[2px]">
-          <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
-          <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
-        </span>
-      </button>
-
-      <dl className="flex flex-col border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex items-baseline justify-between gap-[var(--space-2)] py-[6px]">
-            <dt className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
-            <dd className="min-w-0 truncate text-[16px] leading-[20px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }} title={stat.value}>{stat.value}</dd>
-          </div>
-        ))}
-      </dl>
-
       <button
         type="button"
-        onClick={selected ? onOpen : onSelect}
-        className="dm-quiet mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[12.5px] font-bold"
-        style={{ borderColor: "var(--border)", background: "transparent" }}
-      >
-        {selected ? "See details" : "Make this my route"}
-      </button>
+        onClick={onOpen}
+        aria-label={`Open details for ${route.short}`}
+        className="absolute inset-0 z-0 cursor-pointer rounded-[var(--radius-2xl)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-subtle)]"
+      />
+
+      <div className="pointer-events-none relative z-[1] flex flex-col gap-[var(--space-4)]">
+        <div className="flex flex-col items-start gap-[var(--space-3)]">
+          <span className="flex w-full items-start justify-between gap-[var(--space-2)]">
+            <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
+              <RouteIcon className="h-4 w-4" aria-hidden />
+            </span>
+            <span className="flex flex-none items-center gap-[5px]">
+              {route.recommended && (
+                <span className="flex items-center gap-[3px] rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+                  <Sparkles className="h-2.5 w-2.5" aria-hidden /> Pick
+                </span>
+              )}
+              {selected && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+            </span>
+          </span>
+          <span className="flex min-w-0 flex-col gap-[2px]">
+            <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+            <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
+          </span>
+        </div>
+
+        <dl className="flex flex-col border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex items-baseline justify-between gap-[var(--space-2)] py-[6px]">
+              <dt className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+              <dd className="min-w-0 truncate text-[16px] leading-[20px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }} title={stat.value}>{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {!selected && (
+        <button
+          type="button"
+          onClick={onSelect}
+          className="dm-quiet relative z-[2] mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[12.5px] font-bold"
+          style={{ borderColor: "var(--border)", background: "transparent" }}
+        >
+          Make this my route
+        </button>
+      )}
     </div>
   );
 }

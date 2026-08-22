@@ -88,6 +88,21 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 12: whole route card is the click target (PUSHED)
+
+- Pattern: a full-bleed <button> sits BEHIND the card content (absolute inset-0
+  z-0) rather than wrapping it, the content block is pointer-events-none
+  z-[1], and "Make this my route" is a sibling at z-[2]. That keeps the whole
+  card clickable without nesting a button inside a button. The overlay carries
+  its own focus-visible ring since .dm-tap sits on the wrapper, not on it.
+- Verified with real pointer clicks, not just JS .click(): clicking the stats
+  area opens the correct modal; clicking the select button selects the route
+  and does NOT open the modal.
+- Testing note: elementFromPoint returns null for anything outside the
+  viewport, which made a hit-test look like a z-index bug until the element was
+  scrolled into view. Scroll first, then hit-test.
+- Dev server had died mid-session; restarted via preview_start dreamari-dev.
+
 ### 2026-08-22 Round 11: mobile route rail + Pay label (PUSHED)
 
 - Route cards no longer stack on phones. One container does both: a snap rail
