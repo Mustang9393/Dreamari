@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
   { label: "Play", href: "#" },
-  { label: "Connect", href: "#" },
+  { label: "Connect", href: "/connect" },
 ] as const;
 
 // Every page the prototype can demo, reachable from anywhere.
@@ -55,6 +55,7 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-lab" },
   { label: "My Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
+  { label: "Connect", href: "/connect" },
 ] as const;
 
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
@@ -192,7 +193,7 @@ const MOBILE_ITEMS = [
   { label: "Home", href: "/home", Icon: House },
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "#", Icon: CirclePlay },
-  { label: "Connect", href: "#", Icon: Users },
+  { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 
 export function MobileNav({ active }: { active: string }) {
