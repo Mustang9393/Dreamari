@@ -785,7 +785,7 @@ function OverviewTab({
           <span className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             {[
               { label: "Time", value: route.duration },
-              { label: "Starts at", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
+              { label: "Pay", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
               { label: "Debt clear", value: (routeDetail(route.id)?.payoff.time ?? route.loanPayoff).replace("~", "") },
             ].map((stat) => (
               <span key={stat.label} className="flex flex-col gap-[1px]">
@@ -1099,13 +1099,13 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
   const stats = [
     { label: "Time", value: route.duration },
     { label: "Cost", value: route.cost.split(",")[0] },
-    { label: "Starts at", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
+    { label: "Pay", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
     { label: "Debt clear", value: (detail?.payoff.time ?? route.loanPayoff).replace("~", "") },
   ];
   const RouteIcon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   return (
     <div
-      className="dm-tap flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]"
+      className="dm-tap flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       <button type="button" onClick={onOpen} className="flex w-full cursor-pointer flex-col items-start gap-[var(--space-3)] text-left" aria-label={`Open details for ${route.short}`}>
@@ -1208,7 +1208,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       </div>
 
       {routeView === "cards" ? (
-        <div className="grid gap-[var(--space-3)] [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+        <div className="-mx-5 flex snap-x snap-mandatory items-stretch gap-[var(--space-3)] overflow-x-auto scroll-px-5 px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:overflow-visible sm:px-0 sm:pb-0 sm:[grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]" style={{ touchAction: "pan-x pan-y" }}>
           {focus.routes.map((routeOption) => (
             <RouteRow
               key={routeOption.id}
@@ -1483,7 +1483,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
           {[
             { label: "Time", value: route.duration },
             { label: "Total cost", value: route.cost.split(",")[0] },
-            { label: "First-year pay", value: route.salary.split(",")[0].replace(/ first year/i, "") },
+            { label: "Pay", value: route.salary.split(",")[0].replace(/ first year/i, "") },
           ].map((stat, index) => (
             <div key={stat.label} className={`flex flex-1 flex-col justify-center gap-[4px] ${index < 2 ? "border-b pb-[var(--space-3)]" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
               <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stat.label}</span>

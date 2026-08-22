@@ -40,6 +40,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 11: mobile route rail + Pay label (PUSHED)
+
+- Route cards no longer stack on phones. One container does both: a snap rail
+  below sm (flex, snap-x, -mx-5/px-5 full bleed, scroll-px-5 so card 1 is not
+  flush to the edge, cards w-[74vw] max-w-[280px] flex-none snap-start) and
+  the auto-fit grid from sm up (cards go w-auto max-w-none). Verified on 375:
+  scrollWidth 897 vs clientWidth 375, three cards, display flex.
+- "Starts at" was a vague label of my own invention. It is now "Pay", carrying
+  the range the route already describes ($96K-110K+). Changed in the route
+  cards, the route modal stats and the Overview bento tile.
+
 ### 2026-08-22 Round 10: routes as compact cards + modal (PUSHED)
 
 - The route carousel is GONE (rail, snap, prev/next arrows, route pills). The
