@@ -79,14 +79,17 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
 // A numbered report section. Nothing here collapses: the export has to carry
 // everything, and a dropdown is exactly how information goes missing from a
 // printed document.
-function ReportSection({ id, n, title, children }: { id: string; n: number; title: string; children: React.ReactNode }) {
+function ReportSection({ id, n, title, action, children }: { id: string; n: number; title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[40px] sm:pt-[46px]">
-      <div className="flex items-baseline gap-[10px] sm:gap-[16px]">
+      <div className="flex flex-col gap-[12px] sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-[16px] sm:gap-y-[8px]">
+        <span className="flex items-baseline gap-[10px] sm:contents">
         <span aria-hidden className="dm-report-num flex-none text-[23px] leading-[27px] font-extrabold tabular-nums sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>{String(n).padStart(2, "0")}</span>
         <h3 id={`${id}-title`} className="text-[23px] leading-[27px] font-extrabold text-balance uppercase sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.004em" }}>
           {title}
         </h3>
+        </span>
+        {action && <span className="sm:ml-auto">{action}</span>}
       </div>
       <div className="mt-[16px] border-t pt-[18px]" style={{ borderColor: "var(--rule-strong)" }}>
         {children}
@@ -236,22 +239,25 @@ function ReportDocument({
         </header>
 
         {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
-        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} Overview`}>
+        <ReportSection
+          id={`${idPrefix}glance`}
+          n={1}
+          title={`${career.title} Overview`}
+          action={
+            <Link
+              href="/explore?tab=browse"
+              data-print-hide
+              className="dm-tap inline-flex min-h-[34px] items-center gap-[6px] rounded-[8px] border px-[12px] text-[14px] font-bold tracking-[-0.012em]"
+              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
+            >
+              <Compass className="h-3.5 w-3.5" aria-hidden /> Career details
+            </Link>
+          }
+        >
           <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
             <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
             <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
-            <div className="flex gap-[12px] py-[13px]">
-              <Compass className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
-              <Link
-                href="/explore?tab=browse"
-                data-print-hide
-                className="dm-link text-[18px] leading-[23px] font-extrabold tracking-[-0.012em] underline decoration-[color:var(--rule-strong)] underline-offset-4"
-                style={{ color: "var(--ink)" }}
-              >
-                See full career details
-              </Link>
-            </div>
           </dl>
         </ReportSection>
 
@@ -292,7 +298,21 @@ function ReportDocument({
         </ReportSection>
 
         {/* 04 — Colleges */}
-        <ReportSection id={`${idPrefix}colleges`} n={4} title="Colleges">
+        <ReportSection
+          id={`${idPrefix}colleges`}
+          n={4}
+          title="Colleges"
+          action={
+            <Link
+              href="/colleges"
+              data-print-hide
+              className="dm-tap inline-flex min-h-[34px] items-center gap-[6px] rounded-[8px] border px-[12px] text-[14px] font-bold tracking-[-0.012em]"
+              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
+            >
+              <Search className="h-3.5 w-3.5" aria-hidden /> College Lookup
+            </Link>
+          }
+        >
           <div className="grid gap-[12px] sm:grid-cols-2">
             {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
@@ -302,24 +322,16 @@ function ReportDocument({
                 style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}
                 data-keep-together
               >
-                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                <span className="mt-[3px] block text-[11px] font-bold tracking-[0.09em] uppercase" style={{ color: "var(--ink-faint)" }}>
+                <span className="mb-[7px] inline-flex w-fit items-center rounded-[5px] border px-[7px] py-[2px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-sunken)" }}>
                   {college.status}
                 </span>
+                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
                 <span data-print-hide className="mt-[6px] inline-flex items-center gap-[4px] text-[15px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
               </Link>
             ))}
           </div>
-          <Link
-            href="/colleges"
-            data-print-hide
-            className="dm-solid mt-[20px] inline-flex min-h-[46px] items-center gap-[8px] rounded-[10px] px-[20px] text-[16px] font-bold tracking-[-0.012em]"
-            style={{ background: "var(--ink)", color: "var(--paper)" }}
-          >
-            <Search className="h-4 w-4" aria-hidden /> Open College Lookup
-          </Link>
         </ReportSection>
 
         {/* Sources: a footer, not a section a student has to open */}

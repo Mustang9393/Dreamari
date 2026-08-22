@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Compass,
   Eye,
+  FileText,
   Flame,
   Gamepad2,
   GraduationCap,
@@ -250,7 +251,7 @@ export function ProfileExperience() {
               <span className="truncate text-[15px] leading-[17px] font-bold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
-              {([["locker", "Locker", Archive], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
+              {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
                 <button
                   key={id}
                   type="button"
@@ -294,7 +295,7 @@ export function ProfileExperience() {
 
         {/* Utility views (Locker, Settings, Resume) take over everything under
             the header; the Top 3 and tabs belong to the career-facing views. */}
-        {(tab === "locker" || tab === "settings") ? null : (
+        {(tab === "locker" || tab === "settings" || tab === "resume") ? null : (
         <>
         {/* ---- My Top 3: the profile's context switcher, above the tabs.
              Tap a card and every tab below shows that career. ---- */}
@@ -315,7 +316,7 @@ export function ProfileExperience() {
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "routes", "plan", "report", "resume"];
+            const order: TabId[] = ["overview", "routes", "plan", "report"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -333,10 +334,9 @@ export function ProfileExperience() {
           {(
             [
               { id: "overview", label: "Overview" },
-              { id: "routes", label: "Routes" },
+              { id: "routes", label: "Paths" },
               { id: "plan", label: "Plan" },
               { id: "report", label: "Report" },
-              { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
             <button
@@ -400,11 +400,7 @@ export function ProfileExperience() {
         )}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
         {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
-        {tab === "resume" && (
-          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
-            <ResumeView onClose={() => setTab("overview")} />
-          </div>
-        )}
+        {tab === "resume" && <ResumeView onClose={() => setTab("overview")} />}
       </main>
 
       {compareOpen && (
@@ -682,6 +678,9 @@ function OverviewTab({
 
   const route = chosenRoute(focus);
   const careerSummary = reportV2(focus.id);
+  // Loans vary, so the figure is approximate and "None" when there is no debt.
+  const avgLoan = routeDetail(route.id)?.payoff.avgLoan;
+  const loan = !avgLoan ? null : /^\$?0/.test(avgLoan) ? "None" : `~${avgLoan}`;
   const next = nextTask(focus);
   const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const progress = planProgress(focus);
@@ -705,7 +704,9 @@ function OverviewTab({
             {[
               { label: "Time to get in", ...splitDuration(careerSummary.comparison.timeToEnter) },
               { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
-              { label: "Job outlook", value: careerSummary.salary.outlook.replace(/ than average/i, ""), note: "than average" },
+              // Loan beats outlook here: "faster than average" needs a second
+              // line to mean anything, and debt is the question students ask.
+              ...(loan ? [{ label: "Typical loan", value: loan, note: null as string | null }] : []),
             ].map((stat) => (
               <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
                 <span className="flex-none text-[12px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
@@ -762,13 +763,13 @@ function OverviewTab({
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Current route</span>
+            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Current path</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
             <span className="truncate text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-              {stillExploring ? `${route.program} · ${focus.routes.length} ways in` : route.program}
+              {stillExploring ? `${route.program} · ${focus.routes.length} paths in` : route.program}
             </span>
           </span>
           <span className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -1094,7 +1095,7 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
   const RouteIcon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   return (
     // The whole card opens the detail. A full-bleed button sits behind the
-    // content rather than wrapping it, so "Make this my route" stays a real
+    // content rather than wrapping it, so "Make this my path" stays a real
     // sibling button instead of an invalid nested one.
     <div
       className="dm-tap group relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
@@ -1154,7 +1155,7 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
           className="dm-quiet relative z-[2] mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[15px] font-bold"
           style={{ borderColor: "var(--border)", background: "transparent" }}
         >
-          Make this my route
+          Make this my path
         </button>
       )}
     </div>
@@ -1209,7 +1210,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
+        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Paths into ${focus.title}`} /></h2>
         <button
           type="button"
           onClick={() => setRouteView(routeView === "cards" ? "compare" : "cards")}
@@ -1217,7 +1218,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
           style={{ borderColor: routeView === "compare" ? "var(--accent-subtle)" : "var(--border)", background: "transparent", color: routeView === "compare" ? "var(--accent-subtle)" : "var(--foreground)" }}
         >
           <ArrowLeftRight className="h-4 w-4" aria-hidden />
-          {routeView === "compare" ? "Back to routes" : `Compare all ${focus.routes.length}`}
+          {routeView === "compare" ? "Back to paths" : `Compare all ${focus.routes.length}`}
         </button>
       </div>
 

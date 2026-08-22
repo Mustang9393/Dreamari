@@ -116,6 +116,24 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-23 Round 25: 4 tabs, CTA pattern, Paths rename (PUSHED)
+
+- FIVE TABS DO NOT FIT A PHONE. Resume went back to a labelled header button
+  beside Locker and Settings; tabs are Overview / Paths / Plan / Report.
+  Verified no overflow at 375. Do not add a fifth tab.
+- "Routes" is "Paths" in all user-facing copy (tab, section heading, Make this
+  my path, Back to paths, Current path). The `routes` tab id, the
+  ProfileCareer.routes field and every route* helper keep their names.
+- CTA pattern in the report: a small bordered secondary button with the icon
+  inside, sitting on the section title line (Career details on 01, College
+  Lookup on 04). ReportSection takes an optional `action` for this. On mobile
+  the head stacks and the button sits under the title, left-aligned with the
+  content; numeral and title stay on one line via `sm:contents`.
+- College band is a chip ABOVE the name, not a label beside it.
+- Overview summary: Job outlook replaced by Typical loan (~$68K), because
+  "Faster" needed a trailing "than average" to mean anything. Loans read "None"
+  when there is no debt and always carry the ~ (they vary).
+
 ### 2026-08-23 Round 24: report trimmed, colleges grouped by band (PUSHED)
 
 - Each career now has EXACTLY SIX colleges, two per band, and the section
