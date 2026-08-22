@@ -126,6 +126,10 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - "11th Grade" and "3.7 GPA" are single template strings in one span, at one
   weight and one colour, not a value span plus a label span. The verified
   badge is an inline icon after the text, not a flex sibling with a gap.
+- The whole stat line is ONE treatment: every item (grade, GPA, school, date)
+  is white and bold. No quiet members, no emphasised member. I tried grading
+  it twice (bold label/light value, then school-only emphasis) and both were
+  rejected. Leave it uniform.
 
 ### 2026-08-22 Round 18: report stat line reads as phrases (LOCAL)
 

@@ -307,7 +307,7 @@ function ReportDocument({
             Career &amp; Pathway Report
           </p>
           <h2 className="mt-[2px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
+          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] font-bold tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink)" }}>
             <span>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
             {ACADEMIC_RECORD.verified && (
               <span>
@@ -316,7 +316,7 @@ function ReportDocument({
                 <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
               </span>
             )}
-            <span className="font-bold" style={{ color: "var(--ink)" }}>{student.school}</span>
+            <span>{student.school}</span>
             <span className="tabular-nums">{reportDate}</span>
           </p>
         </header>
