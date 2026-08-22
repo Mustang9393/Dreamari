@@ -40,6 +40,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 7: stat composition + identity block (PUSHED)
+
+- Overview career TLDR: only the duration is set at display size now. A
+  splitDuration() helper cuts "2 to 4 years to a first flying job" into a big
+  figure plus a small trailing note, matching how "than average" sits beside
+  the outlook. Figure is whitespace-nowrap so it never wraps mid-number.
+- Identity block recomposed after a real-device screenshot showed it breaking
+  on mobile (utility icons orphaned on their own row, ragged 2-col metadata):
+  now name + school byline on one row with icon-only buttons on phones and
+  labelled pills from sm:, then a 3-up numeric strip (Grade / GPA / Streak).
+  School left the numeric strip because it is text, not a figure.
+  Strip is grid-cols-3 on mobile and a left-hugging flex row from sm: so the
+  facts do not spread across a 1200px width.
+
 ### 2026-08-22 Round 6: counselor questions removed entirely (PUSHED)
 
 - The counselor-questions feature is gone from everywhere: the report body,

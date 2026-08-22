@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   Archive,
+  BadgeCheck,
   BookOpen,
   Check,
   ChevronDown,
@@ -253,21 +254,22 @@ export function ProfileExperience() {
       </header>
 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        {/* ---- Identity: an editorial masthead. Name at display size, then
-             the facts that matter set as caption/value pairs, so grade, school,
-             GPA and streak read as a byline rather than thin grey filler. ---- */}
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <div className="flex min-w-0 items-center gap-[var(--space-3)]">
-              <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
-                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
-                <span className="absolute -right-0.5 -bottom-0.5 flex size-[19px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "var(--background)", color: "var(--foreground)" }}>
-                  <Pencil className="h-[10px] w-[10px]" />
-                </span>
-                <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
-              </label>
-              <h2 className="min-w-0 truncate text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] sm:text-[32px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
-            </div>
+        {/* ---- Identity: an editorial masthead. Name and school read as a
+             byline; the numeric facts sit in their own strip so they line up
+             at every width instead of forming a ragged grid on phones. ---- */}
+        <section className="flex flex-col gap-[var(--space-3)]">
+          <div className="flex items-center gap-[var(--space-3)]">
+            <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
+              <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
+              <span className="absolute -right-0.5 -bottom-0.5 flex size-[19px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "var(--background)", color: "var(--foreground)" }}>
+                <Pencil className="h-[10px] w-[10px]" />
+              </span>
+              <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
+            </label>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <h2 className="truncate text-[23px] leading-[27px] font-extrabold tracking-[-0.02em] sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
+              <span className="truncate text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
+            </span>
             <span className="flex flex-none items-center gap-[2px]">
               {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
                 <button
@@ -275,25 +277,32 @@ export function ProfileExperience() {
                   type="button"
                   aria-label={label}
                   onClick={() => setTab(id)}
-                  className="flex h-9 cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[11.5px] font-bold"
+                  className="flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[11.5px] sm:font-bold"
                   style={{ background: tab === id ? "var(--glass-surface-3)" : "transparent", color: tab === id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
-                  <Icon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{label}</span>
+                  <Icon className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </span>
           </div>
-          <dl className="flex flex-wrap items-stretch gap-x-[var(--space-6)] gap-y-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+          <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-3)] sm:flex sm:gap-x-[44px]" style={{ borderColor: "var(--glass-border)" }}>
             {[
-              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null },
-              { label: "School", value: STUDENT.school.replace(" High School", ""), note: "High School" },
-              ...(ACADEMIC_RECORD.verified ? [{ label: "GPA", value: ACADEMIC_RECORD.gpa, note: `verified · ${ACADEMIC_RECORD.updated}` }] : []),
-              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days" },
+              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, verified: false },
+              { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, verified: ACADEMIC_RECORD.verified },
+              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", verified: false },
             ].map((fact) => (
-              <div key={fact.label} className="flex flex-col gap-[1px]">
-                <dt className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>{fact.label}</dt>
-                <dd className="flex items-baseline gap-[5px]">
-                  <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
+              <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
+                <dt className="flex items-center gap-[4px] text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>
+                  {fact.label}
+                  {fact.verified && (
+                    <>
+                      <BadgeCheck className="h-[12px] w-[12px]" aria-hidden />
+                      <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
+                    </>
+                  )}
+                </dt>
+                <dd className="flex items-baseline gap-[4px]">
+                  <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
                   {fact.note && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
                 </dd>
               </div>
@@ -608,6 +617,15 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
   );
 }
 
+// "2 to 4 years to a first flying job" -> big "2 to 4 years", small trailing
+// note. Keeps the stat row scannable without dropping the qualifier.
+function splitDuration(value: string): { value: string; note: string | null } {
+  const trimmed = value.replace(/^about\s+/i, "");
+  const match = trimmed.match(/^(.*?\b(?:years?|months?|weeks?))\b\s*(.*)$/i);
+  if (!match) return { value: trimmed, note: null };
+  return { value: match[1], note: match[2] ? match[2] : null };
+}
+
 // ---- Compare my Top 3 ----
 // Lives beside My Top 3, not inside the report: a report is one career's
 // document, and stacking three of them in it made it read as a bundle.
@@ -699,14 +717,14 @@ function OverviewTab({
           <div className="grid grid-cols-1 gap-[var(--space-2)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
             {[
               { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
-              { label: "Time to get in", value: careerSummary.comparison.timeToEnter.replace("About ", ""), note: null },
+              { label: "Time to get in", ...splitDuration(careerSummary.comparison.timeToEnter) },
               { label: "Job outlook", value: careerSummary.salary.outlook.replace(/ than average/i, ""), note: "than average" },
             ].map((stat) => (
               <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
                 <span className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
-                <span className="flex items-baseline gap-[4px]">
-                  <span className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
-                  {stat.note && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
+                <span className="flex flex-wrap items-baseline gap-x-[5px]">
+                  <span className="whitespace-nowrap text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+                  {stat.note && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
                 </span>
               </span>
             ))}
