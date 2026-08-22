@@ -88,6 +88,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 13: route card affordance (PUSHED)
+
+- Each route card shows a chevron in a bordered circle beside the route name:
+  a visible "this opens" cue, because hover cannot carry that signal on a
+  phone. It brightens with the card via `group` + group-hover.
+- The chevron is aria-hidden and inside the pointer-events-none content layer,
+  so it is decoration only: hit-testing it resolves to the card's real
+  "Open details for X" button, and screen readers are not told about a control
+  that does not exist.
+
 ### 2026-08-22 Round 12: whole route card is the click target (PUSHED)
 
 - Pattern: a full-bleed <button> sits BEHIND the card content (absolute inset-0

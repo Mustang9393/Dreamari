@@ -1108,7 +1108,7 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
     // content rather than wrapping it, so "Make this my route" stays a real
     // sibling button instead of an invalid nested one.
     <div
-      className="dm-tap relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
+      className="dm-tap group relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       <button
@@ -1133,9 +1133,18 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
               {selected && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           </span>
-          <span className="flex min-w-0 flex-col gap-[2px]">
-            <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
-            <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
+          <span className="flex w-full items-center gap-[var(--space-2)]">
+            <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+              <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+              <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
+            </span>
+            <span
+              aria-hidden
+              className="flex size-7 flex-none items-center justify-center rounded-full border transition-colors group-hover:border-[var(--accent-subtle)] group-hover:text-[var(--accent-subtle)]"
+              style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </span>
           </span>
         </div>
 
