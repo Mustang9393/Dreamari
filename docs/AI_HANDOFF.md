@@ -116,6 +116,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 19: weights restored, stat phrases unified (LOCAL)
+
+- REVERSAL: round 17 flattened every weight to 600 in pursuit of Apple's
+  two-weight system. The user wants the previous weights back. Display and
+  >=18px text is font-extrabold again; everything smaller is font-bold.
+  The rest of round 17 STAYS: the size jumps, 17px body, negative tracking,
+  colour-led hierarchy and the 12px floor. Only weight was rolled back.
+- "11th Grade" and "3.7 GPA" are single template strings in one span, at one
+  weight and one colour, not a value span plus a label span. The verified
+  badge is an inline icon after the text, not a flex sibling with a gap.
+
 ### 2026-08-22 Round 18: report stat line reads as phrases (LOCAL)
 
 - "Grade 11" / "GPA 3.7" became "11th Grade" / "3.7 GPA" via an ordinal()
