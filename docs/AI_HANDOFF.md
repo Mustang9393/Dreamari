@@ -116,6 +116,53 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 14: THE REPORT TYPE SCALE (LOCAL)
+
+RULE, stated by the user and not to be reinterpreted: heading, subheading,
+body. Top down, bigger to smaller. Nothing else. No eyebrows, no captions, no
+hero numerals. Titles are ALL CAPS.
+
+  document title  34 / 26  extrabold  UPPERCASE   --ink
+  section heading 24 / 20  extrabold  UPPERCASE   --ink   (numeral matches)
+  subheading      16       bold                   --ink
+  body            14                              --ink-soft
+
+Verified in the browser: 34 > 24 > 16 > 14, strictly descending.
+- The masthead label/value grid was the last caption layer; it is now one body
+  line (Grade 11 · Westfield High School · GPA 3.7 ✓ · August 22, 2026), with
+  the verifying school still announced to screen readers.
+- Student name dropped to subheading. The DOCUMENT is the title here, not the
+  person.
+- Salary renders through the same <Fact> as every other field. It has been
+  re-emphasised twice by me and corrected twice. Leave it at body.
+- Emphasis available: weight and brightness. Not size.
+
+
+
+Report scale is now heading / subheading / body / caption, with the rule that a
+subheading is never smaller than the body it introduces:
+- heading 26-32 display; section numerals raised to MATCH the heading size
+- subheading 15 bold at --ink (field labels are sentence case now, not 10px
+  small-caps, which had them smaller than their own content)
+- body 14.5 at --ink-soft; caption 12 at --ink-faint
+- brightness carries head-vs-content as well as weight
+- "Career & Pathway Report" is a real title (26/32) above the name (38/50)
+- SALARY IS NOT SPECIAL: it renders through the same <Fact> as What You Do,
+  Potential Employers and Education. It was a 38px hero numeral. Do not
+  re-emphasise it.
+- Major cards are name-only. NOTE: an earlier attempt to remove those
+  descriptions silently no-opped because the replace ran against pre-extraction
+  indentation and I did not assert. Always assert on string edits.
+- College `why` copy rewritten: no "you saved it" self-reference, each line now
+  carries a fact worth acting on (cost, location, admission odds, co-op).
+
+Play chapter (landing) hierarchy, per direct feedback:
+  title "Day in the life of an investment banker" (biggest, 17-23 extrabold,
+  accent blue) > situation (14-17, weight 500, narration) > question
+  (13-15.5 uppercase 800, prompt-label treatment) > options (body) > result
+  (caption). The question is differentiated by KIND not size, because at a
+  similar size and weight it read as a second sentence of the narration.
+
 ### 2026-08-22 Round 13: route card affordance (PUSHED)
 
 - Each route card shows a chevron in a bordered circle beside the route name:
