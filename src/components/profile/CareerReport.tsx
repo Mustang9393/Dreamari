@@ -26,7 +26,7 @@ import {
 // Scoped to what the report has to say. The action plan lives in My Plan,
 // where a student works; the report is the document they hand over.
 export const REPORT_SECTIONS = [
-  { id: "glance", n: 1, label: "At a Glance" },
+  { id: "glance", n: 1, label: "Overview" },
   { id: "majors", n: 2, label: "Three Majors" },
   { id: "education", n: 3, label: "Education" },
   { id: "colleges", n: 4, label: "Colleges" },
@@ -66,7 +66,7 @@ function ordinal(n: string): string {
 
 function SourceLink({ url, children }: { url: string; children: React.ReactNode }) {
   return (
-    <a href={url} target="_blank" rel="noreferrer" data-print-url={url} className="inline-flex items-center gap-[3px] font-bold underline decoration-[color:var(--rule-strong)] underline-offset-2" style={{ color: "var(--ink)" }}>
+    <a href={url} target="_blank" rel="noreferrer" data-print-url={url} className="inline-flex items-center gap-[3px] underline decoration-[color:var(--rule-strong)] underline-offset-2" style={{ color: "var(--ink-soft)" }}>
       {children} <ExternalLink className="h-3 w-3" aria-hidden />
     </a>
   );
@@ -217,7 +217,7 @@ function ReportDocument({
             Career &amp; Pathway Report
           </p>
           <h2 className="mt-[2px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] font-bold tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink)" }}>
+          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
             <span>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
             {ACADEMIC_RECORD.verified && (
               <span>
@@ -227,12 +227,11 @@ function ReportDocument({
               </span>
             )}
             <span>{student.school}</span>
-            <span className="tabular-nums">{reportDate}</span>
           </p>
         </header>
 
         {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
-        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} at a Glance`}>
+        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} Overview`}>
           <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
             <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
@@ -275,7 +274,7 @@ function ReportDocument({
                 {report.education.filter((route) => !route.common).map((route) => (
                   <li key={route.name}>
                     <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
-                      <span className="text-[15px] leading-[21px] font-bold">{route.name}</span>
+                      <span className="text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{route.name}</span>
                       <span className="text-[15px] leading-[21px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
                     </span>
                   </li>

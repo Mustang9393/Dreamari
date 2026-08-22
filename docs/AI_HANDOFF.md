@@ -116,6 +116,18 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-23 Round 23: report emphasis pulled back (PUSHED)
+
+- Only headings and subheadings carry full --ink now. Everything else sits at
+  --ink-soft or --ink-faint at regular weight: the masthead metadata line,
+  pathway chips and the source links.
+- REVERSAL of round 20: the masthead stat line was "all white and bold" by
+  explicit request; it is now de-emphasised by a later explicit request.
+  Current rule wins — headings and subheadings only.
+- The report date left the masthead. It still prints in the running footer,
+  so the document is not undated.
+- Section 01 is "<Career> Overview", not "at a Glance" (contents entry too).
+
 ### 2026-08-22 Round 22: overlays portalled, summary dropped, Resume tab (PUSHED)
 
 STACKING CONTEXT BUG (the "stuck on the export screen" report):
