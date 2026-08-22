@@ -143,7 +143,7 @@ export type CareerReportV2 = {
   sources: Source[];
 };
 
-const bls = (label: string, year: string, url: string): Source => ({ label, org: "U.S. Bureau of Labor Statistics", year, verified: "August 2026", url });
+const bls = (label: string, year: string, url: string): Source => ({ label, org: "U.S. Bureau of Labor Statistics", year, verified: "Aug 2026", url });
 
 export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
   "investment-banking": {
@@ -218,8 +218,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     ],
     sources: [
       bls("Financial analyst pay and outlook", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
-      { label: "College cost, size and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "August 2026", url: "https://collegescorecard.ed.gov/" },
-      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "August 2026", url: "https://www.onetonline.org/" },
+      { label: "College cost, size and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "Aug 2026", url: "https://www.onetonline.org/" },
     ],
   },
 
@@ -294,8 +294,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     ],
     sources: [
       bls("Airline and commercial pilot pay and outlook", "May 2024", "https://www.bls.gov/ooh/transportation-and-material-moving/airline-and-commercial-pilots.htm"),
-      { label: "Pilot certification and hour requirements", org: "Federal Aviation Administration", year: "2025", verified: "August 2026", url: "https://www.faa.gov/pilots" },
-      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "August 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Pilot certification and hour requirements", org: "Federal Aviation Administration", year: "2025", verified: "Aug 2026", url: "https://www.faa.gov/pilots" },
+      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
     ],
   },
 
@@ -368,7 +368,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     ],
     sources: [
       bls("Financial analyst pay and outlook (closest tracked occupation)", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
-      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "August 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
     ],
   },
 
@@ -446,8 +446,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     ],
     sources: [
       bls("Software developer pay and outlook", "May 2024", "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"),
-      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "August 2026", url: "https://collegescorecard.ed.gov/" },
-      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "August 2026", url: "https://www.onetonline.org/" },
+      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "Aug 2026", url: "https://www.onetonline.org/" },
     ],
   },
 };
@@ -523,7 +523,7 @@ export const ACADEMIC_RECORD = {
   scale: "4.0 unweighted",
   verified: true,
   source: "Westfield High School",
-  updated: "June 2026",
+  updated: "Jun 2026",
 };
 
 // Courses and experiences to consider, per career. Fixture content.

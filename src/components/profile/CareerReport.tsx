@@ -462,7 +462,7 @@ export function CareerReportView(props: ReportViewProps) {
     return () => observer.disconnect();
   }, [career.id]);
 
-  const reportDate = "August 22, 2026";
+  const reportDate = "Aug 22, 2026";
 
   const entries = useMemo(
     () => top3.map((item) => ({ career: item, report: reportV2(item.id) })).filter((entry): entry is { career: ProfileCareer; report: CareerReportV2 } => Boolean(entry.report)),
