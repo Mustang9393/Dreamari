@@ -116,6 +116,21 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 16: report padding bug + label emphasis (PUSHED)
+
+- BUG I INTRODUCED: the report used py-[var(--space-9)]. --space-9 DOES NOT
+  EXIST in tokens.css (the scale is 1,2,3,4,5,6,8,10,12,13,14). An undefined
+  var makes the declaration invalid, so vertical padding computed to 0px and
+  the document hugged its own edges on mobile. Measured, not guessed:
+  getComputedStyle reported paddingTop "0px". Now space-8 on mobile and
+  space-12 from sm. CHECK THE SCALE BEFORE USING A SPACE TOKEN — 7, 9 and 11
+  are not in it.
+- Masthead facts: the LABEL is bold at --ink and the VALUE is normal weight at
+  --ink-soft. This is the opposite of the usual instinct and it is deliberate,
+  per the user. Do not "fix" it back.
+- Middot separators removed: now that each field carries a label, the dots only
+  stranded at the end of wrapped lines.
+
 ### 2026-08-22 Round 15: masthead, CTA, mobile composition (PUSHED)
 
 - Masthead: "CAREER & PATHWAY REPORT" is grey (--ink-faint) caps, the student

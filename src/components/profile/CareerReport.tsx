@@ -173,7 +173,7 @@ function MeetingSummary({
   reportDate: string;
 }) {
   return (
-    <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)] sm:py-[var(--space-9)]">
+    <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)] sm:py-[var(--space-12)]">
       <header>
         <p className="text-[10px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary</p>
         <h2 className="mt-[8px] text-[36px] leading-[38px] font-extrabold tracking-[-0.035em] sm:text-[44px] sm:leading-[44px]" style={{ fontFamily: "var(--font-display)" }}>
@@ -289,7 +289,7 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-9)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-10)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-12)]"
     >
       <div className="mx-auto max-w-[68ch]">
         {/* Masthead */}
@@ -298,24 +298,25 @@ function ReportDocument({
             Career &amp; Pathway Report
           </p>
           <h2 className="mt-[2px] text-[26px] leading-[31px] font-extrabold sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[14px] flex flex-wrap items-center gap-x-[10px] gap-y-[4px] border-t pt-[11px] text-[14px] leading-[21px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-            <span>
-              Grade <strong className="font-bold" style={{ color: "var(--ink)" }}>{student.grade.replace("Grade ", "")}</strong>
+          <p className="mt-[14px] flex flex-wrap items-center gap-x-[18px] gap-y-[4px] border-t pt-[11px] text-[14px] leading-[21px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+            <span className="font-bold" style={{ color: "var(--ink)" }}>
+              Grade <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.grade.replace("Grade ", "")}</span>
             </span>
-            <span aria-hidden>·</span>
-            <strong className="font-bold" style={{ color: "var(--ink)" }}>{student.school}</strong>
+            <span className="font-bold" style={{ color: "var(--ink)" }}>
+              School <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.school}</span>
+            </span>
             {ACADEMIC_RECORD.verified && (
               <>
-                <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-[4px]">
-                  GPA <strong className="font-bold tabular-nums" style={{ color: "var(--ink)" }}>{ACADEMIC_RECORD.gpa}</strong>
+                    <span className="inline-flex items-center gap-[4px] font-bold" style={{ color: "var(--ink)" }}>
+                  GPA <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{ACADEMIC_RECORD.gpa}</span>
                   <BadgeCheck className="h-[14px] w-[14px]" aria-hidden />
                   <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
                 </span>
               </>
             )}
-            <span aria-hidden>·</span>
-            <strong className="font-bold tabular-nums" style={{ color: "var(--ink)" }}>{reportDate}</strong>
+            <span className="font-bold" style={{ color: "var(--ink)" }}>
+              Date <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{reportDate}</span>
+            </span>
           </p>
         </header>
 
