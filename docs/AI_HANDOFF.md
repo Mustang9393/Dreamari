@@ -116,6 +116,29 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 17: Apple-style hierarchy across the profile (LOCAL)
+
+User asked for apple.com/ipad-pro hierarchy "for the entire UI in my profile
+and everywhere", then clarified: DO NOT touch our tokens, follow the CONCEPT.
+So this is inline Tailwind on existing tokens; no new type classes, no token
+edits. (I briefly added .ap-* utility classes to app.css and removed them.)
+
+Measured off the live Apple page rather than recalled:
+  64/600 #f5f5f7 · 48/600 #86868b · 40/600 · 28/600 · 24/600 · 21/400 · 17/400
+  #86868b · negative tracking growing with size · body is 17px.
+Principles adopted:
+  - TWO WEIGHTS ONLY. 600 for anything structural, 400 for prose. All 42
+    font-extrabold and 124 font-bold occurrences are now font-semibold.
+    Verified in-browser: the profile renders exactly one weight >= 500 (600).
+  - Big jumps, not a 2px ladder: report is 42 / 28 / 18 / 17.
+  - Colour carries hierarchy: --ink for structure, --ink-soft for prose,
+    --ink-faint for the quietest line.
+  - Negative tracking on large text (-0.022em display, -0.012em body).
+  - NOTHING UNDER 12px. All 9/9.5/10/10.5px labels lifted to 12; body copy
+    from 11-13.5px lifted to 14-15px. Verified: 0 elements under 12px.
+- Scope: profile only (Overview, Routes, My Plan, Report). The landing page,
+  Explore, Connect and Match Lab are NOT converted.
+
 ### 2026-08-22 Round 16: report padding bug + label emphasis (PUSHED)
 
 - BUG I INTRODUCED: the report used py-[var(--space-9)]. --space-9 DOES NOT

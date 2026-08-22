@@ -49,8 +49,8 @@ function ReportSection({ id, n, title, children }: { id: string; n: number; titl
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[40px] sm:pt-[46px]">
       <div className="flex items-baseline gap-[10px] sm:gap-[16px]">
-        <span aria-hidden className="dm-report-num flex-none text-[20px] leading-[26px] font-extrabold tabular-nums sm:text-[24px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>{String(n).padStart(2, "0")}</span>
-        <h3 id={`${id}-title`} className="text-[20px] leading-[26px] font-extrabold text-balance uppercase sm:text-[24px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.01em" }}>
+        <span aria-hidden className="dm-report-num flex-none text-[23px] leading-[27px] font-semibold tabular-nums sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>{String(n).padStart(2, "0")}</span>
+        <h3 id={`${id}-title`} className="text-[23px] leading-[27px] font-semibold text-balance uppercase sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.004em" }}>
           {title}
         </h3>
       </div>
@@ -69,8 +69,8 @@ function Fact({ label, value, icon: Icon }: { label: string; value: React.ReactN
     <div className="flex gap-[12px] py-[13px]">
       {Icon && <Icon className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />}
       <div className="min-w-0">
-        <dt className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>{label}</dt>
-        <dd className="mt-[3px] text-[14px] leading-[20px]" style={{ color: "var(--ink-soft)" }}>{value}</dd>
+        <dt className="text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{label}</dt>
+        <dd className="mt-[4px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ color: "var(--ink-soft)" }}>{value}</dd>
       </div>
     </div>
   );
@@ -102,13 +102,13 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
           <thead>
             <tr>
-              <th scope="col" className="w-[150px] border-b pb-[10px] text-[11px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+              <th scope="col" className="w-[150px] border-b pb-[10px] text-[11px] font-semibold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
                 Factor
               </th>
               {entries.map(({ career }) => (
                 <th key={career.id} scope="col" className="border-b pb-[10px] pl-[16px] text-[15px] font-extrabold" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
                   {career.title}
-                  {career.id === focusId && <span className="ml-[6px] align-middle text-[10px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
+                  {career.id === focusId && <span className="ml-[6px] align-middle text-[12px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
                 </th>
               ))}
             </tr>
@@ -116,7 +116,7 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           <tbody>
             {COMPARE_FIELDS.map((field) => (
               <tr key={field.key}>
-                <th scope="row" className="border-b py-[10px] pr-[12px] align-top text-[11px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
+                <th scope="row" className="border-b py-[10px] pr-[12px] align-top text-[11px] font-semibold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
                   {field.label}
                 </th>
                 {entries.map(({ career, report }) => (
@@ -136,12 +136,12 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           <div key={career.id} data-keep-together>
             <h4 className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
               {career.title}
-              {career.id === focusId && <span className="ml-[6px] text-[10px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
+              {career.id === focusId && <span className="ml-[6px] text-[12px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
             </h4>
             <dl className="mt-[6px] divide-y" style={{ borderColor: "var(--rule)" }}>
               {COMPARE_FIELDS.map((field) => (
                 <div key={field.key} className="grid grid-cols-[104px_minmax(0,1fr)] gap-[10px] border-t py-[8px]" style={{ borderColor: "var(--rule)" }}>
-                  <dt className="text-[10.5px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--ink-faint)" }}>{field.label}</dt>
+                  <dt className="text-[12px] font-semibold tracking-[0.5px] uppercase" style={{ color: "var(--ink-faint)" }}>{field.label}</dt>
                   <dd className="text-[13px] leading-[18px]">{field.get(report.comparison)}</dd>
                 </div>
               ))}
@@ -175,7 +175,7 @@ function MeetingSummary({
   return (
     <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)] sm:py-[var(--space-12)]">
       <header>
-        <p className="text-[10px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary</p>
+        <p className="text-[12px] font-semibold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary</p>
         <h2 className="mt-[8px] text-[36px] leading-[38px] font-extrabold tracking-[-0.035em] sm:text-[44px] sm:leading-[44px]" style={{ fontFamily: "var(--font-display)" }}>
           {student.name}
         </h2>
@@ -187,7 +187,7 @@ function MeetingSummary({
             { label: "Date", value: reportDate },
           ].map((fact) => (
             <div key={fact.label} className="flex flex-col gap-[1px]">
-              <dt className="text-[9.5px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>{fact.label}</dt>
+              <dt className="text-[12px] font-semibold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>{fact.label}</dt>
               <dd className="text-[19px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</dd>
             </div>
           ))}
@@ -195,7 +195,7 @@ function MeetingSummary({
       </header>
 
       <section className="mt-[26px]" data-keep-together>
-        <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am working toward</h3>
+        <h3 className="text-[12px] font-semibold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am working toward</h3>
         <p className="mt-[7px] max-w-[60ch] text-[21px] leading-[29px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
           {direction.goal}
         </p>
@@ -205,12 +205,12 @@ function MeetingSummary({
       </section>
 
       <section className="mt-[24px] border-t pt-[16px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-        <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>My careers, side by side</h3>
+        <h3 className="text-[12px] font-semibold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>My careers, side by side</h3>
         <table className="mt-[10px] w-full border-collapse text-left">
           <thead>
             <tr>
               {["Career", "Education", "Time", "Pay starting out", "Where I am"].map((head) => (
-                <th key={head} scope="col" className="border-b pb-[6px] pr-[12px] text-[9.5px] font-bold tracking-[1px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{head}</th>
+                <th key={head} scope="col" className="border-b pb-[6px] pr-[12px] text-[12px] font-semibold tracking-[1px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{head}</th>
               ))}
             </tr>
           </thead>
@@ -230,15 +230,15 @@ function MeetingSummary({
 
       <div className="mt-[24px] grid gap-x-[36px] gap-y-[22px] border-t pt-[16px] sm:grid-cols-2" style={{ borderColor: "var(--rule)" }}>
         <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
+          <h3 className="text-[12px] font-semibold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
           <p className="mt-[7px] text-[15px] leading-[23px]">{direction.question}</p>
         </section>
         <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
+          <h3 className="text-[12px] font-semibold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
           <ul className="mt-[7px] grid list-none gap-x-[28px] p-0 sm:grid-cols-2">
             {actions.map((action) => (
               <li key={action.label} className="flex items-start gap-[9px] border-b py-[7px] text-[13.5px] leading-[19px]" style={{ borderColor: "var(--rule)" }}>
-                <span aria-hidden className="mt-[2px] flex size-[14px] flex-none items-center justify-center border text-[10px] font-bold" style={{ borderColor: "var(--rule-strong)" }}>{action.done ? "x" : ""}</span>
+                <span aria-hidden className="mt-[2px] flex size-[14px] flex-none items-center justify-center border text-[12px] font-semibold" style={{ borderColor: "var(--rule-strong)" }}>{action.done ? "x" : ""}</span>
                 <span style={{ textDecoration: action.done ? "line-through" : "none" }}>{action.label}</span>
               </li>
             ))}
@@ -246,7 +246,7 @@ function MeetingSummary({
         </section>
       </div>
 
-      <p className="mt-[22px] border-t pt-[12px] text-[10.5px] leading-[15px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+      <p className="mt-[22px] border-t pt-[12px] text-[12px] leading-[15px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
         Prepared by the student with Dreamari. Pay and outlook from the U.S. Bureau of Labor Statistics; college figures from the College Scorecard.
         This supports a conversation about options. It is not a decision, a prediction, or a guarantee.
       </p>
@@ -294,27 +294,27 @@ function ReportDocument({
       <div className="mx-auto max-w-[68ch]">
         {/* Masthead */}
         <header data-print-keep>
-          <p className="text-[26px] leading-[31px] font-extrabold uppercase sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink-faint)", letterSpacing: "0.01em" }}>
+          <p className="text-[30px] leading-[33px] font-semibold uppercase sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink-faint)", letterSpacing: "0.004em" }}>
             Career &amp; Pathway Report
           </p>
-          <h2 className="mt-[2px] text-[26px] leading-[31px] font-extrabold sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[14px] flex flex-wrap items-center gap-x-[18px] gap-y-[4px] border-t pt-[11px] text-[14px] leading-[21px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-            <span className="font-bold" style={{ color: "var(--ink)" }}>
+          <h2 className="mt-[2px] text-[30px] leading-[33px] font-semibold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
+          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+            <span className="font-semibold" style={{ color: "var(--ink)" }}>
               Grade <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.grade.replace("Grade ", "")}</span>
             </span>
-            <span className="font-bold" style={{ color: "var(--ink)" }}>
+            <span className="font-semibold" style={{ color: "var(--ink)" }}>
               School <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.school}</span>
             </span>
             {ACADEMIC_RECORD.verified && (
               <>
-                    <span className="inline-flex items-center gap-[4px] font-bold" style={{ color: "var(--ink)" }}>
+                    <span className="inline-flex items-center gap-[4px] font-semibold" style={{ color: "var(--ink)" }}>
                   GPA <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{ACADEMIC_RECORD.gpa}</span>
                   <BadgeCheck className="h-[14px] w-[14px]" aria-hidden />
                   <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
                 </span>
               </>
             )}
-            <span className="font-bold" style={{ color: "var(--ink)" }}>
+            <span className="font-semibold" style={{ color: "var(--ink)" }}>
               Date <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{reportDate}</span>
             </span>
           </p>
@@ -331,7 +331,7 @@ function ReportDocument({
           <Link
             href="/explore?tab=browse"
             data-print-hide
-            className="dm-tap mt-[20px] inline-flex min-h-[44px] items-center gap-[8px] rounded-[8px] border px-[16px] text-[14px] font-bold"
+            className="dm-tap mt-[24px] inline-flex min-h-[46px] items-center gap-[8px] rounded-[10px] border px-[18px] text-[16px] font-semibold tracking-[-0.012em]"
             style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
           >
             <Compass className="h-4 w-4" aria-hidden /> See full career details
@@ -343,7 +343,7 @@ function ReportDocument({
           <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
             {report.majors.map((major, index) => (
               <div key={major.name} className="rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                <h4 className="text-[16px] leading-[21px] font-bold" style={{ color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
+                <h4 className="text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
               </div>
             ))}
           </div>
@@ -353,19 +353,19 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}education`} n={3} title="Education">
           <div className="flex flex-col gap-[20px]" data-keep-together>
             <div>
-              <h4 className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>Most Common Path</h4>
-              <p className="mt-[3px] max-w-[56ch] text-[14px] leading-[20px]" style={{ color: "var(--ink-soft)" }}>
+              <h4 className="text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Most Common Path</h4>
+              <p className="mt-[5px] max-w-[50ch] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ color: "var(--ink-soft)" }}>
                 {report.education.find((route) => route.common)?.name}
               </p>
             </div>
             <div className="border-t pt-[16px]" style={{ borderColor: "var(--rule)" }}>
-              <h4 className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>Other Viable Pathways</h4>
+              <h4 className="text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Other Viable Pathways</h4>
               <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
                 {report.education.filter((route) => !route.common).map((route) => (
                   <li key={route.name}>
                     <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
-                      <span className="text-[13px] font-bold">{route.name}</span>
-                      <span className="text-[14px] leading-[20px] tabular-nums" style={{ color: "var(--ink-soft)" }}>{route.time}</span>
+                      <span className="text-[15px] leading-[21px] font-semibold">{route.name}</span>
+                      <span className="text-[15px] leading-[21px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
                     </span>
                   </li>
                 ))}
@@ -386,13 +386,13 @@ function ReportDocument({
                 data-keep-together
               >
                 <div className="flex items-start justify-between gap-[10px]">
-                  <h4 className="min-w-0 text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                  <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[14px] font-semibold" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)", background: "var(--paper-sunken)" }}>
+                  <h4 className="min-w-0 text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
+                  <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[14px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-sunken)" }}>
                     {college.status}
                   </span>
                 </div>
-                <p className="text-[14px] leading-[20px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
-                <span data-print-hide className="mt-[2px] inline-flex items-center gap-[4px] text-[14px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+                <p className="mt-[3px] text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
+                <span data-print-hide className="mt-[6px] inline-flex items-center gap-[4px] text-[15px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
               </Link>
@@ -401,7 +401,7 @@ function ReportDocument({
           <Link
             href="/colleges"
             data-print-hide
-            className="dm-solid mt-[16px] inline-flex min-h-[44px] items-center gap-[7px] rounded-[8px] px-[18px] text-[13px] font-bold"
+            className="dm-solid mt-[20px] inline-flex min-h-[46px] items-center gap-[8px] rounded-[10px] px-[20px] text-[16px] font-semibold tracking-[-0.012em]"
             style={{ background: "var(--ink)", color: "var(--paper)" }}
           >
             <Search className="h-4 w-4" aria-hidden /> Open College Lookup
@@ -410,8 +410,8 @@ function ReportDocument({
 
         {/* Sources: a footer, not a section a student has to open */}
         <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
-          <h4 className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>Where this comes from</h4>
-          <ul className="mt-[8px] flex list-none flex-col gap-[3px] p-0 text-[14px] leading-[21px]" style={{ color: "var(--ink-faint)" }}>
+          <h4 className="text-[18px] leading-[23px] font-semibold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Where this comes from</h4>
+          <ul className="mt-[10px] flex list-none flex-col gap-[5px] p-0 text-[15px] leading-[22px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
                 {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
@@ -419,7 +419,7 @@ function ReportDocument({
               </li>
             ))}
           </ul>
-          <p className="mt-[10px] max-w-[70ch] text-[14px] leading-[21px]" style={{ color: "var(--ink-faint)" }}>
+          <p className="mt-[12px] max-w-[64ch] text-[15px] leading-[22px]" style={{ color: "var(--ink-faint)" }}>
             Prepared by the student with Dreamari. It supports a conversation with a counselor; it is not a decision or a prediction.
             Employers are examples of who hires for this work, not job openings.
             Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
@@ -472,7 +472,7 @@ export function CareerReportView(props: ReportViewProps) {
   if (!report) {
     return (
       <div className="rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-        <p className="text-[15px] font-bold">No report yet for {career.title}</p>
+        <p className="text-[15px] font-semibold">No report yet for {career.title}</p>
         <p className="mt-[6px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or save it from Explore and the report will build itself.</p>
       </div>
     );
@@ -501,7 +501,7 @@ export function CareerReportView(props: ReportViewProps) {
     <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start lg:gap-[var(--space-8)]">
       {/* Contextual table of contents — desktop only, beside the page */}
       <nav aria-label="Report contents" data-print-hide className="no-print sticky top-[16px] hidden w-[190px] flex-none lg:block">
-        <p className="pb-[10px] text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Contents</p>
+        <p className="pb-[10px] text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Contents</p>
         <ol className="flex list-none flex-col gap-[1px] p-0">
           {REPORT_SECTIONS.map((section) => (
             <li key={section.id}>
@@ -512,7 +512,7 @@ export function CareerReportView(props: ReportViewProps) {
                 className="flex w-full cursor-pointer items-baseline gap-[8px] rounded-[var(--radius-md)] px-[8px] py-[7px] text-left text-[12.5px] leading-[17px] font-semibold"
                 style={{ background: active === section.id ? "var(--glass-surface-2)" : "transparent", color: active === section.id ? "var(--foreground)" : "var(--muted-foreground)" }}
               >
-                <span className="text-[10px] tabular-nums" style={{ color: "var(--accent-subtle)" }}>{String(section.n).padStart(2, "0")}</span>
+                <span className="text-[12px] tabular-nums" style={{ color: "var(--accent-subtle)" }}>{String(section.n).padStart(2, "0")}</span>
                 {section.label}
               </button>
             </li>
@@ -523,10 +523,10 @@ export function CareerReportView(props: ReportViewProps) {
       <div className="min-w-0 flex-1">
         {/* Document controls — app chrome, never printed */}
         <div data-print-hide className="no-print mb-[var(--space-4)] flex flex-wrap items-center gap-[var(--space-2)]">
-          <button type="button" onClick={() => setTocOpen(true)} ref={tocButtonRef} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold lg:hidden" style={{ borderColor: "var(--border)" }}>
+          <button type="button" onClick={() => setTocOpen(true)} ref={tocButtonRef} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-semibold lg:hidden" style={{ borderColor: "var(--border)" }}>
             <List className="h-4 w-4" aria-hidden /> Contents
           </button>
-          <button type="button" onClick={() => setPreview("full")} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <button type="button" onClick={() => setPreview("full")} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Printer className="h-4 w-4" aria-hidden /> Export
           </button>
           <button type="button" onClick={props.onOpenShare} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-semibold" style={{ borderColor: "var(--border)" }}>
@@ -580,12 +580,12 @@ export function CareerReportView(props: ReportViewProps) {
             <h3 className="mr-auto text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Export preview</h3>
             <div role="radiogroup" aria-label="Which document" className="flex gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
               {([["full", "Full report"], ["summary", "One-page summary"]] as const).map(([value, label]) => (
-                <button key={value} type="button" role="radio" aria-checked={preview === value} onClick={() => setPreview(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: preview === value ? "var(--primary)" : "transparent", color: preview === value ? "var(--primary-foreground)" : "var(--foreground)" }}>
+                <button key={value} type="button" role="radio" aria-checked={preview === value} onClick={() => setPreview(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-semibold" style={{ background: preview === value ? "var(--primary)" : "transparent", color: preview === value ? "var(--primary-foreground)" : "var(--foreground)" }}>
                   {label}
                 </button>
               ))}
             </div>
-            <button type="button" onClick={() => print(preview)} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <button type="button" onClick={() => print(preview)} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
               <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
             </button>
             <button type="button" onClick={() => setPreview(null)} className="flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close preview">

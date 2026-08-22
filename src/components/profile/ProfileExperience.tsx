@@ -66,7 +66,7 @@ function careerById(id: string | null): ProfileCareer | null {
 }
 
 
-const CAPTION = "text-[10px] leading-[14px] font-semibold tracking-[0.6px] uppercase";
+const CAPTION = "text-[12px] leading-[14px] font-semibold tracking-[0.6px] uppercase";
 const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
 
 export function ProfileExperience() {
@@ -243,7 +243,7 @@ export function ProfileExperience() {
       <h1 className="sr-only">My Profile</h1>
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
-        <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold">
+        <span className="flex items-center gap-[var(--space-4)] text-[15px] font-semibold">
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
             <Flame className="h-4 w-4" /> {STUDENT.streakDays}
           </span>
@@ -265,8 +265,8 @@ export function ProfileExperience() {
               <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
             </label>
             <span className="flex min-w-0 flex-1 flex-col">
-              <h2 className="truncate text-[23px] leading-[27px] font-extrabold tracking-[-0.02em] sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
-              <span className="truncate text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
+              <h2 className="truncate text-[23px] leading-[27px] font-semibold tracking-[-0.02em] sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
+              <span className="truncate text-[15px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
               {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
@@ -275,7 +275,7 @@ export function ProfileExperience() {
                   type="button"
                   aria-label={label}
                   onClick={() => setTab(id)}
-                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[11.5px] sm:font-bold"
+                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ background: tab === id ? "var(--glass-surface-3)" : "transparent", color: tab === id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
                   <Icon className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{label}</span>
@@ -290,7 +290,7 @@ export function ProfileExperience() {
               { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", verified: false },
             ].map((fact) => (
               <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
-                <dt className="flex items-center gap-[4px] text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>
+                <dt className="flex items-center gap-[4px] text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>
                   {fact.label}
                   {fact.verified && (
                     <>
@@ -300,8 +300,8 @@ export function ProfileExperience() {
                   )}
                 </dt>
                 <dd className="flex items-baseline gap-[4px]">
-                  <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
-                  {fact.note && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
+                  <span className="text-[20px] leading-[24px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
+                  {fact.note && <span className="text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
                 </dd>
               </div>
             ))}
@@ -319,9 +319,9 @@ export function ProfileExperience() {
              Tap a card and every tab below shows that career. ---- */}
         <section className="flex flex-col gap-[var(--space-2)]">
           <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-            <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
+            <h2 className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
             {top3.length > 1 && (
-              <button type="button" onClick={() => setCompareOpen(true)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              <button type="button" onClick={() => setCompareOpen(true)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
                 <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare
               </button>
             )}
@@ -366,12 +366,12 @@ export function ProfileExperience() {
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[13px] leading-[18px] font-bold"
+              className="dm-quiet relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[15px] leading-[18px] font-semibold"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
               {pings[item.id] && (
-                <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
+                <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-semibold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
               )}
             </button>
           ))}
@@ -453,20 +453,20 @@ export function ProfileExperience() {
       {swapCandidate && (
         <div className="no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
           <div className="filters-reveal w-full max-w-[440px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
-            <p className="mt-1 text-[13px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to your locker.</p>
+            <p className="text-[19px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
+            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to your locker.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
               {top3.map((id, index) => {
                 const career = careerById(id)!;
                 return (
                   <button key={id} type="button" onClick={() => confirmSwap(id)} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
                     <span className="text-[14px] font-semibold">{index + 1} · {career.title}</span>
-                    <span className="text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Replace</span>
+                    <span className="text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Replace</span>
                   </button>
                 );
               })}
             </div>
-            <button type="button" onClick={() => setSwapCandidate(null)} className="dm-quiet mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
+            <button type="button" onClick={() => setSwapCandidate(null)} className="dm-quiet mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[15px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
               Never mind
             </button>
           </div>
@@ -477,11 +477,11 @@ export function ProfileExperience() {
       {confirmRemove && (
         <div className="no-print fixed inset-0 z-[66] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
           <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
-            <p className="mt-1 text-[13px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Locker. Nothing is lost.</p>
+            <p className="text-[17px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
+            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Locker. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-              <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Cancel</button>
-              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
+              <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ borderColor: "var(--border)" }}>Cancel</button>
+              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
             </div>
           </div>
         </div>
@@ -493,8 +493,8 @@ export function ProfileExperience() {
           <div className="filters-reveal w-full max-w-[420px] rounded-t-[var(--radius-2xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div>
-                <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
-                <p className="mt-[2px] text-[12px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from your Locker</p>
+                <p className="text-[17px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
+                <p className="mt-[2px] text-[14px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from your Locker</p>
               </div>
               <button type="button" aria-label="Close" onClick={() => setAddOpen(false)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
                 <X className="h-4 w-4" />
@@ -502,7 +502,7 @@ export function ProfileExperience() {
             </div>
             <div className="mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
               {locker.length === 0 && (
-                <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Locker is empty · swipe careers</Link>
+                <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Locker is empty · swipe careers</Link>
               )}
               {locker.map((career) => (
                 <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-2)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -510,13 +510,13 @@ export function ProfileExperience() {
                     <Image src={career.photo} alt="" fill sizes="38px" className="object-cover" />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-[13.5px] font-bold">{career.title}</span>
-                    <span className="truncate text-[10.5px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {interestTier(career.match)}</span>
+                    <span className="truncate text-[15px] font-semibold">{career.title}</span>
+                    <span className="truncate text-[12px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world} · {interestTier(career.match)}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => { addToTop3(career.id); if (top3.length >= 2) setAddOpen(false); }}
-                    className="dm-solid flex-none cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-[12px] font-bold"
+                    className="dm-solid flex-none cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-[14px] font-semibold"
                     style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
                   >
                     Add
@@ -561,12 +561,12 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
             >
               <span className="relative size-[56px] flex-none overflow-hidden rounded-[var(--radius-md)] md:size-[64px]">
                 <Image src={career.photo} alt="" fill sizes="64px" className="object-cover" />
-                <span className="absolute top-[3px] left-[3px] flex size-[16px] items-center justify-center rounded-full text-[9px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
+                <span className="absolute top-[3px] left-[3px] flex size-[16px] items-center justify-center rounded-full text-[12px] font-semibold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
               </span>
               <span className="flex min-w-0 flex-col gap-[2px]">
-                <span className="truncate text-[14px] leading-[18px] font-bold">{career.title}</span>
-                <span className="truncate text-[10px] leading-[13px] font-semibold tracking-[0.5px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
-                {isFocus && <span className="text-[10px] leading-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Current focus</span>}
+                <span className="truncate text-[14px] leading-[18px] font-semibold">{career.title}</span>
+                <span className="truncate text-[12px] leading-[13px] font-semibold tracking-[0.5px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
+                {isFocus && <span className="text-[12px] leading-[13px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Current focus</span>}
               </span>
             </button>
             {/* Overflow: destructive actions live OUTSIDE the selection target */}
@@ -587,7 +587,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
                   <button
                     type="button"
                     onClick={() => { setMenuFor(null); onRemove(id); }}
-                    className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[13px] font-semibold"
+                    className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-semibold"
                     style={{ color: "var(--destructive)" }}
                   >
                     Remove from Top 3
@@ -608,7 +608,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
           </span>
-          <span className="text-[13px] font-bold">Add a career</span>
+          <span className="text-[15px] font-semibold">Add a career</span>
         </button>
       )}
     </div>
@@ -638,8 +638,8 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
       <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:my-auto sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex flex-col gap-[2px]">
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
-            <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
+            <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
+            <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
           </span>
           <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
             <X className="h-5 w-5" aria-hidden />
@@ -681,11 +681,11 @@ function OverviewTab({
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
-        <p className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
-        <p className="max-w-[42ch] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
+        <p className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
+        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
-          <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
-          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
+          <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
+          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
         </div>
       </section>
     );
@@ -704,11 +704,11 @@ function OverviewTab({
         <section aria-labelledby="summary-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex min-w-0 flex-col gap-[3px]">
-              <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
-              <h3 id="summary-title" className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</h3>
-              <span className="max-w-[52ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{careerSummary.glance.whatYouDo}</span>
+              <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
+              <h3 id="summary-title" className="text-[24px] leading-[28px] font-semibold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</h3>
+              <span className="max-w-[52ch] text-[15px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{careerSummary.glance.whatYouDo}</span>
             </span>
-            <button type="button" onClick={onGoReport} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+            <button type="button" onClick={onGoReport} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
               Full report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           </div>
@@ -719,10 +719,10 @@ function OverviewTab({
               { label: "Job outlook", value: careerSummary.salary.outlook.replace(/ than average/i, ""), note: "than average" },
             ].map((stat) => (
               <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
-                <span className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+                <span className="flex-none text-[12px] font-semibold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
                 <span className="flex flex-wrap items-baseline gap-x-[5px]">
-                  <span className="whitespace-nowrap text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
-                  {stat.note && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
+                  <span className="whitespace-nowrap text-[24px] leading-[28px] font-semibold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+                  {stat.note && <span className="text-[15px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
                 </span>
               </span>
             ))}
@@ -734,23 +734,23 @@ function OverviewTab({
       <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
           <span className="flex min-w-0 flex-col gap-[3px]">
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
-            <h3 id="next-title" className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
+            <h3 id="next-title" className="text-[17px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>
               {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
             </h3>
           </span>
           {next ? (
-            <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
               <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
             </Link>
           ) : (
-            <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
+            <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
           )}
         </div>
         <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex items-baseline justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold">{progress.complete} of {progress.total} steps done</span>
-            <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+            <span className="text-[14px] font-semibold">{progress.complete} of {progress.total} steps done</span>
+            <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
               My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           </span>
@@ -773,12 +773,12 @@ function OverviewTab({
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Current route</span>
+            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Current route</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
-            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
-            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span className="text-[22px] leading-[26px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+            <span className="truncate text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {stillExploring ? `${route.program} · ${focus.routes.length} ways in` : route.program}
             </span>
           </span>
@@ -789,8 +789,8 @@ function OverviewTab({
               { label: "Debt clear", value: (routeDetail(route.id)?.payoff.time ?? route.loanPayoff).replace("~", "") },
             ].map((stat) => (
               <span key={stat.label} className="flex flex-col gap-[1px]">
-                <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
-                <span className="text-[19px] leading-[23px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+                <span className="text-[12px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+                <span className="text-[19px] leading-[23px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
               </span>
             ))}
           </span>
@@ -804,17 +804,17 @@ function OverviewTab({
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My plan</span>
+            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My plan</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-[28px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+            <span className="text-[28px] leading-[30px] font-semibold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
               {progress.complete}<span className="text-[16px]">/{progress.total}</span>
             </span>
             <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
             </span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>steps done</span>
+            <span className="text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>steps done</span>
           </span>
         </button>
 
@@ -826,12 +826,12 @@ function OverviewTab({
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
+            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
-            <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
-            <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span className="text-[17px] leading-[21px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
+            <span className="text-[15px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {sharedAt ? `with your counselor ${sharedAt}` : "not shared yet"}
             </span>
           </span>
@@ -844,13 +844,13 @@ function OverviewTab({
         <span className="flex flex-wrap items-center gap-[var(--space-5)]">
           <span className="flex items-center gap-[7px]">
             <Flame className="h-4 w-4" style={{ color: "var(--chart-3)" }} aria-hidden />
-            <span className="text-[12.5px] font-bold">{STUDENT.streakDays} day streak</span>
+            <span className="text-[15px] font-semibold">{STUDENT.streakDays} day streak</span>
           </span>
-          <button type="button" onClick={onOpenEvidence} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onOpenEvidence} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <Eye className="h-4 w-4" aria-hidden /> {EVIDENCE.length} inputs behind your report
           </button>
         </span>
-        <button type="button" onClick={onGoSettings} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+        <button type="button" onClick={onGoSettings} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[15px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
           <Settings className="h-4 w-4" aria-hidden /> Profile and privacy
         </button>
       </section>
@@ -886,9 +886,9 @@ function EvidenceSheet({
       <div className="relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="flex flex-col gap-[3px]">
-          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
-          <h3 id="evidence-intro" className="text-[21px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
-          <span className="max-w-[54ch] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+          <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
+          <h3 id="evidence-intro" className="text-[21px] leading-[26px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
+          <span className="max-w-[54ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
             Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
           </span>
         </span>
@@ -898,7 +898,7 @@ function EvidenceSheet({
       </div>
       <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
         {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[14px] font-semibold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {label}
           </button>
         ))}
@@ -906,24 +906,24 @@ function EvidenceSheet({
 
       {Object.entries(grouped).map(([kind, list]) => (
         <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <h3 id={`ev-${kind}`} className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>
+          <h3 id={`ev-${kind}`} className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>
             {EVIDENCE_KIND_LABEL[kind as EvidenceItem["kind"]]}
           </h3>
           <ul className="flex list-none flex-col p-0">
             {list.map((item) => (
               <li key={item.id} className="flex flex-wrap items-start justify-between gap-[var(--space-3)] border-t py-[11px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                  <span className="text-[13.5px] leading-[18px] font-bold">{item.label}</span>
-                  <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.detail} · {item.when}</span>
+                  <span className="text-[15px] leading-[18px] font-semibold">{item.label}</span>
+                  <span className="text-[14px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.detail} · {item.when}</span>
                 </span>
                 <span className="flex flex-none items-center gap-[var(--space-2)]">
-                  <button type="button" role="checkbox" aria-checked={confirmed.has(item.id)} onClick={() => onToggleConfirmed(item.id)} className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[11.5px] font-bold" style={{ color: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--muted-foreground)" }}>
+                  <button type="button" role="checkbox" aria-checked={confirmed.has(item.id)} onClick={() => onToggleConfirmed(item.id)} className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[14px] font-semibold" style={{ color: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--muted-foreground)" }}>
                     <span className="flex size-[18px] items-center justify-center rounded-[5px] border" style={{ borderColor: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--glass-border)" }}>
                       {confirmed.has(item.id) && <Check className="h-3 w-3" aria-hidden />}
                     </span>
                     {confirmed.has(item.id) ? "Right" : "Confirm"}
                   </button>
-                  <button type="button" onClick={() => onHide(item.id)} className="dm-quiet min-h-[44px] cursor-pointer px-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <button type="button" onClick={() => onHide(item.id)} className="dm-quiet min-h-[44px] cursor-pointer px-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                     Not me
                   </button>
                 </span>
@@ -935,14 +935,14 @@ function EvidenceSheet({
 
       {items.length === 0 && (
         <section className="rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
-          <p className="text-[15px] font-bold">Nothing logged for this career yet</p>
-          <p className="mx-auto mt-[6px] max-w-[40ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or finish a glossary level and it shows up here.</p>
+          <p className="text-[15px] font-semibold">Nothing logged for this career yet</p>
+          <p className="mx-auto mt-[6px] max-w-[40ch] text-[15px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or finish a glossary level and it shows up here.</p>
         </section>
       )}
 
       <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>What does not count</span>
-        <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+        <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>What does not count</span>
+        <p className="text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
           Scrolling, tapping around and watching without finishing. Dreamari keeps some internal signals to order your feed, and none of them appear in your report or get shared with anyone.
         </p>
       </section>
@@ -958,17 +958,17 @@ function CompareChart({ title, better, unit, rows, selectedId }: { title: string
   return (
     <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <div className="flex items-baseline justify-between">
-        <span className="text-[12px] font-bold">{title}</span>
-        <span className="text-[9px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{better} is better</span>
+        <span className="text-[14px] font-semibold">{title}</span>
+        <span className="text-[12px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{better} is better</span>
       </div>
       <div className="flex flex-col gap-[6px]">
         {rows.map((row) => (
           <div key={row.id} title={`${row.name}: ${unit(row.value)}`} className="flex items-center gap-[8px]">
-            <span className="w-[88px] flex-none truncate text-[10.5px] leading-[14px] font-semibold" style={{ color: row.id === selectedId ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.name}</span>
+            <span className="w-[88px] flex-none truncate text-[12px] leading-[14px] font-semibold" style={{ color: row.id === selectedId ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.name}</span>
             <span className="relative h-[10px] min-w-0 flex-1">
               <span className="absolute inset-y-0 left-0 rounded-r-[4px]" style={{ width: `${Math.max((row.value / max) * 100, 2)}%`, background: row.id === selectedId ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 45%, transparent)" }} />
             </span>
-            <span className="w-[52px] flex-none text-right text-[10.5px] font-bold">{unit(row.value)}</span>
+            <span className="w-[52px] flex-none text-right text-[12px] font-semibold">{unit(row.value)}</span>
           </div>
         ))}
       </div>
@@ -1001,15 +1001,15 @@ function RoutesTab({
 
       {report && (
         <section aria-labelledby="majors-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <h3 id="majors-title" className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
+          <h3 id="majors-title" className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
           <ul className="flex list-none flex-col p-0">
             {report.majors.map((major) => (
               <li key={major.name} className="flex items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex min-w-0 flex-col gap-[1px]">
-                  <span className="truncate text-[13.5px] font-bold">{major.name}</span>
-                  <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{major.teaches}</span>
+                  <span className="truncate text-[15px] font-semibold">{major.name}</span>
+                  <span className="truncate text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{major.teaches}</span>
                 </span>
-                <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[11.5px] font-bold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-semibold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   {savedMajors.has(major.name) ? <><Check className="h-3.5 w-3.5" aria-hidden /> Saved</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Save</>}
                 </button>
               </li>
@@ -1053,27 +1053,27 @@ function MyPlanTab({
         <h3 id="ahead-title" className="sr-only">What is coming up</h3>
         {courses.length > 0 && (
           <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
+            <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
             <ul className="flex list-none flex-col p-0">
               {courses.map((course) => (
                 <li key={course.label} className="flex flex-col gap-[1px] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="text-[13.5px] font-bold">{course.label}</span>
-                  <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{course.why}</span>
+                  <span className="text-[15px] font-semibold">{course.label}</span>
+                  <span className="text-[14px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{course.why}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Coming up</span>
+          <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Coming up</span>
           <ul className="flex list-none flex-col p-0">
             {UPCOMING.map((item) => (
               <li key={item.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex min-w-0 flex-col gap-[1px]">
-                  <span className="text-[13.5px] font-bold">{item.label}</span>
-                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.note}</span>
+                  <span className="text-[15px] font-semibold">{item.label}</span>
+                  <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.note}</span>
                 </span>
-                <span className="flex-none text-[11.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>{item.when}</span>
+                <span className="flex-none text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{item.when}</span>
               </li>
             ))}
           </ul>
@@ -1126,17 +1126,17 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
             </span>
             <span className="flex flex-none items-center gap-[5px]">
               {route.recommended && (
-                <span className="flex items-center gap-[3px] rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+                <span className="flex items-center gap-[3px] rounded-full px-[8px] py-[2px] text-[12px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
                   <Sparkles className="h-2.5 w-2.5" aria-hidden /> Pick
                 </span>
               )}
-              {selected && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+              {selected && <span className="rounded-full px-[8px] py-[2px] text-[12px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           </span>
           <span className="flex w-full items-center gap-[var(--space-2)]">
             <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-              <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
-              <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
+              <span className="text-[19px] leading-[24px] font-semibold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+              <span className="text-[14px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
             </span>
             <span
               aria-hidden
@@ -1151,8 +1151,8 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
         <dl className="flex flex-col border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
           {stats.map((stat) => (
             <div key={stat.label} className="flex items-baseline justify-between gap-[var(--space-2)] py-[6px]">
-              <dt className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
-              <dd className="min-w-0 truncate text-[16px] leading-[20px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }} title={stat.value}>{stat.value}</dd>
+              <dt className="flex-none text-[12px] font-semibold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+              <dd className="min-w-0 truncate text-[16px] leading-[20px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }} title={stat.value}>{stat.value}</dd>
             </div>
           ))}
         </dl>
@@ -1162,7 +1162,7 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
         <button
           type="button"
           onClick={onSelect}
-          className="dm-quiet relative z-[2] mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[12.5px] font-bold"
+          className="dm-quiet relative z-[2] mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[15px] font-semibold"
           style={{ borderColor: "var(--border)", background: "transparent" }}
         >
           Make this my route
@@ -1207,8 +1207,8 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
-        <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its routes</p>
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
+        <p className="text-[17px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its routes</p>
+        <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
       </section>
     );
   }
@@ -1218,11 +1218,11 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
+        <h2 key={focus.id} className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
         <button
           type="button"
           onClick={() => setRouteView(routeView === "cards" ? "compare" : "cards")}
-          className="dm-quiet flex min-h-[40px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold"
+          className="dm-quiet flex min-h-[40px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold"
           style={{ borderColor: routeView === "compare" ? "var(--accent-subtle)" : "var(--border)", background: "transparent", color: routeView === "compare" ? "var(--accent-subtle)" : "var(--foreground)" }}
         >
           <ArrowLeftRight className="h-4 w-4" aria-hidden />
@@ -1286,8 +1286,8 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
-        <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its plan</p>
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
+        <p className="text-[17px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its plan</p>
+        <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
       </section>
     );
   }
@@ -1306,17 +1306,17 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
     <div className="flex flex-col gap-[var(--space-3)]">
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
         <div>
-          <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
-          <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
+          <h2 key={focus.id} className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
+          <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
-        <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
+        <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[14px] font-semibold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
       </div>
 
       {/* Your roadmap: overall progress across every step */}
       <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)]" style={GLASS}>
         <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
-          <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
+          <span className="text-[19px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
           <span className="relative h-[6px] w-full max-w-[420px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
             <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(Math.round((doneCount / Math.max(allTasks.length, 1)) * 100), 2)}%`, background: "var(--accent-subtle)" }} />
           </span>
@@ -1333,18 +1333,18 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
             <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
               <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left">
                 <span className="flex min-w-0 items-center gap-[var(--space-3)]">
-                  <span className="flex size-8 flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
+                  <span className="flex size-8 flex-none items-center justify-center rounded-full text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
                   <span className="flex min-w-0 flex-col">
                     <span className={CAPTION} style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
-                    <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
-                    <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>
+                    <span className="text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
+                    <span className="text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>
                   </span>
                 </span>
                 <span className="flex flex-none items-center gap-[var(--space-3)]">
                   {unlocked ? (
-                    <span className="text-[12px] font-bold" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total} done</span>
+                    <span className="text-[14px] font-semibold" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total} done</span>
                   ) : (
-                    <span className="text-[10px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}</span>
+                    <span className="text-[12px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}</span>
                   )}
                   <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
                 </span>
@@ -1359,11 +1359,11 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                         <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
                           {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                         </button>
-                        <span className={`min-w-0 flex-1 text-[12.5px] leading-[17px] font-semibold ${complete ? "line-through" : ""}`}>{task.label}</span>
+                        <span className={`min-w-0 flex-1 text-[15px] leading-[17px] font-semibold ${complete ? "line-through" : ""}`}>{task.label}</span>
                         {task.custom && (
-                          <span className="flex-none rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
+                          <span className="flex-none rounded-full px-[8px] py-[2px] text-[8.5px] font-semibold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
                         )}
-                        <span className="flex-none text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
+                        <span className="flex-none text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
                         {!complete && !task.custom && (
                           <Link href={task.href} aria-label={`${task.action}: ${task.label}`} title={task.action} className="flex flex-none items-center rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
                             <TaskIcon className="h-3.5 w-3.5" />
@@ -1392,10 +1392,10 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                       value={draftTask}
                       onChange={(event) => setDraftTask(event.target.value)}
                       placeholder="Add your own step"
-                      className="min-w-0 flex-1 bg-transparent text-[12.5px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+                      className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
                       style={{ color: "var(--foreground)" }}
                     />
-                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
+                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[15px] font-semibold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
                       Add
                     </button>
                   </form>
@@ -1405,7 +1405,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           );
         })}
       </div>
-      <p className="pt-[var(--space-2)] text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      <p className="pt-[var(--space-2)] text-center text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         You&apos;re building something real. <span style={{ color: "var(--accent-subtle)" }}>Every step brings your future closer.</span>
       </p>
     </div>
@@ -1454,21 +1454,21 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
       {/* Status chips */}
       <div className="flex items-center gap-[6px] md:[grid-area:chips]">
         {route.recommended && (
-          <span className="flex items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+          <span className="flex items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[12px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
             <Sparkles className="h-3 w-3" /> Recommended
           </span>
         )}
-        {selected && <span className="rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
+        {selected && <span className="rounded-full px-[10px] py-[3px] text-[12px] font-semibold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
       </div>
 
       {/* Editorial masthead: kicker, headline, deck, meta */}
       <div className="seq-reveal flex flex-col gap-[var(--space-2)] md:self-start md:[grid-area:head]">
-        <span className="flex items-center gap-[6px] text-[10px] font-bold tracking-[1.2px] uppercase" style={{ color: selected ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+        <span className="flex items-center gap-[6px] text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: selected ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
           <Icon className="h-3.5 w-3.5" /> {route.type}
         </span>
-        <h3 className="text-[30px] leading-[32px] font-extrabold md:text-[38px] md:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={route.short} /></h3>
-        {detail && <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</p>}
-        <div className="mt-[2px] flex flex-col gap-[2px] border-t pt-[var(--space-2)] text-[11px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <h3 className="text-[30px] leading-[32px] font-semibold md:text-[38px] md:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={route.short} /></h3>
+        {detail && <p className="text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{detail.pitch}</p>}
+        <div className="mt-[2px] flex flex-col gap-[2px] border-t pt-[var(--space-2)] text-[15px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           <span>{route.program}</span>
           <span>{route.credential} · {route.location}</span>
         </div>
@@ -1491,7 +1491,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
               type="button"
               aria-pressed={pane === item.id}
               onClick={() => setPane(item.id)}
-              className="dm-quiet -mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[10.5px] font-bold tracking-[1px] uppercase"
+              className="dm-quiet -mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[12px] font-semibold tracking-[1px] uppercase"
               style={{ borderColor: pane === item.id && !(hint === "run" && pane === "stats") ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {item.label}
@@ -1509,8 +1509,8 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
             { label: "Pay", value: route.salary.split(",")[0].replace(/ first year/i, "") },
           ].map((stat, index) => (
             <div key={stat.label} className={`flex flex-1 flex-col justify-center gap-[4px] ${index < 2 ? "border-b pb-[var(--space-3)]" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stat.label}</span>
-              <span className="text-[30px] leading-[32px] font-extrabold md:text-[34px] md:leading-[36px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+              <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stat.label}</span>
+              <span className="text-[30px] leading-[32px] font-semibold md:text-[34px] md:leading-[36px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
             </div>
           ))}
         </div>
@@ -1520,29 +1520,29 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
           {/* Lead: the thesis, set like Life's pull quote */}
           <div className="flex flex-col gap-[4px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The fit</span>
-            <p className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.tagline}</p>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The fit</span>
+            <p className="text-[17px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.tagline}</p>
           </div>
 
           <div className="flex flex-col gap-[4px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Acceptance</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Acceptance</span>
             {detail.fit.acceptancePct !== undefined ? (
               <>
-                <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
+                <span className="text-[26px] leading-[28px] font-semibold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.fit.acceptancePct}%</span>
                 <div className="relative h-[7px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
                   <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(detail.fit.acceptancePct, 3)}%`, background: "var(--accent-subtle)" }} />
                 </div>
-                <span className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail.fit.acceptance}</span>
+                <span className="text-[12px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail.fit.acceptance}</span>
               </>
             ) : (
-              <span className="text-[13px] leading-[17px] font-semibold">{detail.fit.acceptance}</span>
+              <span className="text-[15px] leading-[17px] font-semibold">{detail.fit.acceptance}</span>
             )}
           </div>
 
           {/* Placement as a stat, not a chip */}
           <div className="flex flex-col gap-[2px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Job placement</span>
-            <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Job placement</span>
+            <span className="text-[18px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: detail.fit.placement === "High" ? "var(--color-feedback-success, #33c78c)" : "var(--foreground)" }}>{detail.fit.placement}</span>
           </div>
 
           <div className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -1558,15 +1558,15 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
         <div className={`seq-reveal flex flex-col gap-[var(--space-4)] self-start md:[grid-area:pane] ${PANE_MIN}`}>
           {/* Lead: the vibe, set like a pull quote */}
           <div className="flex flex-col gap-[4px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The vibe</span>
-            <p className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>The vibe</span>
+            <p className="text-[18px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.life.feel}</p>
           </div>
 
           <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Student life</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Student life</span>
             <div className="flex flex-col">
               {detail.life.clubs.map((club, index) => (
-                <span key={club} className={`py-[7px] text-[12px] leading-[16px] font-semibold ${index < detail.life.clubs.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                <span key={club} className={`py-[7px] text-[14px] leading-[16px] font-semibold ${index < detail.life.clubs.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
                   {club}
                 </span>
               ))}
@@ -1574,8 +1574,8 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
           </div>
 
           <div className="mt-auto flex flex-col gap-[2px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Study abroad</span>
-            <span className="text-[13px] leading-[17px] font-bold">{detail.life.abroad}</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Study abroad</span>
+            <span className="text-[15px] leading-[17px] font-semibold">{detail.life.abroad}</span>
           </div>
         </div>
       )}
@@ -1586,18 +1586,18 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
              (Starting salary is already the chart's Year 1 base segment.) */}
           <div className="flex items-start justify-between gap-[var(--space-3)]">
             <div className="flex min-w-0 flex-col gap-[4px]">
-              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
-              <span className="text-[26px] leading-[28px] font-extrabold whitespace-nowrap" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
+              <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>{detail.payoff.time === "None" ? "Debt-free" : "Debt-free in"}</span>
+              <span className="text-[26px] leading-[28px] font-semibold whitespace-nowrap" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{detail.payoff.time === "None" ? "From day 1" : detail.payoff.time}</span>
             </div>
             <div className="flex flex-none flex-col items-end gap-[4px]">
-              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Typical loan</span>
-              <span className="text-[22px] leading-[24px] font-extrabold whitespace-nowrap" style={{ fontFamily: "var(--font-display)" }}>{detail.payoff.avgLoan === "$0" ? "$0" : `~${detail.payoff.avgLoan}`}</span>
+              <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Typical loan</span>
+              <span className="text-[22px] leading-[24px] font-semibold whitespace-nowrap" style={{ fontFamily: "var(--font-display)" }}>{detail.payoff.avgLoan === "$0" ? "$0" : `~${detail.payoff.avgLoan}`}</span>
             </div>
           </div>
 
           {/* Pay curve: bonus lives IN the bar (stacked), not in a caption */}
           <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you make</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you make</span>
             <div className="grid grid-cols-3 items-end gap-[var(--space-2)]">
               {(() => {
                 const parsed = detail.payoff.years.map((year) => {
@@ -1609,18 +1609,18 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
                 const max = Math.max(...parsed.map((year) => year.total), 1);
                 return parsed.map((year) => (
                   <span key={year.label} className="flex flex-col items-center gap-[3px]">
-                    <span className="text-[12.5px] leading-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
+                    <span className="text-[15px] leading-[15px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{year.amount}</span>
                     <span className="flex w-full flex-col overflow-hidden rounded-t-[5px]">
                       {year.bonus > 0 && <span className="w-full" style={{ height: `${Math.max(Math.round((year.bonus / max) * 56), 4)}px`, background: "var(--accent-subtle)" }} />}
                       <span className="w-full" style={{ height: `${Math.max(Math.round((year.base / max) * 56), 8)}px`, background: "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} />
                     </span>
-                    <span className="text-[9px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
+                    <span className="text-[12px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{year.label}</span>
                   </span>
                 ));
               })()}
             </div>
             {detail.payoff.years.some((year) => /\+\s*\$?\d+K/i.test(year.note ?? "")) && (
-              <div className="flex items-center gap-[var(--space-3)] text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <div className="flex items-center gap-[var(--space-3)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                 <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 40%, transparent)" }} /> Base</span>
                 <span className="flex items-center gap-[5px]"><span className="size-2 rounded-[2px]" style={{ background: "var(--accent-subtle)" }} /> Bonus</span>
               </div>
@@ -1629,18 +1629,18 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
 
           {/* Budget: base lives in the caption, one-line legend */}
           <div className="flex flex-col gap-[5px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Monthly budget · on {detail.payoff.budget.income}</span>
+            <span className="text-[12px] font-semibold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Monthly budget · on {detail.payoff.budget.income}</span>
             <div className="flex h-[10px] w-full overflow-hidden rounded-full">
               <span style={{ width: `${Math.max(detail.payoff.budget.pct, 3)}%`, background: "var(--accent-subtle)" }} />
               <span className="flex-1" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} />
             </div>
-            <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "var(--accent-subtle)" }} /> Loan</span>
               <span className="flex items-center gap-[5px]"><span className="size-2 rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }} /> In hand</span>
             </div>
           </div>
 
-          <span className="border-t pt-[var(--space-3)] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
+          <span className="border-t pt-[var(--space-3)] text-[14px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>{detail.payoff.takeaway}</span>
         </div>
       )}
 
@@ -1650,15 +1650,15 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
           type="button"
           onClick={selected ? onGoPlan : onSelect}
           aria-pressed={selected}
-          className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] py-[var(--space-3)] text-[13px] font-bold"
+          className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] py-[var(--space-3)] text-[15px] font-semibold"
           style={selected ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "transparent", color: "var(--foreground)", border: "1px solid var(--border)" }}
         >
           {selected ? "Open your plan for this path" : `Continue with ${route.short}`}
         </button>
-        <div className="flex items-center justify-between gap-[var(--space-2)] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-2)] text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <span className="min-w-0 truncate">Next: {route.nextStep}</span>
           {/program|college|school|transfer/i.test(route.nextStep) && (
-            <Link href="/colleges" className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+            <Link href="/colleges" className="flex flex-none items-center gap-[3px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
               College lookup <ChevronRight className="h-3 w-3" />
             </Link>
           )}
@@ -1671,8 +1671,8 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
 function FactRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-[1px]">
-      <span className="text-[10px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="text-[12px] leading-[16px] font-semibold">{value}</span>
+      <span className="text-[12px] font-semibold tracking-[0.5px] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      <span className="text-[14px] leading-[16px] font-semibold">{value}</span>
     </div>
   );
 }
@@ -1695,19 +1695,19 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
         <div className="grid" style={{ gridTemplateColumns: `130px repeat(${routes.length}, minmax(150px, 1fr))` }}>
           <span className="border-b p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} />
           {routes.map((route) => (
-            <span key={route.id} className="border-b p-[var(--space-3)] text-[13px] font-extrabold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-display)", color: route.id === selectedId ? "var(--accent-subtle)" : "var(--foreground)" }}>
+            <span key={route.id} className="border-b p-[var(--space-3)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-display)", color: route.id === selectedId ? "var(--accent-subtle)" : "var(--foreground)" }}>
               {route.short}
-              {route.recommended && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>Recommended</span>}
-              {route.id === selectedId && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+              {route.recommended && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-semibold tracking-[0.4px] uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>Recommended</span>}
+              {route.id === selectedId && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-semibold tracking-[0.4px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           ))}
           {rows.map((row, rowIndex) => (
             <Fragment key={row.label}>
-              <span className={`p-[var(--space-3)] text-[10.5px] font-bold tracking-[0.4px] uppercase ${rowIndex < rows.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{row.label}</span>
+              <span className={`p-[var(--space-3)] text-[12px] font-semibold tracking-[0.4px] uppercase ${rowIndex < rows.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{row.label}</span>
               {routes.map((route) => (
                 <span key={route.id} className={`flex flex-col items-start gap-[3px] p-[var(--space-3)] ${rowIndex < rows.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)", background: route.id === selectedId ? "color-mix(in srgb, var(--primary) 7%, transparent)" : "transparent" }}>
-                  <span className="text-[12.5px] leading-[16px] font-semibold">{row.value(route)}</span>
-                  {row.tag(route) && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{row.tag(route)}</span>}
+                  <span className="text-[15px] leading-[16px] font-semibold">{row.value(route)}</span>
+                  {row.tag(route) && <span className="rounded-full px-[8px] py-[2px] text-[12px] font-semibold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{row.tag(route)}</span>}
                 </span>
               ))}
             </Fragment>
@@ -1724,9 +1724,9 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Locker</h2>
+        <h2 className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Career Locker</h2>
         <span className="flex items-center gap-[var(--space-3)]">
-          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
+          <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
           <button type="button" aria-label="Close Locker" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
@@ -1734,8 +1734,8 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
       </div>
       {locker.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
-          <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>
-          <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
+          <p className="text-[15px] font-semibold">Everything saved is in your Top 3</p>
+          <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
@@ -1750,7 +1750,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
               </span>
               <span className="flex items-center justify-between gap-[var(--space-2)] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
                 <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
-                  <span className="truncate text-[11.5px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
+                  <span className="truncate text-[14px] leading-[15px] font-semibold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
                   <span className="text-[8.5px] leading-[11px] font-semibold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
                 <button
@@ -1778,23 +1778,23 @@ function SettingsView({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
+        <h2 className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
         <button type="button" aria-label="Close settings" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <X className="h-4 w-4" />
         </button>
       </div>
       <div className="flex max-w-[560px] flex-col gap-[var(--space-2)]">
         <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-          <span className="text-[13px] font-semibold">Profile photo</span>
-          <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap your avatar to change it</span>
+          <span className="text-[15px] font-semibold">Profile photo</span>
+          <span className="text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap your avatar to change it</span>
         </div>
         {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
           <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-            <span className="text-[13px] font-semibold">{item}</span>
-            <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
+            <span className="text-[15px] font-semibold">{item}</span>
+            <span className="rounded-full px-[8px] py-[2px] text-[12px] font-semibold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
           </div>
         ))}
-        <button type="button" className="cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
+        <button type="button" className="cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-semibold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
           Sign out
         </button>
       </div>
@@ -1806,7 +1806,7 @@ function ResumeView({ onClose }: { onClose: () => void }) {
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-8)]" style={GLASS}>
       <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
+        <h2 className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
         <button type="button" aria-label="Close resume builder" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <X className="h-4 w-4" />
         </button>
@@ -1814,13 +1814,13 @@ function ResumeView({ onClose }: { onClose: () => void }) {
       <ol className="flex flex-col gap-[var(--space-3)]">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
           <li key={step} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={GLASS}>
-            <span className="flex size-7 flex-none items-center justify-center rounded-full text-[13px] font-bold" style={{ background: index === 0 ? "var(--primary)" : "var(--glass-surface-2)", color: index === 0 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
+            <span className="flex size-7 flex-none items-center justify-center rounded-full text-[15px] font-semibold" style={{ background: index === 0 ? "var(--primary)" : "var(--glass-surface-2)", color: index === 0 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
             <span className="text-[14px] font-semibold">{step}</span>
           </li>
         ))}
       </ol>
       <div className="flex items-center gap-[var(--space-3)]">
-        <button type="button" className="w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <button type="button" className="w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Continue
         </button>
       </div>
@@ -1847,8 +1847,8 @@ function ShareSheet({ student, career, sharedAt, onShare, onRevoke, onClose }: {
       <div className="relative flex max-h-[88dvh] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)]">
           <span className="flex flex-col gap-[3px]">
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Share my report</span>
-            <h3 id="share-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Send this to your counselor</h3>
+            <span className="text-[12px] font-semibold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Share my report</span>
+            <h3 id="share-title" className="text-[20px] leading-[25px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Send this to your counselor</h3>
           </span>
           <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close">
             <X className="h-5 w-5" aria-hidden />
@@ -1856,36 +1856,36 @@ function ShareSheet({ student, career, sharedAt, onShare, onRevoke, onClose }: {
         </div>
 
         <div className="flex flex-col gap-[6px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
-          <span className="text-[10px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>Who sees it</span>
-          <span className="text-[13.5px] font-bold">Your school counselor at Westfield High School</span>
-          <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Sharing with a parent or guardian is turned off by your school. You can always print or download a copy and hand it over yourself.</span>
+          <span className="text-[12px] font-semibold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>Who sees it</span>
+          <span className="text-[15px] font-semibold">Your school counselor at Westfield High School</span>
+          <span className="text-[14px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Sharing with a parent or guardian is turned off by your school. You can always print or download a copy and hand it over yourself.</span>
         </div>
 
         <div className="flex flex-col gap-[4px]">
-          <span className="text-[10px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>What is included</span>
+          <span className="text-[12px] font-semibold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>What is included</span>
           <ul className="flex list-none flex-col p-0">
             {included.map((item) => (
-              <li key={item} className="flex items-center gap-[8px] border-t py-[7px] text-[12.5px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+              <li key={item} className="flex items-center gap-[8px] border-t py-[7px] text-[15px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
                 <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-feedback-success, #33c78c)" }} aria-hidden /> {item}
               </li>
             ))}
           </ul>
-          <p className="pt-[6px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <p className="pt-[6px] text-[15px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             Your school already holds your grades and course records separately. Sharing this report does not change what they can see there.
           </p>
         </div>
 
         {sharedAt ? (
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 40%, var(--glass-border))" }}>
-            <span className="text-[12.5px] font-bold">Shared {sharedAt}</span>
-            <button type="button" onClick={onRevoke} className="min-h-[44px] cursor-pointer text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>Stop sharing</button>
+            <span className="text-[15px] font-semibold">Shared {sharedAt}</span>
+            <button type="button" onClick={onRevoke} className="min-h-[44px] cursor-pointer text-[15px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Stop sharing</button>
           </div>
         ) : (
-          <button type="button" onClick={onShare} className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <button type="button" onClick={onShare} className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Send className="h-4 w-4" aria-hidden /> Share with {student.split(" ")[0]}&apos;s counselor
           </button>
         )}
-        <p className="text-[10.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+        <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
           Prototype: sharing is simulated locally and does not send anything yet.
         </p>
       </div>
@@ -1903,7 +1903,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
   return (
     <div className="print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
       <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[10px]" style={{ background: "var(--glass-surface-3)" }}>
-        <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
+        <span className="text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
         <span className="flex flex-wrap items-center gap-[var(--space-2)]">
           {(
             [
@@ -1917,7 +1917,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
               type="button"
               aria-pressed={sections[section.key]}
               onClick={() => toggle(section.key)}
-              className="cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold"
+              className="cursor-pointer rounded-full border px-[12px] py-[4px] text-[15px] font-semibold"
               style={{
                 background: sections[section.key] ? "color-mix(in srgb, var(--primary) 24%, transparent)" : "transparent",
                 borderColor: sections[section.key] ? "var(--primary)" : "var(--glass-border)",
@@ -1927,10 +1927,10 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
               {section.label}
             </button>
           ))}
-          <button type="button" onClick={() => window.print()} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <button type="button" onClick={() => window.print()} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Printer className="h-4 w-4" /> Print / Save PDF
           </button>
-          <button type="button" onClick={onClose} aria-label="Close report" className="flex cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[var(--space-3)] text-[13px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          <button type="button" onClick={onClose} aria-label="Close report" className="flex cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
         </span>
@@ -1939,13 +1939,13 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
       <div className="print-report mx-auto my-6 w-[min(720px,92vw)] rounded-[8px] bg-white p-10 text-[#111827] shadow-2xl print:my-0 print:w-full print:rounded-none print:shadow-none">
         <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
           <div>
-            <p className="text-[11px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Interest Report</p>
-            <p className="mt-1 text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</p>
-            <p className="text-[13px] text-[#6b7280]">{career.world}</p>
-            <p className="mt-1 text-[11.5px] text-[#6b7280]">Prepared for counselors, school staff, and family</p>
+            <p className="text-[15px] font-semibold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Interest Report</p>
+            <p className="mt-1 text-[26px] leading-[30px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</p>
+            <p className="text-[15px] text-[#6b7280]">{career.world}</p>
+            <p className="mt-1 text-[14px] text-[#6b7280]">Prepared for counselors, school staff, and family</p>
           </div>
-          <div className="text-right text-[12px] text-[#6b7280]">
-            <p className="font-bold text-[#111827]">{STUDENT.name}</p>
+          <div className="text-right text-[14px] text-[#6b7280]">
+            <p className="font-semibold text-[#111827]">{STUDENT.name}</p>
             <p>{STUDENT.grade} · {STUDENT.school}</p>
             <p>{today}</p>
           </div>
@@ -1958,16 +1958,16 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
             ["Plan progress", `${progress.complete} of ${progress.total} planned actions complete (${progress.pct}%)`],
           ].map(([label, value]) => (
             <div key={label} className="rounded-[6px] border border-[#e5e7eb] px-3 py-2">
-              <p className="text-[10px] font-bold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
-              <p className="text-[13px] font-semibold">{value}</p>
+              <p className="text-[12px] font-semibold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
+              <p className="text-[15px] font-semibold">{value}</p>
             </div>
           ))}
         </div>
 
         {sections.receipts && (
           <ReportSection title="Demonstrated engagement">
-            <p className="mb-2 text-[12px] leading-[18px] text-[#6b7280]">Logged automatically from {STUDENT.name.split(" ")[0]}&apos;s activity in Dreamari. Sustained, self-directed engagement is the primary signal behind the match strength above.</p>
-            <ul className="list-disc pl-5 text-[13px] leading-[20px]">
+            <p className="mb-2 text-[14px] leading-[18px] text-[#6b7280]">Logged automatically from {STUDENT.name.split(" ")[0]}&apos;s activity in Dreamari. Sustained, self-directed engagement is the primary signal behind the match strength above.</p>
+            <ul className="list-disc pl-5 text-[15px] leading-[20px]">
               {career.receipts.map((receipt) => (
                 <li key={receipt.label}>{receipt.value} · {receipt.label}</li>
               ))}
@@ -1977,7 +1977,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
 
         {sections.route && (
         <ReportSection title="Selected pathway">
-          <div className="grid grid-cols-3 gap-x-4 gap-y-2 text-[12.5px]">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-2 text-[15px]">
             {[
               ["Program", route.program],
               ["Location", route.location],
@@ -1989,7 +1989,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
               ["Next step", route.nextStep],
             ].map(([label, value]) => (
               <div key={label}>
-                <p className="text-[10px] font-bold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
+                <p className="text-[12px] font-semibold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
                 <p className="font-semibold">{value}</p>
               </div>
             ))}
@@ -2001,27 +2001,27 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         <ReportSection title="Action plan">
           {career.plan.map((horizon) => (
             <div key={horizon.id} className="mb-3">
-              <p className="text-[12px] font-bold">{horizon.title} <span className="font-normal text-[#6b7280]">· {horizon.subtitle}</span></p>
-              <ul className="mt-1 list-disc pl-5 text-[12.5px] leading-[19px]">
+              <p className="text-[14px] font-semibold">{horizon.title} <span className="font-normal text-[#6b7280]">· {horizon.subtitle}</span></p>
+              <ul className="mt-1 list-disc pl-5 text-[15px] leading-[19px]">
                 {tasksFor(career, horizon.id).map((task) => (
                   <li key={task.id}>{task.label} · {task.minutes} min{task.custom ? " (added by student)" : ""}</li>
                 ))}
               </ul>
             </div>
           ))}
-          {next && <p className="mt-2 text-[12.5px] font-semibold">Immediate next step: {next.label} ({next.minutes} min)</p>}
+          {next && <p className="mt-2 text-[15px] font-semibold">Immediate next step: {next.label} ({next.minutes} min)</p>}
         </ReportSection>
         )}
 
         <ReportSection title="For the advising conversation">
-          <ul className="list-disc pl-5 text-[12.5px] leading-[19px]">
+          <ul className="list-disc pl-5 text-[15px] leading-[19px]">
             <li>Review the {route.type.toLowerCase()} pathway together, including total cost ({route.cost}), typical starting pay ({route.salary}), and the estimated loan payoff window ({route.loanPayoff}).</li>
             <li>Ask {STUDENT.name.split(" ")[0]} which activity felt most engaging. Interest built through repeated, voluntary practice is a stronger indicator than a single assessment.</li>
             <li>If interest holds over the next grading period, help with the concrete next step: {route.nextStep}.</li>
           </ul>
         </ReportSection>
 
-        <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[10.5px] leading-[15px] text-[#6b7280]">
+        <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[12px] leading-[15px] text-[#6b7280]">
           The interest level summarizes {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. It is an engagement indicator intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
         </p>
       </div>
@@ -2032,7 +2032,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
 function ReportSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-5">
-      <p className="mb-2 text-[11px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">{title}</p>
+      <p className="mb-2 text-[15px] font-semibold tracking-[0.14em] text-[#6b7280] uppercase">{title}</p>
       {children}
     </div>
   );
