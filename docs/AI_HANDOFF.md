@@ -6,6 +6,54 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-22
 
+### 2026-08-22 Connect: career communities + post-event boards (PUSHED)
+
+- New feature, own files only (src/components/connect/*, src/app/connect/
+  page.tsx, chrome.tsx nav wiring) — built to
+  Dreamari_Connect_Claude_Implementation_Handoff.docx v1.0 while Profile/
+  CareerReport were being rebuilt in parallel by another session. Never
+  touched ProfileExperience.tsx/CareerReport.tsx.
+- IA: Connect home (For You feed / Communities / Events / Saved), a
+  Community board (Ask a question, filters, pinned insights), an Event
+  board (post-event continuation, entitlement-gated), Thread detail
+  (verified-pro answers, follow-ups, peer perspectives).
+- Identity, per direct user override of the handoff's grade-band-only
+  default: students post as a first-name handle + class year ("Ethan ·
+  Junior"), Twitter-shaped like the marketing site's own Connect chapter
+  (src/components/marketing/chapters/Connect.tsx) — never a full/last name,
+  never a photo. Verified pros: initials avatar (checkmark on the badge
+  itself) + name + company · role. No follower counts, no DMs, no exposed
+  internal rankings.
+- Editorial pass (direct user feedback, several rounds): For You is a
+  single minimal feed read as posts (avatar/name/byline, headline in
+  --font-display extrabold for weight, like/comment stats) — no long
+  sentences or restated descriptions anywhere. Cards are solid (var(--card),
+  matching the Profile-modal/HomeExperience solid-card recipe) with hairline
+  dividers between identity/content/actions, not glass. Community identity
+  is color + icon + stats, no photography (handoff's own "no stock photos"
+  direction) — an earlier organic-blob-photo treatment was built and then
+  fully removed per user call.
+- tokens.css also carries an uncommitted-until-now fix from earlier this
+  session: light-mode world-color contrast recompute (color-mix's first
+  percentage is the ORIGINAL color's share, not black's — a subtlety worth
+  remembering if this ramp is touched again). tokens:check passes.
+- Validation before push: since another session was live-editing
+  ProfileExperience.tsx in this same working tree, verified in an isolated
+  detached-HEAD git worktree (real `npm install`, not a symlink — Turbopack
+  rejects a node_modules symlink that points outside the worktree's own
+  root) containing HEAD + only the three Connect/tokens files, re-run twice
+  as HEAD advanced: tsc clean, eslint 0 errors (fixed one pre-existing
+  react-hooks/set-state-in-effect error in the URL-hydration effect with a
+  scoped, justified disable — window.location.search is genuinely
+  client-only, an effect is the correct tool here), tokens:check clean,
+  `next build` clean (13/13 static pages incl. /connect). Also verified
+  live in-browser (dark + light, mobile + desktop): feed, board, thread,
+  insight card, Ask sheet.
+- NOT done (flagged, not silently skipped): P0 server-side items from the
+  handoff (real AccessGrant/entitlement, routing/SLA, moderation, PII
+  checks) are simulated client-side only, documented in the file's own
+  header comment. No backend exists yet.
+
 ### 2026-08-22 Report tab = Replit print report verbatim (LOCAL main, NOT pushed)
 
 - b36e969 (on top of cf05e4e Profile v3): the profile Report tab now mirrors

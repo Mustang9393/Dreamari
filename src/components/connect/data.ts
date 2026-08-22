@@ -5,9 +5,12 @@
 // simulated states, not real authorization (the handoff's P0 items are
 // server-side work and are documented as assumptions in ConnectExperience).
 //
-// Identity rules from the handoff: students display as grade band only;
-// professionals display full name + verified scope ("what was verified and by
-// whom"). No follower counts, no DMs, no popularity ranking anywhere.
+// Identity rules, per direct request: students post under a handle + class
+// year (Freshman/Sophomore/Junior/Senior) — Twitter-shaped, like the
+// marketing site's own Connect chapter (src/components/marketing/chapters/
+// Connect.tsx) — never a full/last name. Professionals display full name +
+// verified scope ("what was verified and by whom"). No follower counts, no
+// DMs, no popularity ranking anywhere.
 
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
 
@@ -21,7 +24,7 @@ export type ProResponse = {
 };
 
 export type FollowUp = { kind: "followup"; body: string; postedAgo: string };
-export type PeerPerspective = { kind: "peer"; identity: string; body: string; postedAgo: string };
+export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string };
 
 export type Thread = {
   id: string;
@@ -29,7 +32,8 @@ export type Thread = {
   type: "question";
   title: string;
   context?: string;
-  identity: string; // protected: grade band only
+  handle: string; // first-name-only handle, never a full/last name
+  grade: string; // Freshman / Sophomore / Junior / Senior
   postedAgo: string;
   state: QuestionState;
   routedScope: string;
@@ -83,13 +87,12 @@ export type Community = {
   name: string;
   world: string; // maps to the app's world taxonomy for the identity accent
   purpose: string;
-  photo: string; // reuses an existing poster asset for this world — no new art
   topics: string[];
+  students: number; // from the Replit prototype's real evidence counts
   activePros: number;
   responseWindow: string; // from recent performance, not a static promise
   joined: boolean;
   unreadAnswers: number;
-  lastActivity: string;
   recommendedBecause?: string; // explicit-interest explanation (Top 3), never internal rankings
 };
 
@@ -106,39 +109,36 @@ export const COMMUNITIES: Community[] = [
     name: "Business & Money",
     world: "Business & Money",
     purpose: "Banking, investing, consulting and business careers — ask people who do the work.",
-    photo: "/images/app/poster-asset-manager.png",
     topics: ["Investment Banking", "Consulting", "Accounting", "Economics"],
+    students: 312,
     activePros: 11,
     responseWindow: "Most questions answered within 2 days",
     joined: true,
     unreadAnswers: 2,
-    lastActivity: "New verified answer · 3h ago",
   },
   {
     id: "tech-engineering",
     name: "Tech & Engineering",
     world: "Tech & Engineering",
     purpose: "Software, cybersecurity, AI and data careers, answered by working engineers.",
-    photo: "/images/app/poster-software-engineer.png",
     topics: ["Software Engineering", "Cybersecurity", "AI & Data"],
+    students: 389,
     activePros: 16,
     responseWindow: "Most questions answered within 1 day",
     joined: true,
     unreadAnswers: 1,
-    lastActivity: "Amara asked a follow-up · 6h ago",
   },
   {
     id: "health-medicine",
     name: "Health & Medicine",
     world: "Health & Medicine",
     purpose: "Medicine, nursing and public health careers — real paths, real trade-offs.",
-    photo: "/images/app/poster-registered-nurse.png",
     topics: ["Nursing", "Medicine", "Public Health"],
+    students: 267,
     activePros: 9,
     responseWindow: "Most questions answered within 3 days",
     joined: false,
     unreadAnswers: 0,
-    lastActivity: "Active today",
     recommendedBecause: "Because your Top 3 includes Registered Nurse",
   },
   {
@@ -146,28 +146,30 @@ export const COMMUNITIES: Community[] = [
     name: "Arts, Media & Sport",
     world: "Arts, Media & Sport",
     purpose: "Design, media, content and creative careers, without the gatekeeping.",
-    photo: "/images/app/poster-art-director.png",
     topics: ["Design", "Media", "Marketing"],
+    students: 198,
     activePros: 8,
     responseWindow: "Most questions answered within 3 days",
     joined: false,
     unreadAnswers: 0,
-    lastActivity: "Active this week",
     recommendedBecause: "Because you saved Art Director in Explore",
   },
   {
-    id: "first-gen",
-    name: "First-Gen & New to This",
+    // name/world match exactly, same as every other community — a prior
+    // draft invented "First-Gen & New to This" here under the Teaching &
+    // Education color, which strayed from the app's established 15-world
+    // taxonomy (that world is teaching careers, not general student support).
+    id: "teaching-education",
+    name: "Teaching & Education",
     world: "Teaching & Education",
-    purpose: "For students figuring out careers without a family playbook. No question is too basic.",
-    photo: "/images/app/poster-elementary-teacher.png",
-    topics: ["College Applications", "Networking", "Confidence"],
+    purpose: "Teaching, school counseling and education careers — from the people doing it.",
+    topics: ["Elementary Teaching", "School Counseling", "Higher Education"],
+    students: 428,
     activePros: 14,
     responseWindow: "Most questions answered within 2 days",
     joined: false,
     unreadAnswers: 0,
-    lastActivity: "Active today",
-    recommendedBecause: "Popular with students exploring Business & Money",
+    recommendedBecause: "Because you saved School Counselor in Explore",
   },
 ];
 
@@ -178,7 +180,8 @@ export const THREADS: Thread[] = [
     type: "question",
     title: "Do I need a CS degree to work in tech?",
     context: "I love building things and I'm teaching myself to code, but I'm not sure I want to study computer science in college. What do tech companies actually look for?",
-    identity: "Grade 11",
+    handle: "Ethan",
+    grade: "Junior",
     postedAgo: "1d ago",
     state: "answered",
     routedScope: "Software engineering careers",
@@ -202,7 +205,7 @@ export const THREADS: Thread[] = [
         postedAgo: "6h ago",
         body: "Tutorials are a fine start — just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
-      { kind: "peer", identity: "Grade 12", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago" },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago" },
     ],
   },
   {
@@ -211,7 +214,8 @@ export const THREADS: Thread[] = [
     type: "question",
     title: "What is the difference between data science and AI?",
     context: "I keep seeing both mentioned but I can't tell if they're the same thing. Which one is better to study in college?",
-    identity: "Grade 10",
+    handle: "Priya",
+    grade: "Sophomore",
     postedAgo: "6h ago",
     state: "routed",
     routedScope: "AI & data careers",
@@ -226,7 +230,8 @@ export const THREADS: Thread[] = [
     type: "question",
     title: "Are the hours in investment banking really that bad?",
     context: "Everyone online says 80-100 hour weeks. Is that true everywhere, and does it ever get better?",
-    identity: "Grade 11",
+    handle: "Maya",
+    grade: "Junior",
     postedAgo: "2d ago",
     state: "answered",
     routedScope: "Finance & banking careers",
@@ -251,7 +256,8 @@ export const THREADS: Thread[] = [
     boardId: "health-medicine",
     type: "question",
     title: "How do I shadow a nurse while still in high school?",
-    identity: "Grade 10",
+    handle: "Zoe",
+    grade: "Sophomore",
     postedAgo: "3d ago",
     state: "resolved",
     routedScope: "Nursing & patient care careers",
@@ -392,7 +398,8 @@ export const EVENT_THREADS: Thread[] = [
     type: "question",
     title: "What was everyone's biggest takeaway from today?",
     context: "I was surprised by how approachable everyone was. I expected it to feel intimidating, but it didn't at all. What stood out to you?",
-    identity: "Grade 11",
+    handle: "Amir",
+    grade: "Junior",
     postedAgo: "2h ago",
     state: "awaiting",
     routedScope: "Event professionals",
@@ -400,7 +407,7 @@ export const EVENT_THREADS: Thread[] = [
     helpful: 34,
     followers: 19,
     responses: [
-      { kind: "peer", identity: "Grade 10", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago" },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago" },
     ],
   },
   {
@@ -409,7 +416,8 @@ export const EVENT_THREADS: Thread[] = [
     type: "question",
     title: "What's actually different between consulting and investment banking?",
     context: "One of the speakers mentioned consulting today. I've been going back and forth between the two — they sound similar from the outside but I can tell they're not.",
-    identity: "Grade 12",
+    handle: "Devon",
+    grade: "Senior",
     postedAgo: "3h ago",
     state: "routed",
     routedScope: "Consulting & professional services",
@@ -424,7 +432,8 @@ export const EVENT_THREADS: Thread[] = [
     type: "question",
     title: "How do you stay in touch with someone professionally without it feeling awkward?",
     context: "I connected with a few people at the event but I'm not sure what to say when I reach out. I don't want it to come across like I'm just asking for something.",
-    identity: "Grade 10",
+    handle: "Riley",
+    grade: "Sophomore",
     postedAgo: "8h ago",
     state: "answered",
     routedScope: "Event professionals",
@@ -456,5 +465,5 @@ export const UPCOMING_SESSION = {
 export const STARTER_PROMPTS = [
   "What does a normal Tuesday look like in this job?",
   "What class helped you most, and what turned out not to matter?",
-  "What would you tell someone in Grade 10 who thinks they want this career?",
+  "What would you tell a Sophomore who thinks they want this career?",
 ];
