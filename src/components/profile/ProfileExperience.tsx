@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft,
   ArrowLeftRight,
   ArrowRight,
   ArrowUpRight,
@@ -15,7 +14,6 @@ import {
   BookOpen,
   Check,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Compass,
   Eye,
@@ -1086,6 +1084,94 @@ function MyPlanTab({
   );
 }
 
+// Routes list. One column, one row per route, stats laid out horizontally so
+// three routes can be read against each other without scrolling sideways.
+// The pitch, fit, student life and payoff detail moves into a modal, because
+// on a list the only job is "which of these do I want to look at".
+
+function RouteRow({ route, selected, onOpen, onSelect }: {
+  route: ProfileCareer["routes"][number];
+  selected: boolean;
+  onOpen: () => void;
+  onSelect: () => void;
+}) {
+  const detail = routeDetail(route.id);
+  const stats = [
+    { label: "Time", value: route.duration },
+    { label: "Cost", value: route.cost.split(",")[0] },
+    { label: "Starts at", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
+    { label: "Debt clear", value: (detail?.payoff.time ?? route.loanPayoff).replace("~", "") },
+  ];
+  const RouteIcon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
+  return (
+    <div
+      className="dm-tap flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]"
+      style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
+    >
+      <button type="button" onClick={onOpen} className="flex w-full cursor-pointer flex-col items-start gap-[var(--space-3)] text-left" aria-label={`Open details for ${route.short}`}>
+        <span className="flex w-full items-start justify-between gap-[var(--space-2)]">
+          <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
+            <RouteIcon className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="flex flex-none items-center gap-[5px]">
+            {route.recommended && (
+              <span className="flex items-center gap-[3px] rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>
+                <Sparkles className="h-2.5 w-2.5" aria-hidden /> Pick
+              </span>
+            )}
+            {selected && <span className="rounded-full px-[8px] py-[2px] text-[9px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+          </span>
+        </span>
+        <span className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[19px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+          <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.credential}</span>
+        </span>
+      </button>
+
+      <dl className="flex flex-col border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex items-baseline justify-between gap-[var(--space-2)] py-[6px]">
+            <dt className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+            <dd className="min-w-0 truncate text-[16px] leading-[20px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }} title={stat.value}>{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <button
+        type="button"
+        onClick={selected ? onOpen : onSelect}
+        className="dm-quiet mt-auto min-h-[40px] w-full cursor-pointer rounded-[var(--radius-md)] border text-[12.5px] font-bold"
+        style={{ borderColor: "var(--border)", background: "transparent" }}
+      >
+        {selected ? "See details" : "Make this my route"}
+      </button>
+    </div>
+  );
+}
+
+function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose }: {
+  route: ProfileCareer["routes"][number];
+  majors?: string[];
+  selected: boolean;
+  onSelect: () => void;
+  onGoPlan: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
+      <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <button type="button" onClick={onClose} className="dm-quiet absolute top-[10px] right-[10px] z-10 flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+        <div className="min-h-0 flex-1 overflow-y-auto p-[var(--space-4)] pb-[calc(env(safe-area-inset-bottom)+var(--space-5))] sm:p-[var(--space-5)]">
+          <RouteColumn route={route} majors={majors} selected={selected} onSelect={onSelect} onGoPlan={onGoPlan} inModal />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
@@ -1093,9 +1179,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   onGoPlan: () => void;
 }) {
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
-  // Mobile: the route the carousel is resting on, for the switcher pills.
-  const [visibleRoute, setVisibleRoute] = useState(0);
-  const railRef = useRef<HTMLDivElement | null>(null);
+  const [openRoute, setOpenRoute] = useState<string | null>(null);
 
   if (!focus) {
     return (
@@ -1106,96 +1190,37 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
     );
   }
 
+  const active = focus.routes.find((route) => route.id === openRoute) ?? null;
+
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Three ALTERNATE ways in, side by side */}
-      <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Ways into ${focus.title}`} /></h2>
+        <button
+          type="button"
+          onClick={() => setRouteView(routeView === "cards" ? "compare" : "cards")}
+          className="dm-quiet flex min-h-[40px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold"
+          style={{ borderColor: routeView === "compare" ? "var(--accent-subtle)" : "var(--border)", background: "transparent", color: routeView === "compare" ? "var(--accent-subtle)" : "var(--foreground)" }}
+        >
+          <ArrowLeftRight className="h-4 w-4" aria-hidden />
+          {routeView === "compare" ? "Back to routes" : `Compare all ${focus.routes.length}`}
+        </button>
+      </div>
 
       {routeView === "cards" ? (
-        <>
-        {/* ONE control row: route pills + the Compare view, nothing else */}
-        <div className="-mt-[6px] flex flex-wrap items-center gap-[var(--space-2)]">
-          {focus.routes.map((routeOption, index) => (
-            <button
+        <div className="grid gap-[var(--space-3)] [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+          {focus.routes.map((routeOption) => (
+            <RouteRow
               key={routeOption.id}
-              type="button"
-              aria-pressed={visibleRoute === index}
-              onClick={() => {
-                const card = railRef.current?.children[index] as HTMLElement | undefined;
-                card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-                setVisibleRoute(index);
-              }}
-              className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
-              style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
-            >
-              <span className="flex items-center gap-[4px]">
-                {routeOption.recommended && <Sparkles className="h-3 w-3" style={{ color: visibleRoute === index ? "var(--primary-foreground)" : "var(--accent-subtle)" }} />}
-                {routeOption.short}
-              </span>
-            </button>
+              route={routeOption}
+              selected={chosenRoute(focus).id === routeOption.id}
+              onOpen={() => setOpenRoute(routeOption.id)}
+              onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
+            />
           ))}
-          <span aria-hidden className="h-[16px] w-px" style={{ background: "var(--glass-border)" }} />
-          <button
-            type="button"
-            aria-pressed={false}
-            onClick={() => setRouteView("compare")}
-            className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
-            style={{ background: "transparent", color: "var(--muted-foreground)" }}
-          >
-            Compare
-          </button>
         </div>
-        <div className="relative">
-          <div
-            ref={railRef}
-            onScroll={(event) => {
-              const rail = event.currentTarget;
-              const step = rail.scrollWidth / focus.routes.length;
-              setVisibleRoute(Math.min(focus.routes.length - 1, Math.max(0, Math.round(rail.scrollLeft / step))));
-            }}
-            className="-mx-5 flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] md:-mx-[calc((100vw-100%)/2)] md:gap-[var(--space-4)] md:px-[calc((100vw-100%)/2)]"
-            style={{ touchAction: "pan-x pan-y" }}
-          >
-            {focus.routes.map((routeOption) => (
-              <RouteColumn
-                key={routeOption.id}
-                route={routeOption}
-                majors={careerReport(focus.id)?.majors}
-                selected={chosenRoute(focus).id === routeOption.id}
-                onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
-                onGoPlan={onGoPlan}
-              />
-            ))}
-          </div>
-          {/* Desktop: previous / next route */}
-          <button
-            type="button"
-            aria-label="Previous route"
-            disabled={visibleRoute === 0}
-            onClick={() => { const card = railRef.current?.children[visibleRoute - 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="dm-quiet absolute top-1/2 -left-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
-            style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next route"
-            disabled={visibleRoute >= focus.routes.length - 1}
-            onClick={() => { const card = railRef.current?.children[visibleRoute + 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="dm-quiet absolute top-1/2 -right-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
-            style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-        </>
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
-          <div className="-mt-[6px] flex items-center gap-[var(--space-2)]">
-            <button type="button" onClick={() => setRouteView("cards")} className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}><span className="inline-flex items-center gap-[4px]"><ArrowLeft size={12} strokeWidth={2.75} aria-hidden />Cards</span></button>
-            <span className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Compare</span>
-          </div>
           <CompareTable routes={focus.routes} selectedId={chosenRoute(focus).id} />
           <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
             <CompareChart title="Total cost" better="lower" unit={(value) => (value === 0 ? "$0" : `$${value}K`)} rows={focus.routes.map((r) => ({ id: r.id, name: r.short, value: r.costMidK }))} selectedId={chosenRoute(focus).id} />
@@ -1204,6 +1229,17 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             <CompareChart title="Loan payoff" better="lower" unit={(value) => (value === 0 ? "None" : `${value} yr`)} rows={focus.routes.map((r) => ({ id: r.id, name: r.short, value: r.payoffYears }))} selectedId={chosenRoute(focus).id} />
           </div>
         </div>
+      )}
+
+      {active && (
+        <RouteDetailModal
+          route={active}
+          majors={careerReport(focus.id)?.majors}
+          selected={chosenRoute(focus).id === active.id}
+          onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: active.id }))}
+          onGoPlan={() => { setOpenRoute(null); onGoPlan(); }}
+          onClose={() => setOpenRoute(null)}
+        />
       )}
     </div>
   );
@@ -1365,7 +1401,7 @@ const routeTypeKey = (type: string): keyof typeof ROUTE_TYPE_ICONS => {
 // One alternate route, editorial: the path name is the headline, the data
 // pane on the right is the feature. Payoff (the tallest pane) is the default
 // and sets the height; the other panes are designed to fill the same space.
-function RouteColumn({ route, majors, selected, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; majors?: string[]; selected: boolean; onSelect: () => void; onGoPlan: () => void }) {
+function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = false }: { route: ProfileCareer["routes"][number]; majors?: string[]; selected: boolean; onSelect: () => void; onGoPlan: () => void; inModal?: boolean }) {
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
@@ -1389,8 +1425,8 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan }: { route: P
   const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
-      className="flex w-[86vw] max-w-[340px] flex-none snap-center flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border-2 p-[var(--space-5)] md:grid md:w-[86%] md:max-w-[880px] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane']"
-      style={{ background: selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
+      className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-5)] md:grid md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane'] ${inModal ? "w-full border-0" : "w-[86vw] max-w-[340px] flex-none snap-center border-2 md:w-[86%] md:max-w-[880px]"}`}
+      style={{ background: inModal ? "transparent" : selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       {/* Status chips */}
       <div className="flex items-center gap-[6px] md:[grid-area:chips]">

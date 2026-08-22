@@ -40,6 +40,21 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 10: routes as compact cards + modal (PUSHED)
+
+- The route carousel is GONE (rail, snap, prev/next arrows, route pills). The
+  Routes tab is now a grid of compact cards, auto-fit at minmax(210px, 1fr):
+  three across on desktop, one on a phone. Each card carries icon, name,
+  credential, four stat rows (Time / Cost / Starts at / Debt clear) and one
+  button. No pitch sentence, no tabs inside the card.
+- Tapping a card opens RouteDetailModal, which renders the existing
+  RouteColumn with a new `inModal` prop (drops the snap/width/border classes
+  and the card background). Stats/Fit/Life/Payoff panes are unchanged and
+  still live there -- that is the only place they render now.
+- Compare is a bordered ghost button with an ArrowLeftRight icon, top right of
+  the section, toggling to the same CompareTable + CompareChart view as before.
+- Report: major cards are name only, descriptions removed.
+
 ### 2026-08-22 Round 9: report CTAs point inward (PUSHED)
 
 - Career Report college cards are now Links to /colleges?school=<name>, plus an
