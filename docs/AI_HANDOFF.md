@@ -6,6 +6,34 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-22
 
+### 2026-08-22 Connect: multi-event Events tab (PUSHED)
+
+- src/components/connect/data.ts: EVENT (single EventBoard) -> EVENTS
+  (array of 3), so the tab can demonstrate every entitlement state at once
+  per direct request: event-ey (already joined, straight into the board),
+  event-jpm (already happened, NOT joined — demonstrates the enter-code
+  flow, code "JPM2026", own recap/resources/thread), event-amazon
+  (lifecycle "Upcoming" — hasn't happened, no code entry at all, "you
+  can't join the convo yet since the event isn't finished"). EventBoard.
+  recap/resources are now optional (upcoming events have neither).
+- ConnectExperience.tsx: the `{kind:"event"}` View gained an `id` field
+  (was implicitly the one global event) — viewToQuery/queryToView,
+  EventView, EventCodeSheet, and ThreadView's board-name lookup all take
+  the event by id now (eventById helper). eventJoined went from a single
+  boolean to Record<eventId, boolean>; codeOpen went from boolean to
+  codeOpenFor: string | null so the code sheet knows which event it's
+  unlocking. Copy fix: "becomes read-only {date}" -> "Read-only after
+  {date}" everywhere (was inconsistent between two spots).
+- Validation: same isolated-worktree method as the prior Connect push
+  (this session was live-editing ProfileExperience.tsx again during this
+  change) — real `npm install` there, tsc/eslint/tokens:check/`next
+  build` all clean, re-run against HEAD twice more as it kept advancing.
+  Verified live in an isolated dev server (a second `next dev` can't run
+  in this same directory — Next's single-instance-per-dir lock): all
+  three event states, the code-redemption flow end to end (JPM2026 ->
+  confirm -> lands on the JPM board, not EY's), deep links (?event=<id>,
+  ?thread=<id>) resolving to the right board's back-button/copy.
+
 ### 2026-08-22 Connect: career communities + post-event boards (PUSHED)
 
 - New feature, own files only (src/components/connect/*, src/app/connect/

@@ -26,7 +26,7 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { WORLD_COLORS } from "@/components/app/worlds";
 import {
   COMMUNITIES,
-  EVENT,
+  EVENTS,
   EVENT_THREADS,
   INSIGHTS,
   OPPORTUNITIES,
@@ -34,6 +34,7 @@ import {
   STARTER_PROMPTS,
   THREADS,
   type Community,
+  type EventBoard,
   type Insight,
   type Opportunity,
   type Thread,
@@ -46,7 +47,7 @@ import {
 // PROTOTYPE ASSUMPTIONS (the handoff's P0 items are server-side and cannot be
 // implemented client-side — per handoff 16.1, hiding a route is not access
 // control):
-//   - Event entitlement is simulated (EVENT.entitled); real AccessGrant
+//   - Event entitlement is simulated (EventBoard.entitled); real AccessGrant
 //     redemption, revocation, and server-authorized reads are backend work.
 //   - Question routing/SLA states are simulated transitions, not a real
 //     routing job. Moderation/PII checks here are a client-side ASSIST only
@@ -80,20 +81,20 @@ const EVENT_ACCENT = "var(--chart-3)";
 type View =
   | { kind: "home"; tab: "foryou" | "communities" | "events" | "saved" }
   | { kind: "board"; id: string; filter: string }
-  | { kind: "event"; filter: string }
+  | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "home") return view.tab === "foryou" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
-  if (view.kind === "event") return `?event=${EVENT.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
+  if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   return `?thread=${view.id}`;
 }
 
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
-  if (q.get("event")) return { kind: "event", filter: q.get("filter") ?? "all" };
+  if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "all" };
   const tab = q.get("tab");
   return { kind: "home", tab: tab === "communities" || tab === "events" || tab === "saved" ? tab : "foryou" };
@@ -103,6 +104,10 @@ const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
 
 function proById(id: string) {
   return PROS.find((p) => p.id === id)!;
+}
+
+function eventById(id: string) {
+  return EVENTS.find((e) => e.id === id);
 }
 
 function communityById(id: string) {
@@ -494,9 +499,9 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
 export function ConnectExperience() {
   const [view, setViewState] = useState<View>({ kind: "home", tab: "foryou" });
   const [askOpen, setAskOpen] = useState<null | { boardId: string; boardName: string; scope: string }>(null);
-  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
-  const [eventJoined, setEventJoined] = useState(EVENT.entitled);
+  const [eventJoined, setEventJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(EVENTS.map((e) => [e.id, e.entitled])));
   const [dismissedRecs, setDismissedRecs] = useState<Record<string, boolean>>({});
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
@@ -533,8 +538,9 @@ export function ConnectExperience() {
   const toggleHelpful = (id: string) => setHelpfuls((h) => ({ ...h, [id]: !h[id] }));
 
   const openAskFor = (boardId: string) => {
-    if (boardId === EVENT.id) {
-      setAskOpen({ boardId, boardName: EVENT.name, scope: "professionals from this event" });
+    const event = eventById(boardId);
+    if (event) {
+      setAskOpen({ boardId, boardName: event.name, scope: "professionals from this event" });
     } else {
       const c = COMMUNITIES.find((x) => x.id === boardId)!;
       setAskOpen({ boardId, boardName: c.name, scope: `verified professionals in ${c.topics[0]}` });
@@ -575,10 +581,10 @@ export function ConnectExperience() {
             eventJoined={eventJoined}
             saves={saves}
             onOpenBoard={(id) => setView({ kind: "board", id, filter: "all" })}
-            onOpenEvent={() => setView({ kind: "event", filter: "all" })}
+            onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onAsk={() => openAskFor(COMMUNITIES.find((c) => joined[c.id])?.id ?? COMMUNITIES[0].id)}
-            onEnterCode={() => setCodeOpen(true)}
+            onEnterCode={(id) => setCodeOpenFor(id)}
           />
         )}
 
@@ -600,33 +606,49 @@ export function ConnectExperience() {
         )}
 
         {view.kind === "event" &&
-          (eventJoined ? (
-            <EventView
-              filter={view.filter}
-              onFilter={(filter) => setView({ kind: "event", filter })}
-              onBack={() => setView({ kind: "home", tab: "foryou" })}
-              onAsk={() => openAskFor(EVENT.id)}
-              onOpenThread={(id) => setView({ kind: "thread", id })}
-              onSaveTakeaway={() => toggleSave("recap-" + EVENT.id, "takeaway")}
-              takeawaySaved={!!saves["recap-" + EVENT.id]}
-              onAddToPlan={() => say("Added to your Plan as a next action.")}
-              cardProps={cardProps}
-            />
-          ) : (
-            /* Server-side entitlement is the real gate (handoff 16.1); this
-               client fallback only explains the safe route in. */
-            <Card>
-              <h2 className="text-[16px] font-bold" style={{ fontFamily: "var(--font-display)" }}>Attendees only</h2>
-              <div className="mt-[12px]"><QuietCta onClick={() => setCodeOpen(true)}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
-            </Card>
-          ))}
+          (() => {
+            const event = eventById(view.id);
+            if (!event) return null;
+            if (eventJoined[event.id]) {
+              return (
+                <EventView
+                  event={event}
+                  filter={view.filter}
+                  onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
+                  onBack={() => setView({ kind: "home", tab: "foryou" })}
+                  onAsk={() => openAskFor(event.id)}
+                  onOpenThread={(id) => setView({ kind: "thread", id })}
+                  onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
+                  takeawaySaved={!!saves["recap-" + event.id]}
+                  onAddToPlan={() => say("Added to your Plan as a next action.")}
+                  cardProps={cardProps}
+                />
+              );
+            }
+            if (event.lifecycle === "Upcoming") {
+              return (
+                <Card>
+                  <h2 className="text-[16px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
+                  <p className="mt-[6px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Discussion opens after the event, on {event.date}.</p>
+                </Card>
+              );
+            }
+            return (
+              /* Server-side entitlement is the real gate (handoff 16.1); this
+                 client fallback only explains the safe route in. */
+              <Card>
+                <h2 className="text-[16px] font-bold" style={{ fontFamily: "var(--font-display)" }}>Attendees only</h2>
+                <div className="mt-[12px]"><QuietCta onClick={() => setCodeOpenFor(event.id)}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
+              </Card>
+            );
+          })()}
 
         {view.kind === "thread" && (
           <ThreadView
             thread={ALL_THREADS.find((t) => t.id === view.id)!}
             onBack={() => {
               const t = ALL_THREADS.find((x) => x.id === view.id)!;
-              setView(t.boardId === EVENT.id ? { kind: "event", filter: "all" } : { kind: "board", id: t.boardId, filter: "all" });
+              setView(eventById(t.boardId) ? { kind: "event", id: t.boardId, filter: "all" } : { kind: "board", id: t.boardId, filter: "all" });
             }}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onAddToPlan={() => say("Added to your Plan as a next action.")}
@@ -640,13 +662,15 @@ export function ConnectExperience() {
       </main>
 
       {askOpen && <AskSheet board={askOpen} onClose={() => setAskOpen(null)} onChangeBoard={(id) => openAskFor(id)} joined={joined} />}
-      {codeOpen && (
+      {codeOpenFor && (
         <EventCodeSheet
-          onClose={() => setCodeOpen(false)}
+          event={eventById(codeOpenFor)!}
+          onClose={() => setCodeOpenFor(null)}
           onRedeemed={() => {
-            setEventJoined(true);
-            setCodeOpen(false);
-            setView({ kind: "event", filter: "all" });
+            const id = codeOpenFor;
+            setEventJoined((j) => ({ ...j, [id]: true }));
+            setCodeOpenFor(null);
+            setView({ kind: "event", id, filter: "all" });
             say("Event board unlocked. It stays under Your events — no code needed next time.");
           }}
         />
@@ -680,13 +704,13 @@ function HomeView({
   dismissedRecs: Record<string, boolean>;
   onDismissRec: (id: string) => void;
   onJoin: (id: string) => void;
-  eventJoined: boolean;
+  eventJoined: Record<string, boolean>;
   saves: Record<string, boolean>;
   onOpenBoard: (id: string) => void;
-  onOpenEvent: () => void;
+  onOpenEvent: (id: string) => void;
   onOpenThread: (id: string) => void;
   onAsk: () => void;
-  onEnterCode: () => void;
+  onEnterCode: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const myCommunities = COMMUNITIES.filter((c) => joined[c.id]);
@@ -774,17 +798,30 @@ function HomeView({
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your events">
           <SectionHead>Your events</SectionHead>
-          {eventJoined ? (
-            <button type="button" onClick={onOpenEvent} className="cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--glass-surface-1)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
-              <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up · read-only after {EVENT.closesOn}</span>
-              <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{EVENT.name}</span>
-              <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{EVENT.date} · {EVENT.host}</span>
-            </button>
-          ) : (
-            <Card>
-              <p className="text-[13px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>Have an event code?</p>
-              <div className="mt-[10px]"><QuietCta onClick={onEnterCode}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
-            </Card>
+          {EVENTS.map((event) =>
+            eventJoined[event.id] ? (
+              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
+                <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up · Read-only after {event.closesOn}</span>
+                <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
+                <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</span>
+              </button>
+            ) : event.lifecycle === "Upcoming" ? (
+              <div key={event.id} className="rounded-[var(--radius-xl)] border p-[var(--space-5)] opacity-70" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+                <span className="flex items-center gap-[5px] text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+                  <Clock className="h-3 w-3" aria-hidden /> Upcoming · {event.date}
+                </span>
+                <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
+                <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.host}</span>
+                <p className="mt-[8px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Discussion opens after the event.</p>
+              </div>
+            ) : (
+              <Card key={event.id}>
+                <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up · Read-only after {event.closesOn}</span>
+                <p className="mt-[3px] text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</p>
+                <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</p>
+                <div className="mt-[10px]"><QuietCta onClick={() => onEnterCode(event.id)}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
+              </Card>
+            )
           )}
         </section>
       )}
@@ -935,6 +972,7 @@ function BoardView({
 // ——— event board (handoff 10) ———
 
 function EventView({
+  event,
   filter,
   onFilter,
   onBack,
@@ -945,6 +983,7 @@ function EventView({
   onAddToPlan,
   cardProps,
 }: {
+  event: EventBoard;
   filter: string;
   onFilter: (f: string) => void;
   onBack: () => void;
@@ -955,7 +994,8 @@ function EventView({
   onAddToPlan: () => void;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
-  const opps = OPPORTUNITIES.filter((o) => o.boardId === EVENT.id);
+  const opps = OPPORTUNITIES.filter((o) => o.boardId === event.id);
+  const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   return (
     <>
       <button type="button" onClick={onBack} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -963,12 +1003,12 @@ function EventView({
       </button>
 
       <section aria-label="Event context" className="rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, " + EVENT_ACCENT + " 8%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
-        <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>{EVENT.lifecycle} · becomes read-only {EVENT.closesOn}</span>
-        <h1 className="mt-[4px] text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{EVENT.name}</h1>
+        <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>{event.lifecycle} · Read-only after {event.closesOn}</span>
+        <h1 className="mt-[4px] text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</h1>
         <p className="mt-[3px] flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[2px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {EVENT.date}</span>
-          <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {EVENT.location}</span>
-          <span>Hosted by {EVENT.host}</span>
+          <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {event.date}</span>
+          <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {event.location}</span>
+          <span>Hosted by {event.host}</span>
         </p>
         <p className="mt-[8px] flex items-center gap-[5px] text-[12px] leading-[17px] font-semibold" style={{ color: "var(--foreground)" }}>
           <ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: EVENT_ACCENT }} /> Attendees + event pros only
@@ -977,38 +1017,42 @@ function EventView({
       </section>
 
       {/* Pinned host recap with three takeaways (handoff 10.3) */}
-      <Card>
-        <span className="flex items-center gap-[6px] text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
-        </span>
-        <div className="mt-[8px]"><ProBadge proId={EVENT.recap.proId} postedAgo={EVENT.recap.postedAgo} /></div>
-        <p className="mt-[8px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Great meeting everyone. Three things I hope you remember:</p>
-        <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
-          {EVENT.recap.takeaways.map((t) => (
-            <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
-          ))}
-        </ol>
-        <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
-          <QuietCta onClick={onSaveTakeaway}><Bookmark className="h-4 w-4" aria-hidden /> {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-          <QuietCta onClick={onAddToPlan}><ArrowRight className="h-4 w-4" aria-hidden /> Add to my Plan</QuietCta>
-        </div>
-      </Card>
+      {event.recap && (
+        <Card>
+          <span className="flex items-center gap-[6px] text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
+          </span>
+          <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
+          <p className="mt-[8px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Great meeting everyone. Three things I hope you remember:</p>
+          <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
+            {event.recap.takeaways.map((t) => (
+              <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
+            ))}
+          </ol>
+          <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
+            <QuietCta onClick={onSaveTakeaway}><Bookmark className="h-4 w-4" aria-hidden /> {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
+            <QuietCta onClick={onAddToPlan}><ArrowRight className="h-4 w-4" aria-hidden /> Add to my Plan</QuietCta>
+          </div>
+        </Card>
+      )}
 
       {/* Resources: View resource, never Apply now (handoff 10.3) */}
-      <section className="flex flex-col gap-[var(--space-3)]" aria-label="Event resources">
-        <SectionHead>Resources from the event</SectionHead>
-        {EVENT.resources.map((r) => (
-          <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <div className="min-w-0">
-              <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
-              <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
+      {event.resources && event.resources.length > 0 && (
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Event resources">
+          <SectionHead>Resources from the event</SectionHead>
+          {event.resources.map((r) => (
+            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+              <div className="min-w-0">
+                <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
+                <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
+              </div>
+              <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                View resource <ExternalLink className="h-3 w-3" aria-hidden />
+              </span>
             </div>
-            <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              View resource <ExternalLink className="h-3 w-3" aria-hidden />
-            </span>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+      )}
 
       <FilterRow
         options={[
@@ -1023,7 +1067,7 @@ function EventView({
 
       <div className="flex flex-col gap-[var(--space-4)]">
         {(filter === "all" || filter === "questions") &&
-          EVENT_THREADS.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+          threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
         {(filter === "all" || filter === "opportunities") && opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
         {filter === "insights" && (
           <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
@@ -1056,8 +1100,7 @@ function ThreadView({
   helpfuls: Record<string, boolean>;
   toggleHelpful: (id: string) => void;
 }) {
-  const isEvent = thread.boardId === EVENT.id;
-  const boardName = isEvent ? EVENT.name : COMMUNITIES.find((c) => c.id === thread.boardId)?.name ?? "Community";
+  const boardName = eventById(thread.boardId)?.name ?? COMMUNITIES.find((c) => c.id === thread.boardId)?.name ?? "Community";
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
   const answered = thread.responses.some((r) => r.kind === "answer");
   const p = cardProps(thread.id);
@@ -1322,7 +1365,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
 
 // ——— event code redemption (handoff 9) ———
 
-function EventCodeSheet({ onClose, onRedeemed }: { onClose: () => void; onRedeemed: () => void }) {
+function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -1335,9 +1378,10 @@ function EventCodeSheet({ onClose, onRedeemed }: { onClose: () => void; onRedeem
   }, [onClose]);
 
   const check = () => {
-    // Prototype: one demo token. Real validation/redemption is server-side
-    // (single-use token hashes, throttling, revocation — handoff 9.2).
-    if (code.trim().toUpperCase() === "EY2026") {
+    // Prototype: one demo token per event. Real validation/redemption is
+    // server-side (single-use token hashes, throttling, revocation —
+    // handoff 9.2).
+    if (event.code && code.trim().toUpperCase() === event.code) {
       setError(null);
       setConfirming(true);
     } else {
@@ -1354,8 +1398,8 @@ function EventCodeSheet({ onClose, onRedeemed }: { onClose: () => void; onRedeem
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
-            <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{EVENT.name}</h2>
-            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{EVENT.date} · {EVENT.location} · Hosted by {EVENT.host}</p>
+            <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
+            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.location} · Hosted by {event.host}</p>
             <p className="mt-[10px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>
               This private board is limited to verified attendees and event professionals. Joining adds it to Your events — you won&apos;t need the code again, and access can be managed by the host.
             </p>
@@ -1381,7 +1425,7 @@ function EventCodeSheet({ onClose, onRedeemed }: { onClose: () => void; onRedeem
                 value={code}
                 onChange={(e) => { setCode(e.target.value); setError(null); }}
                 onKeyDown={(e) => e.key === "Enter" && check()}
-                placeholder="e.g. EY2026"
+                placeholder={`e.g. ${event.code ?? "EY2026"}`}
                 autoCapitalize="characters"
                 className="w-full rounded-[var(--radius-lg)] border bg-transparent p-[var(--space-4)] text-center text-[18px] font-bold tracking-[0.2em] uppercase outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:tracking-normal placeholder:text-[color:var(--muted-foreground)]"
                 style={{ borderColor: error ? EVENT_ACCENT : "var(--border)", color: "var(--foreground)" }}
@@ -1396,7 +1440,7 @@ function EventCodeSheet({ onClose, onRedeemed }: { onClose: () => void; onRedeem
               </p>
             )}
             <div className="mt-[var(--space-5)]"><PrimaryCta onClick={check} className="w-full">Continue</PrimaryCta></div>
-            <p className="mt-[8px] text-center text-[10.5px]" style={{ color: "var(--muted-foreground)" }}>Prototype: use EY2026 to preview the event board.</p>
+            <p className="mt-[8px] text-center text-[10.5px]" style={{ color: "var(--muted-foreground)" }}>Prototype: use {event.code} to preview the event board.</p>
           </>
         )}
       </div>

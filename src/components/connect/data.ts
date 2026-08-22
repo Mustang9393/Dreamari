@@ -356,40 +356,83 @@ export type EventBoard = {
   host: string;
   date: string;
   location: string;
-  lifecycle: "Active follow-up";
-  closesOn: string;
+  // Lifecycle per handoff 9.4 (Draft/Scheduled/Live collapsed for this
+  // prototype into the two states the UI actually distinguishes): a
+  // student can only ever ASK about an event that already happened.
+  lifecycle: "Upcoming" | "Active follow-up";
+  closesOn?: string; // Active follow-up only: when the board goes read-only
   orgs: string[];
   topics: string[];
   entitled: boolean; // prototype: simulated AccessGrant — real entitlement is server-side (P0)
-  recap: { proId: string; takeaways: string[]; postedAgo: string };
-  resources: { title: string; description: string; sourceLabel: string }[];
+  code?: string; // prototype: demo redemption token — real tokens are single-use/server-side (handoff 9.2)
+  // Upcoming events have neither yet — there's nothing to recap or share
+  // until the event itself has happened.
+  recap?: { proId: string; takeaways: string[]; postedAgo: string };
+  resources?: { title: string; description: string; sourceLabel: string }[];
 };
 
-export const EVENT: EventBoard = {
-  id: "event-ey",
-  name: "EY Student Impact Day",
-  host: "Ernst & Young",
-  date: "August 14, 2026",
-  location: "EY Dallas Office",
-  lifecycle: "Active follow-up",
-  closesOn: "September 5, 2026",
-  orgs: ["Ernst & Young", "Dreamari"],
-  topics: ["Consulting", "Finance", "Networking"],
-  entitled: true,
-  recap: {
-    proId: "pro-martinez",
-    takeaways: [
-      "Your major does not determine your career path — several of us on the panel changed directions completely.",
-      "Every person you spoke to is someone you can follow up with. Do it within 48 hours while the conversation is fresh.",
-      "Curiosity is the skill that matters most early in your career. Keep asking the questions you didn't get to ask.",
+export const EVENTS: EventBoard[] = [
+  {
+    id: "event-ey",
+    name: "EY Student Impact Day",
+    host: "Ernst & Young",
+    date: "August 14, 2026",
+    location: "EY Dallas Office",
+    lifecycle: "Active follow-up",
+    closesOn: "September 5, 2026",
+    orgs: ["Ernst & Young", "Dreamari"],
+    topics: ["Consulting", "Finance", "Networking"],
+    entitled: true, // already joined — demonstrates the straight-into-the-board state
+    recap: {
+      proId: "pro-martinez",
+      takeaways: [
+        "Your major does not determine your career path — several of us on the panel changed directions completely.",
+        "Every person you spoke to is someone you can follow up with. Do it within 48 hours while the conversation is fresh.",
+        "Curiosity is the skill that matters most early in your career. Keep asking the questions you didn't get to ask.",
+      ],
+      postedAgo: "10h ago",
+    },
+    resources: [
+      { title: "Panel slides & career overviews", description: "Everything shown on stage, plus the career one-pagers each speaker recommended.", sourceLabel: "dreamari.co/resources" },
+      { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
     ],
-    postedAgo: "10h ago",
   },
-  resources: [
-    { title: "Panel slides & career overviews", description: "Everything shown on stage, plus the career one-pagers each speaker recommended.", sourceLabel: "dreamari.co/resources" },
-    { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
-  ],
-};
+  {
+    id: "event-jpm",
+    name: "JPMorgan Chase Markets Day",
+    host: "JPMorgan Chase",
+    date: "August 10, 2026",
+    location: "JPMorgan Chase — New York, NY",
+    lifecycle: "Active follow-up",
+    closesOn: "September 1, 2026",
+    orgs: ["JPMorgan Chase", "Dreamari"],
+    topics: ["Investment Banking", "Trading", "Networking"],
+    entitled: false, // not joined yet — demonstrates the enter-code state
+    code: "JPM2026",
+    recap: {
+      proId: "pro-okafor",
+      takeaways: [
+        "Trading and investment banking look similar from outside but run on completely different clocks — trading reacts in seconds, banking builds over months.",
+        "The analysts who stood out to us weren't the ones with finance degrees — they were the ones who could explain a hard idea simply.",
+      ],
+      postedAgo: "1d ago",
+    },
+    resources: [
+      { title: "Desk-by-desk overview slides", description: "What each floor actually does, in plain language.", sourceLabel: "dreamari.co/resources" },
+    ],
+  },
+  {
+    id: "event-amazon",
+    name: "Amazon Future Engineer Info Session",
+    host: "Amazon",
+    date: "September 10, 2026",
+    location: "Virtual",
+    lifecycle: "Upcoming", // hasn't happened yet — no discussion to join
+    orgs: ["Amazon", "Dreamari"],
+    topics: ["Software Engineering"],
+    entitled: false,
+  },
+];
 
 export const EVENT_THREADS: Thread[] = [
   {
@@ -449,6 +492,31 @@ export const EVENT_THREADS: Thread[] = [
         postedAgo: "5h ago",
         body: "The trick is to give before you ask. Message something like: 'You mentioned X on the panel — I tried it / read about it, and here's what I found.' That's a conversation, not a request. Keep it short, don't apologize for reaching out, and don't attach your resume unless they ask. One real follow-up like that is worth more than ten generic thank-you notes. Ask a follow-up in this thread if you want help wording yours.",
         disclosure: "Personal approach — different professionals prefer different styles.",
+      },
+    ],
+  },
+  {
+    id: "et-trading-hours",
+    boardId: "event-jpm",
+    type: "question",
+    title: "Is trading as stressful as banking, or is that just a stereotype?",
+    context: "You mentioned trading reacts in seconds. Does that mean the hours are just as long as investment banking, or is it a different kind of pressure?",
+    handle: "Zoe",
+    grade: "Sophomore",
+    postedAgo: "6h ago",
+    state: "answered",
+    routedScope: "Event professionals",
+    expectedWindow: "within 2 days",
+    helpful: 14,
+    followers: 5,
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-okafor",
+        primary: true,
+        postedAgo: "3h ago",
+        body: "Different pressure, not necessarily longer hours. Trading days are bounded by market hours, so the stress is concentrated and intense rather than spread across a 90-hour week. Banking hours are longer but more self-paced within the deadline. Neither is easier — it's a question of whether you want pressure that ends at market close or pressure that follows you home.",
+        disclosure: "Based on my own team's experience — desks vary.",
       },
     ],
   },
