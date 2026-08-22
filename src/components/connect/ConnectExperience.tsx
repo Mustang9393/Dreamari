@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -154,6 +155,29 @@ function WorldTile({ world, size = 40 }: { world: string; size?: number }) {
     >
       <Users style={{ width: size * 0.45, height: size * 0.45 }} />
     </span>
+  );
+}
+
+// Same visual grammar as the app's poster/browse cards (theme-aware scrim +
+// world-color label) applied to a wide banner shape — graphic and colorful
+// like the reference boards, but zero new tokens: --poster-scrim/
+// --poster-title/WORLD_COLORS are the same variables PosterCard uses.
+function CommunityBanner({ community, className = "" }: { community: Community; className?: string }) {
+  return (
+    <div className={`relative aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-xl)] ${className}`}>
+      <Image src={community.photo} alt="" fill sizes="360px" className="object-cover" draggable={false} />
+      <span
+        aria-hidden
+        className="absolute top-[10px] left-[10px] flex size-8 items-center justify-center rounded-[var(--radius-md)]"
+        style={{ background: "rgba(5,8,20,0.6)", backdropFilter: "blur(6px)", color: WORLD_COLORS[community.world] ?? "var(--primary)" }}
+      >
+        <Users className="h-4 w-4" />
+      </span>
+      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[3px] px-[14px] pt-[30px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        <span className="text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{community.name}</span>
+        <span className="text-[10px] leading-[13px] font-semibold tracking-[0.4px]" style={{ color: WORLD_COLORS[community.world] ?? "var(--primary)" }}>{community.world}</span>
+      </span>
+    </div>
   );
 }
 
@@ -680,38 +704,41 @@ function HomeView({
 
 function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; onDismiss?: () => void }) {
   return (
-    <div className="flex items-center gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      <WorldTile world={community.world} />
-      <button type="button" onClick={onOpen} className="min-w-0 flex-1 cursor-pointer text-left">
-        <span className="flex items-center gap-[8px]">
-          <span className="truncate text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{community.name}</span>
-          {joined && community.unreadAnswers > 0 && (
-            <span className="flex-none rounded-full px-[8px] py-[1px] text-[10px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+    <div className="overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <button type="button" onClick={onOpen} className="block w-full cursor-pointer text-left">
+        <CommunityBanner community={community} className="rounded-none" />
+      </button>
+      <div className="flex items-center gap-[var(--space-3)] p-[var(--space-4)]">
+        <button type="button" onClick={onOpen} className="min-w-0 flex-1 cursor-pointer text-left">
+          <span className="line-clamp-1 text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
+            {joined ? community.lastActivity : community.recommendedBecause ?? community.purpose}
+          </span>
+          <span className="mt-[2px] flex items-center gap-[8px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <ShieldCheck className="h-3 w-3 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+            {community.activePros} pros · {community.responseWindow.replace("Most questions answered ", "")}
+          </span>
+        </button>
+        {joined ? (
+          community.unreadAnswers > 0 ? (
+            <span className="flex-none rounded-full px-[10px] py-[4px] text-[11px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
               {community.unreadAnswers} new
             </span>
-          )}
-        </span>
-        <span className="mt-[2px] block truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-          {joined ? community.lastActivity : community.recommendedBecause ?? community.purpose}
-        </span>
-        <span className="mt-[2px] block text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-          {community.activePros} verified professionals · {community.responseWindow.toLowerCase()}
-        </span>
-      </button>
-      {joined ? (
-        <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-      ) : (
-        <span className="flex flex-none flex-col items-end gap-[4px]">
-          <button type="button" onClick={onJoin} className="min-h-[44px] cursor-pointer rounded-[999px] px-[var(--space-5)] py-[6px] text-[12px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            Join
-          </button>
-          {onDismiss && (
-            <button type="button" onClick={onDismiss} className="cursor-pointer text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              Not interested
+          ) : (
+            <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          )
+        ) : (
+          <span className="flex flex-none flex-col items-end gap-[4px]">
+            <button type="button" onClick={onJoin} className="min-h-[44px] cursor-pointer rounded-[999px] px-[var(--space-5)] py-[6px] text-[12px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+              Join
             </button>
-          )}
-        </span>
-      )}
+            {onDismiss && (
+              <button type="button" onClick={onDismiss} className="cursor-pointer text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                Not interested
+              </button>
+            )}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

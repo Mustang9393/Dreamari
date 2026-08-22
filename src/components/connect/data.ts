@@ -83,6 +83,7 @@ export type Community = {
   name: string;
   world: string; // maps to the app's world taxonomy for the identity accent
   purpose: string;
+  photo: string; // reuses an existing poster asset for this world — no new art
   topics: string[];
   activePros: number;
   responseWindow: string; // from recent performance, not a static promise
@@ -105,6 +106,7 @@ export const COMMUNITIES: Community[] = [
     name: "Business & Money",
     world: "Business & Money",
     purpose: "Banking, investing, consulting and business careers — ask people who do the work.",
+    photo: "/images/app/poster-asset-manager.png",
     topics: ["Investment Banking", "Consulting", "Accounting", "Economics"],
     activePros: 11,
     responseWindow: "Most questions answered within 2 days",
@@ -117,6 +119,7 @@ export const COMMUNITIES: Community[] = [
     name: "Tech & Engineering",
     world: "Tech & Engineering",
     purpose: "Software, cybersecurity, AI and data careers, answered by working engineers.",
+    photo: "/images/app/poster-software-engineer.png",
     topics: ["Software Engineering", "Cybersecurity", "AI & Data"],
     activePros: 16,
     responseWindow: "Most questions answered within 1 day",
@@ -129,6 +132,7 @@ export const COMMUNITIES: Community[] = [
     name: "Health & Medicine",
     world: "Health & Medicine",
     purpose: "Medicine, nursing and public health careers — real paths, real trade-offs.",
+    photo: "/images/app/poster-registered-nurse.png",
     topics: ["Nursing", "Medicine", "Public Health"],
     activePros: 9,
     responseWindow: "Most questions answered within 3 days",
@@ -142,6 +146,7 @@ export const COMMUNITIES: Community[] = [
     name: "Arts, Media & Sport",
     world: "Arts, Media & Sport",
     purpose: "Design, media, content and creative careers, without the gatekeeping.",
+    photo: "/images/app/poster-art-director.png",
     topics: ["Design", "Media", "Marketing"],
     activePros: 8,
     responseWindow: "Most questions answered within 3 days",
@@ -155,6 +160,7 @@ export const COMMUNITIES: Community[] = [
     name: "First-Gen & New to This",
     world: "Teaching & Education",
     purpose: "For students figuring out careers without a family playbook. No question is too basic.",
+    photo: "/images/app/poster-elementary-teacher.png",
     topics: ["College Applications", "Networking", "Confidence"],
     activePros: 14,
     responseWindow: "Most questions answered within 2 days",
