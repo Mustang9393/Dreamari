@@ -720,8 +720,8 @@ function OverviewTab({
           </div>
           <div className="grid grid-cols-1 gap-[var(--space-2)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
             {[
-              { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
               { label: "Time to get in", ...splitDuration(careerSummary.comparison.timeToEnter) },
+              { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
               { label: "Job outlook", value: careerSummary.salary.outlook.replace(/ than average/i, ""), note: "than average" },
             ].map((stat) => (
               <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
