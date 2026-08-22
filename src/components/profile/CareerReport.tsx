@@ -34,6 +34,15 @@ export const REPORT_SECTIONS = [
 ] as const;
 
 
+// 11 -> "11th". Grades only, so the teen rules are all that matter.
+function ordinal(n: string): string {
+  const value = Number(n);
+  if (!Number.isFinite(value)) return n;
+  const tens = value % 100;
+  if (tens >= 11 && tens <= 13) return `${value}th`;
+  return `${value}${["th", "st", "nd", "rd"][value % 10] ?? "th"}`;
+}
+
 function SourceLink({ url, children }: { url: string; children: React.ReactNode }) {
   return (
     <a href={url} target="_blank" rel="noreferrer" data-print-url={url} className="inline-flex items-center gap-[3px] font-semibold underline decoration-[color:var(--rule-strong)] underline-offset-2" style={{ color: "var(--ink)" }}>
@@ -298,25 +307,17 @@ function ReportDocument({
             Career &amp; Pathway Report
           </p>
           <h2 className="mt-[2px] text-[30px] leading-[33px] font-semibold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-            <span className="font-semibold" style={{ color: "var(--ink)" }}>
-              Grade <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.grade.replace("Grade ", "")}</span>
-            </span>
-            <span className="font-semibold" style={{ color: "var(--ink)" }}>
-              School <span className="font-normal" style={{ color: "var(--ink-soft)" }}>{student.school}</span>
-            </span>
+          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
+            <span>{ordinal(student.grade.replace(/\D/g, ""))} Grade</span>
             {ACADEMIC_RECORD.verified && (
-              <>
-                    <span className="inline-flex items-center gap-[4px] font-semibold" style={{ color: "var(--ink)" }}>
-                  GPA <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{ACADEMIC_RECORD.gpa}</span>
-                  <BadgeCheck className="h-[14px] w-[14px]" aria-hidden />
-                  <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
-                </span>
-              </>
+              <span className="inline-flex items-center gap-[5px] tabular-nums">
+                {ACADEMIC_RECORD.gpa} GPA
+                <BadgeCheck className="h-[15px] w-[15px]" aria-hidden />
+                <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
+              </span>
             )}
-            <span className="font-semibold" style={{ color: "var(--ink)" }}>
-              Date <span className="font-normal tabular-nums" style={{ color: "var(--ink-soft)" }}>{reportDate}</span>
-            </span>
+            <span className="font-semibold" style={{ color: "var(--ink)" }}>{student.school}</span>
+            <span className="tabular-nums">{reportDate}</span>
           </p>
         </header>
 

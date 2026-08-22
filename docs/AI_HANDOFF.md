@@ -116,6 +116,15 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 18: report stat line reads as phrases (LOCAL)
+
+- "Grade 11" / "GPA 3.7" became "11th Grade" / "3.7 GPA" via an ordinal()
+  helper. The school shows its name only, no "School" label.
+- EACH PHRASE IS ONE WEIGHT AND ONE COLOUR. No bold-the-noun / light-the-value
+  split inside a single phrase; that was tried and rejected. The school name
+  is the one item at --ink semibold because it is the distinguishing detail;
+  grade, GPA and date sit at --ink-soft regular.
+
 ### 2026-08-22 Round 17: Apple-style hierarchy across the profile (LOCAL)
 
 User asked for apple.com/ipad-pro hierarchy "for the entire UI in my profile
