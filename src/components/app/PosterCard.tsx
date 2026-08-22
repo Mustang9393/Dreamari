@@ -109,7 +109,7 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
       </p>
       <button
         type="button"
-        className="dm-link absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] text-center uppercase"
+        className="dm-tap absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] text-center uppercase"
       >
         <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
         <span

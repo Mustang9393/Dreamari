@@ -286,7 +286,7 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="dm-link h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
+              className="h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
               style={{ width: panel === index ? 24 : 7, background: panel === index ? "var(--foreground)" : "var(--muted-foreground)" }}
             />
           ))}
@@ -489,7 +489,7 @@ export function HomeExperience() {
               </div>
               <a
                 href="/explore?tab=browse"
-                className="inline-flex flex-none items-center gap-[6px] text-[13px] leading-[18px] font-semibold"
+                className="dm-link inline-flex flex-none items-center gap-[6px] text-[13px] leading-[18px] font-semibold"
                 style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}
               >
                 Explore All Careers

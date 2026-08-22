@@ -134,6 +134,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - NOT TOUCHED: the marketing chapters on the landing page. Those have bespoke
   interactions (the Play answer rows animate themselves) and a blanket hover
   would fight them.
+- FOLLOW-UP after user testing: the shape heuristic put dm-link on a 175x250
+  poster card, so a card underlined and faded on hover. Anything card-shaped
+  must be dm-tap; dm-link is for bare text only. Also fixed: carousel dots and
+  the Panel dots stay bare on purpose (they animate their own width, a lift
+  would fight it).
+- The sweep only matched elements carrying cursor-pointer, which missed every
+  <Link> in the chrome: desktop nav items, mobile bottom-bar icons, the
+  wordmark and both profile avatars had no feedback. All wired now.
+- Verified per screen with an audit that counts uncovered button/a/[role] AND
+  flags any .dm-link larger than 120x80 (a card wearing the link treatment):
+  Explore 38/0, Connect 13/0, Home 31/0-with-dots-excluded.
 
 ### 2026-08-22 Round 20: uniform stat line, short months, focus star (PUSHED)
 

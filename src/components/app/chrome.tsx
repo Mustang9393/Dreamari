@@ -14,7 +14,7 @@ const AVATAR_SRC = "/images/avatar-jordan.jpg";
 // currentColor instead of the asset's baked-in near-white fill.
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} aria-label="Dreamari" className="flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>
+    <Link href={href} aria-label="Dreamari" className="dm-link flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>
       <span
         aria-hidden
         className="h-[12px] w-[21px] flex-none"
@@ -150,7 +150,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
               key={item.label}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className="rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase transition-colors"
+              className="dm-quiet rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
               style={{
                 background: isActive ? "var(--primary)" : "transparent",
                 color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
@@ -179,7 +179,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
             15,980 XP
           </span>
         </span>
-        <Link href="/profile" aria-label="My Profile">
+        <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
         </Link>
@@ -210,7 +210,7 @@ export function MobileNav({ active }: { active: string }) {
             href={href}
             aria-label={label}
             aria-current={isActive ? "page" : undefined}
-            className="flex h-11 w-11 items-center justify-center"
+            className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
             style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
           >
             <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 2} />
@@ -221,7 +221,7 @@ export function MobileNav({ active }: { active: string }) {
         href="/profile"
         aria-label="My Profile"
         aria-current={active === "Profile" ? "page" : undefined}
-        className="flex h-11 w-11 items-center justify-center"
+        className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
