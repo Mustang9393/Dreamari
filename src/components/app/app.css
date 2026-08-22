@@ -143,6 +143,71 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Interaction affordances
+   ---------------------------------------------------------------------------
+   Most surfaces in the profile set their background and border inline from
+   tokens, which beats any stylesheet rule, so the hover states below override
+   with !important on exactly those two properties and nothing else. Every
+   utility also carries a focus-visible ring, because a hover state that has no
+   keyboard equivalent is only half an affordance.                             */
+.dm-tap {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+.dm-tap:hover {
+  border-color: color-mix(in srgb, var(--accent-subtle) 50%, var(--glass-border)) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -20px rgb(0 0 0 / 0.85);
+}
+.dm-tap:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Quiet controls: icon buttons and rail chips that sit on transparent. */
+.dm-quiet {
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.dm-quiet:hover {
+  background: var(--glass-surface-2) !important;
+  color: var(--foreground) !important;
+}
+
+/* Text links and inline actions. */
+.dm-link {
+  transition: opacity 140ms ease;
+}
+.dm-link:hover {
+  opacity: 0.72;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Solid buttons keep their fill and lift instead. */
+.dm-solid {
+  transition: filter 140ms ease, transform 140ms ease;
+}
+.dm-solid:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.dm-solid:active {
+  transform: translateY(0);
+}
+
+.dm-tap:focus-visible,
+.dm-quiet:focus-visible,
+.dm-link:focus-visible,
+.dm-solid:focus-visible {
+  outline: 2px solid var(--accent-subtle);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-tap, .dm-quiet, .dm-link, .dm-solid { transition: none; }
+  .dm-tap:hover, .dm-solid:hover, .dm-tap:active, .dm-solid:active { transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
    Career & Pathway Report — reading surface + print
    ---------------------------------------------------------------------------
    The report is a document, not a screen. It keeps a warm paper surface in

@@ -277,7 +277,7 @@ export function ProfileExperience() {
                   type="button"
                   aria-label={label}
                   onClick={() => setTab(id)}
-                  className="flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[11.5px] sm:font-bold"
+                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[11.5px] sm:font-bold"
                   style={{ background: tab === id ? "var(--glass-surface-3)" : "transparent", color: tab === id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
                   <Icon className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{label}</span>
@@ -323,7 +323,7 @@ export function ProfileExperience() {
           <div className="flex items-baseline justify-between gap-[var(--space-3)]">
             <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
             {top3.length > 1 && (
-              <button type="button" onClick={() => setCompareOpen(true)} className="flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              <button type="button" onClick={() => setCompareOpen(true)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                 <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare
               </button>
             )}
@@ -368,7 +368,7 @@ export function ProfileExperience() {
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[13px] leading-[18px] font-bold"
+              className="dm-quiet relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[13px] leading-[18px] font-bold"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
@@ -461,14 +461,14 @@ export function ProfileExperience() {
               {top3.map((id, index) => {
                 const career = careerById(id)!;
                 return (
-                  <button key={id} type="button" onClick={() => confirmSwap(id)} className="flex cursor-pointer items-center justify-between rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
+                  <button key={id} type="button" onClick={() => confirmSwap(id)} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
                     <span className="text-[14px] font-semibold">{index + 1} · {career.title}</span>
                     <span className="text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Replace</span>
                   </button>
                 );
               })}
             </div>
-            <button type="button" onClick={() => setSwapCandidate(null)} className="mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
+            <button type="button" onClick={() => setSwapCandidate(null)} className="dm-quiet mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
               Never mind
             </button>
           </div>
@@ -482,8 +482,8 @@ export function ProfileExperience() {
             <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
             <p className="mt-1 text-[13px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Locker. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-              <button type="button" onClick={() => setConfirmRemove(null)} className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Cancel</button>
-              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
+              <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Cancel</button>
+              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
             </div>
           </div>
         </div>
@@ -498,7 +498,7 @@ export function ProfileExperience() {
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
                 <p className="mt-[2px] text-[12px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from your Locker</p>
               </div>
-              <button type="button" aria-label="Close" onClick={() => setAddOpen(false)} className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+              <button type="button" aria-label="Close" onClick={() => setAddOpen(false)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -518,7 +518,7 @@ export function ProfileExperience() {
                   <button
                     type="button"
                     onClick={() => { addToTop3(career.id); if (top3.length >= 2) setAddOpen(false); }}
-                    className="flex-none cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-[12px] font-bold"
+                    className="dm-solid flex-none cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-[12px] font-bold"
                     style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
                   >
                     Add
@@ -559,7 +559,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
               type="button"
               aria-pressed={isFocus}
               onClick={() => setFocusId(id)}
-              className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] text-left"
+              className="dm-tap flex h-full min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] text-left"
             >
               <span className="relative size-[56px] flex-none overflow-hidden rounded-[var(--radius-md)] md:size-[64px]">
                 <Image src={career.photo} alt="" fill sizes="64px" className="object-cover" />
@@ -577,7 +577,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
               aria-label={`More options for ${career.title}`}
               aria-expanded={menuFor === id}
               onClick={() => setMenuFor(menuFor === id ? null : id)}
-              className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full"
+              className="dm-quiet flex size-10 flex-none cursor-pointer items-center justify-center rounded-full"
               style={{ color: "var(--muted-foreground)" }}
             >
               <MoreVertical className="h-4 w-4" />
@@ -589,7 +589,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
                   <button
                     type="button"
                     onClick={() => { setMenuFor(null); onRemove(id); }}
-                    className="w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[13px] font-semibold"
+                    className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[13px] font-semibold"
                     style={{ color: "var(--destructive)" }}
                   >
                     Remove from Top 3
@@ -604,7 +604,7 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
         <button
           type="button"
           onClick={onAdd}
-          className="flex h-[80px] w-[248px] flex-none cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed md:h-[104px] md:w-auto"
+          className="dm-tap flex h-[80px] w-[248px] flex-none cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border-2 border-dashed md:h-[104px] md:w-auto"
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -643,7 +643,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
             <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
           </span>
-          <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
+          <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
@@ -687,7 +687,7 @@ function OverviewTab({
         <p className="max-w-[42ch] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
           <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
-          <button type="button" onClick={onGoLocker} className="flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
+          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
         </div>
       </section>
     );
@@ -710,7 +710,7 @@ function OverviewTab({
               <h3 id="summary-title" className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</h3>
               <span className="max-w-[52ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{careerSummary.glance.whatYouDo}</span>
             </span>
-            <button type="button" onClick={onGoReport} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+            <button type="button" onClick={onGoReport} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
               Full report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           </div>
@@ -742,17 +742,17 @@ function OverviewTab({
             </h3>
           </span>
           {next ? (
-            <Link href={next.href} className="flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
               <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
             </Link>
           ) : (
-            <button type="button" onClick={onGoPlan} className="flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
+            <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
           )}
         </div>
         <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex items-baseline justify-between gap-[var(--space-2)]">
             <span className="text-[12px] font-bold">{progress.complete} of {progress.total} steps done</span>
-            <button type="button" onClick={onGoPlan} className="flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+            <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
               My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           </span>
@@ -771,17 +771,17 @@ function OverviewTab({
         <button
           type="button"
           onClick={onGoRoutes}
-          className="col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stillExploring ? "Suggested route" : "My route"}</span>
+            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Current route</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              {stillExploring ? `Suggested for you · ${focus.routes.length} ways in` : route.program}
+              {stillExploring ? `${route.program} · ${focus.routes.length} ways in` : route.program}
             </span>
           </span>
           <span className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -802,7 +802,7 @@ function OverviewTab({
         <button
           type="button"
           onClick={onGoPlan}
-          className="flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
@@ -824,7 +824,7 @@ function OverviewTab({
         <button
           type="button"
           onClick={onGoReport}
-          className="flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
@@ -848,11 +848,11 @@ function OverviewTab({
             <Flame className="h-4 w-4" style={{ color: "var(--chart-3)" }} aria-hidden />
             <span className="text-[12.5px] font-bold">{STUDENT.streakDays} day streak</span>
           </span>
-          <button type="button" onClick={onOpenEvidence} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onOpenEvidence} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <Eye className="h-4 w-4" aria-hidden /> {EVIDENCE.length} inputs behind your report
           </button>
         </span>
-        <button type="button" onClick={onGoSettings} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+        <button type="button" onClick={onGoSettings} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
           <Settings className="h-4 w-4" aria-hidden /> Profile and privacy
         </button>
       </section>
@@ -894,13 +894,13 @@ function EvidenceSheet({
             Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
           </span>
         </span>
-        <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close evidence">
+        <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close evidence">
           <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
       <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
         {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {label}
           </button>
         ))}
@@ -919,13 +919,13 @@ function EvidenceSheet({
                   <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.detail} · {item.when}</span>
                 </span>
                 <span className="flex flex-none items-center gap-[var(--space-2)]">
-                  <button type="button" role="checkbox" aria-checked={confirmed.has(item.id)} onClick={() => onToggleConfirmed(item.id)} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[11.5px] font-bold" style={{ color: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--muted-foreground)" }}>
+                  <button type="button" role="checkbox" aria-checked={confirmed.has(item.id)} onClick={() => onToggleConfirmed(item.id)} className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[11.5px] font-bold" style={{ color: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--muted-foreground)" }}>
                     <span className="flex size-[18px] items-center justify-center rounded-[5px] border" style={{ borderColor: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--glass-border)" }}>
                       {confirmed.has(item.id) && <Check className="h-3 w-3" aria-hidden />}
                     </span>
                     {confirmed.has(item.id) ? "Right" : "Confirm"}
                   </button>
-                  <button type="button" onClick={() => onHide(item.id)} className="min-h-[44px] cursor-pointer px-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <button type="button" onClick={() => onHide(item.id)} className="dm-quiet min-h-[44px] cursor-pointer px-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                     Not me
                   </button>
                 </span>
@@ -1011,7 +1011,7 @@ function RoutesTab({
                   <span className="truncate text-[13.5px] font-bold">{major.name}</span>
                   <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{major.teaches}</span>
                 </span>
-                <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[11.5px] font-bold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[11.5px] font-bold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
                   {savedMajors.has(major.name) ? <><Check className="h-3.5 w-3.5" aria-hidden /> Saved</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Save</>}
                 </button>
               </li>
@@ -1125,7 +1125,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
                 card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
                 setVisibleRoute(index);
               }}
-              className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
+              className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
               style={{ background: visibleRoute === index ? "var(--primary)" : "transparent", color: visibleRoute === index ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
             >
               <span className="flex items-center gap-[4px]">
@@ -1139,7 +1139,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             type="button"
             aria-pressed={false}
             onClick={() => setRouteView("compare")}
-            className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
+            className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold"
             style={{ background: "transparent", color: "var(--muted-foreground)" }}
           >
             Compare
@@ -1173,7 +1173,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             aria-label="Previous route"
             disabled={visibleRoute === 0}
             onClick={() => { const card = railRef.current?.children[visibleRoute - 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="absolute top-1/2 -left-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            className="dm-quiet absolute top-1/2 -left-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
             style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -1183,7 +1183,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
             aria-label="Next route"
             disabled={visibleRoute >= focus.routes.length - 1}
             onClick={() => { const card = railRef.current?.children[visibleRoute + 1] as HTMLElement | undefined; card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
-            className="absolute top-1/2 -right-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
+            className="dm-quiet absolute top-1/2 -right-[48px] z-10 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30 md:flex"
             style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)", backdropFilter: "blur(8px)" }}
           >
             <ChevronRight className="h-5 w-5" />
@@ -1193,7 +1193,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
           <div className="-mt-[6px] flex items-center gap-[var(--space-2)]">
-            <button type="button" onClick={() => setRouteView("cards")} className="cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}><span className="inline-flex items-center gap-[4px]"><ArrowLeft size={12} strokeWidth={2.75} aria-hidden />Cards</span></button>
+            <button type="button" onClick={() => setRouteView("cards")} className="dm-quiet cursor-pointer rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "transparent", color: "var(--muted-foreground)" }}><span className="inline-flex items-center gap-[4px]"><ArrowLeft size={12} strokeWidth={2.75} aria-hidden />Cards</span></button>
             <span className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Compare</span>
           </div>
           <CompareTable routes={focus.routes} selectedId={chosenRoute(focus).id} />
@@ -1250,7 +1250,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
           <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
-        <button type="button" onClick={onGoPath} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
+        <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
       </div>
 
       {/* Your roadmap: overall progress across every step */}
@@ -1272,7 +1272,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           const isOpen = openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id;
           return (
             <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
-              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left">
+              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left">
                 <span className="flex min-w-0 items-center gap-[var(--space-3)]">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
                   <span className="flex min-w-0 flex-col">
@@ -1297,7 +1297,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                     const TaskIcon = ACTION_ICON[task.action];
                     return (
                       <div key={task.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", opacity: complete ? 0.6 : 1 }}>
-                        <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
+                        <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
                           {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                         </button>
                         <span className={`min-w-0 flex-1 text-[12.5px] leading-[17px] font-semibold ${complete ? "line-through" : ""}`}>{task.label}</span>
@@ -1311,7 +1311,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                           </Link>
                         )}
                         {task.custom && (
-                          <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="flex-none cursor-pointer rounded p-[2px]" style={{ color: "var(--muted-foreground)" }}>
+                          <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded p-[2px]" style={{ color: "var(--muted-foreground)" }}>
                             <X className="h-3.5 w-3.5" />
                           </button>
                         )}
@@ -1336,7 +1336,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                       className="min-w-0 flex-1 bg-transparent text-[12.5px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
                       style={{ color: "var(--foreground)" }}
                     />
-                    <button type="submit" disabled={!draftTask.trim()} className="flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
+                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[11px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
                       Add
                     </button>
                   </form>
@@ -1432,7 +1432,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan }: { route: P
               type="button"
               aria-pressed={pane === item.id}
               onClick={() => setPane(item.id)}
-              className="-mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[10.5px] font-bold tracking-[1px] uppercase"
+              className="dm-quiet -mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[10.5px] font-bold tracking-[1px] uppercase"
               style={{ borderColor: pane === item.id && !(hint === "run" && pane === "stats") ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {item.label}
@@ -1591,7 +1591,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan }: { route: P
           type="button"
           onClick={selected ? onGoPlan : onSelect}
           aria-pressed={selected}
-          className="w-full cursor-pointer rounded-[var(--radius-md)] py-[var(--space-3)] text-[13px] font-bold"
+          className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] py-[var(--space-3)] text-[13px] font-bold"
           style={selected ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "transparent", color: "var(--foreground)", border: "1px solid var(--border)" }}
         >
           {selected ? "Open your plan for this path" : `Continue with ${route.short}`}

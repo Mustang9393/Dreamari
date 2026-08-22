@@ -40,6 +40,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 8: hover + focus affordances (PUSHED)
+
+- Four utilities in app.css: .dm-tap (cards and bento tiles: lift, shadow,
+  accent border), .dm-quiet (icon buttons, tabs, chips: surface wash),
+  .dm-link (text actions: fade + underline), .dm-solid (filled buttons:
+  brightness + lift). Applied across ~41 controls in ProfileExperience.
+- WHY !important: nearly every surface sets background and border-color inline
+  from tokens, and inline styles beat stylesheet rules. The hover rules
+  override only those two properties; do not widen that.
+- Each utility carries :focus-visible (2px accent outline) and a
+  prefers-reduced-motion block that drops transform and transition.
+- Overview route tile label is now always "Current route" (was "Suggested
+  route" when nothing was picked).
+
 ### 2026-08-22 Round 7: stat composition + identity block (PUSHED)
 
 - Overview career TLDR: only the duration is set at display size now. A
