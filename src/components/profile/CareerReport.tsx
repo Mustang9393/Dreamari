@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, ExternalLink, List, Plus, Printer, Send, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Plus, Printer, Send, Target, X } from "lucide-react";
 import type { ProfileCareer, PathwayRoute } from "./data";
 import {
   ACADEMIC_RECORD,
-  EVIDENCE,
   PATHWAY_STAGES,
-  SUGGESTED_QUESTIONS,
   reportV2,
   type CareerReportV2,
-  type CollegeStatus,
   type CounselorQuestion,
   type PathwayStage,
   type StudentDirection,
@@ -28,38 +25,16 @@ import {
 // from the internal Career Intelligence scores (interest score, feed rank,
 // signal confidence, readiness) reaches this page.
 
+// Scoped to what the report has to say. The action plan and the counselor
+// questions moved to My Plan, where a student works; the report is the
+// document they hand over.
 export const REPORT_SECTIONS = [
-  { id: "direction", n: 1, label: "My direction" },
-  { id: "glance", n: 2, label: "At a glance" },
-  { id: "salary", n: 3, label: "Pay and outlook" },
-  { id: "education", n: 4, label: "How people get in" },
-  { id: "majors", n: 5, label: "Majors to consider" },
-  { id: "colleges", n: 6, label: "Colleges to research" },
-  { id: "actions", n: 7, label: "What I do next" },
-  { id: "questions", n: 8, label: "For my counselor" },
-  { id: "sources", n: 9, label: "Sources and limits" },
+  { id: "glance", n: 1, label: "At a Glance" },
+  { id: "majors", n: 2, label: "Three Majors" },
+  { id: "education", n: 3, label: "Education" },
+  { id: "colleges", n: 4, label: "Colleges" },
 ] as const;
 
-const STATUS_NOTE: Record<CollegeStatus, string> = {
-  Saved: "You saved this one.",
-  Explore: "Worth a look, you have not saved it yet.",
-  "Check requirements": "Admission has an extra step. Read it before applying.",
-  "Discuss with counselor": "Bring this one to a conversation before counting on it.",
-};
-
-function Rule() {
-  return <hr className="my-0 border-0 border-t" style={{ borderColor: "var(--rule)" }} />;
-}
-
-// Editorial side note: sources and caveats live beside the claim, not in a
-// footnote nobody reads.
-function SideNote({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="border-l-2 pl-3 text-[11.5px] leading-[16px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-      {children}
-    </p>
-  );
-}
 
 function SourceLink({ url, children }: { url: string; children: React.ReactNode }) {
   return (
@@ -69,98 +44,37 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
   );
 }
 
-// A numbered report section. `summary` is what a first scan gets; `children`
-// is the detail, kept in the DOM while collapsed so print can reveal it.
-function Section({
-  id,
-  n,
-  title,
-  standfirst,
-  summary,
-  open,
-  onToggle,
-  children,
-}: {
-  id: string;
-  n: number;
-  title: string;
-  standfirst?: string;
-  summary?: React.ReactNode;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  const panelId = `${id}-detail`;
+// A numbered report section. Nothing here collapses: the export has to carry
+// everything, and a dropdown is exactly how information goes missing from a
+// printed document.
+function ReportSection({ id, n, title, children }: { id: string; n: number; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[38px]">
-      <Rule />
-      <div className="flex gap-[14px] pt-[18px] sm:gap-[22px]">
-        <span aria-hidden className="dm-report-num flex-none pt-[6px] text-[13px] font-bold sm:text-[15px]">{String(n).padStart(2, "0")}</span>
-        <div className="min-w-0 flex-1">
-          <h3 id={`${id}-title`} className="text-[23px] leading-[27px] font-extrabold tracking-[-0.01em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)" }}>
-            {title}
-          </h3>
-          {standfirst && (
-            <p className="mt-[7px] max-w-[62ch] text-[14.5px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>
-              {standfirst}
-            </p>
-          )}
-          {summary && <div className="mt-[16px]">{summary}</div>}
-          <div id={panelId} hidden={!open} className="mt-[18px] flex flex-col gap-[18px]">
-            {children}
-          </div>
-          <button
-            type="button"
-            data-disclosure-control
-            aria-expanded={open}
-            aria-controls={panelId}
-            onClick={onToggle}
-            className="mt-[16px] inline-flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[13px] font-bold"
-            style={{ color: "var(--ink)" }}
-          >
-            {open ? "Show less" : "Show the detail"}
-            <ChevronDown className="h-4 w-4 transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} aria-hidden />
-          </button>
-        </div>
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[46px]">
+      <div className="flex items-baseline gap-[12px] sm:gap-[16px]">
+        <span aria-hidden className="dm-report-num flex-none text-[13px] font-bold tabular-nums sm:text-[15px]">{String(n).padStart(2, "0")}</span>
+        <h3 id={`${id}-title`} className="text-[26px] leading-[30px] font-extrabold tracking-[-0.03em] text-balance sm:text-[32px] sm:leading-[35px]" style={{ fontFamily: "var(--font-display)" }}>
+          {title}
+        </h3>
+      </div>
+      <div className="mt-[16px] border-t pt-[18px]" style={{ borderColor: "var(--rule-strong)" }}>
+        {children}
       </div>
     </section>
   );
 }
 
-function Fact({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-[2px] py-[9px]">
-      <dt className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>{label}</dt>
-      <dd className="text-[14px] leading-[20px]" style={{ color: "var(--ink)" }}>{value}</dd>
-    </div>
-  );
-}
+// Majors keep the reference's colour coding, drawn from our accent tokens.
+const MAJOR_INK = ["var(--primary)", "#1f7a52", "#6d4ab8"];
 
-// Salary drawn as a range, never as one number. Greyscale-safe: the bar has a
-// border and every value is printed as text beside it.
-function SalaryRange({ entry, median, experienced }: { entry: string; median: string; experienced: string }) {
-  const rows = [
-    { label: "Starting out", value: entry, width: 34 },
-    { label: "National median", value: median, width: 62 },
-    { label: "With experience", value: experienced, width: 100 },
-  ];
+function Fact({ label, value, icon: Icon }: { label: string; value: React.ReactNode; icon?: typeof Check }) {
   return (
-    <figure className="m-0 flex flex-col gap-[12px]" data-keep-together>
-      <figcaption className="sr-only">
-        Pay by stage: starting out {entry}; national median {median}; with experience {experienced}.
-      </figcaption>
-      {rows.map((row) => (
-        <div key={row.label} className="flex flex-col gap-[5px]">
-          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-            <span className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>{row.label}</span>
-            <span className="text-[14.5px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{row.value}</span>
-          </div>
-          <span data-bar className="relative block h-[8px] overflow-hidden rounded-full" style={{ background: "var(--paper-sunken)", border: "1px solid var(--rule)" }}>
-            <span data-bar-fill className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${row.width}%`, background: "color-mix(in srgb, var(--primary) 55%, #6d6f7a)" }} />
-          </span>
-        </div>
-      ))}
-    </figure>
+    <div className="flex gap-[12px] py-[13px]">
+      {Icon && <Icon className="mt-[3px] h-[17px] w-[17px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />}
+      <div className="min-w-0">
+        <dt className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>{label}</dt>
+        <dd className="mt-[3px] text-[14.5px] leading-[21px]" style={{ color: "var(--ink)" }}>{value}</dd>
+      </div>
+    </div>
   );
 }
 
@@ -363,19 +277,9 @@ export { ComparisonTable };
 export function CareerReportView(props: ReportViewProps) {
   const { student, career, route, top3, stage, direction, questions, doneActions, savedMajors } = props;
   const report = reportV2(career.id);
-  const [open, setOpen] = useState<Record<string, boolean>>({ glance: true });
   const [tocOpen, setTocOpen] = useState(false);
-  const [active, setActive] = useState<string>("direction");
-  const [draftQuestion, setDraftQuestion] = useState("");
-  // The draft resets by keying off the saved value rather than syncing in an
-  // effect, so a half-typed reflection is never wiped by a re-render.
-  const [reflectionEdit, setReflectionEdit] = useState<{ base: string; value: string } | null>(null);
-  const reflectionDraft = reflectionEdit && reflectionEdit.base === direction.reflection ? reflectionEdit.value : direction.reflection;
-  const editingReflection = reflectionEdit !== null && reflectionEdit.base === direction.reflection;
-  const setReflectionDraft = (value: string) => setReflectionEdit({ base: direction.reflection, value });
-  const setEditingReflection = (on: boolean) => setReflectionEdit(on ? { base: direction.reflection, value: direction.reflection } : null);
   const [preview, setPreview] = useState<null | "full" | "summary">(null);
-  const questionInputId = useId();
+  const [active, setActive] = useState<string>("glance");
   const tocButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -400,7 +304,6 @@ export function CareerReportView(props: ReportViewProps) {
     [top3],
   );
 
-  const evidenceForCareer = useMemo(() => EVIDENCE.filter((item) => item.careerId === career.id), [career.id]);
 
   if (!report) {
     return (
@@ -411,7 +314,6 @@ export function CareerReportView(props: ReportViewProps) {
     );
   }
 
-  const toggle = (id: string) => setOpen((value) => ({ ...value, [id]: !value[id] }));
   const jump = (id: string) => {
     setTocOpen(false);
     setActive(id);
@@ -478,10 +380,10 @@ export function CareerReportView(props: ReportViewProps) {
             {/* Masthead */}
             <header data-print-keep>
               <p className="text-[10.5px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Career &amp; Pathway Report</p>
-              <h2 className="mt-[10px] text-[38px] leading-[40px] font-extrabold tracking-[-0.03em] sm:text-[52px] sm:leading-[52px]" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="mt-[12px] text-[44px] leading-[44px] font-extrabold tracking-[-0.04em] sm:text-[64px] sm:leading-[62px]" style={{ fontFamily: "var(--font-display)" }}>
                 {student.name}
               </h2>
-              <p className="mt-[10px] text-[15px] leading-[22px]" style={{ color: "var(--ink-soft)" }}>
+              <p className="mt-[12px] text-[17px] leading-[24px]" style={{ color: "var(--ink-soft)" }}>
                 {student.grade} · {student.school}
               </p>
               <dl className="mt-[18px] grid grid-cols-2 gap-x-[20px] border-t pt-[12px] sm:grid-cols-4" style={{ borderColor: "var(--rule)" }}>
@@ -507,355 +409,122 @@ export function CareerReportView(props: ReportViewProps) {
               </p>
             </header>
 
-            {/* 1. Direction */}
-            <Section
-              id="direction" n={1} title="What I am working out"
-              standfirst="In my own words, before any of the data."
-              open={!!open.direction} onToggle={() => toggle("direction")}
-              summary={
-                <div className="flex flex-col gap-[10px]">
-                  <p className="text-[16px] leading-[24px]">I&apos;m currently exploring <strong>{direction.exploring}</strong>.</p>
-                  <p className="text-[16px] leading-[24px]">My goal right now is to <strong>{direction.goal.charAt(0).toLowerCase() + direction.goal.slice(1)}</strong>.</p>
-                </div>
-              }
-            >
-              <blockquote className="m-0 border-l-2 pl-[16px] text-[17px] leading-[26px] italic" style={{ borderColor: "var(--rule-strong)" }}>
-                {editingReflection ? (
-                  <>
-                    <label htmlFor="reflection" className="sr-only">Your reflection</label>
-                    <textarea
-                      id="reflection"
-                      value={reflectionDraft}
-                      onChange={(event) => setReflectionDraft(event.target.value)}
-                      rows={6}
-                      className="w-full resize-y rounded-[var(--radius-md)] border p-[10px] text-[15px] leading-[22px] not-italic"
-                      style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
-                    />
-                    <span data-print-hide className="mt-[8px] flex gap-[8px] not-italic">
-                      <button type="button" onClick={() => { props.onReflectionChange(reflectionDraft); setEditingReflection(false); }} className="min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[16px] text-[12.5px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>Save</button>
-                      <button type="button" onClick={() => { setReflectionDraft(direction.reflection); setEditingReflection(false); }} className="min-h-[44px] cursor-pointer px-[8px] text-[12.5px] font-semibold">Cancel</button>
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    {direction.reflection}
-                    <button type="button" data-print-hide onClick={() => setEditingReflection(true)} className="mt-[10px] block min-h-[44px] cursor-pointer text-[12.5px] font-bold not-italic underline underline-offset-2">Edit what I wrote</button>
-                  </>
-                )}
-              </blockquote>
-              <div className="grid gap-[16px] sm:grid-cols-3">
-                {[
-                  { label: "Interests I picked", items: direction.interests },
-                  { label: "Strengths I confirmed", items: direction.strengths },
-                  { label: "What matters to me", items: direction.values },
-                ].map((group) => (
-                  <div key={group.label}>
-                    <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>{group.label}</h4>
-                    <ul className="mt-[6px] list-none p-0 text-[13.5px] leading-[21px]">
-                      {group.items.map((item) => <li key={item}>{item}</li>)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-              <SideNote>These come from what you chose in Build and confirmed in Evidence. You can change any of them.</SideNote>
-            </Section>
-
-            {/* 2. At a glance */}
-            <Section
-              id="glance" n={2} title={`${career.title} at a glance`}
-              standfirst={report.glance.simple}
-              open={!!open.glance} onToggle={() => toggle("glance")}
-              summary={
-                <>
-                  <p className="text-[15px] leading-[23px]">{report.glance.example}</p>
-                  <dl className="mt-[14px] grid gap-x-[24px] sm:grid-cols-2">
-                    <Fact label="What you would do" value={report.glance.whatYouDo} />
-                    <Fact label="Where you would work" value={report.glance.environment} />
-                    <Fact label="Hours" value={report.glance.schedule} />
-                    <Fact label="Typical education" value={report.glance.education} />
-                  </dl>
-                </>
-              }
-            >
-              <div className="grid gap-[18px] sm:grid-cols-2">
-                <div>
-                  <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>A normal day includes</h4>
-                  <ul className="mt-[6px] list-disc pl-[18px] text-[13.5px] leading-[21px]">
-                    {report.glance.responsibilities.map((item) => <li key={item}>{item}</li>)}
-                  </ul>
-                </div>
-                <div className="flex flex-col gap-[14px]">
-                  <div>
-                    <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>Skills that matter</h4>
-                    <p className="mt-[5px] text-[13.5px] leading-[20px]">{report.glance.skills.join(" · ")}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>Industries that hire for it</h4>
-                    <p className="mt-[5px] text-[13.5px] leading-[20px]">{report.glance.industries.join(" · ")}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>Example employers</h4>
-                    <p className="mt-[5px] text-[13.5px] leading-[20px]">{report.glance.employers.join(" · ")}</p>
-                    <SideNote>Examples of who does this work, to show you the shape of the industry. Not openings, and not places Dreamari can get you hired.</SideNote>
-                  </div>
-                </div>
-              </div>
-            </Section>
-
-            {/* 3. Pay and outlook */}
-            <Section
-              id="salary" n={3} title="Pay and outlook"
-              standfirst="A range, not a promise. Where you live and how long you have been doing it move this number a lot."
-              open={!!open.salary} onToggle={() => toggle("salary")}
-              summary={<SalaryRange entry={report.salary.entry} median={report.salary.median} experienced={report.salary.experienced} />}
-            >
-              <dl className="grid gap-x-[24px] sm:grid-cols-2">
-                <Fact label="Job outlook" value={`${report.salary.outlook} — ${report.salary.outlookDetail}`} />
-                <Fact label="Where you live" value={report.salary.geography} />
-                {report.salary.variablePay && <Fact label="Bonus and other pay" value={report.salary.variablePay} />}
-                <Fact label="What the median means" value="Half the people in this job earn more than this, half earn less. It is not a starting salary." />
-              </dl>
-              <SideNote>
-                {report.salary.source.org}, {report.salary.source.year} data. Last checked {report.salary.source.verified}.{" "}
-                <SourceLink url={report.salary.source.url}>See the source</SourceLink>
-              </SideNote>
-            </Section>
-
-            {/* 4. Education and training */}
-            <Section
-              id="education" n={4} title="How people get in"
-              standfirst="More than one route works. The most common one is not automatically the right one for you."
-              open={!!open.education} onToggle={() => toggle("education")}
-              summary={
-                <p className="text-[15px] leading-[23px]">
-                  Most common: <strong>{report.education.find((route) => route.common)?.name}</strong>. There are {report.education.length - 1} other routes worth knowing about.
-                </p>
-              }
-            >
-              <ul className="flex list-none flex-col gap-[2px] p-0">
-                {report.education.map((item) => (
-                  <li key={item.name} className="border-t py-[12px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-                    <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-                      <h4 className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{item.name}</h4>
-                      <span className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>
-                        {item.common ? "Most common · " : ""}{item.kind} · {item.time}
+            {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
+            <ReportSection id="glance" n={1} title={`${career.title} at a Glance`}>
+              <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
+                <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
+                <Fact
+                  icon={MapPin}
+                  label="Potential Employers"
+                  value={
+                    <>
+                      {report.glance.employers.slice(0, 3).join(", ")}
+                      <span className="mt-[4px] block text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
+                        Examples of companies that hire for this work, not job openings.
                       </span>
-                    </div>
-                    <p className="mt-[4px] text-[13.5px] leading-[20px]">{item.note}</p>
-                    <p className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
-                      Needs: {item.prerequisites}{item.licensure ? ` · License: ${item.licensure}` : ""}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </Section>
+                    </>
+                  }
+                />
+                <div className="flex gap-[12px] py-[13px]">
+                  <DollarSign className="mt-[3px] h-[17px] w-[17px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
+                  <div className="min-w-0">
+                    <dt className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>U.S. Median Salary</dt>
+                    <dd className="mt-[2px] flex items-baseline gap-[5px]">
+                      <span className="text-[38px] leading-[40px] font-extrabold tracking-[-0.04em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{report.salary.median}</span>
+                      <span className="text-[15px] font-bold" style={{ color: "var(--ink-faint)" }}>/yr</span>
+                    </dd>
+                    <dd className="mt-[2px] text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
+                      {report.salary.source.org}, {report.salary.source.year}
+                    </dd>
+                  </div>
+                </div>
+                <Fact icon={GraduationCap} label="Education" value={report.glance.education} />
+              </dl>
+            </ReportSection>
 
-            {/* 5. Majors */}
-            <Section
-              id="majors" n={5} title="Majors to consider"
-              standfirst="Three that connect to this work. None of them are required, and people arrive here from other majors too."
-              open={!!open.majors} onToggle={() => toggle("majors")}
-              summary={<p className="text-[15px] leading-[23px]">{report.majors.map((major) => major.name).join(" · ")}</p>}
-            >
-              <div className="flex flex-col gap-[2px]">
-                {report.majors.map((major) => (
-                  <div key={major.name} className="border-t py-[12px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-                    <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-                      <h4 className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{major.name}</h4>
+            {/* 02 — Three Majors to Explore */}
+            <ReportSection id="majors" n={2} title="Three Majors to Explore">
+              <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
+                {report.majors.map((major, index) => (
+                  <div key={major.name} className="flex flex-col gap-[6px] rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
+                    <div className="flex items-start justify-between gap-[8px]">
+                      <h4 className="text-[17px] leading-[22px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
                       <button
                         type="button"
                         data-print-hide
                         aria-pressed={savedMajors.has(major.name)}
+                        aria-label={savedMajors.has(major.name) ? `${major.name} saved` : `Save ${major.name}`}
                         onClick={() => props.onToggleMajor(major.name)}
-                        className="flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12px] font-bold"
-                        style={{ color: "var(--ink)" }}
+                        className="-mr-[6px] -mt-[6px] flex size-[32px] flex-none cursor-pointer items-center justify-center rounded-full"
                       >
-                        {savedMajors.has(major.name) ? <><Check className="h-3.5 w-3.5" aria-hidden /> Saved</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Save major</>}
+                        {savedMajors.has(major.name) ? <Check className="h-4 w-4" style={{ color: "var(--ink)" }} aria-hidden /> : <Plus className="h-4 w-4" style={{ color: "var(--ink-faint)" }} aria-hidden />}
                       </button>
                     </div>
-                    <p className="mt-[3px] text-[13.5px] leading-[20px]"><span style={{ color: "var(--ink-faint)" }}>What it teaches:</span> {major.teaches}</p>
-                    <p className="mt-[2px] text-[13.5px] leading-[20px]"><span style={{ color: "var(--ink-faint)" }}>How it connects:</span> {major.connection}</p>
-                    <p className="mt-[2px] text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Close alternatives: {major.alternatives.join(", ")}</p>
+                    <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{major.teaches}</p>
                   </div>
                 ))}
               </div>
-            </Section>
+            </ReportSection>
 
-            {/* 6. Colleges and programs to research */}
-            <Section
-              id="colleges" n={6} title="Colleges and programs to research"
-              standfirst="A research list, not a ranking. Cost is the published figure before aid, so treat it as a starting point."
-              open={!!open.colleges} onToggle={() => toggle("colleges")}
-              summary={
-                <p className="text-[15px] leading-[23px]">
-                  {report.colleges.filter((college) => college.status === "Saved").length} saved,{" "}
-                  {report.colleges.length - report.colleges.filter((college) => college.status === "Saved").length} to look into.
-                </p>
-              }
-            >
-              <div className="flex flex-col gap-[2px]">
+            {/* 03 — Education */}
+            <ReportSection id="education" n={3} title="Education">
+              <div className="flex flex-col gap-[20px]" data-keep-together>
+                <div>
+                  <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Most Common Path</h4>
+                  <p className="mt-[6px] max-w-[52ch] text-[19px] leading-[27px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
+                    {report.education.find((route) => route.common)?.name}
+                  </p>
+                </div>
+                <div className="border-t pt-[16px]" style={{ borderColor: "var(--rule)" }}>
+                  <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
+                  <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
+                    {report.education.filter((route) => !route.common).map((route) => (
+                      <li key={route.name}>
+                        <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
+                          <span className="text-[13px] font-bold">{route.name}</span>
+                          <span className="text-[11px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </ReportSection>
+
+            {/* 04 — Colleges */}
+            <ReportSection id="colleges" n={4} title="Colleges">
+              <div className="grid gap-[12px] sm:grid-cols-2">
                 {report.colleges.map((college) => (
-                  <div key={college.name} className="border-t py-[13px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-                    <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-                      <h4 className="text-[15.5px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{college.name}</h4>
-                      <span className="rounded-full border px-[9px] py-[2px] text-[10px] font-bold tracking-[0.5px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
+                  <div key={college.name} className="flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }} data-keep-together>
+                    <div className="flex items-start justify-between gap-[10px]">
+                      <h4 className="min-w-0 text-[16px] leading-[21px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>{college.name}</h4>
+                      <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[9.5px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)", background: "var(--paper-sunken)" }}>
                         {college.status}
                       </span>
                     </div>
-                    <p className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
-                      {college.location} · {college.control} · {college.length} · {college.program}
-                    </p>
-                    <dl className="mt-[7px] grid gap-x-[20px] sm:grid-cols-2">
-                      <Fact label="Cost" value={college.cost} />
-                      {college.outcome && <Fact label="Graduation rate" value={college.outcome} />}
-                      <Fact label="Getting in" value={college.requirements} />
-                      <Fact label="Why it is on my list" value={college.why} />
-                    </dl>
-                    <p className="text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>{STATUS_NOTE[college.status]}</p>
+                    <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
                   </div>
                 ))}
               </div>
-              <SideNote>
-                No school here is labelled reach, target or safety. Those labels need an admissions model your school has not turned on, and a GPA alone cannot support them honestly.
-                Cost and graduation figures: U.S. Department of Education College Scorecard, 2024-25, checked August 2026.
-              </SideNote>
-            </Section>
+            </ReportSection>
 
-            {/* 7. Action plan */}
-            <Section
-              id="actions" n={7} title="What I do next"
-              standfirst="Small enough to actually finish, and each one exists for a reason."
-              open={open.actions !== false} onToggle={() => toggle("actions")}
-              summary={
-                <p className="text-[15px] leading-[23px]">
-                  {report.actions.filter((action) => doneActions.has(action.id)).length} of {report.actions.length} done.
-                </p>
-              }
-            >
-              <ul className="flex list-none flex-col gap-[2px] p-0">
-                {report.actions.map((action) => {
-                  const done = doneActions.has(action.id);
-                  return (
-                    <li key={action.id} className="border-t py-[11px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-                      <div className="flex items-start gap-[11px]">
-                        <button
-                          type="button"
-                          data-print-hide
-                          role="checkbox"
-                          aria-checked={done}
-                          onClick={() => props.onToggleAction(action.id)}
-                          className="mt-[1px] flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-[6px] border"
-                          style={{ borderColor: "var(--rule-strong)", background: done ? "var(--ink)" : "transparent" }}
-                        >
-                          {done && <Check className="h-3.5 w-3.5" style={{ color: "var(--paper)" }} aria-hidden />}
-                          <span className="sr-only">{action.label}</span>
-                        </button>
-                        <span aria-hidden className="hidden text-[13px] font-bold print:inline">{done ? "[x]" : "[ ]"}</span>
-                        <div className="min-w-0">
-                          <p className="text-[14.5px] leading-[20px] font-bold" style={{ textDecoration: done ? "line-through" : "none" }}>{action.label}</p>
-                          <p className="mt-[2px] text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{action.reason}</p>
-                          <p className="mt-[2px] text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
-                            Goes to {action.destination}{action.due ? ` · ${action.due}` : ""} · {done ? "Done" : "Not started"}
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Section>
-
-            {/* 8. Counselor conversation */}
-            <Section
-              id="questions" n={8} title="For my counselor"
-              standfirst="What I want to get out of the meeting, written before I am sitting in it."
-              open={open.questions !== false} onToggle={() => toggle("questions")}
-              summary={
-                <div className="flex flex-col gap-[8px]">
-                  <p className="text-[15px] leading-[23px]"><span style={{ color: "var(--ink-faint)" }}>Leaning toward:</span> {career.title}, {route.short.charAt(0).toLowerCase() + route.short.slice(1)} route.</p>
-                  <p className="text-[15px] leading-[23px]"><span style={{ color: "var(--ink-faint)" }}>Unsure about:</span> {direction.question}</p>
-                </div>
-              }
-            >
-              <div>
-                <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>Questions I want to ask</h4>
-                <ol className="mt-[8px] flex list-none flex-col gap-[2px] p-0">
-                  {questions.map((question, index) => (
-                    <li key={question.id} className="flex items-start gap-[10px] border-t py-[9px]" style={{ borderColor: "var(--rule)" }}>
-                      <span aria-hidden className="dm-report-num pt-[2px] text-[12px] font-bold">{index + 1}</span>
-                      <span className="min-w-0 flex-1 text-[14px] leading-[20px]">{question.text}</span>
-                      <button type="button" data-print-hide onClick={() => props.onRemoveQuestion(question.id)} className="flex size-[32px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label={`Remove question: ${question.text}`}>
-                        <X className="h-4 w-4" style={{ color: "var(--ink-faint)" }} aria-hidden />
-                      </button>
-                    </li>
-                  ))}
-                  {questions.length === 0 && (
-                    <li className="border-t py-[10px] text-[13.5px]" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
-                      No questions yet. Add one below, or use a suggestion.
-                    </li>
-                  )}
-                </ol>
-                <form
-                  data-print-hide
-                  className="mt-[12px] flex flex-wrap gap-[8px]"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    if (!draftQuestion.trim()) return;
-                    props.onAddQuestion(draftQuestion.trim());
-                    setDraftQuestion("");
-                  }}
-                >
-                  <label htmlFor={questionInputId} className="sr-only">Add a question for your counselor</label>
-                  <input
-                    id={questionInputId}
-                    value={draftQuestion}
-                    onChange={(event) => setDraftQuestion(event.target.value)}
-                    placeholder="Add a question"
-                    className="min-h-[44px] min-w-0 flex-1 rounded-[var(--radius-md)] border px-[12px] text-[13.5px]"
-                    style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
-                  />
-                  <button type="submit" className="min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[18px] text-[12.5px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>Add</button>
-                </form>
-                <div data-print-hide className="mt-[10px] flex flex-wrap gap-[6px]">
-                  {SUGGESTED_QUESTIONS.filter((text) => !questions.some((question) => question.text === text)).map((text) => (
-                    <button key={text} type="button" onClick={() => props.onAddQuestion(text)} className="cursor-pointer rounded-full border px-[11px] py-[7px] text-[11.5px] font-semibold" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
-                      + {text}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="text-[11px] font-bold tracking-[0.7px] uppercase" style={{ color: "var(--ink-faint)" }}>Notes from the meeting</h4>
-                <div className="mt-[6px] rounded-[var(--radius-md)] border border-dashed p-[14px] text-[12.5px] leading-[19px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-                  Space to write during the meeting, and to record what you agreed to do next.
-                </div>
-              </div>
-            </Section>
-
-            {/* 9. Sources and limitations */}
-            <Section
-              id="sources" n={9} title="Sources and limits"
-              standfirst="Where these numbers came from, and what they cannot tell you."
-              open={!!open.sources} onToggle={() => toggle("sources")}
-              summary={<p className="text-[14.5px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{report.sources.length} sources, all checked August 2026.</p>}
-            >
-              <ul className="flex list-none flex-col gap-[2px] p-0">
+            {/* Sources: a footer, not a section a student has to open */}
+            <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
+              <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Where this comes from</h4>
+              <ul className="mt-[8px] flex list-none flex-col gap-[3px] p-0 text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
                 {report.sources.map((source) => (
-                  <li key={source.url + source.label} className="border-t py-[9px] text-[13px] leading-[19px]" style={{ borderColor: "var(--rule)" }}>
-                    <strong>{source.label}</strong> — {source.org}, {source.year} data. Checked {source.verified}.{" "}
+                  <li key={source.url + source.label}>
+                    {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
                     <SourceLink url={source.url}>Open</SourceLink>
                   </li>
                 ))}
               </ul>
-              <div className="border-t pt-[12px] text-[12.5px] leading-[19px]" style={{ borderColor: "var(--rule)", color: "var(--ink-soft)" }}>
-                <p>Pay, hiring and program information changes. Salary figures describe people already working in the job, not what you would be offered. College costs are published prices before financial aid, and admission requirements change year to year.</p>
-                <p className="mt-[8px]">Everything in this report supports exploration. Nothing in it is a guarantee, a prediction, or a substitute for talking to your counselor.</p>
-                <p className="mt-[8px]">Built from {evidenceForCareer.length} things you did in Dreamari for this career, plus the sources above.</p>
-                <button type="button" data-print-hide onClick={props.onOpenEvidence} className="mt-[8px] inline-flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12.5px] font-bold underline underline-offset-2" style={{ color: "var(--ink)" }}>
-                  See and correct every input
-                </button>
-              </div>
-            </Section>
+              <p className="mt-[10px] max-w-[70ch] text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
+                Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
+                working in the job. Pay, programs and admission requirements change, so treat everything here as a starting point for a conversation
+                rather than a guarantee.
+              </p>
+            </footer>
           </div>
 
           {/* Running footer: repeats on every printed page */}

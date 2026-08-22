@@ -40,6 +40,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 4: report scoped to the reference screenshot (PUSHED)
+
+- Report is now EXACTLY the reference's four sections, in its copy:
+  "[Career] at a Glance" (What You Do / Potential Employers / U.S. Median
+  Salary / Education), "Three Majors to Explore", "Education" (Most Common
+  Path + Other Viable Pathways), "Colleges". Plus a compact sources footer.
+- NO DISCLOSURE ANYWHERE IN THE REPORT. User: an exportable document must not
+  hide anything behind a dropdown. The Section component was replaced with a
+  plain non-collapsing ReportSection, and the `hidden` + print-reveal trick is
+  no longer needed for the report body. Do not reintroduce accordions here.
+- Reach / Target / Safety RESTORED (user pointed at the screenshot and said
+  show only what it shows). The methodology caveat now lives in the sources
+  footer: indicative bands to guide research, not predictions.
+- Dropped from the report and living elsewhere: student direction/reflection,
+  action plan, counselor questions (My Plan), top-3 comparison (CompareSheet),
+  pay range detail + work environment (folded away; median stays in Glance).
+- Typography pass: hanging section numerals, 26-32px display heads, hero
+  salary numeral, coloured major cards, small-caps labels at 10px/1.3px.
+- SE college list extended to the reference's six (added Georgia Tech and
+  Rutgers) so the canonical example matches.
+
 ### 2026-08-22 Profile round 3: user-directed simplification (PUSHED)
 
 All from direct user calls in session, several reversing my own earlier choices:
