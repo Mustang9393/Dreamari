@@ -116,6 +116,16 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 20: uniform stat line, short months, focus star (PUSHED)
+
+- Report stat line: grade, GPA, school and date are ALL white and bold, one
+  treatment. Two graded versions were tried and rejected before this.
+- Months abbreviated everywhere a user sees one: the report date, the source
+  "checked" dates and the GPA record. Verified: zero long month names render.
+- My Top 3: the "Current focus" text line is replaced by a filled star badge
+  on the card art (sr-only text retained). It was a third line of copy under
+  the title and it pushed the card layout around.
+
 ### 2026-08-22 Round 19: weights restored, stat phrases unified (LOCAL)
 
 - REVERSAL: round 17 flattened every weight to 600 in pursuit of Apple's

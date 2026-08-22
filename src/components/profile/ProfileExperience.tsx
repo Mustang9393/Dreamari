@@ -30,6 +30,7 @@ import {
   Settings,
   Shield,
   Sparkles,
+  Star,
   Users,
   Wrench,
   X,
@@ -563,10 +564,15 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
                 <Image src={career.photo} alt="" fill sizes="64px" className="object-cover" />
                 <span className="absolute top-[3px] left-[3px] flex size-[16px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
               </span>
+              {isFocus && (
+                <span className="absolute top-[8px] right-[8px] flex size-[20px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }} title="Current focus">
+                  <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden />
+                  <span className="sr-only">Current focus</span>
+                </span>
+              )}
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <span className="truncate text-[14px] leading-[18px] font-bold">{career.title}</span>
                 <span className="truncate text-[12px] leading-[13px] font-bold tracking-[0.5px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
-                {isFocus && <span className="text-[12px] leading-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Current focus</span>}
               </span>
             </button>
             {/* Overflow: destructive actions live OUTSIDE the selection target */}
