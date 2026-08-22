@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, BadgeCheck, Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, Compass, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
 import type { ProfileCareer, PathwayRoute } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -47,8 +47,8 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
 // printed document.
 function ReportSection({ id, n, title, children }: { id: string; n: number; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[46px]">
-      <div className="flex items-baseline gap-[12px] sm:gap-[16px]">
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[40px] sm:pt-[46px]">
+      <div className="flex items-baseline gap-[10px] sm:gap-[16px]">
         <span aria-hidden className="dm-report-num flex-none text-[20px] leading-[26px] font-extrabold tabular-nums sm:text-[24px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>{String(n).padStart(2, "0")}</span>
         <h3 id={`${id}-title`} className="text-[20px] leading-[26px] font-extrabold text-balance uppercase sm:text-[24px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.01em" }}>
           {title}
@@ -289,31 +289,33 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-10)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-9)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-10)]"
     >
       <div className="mx-auto max-w-[68ch]">
         {/* Masthead */}
         <header data-print-keep>
-          <p className="text-[26px] leading-[31px] font-extrabold uppercase sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.01em" }}>
+          <p className="text-[26px] leading-[31px] font-extrabold uppercase sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink-faint)", letterSpacing: "0.01em" }}>
             Career &amp; Pathway Report
           </p>
-          <h2 className="mt-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[8px] flex flex-wrap items-center gap-x-[8px] gap-y-[2px] text-[14px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>
-            <span>Grade {student.grade.replace("Grade ", "")}</span>
+          <h2 className="mt-[2px] text-[26px] leading-[31px] font-extrabold sm:text-[34px] sm:leading-[39px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
+          <p className="mt-[14px] flex flex-wrap items-center gap-x-[10px] gap-y-[4px] border-t pt-[11px] text-[14px] leading-[21px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+            <span>
+              Grade <strong className="font-bold" style={{ color: "var(--ink)" }}>{student.grade.replace("Grade ", "")}</strong>
+            </span>
             <span aria-hidden>·</span>
-            <span>{student.school}</span>
+            <strong className="font-bold" style={{ color: "var(--ink)" }}>{student.school}</strong>
             {ACADEMIC_RECORD.verified && (
               <>
                 <span aria-hidden>·</span>
                 <span className="inline-flex items-center gap-[4px]">
-                  GPA {ACADEMIC_RECORD.gpa}
+                  GPA <strong className="font-bold tabular-nums" style={{ color: "var(--ink)" }}>{ACADEMIC_RECORD.gpa}</strong>
                   <BadgeCheck className="h-[14px] w-[14px]" aria-hidden />
                   <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
                 </span>
               </>
             )}
             <span aria-hidden>·</span>
-            <span>{reportDate}</span>
+            <strong className="font-bold tabular-nums" style={{ color: "var(--ink)" }}>{reportDate}</strong>
           </p>
         </header>
 
@@ -328,10 +330,10 @@ function ReportDocument({
           <Link
             href="/explore?tab=browse"
             data-print-hide
-            className="dm-link mt-[18px] inline-flex min-h-[44px] items-center gap-[5px] text-[14px] font-bold"
-            style={{ color: "var(--ink)" }}
+            className="dm-tap mt-[20px] inline-flex min-h-[44px] items-center gap-[8px] rounded-[8px] border px-[16px] text-[14px] font-bold"
+            style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
           >
-            See full career details in Explore <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            <Compass className="h-4 w-4" aria-hidden /> See full career details
           </Link>
         </ReportSection>
 
@@ -529,7 +531,7 @@ export function CareerReportView(props: ReportViewProps) {
           <button type="button" onClick={props.onOpenShare} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-semibold" style={{ borderColor: "var(--border)" }}>
             <Send className="h-4 w-4" aria-hidden /> Share
           </button>
-          <span className="ml-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
+          <span className="order-first w-full text-[11.5px] font-semibold sm:order-none sm:ml-auto sm:w-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
         </div>
 
         {/* ---------------- The document ---------------- */}

@@ -75,6 +75,13 @@
 /* Career Report export: only the paper page prints */
 /* The export preview is a proxy for paper, so it ignores the app theme and
    always renders the printed palette. What you approve is what comes out. */
+/* The preview is a proxy for paper, so app-only controls disappear there too:
+   what you approve is exactly what prints. */
+[data-preview] [data-print-hide],
+[data-preview] .no-print {
+  display: none !important;
+}
+
 [data-preview] .dm-report {
   --paper: #ffffff;
   --paper-raised: #ffffff;

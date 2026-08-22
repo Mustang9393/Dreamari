@@ -116,6 +116,24 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 15: masthead, CTA, mobile composition (PUSHED)
+
+- Masthead: "CAREER & PATHWAY REPORT" is grey (--ink-faint) caps, the student
+  name sits at the SAME SIZE in Title Case at full brightness. The document
+  names itself quietly; the person is the bright thing.
+- Stats are one flowing line, not a grid. The two-column grid wrapped into
+  ragged blocks on a phone ("School / Westfield / High / School"). A wrapping
+  sentence degrades gracefully at any width. Values are bold --ink, the words
+  around them --ink-faint, so a label never outweighs its own number.
+- Explicit divider spans were tried and removed: on wrap they strand at the
+  start of a line.
+- "See full career details" is a bordered button with a Compass icon, not a
+  stray text link at the end of the section.
+- [data-preview] now hides [data-print-hide] and .no-print, so the export
+  preview shows exactly the printed document with no app CTAs in it.
+- Mobile padding raised (space-6/space-9), section top padding 40 on mobile,
+  and "Updated today" moves above the button row instead of orphaning under it.
+
 ### 2026-08-22 Round 14: THE REPORT TYPE SCALE (LOCAL)
 
 RULE, stated by the user and not to be reinterpreted: heading, subheading,
