@@ -73,6 +73,20 @@
 }
 
 /* Career Report export: only the paper page prints */
+/* The export preview is a proxy for paper, so it ignores the app theme and
+   always renders the printed palette. What you approve is what comes out. */
+[data-preview] .dm-report {
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --paper-sunken: #f4f2ed;
+  --ink: #17181d;
+  --ink-soft: #4a4d57;
+  --ink-faint: #767a85;
+  --rule: #e2ded5;
+  --rule-strong: #cdc7ba;
+  color-scheme: light;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -137,6 +151,21 @@
    are the only fixed colours in the app; everything else still comes from the
    design tokens, and the accents below are token-derived.                    */
 .dm-report {
+  /* Dark is the app's default, so the reading surface follows it on screen:
+     an ink-on-paper document rendered in the dark, not a white slab burning a
+     hole in the UI. Print always overrides back to black on white below. */
+  --paper: #14161c;
+  --paper-raised: #191c23;
+  --paper-sunken: #1e222a;
+  --ink: #f4f5f8;
+  --ink-soft: #b6bac6;
+  --ink-faint: #8b90a0;
+  --rule: #2b303a;
+  --rule-strong: #3d4350;
+  background: var(--paper);
+  color: var(--ink);
+}
+html.light .dm-report {
   --paper: #fbfaf7;
   --paper-raised: #ffffff;
   --paper-sunken: #f4f2ed;
@@ -145,8 +174,6 @@
   --ink-faint: #767a85;
   --rule: #e2ded5;
   --rule-strong: #cdc7ba;
-  background: var(--paper);
-  color: var(--ink);
 }
 .dm-report ::selection { background: color-mix(in srgb, var(--primary) 28%, transparent); }
 
@@ -177,7 +204,8 @@
   [data-print-hide],
   nav, header:not([data-print-keep]) { display: none !important; }
 
-  .dm-report {
+  .dm-report,
+  html.light .dm-report {
     --paper: #ffffff;
     --paper-raised: #ffffff;
     --paper-sunken: #f5f5f5;

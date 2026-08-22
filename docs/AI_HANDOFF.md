@@ -40,6 +40,32 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 5: report polish + overview summary (PUSHED)
+
+- Report header: Stage and Last updated REMOVED. Grade / School / GPA / Date
+  as an even four-up grid; GPA carries a BadgeCheck (sr-only names the
+  verifying school) instead of the "4.0 unweighted verified by..." sentence.
+  Date renders a size down so it never clips. The duplicate "Grade 11 ·
+  Westfield High School" line under the name is gone.
+- Header disclaimer moved to the footer small print, along with the
+  "employers are examples, not openings" line that used to sit in the panel.
+- Glance panel is values only, and the underlying copy was shortened in
+  report-data (whatYouDo / education) so it scans.
+- DARK MODE REPORT: .dm-report now defaults to a dark reading surface and
+  html.light .dm-report carries the paper palette. @media print and
+  [data-preview] .dm-report both force the printed light palette, so the
+  export preview looks like paper whatever theme the app is in.
+- EXPORT PREVIEW IS THE DOCUMENT. The <article> was extracted into
+  ReportDocument and is rendered in both the page and the preview (idPrefix
+  keeps section ids unique). There is no separate preview rendering to drift
+  out of sync -- do not reintroduce one.
+- Meeting summary rebuilt with the same editorial treatment; stage dropped.
+- Majors lost their save/plus control in the report.
+- Overview gained a career TLDR above "Do this next": world, title, one-line
+  what-you-do, then median pay / time to get in / job outlook as gradient
+  numerals. Route tile now says "Suggested route" and "Suggested for you"
+  when nothing is picked, instead of "Not picked yet" above real numbers.
+
 ### 2026-08-22 Round 4: report scoped to the reference screenshot (PUSHED)
 
 - Report is now EXACTLY the reference's four sections, in its copy:

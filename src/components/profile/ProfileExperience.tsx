@@ -684,12 +684,44 @@ function OverviewTab({
   }
 
   const route = chosenRoute(focus);
+  const careerSummary = reportV2(focus.id);
   const next = nextTask(focus);
   const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const progress = planProgress(focus);
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
+      {/* The TLDR: what this career is, in three numbers and one line */}
+      {careerSummary && (
+        <section aria-labelledby="summary-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+            <span className="flex min-w-0 flex-col gap-[3px]">
+              <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
+              <h3 id="summary-title" className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</h3>
+              <span className="max-w-[52ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{careerSummary.glance.whatYouDo}</span>
+            </span>
+            <button type="button" onClick={onGoReport} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              Full report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-[var(--space-2)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
+            {[
+              { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
+              { label: "Time to get in", value: careerSummary.comparison.timeToEnter.replace("About ", ""), note: null },
+              { label: "Job outlook", value: careerSummary.salary.outlook.replace(/ than average/i, ""), note: "than average" },
+            ].map((stat) => (
+              <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
+                <span className="flex-none text-[9.5px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+                <span className="flex items-baseline gap-[4px]">
+                  <span className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+                  {stat.note && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
+                </span>
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* The one thing to do next */}
       <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -733,12 +765,14 @@ function OverviewTab({
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My route</span>
+            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>{stillExploring ? "Suggested route" : "My route"}</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
-            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{stillExploring ? "Not picked yet" : route.short}</span>
-            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stillExploring ? `${focus.routes.length} ways into ${focus.title}` : route.program}</span>
+            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {stillExploring ? `Suggested for you · ${focus.routes.length} ways in` : route.program}
+            </span>
           </span>
           <span className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             {[
@@ -748,7 +782,7 @@ function OverviewTab({
             ].map((stat) => (
               <span key={stat.label} className="flex flex-col gap-[1px]">
                 <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
-                <span className="text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{stat.value}</span>
+                <span className="text-[19px] leading-[23px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
               </span>
             ))}
           </span>

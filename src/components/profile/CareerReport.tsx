@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Plus, Printer, Send, Target, X } from "lucide-react";
+import { BadgeCheck, Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Send, Target, X } from "lucide-react";
 import type { ProfileCareer, PathwayRoute } from "./data";
 import {
   ACADEMIC_RECORD,
-  PATHWAY_STAGES,
   reportV2,
   type CareerReportV2,
   type CounselorQuestion,
@@ -165,7 +164,6 @@ function MeetingSummary({
   questions,
   actions,
   route,
-  stageLabel,
   reportDate,
 }: {
   student: { name: string; grade: string; school: string };
@@ -175,81 +173,101 @@ function MeetingSummary({
   questions: CounselorQuestion[];
   actions: { label: string; done: boolean }[];
   route: PathwayRoute;
-  stageLabel: string;
   reportDate: string;
 }) {
   return (
-    <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)]">
-      <header className="flex flex-wrap items-end justify-between gap-[var(--space-3)] border-b pb-[10px]" style={{ borderColor: "var(--rule-strong)" }}>
-        <div>
-          <p className="text-[10.5px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary · one page</p>
-          <h2 className="mt-[3px] text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{student.name}</h2>
-        </div>
-        <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
-          {student.grade} · {student.school}<br />
-          {reportDate} · Stage: {stageLabel}
-        </p>
+    <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)] sm:py-[var(--space-9)]">
+      <header>
+        <p className="text-[10px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary</p>
+        <h2 className="mt-[8px] text-[36px] leading-[38px] font-extrabold tracking-[-0.035em] sm:text-[44px] sm:leading-[44px]" style={{ fontFamily: "var(--font-display)" }}>
+          {student.name}
+        </h2>
+        <dl className="mt-[16px] flex flex-wrap items-end gap-x-[32px] gap-y-[12px] border-t pt-[14px]" style={{ borderColor: "var(--rule-strong)" }}>
+          {[
+            { label: "Grade", value: student.grade.replace("Grade ", "") },
+            { label: "School", value: student.school },
+            ...(ACADEMIC_RECORD.verified ? [{ label: "GPA", value: ACADEMIC_RECORD.gpa }] : []),
+            { label: "Date", value: reportDate },
+          ].map((fact) => (
+            <div key={fact.label} className="flex flex-col gap-[1px]">
+              <dt className="text-[9.5px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>{fact.label}</dt>
+              <dd className="text-[19px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
       </header>
 
-      <div className="grid gap-x-[28px] gap-y-[14px] pt-[14px] sm:grid-cols-2">
-        <section data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>My goal</h3>
-          <p className="mt-[3px] text-[13.5px] leading-[19px]">{direction.goal}</p>
-        </section>
-        <section data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>Leaning toward</h3>
-          <p className="mt-[3px] text-[13.5px] leading-[19px]">{career.title} · {route.short} ({route.duration}, {route.cost.split(",")[0]})</p>
-        </section>
-        <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>My top {entries.length}, in short</h3>
-          <table className="mt-[5px] w-full border-collapse text-left text-[12px]">
-            <thead>
-              <tr>
-                {["Career", "Education", "Time", "Pay starting out", "Where I am"].map((h) => (
-                  <th key={h} scope="col" className="border-b pb-[4px] pr-[10px] text-[10px] font-bold tracking-[0.5px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map(({ career: item, report }) => (
-                <tr key={item.id}>
-                  <td className="border-b py-[5px] pr-[10px] font-bold" style={{ borderColor: "var(--rule)" }}>{item.title}</td>
-                  <td className="border-b py-[5px] pr-[10px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.education}</td>
-                  <td className="border-b py-[5px] pr-[10px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.timeToEnter}</td>
-                  <td className="border-b py-[5px] pr-[10px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.salaryRange}</td>
-                  <td className="border-b py-[5px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.evidence}</td>
-                </tr>
+      <section className="mt-[26px]" data-keep-together>
+        <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am working toward</h3>
+        <p className="mt-[7px] max-w-[60ch] text-[21px] leading-[29px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
+          {direction.goal}
+        </p>
+        <p className="mt-[8px] max-w-[62ch] text-[14px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>
+          Leaning toward <strong style={{ color: "var(--ink)" }}>{career.title}</strong> by the {route.short.toLowerCase()} route: {route.duration}, {route.cost.split(",")[0]}.
+        </p>
+      </section>
+
+      <section className="mt-[24px] border-t pt-[16px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
+        <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>My careers, side by side</h3>
+        <table className="mt-[10px] w-full border-collapse text-left">
+          <thead>
+            <tr>
+              {["Career", "Education", "Time", "Pay starting out", "Where I am"].map((head) => (
+                <th key={head} scope="col" className="border-b pb-[6px] pr-[12px] text-[9.5px] font-bold tracking-[1px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{head}</th>
               ))}
-            </tbody>
-          </table>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map(({ career: item, report }) => (
+              <tr key={item.id}>
+                <td className="border-b py-[9px] pr-[12px] align-top text-[14px] leading-[19px] font-extrabold" style={{ borderColor: "var(--rule)", fontFamily: "var(--font-display)" }}>{item.title}</td>
+                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.education}</td>
+                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px] tabular-nums" style={{ borderColor: "var(--rule)" }}>{report.comparison.timeToEnter}</td>
+                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px] tabular-nums" style={{ borderColor: "var(--rule)" }}>{report.comparison.salaryRange}</td>
+                <td className="border-b py-[9px] align-top text-[12.5px] leading-[18px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.evidence}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <div className="mt-[24px] grid gap-x-[36px] gap-y-[22px] border-t pt-[16px] sm:grid-cols-2" style={{ borderColor: "var(--rule)" }}>
+        <section data-keep-together>
+          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
+          <p className="mt-[7px] text-[15px] leading-[23px]">{direction.question}</p>
         </section>
         <section data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
-          <p className="mt-[3px] text-[13.5px] leading-[19px]">{direction.question}</p>
-        </section>
-        <section data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>Questions I want to ask</h3>
-          <ol className="mt-[3px] list-decimal pl-[16px] text-[13px] leading-[19px]">
-            {questions.map((question) => <li key={question.id}>{question.text}</li>)}
+          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Questions I want to ask</h3>
+          <ol className="mt-[7px] flex list-none flex-col p-0">
+            {questions.map((question, index) => (
+              <li key={question.id} className="flex gap-[9px] border-b py-[6px] text-[13.5px] leading-[19px] last:border-0" style={{ borderColor: "var(--rule)" }}>
+                <span aria-hidden className="dm-report-num flex-none font-bold tabular-nums">{index + 1}</span>
+                {question.text}
+              </li>
+            ))}
           </ol>
         </section>
         <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[11px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
-          <ul className="mt-[3px] list-none pl-0 text-[13px] leading-[20px]">
+          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
+          <ul className="mt-[7px] grid list-none gap-x-[28px] p-0 sm:grid-cols-2">
             {actions.map((action) => (
-              <li key={action.label}>{action.done ? "[x]" : "[ ]"} {action.label}</li>
+              <li key={action.label} className="flex items-start gap-[9px] border-b py-[7px] text-[13.5px] leading-[19px]" style={{ borderColor: "var(--rule)" }}>
+                <span aria-hidden className="mt-[2px] flex size-[14px] flex-none items-center justify-center border text-[10px] font-bold" style={{ borderColor: "var(--rule-strong)" }}>{action.done ? "x" : ""}</span>
+                <span style={{ textDecoration: action.done ? "line-through" : "none" }}>{action.label}</span>
+              </li>
             ))}
           </ul>
         </section>
-        <section className="sm:col-span-2 border-t pt-[10px]" style={{ borderColor: "var(--rule)" }}>
-          <p className="text-[10.5px] leading-[15px]" style={{ color: "var(--ink-faint)" }}>
-            Prepared by the student with Dreamari. Pay and outlook figures come from the U.S. Bureau of Labor Statistics; college figures from the College Scorecard. This summary supports a conversation about options. It is not a decision, a prediction, or a guarantee.
-          </p>
-        </section>
       </div>
+
+      <p className="mt-[22px] border-t pt-[12px] text-[10.5px] leading-[15px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+        Prepared by the student with Dreamari. Pay and outlook from the U.S. Bureau of Labor Statistics; college figures from the College Scorecard.
+        This supports a conversation about options. It is not a decision, a prediction, or a guarantee.
+      </p>
     </div>
   );
 }
+
 
 export type ReportViewProps = {
   student: { name: string; grade: string; school: string };
@@ -272,10 +290,160 @@ export type ReportViewProps = {
   updatedLabel: string;
 };
 
+
+// The document itself, rendered identically on the page and in the export
+// preview. One component means the preview genuinely is what prints — there
+// is no second, prettier version of the report to drift out of sync.
+function ReportDocument({
+  student, career, report, reportDate, idPrefix = "",
+}: {
+  student: { name: string; grade: string; school: string };
+  career: ProfileCareer;
+  report: CareerReportV2;
+  reportDate: string;
+  idPrefix?: string;
+}) {
+  return (
+    <article
+      data-doc="full"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-10)]"
+    >
+      <div className="mx-auto max-w-[68ch]">
+        {/* Masthead */}
+        <header data-print-keep>
+          <p className="text-[10.5px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Career &amp; Pathway Report</p>
+          <h2 className="mt-[12px] text-[44px] leading-[44px] font-extrabold tracking-[-0.04em] sm:text-[64px] sm:leading-[62px]" style={{ fontFamily: "var(--font-display)" }}>
+            {student.name}
+          </h2>
+          <dl className="mt-[20px] grid grid-cols-2 items-start gap-x-[24px] gap-y-[18px] border-t pt-[16px] sm:grid-cols-4" style={{ borderColor: "var(--rule-strong)" }}>
+            {[
+              { label: "Grade", value: student.grade.replace("Grade ", ""), verified: false, small: false },
+              { label: "School", value: student.school, verified: false, small: true },
+              ...(ACADEMIC_RECORD.verified ? [{ label: "GPA", value: ACADEMIC_RECORD.gpa, verified: true, small: false }] : []),
+              { label: "Date", value: reportDate.replace("August", "Aug"), verified: false, small: true },
+            ].map((fact) => (
+              <div key={fact.label} className="flex min-w-0 flex-col gap-[3px]">
+                <dt className="flex items-center gap-[4px] text-[9.5px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>
+                  {fact.label}
+                  {fact.verified && (
+                    <>
+                      <BadgeCheck className="h-[13px] w-[13px]" aria-hidden />
+                      <span className="sr-only">verified by {ACADEMIC_RECORD.source}</span>
+                    </>
+                  )}
+                </dt>
+                <dd className={`font-extrabold tracking-[-0.02em] text-balance ${fact.small ? "text-[17px] leading-[22px]" : "text-[24px] leading-[28px]"}`} style={{ fontFamily: "var(--font-display)" }}>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </header>
+
+        {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
+        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} at a Glance`}>
+          <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
+            <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
+            <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
+            <div className="flex gap-[12px] py-[13px]">
+              <DollarSign className="mt-[3px] h-[17px] w-[17px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
+              <div className="min-w-0">
+                <dt className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>U.S. Median Salary</dt>
+                <dd className="mt-[2px] flex items-baseline gap-[5px]">
+                  <span className="text-[38px] leading-[40px] font-extrabold tracking-[-0.04em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{report.salary.median}</span>
+                  <span className="text-[15px] font-bold" style={{ color: "var(--ink-faint)" }}>/yr</span>
+                </dd>
+              </div>
+            </div>
+            <Fact icon={GraduationCap} label="Education" value={report.glance.education} />
+          </dl>
+        </ReportSection>
+
+        {/* 02 — Three Majors to Explore */}
+        <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore">
+          <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
+            {report.majors.map((major, index) => (
+              <div key={major.name} className="flex flex-col gap-[6px] rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
+                <h4 className="text-[17px] leading-[22px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
+                <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{major.teaches}</p>
+              </div>
+            ))}
+          </div>
+        </ReportSection>
+
+        {/* 03 — Education */}
+        <ReportSection id={`${idPrefix}education`} n={3} title="Education">
+          <div className="flex flex-col gap-[20px]" data-keep-together>
+            <div>
+              <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Most Common Path</h4>
+              <p className="mt-[6px] max-w-[52ch] text-[19px] leading-[27px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
+                {report.education.find((route) => route.common)?.name}
+              </p>
+            </div>
+            <div className="border-t pt-[16px]" style={{ borderColor: "var(--rule)" }}>
+              <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
+              <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
+                {report.education.filter((route) => !route.common).map((route) => (
+                  <li key={route.name}>
+                    <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
+                      <span className="text-[13px] font-bold">{route.name}</span>
+                      <span className="text-[11px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </ReportSection>
+
+        {/* 04 — Colleges */}
+        <ReportSection id={`${idPrefix}colleges`} n={4} title="Colleges">
+          <div className="grid gap-[12px] sm:grid-cols-2">
+            {report.colleges.map((college) => (
+              <div key={college.name} className="flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }} data-keep-together>
+                <div className="flex items-start justify-between gap-[10px]">
+                  <h4 className="min-w-0 text-[16px] leading-[21px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>{college.name}</h4>
+                  <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[9.5px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)", background: "var(--paper-sunken)" }}>
+                    {college.status}
+                  </span>
+                </div>
+                <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
+              </div>
+            ))}
+          </div>
+        </ReportSection>
+
+        {/* Sources: a footer, not a section a student has to open */}
+        <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
+          <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Where this comes from</h4>
+          <ul className="mt-[8px] flex list-none flex-col gap-[3px] p-0 text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
+            {report.sources.map((source) => (
+              <li key={source.url + source.label}>
+                {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
+                <SourceLink url={source.url}>Open</SourceLink>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-[10px] max-w-[70ch] text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
+            Prepared by the student with Dreamari. It supports a conversation with a counselor; it is not a decision or a prediction.
+            Employers are examples of who hires for this work, not job openings.
+            Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
+            working in the job. Pay, programs and admission requirements change, so treat everything here as a starting point for a conversation
+            rather than a guarantee.
+          </p>
+        </footer>
+      </div>
+
+      {/* Running footer: repeats on every printed page */}
+      <div className="dm-print-footer" aria-hidden>
+        {student.name} · Career &amp; Pathway Report · {reportDate} · v1.0 · Prepared with Dreamari
+      </div>
+    </article>
+  );
+}
+
 export { ComparisonTable };
 
 export function CareerReportView(props: ReportViewProps) {
-  const { student, career, route, top3, stage, direction, questions, doneActions, savedMajors } = props;
+  const { student, career, route, top3, direction, questions, doneActions } = props;
   const report = reportV2(career.id);
   const [tocOpen, setTocOpen] = useState(false);
   const [preview, setPreview] = useState<null | "full" | "summary">(null);
@@ -297,7 +465,6 @@ export function CareerReportView(props: ReportViewProps) {
   }, [career.id]);
 
   const reportDate = "August 22, 2026";
-  const stageLabel = PATHWAY_STAGES.find((item) => item.id === stage)?.label ?? "Explore";
 
   const entries = useMemo(
     () => top3.map((item) => ({ career: item, report: reportV2(item.id) })).filter((entry): entry is { career: ProfileCareer; report: CareerReportV2 } => Boolean(entry.report)),
@@ -372,171 +539,12 @@ export function CareerReportView(props: ReportViewProps) {
         </div>
 
         {/* ---------------- The document ---------------- */}
-        <article
-          data-doc="full"
-          className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-10)]"
-        >
-          <div className="mx-auto max-w-[68ch]">
-            {/* Masthead */}
-            <header data-print-keep>
-              <p className="text-[10.5px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Career &amp; Pathway Report</p>
-              <h2 className="mt-[12px] text-[44px] leading-[44px] font-extrabold tracking-[-0.04em] sm:text-[64px] sm:leading-[62px]" style={{ fontFamily: "var(--font-display)" }}>
-                {student.name}
-              </h2>
-              <p className="mt-[12px] text-[17px] leading-[24px]" style={{ color: "var(--ink-soft)" }}>
-                {student.grade} · {student.school}
-              </p>
-              <dl className="mt-[18px] grid grid-cols-2 gap-x-[20px] border-t pt-[12px] sm:grid-cols-4" style={{ borderColor: "var(--rule)" }}>
-                <Fact label="Report date" value={reportDate} />
-                <Fact label="Last updated" value={props.updatedLabel} />
-                <Fact label="Stage" value={stageLabel} />
-                {ACADEMIC_RECORD.verified && (
-                  <Fact
-                    label="GPA"
-                    value={
-                      <>
-                        {ACADEMIC_RECORD.gpa}
-                        <span className="block text-[10.5px] leading-[14px]" style={{ color: "var(--ink-faint)" }}>
-                          {ACADEMIC_RECORD.scale} · verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}
-                        </span>
-                      </>
-                    }
-                  />
-                )}
-              </dl>
-              <p className="mt-[14px] text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
-                Prepared by the student with Dreamari. It supports a conversation with a counselor. It is not a decision or a prediction.
-              </p>
-            </header>
-
-            {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
-            <ReportSection id="glance" n={1} title={`${career.title} at a Glance`}>
-              <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
-                <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
-                <Fact
-                  icon={MapPin}
-                  label="Potential Employers"
-                  value={
-                    <>
-                      {report.glance.employers.slice(0, 3).join(", ")}
-                      <span className="mt-[4px] block text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
-                        Examples of companies that hire for this work, not job openings.
-                      </span>
-                    </>
-                  }
-                />
-                <div className="flex gap-[12px] py-[13px]">
-                  <DollarSign className="mt-[3px] h-[17px] w-[17px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
-                  <div className="min-w-0">
-                    <dt className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>U.S. Median Salary</dt>
-                    <dd className="mt-[2px] flex items-baseline gap-[5px]">
-                      <span className="text-[38px] leading-[40px] font-extrabold tracking-[-0.04em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{report.salary.median}</span>
-                      <span className="text-[15px] font-bold" style={{ color: "var(--ink-faint)" }}>/yr</span>
-                    </dd>
-                    <dd className="mt-[2px] text-[11.5px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>
-                      {report.salary.source.org}, {report.salary.source.year}
-                    </dd>
-                  </div>
-                </div>
-                <Fact icon={GraduationCap} label="Education" value={report.glance.education} />
-              </dl>
-            </ReportSection>
-
-            {/* 02 — Three Majors to Explore */}
-            <ReportSection id="majors" n={2} title="Three Majors to Explore">
-              <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
-                {report.majors.map((major, index) => (
-                  <div key={major.name} className="flex flex-col gap-[6px] rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                    <div className="flex items-start justify-between gap-[8px]">
-                      <h4 className="text-[17px] leading-[22px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)", color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
-                      <button
-                        type="button"
-                        data-print-hide
-                        aria-pressed={savedMajors.has(major.name)}
-                        aria-label={savedMajors.has(major.name) ? `${major.name} saved` : `Save ${major.name}`}
-                        onClick={() => props.onToggleMajor(major.name)}
-                        className="-mr-[6px] -mt-[6px] flex size-[32px] flex-none cursor-pointer items-center justify-center rounded-full"
-                      >
-                        {savedMajors.has(major.name) ? <Check className="h-4 w-4" style={{ color: "var(--ink)" }} aria-hidden /> : <Plus className="h-4 w-4" style={{ color: "var(--ink-faint)" }} aria-hidden />}
-                      </button>
-                    </div>
-                    <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{major.teaches}</p>
-                  </div>
-                ))}
-              </div>
-            </ReportSection>
-
-            {/* 03 — Education */}
-            <ReportSection id="education" n={3} title="Education">
-              <div className="flex flex-col gap-[20px]" data-keep-together>
-                <div>
-                  <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Most Common Path</h4>
-                  <p className="mt-[6px] max-w-[52ch] text-[19px] leading-[27px] font-semibold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
-                    {report.education.find((route) => route.common)?.name}
-                  </p>
-                </div>
-                <div className="border-t pt-[16px]" style={{ borderColor: "var(--rule)" }}>
-                  <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
-                  <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
-                    {report.education.filter((route) => !route.common).map((route) => (
-                      <li key={route.name}>
-                        <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
-                          <span className="text-[13px] font-bold">{route.name}</span>
-                          <span className="text-[11px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </ReportSection>
-
-            {/* 04 — Colleges */}
-            <ReportSection id="colleges" n={4} title="Colleges">
-              <div className="grid gap-[12px] sm:grid-cols-2">
-                {report.colleges.map((college) => (
-                  <div key={college.name} className="flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }} data-keep-together>
-                    <div className="flex items-start justify-between gap-[10px]">
-                      <h4 className="min-w-0 text-[16px] leading-[21px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>{college.name}</h4>
-                      <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[9.5px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)", background: "var(--paper-sunken)" }}>
-                        {college.status}
-                      </span>
-                    </div>
-                    <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
-                  </div>
-                ))}
-              </div>
-            </ReportSection>
-
-            {/* Sources: a footer, not a section a student has to open */}
-            <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
-              <h4 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Where this comes from</h4>
-              <ul className="mt-[8px] flex list-none flex-col gap-[3px] p-0 text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
-                {report.sources.map((source) => (
-                  <li key={source.url + source.label}>
-                    {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
-                    <SourceLink url={source.url}>Open</SourceLink>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-[10px] max-w-[70ch] text-[11.5px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
-                Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
-                working in the job. Pay, programs and admission requirements change, so treat everything here as a starting point for a conversation
-                rather than a guarantee.
-              </p>
-            </footer>
-          </div>
-
-          {/* Running footer: repeats on every printed page */}
-          <div className="dm-print-footer" aria-hidden>
-            {student.name} · Career &amp; Pathway Report · {reportDate} · v1.0 · Prepared with Dreamari
-          </div>
-        </article>
+        <ReportDocument student={student} career={career} report={report} reportDate={reportDate} />
 
         {/* One-page meeting summary, print-only unless previewed */}
         <MeetingSummary
           student={student} career={career} entries={entries} direction={direction}
-          questions={questions} actions={actionList} route={route} stageLabel={stageLabel} reportDate={reportDate}
+          questions={questions} actions={actionList} route={route} reportDate={reportDate}
         />
         <div className="dm-print-footer" aria-hidden>
           {student.name} · Meeting summary · {reportDate} · v1.0
@@ -590,30 +598,18 @@ export function CareerReportView(props: ReportViewProps) {
           <div className="min-h-0 flex-1 overflow-y-auto p-5" data-preview={preview}>
             <p className="mx-auto mb-[var(--space-3)] max-w-[820px] text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
               {preview === "full"
-                ? "The export opens every section, drops the app navigation, and prints on US Letter. Page numbers come from your browser's print settings."
-                : "One page, sized for US Letter. Goal, top three, where you are, what you are unsure about, your questions and your next actions."}
+                ? "This is the document exactly as it will print: US Letter, no app navigation, nothing hidden. Page numbers come from your browser's print settings."
+                : "One page, sized for US Letter. Your goal, your top careers, what you are unsure about, your questions and your next actions."}
             </p>
-            <div className="mx-auto max-w-[820px] overflow-hidden rounded-[var(--radius-xl)]">
+            {/* Paper proxy: sized near US Letter's printable width. */}
+            <div className="mx-auto max-w-[816px] overflow-hidden rounded-[6px] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.8)]">
               {preview === "summary" ? (
                 <MeetingSummary
                   student={student} career={career} entries={entries} direction={direction}
-                  questions={questions} actions={actionList} route={route} stageLabel={stageLabel} reportDate={reportDate}
+                  questions={questions} actions={actionList} route={route} reportDate={reportDate}
                 />
               ) : (
-                <div className="dm-report px-[var(--space-6)] py-[var(--space-6)] text-[13px] leading-[19px]">
-                  <p className="text-[10.5px] font-bold tracking-[1.6px] uppercase" style={{ color: "var(--ink-faint)" }}>Career &amp; Pathway Report</p>
-                  <p className="mt-[6px] text-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{student.name}</p>
-                  <p className="mt-[2px]" style={{ color: "var(--ink-soft)" }}>{student.grade} · {student.school} · {reportDate}</p>
-                  <ol className="mt-[14px] flex list-none flex-col p-0">
-                    {REPORT_SECTIONS.map((section) => (
-                      <li key={section.id} className="flex items-baseline gap-[10px] border-t py-[7px]" style={{ borderColor: "var(--rule)" }}>
-                        <span className="dm-report-num text-[11px] font-bold">{String(section.n).padStart(2, "0")}</span>
-                        <span className="font-semibold">{section.label}</span>
-                        <span className="ml-auto text-[11px]" style={{ color: "var(--ink-faint)" }}>included, fully expanded</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                <ReportDocument student={student} career={career} report={report} reportDate={reportDate} idPrefix="preview-" />
               )}
             </div>
           </div>

@@ -150,7 +150,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     glance: {
       simple: "Investment bankers help companies raise money and buy or sell businesses.",
       example: "A hospital company wants to build 100 new hospitals but does not have the money. An investment bank finds investors and puts the deal together.",
-      whatYouDo: "Study companies, build the math behind big deals, and help them happen.",
+      whatYouDo: "Analyze companies and build the math behind big deals.",
       responsibilities: [
         "Build financial models in Excel",
         "Research companies and industries",
@@ -164,7 +164,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       skills: ["Working with numbers", "Attention to detail", "Writing clearly", "Staying calm under deadline"],
       industries: ["Investment banks", "Advisory firms", "Corporate finance teams", "Private credit"],
       employers: ["JPMorgan", "Goldman Sachs", "Evercore", "Regional and boutique banks"],
-      education: "Most people start with a bachelor's degree in finance, economics, accounting or business.",
+      education: "Bachelor's degree in finance or economics.",
       alternatives: ["Start at a regional bank and move up", "Two-year college, then transfer", "Any major plus finance internships"],
     },
     salary: {
@@ -227,7 +227,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     glance: {
       simple: "Airline pilots fly passengers and cargo safely from one airport to another.",
       example: "A plane in Phoenix needs to be in Chicago by 6pm with 180 people on it. The crew plans the fuel, the route and the weather, then flies it.",
-      whatYouDo: "Fly the aircraft and manage every stage of the flight with your crew.",
+      whatYouDo: "Fly the aircraft and manage every stage of the flight.",
       responsibilities: [
         "Run pre-flight checks and build the flight plan",
         "Fly the route as part of a two-pilot crew",
@@ -241,7 +241,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       skills: ["Staying calm under pressure", "Following procedure exactly", "Quick decisions", "Clear radio communication"],
       industries: ["Passenger airlines", "Cargo carriers", "Charter operators", "Flight schools"],
       employers: ["SkyWest", "Republic Airways", "UPS Airlines", "Regional carriers hiring at 1,500 hours"],
-      education: "FAA licenses and flight hours are what matter. A degree helps at some airlines but is not required by the FAA.",
+      education: "FAA licenses and 1,500 flight hours.",
       alternatives: ["Aviation university with an R-ATP at 1,000 hours", "Military flight training", "Train part time while working"],
     },
     salary: {
@@ -303,7 +303,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     glance: {
       simple: "Private equity firms buy companies, try to make them better, and sell them later for more.",
       example: "A firm buys a chain of 40 car washes, fixes how they are run, opens 20 more, and sells the whole thing five years later.",
-      whatYouDo: "Find companies worth buying, then help run the plan that makes them worth more.",
+      whatYouDo: "Buy companies and help make them worth more.",
       responsibilities: [
         "Screen companies that might be worth buying",
         "Model what a company could look like in five years",
@@ -317,7 +317,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       skills: ["Judgment about businesses", "Modeling and analysis", "Asking good questions", "Patience"],
       industries: ["Private equity firms", "Growth equity funds", "Family offices", "Search funds"],
       employers: ["Blackstone", "KKR", "Middle-market and regional funds"],
-      education: "Usually a bachelor's degree plus two years in investment banking or consulting first.",
+      education: "Bachelor's degree, then two years in banking.",
       alternatives: ["Consulting first, then move over", "State school plus strong internships", "Work in an industry, then join a fund that buys in it"],
     },
     salary: {
@@ -390,7 +390,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       skills: ["Problem solving", "Logical thinking", "Reading other people's code", "Explaining technical things simply"],
       industries: ["Tech", "Finance", "Healthcare", "Entertainment", "Government"],
       employers: ["Google", "Oracle", "Epic Systems", "Almost any company with a product online"],
-      education: "Bachelor's degree in computer science or a related field is the most common path.",
+      education: "Bachelor's degree in CS or a related field.",
       alternatives: ["Two-year college then transfer", "Apprenticeship", "Technical training plus a portfolio"],
     },
     salary: {
