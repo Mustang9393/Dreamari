@@ -130,13 +130,14 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       h("ib-3", "Next 3 Months", "Foundation", [
         t("ib-3-1", "Complete the finance glossary game", 10, "Play", "/match-lab"),
         t("ib-3-2", "Explore 5 finance careers", 10, "Explore", "/explore?tab=browse"),
-        t("ib-3-3", "Play the Investment Banking mini game", 15, "Play", "/match-lab"),
+        t("ib-3-3", "Continue playing the Investment Banking Simulation", 15, "Play", "/match-lab"),
         t("ib-3-4", "Start your resume draft", 15, "Build", "#resume"),
       ]),
       h("ib-6", "Next 6 Months", "Skills + people", [
         t("ib-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
         t("ib-6-2", "Try the Freshman Finance simulator", 20, "Play", "/match-lab"),
         t("ib-6-3", "Compare 3 finance programs side by side", 10, "Explore", "/explore?tab=browse"),
+        t("ib-6-4", "Join Finance East Coast Community Board", 5, "Join", "/explore"),
       ]),
       h("ib-12", "Next 12 Months", "Apply it", [
         t("ib-12-1", "Complete the Freshman Year Finance sim", 30, "Play", "/match-lab"),
@@ -216,9 +217,10 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
         t("pl-6-1", "Book a discovery flight near you", 20, "Explore", "/explore"),
         t("pl-6-2", "Compare flight school vs aviation university", 10, "Explore", "/explore?tab=browse"),
         t("pl-6-3", "Start your resume draft", 15, "Build", "#resume"),
+        t("pl-6-4", "Join Aviation Community Board", 5, "Join", "/explore"),
       ]),
       h("pl-12", "Next 12 Months", "Commit", [
-        t("pl-12-1", "Complete the pilot pathway simulator", 30, "Play", "/match-lab"),
+        t("pl-12-1", "Complete the Airline Pilot Simulation", 30, "Play", "/match-lab"),
         t("pl-12-2", "Shortlist 3 flight programs", 15, "Explore", "/explore?tab=browse"),
         t("pl-12-3", "Ask Dreamy about FAFSA for flight school", 5, "Explore", "/explore"),
       ]),
@@ -272,13 +274,14 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     plan: [
       h("pe-3", "Next 3 Months", "Learn the language", [
         t("pe-3-1", "Complete the finance glossary game", 10, "Play", "/match-lab"),
-        t("pe-3-2", "Play the Private Equity mini game", 15, "Play", "/match-lab"),
+        t("pe-3-2", "Continue playing the Private Equity Simulation", 15, "Play", "/match-lab"),
         t("pe-3-3", "Explore how PE differs from IB", 10, "Explore", "/explore?tab=browse"),
       ]),
       h("pe-6", "Next 6 Months", "Analyst mindset", [
         t("pe-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
         t("pe-6-2", "Complete the valuation scenario", 20, "Play", "/match-lab"),
         t("pe-6-3", "Start your resume draft", 15, "Build", "#resume"),
+        t("pe-6-4", "Join Finance East Coast Community Board", 5, "Join", "/explore"),
       ]),
       h("pe-12", "Next 12 Months", "Aim the funnel", [
         t("pe-12-1", "Complete 3 finance simulations", 30, "Play", "/match-lab"),
@@ -313,10 +316,10 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     ],
     plan: [
       h("se-3", "Next 3 Months", "First code", [
-        t("se-3-1", "Play the coding logic mini game", 10, "Play", "/match-lab"),
+        t("se-3-1", "Continue playing the Software Engineer Simulation", 10, "Play", "/match-lab"),
         t("se-3-2", "Explore 5 tech careers", 10, "Explore", "/explore?tab=browse"),
       ]),
-      h("se-6", "Next 6 Months", "Build real", [t("se-6-1", "Finish a small project", 30, "Build", "#resume")]),
+      h("se-6", "Next 6 Months", "Build real", [t("se-6-1", "Finish a small project", 30, "Build", "#resume"), t("se-6-2", "Join Engineering East Coast Community Board", 5, "Join", "/explore")]),
       h("se-12", "Next 12 Months", "Show it", [t("se-12-1", "Publish your portfolio", 30, "Build", "#resume")]),
     ],
   },

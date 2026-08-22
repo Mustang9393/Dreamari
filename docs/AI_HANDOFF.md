@@ -36,9 +36,40 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   routes[0] (export overlay was showing target school instead of flagship).
 - Validation: tsc clean, eslint clean, tokens:check green; verified in
   browser at ~744px and 375px (rail pins, jumps land, donut row compact).
-- NOT pushed; origin/main is 2 commits behind (cf05e4e, b36e969). Push only
-  on explicit user go-ahead. Figma handoff pack (docs/handoff/profile-figma)
+- Pushed to origin main (ec191cb) + v4 synced on user go-ahead; verified live
+  on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
+
+### 2026-08-22 Report polish round 2 (PUSHED to main only, per user)
+
+- Section rail restyled from a full-bleed black band to a floating glass pill
+  (sticky top-8px, rounded-full, blur, active chip = glass-surface-2). User
+  called the band "a bad black fill".
+- Sticky rail dead-on-arrival gotcha again, root cause found: tokens.css
+  `.marketing-v2 { overflow-x: hidden }` (Usman contract, untouchable) makes
+  the wrapper a scroll container; profile root overrides inline with
+  `overflowX: "clip"` — keep this if the root div is ever rebuilt.
+- Collapsible report sections (ReportPanel — NOTE: named ReportPanel because
+  a ReportSection already exists for the counselor export overlay): Day to
+  Day, Education, Colleges collapse to a one-line glass summary (first item
+  " · +N more") with the overview stat + chevron in the caption row; Why /
+  Glance / Salary / Majors / Next Actions stay open. Rail click auto-expands
+  its target before scrolling.
+- Background fix: background-space.svg starfield had hard-coded h-[2602px]
+  and stopped mid-page ("background isn't scaling") — now inset-0 h-full
+  object-cover in Profile, Home, and Colleges (all three shared the bug).
+- My Top 3 mobile rail: snap-x was pulling card 1 flush to the screen edge
+  (scroll-padding defaults to 0, ignoring px-5) — fixed with scroll-px-5.
+- Colleges section: "Open College Lookup ->" CTA to /colleges; Education
+  card: "Compare these routes in Path" CTA (onGoPath prop restored).
+- Report -> Plan/Path coherence (user ask): plan tasks now mirror the report
+  Next Actions per career (renamed sim tasks to "Continue playing the X
+  Simulation", added the Join <board> task to each career's 6-month level);
+  Path fit pane gains a "Majors to explore" FactRow from the career report
+  on university/college/transfer routes only.
+- Stale-screenshot trap hit twice this round: browser-pane screenshots showed
+  truncated panes that the DOM proved were fully rendered — verify via
+  element queries before diagnosing render bugs.
 
 ### 2026-08-21 FINAL DEPLOYMENT MAP (corrected + verified by curl)
 

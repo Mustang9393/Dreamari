@@ -202,7 +202,7 @@ export function ProfileExperience() {
     // creating a scroll container, so the report's sticky section rail can pin.
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)", fontFamily: "var(--font-body)", overflowX: "clip" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
+        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       </div>
 
       <div className="no-print">
@@ -336,7 +336,7 @@ export function ProfileExperience() {
 
         {tab === "report" && (
           <div role="tabpanel" id="profile-panel-report" aria-labelledby="profile-tab-report">
-            <ReportTab focus={focus} onExport={() => setReportOpen(true)} onGoLocker={() => setTab("locker")} />
+            <ReportTab focus={focus} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoLocker={() => setTab("locker")} />
           </div>
         )}
         {tab === "path" && (
@@ -457,7 +457,7 @@ export function ProfileExperience() {
 function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: string[]; focus: ProfileCareer | null; setFocusId: (id: string) => void; onAdd: () => void; onRemove: (id: string) => void }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
   return (
-    <div role="group" aria-label="My Top 3 careers" className="-mx-5 flex snap-x gap-[var(--space-3)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0" style={{ touchAction: "pan-x pan-y" }}>
+    <div role="group" aria-label="My Top 3 careers" className="-mx-5 flex snap-x scroll-px-5 gap-[var(--space-3)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0" style={{ touchAction: "pan-x pan-y" }}>
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const isFocus = focus?.id === id;
@@ -584,6 +584,47 @@ function ReportSectionHead({ title, stat }: { title: string; stat?: string }) {
   );
 }
 
+// Report section shell. With a `summary`, the section collapses to a one-line
+// overview card (tap to expand); without one it always shows its content.
+function ReportPanel({ id, title, stat, summary, sub, open, onToggle, children }: {
+  id: string;
+  title: string;
+  stat?: string;
+  summary?: string;
+  sub?: string;
+  open?: boolean;
+  onToggle?: () => void;
+  children: React.ReactNode;
+}) {
+  const collapsible = summary !== undefined;
+  return (
+    <section id={id} data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
+      {collapsible ? (
+        <button type="button" aria-expanded={open} onClick={onToggle} className="flex w-full cursor-pointer flex-col gap-[var(--space-3)] text-left">
+          <span className="flex w-full items-baseline justify-between gap-[var(--space-3)] pt-[var(--space-2)]">
+            <span className="text-[11px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>{title}</span>
+            <span className="flex flex-none items-center gap-[7px]">
+              {stat && <span className="whitespace-nowrap text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat}</span>}
+              <ChevronDown className="h-3.5 w-3.5 flex-none transition-transform" style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "none" }} />
+            </span>
+          </span>
+          {!open && (
+            <span className="flex w-full flex-col gap-[3px] rounded-[var(--radius-2xl)] border px-[var(--space-6)] py-[var(--space-4)]" style={GLASS}>
+              <span className="text-[13px] leading-[18px] font-semibold">{summary}</span>
+              {sub && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sub}</span>}
+            </span>
+          )}
+        </button>
+      ) : (
+        <ReportSectionHead title={title} stat={stat} />
+      )}
+      {(!collapsible || open) && <div className={`flex flex-col gap-[var(--space-3)] ${collapsible ? "filters-reveal" : ""}`}>{children}</div>}
+    </section>
+  );
+}
+
+const COLLAPSIBLE_REPORT_SECTIONS = new Set(["report-duties", "report-education", "report-colleges"]);
+
 // The reference's first-section graphic: an equal-segment donut, one segment
 // per trait, color-keyed to the trait tiles below it.
 function TraitDonut() {
@@ -615,13 +656,16 @@ function TraitDonut() {
 function ReportTab({
   focus,
   onExport,
+  onGoPath,
   onGoLocker,
 }: {
   focus: ProfileCareer | null;
   onExport: () => void;
+  onGoPath: () => void;
   onGoLocker: () => void;
 }) {
   const [activeSection, setActiveSection] = useState<string>(REPORT_SECTIONS[0].id);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -636,9 +680,12 @@ function ReportTab({
     return () => observer.disconnect();
   }, [focus?.id]);
 
+  const toggleSection = (id: string) => setOpenSections((value) => ({ ...value, [id]: !value[id] }));
+
   const goToSection = (id: string) => {
     setActiveSection(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (COLLAPSIBLE_REPORT_SECTIONS.has(id)) setOpenSections((value) => (value[id] ? value : { ...value, [id]: true }));
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
   if (!focus) {
@@ -681,24 +728,25 @@ function ReportTab({
         </div>
       </section>
 
-      {/* Scroll tabs: jump rail over the report sections */}
-      <nav aria-label="Report sections" className="sticky top-0 z-20 -mx-5 flex gap-[18px] overflow-x-auto border-b px-5 py-[10px] [scrollbar-width:none] md:-mx-1 md:px-1" style={{ background: "color-mix(in srgb, var(--background) 90%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderColor: "var(--glass-border)" }}>
-        {REPORT_SECTIONS.map((section) => (
-          <button
-            key={section.id}
-            type="button"
-            onClick={() => goToSection(section.id)}
-            className="relative flex-none cursor-pointer whitespace-nowrap pb-[3px] text-[11px] font-bold tracking-[0.8px] uppercase"
-            style={{ color: activeSection === section.id ? "var(--foreground)" : "var(--muted-foreground)" }}
-          >
-            {section.label}
-            <span className="absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full transition-opacity" style={{ background: "var(--accent-subtle)", opacity: activeSection === section.id ? 1 : 0 }} />
-          </button>
-        ))}
+      {/* Scroll tabs: floating glass jump rail over the report sections */}
+      <nav aria-label="Report sections" className="sticky top-[8px] z-20">
+        <div className="flex gap-[3px] overflow-x-auto rounded-full border p-[4px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--background) 55%, var(--glass-surface-1))", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderColor: "var(--glass-border)", boxShadow: "0 12px 28px -20px rgb(0 0 0 / 0.6)" }}>
+          {REPORT_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => goToSection(section.id)}
+              className="flex-none cursor-pointer whitespace-nowrap rounded-full px-[13px] py-[7px] text-[10.5px] font-bold tracking-[0.7px] uppercase"
+              style={{ background: activeSection === section.id ? "var(--glass-surface-2)" : "transparent", color: activeSection === section.id ? "var(--foreground)" : "var(--muted-foreground)" }}
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* Why This Matches You — donut beside the trait tiles */}
-      <section id="report-why" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <section id="report-why" data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
         <ReportSectionHead title="Why This Matches You" />
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
           <p className="text-[14.5px] leading-[20px] font-semibold">{report.matchIntro}</p>
@@ -717,7 +765,7 @@ function ReportTab({
       </section>
 
       {/* [Career] at a Glance */}
-      <section id="report-glance" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <section id="report-glance" data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
       <ReportSectionHead title={report.glanceTitle} />
       <div className="grid grid-cols-1 gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:grid-cols-2" style={GLASS}>
         {[
@@ -738,20 +786,26 @@ function ReportTab({
       </section>
 
       {/* What Would You Actually Do? — all six duties, two columns */}
-      <section id="report-duties" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
-      <ReportSectionHead title="What Would You Actually Do?" stat={`${report.duties.length} responsibilities`} />
-      <div className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:grid-cols-2" style={GLASS}>
-        {report.duties.map((duty) => (
-          <span key={duty} className="flex items-start gap-[10px] text-[13px] leading-[18px] font-semibold">
-            <span className="mt-[6px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />
-            {duty}
-          </span>
-        ))}
-      </div>
-      </section>
+      <ReportPanel
+        id="report-duties"
+        title="What Would You Actually Do?"
+        stat={`${report.duties.length} responsibilities`}
+        summary={`${report.duties[0]} · +${report.duties.length - 1} more`}
+        open={!!openSections["report-duties"]}
+        onToggle={() => toggleSection("report-duties")}
+      >
+        <div className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:grid-cols-2" style={GLASS}>
+          {report.duties.map((duty) => (
+            <span key={duty} className="flex items-start gap-[10px] text-[13px] leading-[18px] font-semibold">
+              <span className="mt-[6px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />
+              {duty}
+            </span>
+          ))}
+        </div>
+      </ReportPanel>
 
       {/* Salary — median, growth chip, three-step ladder with bars */}
-      <section id="report-salary" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <section id="report-salary" data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
       <ReportSectionHead title="Salary" />
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -786,26 +840,36 @@ function ReportTab({
       </section>
 
       {/* Education — most common path + other viable pathways */}
-      <section id="report-education" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
-      <ReportSectionHead title="Education" stat={`${report.education.alternatives.length + 1} pathways`} />
-      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <div className="flex flex-col gap-[5px]">
-          <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Most Common Path</span>
-          <span className="text-[13.5px] leading-[19px] font-semibold">{report.education.common}</span>
-        </div>
-        <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Other Viable Pathways</span>
-          <div className="flex flex-wrap gap-[var(--space-2)]">
-            {report.education.alternatives.map((path) => (
-              <span key={path} className="rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)" }}>{path}</span>
-            ))}
+      <ReportPanel
+        id="report-education"
+        title="Education"
+        stat={`${report.education.alternatives.length + 1} pathways`}
+        summary={report.education.common}
+        sub={`${report.education.alternatives.length} other viable pathways · compare them in the Path tab`}
+        open={!!openSections["report-education"]}
+        onToggle={() => toggleSection("report-education")}
+      >
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+          <div className="flex flex-col gap-[5px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Most Common Path</span>
+            <span className="text-[13.5px] leading-[19px] font-semibold">{report.education.common}</span>
+          </div>
+          <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Other Viable Pathways</span>
+            <div className="flex flex-wrap gap-[var(--space-2)]">
+              {report.education.alternatives.map((path) => (
+                <span key={path} className="rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)" }}>{path}</span>
+              ))}
+            </div>
+            <button type="button" onClick={onGoPath} className="mt-[2px] flex w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              Compare these routes in Path <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
-      </div>
-      </section>
+      </ReportPanel>
 
       {/* Three Majors to Explore */}
-      <section id="report-majors" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <section id="report-majors" data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
       <ReportSectionHead title="Three Majors to Explore" />
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         {report.majors.map((major, index) => (
@@ -815,23 +879,32 @@ function ReportTab({
       </section>
 
       {/* Colleges — Reach / Target / Safety, verbatim reasons */}
-      <section id="report-colleges" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
-      <ReportSectionHead title="Colleges" stat={(["Reach", "Target", "Safety"] as const).map((band) => `${report.colleges.filter((college) => college.band === band).length} ${band.toLowerCase()}`).join(" · ")} />
-      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
-        {report.colleges.map((college) => (
-          <div key={college.name} className="flex flex-col gap-[5px] rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={GLASS}>
-            <div className="flex items-center justify-between gap-[var(--space-2)]">
-              <span className="min-w-0 truncate text-[14.5px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{college.name}</span>
-              <span className="flex-none rounded-full px-[9px] py-[2px] text-[9.5px] font-bold tracking-[0.6px] uppercase" style={{ background: `color-mix(in srgb, ${BAND_COLORS[college.band]} 18%, transparent)`, color: BAND_COLORS[college.band] }}>{college.band}</span>
+      <ReportPanel
+        id="report-colleges"
+        title="Colleges"
+        stat={(["Reach", "Target", "Safety"] as const).map((band) => `${report.colleges.filter((college) => college.band === band).length} ${band.toLowerCase()}`).join(" · ")}
+        summary={`${report.colleges.slice(0, 2).map((college) => college.name).join(" · ")} · +${report.colleges.length - 2} more schools`}
+        open={!!openSections["report-colleges"]}
+        onToggle={() => toggleSection("report-colleges")}
+      >
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+          {report.colleges.map((college) => (
+            <div key={college.name} className="flex flex-col gap-[5px] rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={GLASS}>
+              <div className="flex items-center justify-between gap-[var(--space-2)]">
+                <span className="min-w-0 truncate text-[14.5px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{college.name}</span>
+                <span className="flex-none rounded-full px-[9px] py-[2px] text-[9.5px] font-bold tracking-[0.6px] uppercase" style={{ background: `color-mix(in srgb, ${BAND_COLORS[college.band]} 18%, transparent)`, color: BAND_COLORS[college.band] }}>{college.band}</span>
+              </div>
+              <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{college.reason}</span>
             </div>
-            <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{college.reason}</span>
-          </div>
-        ))}
-      </div>
-      </section>
+          ))}
+        </div>
+        <Link href="/colleges" className="flex w-fit items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          Open College Lookup <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </ReportPanel>
 
       {/* Next Actions — numbered, Play / Join / Share */}
-      <section id="report-actions" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <section id="report-actions" data-report-section className="flex scroll-mt-[64px] flex-col gap-[var(--space-3)]">
       <ReportSectionHead title="Next Actions" stat={`${report.nextActions.length} steps`} />
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         {report.nextActions.map((item, index) => {
@@ -983,6 +1056,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
               <RouteColumn
                 key={routeOption.id}
                 route={routeOption}
+                majors={careerReport(focus.id)?.majors}
                 selected={chosenRoute(focus).id === routeOption.id}
                 onSelect={() => setRouteChoice((current) => ({ ...current, [focus.id]: routeOption.id }))}
                 onGoPlan={onGoPlan}
@@ -1187,7 +1261,7 @@ const routeTypeKey = (type: string): keyof typeof ROUTE_TYPE_ICONS => {
 // One alternate route, editorial: the path name is the headline, the data
 // pane on the right is the feature. Payoff (the tallest pane) is the default
 // and sets the height; the other panes are designed to fill the same space.
-function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; selected: boolean; onSelect: () => void; onGoPlan: () => void }) {
+function RouteColumn({ route, majors, selected, onSelect, onGoPlan }: { route: ProfileCareer["routes"][number]; majors?: string[]; selected: boolean; onSelect: () => void; onGoPlan: () => void }) {
   const detail = routeDetail(route.id);
   const Icon = ROUTE_TYPE_ICONS[routeTypeKey(route.type)];
   const [pane, setPane] = useState<"stats" | "fit" | "life" | "payoff">("stats");
@@ -1311,6 +1385,7 @@ function RouteColumn({ route, selected, onSelect, onGoPlan }: { route: ProfileCa
           <div className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <FactRow label="Financial aid" value={detail.fit.aid} />
             <FactRow label="Where you'd work" value={detail.fit.targets} />
+            {majors && /university|college|transfer/i.test(route.type) && <FactRow label="Majors to explore" value={majors.join(" · ")} />}
           </div>
 
         </div>
