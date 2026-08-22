@@ -30,15 +30,14 @@ import {
 
 export const REPORT_SECTIONS = [
   { id: "direction", n: 1, label: "My direction" },
-  { id: "compare", n: 2, label: "Comparing my top 3" },
-  { id: "glance", n: 3, label: "At a glance" },
-  { id: "salary", n: 4, label: "Pay and outlook" },
-  { id: "education", n: 5, label: "How people get in" },
-  { id: "majors", n: 6, label: "Majors to consider" },
-  { id: "colleges", n: 7, label: "Colleges to research" },
-  { id: "actions", n: 8, label: "What I do next" },
-  { id: "questions", n: 9, label: "For my counselor" },
-  { id: "sources", n: 10, label: "Sources and limits" },
+  { id: "glance", n: 2, label: "At a glance" },
+  { id: "salary", n: 3, label: "Pay and outlook" },
+  { id: "education", n: 4, label: "How people get in" },
+  { id: "majors", n: 5, label: "Majors to consider" },
+  { id: "colleges", n: 6, label: "Colleges to research" },
+  { id: "actions", n: 7, label: "What I do next" },
+  { id: "questions", n: 8, label: "For my counselor" },
+  { id: "sources", n: 9, label: "Sources and limits" },
 ] as const;
 
 const STATUS_NOTE: Record<CollegeStatus, string> = {
@@ -355,13 +354,16 @@ export type ReportViewProps = {
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
   onOpenShare: () => void;
+  onOpenEvidence: () => void;
   updatedLabel: string;
 };
+
+export { ComparisonTable };
 
 export function CareerReportView(props: ReportViewProps) {
   const { student, career, route, top3, stage, direction, questions, doneActions, savedMajors } = props;
   const report = reportV2(career.id);
-  const [open, setOpen] = useState<Record<string, boolean>>({ compare: true });
+  const [open, setOpen] = useState<Record<string, boolean>>({ glance: true });
   const [tocOpen, setTocOpen] = useState(false);
   const [active, setActive] = useState<string>("direction");
   const [draftQuestion, setDraftQuestion] = useState("");
@@ -558,27 +560,9 @@ export function CareerReportView(props: ReportViewProps) {
               <SideNote>These come from what you chose in Build and confirmed in Evidence. You can change any of them.</SideNote>
             </Section>
 
-            {/* 2. Top 3 comparison — before any single career */}
+            {/* 2. At a glance */}
             <Section
-              id="compare" n={2} title="My top three, side by side"
-              standfirst="The comparison comes first on purpose. One career on its own always looks like the right answer."
-              open={open.compare !== false} onToggle={() => toggle("compare")}
-              summary={
-                <p className="text-[14.5px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>
-                  {entries.map((entry) => entry.career.title).join(", ")} — compared on twelve things that actually differ.
-                </p>
-              }
-            >
-              <ComparisonTable entries={entries} focusId={career.id} />
-              <SideNote>
-                No match percentage here on purpose. &ldquo;Where I am with it&rdquo; describes what you have actually done, not a score:
-                strong interest means repeated, self-directed activity; needs more exploration means you have looked but not tested it.
-              </SideNote>
-            </Section>
-
-            {/* 3. At a glance */}
-            <Section
-              id="glance" n={3} title={`${career.title} at a glance`}
+              id="glance" n={2} title={`${career.title} at a glance`}
               standfirst={report.glance.simple}
               open={!!open.glance} onToggle={() => toggle("glance")}
               summary={
@@ -618,9 +602,9 @@ export function CareerReportView(props: ReportViewProps) {
               </div>
             </Section>
 
-            {/* 4. Pay and outlook */}
+            {/* 3. Pay and outlook */}
             <Section
-              id="salary" n={4} title="Pay and outlook"
+              id="salary" n={3} title="Pay and outlook"
               standfirst="A range, not a promise. Where you live and how long you have been doing it move this number a lot."
               open={!!open.salary} onToggle={() => toggle("salary")}
               summary={<SalaryRange entry={report.salary.entry} median={report.salary.median} experienced={report.salary.experienced} />}
@@ -637,9 +621,9 @@ export function CareerReportView(props: ReportViewProps) {
               </SideNote>
             </Section>
 
-            {/* 5. Education and training */}
+            {/* 4. Education and training */}
             <Section
-              id="education" n={5} title="How people get in"
+              id="education" n={4} title="How people get in"
               standfirst="More than one route works. The most common one is not automatically the right one for you."
               open={!!open.education} onToggle={() => toggle("education")}
               summary={
@@ -666,9 +650,9 @@ export function CareerReportView(props: ReportViewProps) {
               </ul>
             </Section>
 
-            {/* 6. Majors */}
+            {/* 5. Majors */}
             <Section
-              id="majors" n={6} title="Majors to consider"
+              id="majors" n={5} title="Majors to consider"
               standfirst="Three that connect to this work. None of them are required, and people arrive here from other majors too."
               open={!!open.majors} onToggle={() => toggle("majors")}
               summary={<p className="text-[15px] leading-[23px]">{report.majors.map((major) => major.name).join(" · ")}</p>}
@@ -697,9 +681,9 @@ export function CareerReportView(props: ReportViewProps) {
               </div>
             </Section>
 
-            {/* 7. Colleges and programs to research */}
+            {/* 6. Colleges and programs to research */}
             <Section
-              id="colleges" n={7} title="Colleges and programs to research"
+              id="colleges" n={6} title="Colleges and programs to research"
               standfirst="A research list, not a ranking. Cost is the published figure before aid, so treat it as a starting point."
               open={!!open.colleges} onToggle={() => toggle("colleges")}
               summary={
@@ -737,9 +721,9 @@ export function CareerReportView(props: ReportViewProps) {
               </SideNote>
             </Section>
 
-            {/* 8. Action plan */}
+            {/* 7. Action plan */}
             <Section
-              id="actions" n={8} title="What I do next"
+              id="actions" n={7} title="What I do next"
               standfirst="Small enough to actually finish, and each one exists for a reason."
               open={open.actions !== false} onToggle={() => toggle("actions")}
               summary={
@@ -781,9 +765,9 @@ export function CareerReportView(props: ReportViewProps) {
               </ul>
             </Section>
 
-            {/* 9. Counselor conversation */}
+            {/* 8. Counselor conversation */}
             <Section
-              id="questions" n={9} title="For my counselor"
+              id="questions" n={8} title="For my counselor"
               standfirst="What I want to get out of the meeting, written before I am sitting in it."
               open={open.questions !== false} onToggle={() => toggle("questions")}
               summary={
@@ -848,9 +832,9 @@ export function CareerReportView(props: ReportViewProps) {
               </div>
             </Section>
 
-            {/* 10. Sources and limitations */}
+            {/* 9. Sources and limitations */}
             <Section
-              id="sources" n={10} title="Sources and limits"
+              id="sources" n={9} title="Sources and limits"
               standfirst="Where these numbers came from, and what they cannot tell you."
               open={!!open.sources} onToggle={() => toggle("sources")}
               summary={<p className="text-[14.5px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{report.sources.length} sources, all checked August 2026.</p>}
@@ -866,7 +850,10 @@ export function CareerReportView(props: ReportViewProps) {
               <div className="border-t pt-[12px] text-[12.5px] leading-[19px]" style={{ borderColor: "var(--rule)", color: "var(--ink-soft)" }}>
                 <p>Pay, hiring and program information changes. Salary figures describe people already working in the job, not what you would be offered. College costs are published prices before financial aid, and admission requirements change year to year.</p>
                 <p className="mt-[8px]">Everything in this report supports exploration. Nothing in it is a guarantee, a prediction, or a substitute for talking to your counselor.</p>
-                <p className="mt-[8px]">Built from {evidenceForCareer.length} things you did in Dreamari for this career, plus the sources above. You can see and correct every input in Evidence.</p>
+                <p className="mt-[8px]">Built from {evidenceForCareer.length} things you did in Dreamari for this career, plus the sources above.</p>
+                <button type="button" data-print-hide onClick={props.onOpenEvidence} className="mt-[8px] inline-flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12.5px] font-bold underline underline-offset-2" style={{ color: "var(--ink)" }}>
+                  See and correct every input
+                </button>
               </div>
             </Section>
           </div>

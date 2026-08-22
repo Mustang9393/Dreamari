@@ -40,6 +40,34 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Profile round 3: user-directed simplification (PUSHED)
+
+All from direct user calls in session, several reversing my own earlier choices:
+- Identity banner (career art backdrop, 64px avatar, streak block) REPLACED by
+  an editorial masthead: name at display size, then GRADE / SCHOOL / GPA /
+  STREAK as caption+value pairs. GPA and signals moved up here from elsewhere;
+  "grade + school looked small and thin" was the complaint.
+- Overview lost "Where you are" (stage card) and "What I am looking at" (Top 3
+  restatement -- it duplicated the switcher directly above it).
+- Overview gained a BENTO: My route (wide tile, 3 stats) / My plan (n of N +
+  bar) / My report (status + questions). Each tile is a doorway.
+- My Pathway SPLIT BACK into two tabs: Routes and My Plan. Merging them made
+  one very long screen where the plan sat below a whole comparison carousel.
+  The brief's worry was Path vs Plan being indistinguishable -- solved by
+  naming (Routes / My Plan), not by merging. Tabs: Overview / Routes / My Plan
+  / Report.
+- Evidence is NO LONGER A TAB. It is a right-side sheet opened from the
+  Overview activity strip and from the report's Sources section. It explains a
+  claim, so it belongs next to the claim.
+- STAGE RAIL REMOVED ENTIRELY ("I dont want that thing anywhere"). The stage
+  engine still computes a value and the report header still prints "Stage:",
+  which the user has NOT explicitly rejected -- confirm if it should also go.
+- Career Report is now SINGLE-CAREER. The Top 3 comparison moved out of the
+  report into its own CompareSheet, launched from a Compare button on the My
+  Top 3 heading. Report sections renumbered 1-9. The one-page meeting summary
+  still carries a top-3 table (the brief requires it there) -- flag if that
+  should also become single-career.
+
 ### 2026-08-22 My Profile + Career Report v2 rebuild (LOCAL, NOT pushed)
 
 Brief: full authority to change IA, composition, tabs, hierarchy, responsive.

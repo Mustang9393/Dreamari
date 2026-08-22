@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ArrowRight,
+  ArrowUpRight,
   Archive,
   BookOpen,
   Check,
@@ -38,13 +39,13 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
-import { CareerReportView } from "./CareerReport";
+import { CareerReportView, ComparisonTable } from "./CareerReport";
 import {
+  ACADEMIC_RECORD,
   COURSE_SUGGESTIONS,
   EVIDENCE,
   EVIDENCE_KIND_LABEL,
   INITIAL_QUESTIONS,
-  PATHWAY_STAGES,
   STUDENT_DIRECTION,
   UPCOMING,
   reportV2,
@@ -59,7 +60,7 @@ import {
 // horizon, and the Career Locker is its own tab plus a strip at the end of
 // Overview. College Lookup CTAs point at /colleges (feature in the works).
 
-type TabId = "overview" | "pathway" | "report" | "evidence" | "locker" | "resume" | "settings";
+type TabId = "overview" | "routes" | "plan" | "report" | "locker" | "resume" | "settings";
 
 const ACTION_ICON = { Play: Gamepad2, Explore: Compass, Join: Users, Build: BookOpen } as const;
 
@@ -99,7 +100,7 @@ export function ProfileExperience() {
   };
   useEffect(() => {
     if (!pingMounted.current) return;
-    pingTabs(["overview", "pathway", "report"]);
+    pingTabs(["overview", "routes", "plan", "report"]);
     const career = ALL_PROFILE_CAREERS.find((item) => item.id === focusId);
     if (career) {
       const timer = window.setTimeout(() => setAnnounce(`Showing ${career.title}. Overview, pathway and report updated.`), 0);
@@ -111,10 +112,12 @@ export function ProfileExperience() {
       pingMounted.current = true;
       return;
     }
-    pingTabs(["overview", "pathway", "report"]);
+    pingTabs(["overview", "routes", "plan", "report"]);
   }, [routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [sharedAt, setSharedAt] = useState<string | null>(null);
   // Student-owned report state. Local only: there is no persistence layer yet,
   // so this resets on reload (documented in the handoff).
@@ -177,7 +180,6 @@ export function ProfileExperience() {
     if (picked) return "decide";
     return "compare";
   })();
-  const stageIndex = PATHWAY_STAGES.findIndex((item) => item.id === stage);
   // "Still exploring" is a first-class state, not a failure to progress.
   const stillExploring = !focus || !routeChoice[focus.id];
 
@@ -256,53 +258,52 @@ export function ProfileExperience() {
       </header>
 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        {/* ---- Identity: the focus career's art follows the switch ---- */}
-        <section className="relative overflow-hidden rounded-[var(--radius-2xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-          {focus && (
-            <div aria-hidden className="absolute inset-y-0 right-0 w-[75%] opacity-80 sm:w-[58%]" style={{ maskImage: "linear-gradient(90deg, transparent 0%, #000 45%)", WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 45%)" }}>
-              <Image src={focus.photo} alt="" fill sizes="420px" priority className="object-cover object-[center_35%]" />
-            </div>
-          )}
-          {focus && <div aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${WORLD_COLORS[focus.world]} 10%, transparent) 0%, transparent 45%)` }} />}
-          {/* Progress-blue backdrop, left to right, so the header signals stay legible over the art */}
-          <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 30%, color-mix(in srgb, var(--primary) 16%, color-mix(in srgb, var(--background) 88%, transparent)) 62%, color-mix(in srgb, var(--primary) 30%, var(--background)) 100%)" }} />
-          <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-[var(--space-4)]">
-              <label className="group relative size-16 flex-none cursor-pointer" aria-label="Change profile photo">
-                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-16 rounded-full border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
-                <span className="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--primary)", borderColor: "var(--background)", color: "var(--primary-foreground)" }}>
-                  <Pencil className="h-3 w-3" />
+        {/* ---- Identity: an editorial masthead. Name at display size, then
+             the facts that matter set as caption/value pairs, so grade, school,
+             GPA and streak read as a byline rather than thin grey filler. ---- */}
+        <section className="flex flex-col gap-[var(--space-4)]">
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <div className="flex min-w-0 items-center gap-[var(--space-3)]">
+              <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
+                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
+                <span className="absolute -right-0.5 -bottom-0.5 flex size-[19px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "var(--background)", color: "var(--foreground)" }}>
+                  <Pencil className="h-[10px] w-[10px]" />
                 </span>
                 <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
               </label>
-              <span className="flex flex-col gap-[2px]">
-                <span className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
-                <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · {STUDENT.school}</span>
-              </span>
+              <h2 className="min-w-0 truncate text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] sm:text-[32px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
             </div>
-            <div className="flex flex-col items-start gap-[var(--space-3)] sm:items-end">
-              {/* Utility pills: labeled so the Locker is findable, small so it
-                  reads as an archive rather than a main destination. */}
-              <span className="flex items-center gap-[var(--space-2)]">
-                <button type="button" aria-label="Open Career Locker" onClick={() => setTab("locker")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                  <Archive className="h-3.5 w-3.5" /> Locker
+            <span className="flex flex-none items-center gap-[2px]">
+              {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-label={label}
+                  onClick={() => setTab(id)}
+                  className="flex h-9 cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[11.5px] font-bold"
+                  style={{ background: tab === id ? "var(--glass-surface-3)" : "transparent", color: tab === id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+                >
+                  <Icon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{label}</span>
                 </button>
-                <button type="button" aria-label="Resume builder" onClick={() => setTab("resume")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "resume" ? "var(--glass-surface-3)" : "transparent", color: tab === "resume" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                  <FileText className="h-3.5 w-3.5" /> Resume
-                </button>
-                <button type="button" aria-label="Profile settings" onClick={() => setTab("settings")} className="flex h-8 cursor-pointer items-center gap-[6px] rounded-full px-[10px] text-[11.5px] font-bold" style={{ background: tab === "settings" ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                  <Settings className="h-3.5 w-3.5" /> Settings
-                </button>
-              </span>
-              <span className="flex items-center gap-[8px]">
-                <Flame className="h-5 w-5" style={{ color: "var(--chart-3)" }} />
-                <span className="flex flex-col">
-                  <span className="text-[19px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.streakDays} days</span>
-                  <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Streak</span>
-                </span>
-              </span>
-            </div>
+              ))}
+            </span>
           </div>
+          <dl className="flex flex-wrap items-stretch gap-x-[var(--space-6)] gap-y-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            {[
+              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null },
+              { label: "School", value: STUDENT.school.replace(" High School", ""), note: "High School" },
+              ...(ACADEMIC_RECORD.verified ? [{ label: "GPA", value: ACADEMIC_RECORD.gpa, note: `verified · ${ACADEMIC_RECORD.updated}` }] : []),
+              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days" },
+            ].map((fact) => (
+              <div key={fact.label} className="flex flex-col gap-[1px]">
+                <dt className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>{fact.label}</dt>
+                <dd className="flex items-baseline gap-[5px]">
+                  <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
+                  {fact.note && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         {/* SR announcement for focus changes */}
@@ -315,7 +316,14 @@ export function ProfileExperience() {
         {/* ---- My Top 3: the profile's context switcher, above the tabs.
              Tap a card and every tab below shows that career. ---- */}
         <section className="flex flex-col gap-[var(--space-2)]">
-          <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
+          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+            <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My Top 3</h2>
+            {top3.length > 1 && (
+              <button type="button" onClick={() => setCompareOpen(true)} className="flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare
+              </button>
+            )}
+          </div>
           <CompactSwitcher top3={top3} focus={focus} setFocusId={setFocusId} onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)} />
         </section>
 
@@ -324,7 +332,7 @@ export function ProfileExperience() {
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "pathway", "report", "evidence"];
+            const order: TabId[] = ["overview", "routes", "plan", "report"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -342,9 +350,9 @@ export function ProfileExperience() {
           {(
             [
               { id: "overview", label: "Overview" },
-              { id: "pathway", label: "My Pathway" },
-              { id: "report", label: "Career Report" },
-              { id: "evidence", label: "Evidence" },
+              { id: "routes", label: "Routes" },
+              { id: "plan", label: "My Plan" },
+              { id: "report", label: "Report" },
             ] as const
           ).map((item) => (
             <button
@@ -372,21 +380,28 @@ export function ProfileExperience() {
         {tab === "overview" && (
           <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
             <OverviewTab
-              focus={focus} top3={top3.map(careerById).filter(Boolean) as ProfileCareer[]} nextTask={nextTask}
-              planProgress={planProgress} stageIndex={stageIndex} stillExploring={stillExploring}
-              questionCount={questions.length} sharedAt={sharedAt} setFocusId={setFocusId}
-              onGoPathway={() => setTab("pathway")} onGoReport={() => setTab("report")} onGoEvidence={() => setTab("evidence")}
-              onShare={() => setShareOpen(true)} onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
+              focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress}
+              questionCount={questions.length} sharedAt={sharedAt} stillExploring={stillExploring}
+              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
+              onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
             />
           </div>
         )}
-        {tab === "pathway" && (
-          <div role="tabpanel" id="profile-panel-pathway" aria-labelledby="profile-tab-pathway">
-            <PathwayTab
-              focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} stageIndex={stageIndex}
-              stillExploring={stillExploring} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet}
-              toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask}
-              savedMajors={savedMajors} onToggleMajor={toggleMajor} questions={questions} onGoReport={() => setTab("report")}
+        {tab === "routes" && (
+          <div role="tabpanel" id="profile-panel-routes" aria-labelledby="profile-tab-routes">
+            <RoutesTab
+              focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice}
+              savedMajors={savedMajors} onToggleMajor={toggleMajor} onGoPlan={() => setTab("plan")}
+            />
+          </div>
+        )}
+        {tab === "plan" && (
+          <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
+            <MyPlanTab
+              focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
+              doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
+              removeCustomTask={removeCustomTask} questions={questions}
+              onGoRoutes={() => setTab("routes")} onGoReport={() => setTab("report")}
             />
           </div>
         )}
@@ -399,15 +414,7 @@ export function ProfileExperience() {
               questions={questions} onAddQuestion={addQuestion} onRemoveQuestion={removeQuestion}
               doneActions={doneActions} onToggleAction={toggleAction} onSwitchCareer={setFocusId}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onOpenShare={() => setShareOpen(true)}
-              updatedLabel="today"
-            />
-          </div>
-        )}
-        {tab === "evidence" && (
-          <div role="tabpanel" id="profile-panel-evidence" aria-labelledby="profile-tab-evidence">
-            <EvidenceTab
-              focus={focus} confirmed={confirmedEvidence} hidden={hiddenEvidence}
-              onToggleConfirmed={toggleEvidenceConfirmed} onHide={hideEvidence} onGoReport={() => setTab("report")}
+              onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
             />
           </div>
         )}
@@ -415,6 +422,17 @@ export function ProfileExperience() {
         {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
         {tab === "resume" && <ResumeView onClose={() => setTab("overview")} />}
       </main>
+
+      {compareOpen && (
+        <CompareSheet careers={top3.map(careerById).filter(Boolean) as ProfileCareer[]} focusId={focus?.id ?? ""} onClose={() => setCompareOpen(false)} />
+      )}
+
+      {evidenceOpen && (
+        <EvidenceSheet
+          focus={focus} confirmed={confirmedEvidence} hidden={hiddenEvidence}
+          onToggleConfirmed={toggleEvidenceConfirmed} onHide={hideEvidence} onClose={() => setEvidenceOpen(false)}
+        />
+      )}
 
       {shareOpen && focus && (
         <ShareSheet
@@ -597,32 +615,36 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
   );
 }
 
-// ---- The journey rail: Explore -> Compare -> Decide -> Plan -> Share ----
-// Derived from real state and deliberately non-punitive: a student parked in
-// Explore sees a description of where they are, not a bar they are failing.
+// ---- Compare my Top 3 ----
+// Lives beside My Top 3, not inside the report: a report is one career's
+// document, and stacking three of them in it made it read as a bundle.
 
-function StageRail({ stageIndex, compact = false }: { stageIndex: number; compact?: boolean }) {
+function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
+  const entries = careers
+    .map((career) => ({ career, report: reportV2(career.id) }))
+    .filter((entry): entry is { career: ProfileCareer; report: NonNullable<ReturnType<typeof reportV2>> } => Boolean(entry.report));
   return (
-    <ol className="flex list-none items-stretch gap-[3px] p-0" aria-label="Where you are in the process">
-      {PATHWAY_STAGES.map((item, index) => {
-        const state = index < stageIndex ? "done" : index === stageIndex ? "current" : "ahead";
-        return (
-          <li key={item.id} className="min-w-0 flex-1" title={item.blurb}>
-            <span
-              className="flex h-[4px] w-full rounded-full"
-              style={{ background: state === "ahead" ? "var(--glass-surface-2)" : "var(--accent-subtle)", opacity: state === "done" ? 0.55 : 1 }}
-            />
-            <span
-              className={`mt-[7px] block truncate text-[10px] font-bold tracking-[0.6px] uppercase ${compact ? "" : "sm:text-[10.5px]"}`}
-              style={{ color: state === "current" ? "var(--foreground)" : "var(--muted-foreground)" }}
-            >
-              {item.label}
-              {state === "current" && <span className="sr-only"> (you are here)</span>}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+    <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
+      <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:my-auto sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
+            <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
+          </span>
+          <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
+            <X className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+        <div className="dm-report min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
+          {entries.length > 1 ? (
+            <ComparisonTable entries={entries} focusId={focusId} />
+          ) : (
+            <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -631,22 +653,20 @@ function StageRail({ stageIndex, compact = false }: { stageIndex: number; compac
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
 function OverviewTab({
-  focus, top3, nextTask, planProgress, stageIndex, stillExploring,
-  questionCount, sharedAt, setFocusId, onGoPathway, onGoReport, onGoEvidence, onShare, onGoLocker, onGoSettings,
+  focus, chosenRoute, nextTask, planProgress, questionCount, sharedAt, stillExploring,
+  onGoRoutes, onGoPlan, onGoReport, onOpenEvidence, onGoLocker, onGoSettings,
 }: {
   focus: ProfileCareer | null;
-  top3: ProfileCareer[];
+  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   nextTask: (career: ProfileCareer) => PlanTask | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
-  stageIndex: number;
-  stillExploring: boolean;
   questionCount: number;
   sharedAt: string | null;
-  setFocusId: (id: string) => void;
-  onGoPathway: () => void;
+  stillExploring: boolean;
+  onGoRoutes: () => void;
+  onGoPlan: () => void;
   onGoReport: () => void;
-  onGoEvidence: () => void;
-  onShare: () => void;
+  onOpenEvidence: () => void;
   onGoLocker: () => void;
   onGoSettings: () => void;
 }) {
@@ -663,29 +683,13 @@ function OverviewTab({
     );
   }
 
+  const route = chosenRoute(focus);
   const next = nextTask(focus);
   const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const progress = planProgress(focus);
-  const stageMeta = PATHWAY_STAGES[stageIndex] ?? PATHWAY_STAGES[0];
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Where am I in this process */}
-      <section aria-labelledby="stage-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-          <span className="flex min-w-0 flex-col gap-[3px]">
-            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Where you are</span>
-            <h3 id="stage-title" className="text-[21px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-              {stillExploring ? "Still exploring" : stageMeta.label}
-            </h3>
-            <span className="max-w-[46ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              {stillExploring ? "You have careers saved and no route picked yet. That is a completely normal place to be in 11th grade." : stageMeta.blurb}
-            </span>
-          </span>
-        </div>
-        <StageRail stageIndex={stageIndex} />
-      </section>
-
       {/* The one thing to do next */}
       <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -700,14 +704,14 @@ function OverviewTab({
               <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
             </Link>
           ) : (
-            <button type="button" onClick={onGoPathway} className="flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open pathway</button>
+            <button type="button" onClick={onGoPlan} className="flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
           )}
         </div>
         <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex items-baseline justify-between gap-[var(--space-2)]">
             <span className="text-[12px] font-bold">{progress.complete} of {progress.total} steps done</span>
-            <button type="button" onClick={onGoPathway} className="flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              My Pathway <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            <button type="button" onClick={onGoPlan} className="flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           </span>
           <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
@@ -716,55 +720,81 @@ function OverviewTab({
         </div>
       </section>
 
-      {/* Top 3 in one line each */}
-      <section aria-labelledby="top3-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-          <h3 id="top3-title" className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>What I am looking at</h3>
-          <button type="button" onClick={onGoReport} className="flex-none text-[11.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>Compare all {top3.length}</button>
-        </div>
-        <ul className="flex list-none flex-col p-0">
-          {top3.map((career) => {
-            const row = reportV2(career.id)?.comparison;
-            const current = career.id === focus.id;
-            return (
-              <li key={career.id} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                <button type="button" onClick={() => setFocusId(career.id)} aria-current={current ? "true" : undefined} className="flex min-h-[52px] w-full cursor-pointer items-center gap-[var(--space-3)] py-[11px] text-left">
-                  <span className="relative size-[38px] flex-none overflow-hidden rounded-[10px]">
-                    <Image src={career.photo} alt="" fill sizes="38px" className="object-cover" />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
-                    <span className="flex items-center gap-[7px]">
-                      <span className="truncate text-[14.5px] leading-[19px] font-bold">{career.title}</span>
-                      {current && <span className="flex-none rounded-full px-[7px] py-[1px] text-[9px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-3)", color: "var(--accent-subtle)" }}>Current</span>}
-                    </span>
-                    <span className="truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                      {row ? `${row.evidence} · ${row.timeToEnter} · ${row.salaryRange}` : career.world}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      {/* Bento: pathway, plan and report at a glance. One number each, and
+          every tile is a door into the tab that owns the detail. */}
+      <section aria-labelledby="bento-title" className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
+        <h3 id="bento-title" className="sr-only">Your pathway, plan and report at a glance</h3>
 
-      {/* Report status + the recent change */}
-      <section aria-labelledby="report-status-title" className="flex flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="flex min-w-0 flex-col gap-[3px]">
-          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career report</span>
-          <h3 id="report-status-title" className="text-[15px] leading-[20px] font-bold">
-            {sharedAt ? `Shared ${sharedAt}` : "Ready to share, not shared yet"}
-          </h3>
-          <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Updated today · {questionCount} question{questionCount === 1 ? "" : "s"} saved for your counselor
+        {/* Route — the widest tile, because it sets everything else */}
+        <button
+          type="button"
+          onClick={onGoRoutes}
+          className="col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          style={GLASS}
+        >
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My route</span>
+            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-        </span>
-        <span className="flex flex-none flex-wrap gap-[var(--space-2)]">
-          <button type="button" onClick={onGoReport} className="min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Read it</button>
-          <button type="button" onClick={onShare} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-semibold" style={{ borderColor: "var(--border)" }}>
-            <Send className="h-3.5 w-3.5" aria-hidden /> Share
-          </button>
-        </span>
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{stillExploring ? "Not picked yet" : route.short}</span>
+            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stillExploring ? `${focus.routes.length} ways into ${focus.title}` : route.program}</span>
+          </span>
+          <span className="flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            {[
+              { label: "Time", value: route.duration },
+              { label: "Starts at", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
+              { label: "Debt clear", value: (routeDetail(route.id)?.payoff.time ?? route.loanPayoff).replace("~", "") },
+            ].map((stat) => (
+              <span key={stat.label} className="flex flex-col gap-[1px]">
+                <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+                <span className="text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{stat.value}</span>
+              </span>
+            ))}
+          </span>
+        </button>
+
+        {/* Plan */}
+        <button
+          type="button"
+          onClick={onGoPlan}
+          className="flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          style={GLASS}
+        >
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My plan</span>
+            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          </span>
+          <span className="flex flex-col gap-[6px]">
+            <span className="text-[28px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+              {progress.complete}<span className="text-[16px]">/{progress.total}</span>
+            </span>
+            <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+              <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
+            </span>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>steps done</span>
+          </span>
+        </button>
+
+        {/* Report */}
+        <button
+          type="button"
+          onClick={onGoReport}
+          className="flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          style={GLASS}
+        >
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="text-[9.5px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
+            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          </span>
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
+            <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {sharedAt ? `with your counselor ${sharedAt}` : "not shared yet"}
+            </span>
+            <span className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{questionCount} question{questionCount === 1 ? "" : "s"} saved</span>
+          </span>
+        </button>
       </section>
 
       {/* Secondary: activity and controls, kept out of the identity block */}
@@ -775,7 +805,7 @@ function OverviewTab({
             <Flame className="h-4 w-4" style={{ color: "var(--chart-3)" }} aria-hidden />
             <span className="text-[12.5px] font-bold">{STUDENT.streakDays} day streak</span>
           </span>
-          <button type="button" onClick={onGoEvidence} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onOpenEvidence} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <Eye className="h-4 w-4" aria-hidden /> {EVIDENCE.length} inputs behind your report
           </button>
         </span>
@@ -792,15 +822,15 @@ function OverviewTab({
 // inferred appears here, because anything a student cannot check is not
 // something we should be showing back to them as fact.
 
-function EvidenceTab({
-  focus, confirmed, hidden, onToggleConfirmed, onHide, onGoReport,
+function EvidenceSheet({
+  focus, confirmed, hidden, onToggleConfirmed, onHide, onClose,
 }: {
   focus: ProfileCareer | null;
   confirmed: Set<string>;
   hidden: Set<string>;
   onToggleConfirmed: (id: string) => void;
   onHide: (id: string) => void;
-  onGoReport: () => void;
+  onClose: () => void;
 }) {
   const [scope, setScope] = useState<"all" | "career">("all");
   const items = EVIDENCE.filter((item) => !hidden.has(item.id)).filter((item) => (scope === "all" ? true : item.careerId === focus?.id));
@@ -810,8 +840,10 @@ function EvidenceTab({
   }, {});
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      <section aria-labelledby="evidence-intro" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+    <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(8px)" }} />
+      <div className="relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="flex flex-col gap-[3px]">
           <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
           <h3 id="evidence-intro" className="text-[21px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
@@ -819,14 +851,17 @@ function EvidenceTab({
             Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
           </span>
         </span>
-        <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
-          {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
-            <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
+        <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close evidence">
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+      </div>
+      <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
+        {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
+          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            {label}
+          </button>
+        ))}
+      </div>
 
       {Object.entries(grouped).map(([kind, list]) => (
         <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
@@ -869,10 +904,8 @@ function EvidenceTab({
         <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
           Scrolling, tapping around and watching without finishing. Dreamari keeps some internal signals to order your feed, and none of them appear in your report or get shared with anyone.
         </p>
-        <button type="button" onClick={onGoReport} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-          See how this shapes my report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </button>
       </section>
+      </div>
     </div>
   );
 }
@@ -902,20 +935,59 @@ function CompareChart({ title, better, unit, rows, selectedId }: { title: string
   );
 }
 
-// ---- My Pathway: routes and plan in one place ----
-// Path and Plan were the same question asked twice ("how do I get there" and
-// "what do I do about it"), so they are one screen now: pick a route, then
-// the courses, steps and dates that follow from it.
+// ---- Routes: how people actually get into this career ----
+// Split back out from the merged pathway screen: stacking routes above the
+// plan meant scrolling past a full comparison carousel to reach today's
+// tasks. Two tabs, named so they cannot be confused with each other
+// ("Routes" vs "My Plan" rather than the old "Path" vs "Plan").
 
-function PathwayTab({
-  focus, chosenRoute, setRouteChoice, stageIndex, stillExploring, horizonProgress, horizonUnlocked,
-  doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, savedMajors, onToggleMajor, questions, onGoReport,
+function RoutesTab({
+  focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   setRouteChoice: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  stageIndex: number;
-  stillExploring: boolean;
+  savedMajors: Set<string>;
+  onToggleMajor: (name: string) => void;
+  onGoPlan: () => void;
+}) {
+  if (!focus) return null;
+  const report = reportV2(focus.id);
+
+  return (
+    <div className="flex flex-col gap-[var(--space-5)]">
+      <PathTab focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} onGoPlan={onGoPlan} />
+
+      {report && (
+        <section aria-labelledby="majors-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+          <h3 id="majors-title" className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
+          <ul className="flex list-none flex-col p-0">
+            {report.majors.map((major) => (
+              <li key={major.name} className="flex items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="flex min-w-0 flex-col gap-[1px]">
+                  <span className="truncate text-[13.5px] font-bold">{major.name}</span>
+                  <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{major.teaches}</span>
+                </span>
+                <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[11.5px] font-bold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                  {savedMajors.has(major.name) ? <><Check className="h-3.5 w-3.5" aria-hidden /> Saved</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Save</>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}
+
+// ---- My Plan: what to do about it, plus what is coming up ----
+
+function MyPlanTab({
+  focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
+  addCustomTask, removeCustomTask, questions, onGoRoutes, onGoReport,
+}: {
+  focus: ProfileCareer | null;
+  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
   horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
   doneSet: (careerId: string) => Set<string>;
@@ -923,91 +995,36 @@ function PathwayTab({
   tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
   addCustomTask: (careerId: string, horizonId: string, label: string) => void;
   removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
-  savedMajors: Set<string>;
-  onToggleMajor: (name: string) => void;
   questions: CounselorQuestion[];
+  onGoRoutes: () => void;
   onGoReport: () => void;
 }) {
   if (!focus) return null;
-  const route = chosenRoute(focus);
-  const report = reportV2(focus.id);
   const courses = COURSE_SUGGESTIONS[focus.id] ?? [];
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      {/* Direction + where this sits in the journey */}
-      <section aria-labelledby="direction-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="flex flex-col gap-[3px]">
-          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>My direction</span>
-          <h3 id="direction-title" className="text-[21px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-            {stillExploring ? "Still exploring" : `${focus.title}, ${route.short.charAt(0).toLowerCase() + route.short.slice(1)} route`}
-          </h3>
-          <span className="max-w-[52ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-            {stillExploring
-              ? "Pick a route below when you want to test one. You can change it whenever, and nothing locks."
-              : "This is the route your plan and report are built around. Changing it updates both."}
-          </span>
-        </span>
-        <StageRail stageIndex={stageIndex} />
-      </section>
+    <div className="flex flex-col gap-[var(--space-5)]">
+      <PlanTab
+        focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
+        doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
+        removeCustomTask={removeCustomTask} onGoPath={onGoRoutes}
+      />
 
-      {/* Routes — the existing comparison carousel */}
-      <section aria-labelledby="routes-title" className="flex flex-col gap-[var(--space-3)]">
-        <h3 id="routes-title" className="sr-only">Ways into {focus.title}</h3>
-        <PathTab focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} onGoPlan={() => document.getElementById("pathway-plan")?.scrollIntoView({ behavior: "smooth", block: "start" })} />
-      </section>
-
-      {/* Majors + courses: what to take, and why */}
-      {(report || courses.length > 0) && (
-        <section aria-labelledby="prep-title" className="grid gap-[var(--space-4)] md:grid-cols-2">
-          <h3 id="prep-title" className="sr-only">What to study and take</h3>
-          {report && (
-            <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-              <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors that fit</span>
-              <ul className="flex list-none flex-col p-0">
-                {report.majors.map((major) => (
-                  <li key={major.name} className="flex items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                    <span className="flex min-w-0 flex-col gap-[1px]">
-                      <span className="truncate text-[13.5px] font-bold">{major.name}</span>
-                      <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{major.teaches}</span>
-                    </span>
-                    <button type="button" aria-pressed={savedMajors.has(major.name)} onClick={() => onToggleMajor(major.name)} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[11.5px] font-bold" style={{ color: savedMajors.has(major.name) ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                      {savedMajors.has(major.name) ? <><Check className="h-3.5 w-3.5" aria-hidden /> Saved</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Save</>}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {courses.length > 0 && (
-            <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-              <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
-              <ul className="flex list-none flex-col p-0">
-                {courses.map((course) => (
-                  <li key={course.label} className="flex flex-col gap-[1px] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                    <span className="text-[13.5px] font-bold">{course.label}</span>
-                    <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{course.why}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* The plan itself */}
-      <section id="pathway-plan" aria-labelledby="plan-title" className="scroll-mt-[20px] flex flex-col gap-[var(--space-3)]">
-        <h3 id="plan-title" className="sr-only">My plan</h3>
-        <PlanTab
-          focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
-          doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-          removeCustomTask={removeCustomTask} onGoPath={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        />
-      </section>
-
-      {/* Dates and saved questions */}
       <section aria-labelledby="ahead-title" className="grid gap-[var(--space-4)] md:grid-cols-2">
         <h3 id="ahead-title" className="sr-only">What is coming up</h3>
+        {courses.length > 0 && (
+          <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
+            <ul className="flex list-none flex-col p-0">
+              {courses.map((course) => (
+                <li key={course.label} className="flex flex-col gap-[1px] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="text-[13.5px] font-bold">{course.label}</span>
+                  <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{course.why}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
           <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Coming up</span>
           <ul className="flex list-none flex-col p-0">
@@ -1022,21 +1039,22 @@ function PathwayTab({
             ))}
           </ul>
         </div>
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Questions I saved</span>
-          <ol className="flex list-none flex-col p-0">
-            {questions.map((question, index) => (
-              <li key={question.id} className="flex gap-[10px] border-t py-[10px] first:border-t-0 text-[13px] leading-[18px]" style={{ borderColor: "var(--glass-border)" }}>
-                <span aria-hidden className="tabular-nums font-bold" style={{ color: "var(--accent-subtle)" }}>{index + 1}</span>
-                {question.text}
-              </li>
-            ))}
-            {questions.length === 0 && <li className="py-[10px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>None yet. Add them in your report.</li>}
-          </ol>
-          <button type="button" onClick={onGoReport} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-            Edit in my report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </button>
-        </div>
+      </section>
+
+      <section aria-labelledby="questions-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <h3 id="questions-title" className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Questions I saved for my counselor</h3>
+        <ol className="flex list-none flex-col p-0">
+          {questions.map((question, index) => (
+            <li key={question.id} className="flex gap-[10px] border-t py-[10px] text-[13px] leading-[18px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+              <span aria-hidden className="font-bold tabular-nums" style={{ color: "var(--accent-subtle)" }}>{index + 1}</span>
+              {question.text}
+            </li>
+          ))}
+          {questions.length === 0 && <li className="py-[10px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>None yet. Add them in your report.</li>}
+        </ol>
+        <button type="button" onClick={onGoReport} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          Edit in my report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </button>
       </section>
     </div>
   );
