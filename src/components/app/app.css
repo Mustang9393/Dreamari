@@ -343,16 +343,7 @@ html.light .dm-report {
     font-size: 8.5pt;
     color: #555;
   }
-
-  /* Which document prints is chosen before the dialog opens. */
-  body[data-print="summary"] [data-doc="full"] { display: none !important; }
-  body[data-print="full"] [data-doc="summary"] { display: none !important; }
-  body:not([data-print]) [data-doc="summary"] { display: none !important; }
 }
 
-/* The one-page summary is a print artifact; on screen it only appears inside
-   the export preview, which sets data-preview="summary" on its container. */
+/* The running footer is a print artifact only. */
 .dm-print-footer { display: none; }
-[data-doc="summary"] { display: none; }
-[data-preview="summary"] [data-doc="summary"] { display: block; }
-[data-preview="summary"] [data-doc="full"] { display: none; }

@@ -17,7 +17,6 @@ import {
   ChevronRight,
   Compass,
   Eye,
-  FileText,
   Flame,
   Gamepad2,
   GraduationCap,
@@ -39,17 +38,15 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
-import { CareerReportView, ComparisonTable } from "./CareerReport";
+import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
 import {
   ACADEMIC_RECORD,
   COURSE_SUGGESTIONS,
   EVIDENCE,
   EVIDENCE_KIND_LABEL,
-  STUDENT_DIRECTION,
   UPCOMING,
   reportV2,
   type EvidenceItem,
-  type PathwayStage,
 } from "./report-data";
 
 // My Profile, round 2: scannable and visual. No paragraphs, no em dashes.
@@ -119,9 +116,7 @@ export function ProfileExperience() {
   const [sharedAt, setSharedAt] = useState<string | null>(null);
   // Student-owned report state. Local only: there is no persistence layer yet,
   // so this resets on reload (documented in the handoff).
-  const [reflection, setReflection] = useState(STUDENT_DIRECTION.reflection);
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
-  const [doneActions, setDoneActions] = useState<Set<string>>(new Set());
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
@@ -163,25 +158,10 @@ export function ProfileExperience() {
     return null;
   };
 
-  // Where the student is in the journey, derived from what they have actually
-  // done — never a stored "level". A student can sit in Explore forever and
-  // the UI must not imply that is failing.
-  const stage: PathwayStage = (() => {
-    if (top3.length < 2) return "explore";
-    if (!focus) return "explore";
-    const picked = Boolean(routeChoice[focus.id]);
-    const planStarted = (done[focus.id] ?? []).length > 0;
-    const shared = sharedAt !== null;
-    if (shared) return "share";
-    if (planStarted) return "plan";
-    if (picked) return "decide";
-    return "compare";
-  })();
   // "Still exploring" is a first-class state, not a failure to progress.
   const stillExploring = !focus || !routeChoice[focus.id];
 
   const toggleMajor = (name: string) => setSavedMajors((current) => { const next = new Set(current); if (next.has(name)) next.delete(name); else next.add(name); return next; });
-  const toggleAction = (id: string) => setDoneActions((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const toggleEvidenceConfirmed = (id: string) => setConfirmedEvidence((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const hideEvidence = (id: string) => setHiddenEvidence((current) => new Set(current).add(id));
 
@@ -270,7 +250,7 @@ export function ProfileExperience() {
               <span className="truncate text-[15px] leading-[17px] font-bold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
-              {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
+              {([["locker", "Locker", Archive], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
                 <button
                   key={id}
                   type="button"
@@ -314,7 +294,7 @@ export function ProfileExperience() {
 
         {/* Utility views (Locker, Settings, Resume) take over everything under
             the header; the Top 3 and tabs belong to the career-facing views. */}
-        {(tab === "locker" || tab === "settings" || tab === "resume") ? null : (
+        {(tab === "locker" || tab === "settings") ? null : (
         <>
         {/* ---- My Top 3: the profile's context switcher, above the tabs.
              Tap a card and every tab below shows that career. ---- */}
@@ -335,7 +315,7 @@ export function ProfileExperience() {
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "routes", "plan", "report"];
+            const order: TabId[] = ["overview", "routes", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -354,8 +334,9 @@ export function ProfileExperience() {
             [
               { id: "overview", label: "Overview" },
               { id: "routes", label: "Routes" },
-              { id: "plan", label: "My Plan" },
+              { id: "plan", label: "Plan" },
               { id: "report", label: "Report" },
+              { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
             <button
@@ -367,7 +348,7 @@ export function ProfileExperience() {
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-1 cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-2)] py-[13px] text-center text-[15px] leading-[18px] font-bold"
+              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[13px] py-[13px] text-center text-[15px] leading-[18px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)]"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
@@ -384,8 +365,8 @@ export function ProfileExperience() {
           <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
             <OverviewTab
               focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress}
-              sharedAt={sharedAt} stillExploring={stillExploring}
-              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
+              stillExploring={stillExploring}
+              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoResume={() => setTab("resume")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
               onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
             />
           </div>
@@ -411,9 +392,7 @@ export function ProfileExperience() {
           <div role="tabpanel" id="profile-panel-report" aria-labelledby="profile-tab-report">
             <CareerReportView
               student={{ name: STUDENT.name, grade: STUDENT.grade, school: STUDENT.school }}
-              career={focus} route={chosenRoute(focus)} top3={top3.map(careerById).filter(Boolean) as ProfileCareer[]}
-              stage={stage} direction={{ ...STUDENT_DIRECTION, reflection }} onReflectionChange={setReflection}
-              doneActions={doneActions} onToggleAction={toggleAction} onSwitchCareer={setFocusId}
+              career={focus}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onOpenShare={() => setShareOpen(true)}
               onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
             />
@@ -421,7 +400,11 @@ export function ProfileExperience() {
         )}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
         {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
-        {tab === "resume" && <ResumeView onClose={() => setTab("overview")} />}
+        {tab === "resume" && (
+          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
+            <ResumeView onClose={() => setTab("overview")} />
+          </div>
+        )}
       </main>
 
       {compareOpen && (
@@ -668,18 +651,18 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
 function OverviewTab({
-  focus, chosenRoute, nextTask, planProgress, sharedAt, stillExploring,
-  onGoRoutes, onGoPlan, onGoReport, onOpenEvidence, onGoLocker, onGoSettings,
+  focus, chosenRoute, nextTask, planProgress, stillExploring,
+  onGoRoutes, onGoPlan, onGoReport, onGoResume, onOpenEvidence, onGoLocker, onGoSettings,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   nextTask: (career: ProfileCareer) => PlanTask | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
-  sharedAt: string | null;
   stillExploring: boolean;
   onGoRoutes: () => void;
   onGoPlan: () => void;
   onGoReport: () => void;
+  onGoResume: () => void;
   onOpenEvidence: () => void;
   onGoLocker: () => void;
   onGoSettings: () => void;
@@ -824,21 +807,21 @@ function OverviewTab({
           </span>
         </button>
 
-        {/* Report */}
+        {/* Resume — the report already has a doorway in the summary card above */}
         <button
           type="button"
-          onClick={onGoReport}
+          onClick={onGoResume}
           className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
+            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My resume</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[2px]">
-            <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
-            <span className="text-[15px] leading-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-              {sharedAt ? `with your counselor ${sharedAt}` : "not shared yet"}
+            <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Draft started</span>
+            <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              Two jobs and one club added
             </span>
           </span>
         </button>
@@ -1187,6 +1170,7 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
   onClose: () => void;
 }) {
   return (
+    <Portal>
     <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
       <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
@@ -1198,6 +1182,7 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 

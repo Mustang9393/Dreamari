@@ -116,6 +116,40 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 22: overlays portalled, summary dropped, Resume tab (PUSHED)
+
+STACKING CONTEXT BUG (the "stuck on the export screen" report):
+- <main> is `relative z-10`, which creates a stacking context. Any overlay
+  rendered inside it is trapped there, so a z-[110] modal still painted BENEATH
+  the z-40 header: the preview toolbar and its close button sat under the
+  navbar and the screen looked unescapable. Raising the z-index cannot fix
+  this. The export preview, the mobile contents drawer and RouteDetailModal
+  are now rendered through a <Portal>.
+- THE PORTAL HOST MUST CARRY `marketing-v2 themeable`. Every --space-*,
+  --glass-* and --primary token is scoped to that class; a bare document.body
+  portal renders with them undefined and padding silently collapses to 0.
+  Confirmed: paper padding read 0px before the host class, 48/40px after.
+- Sheets already rendered outside <main> (Share, Evidence, Compare) were fine.
+
+ONE-PAGE SUMMARY REMOVED. Measured first: the full report prints to ~1.9
+pages, so it is not literally a one-pager, but two pages is short enough that
+a second condensed document was redundant. MeetingSummary, the document
+radio-group, the data-doc/data-print machinery and the second running footer
+are all gone, along with the props that only fed them (route, top3, stage,
+direction, doneActions, onToggleAction, onSwitchCareer, onReflectionChange).
+
+- Resume is a top-level tab, LAST in the order: Overview / Routes / Plan /
+  Report / Resume. It left the header utility pills so it is not in two places.
+- The Overview bento's report tile became a resume tile; the report already
+  has a doorway in the career summary card above it.
+- Five tabs overflow 375px, so the tab bar scrolls horizontally below sm and
+  goes back to flex-1 from sm up. Verified: no tab clipped, no page overflow.
+
+PROCESS NOTE: several string replacements in CareerReport.tsx silently
+no-opped and successive index-based slices then cut real JSX, leaving the file
+unbuildable. Recovered with `git checkout HEAD -- <file>` and redid the work
+with an assert on every edit. Assert, or do not edit by slice.
+
 ### 2026-08-22 Round 21: hover states outside the profile (PUSHED)
 
 - Round 8 wired .dm-tap/.dm-quiet/.dm-link/.dm-solid into the PROFILE ONLY.

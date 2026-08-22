@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowRight, BadgeCheck, Check, Compass, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
-import type { ProfileCareer, PathwayRoute } from "./data";
+import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
   reportV2,
   type CareerReportV2,
-  type PathwayStage,
-  type StudentDirection,
 } from "./report-data";
 
 // The Career & Pathway Report.
@@ -33,6 +32,28 @@ export const REPORT_SECTIONS = [
   { id: "colleges", n: 4, label: "Colleges" },
 ] as const;
 
+
+// Overlays must escape <main>, which is `relative z-10` and therefore a
+// stacking context: a z-[110] modal inside it still paints beneath the z-40
+// header. Portalling is the fix; raising the z-index is not. The host carries
+// `marketing-v2 themeable` because every --space-*, --glass-* and --primary
+// token is scoped to that class, and without it padding silently collapses.
+function Portal({ children }: { children: React.ReactNode }) {
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const host = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const node = document.createElement("div");
+    node.className = "marketing-v2 themeable";
+    return node;
+  }, []);
+  useEffect(() => {
+    if (!host) return;
+    document.body.appendChild(host);
+    return () => host.remove();
+  }, [host]);
+  if (!mounted || !host) return null;
+  return createPortal(children, host);
+}
 
 // 11 -> "11th". Grades only, so the teen rules are all that matter.
 function ordinal(n: string): string {
@@ -161,117 +182,9 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
 
 // The one-page meeting summary. Print-only by default; the export preview can
 // show it on screen. Everything a counselor needs in the first two minutes.
-function MeetingSummary({
-  student,
-  career,
-  entries,
-  direction,
-  actions,
-  route,
-  reportDate,
-}: {
-  student: { name: string; grade: string; school: string };
-  career: ProfileCareer;
-  entries: { career: ProfileCareer; report: CareerReportV2 }[];
-  direction: StudentDirection;
-  actions: { label: string; done: boolean }[];
-  route: PathwayRoute;
-  reportDate: string;
-}) {
-  return (
-    <div data-doc="summary" className="dm-report px-[var(--space-6)] py-[var(--space-8)] sm:px-[var(--space-10)] sm:py-[var(--space-12)]">
-      <header>
-        <p className="text-[12px] font-bold tracking-[2px] uppercase" style={{ color: "var(--ink-faint)" }}>Meeting summary</p>
-        <h2 className="mt-[8px] text-[36px] leading-[38px] font-extrabold tracking-[-0.035em] sm:text-[44px] sm:leading-[44px]" style={{ fontFamily: "var(--font-display)" }}>
-          {student.name}
-        </h2>
-        <dl className="mt-[16px] flex flex-wrap items-end gap-x-[32px] gap-y-[12px] border-t pt-[14px]" style={{ borderColor: "var(--rule-strong)" }}>
-          {[
-            { label: "Grade", value: student.grade.replace("Grade ", "") },
-            { label: "School", value: student.school },
-            ...(ACADEMIC_RECORD.verified ? [{ label: "GPA", value: ACADEMIC_RECORD.gpa }] : []),
-            { label: "Date", value: reportDate },
-          ].map((fact) => (
-            <div key={fact.label} className="flex flex-col gap-[1px]">
-              <dt className="text-[12px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>{fact.label}</dt>
-              <dd className="text-[19px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </header>
-
-      <section className="mt-[26px]" data-keep-together>
-        <h3 className="text-[12px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am working toward</h3>
-        <p className="mt-[7px] max-w-[60ch] text-[21px] leading-[29px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>
-          {direction.goal}
-        </p>
-        <p className="mt-[8px] max-w-[62ch] text-[14px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>
-          Leaning toward <strong style={{ color: "var(--ink)" }}>{career.title}</strong> by the {route.short.toLowerCase()} route: {route.duration}, {route.cost.split(",")[0]}.
-        </p>
-      </section>
-
-      <section className="mt-[24px] border-t pt-[16px]" style={{ borderColor: "var(--rule)" }} data-keep-together>
-        <h3 className="text-[12px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>My careers, side by side</h3>
-        <table className="mt-[10px] w-full border-collapse text-left">
-          <thead>
-            <tr>
-              {["Career", "Education", "Time", "Pay starting out", "Where I am"].map((head) => (
-                <th key={head} scope="col" className="border-b pb-[6px] pr-[12px] text-[12px] font-bold tracking-[1px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{head}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map(({ career: item, report }) => (
-              <tr key={item.id}>
-                <td className="border-b py-[9px] pr-[12px] align-top text-[14px] leading-[19px] font-extrabold" style={{ borderColor: "var(--rule)", fontFamily: "var(--font-display)" }}>{item.title}</td>
-                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.education}</td>
-                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px] tabular-nums" style={{ borderColor: "var(--rule)" }}>{report.comparison.timeToEnter}</td>
-                <td className="border-b py-[9px] pr-[12px] align-top text-[12.5px] leading-[18px] tabular-nums" style={{ borderColor: "var(--rule)" }}>{report.comparison.salaryRange}</td>
-                <td className="border-b py-[9px] align-top text-[12.5px] leading-[18px]" style={{ borderColor: "var(--rule)" }}>{report.comparison.evidence}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <div className="mt-[24px] grid gap-x-[36px] gap-y-[22px] border-t pt-[16px] sm:grid-cols-2" style={{ borderColor: "var(--rule)" }}>
-        <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[12px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
-          <p className="mt-[7px] text-[15px] leading-[23px]">{direction.question}</p>
-        </section>
-        <section className="sm:col-span-2" data-keep-together>
-          <h3 className="text-[12px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
-          <ul className="mt-[7px] grid list-none gap-x-[28px] p-0 sm:grid-cols-2">
-            {actions.map((action) => (
-              <li key={action.label} className="flex items-start gap-[9px] border-b py-[7px] text-[13.5px] leading-[19px]" style={{ borderColor: "var(--rule)" }}>
-                <span aria-hidden className="mt-[2px] flex size-[14px] flex-none items-center justify-center border text-[12px] font-bold" style={{ borderColor: "var(--rule-strong)" }}>{action.done ? "x" : ""}</span>
-                <span style={{ textDecoration: action.done ? "line-through" : "none" }}>{action.label}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
-      <p className="mt-[22px] border-t pt-[12px] text-[12px] leading-[15px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-        Prepared by the student with Dreamari. Pay and outlook from the U.S. Bureau of Labor Statistics; college figures from the College Scorecard.
-        This supports a conversation about options. It is not a decision, a prediction, or a guarantee.
-      </p>
-    </div>
-  );
-}
-
-
 export type ReportViewProps = {
   student: { name: string; grade: string; school: string };
   career: ProfileCareer;
-  route: PathwayRoute;
-  top3: ProfileCareer[];
-  stage: PathwayStage;
-  direction: StudentDirection;
-  onReflectionChange: (value: string) => void;
-  doneActions: Set<string>;
-  onToggleAction: (id: string) => void;
-  onSwitchCareer: (id: string) => void;
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
   onOpenShare: () => void;
@@ -435,13 +348,13 @@ function ReportDocument({
   );
 }
 
-export { ComparisonTable };
+export { ComparisonTable, Portal };
 
 export function CareerReportView(props: ReportViewProps) {
-  const { student, career, route, top3, direction, doneActions } = props;
+  const { student, career } = props;
   const report = reportV2(career.id);
   const [tocOpen, setTocOpen] = useState(false);
-  const [preview, setPreview] = useState<null | "full" | "summary">(null);
+  const [preview, setPreview] = useState(false);
   const [active, setActive] = useState<string>("glance");
   const tocButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -461,10 +374,6 @@ export function CareerReportView(props: ReportViewProps) {
 
   const reportDate = "Aug 22, 2026";
 
-  const entries = useMemo(
-    () => top3.map((item) => ({ career: item, report: reportV2(item.id) })).filter((entry): entry is { career: ProfileCareer; report: CareerReportV2 } => Boolean(entry.report)),
-    [top3],
-  );
 
 
   if (!report) {
@@ -482,18 +391,8 @@ export function CareerReportView(props: ReportViewProps) {
     requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
-  const print = (doc: "full" | "summary") => {
-    document.body.setAttribute("data-print", doc);
-    const cleanup = () => {
-      document.body.removeAttribute("data-print");
-      window.removeEventListener("afterprint", cleanup);
-    };
-    window.addEventListener("afterprint", cleanup);
-    window.print();
-    window.setTimeout(cleanup, 1500);
-  };
+  const print = () => window.print();
 
-  const actionList = report.actions.map((action) => ({ label: action.label, done: doneActions.has(action.id) }));
 
   return (
     <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start lg:gap-[var(--space-8)]">
@@ -524,7 +423,7 @@ export function CareerReportView(props: ReportViewProps) {
           <button type="button" onClick={() => setTocOpen(true)} ref={tocButtonRef} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold lg:hidden" style={{ borderColor: "var(--border)" }}>
             <List className="h-4 w-4" aria-hidden /> Contents
           </button>
-          <button type="button" onClick={() => setPreview("full")} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <button type="button" onClick={() => setPreview(true)} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Printer className="h-4 w-4" aria-hidden /> Export
           </button>
           <button type="button" onClick={props.onOpenShare} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold" style={{ borderColor: "var(--border)" }}>
@@ -536,18 +435,11 @@ export function CareerReportView(props: ReportViewProps) {
         {/* ---------------- The document ---------------- */}
         <ReportDocument student={student} career={career} report={report} reportDate={reportDate} />
 
-        {/* One-page meeting summary, print-only unless previewed */}
-        <MeetingSummary
-          student={student} career={career} entries={entries} direction={direction}
-          actions={actionList} route={route} reportDate={reportDate}
-        />
-        <div className="dm-print-footer" aria-hidden>
-          {student.name} · Meeting summary · {reportDate} · v1.0
-        </div>
       </div>
 
       {/* Mobile contents drawer — replaces the horizontally scrolling rail */}
       {tocOpen && (
+        <Portal>
         <div data-print-hide className="no-print fixed inset-0 z-[100] lg:hidden">
           <button type="button" aria-label="Close contents" onClick={() => setTocOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(6px)" }} />
           <div role="dialog" aria-label="Report contents" className="absolute inset-x-0 bottom-0 max-h-[78dvh] overflow-y-auto rounded-t-[var(--radius-2xl)] border-t px-5 pt-[var(--space-5)] pb-[calc(env(safe-area-inset-bottom)+var(--space-6))]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
@@ -569,46 +461,32 @@ export function CareerReportView(props: ReportViewProps) {
             </ol>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Export preview: pick the document, see it, then print */}
       {preview && (
+        <Portal>
         <div data-print-hide className="no-print fixed inset-0 z-[110] flex flex-col" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", backdropFilter: "blur(8px)" }}>
           <div className="flex flex-wrap items-center gap-[var(--space-2)] border-b px-5 py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <h3 className="mr-auto text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Export preview</h3>
-            <div role="radiogroup" aria-label="Which document" className="flex gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
-              {([["full", "Full report"], ["summary", "One-page summary"]] as const).map(([value, label]) => (
-                <button key={value} type="button" role="radio" aria-checked={preview === value} onClick={() => setPreview(value)} className="min-h-[38px] cursor-pointer rounded-full px-[14px] text-[12px] font-bold" style={{ background: preview === value ? "var(--primary)" : "transparent", color: preview === value ? "var(--primary-foreground)" : "var(--foreground)" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => print(preview)} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+            <button type="button" onClick={print} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
               <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
             </button>
-            <button type="button" onClick={() => setPreview(null)} className="flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close preview">
+            <button type="button" onClick={() => setPreview(false)} className="flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close preview">
               <X className="h-5 w-5" aria-hidden />
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5" data-preview={preview}>
+          <div className="min-h-0 flex-1 overflow-y-auto p-5" data-preview="full">
             <p className="mx-auto mb-[var(--space-3)] max-w-[820px] text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-              {preview === "full"
-                ? "This is the document exactly as it will print: US Letter, no app navigation, nothing hidden. Page numbers come from your browser's print settings."
-                : "One page, sized for US Letter. Your goal, your top careers, what you are unsure about, your questions and your next actions."}
+              This is the document exactly as it will print: US Letter, no app navigation, nothing hidden. Page numbers come from your browser&apos;s print settings.
             </p>
-            {/* Paper proxy: sized near US Letter's printable width. */}
             <div className="mx-auto max-w-[816px] overflow-hidden rounded-[6px] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.8)]">
-              {preview === "summary" ? (
-                <MeetingSummary
-                  student={student} career={career} entries={entries} direction={direction}
-                  actions={actionList} route={route} reportDate={reportDate}
-                />
-              ) : (
-                <ReportDocument student={student} career={career} report={report} reportDate={reportDate} idPrefix="preview-" />
-              )}
+              <ReportDocument student={student} career={career} report={report} reportDate={reportDate} idPrefix="preview-" />
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

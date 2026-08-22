@@ -160,7 +160,7 @@ function PlayDemo() {
           style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px) calc(var(--mu) * 8px)", gap: "calc(var(--mu) * 5px)", background: "var(--card)" }}
         >
           <div>
-            <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(10px, calc(var(--mu) * 8px), 12px)", letterSpacing: "0.1em", color: "#3b82f6", fontWeight: 600 }}>
+            <p className="font-extrabold" style={{ fontSize: "clamp(17px, calc(var(--mu) * 14px), 23px)", lineHeight: 1.15, letterSpacing: "-0.015em", color: "#5b9bff" }}>
               Day in the life of an investment banker
             </p>
             {/* Narrator line as a quote bar, not a full bordered bubble — the old
@@ -176,9 +176,9 @@ function PlayDemo() {
                 borderLeft: "3px solid color-mix(in srgb, #3b82f6 65%, transparent)",
               }}
             >
-              <p style={{ fontSize: "clamp(12.5px, calc(var(--mu) * 10px), 15px)", lineHeight: 1.35, fontWeight: 600, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
+              <p style={{ fontSize: "clamp(14px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.45, fontWeight: 500, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
             </div>
-            <p className="font-extrabold" style={{ marginTop: "calc(var(--mu) * 8px)", fontSize: "clamp(14px, calc(var(--mu) * 12px), 18px)", color: "var(--foreground)" }}>
+            <p className="uppercase" style={{ marginTop: "calc(var(--mu) * 9px)", fontSize: "clamp(13px, calc(var(--mu) * 10.5px), 15.5px)", letterSpacing: "0.06em", fontWeight: 800, color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
               {SCENARIO.prompt}
             </p>
           </div>
@@ -209,7 +209,7 @@ function PlayDemo() {
                     opacity: pickedIndex === null ? (isCorrect ? 1 : 0.5) : isPicked ? 1 : 0.5,
                   }}
                 >
-                  <span className="flex-1" style={{ fontSize: "clamp(13px, calc(var(--mu) * 10px), 15px)", fontWeight: 600, color: "#fff" }}>
+                  <span className="flex-1" style={{ fontSize: "clamp(13px, calc(var(--mu) * 10.5px), 15.5px)", fontWeight: 500, color: "#fff" }}>
                     {option.label}
                   </span>
                   <svg
@@ -230,7 +230,7 @@ function PlayDemo() {
           </div>
 
           <div className="flex items-center justify-between" style={{ minHeight: "calc(var(--mu) * 16px)" }}>
-            <p style={{ fontSize: "clamp(12px, calc(var(--mu) * 9.5px), 14px)", fontWeight: 700, color: "#7aa4ff" }}>
+            <p style={{ fontSize: "clamp(11.5px, calc(var(--mu) * 9px), 13px)", fontWeight: 600, color: "#7aa4ff" }}>
               {pickedIndex !== null ? SCENARIO.options[pickedIndex].response : ""}
             </p>
             {pickedIndex !== null && (
