@@ -178,9 +178,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       source: bls("Financial analyst pay and outlook", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
     },
     education: [
-      { name: "Bachelor's degree in finance, economics or business", kind: "Degree", time: "4 years", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "Summer internships matter as much as the major." },
+      { name: "Bachelor's: Finance, Economics, or Business", kind: "Degree", time: "4 years", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "Summer internships matter as much as the major." },
       { name: "Two-year college, then transfer", kind: "Degree", time: "2 + 2 years", prerequisites: "High school diploma", licensure: null, common: false, note: "Much cheaper start. Check the transfer agreement early." },
-      { name: "Any major plus finance internships", kind: "Degree", time: "4 years", prerequisites: "High school diploma", licensure: null, common: false, note: "Banks hire non-finance majors who can show the skills." },
     ],
     majors: [
       { name: "Finance", teaches: "How money moves through companies and markets, and how to value a business.", connection: "The most direct line into banking work.", alternatives: ["Economics", "Accounting"] },
@@ -192,6 +191,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       { name: "Baruch College (CUNY)", location: "New York, NY", control: "Public", length: "4-year", program: "BBA Finance", cost: "About $7K a year in-state tuition and fees", outcome: "72% graduate within 6 years", requirements: "Check the GPA and course requirements on the CUNY site", why: "Public tuition in Manhattan, so internships are a subway ride away.", status: "Safety" },
       { name: "Indiana University (Kelley)", location: "Bloomington, IN", control: "Public", length: "4-year", program: "BS Finance", cost: "About $12K in-state, about $41K out-of-state", outcome: "83% graduate within 6 years", requirements: "Direct admission to Kelley is competitive, check requirements", why: "Its investment banking workshop is a known route into Wall Street.", status: "Target" },
       { name: "New York University (Stern)", location: "New York, NY", control: "Private", length: "4-year", program: "BS Business, Finance concentration", cost: "About $62K a year tuition before aid", outcome: "87% graduate within 6 years", requirements: "Very competitive, check requirements and aid before assuming cost", why: "Strongest finance recruiting on this list, at the highest sticker price.", status: "Reach" },
+      { name: "Wharton (UPenn)", location: "Philadelphia, PA", control: "Private", length: "4-year", program: "BS Economics, finance concentration", cost: "About $66K a year tuition before aid", outcome: "96% graduate within 6 years", requirements: "Among the most competitive in the country", why: "The most direct Wall Street pipeline, and the hardest to get into.", status: "Reach" },
+      { name: "Pace University (Lubin)", location: "New York, NY", control: "Private", length: "4-year", program: "BBA Finance", cost: "About $50K a year tuition before aid, strong merit aid", outcome: "60% graduate within 6 years", requirements: "Check merit scholarship criteria", why: "Manhattan campus with an internship requirement built into the degree.", status: "Safety" },
     ],
     comparison: {
       careerId: "investment-banking",
@@ -255,7 +256,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       source: bls("Airline and commercial pilot pay and outlook", "May 2024", "https://www.bls.gov/ooh/transportation-and-material-moving/airline-and-commercial-pilots.htm"),
     },
     education: [
-      { name: "Flight school to a commercial license, then build hours", kind: "Training", time: "1.5 to 2 years, then hour building", prerequisites: "17+, medical certificate, English proficiency", licensure: "FAA Commercial Pilot certificate, then ATP at 1,500 hours", common: true, note: "Most people instruct to build the hours and get paid doing it." },
+      { name: "Flight school, then build hours to 1,500", kind: "Training", time: "1.5 to 2 years, then hour building", prerequisites: "17+, medical certificate, English proficiency", licensure: "FAA Commercial Pilot certificate, then ATP at 1,500 hours", common: true, note: "Most people instruct to build the hours and get paid doing it." },
       { name: "Aviation university degree", kind: "Degree", time: "4 years", prerequisites: "High school diploma, medical certificate", licensure: "R-ATP at 1,000 hours instead of 1,500", common: false, note: "Costs more, but you reach the airlines with fewer hours." },
       { name: "Military flight training", kind: "Military", time: "8 to 10 year commitment", prerequisites: "Officer selection, very competitive", licensure: "Military wings, then civilian conversion", common: false, note: "No training debt. The commitment is the trade." },
     ],
@@ -268,7 +269,9 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       { name: "University of North Dakota", location: "Grand Forks, ND", control: "Public", length: "4-year", program: "BS Commercial Aviation", cost: "About $10K a year in-state tuition, flight fees are extra", outcome: "60% graduate within 6 years", requirements: "Check flight program admission separately from the university", why: "One of the largest collegiate fleets, at the lowest cost on this list.", status: "Target" },
       { name: "ATP Flight School", location: "Multiple locations", control: "Private", length: "Flight school", program: "Airline career pilot program", cost: "About $115K for the full program", outcome: "Publishes time-to-airline data", requirements: "Medical certificate and a financing plan", why: "Fastest structured route to the airlines, with no degree required.", status: "Safety" },
       { name: "Embry-Riddle Aeronautical University", location: "Daytona Beach, FL", control: "Private", length: "4-year", program: "BS Aeronautical Science", cost: "About $42K a year tuition, flight fees are extra", outcome: "62% graduate within 6 years", requirements: "Check requirements and total flight cost, not just tuition", why: "Best known aviation degree. Flight fees roughly double the tuition.", status: "Reach" },
-      { name: "Local Part 141 academy", location: "Near you", control: "Private", length: "Program", program: "Commercial certificate", cost: "$85K to $110K depending on hours flown", outcome: null, requirements: "Discovery flight and a medical certificate first", why: "You can begin training at 17, before you finish high school.", status: "Target" },
+      { name: "Local Part 141 academy", location: "Near you", control: "Private", length: "Program", program: "Commercial certificate", cost: "$85K to $110K depending on hours flown", outcome: null, requirements: "Discovery flight and a medical certificate first", why: "You can begin training at 17, before you finish high school.", status: "Safety" },
+      { name: "Purdue University", location: "West Lafayette, IN", control: "Public", length: "4-year", program: "BS Professional Flight", cost: "About $10K in-state, about $28K out-of-state, flight fees extra", outcome: "84% graduate within 6 years", requirements: "Flight program admits separately and fills early", why: "Respected flight program attached to a major engineering school.", status: "Reach" },
+      { name: "Western Michigan University", location: "Kalamazoo, MI", control: "Public", length: "4-year", program: "BS Aviation Flight Science", cost: "About $14K a year in-state, flight fees extra", outcome: "62% graduate within 6 years", requirements: "Check flight science admission requirements", why: "Large modern training fleet and airline cadet agreements.", status: "Target" },
     ],
     comparison: {
       careerId: "airline-pilot",
@@ -331,9 +334,8 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       source: bls("Financial analyst pay and outlook (closest tracked occupation)", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
     },
     education: [
-      { name: "Bachelor's degree, then two years in banking", kind: "Degree", time: "4 years plus 2", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "Almost nobody joins a fund straight out of school." },
+      { name: "Bachelor's: Finance or Economics, then banking", kind: "Degree", time: "4 years plus 2", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "Almost nobody joins a fund straight out of school." },
       { name: "Consulting first, then private equity", kind: "Degree", time: "4 years plus 2 to 3", prerequisites: "High school diploma", licensure: null, common: false, note: "Operations-focused funds like this background." },
-      { name: "Two-year college, transfer, then internships", kind: "Degree", time: "2 + 2 years", prerequisites: "High school diploma", licensure: null, common: false, note: "Harder route into this field, but it has been done." },
     ],
     majors: [
       { name: "Finance", teaches: "Valuing companies and understanding how deals are financed.", connection: "The core skill the job tests you on.", alternatives: ["Economics", "Accounting"] },
@@ -344,6 +346,9 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       { name: "Indiana University (Kelley)", location: "Bloomington, IN", control: "Public", length: "4-year", program: "BS Finance, investment banking workshop", cost: "About $12K in-state, about $41K out-of-state", outcome: "83% graduate within 6 years", requirements: "Workshop application is separate and competitive", why: "Its banking workshop feeds the analyst jobs that lead into PE.", status: "Target" },
       { name: "University of Virginia (McIntire)", location: "Charlottesville, VA", control: "Public", length: "4-year", program: "BS Commerce, finance track", cost: "About $22K in-state, about $60K out-of-state", outcome: "94% graduate within 6 years", requirements: "You apply to McIntire after your second year", why: "Small cohort, and you apply after two years rather than as a freshman.", status: "Target" },
       { name: "Baruch College (CUNY)", location: "New York, NY", control: "Public", length: "4-year", program: "BBA Finance", cost: "About $7K a year in-state tuition and fees", outcome: "72% graduate within 6 years", requirements: "Check GPA and course requirements", why: "Lowest cost on this list, in the city where the internships are.", status: "Safety" },
+      { name: "Wharton (UPenn)", location: "Philadelphia, PA", control: "Private", length: "4-year", program: "BS Economics, finance concentration", cost: "About $66K a year tuition before aid", outcome: "96% graduate within 6 years", requirements: "Among the most competitive in the country", why: "Feeds the largest funds more directly than anywhere else.", status: "Reach" },
+      { name: "University of Michigan (Ross)", location: "Ann Arbor, MI", control: "Public", length: "4-year", program: "BBA", cost: "About $18K in-state, about $60K out-of-state", outcome: "93% graduate within 6 years", requirements: "Ross admits directly from high school and is competitive", why: "Elite placement from a public school, if you get into Ross.", status: "Reach" },
+      { name: "Rutgers University", location: "New Brunswick, NJ", control: "Public", length: "4-year", program: "BS Finance", cost: "About $17K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "Check the business school's separate admission step", why: "In-state cost with a real alumni network in New York finance.", status: "Safety" },
     ],
     comparison: {
       careerId: "private-equity",
@@ -404,10 +409,9 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       source: bls("Software developer pay and outlook", "May 2024", "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"),
     },
     education: [
-      { name: "Bachelor's degree in computer science or software engineering", kind: "Degree", time: "4 years", prerequisites: "High school diploma, math through pre-calculus helps", licensure: null, common: true, note: "Internships matter more than your exact school." },
+      { name: "Bachelor's: Computer Science or Software Engineering", kind: "Degree", time: "4 years", prerequisites: "High school diploma, math through pre-calculus helps", licensure: null, common: true, note: "Internships matter more than your exact school." },
       { name: "Two-year college, then transfer", kind: "Degree", time: "2 + 2 years", prerequisites: "High school diploma", licensure: null, common: false, note: "Common and much cheaper. Confirm the transfer agreement." },
       { name: "Apprenticeship", kind: "Apprenticeship", time: "1 to 2 years", prerequisites: "Some coding ability before you apply", licensure: null, common: false, note: "You get paid while training. Fewer spots exist." },
-      { name: "Technical training plus a portfolio", kind: "Training", time: "6 to 12 months", prerequisites: "Self-motivation", licensure: null, common: false, note: "Works when your projects are genuinely good. Harder market than it used to be." },
     ],
     majors: [
       { name: "Computer Science", teaches: "How computers solve problems: algorithms, data, systems and theory.", connection: "The standard degree for this work and the widest set of doors.", alternatives: ["Software Engineering", "Math"] },
@@ -420,8 +424,7 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       { name: "University of Washington", location: "Seattle, WA", control: "Public", length: "4-year", program: "BS Computer Science", cost: "About $13K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "CS admission is separate and competitive", why: "In-state tuition, with Amazon and Microsoft hiring locally.", status: "Target" },
       { name: "Rutgers University", location: "New Brunswick, NJ", control: "Public", length: "4-year", program: "BS Computer Science", cost: "About $17K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "Check requirements", why: "In-state tuition and the widest admission odds of these four.", status: "Target" },
       { name: "San Jose State University", location: "San Jose, CA", control: "Public", length: "4-year", program: "BS Software Engineering", cost: "About $8K a year in-state tuition and fees", outcome: "68% graduate within 6 years", requirements: "Check impacted-major requirements", why: "Lowest tuition here, inside Silicon Valley's hiring market.", status: "Safety" },
-      { name: "UMass Lowell", location: "Lowell, MA", control: "Public", length: "4-year", program: "BS Computer Science", cost: "About $16K a year in-state tuition and fees", outcome: "68% graduate within 6 years", requirements: "Check requirements for the co-op program", why: "Co-op program means paid engineering work before you graduate.", status: "Target" },
-      { name: "Carnegie Mellon University", location: "Pittsburgh, PA", control: "Private", length: "4-year", program: "BS Computer Science", cost: "About $65K a year tuition before aid", outcome: "93% graduate within 6 years", requirements: "Extremely competitive, check requirements and aid", why: "Well known for computing. Worth discussing cost and odds honestly.", status: "Reach" },
+      { name: "UMass Lowell", location: "Lowell, MA", control: "Public", length: "4-year", program: "BS Computer Science", cost: "About $16K a year in-state tuition and fees", outcome: "68% graduate within 6 years", requirements: "Check requirements for the co-op program", why: "Co-op program means paid engineering work before you graduate.", status: "Safety" },
     ],
     comparison: {
       careerId: "software-engineer",

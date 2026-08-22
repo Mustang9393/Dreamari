@@ -116,6 +116,29 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-23 Round 24: report trimmed, colleges grouped by band (PUSHED)
+
+- Each career now has EXACTLY SIX colleges, two per band, and the section
+  sorts Reach -> Target -> Safety so it reads as three even rows (matches the
+  reference the user sent). SE had a duplicate Carnegie Mellon entry and UMass
+  Lowell mislabelled Target; both fixed. Keep 2/2/2 when editing this data.
+- College cards are name + band only. The `why` copy stays in the data (still
+  typed, still useful later) but is no longer rendered.
+- Education section: one alternative pathway dropped per career, and the
+  most-common path is a label not a sentence ("Bachelor's: Finance,
+  Economics, or Business").
+- The Education fact left the overview panel (it duplicates section 03); the
+  "See full career details" link now occupies that fourth slot.
+- Majors are unbolded — one large word needs no extra weight.
+- "Where this comes from" is a disclosure, collapsed by default. It renders
+  with the `hidden` attribute, which the print stylesheet reveals, so exports
+  still carry every source. A print-only duplicate heading keeps the printed
+  page labelled.
+
+PROCESS: a batch of edits asserted mid-script and aborted BEFORE the write, so
+two changes silently never landed and I reported them as done. Write once, at
+the end, after every assert has passed — and re-verify in the browser.
+
 ### 2026-08-23 Round 23: report emphasis pulled back (PUSHED)
 
 - Only headings and subheadings carry full --ink now. Everything else sits at

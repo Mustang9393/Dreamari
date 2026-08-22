@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, BadgeCheck, Check, Compass, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, ChevronDown, Compass, DollarSign, ExternalLink, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
   reportV2,
+  type CollegeStatus,
   type CareerReportV2,
 } from "./report-data";
 
@@ -54,6 +55,9 @@ function Portal({ children }: { children: React.ReactNode }) {
   if (!mounted || !host) return null;
   return createPortal(children, host);
 }
+
+// Colleges read as three even rows: reach, then target, then safety.
+const BAND_ORDER: Record<CollegeStatus, number> = { Reach: 0, Target: 1, Safety: 2 };
 
 // 11 -> "11th". Grades only, so the teen rules are all that matter.
 function ordinal(n: string): string {
@@ -205,6 +209,7 @@ function ReportDocument({
   reportDate: string;
   idPrefix?: string;
 }) {
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   return (
     <article
       data-doc="full"
@@ -236,16 +241,18 @@ function ReportDocument({
             <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
             <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
-            <Fact icon={GraduationCap} label="Education" value={report.glance.education} />
+            <div className="flex gap-[12px] py-[13px]">
+              <Compass className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
+              <Link
+                href="/explore?tab=browse"
+                data-print-hide
+                className="dm-link text-[18px] leading-[23px] font-extrabold tracking-[-0.012em] underline decoration-[color:var(--rule-strong)] underline-offset-4"
+                style={{ color: "var(--ink)" }}
+              >
+                See full career details
+              </Link>
+            </div>
           </dl>
-          <Link
-            href="/explore?tab=browse"
-            data-print-hide
-            className="dm-tap mt-[24px] inline-flex min-h-[46px] items-center gap-[8px] rounded-[10px] border px-[18px] text-[16px] font-bold tracking-[-0.012em]"
-            style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
-          >
-            <Compass className="h-4 w-4" aria-hidden /> See full career details
-          </Link>
         </ReportSection>
 
         {/* 02 — Three Majors to Explore */}
@@ -253,7 +260,7 @@ function ReportDocument({
           <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
             {report.majors.map((major) => (
               <div key={major.name} className="rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
+                <h4 className="text-[18px] leading-[23px] tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
             ))}
           </div>
@@ -287,7 +294,7 @@ function ReportDocument({
         {/* 04 — Colleges */}
         <ReportSection id={`${idPrefix}colleges`} n={4} title="Colleges">
           <div className="grid gap-[12px] sm:grid-cols-2">
-            {report.colleges.map((college) => (
+            {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
@@ -295,13 +302,10 @@ function ReportDocument({
                 style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}
                 data-keep-together
               >
-                <div className="flex items-start justify-between gap-[10px]">
-                  <h4 className="min-w-0 text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                  <span className="mt-[4px] flex-none text-[11px] font-bold tracking-[0.09em] whitespace-nowrap uppercase" style={{ color: "var(--ink-faint)" }}>
-                    {college.status}
-                  </span>
-                </div>
-                <p className="mt-[3px] text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
+                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
+                <span className="mt-[3px] block text-[11px] font-bold tracking-[0.09em] uppercase" style={{ color: "var(--ink-faint)" }}>
+                  {college.status}
+                </span>
                 <span data-print-hide className="mt-[6px] inline-flex items-center gap-[4px] text-[15px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
@@ -320,7 +324,21 @@ function ReportDocument({
 
         {/* Sources: a footer, not a section a student has to open */}
         <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
-          <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Where this comes from</h4>
+          {/* Collapsed on screen to keep the page short. The print stylesheet
+              reveals [hidden], so an export still carries every source. */}
+          <button
+            type="button"
+            data-print-hide
+            aria-expanded={sourcesOpen}
+            aria-controls="report-sources"
+            onClick={() => setSourcesOpen((open) => !open)}
+            className="dm-link flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-[var(--space-3)] text-left"
+          >
+            <span className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Where this comes from</span>
+            <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--ink-faint)", transform: sourcesOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+          </button>
+          <span aria-hidden className="hidden text-[18px] leading-[23px] font-extrabold tracking-[-0.012em] print:block" style={{ color: "var(--ink)" }}>Where this comes from</span>
+          <div id="report-sources" hidden={!sourcesOpen}>
           <ul className="mt-[10px] flex list-none flex-col gap-[5px] p-0 text-[15px] leading-[22px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
@@ -336,6 +354,7 @@ function ReportDocument({
             working in the job. Pay, programs and admission requirements change, so treat everything here as a starting point for a conversation
             rather than a guarantee.
           </p>
+          </div>
         </footer>
       </div>
 
