@@ -385,7 +385,7 @@ function ReportDocument({
               >
                 <div className="flex items-start justify-between gap-[10px]">
                   <h4 className="min-w-0 text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                  <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[14px]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-sunken)" }}>
+                  <span className="mt-[4px] flex-none text-[11px] font-bold tracking-[0.09em] whitespace-nowrap uppercase" style={{ color: "var(--ink-faint)" }}>
                     {college.status}
                   </span>
                 </div>
