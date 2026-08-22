@@ -239,25 +239,22 @@ function ReportDocument({
         </header>
 
         {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
-        <ReportSection
-          id={`${idPrefix}glance`}
-          n={1}
-          title={`${career.title} Overview`}
-          action={
-            <Link
-              href="/explore?tab=browse"
-              data-print-hide
-              className="dm-tap inline-flex min-h-[34px] items-center gap-[6px] rounded-[8px] border px-[12px] text-[14px] font-bold tracking-[-0.012em]"
-              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
-            >
-              <Compass className="h-3.5 w-3.5" aria-hidden /> Career details
-            </Link>
-          }
-        >
+        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} Overview`}>
           <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
             <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
             <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
+            <div className="flex gap-[12px] py-[13px]">
+              <Compass className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
+              <Link
+                href="/explore?tab=browse"
+                data-print-hide
+                className="dm-tap inline-flex w-fit items-center gap-[7px] rounded-[8px] border px-[12px] py-[5px] text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]"
+                style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
+              >
+                Career details <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
           </dl>
         </ReportSection>
 
