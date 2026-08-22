@@ -17,21 +17,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  ExternalLink,
   Eye,
-  FileDown,
   FileText,
   Flame,
   Gamepad2,
   GraduationCap,
+  MapPin,
   MoreVertical,
   Plane,
   Pencil,
   Plus,
   Printer,
+  Send,
   Settings,
   Shield,
   Sparkles,
   Target,
+  TrendingUp,
   Trophy,
   Users,
   Wrench,
@@ -117,7 +120,7 @@ export function ProfileExperience() {
   const focus = careerById(focusId);
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
 
-  const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes[0];
+  const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
   // Suggested tasks plus the student's own steps for a horizon.
   const tasksFor = (career: ProfileCareer, horizonId: string) => {
@@ -195,7 +198,9 @@ export function ProfileExperience() {
 
 
   return (
-    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+    // overflowX clip (not the class's hidden) keeps sideways-drag protection without
+    // creating a scroll container, so the report's sticky section rail can pin.
+    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)", fontFamily: "var(--font-body)", overflowX: "clip" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute top-0 left-0 h-[2602px] w-full max-w-none object-cover" />
       </div>
@@ -331,7 +336,7 @@ export function ProfileExperience() {
 
         {tab === "report" && (
           <div role="tabpanel" id="profile-panel-report" aria-labelledby="profile-tab-report">
-            <ReportTab focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoEvidence={() => setTab("evidence")} onGoLocker={() => setTab("locker")} />
+            <ReportTab focus={focus} onExport={() => setReportOpen(true)} onGoLocker={() => setTab("locker")} />
           </div>
         )}
         {tab === "path" && (
@@ -543,26 +548,99 @@ function ReceiptTiles({ receipts }: { receipts: Receipt[] }) {
   );
 }
 
+// Report tab mirrors the Replit print report section-for-section (same
+// headings, same copy, same data), restyled with our tokens. Career Fit is
+// intentionally omitted; the match % chip is out per the report handoff.
+
+const TRAIT_COLORS = ["var(--accent-subtle)", "var(--color-feedback-success, #33c78c)", "var(--chart-3)", "var(--world-tech-engineering-design)"];
+const BAND_COLORS: Record<"Reach" | "Target" | "Safety", string> = {
+  Reach: "var(--chart-3)",
+  Target: "var(--accent-subtle)",
+  Safety: "var(--color-feedback-success, #33c78c)",
+};
+const NEXT_ACTION_ICONS = { Play: Gamepad2, Join: Users, Share: Send } as const;
+
+// Scroll-tab rail (the Replit report's section nav): short labels jump to the
+// anchored sections; the verbatim headings live on the sections themselves.
+const REPORT_SECTIONS = [
+  { id: "report-why", label: "Why you" },
+  { id: "report-glance", label: "At a glance" },
+  { id: "report-duties", label: "Day to day" },
+  { id: "report-salary", label: "Salary" },
+  { id: "report-education", label: "Education" },
+  { id: "report-majors", label: "Majors" },
+  { id: "report-colleges", label: "Colleges" },
+  { id: "report-actions", label: "Next actions" },
+] as const;
+
+// Editorial section head: accent caption voice + an optional overview stat on
+// the same baseline, hairline handled by the card below it.
+function ReportSectionHead({ title, stat }: { title: string; stat?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-[var(--space-3)] pt-[var(--space-2)]">
+      <h3 className="text-[11px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>{title}</h3>
+      {stat && <span className="flex-none whitespace-nowrap text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat}</span>}
+    </div>
+  );
+}
+
+// The reference's first-section graphic: an equal-segment donut, one segment
+// per trait, color-keyed to the trait tiles below it.
+function TraitDonut() {
+  const size = 168;
+  const stroke = 26;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const gapDeg = 10;
+  const segment = ((90 - gapDeg) / 360) * circumference;
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="h-[92px] w-[92px] flex-none sm:h-[118px] sm:w-[118px]" aria-hidden>
+      {TRAIT_COLORS.map((color, index) => (
+        <circle
+          key={color}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeDasharray={`${segment} ${circumference}`}
+          transform={`rotate(${index * 90 - 90 + gapDeg / 2} ${size / 2} ${size / 2})`}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function ReportTab({
   focus,
-  chosenRoute,
-  nextTask,
   onExport,
-  onGoPath,
-  onGoEvidence,
   onGoLocker,
 }: {
   focus: ProfileCareer | null;
-  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
-  nextTask: (career: ProfileCareer) => PlanTask | null;
   onExport: () => void;
-  onGoPath: () => void;
-  onGoEvidence: () => void;
   onGoLocker: () => void;
 }) {
-  const [allDuties, setAllDuties] = useState(false);
-  const [schoolsOpen, setSchoolsOpen] = useState(false);
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>(REPORT_SECTIONS[0].id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        }
+      },
+      { rootMargin: "-25% 0px -65% 0px" },
+    );
+    document.querySelectorAll("[data-report-section]").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [focus?.id]);
+
+  const goToSection = (id: string) => {
+    setActiveSection(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
@@ -575,172 +653,210 @@ function ReportTab({
     );
   }
 
-  const route = chosenRoute(focus);
-  const next = nextTask(focus);
-  const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const report = careerReport(focus.id);
-  const ladderTop = (range: string) => Math.max(...(range.match(/\d+/g) ?? ["1"]).map(Number));
-  const ladderMax = report ? Math.max(...report.salary.ladder.map((step) => ladderTop(step.range))) : 1;
+  if (!report) {
+    return (
+      <section className="rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
+        <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Report coming soon for {focus.title}.</p>
+      </section>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* 1. Title, status, selected path (doc 9: never bury these) */}
-      <section className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+      {/* Header — verbatim: report label, career, hook, Grade + GPA chips */}
+      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
         <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
-          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Career Report</span>
+          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Career &amp; Pathway Report</span>
           <span className="text-[11px] font-semibold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
         </div>
         <div className="flex flex-col gap-[4px]">
-          <p key={focus.id} className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
-          {report && <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{report.hook}</p>}
+          <p key={focus.id} className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={focus.title} /></p>
+          <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{report.hook}</p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="flex min-w-0 flex-col gap-[2px]">
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Selected path</span>
-            <span className="text-[16px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short} · {route.type}</span>
-          </span>
-          <button type="button" onClick={onGoPath} className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[12px] font-bold" style={{ borderColor: "var(--border)", color: "var(--foreground)" }}>Change path</button>
+        <div className="flex flex-wrap gap-[var(--space-2)]">
+          {[STUDENT.grade, STUDENT.gpa].map((chip) => (
+            <span key={chip} className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "var(--glass-surface-2)" }}>{chip}</span>
+          ))}
         </div>
       </section>
 
-      {/* 2. ONE next action, right after the headline facts */}
-      {next && (
-        <section className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--primary) 14%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
-          <span className="flex min-w-0 flex-col gap-[2px]">
-            <span className={CAPTION} style={{ color: "var(--accent-subtle)" }}>Next · {next.minutes} min</span>
-            <span className="text-[15px] leading-[20px] font-bold">{next.label}</span>
-          </span>
-          <Link href={next.href} className="flex flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
-            <NextIcon className="h-4 w-4" /> {next.action}
-          </Link>
-        </section>
-      )}
+      {/* Scroll tabs: jump rail over the report sections */}
+      <nav aria-label="Report sections" className="sticky top-0 z-20 -mx-5 flex gap-[18px] overflow-x-auto border-b px-5 py-[10px] [scrollbar-width:none] md:-mx-1 md:px-1" style={{ background: "color-mix(in srgb, var(--background) 90%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderColor: "var(--glass-border)" }}>
+        {REPORT_SECTIONS.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => goToSection(section.id)}
+            className="relative flex-none cursor-pointer whitespace-nowrap pb-[3px] text-[11px] font-bold tracking-[0.8px] uppercase"
+            style={{ color: activeSection === section.id ? "var(--foreground)" : "var(--muted-foreground)" }}
+          >
+            {section.label}
+            <span className="absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full transition-opacity" style={{ background: "var(--accent-subtle)", opacity: activeSection === section.id ? 1 : 0 }} />
+          </button>
+        ))}
+      </nav>
 
-      {/* 3. Interest: qualitative + explainable, never a raw percentage */}
-      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Interest signals</span>
-        <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{interestTier(focus.match)}</span>
-        {report && (
+      {/* Why This Matches You — donut beside the trait tiles */}
+      <section id="report-why" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+        <ReportSectionHead title="Why This Matches You" />
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+          <p className="text-[14.5px] leading-[20px] font-semibold">{report.matchIntro}</p>
+          <div className="flex items-center gap-[var(--space-5)]">
+            <TraitDonut />
+            <div className="grid min-w-0 flex-1 grid-cols-1 gap-[var(--space-2)] sm:grid-cols-2">
+              {report.traits.map((trait, index) => (
+                <span key={trait} className="flex items-center gap-[10px] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[10px] text-[12.5px] leading-[16px] font-semibold" style={{ background: "var(--glass-surface-2)" }}>
+                  <span className="h-[9px] w-[9px] flex-none rounded-full" style={{ background: TRAIT_COLORS[index % TRAIT_COLORS.length] }} />
+                  {trait}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* [Career] at a Glance */}
+      <section id="report-glance" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title={report.glanceTitle} />
+      <div className="grid grid-cols-1 gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:grid-cols-2" style={GLASS}>
+        {[
+          { icon: Target, label: "What You Do", value: report.glance.whatYouDo },
+          { icon: MapPin, label: "Potential Industries", value: report.glance.industries },
+          { icon: Users, label: "Work Style", value: report.glance.workStyle },
+          { icon: GraduationCap, label: "Education", value: report.glance.education },
+        ].map((item) => (
+          <div key={item.label} className="flex items-start gap-[var(--space-3)]">
+            <item.icon className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--accent-subtle)" }} />
+            <span className="flex min-w-0 flex-col gap-[3px]">
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{item.label}</span>
+              <span className="text-[13px] leading-[18px] font-semibold">{item.value}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      </section>
+
+      {/* What Would You Actually Do? — all six duties, two columns */}
+      <section id="report-duties" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="What Would You Actually Do?" stat={`${report.duties.length} responsibilities`} />
+      <div className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] sm:grid-cols-2" style={GLASS}>
+        {report.duties.map((duty) => (
+          <span key={duty} className="flex items-start gap-[10px] text-[13px] leading-[18px] font-semibold">
+            <span className="mt-[6px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />
+            {duty}
+          </span>
+        ))}
+      </div>
+      </section>
+
+      {/* Salary — median, growth chip, three-step ladder with bars */}
+      <section id="report-salary" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="Salary" />
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+          <span className="flex flex-col gap-[3px]">
+            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>U.S. Median Salary</span>
+            <span className="text-[30px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{report.salary.median}<span className="text-[15px]">/yr</span></span>
+          </span>
+          <span className="flex items-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)" }}>
+            <TrendingUp className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} />
+            <span className="flex flex-col">
+              <span className="text-[9px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career Growth</span>
+              <span className="text-[12.5px] leading-[16px] font-bold">{report.salary.growth}</span>
+            </span>
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-[var(--space-4)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
+          {report.salary.ladder.map((step, index) => (
+            <span key={step.label} className="flex flex-col gap-[5px]">
+              <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>{step.label}</span>
+              <span className="text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{step.range}</span>
+              <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${((index + 1) / report.salary.ladder.length) * 100}%`, background: `color-mix(in srgb, var(--accent-subtle) ${45 + index * 27}%, ${index === report.salary.ladder.length - 1 ? "var(--primary)" : "transparent"})` }} />
+              </span>
+            </span>
+          ))}
+        </div>
+        <p className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.salary.disclaimer}</p>
+        <a href={report.salary.blsUrl} target="_blank" rel="noreferrer" className="flex w-fit items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          View BLS Data <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </div>
+      </section>
+
+      {/* Education — most common path + other viable pathways */}
+      <section id="report-education" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="Education" stat={`${report.education.alternatives.length + 1} pathways`} />
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <div className="flex flex-col gap-[5px]">
+          <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Most Common Path</span>
+          <span className="text-[13.5px] leading-[19px] font-semibold">{report.education.common}</span>
+        </div>
+        <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--muted-foreground)" }}>Other Viable Pathways</span>
           <div className="flex flex-wrap gap-[var(--space-2)]">
-            {report.traits.map((trait) => (
-              <span key={trait} className="rounded-full px-[12px] py-[5px] text-[11.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{trait}</span>
+            {report.education.alternatives.map((path) => (
+              <span key={path} className="rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)" }}>{path}</span>
             ))}
           </div>
-        )}
-        <p className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Based on what you explored and completed. Not a final decision.</p>
+        </div>
+      </div>
       </section>
 
-      {report && (
-        <>
-          {/* 4. Career snapshot */}
-          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career snapshot</span>
-            <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-2">
-              {[
-                { label: "What you do", value: report.snapshot.doing },
-                { label: "Where you could work", value: report.snapshot.industries },
-                { label: "Work style", value: report.snapshot.style },
-                { label: "Typical entry", value: report.snapshot.education },
-              ].map((tile) => (
-                <span key={tile.label} className="flex flex-col gap-[4px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
-                  <span className="text-[9px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{tile.label}</span>
-                  <span className="text-[13px] leading-[18px] font-semibold">{tile.value}</span>
-                </span>
-              ))}
-            </div>
-            {/* What you'd do: three items, then show all (doc 6) */}
-            <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="pb-[6px] text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What you&apos;d actually do</span>
-              {(allDuties ? report.duties : report.duties.slice(0, 3)).map((duty, index, list) => (
-                <span key={duty} className={`py-[8px] text-[13px] leading-[17px] font-semibold ${index < list.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>{duty}</span>
-              ))}
-              <button type="button" onClick={() => setAllDuties((value) => !value)} className="mt-[6px] w-fit cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                {allDuties ? "Show less" : `Show all ${report.duties.length}`}
-              </button>
-            </div>
-          </section>
+      {/* Three Majors to Explore */}
+      <section id="report-majors" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="Three Majors to Explore" />
+      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+        {report.majors.map((major, index) => (
+          <span key={major} className="rounded-[var(--radius-xl)] border px-[var(--space-4)] py-[var(--space-4)] text-center text-[14px] font-extrabold" style={{ ...GLASS, fontFamily: "var(--font-display)", color: TRAIT_COLORS[index % TRAIT_COLORS.length] }}>{major}</span>
+        ))}
+      </div>
+      </section>
 
-          {/* 5. Majors and schools */}
-          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors to explore</span>
-            <div className="flex flex-wrap gap-[var(--space-2)]">
-              {report.majors.map((major) => (
-                <span key={major} className="rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)" }}>{major}</span>
-              ))}
+      {/* Colleges — Reach / Target / Safety, verbatim reasons */}
+      <section id="report-colleges" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="Colleges" stat={(["Reach", "Target", "Safety"] as const).map((band) => `${report.colleges.filter((college) => college.band === band).length} ${band.toLowerCase()}`).join(" · ")} />
+      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+        {report.colleges.map((college) => (
+          <div key={college.name} className="flex flex-col gap-[5px] rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={GLASS}>
+            <div className="flex items-center justify-between gap-[var(--space-2)]">
+              <span className="min-w-0 truncate text-[14.5px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{college.name}</span>
+              <span className="flex-none rounded-full px-[9px] py-[2px] text-[9.5px] font-bold tracking-[0.6px] uppercase" style={{ background: `color-mix(in srgb, ${BAND_COLORS[college.band]} 18%, transparent)`, color: BAND_COLORS[college.band] }}>{college.band}</span>
             </div>
-            <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-              <button type="button" aria-expanded={schoolsOpen} onClick={() => setSchoolsOpen((value) => !value)} className="flex w-full cursor-pointer items-center justify-between py-[4px] text-left">
-                <span className="flex flex-col gap-[2px]">
-                  <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Schools to discuss</span>
-                  <span className="text-[13px] font-bold">{report.colleges.length} programs · {report.educationPath.common}</span>
-                </span>
-                <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--muted-foreground)", transform: schoolsOpen ? "rotate(180deg)" : "none" }} />
-              </button>
-              {schoolsOpen && (
-                <div className="filters-reveal flex flex-col pt-[var(--space-2)]">
-                  {report.colleges.map((college, index) => (
-                    <div key={college.name} className={`flex items-start justify-between gap-[var(--space-3)] py-[9px] ${index < report.colleges.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-                      <span className="flex min-w-0 flex-col gap-[1px]">
-                        <span className="text-[13px] leading-[17px] font-bold">{college.name}</span>
-                        <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{college.reason}</span>
-                      </span>
-                      <span className="flex-none rounded-full px-[9px] py-[2px] text-[9.5px] font-bold tracking-[0.4px] uppercase" style={{ background: college.band === "Reach" ? "color-mix(in srgb, var(--chart-3) 20%, transparent)" : college.band === "Possible" ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: college.band === "Reach" ? "var(--chart-3)" : college.band === "Possible" ? "var(--accent-subtle)" : "var(--color-feedback-success, #33c78c)" }}>{college.band}</span>
-                    </div>
-                  ))}
-                  <p className="pt-[var(--space-2)] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Bands are rough estimates from typical admit rates, not predictions. Other paths: {report.educationPath.alternatives.join(" · ")}.</p>
-                </div>
+            <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{college.reason}</span>
+          </div>
+        ))}
+      </div>
+      </section>
+
+      {/* Next Actions — numbered, Play / Join / Share */}
+      <section id="report-actions" data-report-section className="flex scroll-mt-[52px] flex-col gap-[var(--space-3)]">
+      <ReportSectionHead title="Next Actions" stat={`${report.nextActions.length} steps`} />
+      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+        {report.nextActions.map((item, index) => {
+          const ActionIcon = NEXT_ACTION_ICONS[item.action];
+          const tint = TRAIT_COLORS[index % TRAIT_COLORS.length];
+          const actionButton = (
+            <span className="flex items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[9px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <ActionIcon className="h-4 w-4" style={{ color: tint }} /> {item.action}
+            </span>
+          );
+          return (
+            <div key={item.title} className="flex flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={{ background: `color-mix(in srgb, ${tint} 9%, var(--glass-surface-1))`, borderColor: `color-mix(in srgb, ${tint} 35%, var(--glass-border))` }}>
+              <div className="flex items-start gap-[10px]">
+                <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: "var(--glass-surface-2)" }}>{index + 1}</span>
+                <span className="text-[13.5px] leading-[18px] font-bold">{item.title}</span>
+              </div>
+              {item.action === "Share" ? (
+                <button type="button" onClick={onExport} className="cursor-pointer">{actionButton}</button>
+              ) : (
+                <Link href={item.href ?? "/explore"}>{actionButton}</Link>
               )}
             </div>
-          </section>
-
-          {/* 6. Salary and outlook, always sourced */}
-          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Salary and outlook</span>
-            <div className="flex flex-wrap items-baseline gap-[var(--space-3)]">
-              <span className="text-[30px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{report.salary.median}<span className="text-[15px]">/yr</span></span>
-              <span className="rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: "var(--color-feedback-success, #33c78c)" }}>{report.salary.growth}</span>
-            </div>
-            <div className="flex flex-col gap-[8px]">
-              {report.salary.ladder.map((step) => {
-                const value = ladderTop(step.range);
-                return (
-                  <div key={step.label} className="flex items-center gap-[10px]">
-                    <span className="w-[86px] flex-none text-[10.5px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>{step.label}</span>
-                    <span className="relative h-[10px] min-w-0 flex-1">
-                      <span className="absolute inset-y-0 left-0 rounded-r-[4px]" style={{ width: `${Math.max((value / ladderMax) * 100, 6)}%`, background: "color-mix(in srgb, var(--accent-subtle) 45%, transparent)" }} />
-                    </span>
-                    <span className="w-[96px] flex-none text-right text-[12px] font-bold">{step.range}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.salary.location} median · {report.salary.source} {report.salary.year} · estimates vary by location.</p>
-          </section>
-        </>
-      )}
-
-      {/* 7. Share, then evidence collapsed last (doc 9 ordering) */}
-      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <div className="flex flex-wrap gap-[var(--space-3)]">
-          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <FileDown className="h-4 w-4" /> Share with counselor
-          </button>
-          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
-            Download report
-          </button>
-        </div>
-        <div className="border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-          <button type="button" aria-expanded={evidenceOpen} onClick={() => setEvidenceOpen((value) => !value)} className="flex w-full cursor-pointer items-center justify-between text-left">
-            <span className="text-[13px] font-bold">Evidence · {focus.receipts.length} signals</span>
-            <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: evidenceOpen ? "rotate(180deg)" : "none" }} />
-          </button>
-          {evidenceOpen && (
-            <div className="filters-reveal flex flex-col gap-[var(--space-3)] pt-[var(--space-3)]">
-              <ReceiptTiles receipts={focus.receipts} />
-              <button type="button" onClick={onGoEvidence} className="w-fit cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Open Evidence tab →</button>
-            </div>
-          )}
-        </div>
+          );
+        })}
+      </div>
       </section>
     </div>
   );

@@ -4,7 +4,41 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-21
+- Date: 2026-08-22
+
+### 2026-08-22 Report tab = Replit print report verbatim (LOCAL main, NOT pushed)
+
+- b36e969 (on top of cf05e4e Profile v3): the profile Report tab now mirrors
+  https://dreamari-career-pathway-report.replit.app/print section-for-section,
+  minus Career Fit (per user instruction "copy MUST remain same, without
+  career fit"). Sections: Why This Matches You (equal-segment trait donut,
+  color-keyed tiles), "[Career] at a Glance" (What You Do / Potential
+  Industries / Work Style / Education), What Would You Actually Do? (all 6
+  duties), Salary (U.S. Median + Career Growth chip + Entry/Mid/Senior ladder
+  bars + disclaimer + View BLS Data), Education (Most Common Path / Other
+  Viable Pathways), Three Majors to Explore, Colleges (Reach/Target/Safety,
+  reverted from Likely/Possible/Reach), Next Actions (Play/Join/Share; Share
+  opens the counselor export overlay). SE copy verbatim from the reference;
+  IB/Pilot/PE adapted in the same voice (data.ts CAREER_REPORTS reshaped).
+- Deliberate omission, FLAGGED to user: the reference header's "92% Match"
+  chip is not shown (handoff + earlier "match score irrelevant" call);
+  Grade 11 + GPA 3.7 chips are shown (STUDENT.gpa added).
+- Editorial pass (user request): sticky scroll-tab rail over anchored report
+  sections (short labels, IntersectionObserver active underline); donut sits
+  beside the trait tiles; section titles are accent uppercase captions with
+  right-aligned overview stats (6 responsibilities / 4 pathways / band counts).
+- Sticky gotcha: tokens.css `.marketing-v2 { overflow-x: hidden }` makes the
+  wrapper a scroll container and kills position:sticky against the window.
+  Fix WITHOUT touching the contract file: profile root overrides inline with
+  `overflowX: "clip"` (clips, no scroll container). Contract files verified
+  byte-identical (tokens.css, shadcn-adapter.css, COMPONENT-MAP.md).
+- chosenRoute now falls back to the route flagged `recommended` before
+  routes[0] (export overlay was showing target school instead of flagship).
+- Validation: tsc clean, eslint clean, tokens:check green; verified in
+  browser at ~744px and 375px (rail pins, jumps land, donut row compact).
+- NOT pushed; origin/main is 2 commits behind (cf05e4e, b36e969). Push only
+  on explicit user go-ahead. Figma handoff pack (docs/handoff/profile-figma)
+  is now a full generation stale.
 
 ### 2026-08-21 FINAL DEPLOYMENT MAP (corrected + verified by curl)
 

@@ -398,6 +398,7 @@ export const STUDENT = {
   name: "Jordan Rivera",
   avatar: "/images/avatar-jordan.jpg",
   grade: "Grade 11",
+  gpa: "GPA 3.7",
   school: "Westfield High School",
   streakDays: 12,
 };
@@ -484,40 +485,44 @@ export const ROUTE_DETAILS: Record<string, RouteDetail> = {
 
 export const routeDetail = (routeId: string): RouteDetail | undefined => ROUTE_DETAILS[routeId];
 
-// ---- Career Report data (per the 2026-08-22 Career Report handoff) ----
-// Everything the Report tab and counselor export show, per career. No fit
-// scores, no raw percentages: qualitative interest + explainable evidence.
-// Salary bands are rough estimates; every figure carries source/year/location.
-// PROTOTYPE COPY: 8th-grade language, no em dashes. College bands use
-// Likely / Possible / Reach (soft language, never admissions certainty).
+// ---- Career Report data (Replit print-report parity, minus Career Fit) ----
+// The Report tab mirrors https://dreamari-career-pathway-report.replit.app/print
+// section-for-section: same headings, same copy shape, same data fields. The
+// Software Engineer entry is verbatim from that reference; the other careers
+// carry content adapted to their field in the same voice. Career Fit is the
+// one section intentionally omitted. PROTOTYPE COPY.
 
 export type CareerReport = {
   hook: string;
-  traits: string[]; // "Why this matches you" chips
-  snapshot: { doing: string; industries: string; style: string; education: string };
-  duties: string[]; // first 3 shown, rest behind "Show all"
+  glanceTitle: string; // "Software Engineering at a Glance"
+  matchIntro: string; // "Why This Matches You" lead sentence
+  traits: string[]; // four trait tiles, keyed by index to the donut segments
+  glance: { whatYouDo: string; industries: string; workStyle: string; education: string };
+  duties: string[]; // "What Would You Actually Do?" — all six shown
   salary: {
-    median: string;
-    growth: string;
-    ladder: { label: string; range: string }[];
-    source: string;
-    year: string;
-    location: string;
+    median: string; // "U.S. Median Salary"
+    growth: string; // "Career Growth" chip text
+    ladder: { label: string; range: string }[]; // Entry-Level / Mid-Career / Senior-Specialized
+    disclaimer: string;
+    blsUrl: string; // "View BLS Data"
   };
-  educationPath: { common: string; alternatives: string[] };
-  majors: string[];
-  colleges: { name: string; band: "Likely" | "Possible" | "Reach"; reason: string }[];
+  education: { common: string; alternatives: string[] }; // Most Common Path / Other Viable Pathways
+  majors: string[]; // "Three Majors to Explore"
+  colleges: { name: string; band: "Reach" | "Target" | "Safety"; reason: string }[];
+  nextActions: { title: string; action: "Play" | "Join" | "Share"; href?: string }[];
 };
 
 export const CAREER_REPORTS: Record<string, CareerReport> = {
   "investment-banking": {
     hook: "Help companies raise money and make huge deals happen.",
-    traits: ["Numbers and money", "Competitive drive", "Fast pace", "Deal making"],
-    snapshot: {
-      doing: "Analyze companies and build the models behind big deals.",
-      industries: "Banks, advisory firms, corporate finance teams.",
-      style: "Team deal sprints with long, focused hours.",
-      education: "Bachelor's in finance, economics, or business.",
+    glanceTitle: "Investment Banking at a Glance",
+    matchIntro: "You enjoy working with numbers, competing at a high level, and seeing your work drive big decisions.",
+    traits: ["Analytical Thinking", "Competitive Drive", "Finance Interest", "Detail Focus"],
+    glance: {
+      whatYouDo: "Analyze companies and build the models behind big deals.",
+      industries: "Investment banks, advisory firms, corporate finance teams.",
+      workStyle: "Team deal sprints with long, focused hours.",
+      education: "Bachelor's degree in finance, economics, or business.",
     },
     duties: [
       "Build financial models in Excel",
@@ -529,34 +534,40 @@ export const CAREER_REPORTS: Record<string, CareerReport> = {
     ],
     salary: {
       median: "$135,000",
-      growth: "Faster than average",
+      growth: "Faster Than Average",
       ladder: [
-        { label: "Entry", range: "$85K-$120K" },
-        { label: "Mid-career", range: "$150K-$250K" },
-        { label: "Senior", range: "$300K+" },
+        { label: "Entry-Level", range: "$85K–$120K" },
+        { label: "Mid-Career", range: "$150K–$250K" },
+        { label: "Senior/Specialized", range: "$300K+" },
       ],
-      source: "BLS + industry comps",
-      year: "2025",
-      location: "United States",
+      disclaimer: "Financial analyst employment is projected to grow faster than the average occupation. Ranges are approximate and vary by location and bonus.",
+      blsUrl: "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm",
     },
-    educationPath: { common: "Bachelor's degree in Finance, Economics, or Business.", alternatives: ["State school + strong internships", "Community college transfer", "Any major + a finance minor"] },
+    education: { common: "Bachelor's Degree in Finance, Economics, or a related business field.", alternatives: ["State School + Internships", "2-Year College → Transfer", "Any Major + Finance Minor"] },
     majors: ["Finance", "Economics", "Accounting"],
     colleges: [
       { name: "Wharton (UPenn)", band: "Reach", reason: "The most direct Wall Street pipeline." },
       { name: "NYU Stern", band: "Reach", reason: "In the middle of the finance world." },
-      { name: "UT Austin McCombs", band: "Possible", reason: "Top-ranked public business school." },
-      { name: "Indiana Kelley", band: "Possible", reason: "Strong banking placement for a public school." },
-      { name: "Baruch College", band: "Likely", reason: "NYC location and finance-focused." },
-      { name: "Rutgers", band: "Likely", reason: "Big alumni network near New York." },
+      { name: "UT Austin McCombs", band: "Target", reason: "Top-ranked public business school." },
+      { name: "Indiana Kelley", band: "Target", reason: "Strong banking placement for a public school." },
+      { name: "Baruch College", band: "Safety", reason: "NYC location and finance-focused." },
+      { name: "Rutgers University", band: "Safety", reason: "Big alumni network near New York." },
+    ],
+    nextActions: [
+      { title: "Continue playing the Investment Banking Simulation", action: "Play", href: "/match-lab" },
+      { title: "Join Finance East Coast Community Board", action: "Join", href: "/explore" },
+      { title: "Share Report with Your Counselor", action: "Share" },
     ],
   },
   "airline-pilot": {
     hook: "Fly people across the country and the world safely.",
-    traits: ["Focus under pressure", "Procedures and precision", "Loves travel", "Hands-on skill"],
-    snapshot: {
-      doing: "Fly aircraft and manage every phase of flight.",
-      industries: "Airlines, cargo, charter, flight schools.",
-      style: "Crew teamwork with schedules that change weekly.",
+    glanceTitle: "Being an Airline Pilot at a Glance",
+    matchIntro: "You stay calm under pressure, like clear procedures, and want a career that takes you places.",
+    traits: ["Focus Under Pressure", "Precision & Procedure", "Travel Interest", "Hands-On Skill"],
+    glance: {
+      whatYouDo: "Fly aircraft and manage every phase of flight.",
+      industries: "Airlines, cargo carriers, charter, flight schools.",
+      workStyle: "Crew teamwork with schedules that change weekly.",
       education: "Flight training and FAA licenses; a degree helps.",
     },
     duties: [
@@ -569,33 +580,40 @@ export const CAREER_REPORTS: Record<string, CareerReport> = {
     ],
     salary: {
       median: "$219,140",
-      growth: "Faster than average",
+      growth: "As Fast As Average",
       ladder: [
-        { label: "Entry", range: "$75K-$100K" },
-        { label: "Mid-career", range: "$120K-$200K" },
-        { label: "Senior", range: "$250K-$400K+" },
+        { label: "Entry-Level", range: "$75K–$100K" },
+        { label: "Mid-Career", range: "$120K–$200K" },
+        { label: "Senior/Specialized", range: "$250K–$400K+" },
       ],
-      source: "BLS",
-      year: "2025",
-      location: "United States",
+      disclaimer: "Airline and commercial pilot employment is projected to grow about as fast as the average occupation. Ranges are approximate and vary by airline and seniority.",
+      blsUrl: "https://www.bls.gov/ooh/transportation-and-material-moving/airline-and-commercial-pilots.htm",
     },
-    educationPath: { common: "Flight school to commercial license, then build hours to 1,500.", alternatives: ["Aviation university (R-ATP at 1,000 hours)", "Military flight training", "Part-time training while working"] },
-    majors: ["Aeronautical Science", "Aviation Management", "Any degree + flight training"],
+    education: { common: "Flight school to a commercial license, then build hours to 1,500.", alternatives: ["Aviation University (R-ATP)", "Military Flight Training", "Part-Time Training + Job"] },
+    majors: ["Aeronautical Science", "Aviation Management", "Any Degree + Flight Training"],
     colleges: [
-      { name: "Embry-Riddle", band: "Possible", reason: "The biggest name in aviation degrees." },
-      { name: "Purdue", band: "Possible", reason: "Respected flight program at a big campus." },
-      { name: "University of North Dakota", band: "Likely", reason: "Huge aviation program, strong value." },
-      { name: "Auburn", band: "Likely", reason: "Solid program with airline partnerships." },
-      { name: "ATP Flight School", band: "Likely", reason: "Fastest structured path to the airlines." },
+      { name: "Purdue", band: "Reach", reason: "Respected flight program at a big campus." },
+      { name: "Embry-Riddle", band: "Reach", reason: "The biggest name in aviation degrees." },
+      { name: "Western Michigan", band: "Target", reason: "Respected aviation college with a modern fleet." },
+      { name: "Auburn", band: "Target", reason: "Solid program with airline partnerships." },
+      { name: "University of North Dakota", band: "Safety", reason: "Huge aviation program, strong value." },
+      { name: "ATP Flight School", band: "Safety", reason: "Fastest structured path to the airlines." },
+    ],
+    nextActions: [
+      { title: "Continue playing the Airline Pilot Simulation", action: "Play", href: "/match-lab" },
+      { title: "Join Aviation Community Board", action: "Join", href: "/explore" },
+      { title: "Share Report with Your Counselor", action: "Share" },
     ],
   },
   "private-equity": {
     hook: "Buy companies, improve them, and sell them for more.",
-    traits: ["Numbers and money", "Strategy", "Long-game thinking", "Deal making"],
-    snapshot: {
-      doing: "Find companies worth buying and make them better.",
+    glanceTitle: "Private Equity at a Glance",
+    matchIntro: "You think in strategy, play the long game, and want your decisions to build real value.",
+    traits: ["Strategic Thinking", "Long-Game Patience", "Numbers & Analysis", "Deal Making"],
+    glance: {
+      whatYouDo: "Find companies worth buying and make them better.",
       industries: "PE firms, growth funds, family offices.",
-      style: "Small teams, deep analysis, high stakes.",
+      workStyle: "Small teams, deep analysis, high stakes.",
       education: "Bachelor's in finance or economics, often after banking.",
     },
     duties: [
@@ -608,34 +626,41 @@ export const CAREER_REPORTS: Record<string, CareerReport> = {
     ],
     salary: {
       median: "$170,000",
-      growth: "Faster than average",
+      growth: "Faster Than Average",
       ladder: [
-        { label: "Entry", range: "$100K-$150K" },
-        { label: "Mid-career", range: "$150K-$300K" },
-        { label: "Senior", range: "$400K+" },
+        { label: "Entry-Level", range: "$100K–$150K" },
+        { label: "Mid-Career", range: "$150K–$300K" },
+        { label: "Senior/Specialized", range: "$400K+" },
       ],
-      source: "Industry comps",
-      year: "2025",
-      location: "United States",
+      disclaimer: "Private equity roles are not tracked separately by the BLS; figures reflect industry compensation surveys. Ranges are approximate and vary by fund size and city.",
+      blsUrl: "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm",
     },
-    educationPath: { common: "Bachelor's in Finance or Economics, usually via two years in banking.", alternatives: ["Consulting first, then PE", "State school + top internships", "MBA later for a reset"] },
+    education: { common: "Bachelor's Degree in Finance or Economics, usually after two years in investment banking.", alternatives: ["Consulting → PE", "State School + Top Internships", "MBA Later"] },
     majors: ["Finance", "Economics", "Business Administration"],
     colleges: [
       { name: "Wharton (UPenn)", band: "Reach", reason: "Feeder to the biggest funds." },
       { name: "Harvard", band: "Reach", reason: "Unmatched finance network." },
-      { name: "Michigan Ross", band: "Possible", reason: "Elite placement from a public school." },
-      { name: "UVA McIntire", band: "Possible", reason: "Tight-knit program, strong finance ties." },
-      { name: "Indiana Kelley", band: "Likely", reason: "Investment banking workshop opens PE doors." },
+      { name: "Michigan Ross", band: "Target", reason: "Elite placement from a public school." },
+      { name: "UVA McIntire", band: "Target", reason: "Tight-knit program, strong finance ties." },
+      { name: "Indiana Kelley", band: "Safety", reason: "Investment banking workshop opens PE doors." },
+      { name: "Baruch College", band: "Safety", reason: "NYC access to finance internships." },
+    ],
+    nextActions: [
+      { title: "Continue playing the Private Equity Simulation", action: "Play", href: "/match-lab" },
+      { title: "Join Finance East Coast Community Board", action: "Join", href: "/explore" },
+      { title: "Share Report with Your Counselor", action: "Share" },
     ],
   },
   "software-engineer": {
     hook: "Build the technology people use every day. Design and improve digital systems.",
-    traits: ["Problem solving", "Analytical thinking", "Technology interest", "Independent focus"],
-    snapshot: {
-      doing: "Design, build, and test software applications.",
+    glanceTitle: "Software Engineering at a Glance",
+    matchIntro: "You enjoy solving problems, thinking analytically, and creating things that have a practical result.",
+    traits: ["Problem Solving", "Analytical Thinking", "Technology Interest", "Independent Focus"],
+    glance: {
+      whatYouDo: "Design, build, and test software applications.",
       industries: "Tech, finance, healthcare, entertainment, government.",
-      style: "Mix of deep focus and team collaboration.",
-      education: "Bachelor's degree in CS or a related field.",
+      workStyle: "Mix of deep focus and team collaboration.",
+      education: "Bachelor's degree in CS or related field.",
     },
     duties: [
       "Build new software features",
@@ -643,29 +668,33 @@ export const CAREER_REPORTS: Record<string, CareerReport> = {
       "Fix bugs and technical problems",
       "Design how software systems should work",
       "Review teammates' code",
-      "Work with designers, product managers, and other engineers",
+      "Work with designers, product managers and other engineers",
     ],
     salary: {
       median: "$133,080",
-      growth: "Much faster than average",
+      growth: "Much Faster Than Average",
       ladder: [
-        { label: "Entry", range: "$75K-$100K" },
-        { label: "Mid-career", range: "$110K-$150K" },
-        { label: "Senior", range: "$150K-$200K+" },
+        { label: "Entry-Level", range: "$75K–$100K" },
+        { label: "Mid-Career", range: "$110K–$150K" },
+        { label: "Senior/Specialized", range: "$150K–$200K+" },
       ],
-      source: "BLS",
-      year: "2025",
-      location: "United States",
+      disclaimer: "Software developer employment is projected to grow significantly faster than the average occupation. Ranges are approximate and vary by location.",
+      blsUrl: "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",
     },
-    educationPath: { common: "Bachelor's in Computer Science, Software Engineering, or related.", alternatives: ["2-year college then transfer", "Apprenticeship", "Technical training + portfolio"] },
+    education: { common: "Bachelor's Degree in Computer Science, Software Engineering, or a related field.", alternatives: ["2-Year College → Transfer", "Apprenticeship", "Technical Training + Portfolio"] },
     majors: ["Computer Science", "Software Engineering", "Computer Engineering"],
     colleges: [
-      { name: "Carnegie Mellon", band: "Reach", reason: "World-renowned computing programs." },
-      { name: "Georgia Tech", band: "Reach", reason: "Top public school in a thriving tech city." },
-      { name: "University of Washington", band: "Possible", reason: "Strong ties to major tech companies." },
-      { name: "Rutgers", band: "Possible", reason: "Strong regional network, accessible entry." },
-      { name: "San Jose State", band: "Likely", reason: "In Silicon Valley with exceptional connections." },
-      { name: "UMass Lowell", band: "Likely", reason: "Excellent ROI and co-op opportunities." },
+      { name: "Carnegie Mellon", band: "Reach", reason: "World-renowned theoretical and applied computing." },
+      { name: "Georgia Tech", band: "Reach", reason: "Top-tier public university with a thriving tech ecosystem." },
+      { name: "University of Washington", band: "Target", reason: "Strong ties to major tech companies." },
+      { name: "Rutgers University", band: "Target", reason: "Strong regional network and accessible entry point." },
+      { name: "San Jose State", band: "Safety", reason: "Located in Silicon Valley with exceptional connections." },
+      { name: "UMass Lowell", band: "Safety", reason: "Excellent ROI and cooperative education opportunities." },
+    ],
+    nextActions: [
+      { title: "Continue playing the Software Engineer Simulation", action: "Play", href: "/match-lab" },
+      { title: "Join Engineering East Coast Community Board", action: "Join", href: "/explore" },
+      { title: "Share Report with Your Counselor", action: "Share" },
     ],
   },
 };
