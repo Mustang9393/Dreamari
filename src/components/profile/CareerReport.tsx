@@ -70,9 +70,6 @@ function ReportSection({ id, n, title, children }: { id: string; n: number; titl
   );
 }
 
-// Majors keep the reference's colour coding, drawn from our accent tokens.
-const MAJOR_INK = ["var(--primary)", "#1f7a52", "#6d4ab8"];
-
 function Fact({ label, value, icon: Icon }: { label: string; value: React.ReactNode; icon?: typeof Check }) {
   return (
     <div className="flex gap-[12px] py-[13px]">
@@ -342,9 +339,9 @@ function ReportDocument({
         {/* 02 — Three Majors to Explore */}
         <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore">
           <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
-            {report.majors.map((major, index) => (
+            {report.majors.map((major) => (
               <div key={major.name} className="rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: MAJOR_INK[index % MAJOR_INK.length] }}>{major.name}</h4>
+                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
             ))}
           </div>
