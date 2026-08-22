@@ -51,7 +51,7 @@ import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, 
 // horizon, and the Career Locker is its own tab plus a strip at the end of
 // Overview. College Lookup CTAs point at /colleges (feature in the works).
 
-type TabId = "report" | "path" | "plan" | "evidence" | "locker" | "resume" | "settings";
+type TabId = "overview" | "path" | "plan" | "report" | "locker" | "resume" | "settings";
 
 const ACTION_ICON = { Play: Gamepad2, Explore: Compass, Join: Users, Build: BookOpen } as const;
 const RECEIPT_ICON: Record<Receipt["kind"], typeof Check> = {
@@ -72,7 +72,7 @@ const CAPTION = "text-[10px] leading-[14px] font-semibold tracking-[0.6px] upper
 const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
 
 export function ProfileExperience() {
-  const [tab, setTab] = useState<TabId>("report");
+  const [tab, setTab] = useState<TabId>("overview");
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");
   const [top3, setTop3] = useState<string[]>(["investment-banking", "airline-pilot"]);
@@ -87,7 +87,7 @@ export function ProfileExperience() {
   // The tab currently in view is skipped: the change is visible live there.
   const [pings, setPings] = useState<Partial<Record<TabId, boolean>>>({});
   const pingTimer = useRef<number | null>(null);
-  const tabRef = useRef<TabId>("report");
+  const tabRef = useRef<TabId>("overview");
   useEffect(() => {
     tabRef.current = tab;
   }, [tab]);
@@ -99,10 +99,10 @@ export function ProfileExperience() {
   };
   useEffect(() => {
     if (!pingMounted.current) return;
-    pingTabs(["report", "path", "plan", "evidence"]);
+    pingTabs(["overview", "path", "plan", "report"]);
     const career = ALL_PROFILE_CAREERS.find((item) => item.id === focusId);
     if (career) {
-      const timer = window.setTimeout(() => setAnnounce(`Showing ${career.title} report, path, and plan.`), 0);
+      const timer = window.setTimeout(() => setAnnounce(`Showing ${career.title} overview, path, plan, and report.`), 0);
       return () => window.clearTimeout(timer);
     }
   }, [focusId]);
@@ -111,7 +111,7 @@ export function ProfileExperience() {
       pingMounted.current = true;
       return;
     }
-    pingTabs(["report", "plan"]);
+    pingTabs(["overview", "plan", "report"]);
   }, [routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
@@ -289,7 +289,7 @@ export function ProfileExperience() {
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["report", "path", "plan", "evidence"];
+            const order: TabId[] = ["overview", "path", "plan", "report"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -306,10 +306,10 @@ export function ProfileExperience() {
         >
           {(
             [
-              { id: "report", label: "Report" },
+              { id: "overview", label: "Overview" },
               { id: "path", label: "Path" },
               { id: "plan", label: "Plan" },
-              { id: "evidence", label: "Evidence" },
+              { id: "report", label: "Report" },
             ] as const
           ).map((item) => (
             <button
@@ -334,6 +334,11 @@ export function ProfileExperience() {
         </>
         )}
 
+        {tab === "overview" && (
+          <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
+            <OverviewTab focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress} onGoPath={() => setTab("path")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")} onExport={() => setReportOpen(true)} onGoLocker={() => setTab("locker")} />
+          </div>
+        )}
         {tab === "report" && (
           <div role="tabpanel" id="profile-panel-report" aria-labelledby="profile-tab-report">
             <ReportTab focus={focus} onExport={() => setReportOpen(true)} onGoPath={() => setTab("path")} onGoLocker={() => setTab("locker")} />
@@ -349,14 +354,9 @@ export function ProfileExperience() {
             <PlanTab focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked} doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask} removeCustomTask={removeCustomTask} onGoPath={() => setTab("path")} />
           </div>
         )}
-        {tab === "evidence" && (
-          <div role="tabpanel" id="profile-panel-evidence" aria-labelledby="profile-tab-evidence">
-            <EvidenceTab focus={focus} />
-          </div>
-        )}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("report")} />}
-        {tab === "settings" && <SettingsView onClose={() => setTab("report")} />}
-        {tab === "resume" && <ResumeView onClose={() => setTab("report")} />}
+        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
+        {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
+        {tab === "resume" && <ResumeView onClose={() => setTab("overview")} />}
       </main>
 
       <div className="no-print">
@@ -544,6 +544,159 @@ function ReceiptTiles({ receipts }: { receipts: Receipt[] }) {
           </span>
         );
       })}
+    </div>
+  );
+}
+
+// ---- Overview: the profile's landing view ----
+// One skimmable screen. Every block is a doorway: it shows the single number
+// or line that answers "where am I", then hands off to the tab that holds the
+// detail. Nothing here restates the full career report — that lives one tap
+// deeper, so the landing stays light (progressive disclosure).
+
+function OverviewTab({
+  focus,
+  chosenRoute,
+  nextTask,
+  planProgress,
+  onGoPath,
+  onGoPlan,
+  onGoReport,
+  onExport,
+  onGoLocker,
+}: {
+  focus: ProfileCareer | null;
+  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
+  nextTask: (career: ProfileCareer) => PlanTask | null;
+  planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
+  onGoPath: () => void;
+  onGoPlan: () => void;
+  onGoReport: () => void;
+  onExport: () => void;
+  onGoLocker: () => void;
+}) {
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+
+  if (!focus) {
+    return (
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
+        <p className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a Top 3 to start</p>
+        <div className="flex gap-[var(--space-3)]">
+          <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Swipe careers</Link>
+          <button type="button" onClick={onGoLocker} className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
+        </div>
+      </section>
+    );
+  }
+
+  const route = chosenRoute(focus);
+  const detail = routeDetail(route.id);
+  const next = nextTask(focus);
+  const NextIcon = next ? ACTION_ICON[next.action] : Compass;
+  const progress = planProgress(focus);
+  const world = WORLD_COLORS[focus.world];
+
+  // Three decision numbers, all from the route the student picked, so the
+  // snapshot moves when the path moves.
+  const stats = [
+    { label: "Time", value: route.duration.replace(/\s*yrs?/, " yrs") },
+    { label: "Starting pay", value: route.salary.split(",")[0].replace(/\s*first year/i, "") },
+    { label: "Debt clear", value: detail ? detail.payoff.time.replace("~", "") : route.loanPayoff.replace("~", "") },
+  ];
+
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* 1. Where you're headed — the chosen route in three numbers */}
+      <section className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+          <span className="flex min-w-0 flex-col gap-[3px]">
+            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Your path right now</span>
+            <span className="text-[21px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{route.short}</span>
+            <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{route.program}</span>
+          </span>
+          {route.recommended && (
+            <span className="flex flex-none items-center gap-[4px] rounded-full px-[10px] py-[3px] text-[9.5px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: `color-mix(in srgb, ${world} 18%, transparent)`, color: world }}>
+              <Sparkles className="h-3 w-3" /> Recommended
+            </span>
+          )}
+        </div>
+        {/* Phones read these as three labelled rows; tablets up get the 3-up
+            tiles. A 3-column grid at 375px wrapped every label and value. */}
+        <div className="seq-reveal grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
+          {stats.map((stat) => (
+            <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] px-[var(--space-4)] py-[11px] sm:flex-col sm:items-start sm:gap-[3px] sm:py-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
+              <span className="flex-none text-[9.5px] leading-[13px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+              <span className="text-right text-[20px] leading-[24px] font-extrabold whitespace-nowrap sm:text-left sm:text-[24px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
+            </span>
+          ))}
+        </div>
+        <button type="button" onClick={onGoPath} className="flex w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          See all {focus.routes.length} ways in <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </section>
+
+      {/* 2. Do this next — one task, one button, plan progress underneath */}
+      <section className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+        {next ? (
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <span className="flex min-w-0 flex-col gap-[3px]">
+              <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next · {next.minutes} min</span>
+              <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{next.label}</span>
+            </span>
+            <Link href={next.href} className="flex flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[11px] text-[13px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+              <NextIcon className="h-4 w-4" /> {next.action}
+            </Link>
+          </div>
+        ) : (
+          <span className="flex flex-col gap-[3px]">
+            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Plan</span>
+            <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Every step is done. Nice.</span>
+          </span>
+        )}
+        <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="flex items-baseline justify-between gap-[var(--space-2)]">
+            <span className="text-[12px] font-bold">{progress.complete} of {progress.total} steps done</span>
+            <button type="button" onClick={onGoPlan} className="flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              Open plan <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </span>
+          <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+            <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
+          </span>
+        </div>
+      </section>
+
+      {/* 3. The full report, kept as a doorway rather than dumped inline */}
+      <section className="flex flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <span className="flex min-w-0 flex-col gap-[3px]">
+          <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career report</span>
+          <span className="text-[15px] leading-[20px] font-bold">Pay, day to day, education and colleges</span>
+          <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The full write-up for {focus.title}.</span>
+        </span>
+        <span className="flex flex-none flex-wrap gap-[var(--space-2)]">
+          <button type="button" onClick={onGoReport} className="cursor-pointer rounded-[var(--radius-md)] px-[var(--space-5)] py-[10px] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Read report</button>
+          <button type="button" onClick={onExport} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold" style={{ borderColor: "var(--border)" }}>
+            <Send className="h-3.5 w-3.5" /> Share
+          </button>
+        </span>
+      </section>
+
+      {/* 4. Evidence — collapsed to a count, opens in place */}
+      <section className="flex flex-col rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <button type="button" aria-expanded={evidenceOpen} onClick={() => setEvidenceOpen((value) => !value)} className="flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] text-left">
+          <span className="flex min-w-0 flex-col gap-[3px]">
+            <span className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Why {focus.title} is here</span>
+            <span className="text-[15px] leading-[20px] font-bold">{focus.receipts.length} things you actually did</span>
+          </span>
+          <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--muted-foreground)", transform: evidenceOpen ? "rotate(180deg)" : "none" }} />
+        </button>
+        {evidenceOpen && (
+          <div className="filters-reveal flex flex-col gap-[var(--space-3)] pt-[var(--space-4)]">
+            <ReceiptTiles receipts={focus.receipts} />
+            <p className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Simulations you finish, glossary levels you reach, careers you keep coming back to, plan steps you complete. Scrolling and clicking around do not count.</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
@@ -930,28 +1083,6 @@ function ReportTab({
           );
         })}
       </div>
-      </section>
-    </div>
-  );
-}
-
-// ---- Evidence: what Dreamari observed, never hidden scoring ----
-
-function EvidenceTab({ focus }: { focus: ProfileCareer | null }) {
-  if (!focus) return null;
-  return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence · {focus.title}</span>
-        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Everything here is something you actually did. No hidden scores.</p>
-        <ReceiptTiles receipts={focus.receipts} />
-      </section>
-      <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[10px] font-bold tracking-[1px] uppercase" style={{ color: "var(--accent-subtle)" }}>What counts as evidence</span>
-        {["Finishing simulations and scenarios", "Glossary levels you reach", "Careers you save and come back to", "Plan steps you complete"].map((item, index, list) => (
-          <span key={item} className={`py-[8px] text-[13px] leading-[17px] font-semibold ${index < list.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>{item}</span>
-        ))}
-        <p className="pt-[var(--space-1)] text-[10.5px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Scrolling and clicking around do not count. Doing things does.</p>
       </section>
     </div>
   );

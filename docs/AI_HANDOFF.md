@@ -40,6 +40,35 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 My Profile rethink: Overview landing (LOCAL, NOT pushed)
+
+- User: "my profile is too much, repeating information from career details...
+  needs a simplified OVERVIEW screen. VISUAL, EASY TO SKIM, FULL RETHINK.
+  PROGRESSIVE DISCLOSURE IS KEY."
+- IA change: tabs are now Overview / Path / Plan / Report (was Report / Path /
+  Plan / Evidence). Overview is the default landing; Report moves last and
+  keeps its verbatim-Replit content untouched — it is the counselor-facing
+  DOCUMENT, no longer the landing experience. That is the resolution to the
+  "repeats career details" complaint: a self-contained report is allowed to
+  restate things, it just must not be the first thing a student hits.
+- Evidence tab DELETED as a tab; folded into Overview as a collapsed card
+  ("N things you actually did") that expands to the receipt tiles. Four tabs
+  in, four tabs out — but one less dead-end destination.
+- OverviewTab = 4 blocks, every one a doorway (detail lives one tap deeper):
+  1) Your path right now — chosen route + 3 decision numbers (Time / Starting
+     pay / Debt clear, all route-derived so they move when the path moves)
+     -> "See all N ways in" to Path.
+  2) Do this next — the single next task + action button, plan progress bar
+     underneath -> "Open plan".
+  3) Career report — one-line description + Read report / Share buttons.
+  4) Evidence — collapsed, expands in place.
+- Overview rule to keep: ONE number per topic on the landing, the full set in
+  the tab. Do not let this screen grow into a second report.
+- Mobile: a 3-column stat grid wrapped every label and value at 375px; stats
+  now render as label-left/value-right rows on phones, 3-up tiles from sm:.
+- Validation: tsc, eslint, tokens:check green; all four doorways verified in
+  the browser (aria-selected assertions), desktop + 375px.
+
 ### 2026-08-22 Report polish round 2 (PUSHED to main only, per user)
 
 - Section rail restyled from a full-bleed black band to a floating glass pill
