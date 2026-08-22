@@ -127,3 +127,132 @@
     pointer-events: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Career & Pathway Report — reading surface + print
+   ---------------------------------------------------------------------------
+   The report is a document, not a screen. It keeps a warm paper surface in
+   both themes so that what a student reads on screen is what comes out of a
+   printer, and so the ink contrast is predictable in black and white. These
+   are the only fixed colours in the app; everything else still comes from the
+   design tokens, and the accents below are token-derived.                    */
+.dm-report {
+  --paper: #fbfaf7;
+  --paper-raised: #ffffff;
+  --paper-sunken: #f4f2ed;
+  --ink: #17181d;
+  --ink-soft: #4a4d57;
+  --ink-faint: #767a85;
+  --rule: #e2ded5;
+  --rule-strong: #cdc7ba;
+  background: var(--paper);
+  color: var(--ink);
+}
+.dm-report ::selection { background: color-mix(in srgb, var(--primary) 28%, transparent); }
+
+/* Section numerals sit in the margin on wide screens, inline on narrow ones. */
+.dm-report-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+
+/* Collapsed report detail stays in the DOM so the export can reveal it
+   without the student opening every accordion by hand. */
+.dm-report [hidden] { display: none; }
+
+@media print {
+  /* US Letter with room for the running footer. */
+  @page {
+    size: letter portrait;
+    margin: 0.6in 0.65in 0.75in;
+  }
+  @page { @bottom-right { content: counter(page); font-size: 9pt; color: #555; } }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* Everything that is app, not document, disappears. */
+  .no-print,
+  [data-print-hide],
+  nav, header:not([data-print-keep]) { display: none !important; }
+
+  .dm-report {
+    --paper: #ffffff;
+    --paper-raised: #ffffff;
+    --paper-sunken: #f5f5f5;
+    --ink: #000000;
+    --ink-soft: #2b2b2b;
+    --ink-faint: #555555;
+    --rule: #cccccc;
+    --rule-strong: #999999;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+  /* The export carries the full picture: no student should have to expand
+     twelve accordions before printing. */
+  .dm-report [hidden] { display: block !important; }
+  .dm-report [data-disclosure-control] { display: none !important; }
+
+  /* Predictable pagination. */
+  .dm-report section { break-inside: auto; }
+  .dm-report h2, .dm-report h3, .dm-report h4 { break-after: avoid-page; break-inside: avoid; }
+  .dm-report figure, .dm-report table, .dm-report [data-keep-together] { break-inside: avoid; }
+  .dm-report thead { display: table-header-group; }
+  .dm-report tfoot { display: table-footer-group; }
+  .dm-report tr { break-inside: avoid; }
+  .dm-report [data-page-break] { break-before: page; }
+
+  /* Links read as labels; the URLs are collected in Sources. */
+  .dm-report a { color: #000 !important; text-decoration: none; }
+  .dm-report a[data-print-url]::after {
+    content: " (" attr(data-print-url) ")";
+    font-size: 8.5pt;
+    color: #555;
+    word-break: break-all;
+  }
+
+  /* Charts survive greyscale: bars keep a border and a printed value. */
+  .dm-report [data-bar] {
+    background: #d8d8d8 !important;
+    border: 0.5pt solid #666 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .dm-report [data-bar-fill] {
+    background: #8a8a8a !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Running footer: repeats on every printed page in Chrome and Safari. */
+  .dm-print-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 0.5pt solid #bbb;
+    padding-top: 4pt;
+    font-size: 8.5pt;
+    color: #555;
+  }
+
+  /* Which document prints is chosen before the dialog opens. */
+  body[data-print="summary"] [data-doc="full"] { display: none !important; }
+  body[data-print="full"] [data-doc="summary"] { display: none !important; }
+  body:not([data-print]) [data-doc="summary"] { display: none !important; }
+}
+
+/* The one-page summary is a print artifact; on screen it only appears inside
+   the export preview, which sets data-preview="summary" on its container. */
+.dm-print-footer { display: none; }
+[data-doc="summary"] { display: none; }
+[data-preview="summary"] [data-doc="summary"] { display: block; }
+[data-preview="summary"] [data-doc="full"] { display: none; }

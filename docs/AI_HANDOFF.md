@@ -40,6 +40,57 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 My Profile + Career Report v2 rebuild (LOCAL, NOT pushed)
+
+Brief: full authority to change IA, composition, tabs, hierarchy, responsive.
+Sources read: live /profile, the reference screenshot, and Career Intelligence
+Layer V3 (sections 1.7 pathway fields, 1.8 plan inputs, 5 student-content rules,
+10 career object, 25 privacy/field-level consent, plus the 13-21 internal scores
+that must never surface).
+
+WHERE I DEPARTED FROM THE BRIEF (deliberate, flag to user):
+- Colleges are NOT labelled Reach/Target/Safety any more. The brief allows those
+  labels only behind an explainable admissions model the school can disable; we
+  have none. They are Saved / Explore / Check requirements / Discuss with
+  counselor. THIS OVERRIDES the earlier "verbatim Replit" instruction, which had
+  Reach/Target/Safety. User needs to confirm.
+- "Potential employers" (reference screenshot) -> "Example employers", with an
+  explicit note that these are not openings or endorsements.
+- The old verbatim-Replit ReportTab is DELETED (~30k chars) and replaced by
+  CareerReport.tsx. The Replit copy that still held up was carried over.
+
+IA now: Overview / My Pathway / Career Report / Evidence.
+- Path + Plan merged into My Pathway (they were the same question twice).
+- Evidence is a real area again (correctable inputs, too much for a card).
+- Journey rail Explore -> Compare -> Decide -> Plan -> Share, DERIVED from state
+  (top3 count, route chosen, plan started, shared). "Still exploring" is a
+  first-class state; the rail must never read as a progress bar you are failing.
+
+New files:
+- report-data.ts   report v2 model + authored content for IB/Pilot/PE/SE.
+                   Every figure carries source + year + last-verified.
+- CareerReport.tsx editorial paper document: 10 numbered sections, desktop TOC,
+                   mobile contents drawer, Top 3 comparison BEFORE the deep dive,
+                   per-section disclosure, export preview, one-page summary.
+
+Print (app.css, .dm-report block): real @media print. US Letter, app chrome
+removed, collapsed detail force-revealed (this is why collapsed sections are
+rendered with the `hidden` attribute instead of being unmounted -- do not
+"optimise" that away or the export goes empty), thead repeats, break-inside
+guards, links print as labels with URLs appended, bars greyscale-safe with
+borders, running footer via position:fixed.
+KNOWN GAP: true page numbers need @page margin boxes (Chrome does not support
+them) or a paged.js pipeline. Today the browser's own print header/footer
+supplies them; the fixed footer carries name/date/version.
+
+Other gaps: no persistence (all state is React-local and resets on reload);
+sharing is simulated and grants no real access; GPA renders from a fixture
+flagged school-verified and hides itself if verified is false.
+
+NOTE: ConnectExperience.tsx was being edited by someone else while I worked
+(CommunityBanner mid-refactor, tsc error at 758). Left untouched and NOT
+committed by me. Everything outside that file type-checks clean.
+
 ### 2026-08-22 My Profile rethink: Overview landing (LOCAL, NOT pushed)
 
 - User: "my profile is too much, repeating information from career details...
