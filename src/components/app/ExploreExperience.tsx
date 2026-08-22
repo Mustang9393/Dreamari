@@ -44,7 +44,7 @@ function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (
           type="button"
           aria-pressed={tab === item.key}
           onClick={() => onTab(item.key)}
-          className="cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+          className="dm-quiet cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
           style={{
             fontFamily: "var(--font-body)",
             background: tab === item.key ? "var(--primary)" : "transparent",
@@ -95,7 +95,7 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className="flex-none cursor-pointer rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap transition-colors"
+      className="dm-quiet flex-none cursor-pointer rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap transition-colors"
       style={{
         fontFamily: "var(--font-body)",
         background: selected ? "var(--primary)" : "var(--glass-surface-1)",
@@ -236,7 +236,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
           type="button"
           aria-label={face === "Summary" ? "Show more info" : "Show summary"}
           onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
-          className="flex w-fit max-w-full cursor-pointer flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-4)] text-left"
+          className="dm-tap flex w-fit max-w-full cursor-pointer flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-4)] text-left"
           style={{ background: "var(--scrim-heavy)" }}
         >
           <div key={face} className="face-swap flex min-h-[151px] w-full flex-col gap-[var(--space-2)] md:w-[326px]">
@@ -280,7 +280,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
         <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
           <button
             type="button"
-            className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
+            className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
             /* solid dark glass in BOTH themes: the faint white-alpha surface
                disappeared against the photos (founder feedback) */
             style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
@@ -292,7 +292,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
           </button>
           <button
             type="button"
-            className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
+            className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
             style={{ background: "var(--foreground)" }}
           >
             <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}>
@@ -311,7 +311,7 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
     <button
       type="button"
       aria-label={label}
-      className="flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
+      className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
       style={{
         background: bare ? "transparent" : "var(--glass-surface-1)",
         borderColor: bare ? "transparent" : "var(--glass-border)",
@@ -424,7 +424,7 @@ function ForYouFace() {
           aria-label="Previous career"
           disabled={active === 0}
           onClick={() => step(-1)}
-          className="flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
+          className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
         >
           <ChevronUp className="h-5 w-5" />
@@ -434,7 +434,7 @@ function ForYouFace() {
           aria-label="Next career"
           disabled={active >= total - 1}
           onClick={() => step(1)}
-          className="flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
+          className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
         >
           <ChevronDown className="h-5 w-5" />
@@ -466,7 +466,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         <button
           type="button"
           onClick={() => switchTab("foryou")}
-          className="cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
           style={{ fontFamily: "var(--font-body)", color: tab === "foryou" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           For You
@@ -474,7 +474,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         <button
           type="button"
           onClick={() => switchTab("browse")}
-          className="cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
           style={{ fontFamily: "var(--font-body)", color: tab === "browse" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           Browse All
@@ -485,7 +485,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
             aria-label="Search"
             aria-pressed={searchOpen}
             onClick={() => setSearchOpen((value) => !value)}
-            className="absolute right-4 flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            className="dm-quiet absolute right-4 flex size-9 cursor-pointer items-center justify-center rounded-full border"
             style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
           >
             <Search className="h-4 w-4" />
@@ -520,7 +520,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
                   borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
                 }}
               >
-                <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
+                <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
                   <Search className="h-4 w-4" />
                 </button>
                 <input
@@ -538,7 +538,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
                     type="button"
                     aria-label="Close search"
                     onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-                    className="flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+                    className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
                     style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
                   >
                     <X className="h-3 w-3" />
@@ -574,7 +574,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
               type="button"
               aria-label="Clear search"
               onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-              className="flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+              className="dm-quiet flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
               style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
             >
               <X className="h-3 w-3" />

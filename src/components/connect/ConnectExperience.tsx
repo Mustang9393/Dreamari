@@ -178,7 +178,7 @@ function buildFeed(joined: Record<string, boolean>): FeedItem[] {
 
 function FeedRow({ item, onOpen }: { item: FeedItem; onOpen: () => void }) {
   return (
-    <button type="button" onClick={onOpen} className="flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <button type="button" onClick={onOpen} className="dm-tap flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       {/* Tag sits on its own line above the identity row — beside the name
          it fought long names for space and both wrapped badly. */}
       {item.tag && <span className="text-[10px] font-bold" style={{ color: item.tagColor }}>{item.tag}</span>}
@@ -317,7 +317,7 @@ function CommunityCard({
          never competes for horizontal space or forces a wrap. */}
       <span aria-hidden className="pointer-events-none absolute top-[-30px] right-[-30px] h-[120px] w-[120px] rounded-full blur-[34px]" style={{ background: `color-mix(in srgb, ${accent} 45%, transparent)` }} />
 
-      <button type="button" onClick={onOpen} className="relative flex w-full cursor-pointer items-center gap-[10px] p-[var(--space-4)] pb-[var(--space-3)] text-left">
+      <button type="button" onClick={onOpen} className="dm-link relative flex w-full cursor-pointer items-center gap-[10px] p-[var(--space-4)] pb-[var(--space-3)] text-left">
         <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "var(--card)", color: accent }}>
           <Users className="h-4 w-4" />
         </span>
@@ -356,7 +356,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
+      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-body)" }}
     >
       {children}
@@ -369,7 +369,7 @@ function QuietCta({ children, onClick, className = "" }: { children: React.React
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
+      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
       style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)", fontFamily: "var(--font-body)" }}
     >
       {children}
@@ -394,7 +394,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         <IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} />
         <StatusChip state={thread.state} />
       </div>
-      <button type="button" onClick={onOpen} className="mt-[6px] block w-full cursor-pointer text-left">
+      <button type="button" onClick={onOpen} className="dm-link mt-[6px] block w-full cursor-pointer text-left">
         <h3 className="text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h3>
         {thread.context && (
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{thread.context}</p>
@@ -402,13 +402,13 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
       </button>
       <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
       <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {thread.helpful + (helpful ? 1 : 0)}
         </button>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
         </button>
-        <button type="button" onClick={onOpen} className="ml-auto flex min-h-[44px] cursor-pointer items-center gap-[3px]" style={{ color: "var(--accent-subtle)" }}>
+        <button type="button" onClick={onOpen} className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[3px]" style={{ color: "var(--accent-subtle)" }}>
           Open <ChevronRight className="h-3.5 w-3.5" aria-hidden />
         </button>
       </div>
@@ -427,10 +427,10 @@ function InsightCard({ insight, saved, onSave, helpful, onHelpful }: { insight: 
       <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{insight.body}</p>
       <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
       <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {insight.helpful + (helpful ? 1 : 0)}
         </button>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
         </button>
       </div>
@@ -478,7 +478,7 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
             role="tab"
             aria-selected={active === option.key}
             onClick={() => onPick(option.key)}
-            className="min-h-[44px] flex-none cursor-pointer rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12px] leading-[16px] font-bold whitespace-nowrap"
+            className="dm-quiet min-h-[44px] flex-none cursor-pointer rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12px] leading-[16px] font-bold whitespace-nowrap"
             style={
               active === option.key
                 ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-body)" }
@@ -800,7 +800,7 @@ function HomeView({
           <SectionHead>Your events</SectionHead>
           {EVENTS.map((event) =>
             eventJoined[event.id] ? (
-              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
+              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
                 <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
                 <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
                 <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</span>
@@ -831,7 +831,7 @@ function HomeView({
           <SectionHead>Saved</SectionHead>
           <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Private to you unless you choose to share it.</p>
           {savedThreads.map((t) => (
-            <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
               <span className="min-w-0 truncate text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
               <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
             </button>
@@ -862,11 +862,11 @@ function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { commun
     )
   ) : (
     <span className="flex flex-none flex-col items-end gap-[4px]">
-      <button type="button" onClick={onJoin} className="flex min-h-[44px] cursor-pointer items-center rounded-[999px] px-[var(--space-5)] text-[12px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      <button type="button" onClick={onJoin} className="dm-quiet flex min-h-[44px] cursor-pointer items-center rounded-[999px] px-[var(--space-5)] text-[12px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
         Join
       </button>
       {onDismiss && (
-        <button type="button" onClick={onDismiss} className="cursor-pointer text-[10px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={onDismiss} className="dm-link cursor-pointer text-[10px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
           Not interested
         </button>
       )}
@@ -906,7 +906,7 @@ function BoardView({
 
   return (
     <>
-      <button type="button" onClick={onBack} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Connect
       </button>
 
@@ -917,7 +917,7 @@ function BoardView({
             <h1 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</h1>
           </div>
           {!joined && (
-            <button type="button" onClick={onJoin} className="min-h-[40px] flex-none cursor-pointer rounded-[999px] px-[var(--space-6)] py-[8px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <button type="button" onClick={onJoin} className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[999px] px-[var(--space-6)] py-[8px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
               Join
             </button>
           )}
@@ -998,7 +998,7 @@ function EventView({
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   return (
     <>
-      <button type="button" onClick={onBack} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Connect
       </button>
 
@@ -1107,7 +1107,7 @@ function ThreadView({
 
   return (
     <>
-      <button type="button" onClick={onBack} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
       </button>
 
@@ -1147,16 +1147,16 @@ function ThreadView({
                 )}
                 <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
                 <div className="mt-[12px] flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
+                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
                     <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful
                   </button>
-                  <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
+                  <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
                     <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save insight"}
                   </button>
-                  <button type="button" onClick={onAddToPlan} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+                  <button type="button" onClick={onAddToPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden /> Add to Plan
                   </button>
-                  <button type="button" className="ml-auto flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+                  <button type="button" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[5px]">
                     <Flag className="h-3.5 w-3.5" aria-hidden /> Report
                   </button>
                 </div>
@@ -1188,13 +1188,13 @@ function ThreadView({
         )}
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <button type="button" onClick={p.onHelpful} aria-pressed={p.helpful} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.helpful ? "var(--accent-subtle)" : undefined }}>
+          <button type="button" onClick={p.onHelpful} aria-pressed={p.helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.helpful ? "var(--accent-subtle)" : undefined }}>
             <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {thread.helpful + (p.helpful ? 1 : 0)}
           </button>
-          <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
+          <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
             <Bookmark className="h-3.5 w-3.5" aria-hidden /> {p.saved ? "Saved" : "Save"}
           </button>
-          <button type="button" className="flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+          <button type="button" className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
             <Flag className="h-3.5 w-3.5" aria-hidden /> Report
           </button>
         </div>
@@ -1203,7 +1203,7 @@ function ThreadView({
           <section className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} aria-label="Related answered questions">
             <SectionHead>Related answered questions</SectionHead>
             {related.map((t) => (
-              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
                 <span className="min-w-0 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
                 <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               </button>
@@ -1271,7 +1271,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
           <>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
-              <button type="button" onClick={onClose} aria-label="Close" className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
+              <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -1281,12 +1281,12 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
               <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
                 Posting to <strong style={{ color: "var(--foreground)" }}>{board.boardName}</strong>
               </span>
-              <button type="button" onClick={() => setChanging((c) => !c)} className="cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change</button>
+              <button type="button" onClick={() => setChanging((c) => !c)} className="dm-link cursor-pointer text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change</button>
             </div>
             {changing && (
               <div className="mt-[6px] flex flex-col gap-[4px]">
                 {COMMUNITIES.filter((c) => joined[c.id]).map((c) => (
-                  <button key={c.id} type="button" onClick={() => { onChangeBoard(c.id); setChanging(false); }} className="cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[8px] text-left text-[13px] font-semibold hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]" style={{ color: "var(--foreground)" }}>
+                  <button key={c.id} type="button" onClick={() => { onChangeBoard(c.id); setChanging(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[8px] text-left text-[13px] font-semibold hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]" style={{ color: "var(--foreground)" }}>
                     {c.name}
                   </button>
                 ))}
@@ -1335,7 +1335,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
                   { key: "any", label: "Any verified professional" },
                   { key: "topic", label: board.scope.replace("verified professionals in ", "") },
                 ].map((o) => (
-                  <button key={o.key} type="button" onClick={() => setWho(o.key)} aria-pressed={who === o.key} className="min-h-[44px] cursor-pointer rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12px] font-bold" style={who === o.key ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--border)", color: "var(--foreground)" }}>
+                  <button key={o.key} type="button" onClick={() => setWho(o.key)} aria-pressed={who === o.key} className="dm-quiet min-h-[44px] cursor-pointer rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12px] font-bold" style={who === o.key ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--border)", color: "var(--foreground)" }}>
                     {o.label}
                   </button>
                 ))}
@@ -1346,7 +1346,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
               Posts as <strong style={{ color: "var(--foreground)" }}>Jordan · Junior</strong>. Routed to {board.scope}.
             </p>
 
-            <label className="mt-[var(--space-3)] flex cursor-pointer items-start gap-[var(--space-3)]">
+            <label className="dm-link mt-[var(--space-3)] flex cursor-pointer items-start gap-[var(--space-3)]">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-[2px] size-4 accent-[var(--primary)]" />
               <span className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
                 I&apos;ll keep it kind and won&apos;t share personal contact details. <span className="font-bold" style={{ color: "var(--accent-subtle)" }}>Community Rules</span>
@@ -1412,7 +1412,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
           <>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Enter event code</h2>
-              <button type="button" onClick={onClose} aria-label="Close" className="flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
+              <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>

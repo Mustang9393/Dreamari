@@ -116,6 +116,25 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 21: hover states outside the profile (PUSHED)
+
+- Round 8 wired .dm-tap/.dm-quiet/.dm-link/.dm-solid into the PROFILE ONLY.
+  Explore, Home, Connect, PosterCard and the shared chrome had 58 clickable
+  elements between them with almost no hover feedback. All now carry a
+  utility, chosen by shape: rounded-xl/2xl cards -> dm-tap, icon buttons and
+  pills -> dm-quiet, bare text -> dm-link, solid brand backgrounds -> dm-solid.
+- Two controls (HomeExperience HeroCta, ConnectExperience:359) were solid
+  filled buttons that the shape heuristic first classified as dm-link; a
+  filled button that fades and underlines looks broken. Reclassified by
+  detecting background: var(--foreground|--primary) in the element's style.
+  HeroCta also had its own hover:-translate-y-px, removed to avoid a double
+  lift with dm-solid.
+- Verified per screen in the browser: Explore 38 covered / 0 uncovered, Home
+  21/1 then 0, Connect 13/0.
+- NOT TOUCHED: the marketing chapters on the landing page. Those have bespoke
+  interactions (the Play answer rows animate themselves) and a blanket hover
+  would fight them.
+
 ### 2026-08-22 Round 20: uniform stat line, short months, focus star (PUSHED)
 
 - Report stat line: grade, GPA, school and date are ALL white and bold, one

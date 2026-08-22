@@ -67,7 +67,7 @@ function HeroCta({ children, display = false, fullOnMobile = false, onClick }: {
     <button
       type="button"
       onClick={onClick}
-      className={`cursor-pointer px-[var(--space-6)] py-[var(--space-4)] transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${
+      className={`dm-solid cursor-pointer px-[var(--space-6)] py-[var(--space-4)] active:scale-[0.97] ${
         fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
       }`}
       style={{ background: "var(--foreground)", color: "var(--background)" }}
@@ -260,7 +260,7 @@ function HeroBanner() {
         type="button"
         aria-label="Previous highlight"
         onClick={() => step(-1)}
-        className="absolute top-1/2 left-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
+        className="dm-quiet absolute top-1/2 left-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
         style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -269,7 +269,7 @@ function HeroBanner() {
         type="button"
         aria-label="Next highlight"
         onClick={() => step(1)}
-        className="absolute top-1/2 right-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
+        className="dm-quiet absolute top-1/2 right-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
         style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
         <ChevronRight className="h-5 w-5" />
@@ -286,7 +286,7 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
+              className="dm-link h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
               style={{ width: panel === index ? 24 : 7, background: panel === index ? "var(--foreground)" : "var(--muted-foreground)" }}
             />
           ))}
@@ -296,7 +296,7 @@ function HeroBanner() {
           aria-label={paused ? "Resume carousel" : "Pause carousel"}
           aria-pressed={paused}
           onClick={() => setPaused((value) => !value)}
-          className="flex h-6 cursor-pointer items-center justify-center gap-[4px]"
+          className="dm-link flex h-6 cursor-pointer items-center justify-center gap-[4px]"
         >
           {paused ? (
             <span aria-hidden className="ml-[2px] block border-y-[5px] border-l-[8px] border-y-transparent" style={{ borderLeftColor: "var(--foreground)" }} />
@@ -462,7 +462,7 @@ export function HomeExperience() {
             <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Continue Learning & Playing
             </h2>
-            <button type="button" className="mt-[2px] flex-none cursor-pointer text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+            <button type="button" className="dm-link mt-[2px] flex-none cursor-pointer text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
               <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
             </button>
           </div>
@@ -552,7 +552,7 @@ export function HomeExperience() {
             </div>
             <a
               href="/career-report"
-              className="flex h-[42px] w-full flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-center text-[13px] leading-[18px] font-semibold sm:w-[198px]"
+              className="dm-quiet flex h-[42px] w-full flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-center text-[13px] leading-[18px] font-semibold sm:w-[198px]"
               style={{
                 fontFamily: "var(--font-body)",
                 borderColor: "var(--glass-border)",
@@ -600,14 +600,14 @@ export function HomeExperience() {
             <div className="flex gap-[var(--space-3)]">
               <button
                 type="button"
-                className="cursor-pointer rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
+                className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
                 style={{ fontFamily: "var(--font-body)", background: "var(--primary)", color: "var(--primary-foreground)" }}
               >
                 START STUDY
               </button>
               <button
                 type="button"
-                className="cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
+                className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
                 style={{ fontFamily: "var(--font-body)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
               >
                 4 SETS

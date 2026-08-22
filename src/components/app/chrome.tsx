@@ -68,7 +68,7 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
         if (window.history.length > 1) router.back();
         else router.push(fallback);
       }}
-      className={`flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
+      className={`dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
       style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
     >
       <ArrowLeft className="h-5 w-5" />
@@ -86,7 +86,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
         aria-label={open ? "Close quick links" : "Quick links"}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-xl)] border backdrop-blur-[10px]"
+        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-xl)] border backdrop-blur-[10px]"
         style={{ background: "var(--glass-surface-2)", borderColor: open ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -115,7 +115,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
             <button
               type="button"
               onClick={toggle}
-              className="mt-[2px] flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border-t px-[var(--space-4)] py-[var(--space-2h,10px)] pt-[12px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+              className="dm-quiet mt-[2px] flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border-t px-[var(--space-4)] py-[var(--space-2h,10px)] pt-[12px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
               style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", borderColor: "var(--glass-border)" }}
             >
               {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
