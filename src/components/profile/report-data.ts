@@ -516,20 +516,6 @@ export const EVIDENCE: EvidenceItem[] = [
   { id: "ev-10", kind: "reflection", label: "Why I saved Airline Pilot", detail: "\"It is the only one I looked up on my own time.\"", when: "Aug 2026", careerId: "airline-pilot", confirmed: true },
 ];
 
-export type CounselorQuestion = { id: string; text: string; origin: "student" | "suggested" };
-
-export const SUGGESTED_QUESTIONS: string[] = [
-  "Which of these routes can I start while I am still in high school?",
-  "Does our school have a transfer agreement with the community college?",
-  "What would I need to take next year to keep both options open?",
-];
-
-export const INITIAL_QUESTIONS: CounselorQuestion[] = [
-  { id: "q-1", text: "Can I get finance internships from a state school, or do I need to go somewhere expensive?", origin: "student" },
-  { id: "q-2", text: "How do people pay for flight training if federal aid does not cover it?", origin: "student" },
-  { id: "q-3", text: "Is it realistic to keep both of these open through senior year?", origin: "student" },
-];
-
 // School-verified academic data. Rendered only when verified is true, and
 // always with its source and date (FERPA: this is an education record).
 export const ACADEMIC_RECORD = {

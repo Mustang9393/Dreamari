@@ -45,11 +45,9 @@ import {
   COURSE_SUGGESTIONS,
   EVIDENCE,
   EVIDENCE_KIND_LABEL,
-  INITIAL_QUESTIONS,
   STUDENT_DIRECTION,
   UPCOMING,
   reportV2,
-  type CounselorQuestion,
   type EvidenceItem,
   type PathwayStage,
 } from "./report-data";
@@ -121,7 +119,6 @@ export function ProfileExperience() {
   const [sharedAt, setSharedAt] = useState<string | null>(null);
   // Student-owned report state. Local only: there is no persistence layer yet,
   // so this resets on reload (documented in the handoff).
-  const [questions, setQuestions] = useState<CounselorQuestion[]>(INITIAL_QUESTIONS);
   const [reflection, setReflection] = useState(STUDENT_DIRECTION.reflection);
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
   const [doneActions, setDoneActions] = useState<Set<string>>(new Set());
@@ -183,8 +180,6 @@ export function ProfileExperience() {
   // "Still exploring" is a first-class state, not a failure to progress.
   const stillExploring = !focus || !routeChoice[focus.id];
 
-  const addQuestion = (text: string) => setQuestions((current) => (current.some((item) => item.text === text) ? current : [...current, { id: `q-${current.length + 1}-${text.length}`, text, origin: "student" }]));
-  const removeQuestion = (id: string) => setQuestions((current) => current.filter((item) => item.id !== id));
   const toggleMajor = (name: string) => setSavedMajors((current) => { const next = new Set(current); if (next.has(name)) next.delete(name); else next.add(name); return next; });
   const toggleAction = (id: string) => setDoneActions((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const toggleEvidenceConfirmed = (id: string) => setConfirmedEvidence((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
@@ -381,7 +376,7 @@ export function ProfileExperience() {
           <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
             <OverviewTab
               focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress}
-              questionCount={questions.length} sharedAt={sharedAt} stillExploring={stillExploring}
+              sharedAt={sharedAt} stillExploring={stillExploring}
               onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
               onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
             />
@@ -400,8 +395,7 @@ export function ProfileExperience() {
             <MyPlanTab
               focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
               doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-              removeCustomTask={removeCustomTask} questions={questions}
-              onGoRoutes={() => setTab("routes")} onGoReport={() => setTab("report")}
+              removeCustomTask={removeCustomTask} onGoRoutes={() => setTab("routes")}
             />
           </div>
         )}
@@ -411,7 +405,6 @@ export function ProfileExperience() {
               student={{ name: STUDENT.name, grade: STUDENT.grade, school: STUDENT.school }}
               career={focus} route={chosenRoute(focus)} top3={top3.map(careerById).filter(Boolean) as ProfileCareer[]}
               stage={stage} direction={{ ...STUDENT_DIRECTION, reflection }} onReflectionChange={setReflection}
-              questions={questions} onAddQuestion={addQuestion} onRemoveQuestion={removeQuestion}
               doneActions={doneActions} onToggleAction={toggleAction} onSwitchCareer={setFocusId}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onOpenShare={() => setShareOpen(true)}
               onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
@@ -653,14 +646,13 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
 function OverviewTab({
-  focus, chosenRoute, nextTask, planProgress, questionCount, sharedAt, stillExploring,
+  focus, chosenRoute, nextTask, planProgress, sharedAt, stillExploring,
   onGoRoutes, onGoPlan, onGoReport, onOpenEvidence, onGoLocker, onGoSettings,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   nextTask: (career: ProfileCareer) => PlanTask | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
-  questionCount: number;
   sharedAt: string | null;
   stillExploring: boolean;
   onGoRoutes: () => void;
@@ -826,7 +818,6 @@ function OverviewTab({
             <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {sharedAt ? `with your counselor ${sharedAt}` : "not shared yet"}
             </span>
-            <span className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{questionCount} question{questionCount === 1 ? "" : "s"} saved</span>
           </span>
         </button>
       </section>
@@ -1018,7 +1009,7 @@ function RoutesTab({
 
 function MyPlanTab({
   focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
-  addCustomTask, removeCustomTask, questions, onGoRoutes, onGoReport,
+  addCustomTask, removeCustomTask, onGoRoutes,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
@@ -1029,9 +1020,7 @@ function MyPlanTab({
   tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
   addCustomTask: (careerId: string, horizonId: string, label: string) => void;
   removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
-  questions: CounselorQuestion[];
   onGoRoutes: () => void;
-  onGoReport: () => void;
 }) {
   if (!focus) return null;
   const courses = COURSE_SUGGESTIONS[focus.id] ?? [];
@@ -1075,21 +1064,6 @@ function MyPlanTab({
         </div>
       </section>
 
-      <section aria-labelledby="questions-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <h3 id="questions-title" className="text-[10px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Questions I saved for my counselor</h3>
-        <ol className="flex list-none flex-col p-0">
-          {questions.map((question, index) => (
-            <li key={question.id} className="flex gap-[10px] border-t py-[10px] text-[13px] leading-[18px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-              <span aria-hidden className="font-bold tabular-nums" style={{ color: "var(--accent-subtle)" }}>{index + 1}</span>
-              {question.text}
-            </li>
-          ))}
-          {questions.length === 0 && <li className="py-[10px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>None yet. Add them in your report.</li>}
-        </ol>
-        <button type="button" onClick={onGoReport} className="flex min-h-[44px] w-fit cursor-pointer items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-          Edit in my report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </button>
-      </section>
     </div>
   );
 }
@@ -1789,7 +1763,7 @@ function ShareSheet({ student, career, sharedAt, onShare, onRevoke, onClose }: {
   onRevoke: () => void;
   onClose: () => void;
 }) {
-  const included = ["My direction and what I wrote", "My top 3 comparison", `${career} at a glance`, "Pay and outlook, with sources", "How people get in", "Majors and colleges I am researching", "My next actions", "My questions for you"];
+  const included = ["My direction and what I wrote", "My top 3 comparison", `${career} at a glance`, "Pay and outlook, with sources", "How people get in", "Majors and colleges I am researching", "My next actions"];
   return (
     <div className="no-print fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-labelledby="share-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(8px)" }} />

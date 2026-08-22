@@ -7,7 +7,6 @@ import {
   ACADEMIC_RECORD,
   reportV2,
   type CareerReportV2,
-  type CounselorQuestion,
   type PathwayStage,
   type StudentDirection,
 } from "./report-data";
@@ -24,9 +23,8 @@ import {
 // from the internal Career Intelligence scores (interest score, feed rank,
 // signal confidence, readiness) reaches this page.
 
-// Scoped to what the report has to say. The action plan and the counselor
-// questions moved to My Plan, where a student works; the report is the
-// document they hand over.
+// Scoped to what the report has to say. The action plan lives in My Plan,
+// where a student works; the report is the document they hand over.
 export const REPORT_SECTIONS = [
   { id: "glance", n: 1, label: "At a Glance" },
   { id: "majors", n: 2, label: "Three Majors" },
@@ -161,7 +159,6 @@ function MeetingSummary({
   career,
   entries,
   direction,
-  questions,
   actions,
   route,
   reportDate,
@@ -170,7 +167,6 @@ function MeetingSummary({
   career: ProfileCareer;
   entries: { career: ProfileCareer; report: CareerReportV2 }[];
   direction: StudentDirection;
-  questions: CounselorQuestion[];
   actions: { label: string; done: boolean }[];
   route: PathwayRoute;
   reportDate: string;
@@ -232,20 +228,9 @@ function MeetingSummary({
       </section>
 
       <div className="mt-[24px] grid gap-x-[36px] gap-y-[22px] border-t pt-[16px] sm:grid-cols-2" style={{ borderColor: "var(--rule)" }}>
-        <section data-keep-together>
+        <section className="sm:col-span-2" data-keep-together>
           <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>What I am unsure about</h3>
           <p className="mt-[7px] text-[15px] leading-[23px]">{direction.question}</p>
-        </section>
-        <section data-keep-together>
-          <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Questions I want to ask</h3>
-          <ol className="mt-[7px] flex list-none flex-col p-0">
-            {questions.map((question, index) => (
-              <li key={question.id} className="flex gap-[9px] border-b py-[6px] text-[13.5px] leading-[19px] last:border-0" style={{ borderColor: "var(--rule)" }}>
-                <span aria-hidden className="dm-report-num flex-none font-bold tabular-nums">{index + 1}</span>
-                {question.text}
-              </li>
-            ))}
-          </ol>
         </section>
         <section className="sm:col-span-2" data-keep-together>
           <h3 className="text-[10px] font-bold tracking-[1.3px] uppercase" style={{ color: "var(--ink-faint)" }}>Next actions</h3>
@@ -277,9 +262,6 @@ export type ReportViewProps = {
   stage: PathwayStage;
   direction: StudentDirection;
   onReflectionChange: (value: string) => void;
-  questions: CounselorQuestion[];
-  onAddQuestion: (text: string) => void;
-  onRemoveQuestion: (id: string) => void;
   doneActions: Set<string>;
   onToggleAction: (id: string) => void;
   onSwitchCareer: (id: string) => void;
@@ -443,7 +425,7 @@ function ReportDocument({
 export { ComparisonTable };
 
 export function CareerReportView(props: ReportViewProps) {
-  const { student, career, route, top3, direction, questions, doneActions } = props;
+  const { student, career, route, top3, direction, doneActions } = props;
   const report = reportV2(career.id);
   const [tocOpen, setTocOpen] = useState(false);
   const [preview, setPreview] = useState<null | "full" | "summary">(null);
@@ -544,7 +526,7 @@ export function CareerReportView(props: ReportViewProps) {
         {/* One-page meeting summary, print-only unless previewed */}
         <MeetingSummary
           student={student} career={career} entries={entries} direction={direction}
-          questions={questions} actions={actionList} route={route} reportDate={reportDate}
+          actions={actionList} route={route} reportDate={reportDate}
         />
         <div className="dm-print-footer" aria-hidden>
           {student.name} · Meeting summary · {reportDate} · v1.0
@@ -606,7 +588,7 @@ export function CareerReportView(props: ReportViewProps) {
               {preview === "summary" ? (
                 <MeetingSummary
                   student={student} career={career} entries={entries} direction={direction}
-                  questions={questions} actions={actionList} route={route} reportDate={reportDate}
+                  actions={actionList} route={route} reportDate={reportDate}
                 />
               ) : (
                 <ReportDocument student={student} career={career} report={report} reportDate={reportDate} idPrefix="preview-" />

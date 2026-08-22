@@ -40,6 +40,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 6: counselor questions removed entirely (PUSHED)
+
+- The counselor-questions feature is gone from everywhere: the report body,
+  the one-page meeting summary, the My Plan saved-questions block, the
+  Overview report tile's "N questions saved" line, and the share sheet's
+  included list. CounselorQuestion, INITIAL_QUESTIONS and SUGGESTED_QUESTIONS
+  are deleted from report-data. Verified: no "question" string renders on any
+  of the four tabs.
+- STILL PRESENT and deliberately kept: STUDENT_DIRECTION.question, rendered in
+  the one-page summary as "What I am unsure about". That is the student's own
+  open decision, not a counselor question list. Flagged to the user.
+- Splice trap worth remembering: a marker string used with s.index() matched an
+  EARLIER occurrence than the edit target and silently duplicated ~130 lines
+  (CompareChart / RoutesTab / MyPlanTab appeared twice). tsc caught it as
+  "Duplicate function implementation". When cutting by marker, assert the
+  indices are ordered before slicing.
+
 ### 2026-08-22 Round 5: report polish + overview summary (PUSHED)
 
 - Report header: Stage and Last updated REMOVED. Grade / School / GPA / Date
