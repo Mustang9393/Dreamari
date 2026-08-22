@@ -40,6 +40,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-22 Round 9: report CTAs point inward (PUSHED)
+
+- Career Report college cards are now Links to /colleges?school=<name>, plus an
+  "Open College Lookup" solid CTA under the section. The glance section gets
+  "See full career details in Explore" -> /explore?tab=browse.
+- /colleges now accepts ?school= (async searchParams) and shows the name in its
+  search field with a line saying it came from the report and does not search
+  yet. The param is honoured rather than decorative -- keep it wired if the
+  real lookup lands.
+- STILL EXTERNAL, deliberately: the three "Open" links in the report's sources
+  footer (BLS, College Scorecard, O*NET). Those are citations; a source a
+  reader cannot verify is worse than an outbound link. All CTAs carry
+  data-print-hide so the printed document has no app chrome.
+- No per-career route exists, so career details deep-link to Explore browse
+  rather than a specific career. A /explore?career=<id> route would let the
+  report point at the exact career.
+
 ### 2026-08-22 Round 8: hover + focus affordances (PUSHED)
 
 - Four utilities in app.css: .dm-tap (cards and bento tiles: lift, shadow,

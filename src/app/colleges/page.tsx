@@ -20,7 +20,11 @@ const PREVIEW = [
   { name: "Technical Institute", meta: "Regional · 18 mo", tag: "Certificate" },
 ];
 
-export default function CollegesPage() {
+export default async function CollegesPage({ searchParams }: { searchParams: Promise<{ school?: string | string[] }> }) {
+  // Career Report college cards deep-link here with ?school=, so the lookup
+  // carries the school across instead of dumping the student on a blank page.
+  const params = await searchParams;
+  const requested = Array.isArray(params.school) ? params.school[0] : params.school;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,10 +54,17 @@ export default function CollegesPage() {
           <h1 className="text-[34px] leading-[38px] font-extrabold sm:text-[44px] sm:leading-[48px]" style={{ fontFamily: "var(--font-display)" }}>College Lookup</h1>
           <p className="max-w-[420px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Real schools and programs, matched to your route and budget.</p>
 
-          <div className="flex h-12 w-full max-w-[480px] items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] opacity-70" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-            <Search className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
-            <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Search schools, programs, cities</span>
+          <div className="flex h-12 w-full max-w-[480px] items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: requested ? "var(--accent-subtle)" : "var(--glass-border)", opacity: requested ? 1 : 0.7 }}>
+            <Search className="h-4 w-4 flex-none" style={{ color: requested ? "var(--accent-subtle)" : "var(--muted-foreground)" }} />
+            <span className="min-w-0 truncate text-[13px]" style={{ color: requested ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {requested ?? "Search schools, programs, cities"}
+            </span>
           </div>
+          {requested && (
+            <p className="-mt-[var(--space-3)] text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
+              Brought over from your Career Report. Full lookup is still in the works, so nothing searches yet.
+            </p>
+          )}
 
           <div className="grid w-full grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
             {PREVIEW.map((school) => (

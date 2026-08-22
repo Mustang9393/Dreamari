@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BadgeCheck, Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Send, Target, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, DollarSign, ExternalLink, GraduationCap, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
 import type { ProfileCareer, PathwayRoute } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -337,6 +338,14 @@ function ReportDocument({
             </div>
             <Fact icon={GraduationCap} label="Education" value={report.glance.education} />
           </dl>
+          <Link
+            href="/explore?tab=browse"
+            data-print-hide
+            className="dm-link mt-[18px] inline-flex min-h-[44px] items-center gap-[5px] text-[13px] font-bold"
+            style={{ color: "var(--ink)" }}
+          >
+            See full career details in Explore <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
         </ReportSection>
 
         {/* 02 — Three Majors to Explore */}
@@ -380,7 +389,13 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}colleges`} n={4} title="Colleges">
           <div className="grid gap-[12px] sm:grid-cols-2">
             {report.colleges.map((college) => (
-              <div key={college.name} className="flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }} data-keep-together>
+              <Link
+                key={college.name}
+                href={`/colleges?school=${encodeURIComponent(college.name)}`}
+                className="dm-tap flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]"
+                style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}
+                data-keep-together
+              >
                 <div className="flex items-start justify-between gap-[10px]">
                   <h4 className="min-w-0 text-[16px] leading-[21px] font-extrabold tracking-[-0.015em]" style={{ fontFamily: "var(--font-display)" }}>{college.name}</h4>
                   <span className="flex-none rounded-[5px] border px-[7px] py-[2px] text-[9.5px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)", background: "var(--paper-sunken)" }}>
@@ -388,9 +403,20 @@ function ReportDocument({
                   </span>
                 </div>
                 <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-soft)" }}>{college.why}</p>
-              </div>
+                <span data-print-hide className="mt-[2px] inline-flex items-center gap-[4px] text-[11.5px] font-bold" style={{ color: "var(--ink-faint)" }}>
+                  Look this up <ArrowRight className="h-3 w-3" aria-hidden />
+                </span>
+              </Link>
             ))}
           </div>
+          <Link
+            href="/colleges"
+            data-print-hide
+            className="dm-solid mt-[16px] inline-flex min-h-[44px] items-center gap-[7px] rounded-[8px] px-[18px] text-[13px] font-bold"
+            style={{ background: "var(--ink)", color: "var(--paper)" }}
+          >
+            <Search className="h-4 w-4" aria-hidden /> Open College Lookup
+          </Link>
         </ReportSection>
 
         {/* Sources: a footer, not a section a student has to open */}
