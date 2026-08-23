@@ -299,7 +299,7 @@ export function MatchLab() {
             <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
             <span
               className="flex flex-none items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
-              style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+              style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
             >
               <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${"#33c78c"}` }} />
               {remaining} remaining
@@ -326,13 +326,13 @@ export function MatchLab() {
                   style={
                     c
                       ? {
-                          background: `color-mix(in srgb, ${c.color} 16%, var(--color-glass-surface-1))`,
+                          background: `color-mix(in srgb, ${c.color} 16%, var(--color-glass-surface-raised))`,
                           borderColor: c.color,
                           color: "var(--color-night-foreground)",
                           boxShadow: `0 0 14px color-mix(in srgb, ${c.color} 35%, transparent)`,
                         }
                       : {
-                          background: "var(--color-glass-surface-1)",
+                          background: "var(--color-glass-surface-raised)",
                           border: "1.5px dashed var(--color-glass-stroke)",
                           color: "var(--color-night-muted-foreground)",
                         }
@@ -356,7 +356,7 @@ export function MatchLab() {
               onClick={() => setManageOpen(true)}
               disabled={liked.length === 0}
               className="flex h-9 w-9 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-35"
-              style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)", color: "var(--color-night-muted-foreground)" }}
+              style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-muted-foreground)" }}
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
@@ -490,7 +490,7 @@ export function MatchLab() {
                   type="button"
                   onClick={() => commitSwap(i)}
                   className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all hover:-translate-y-px"
-                  style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+                  style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: c.color }} />
@@ -521,7 +521,7 @@ export function MatchLab() {
                 <div
                   key={c.id}
                   className="flex items-center gap-2.5 rounded-xl border px-3 py-2.5"
-                  style={{ background: `color-mix(in srgb, ${c.color} 10%, var(--color-glass-surface-1))`, borderColor: "var(--color-glass-border)" }}
+                  style={{ background: `color-mix(in srgb, ${c.color} 10%, var(--color-glass-surface-raised))`, borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className={`${bricolage.className} w-7 flex-none text-[16px] font-extrabold`} style={{ color: c.color }}>
                     #{i + 1}
@@ -717,7 +717,7 @@ function ActionButton({ label, color, size, onClick, disabled, children }: { lab
         width: size,
         height: size,
         color,
-        background: "var(--color-glass-surface-1)",
+        background: "var(--color-glass-surface-raised)",
         borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
       }}
     >
@@ -743,7 +743,7 @@ function IconGhostButton({ label, onClick, disabled, children }: { label: string
 
 function GuideRow({ icon, color, children }: { icon: React.ReactNode; color: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+    <div className="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
       <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border" style={{ color, borderColor: `color-mix(in srgb, ${color} 35%, transparent)`, background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
         {icon}
       </span>
@@ -756,7 +756,7 @@ function MiniRanking({ liked }: { liked: Career[] }) {
   return (
     <div className="flex w-full flex-col gap-2">
       {liked.map((c, i) => (
-        <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+        <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
           <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold" style={{ color: c.color }}>
             #{i + 1} <span className="truncate text-[var(--color-night-foreground)]">{c.title}</span>
           </span>

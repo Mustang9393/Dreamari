@@ -6,6 +6,27 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-24
 
+### 2026-08-24 Glass rung: MatchLab adopts it + app-repo mirror spec (PUSHED)
+
+- Both items the previous entry left open, approved by the user.
+- MatchLab.tsx: all 9 surface-1 fills move to surface-raised, and the 6
+  hairlines that sit ON those fills move to border-raised. The other 9
+  glass-border references stay decorative ON PURPOSE and that distinction is
+  the whole point of the rung: the deck card (night-card fill), the
+  surface-3 sheets, the <hr> divider, the surface-2 pill and the night-
+  background scrims already carry their own boundary, so they keep the plain
+  border. Visually the empty Top-3 slots and the "N remaining" counter are
+  the big win — over the lab's black background 3.1% was invisible.
+- docs/handoff/glass-raised-rung.md (NEW): the drop-in spec for the app
+  repo's packages/ui/tokens — rationale, the exact DTCG JSON for both modes,
+  the emitted CSS, the Figma scoping, and the which-rung-when rule. The app
+  repo is not checked out on this machine, so this is the artifact to apply
+  there rather than a change I could make directly.
+- docs/handoff/figma-variables-to-add.md gains section D for the two Figma
+  Semantic variables (glass-raised, glass-border-raised).
+- Contract files (marketing/tokens.css, handoff/shadcn-adapter.css,
+  handoff/COMPONENT-MAP.md) untouched — verified again before the commit.
+
 ### 2026-08-24 Glass: raised rung authored in the DTCG source (PUSHED)
 
 - Follow-up to the entry below, at the user's request: the `.flow-surfaces`

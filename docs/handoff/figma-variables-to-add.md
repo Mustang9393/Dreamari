@@ -53,6 +53,19 @@ the prototype's, which mirrored the dev handoff docs):
 | `feedback-success-dark-surface` | `#33c78c` | `#33c78c` |
 | brand ramp exposure (`brand-300/400/500/900`) | `#7fa8ff` / `#4a82ff` / `#2f6bf2` / `#0c2560` | same — likely exist as primitives; confirm the primitive naming the pull emits |
 
+## D. Glass `raised` rung (2026-08-24, added to the prototype's DTCG source)
+
+Additive — no existing glass variable changes. Add to the **Semantic**
+collection beside the other `glass-*` variables, both modes.
+
+| Name | Light | Dark | Notes |
+|---|---|---|---|
+| `glass-raised` | `#ffffffad` (frosted white) | `#ffffff11` | fill scope. Rest fill for a tile the reader must be able to find; sits between `glass-surface-1` and `glass-surface-2`. Light is WHITE, not black-alpha — the black film goes muddy over the pastel aurora |
+| `glass-border-raised` | `#0000002e` | `#ffffff29` | stroke scope. Pairs with the above; sits between `glass-border` and `glass-hover` |
+
+Rationale, the DTCG source to mirror into `packages/ui/tokens`, and the
+rule for which rung to reach for: `docs/handoff/glass-raised-rung.md`.
+
 ## C. After adding
 
 Re-run the Variables pull; every fallback literal in `bridge.css` and
