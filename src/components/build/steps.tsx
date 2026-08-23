@@ -33,7 +33,6 @@ export type StepProps = {
   onNext: () => void;
   react: () => void;
   percent: number;
-  phase?: string;
   almostDone?: boolean;
   sprite?: string;
 };
@@ -58,10 +57,10 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
   INTEREST_WORLDS.map((world) => [world.label, `var(--color-world-${world.slug})`]),
 );
 
-export function InterestsStep({ state, patch, onNext, react, percent, phase, sprite }: StepProps) {
+export function InterestsStep({ state, patch, onNext, react, percent, sprite }: StepProps) {
   return (
     <div className="w-full">
-      <CardHud percent={percent} phase={phase} />
+      <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
@@ -109,10 +108,10 @@ export function InterestsStep({ state, patch, onNext, react, percent, phase, spr
   );
 }
 
-export function SubjectsStep({ state, patch, onBack, onNext, react, percent, phase, sprite }: StepProps) {
+export function SubjectsStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
     <div className="w-full">
-      <CardHud percent={percent} phase={phase} />
+      <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
@@ -187,10 +186,10 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
   );
 }
 
-export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, phase, sprite }: StepProps) {
+export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
     <div className="w-full">
-      <CardHud percent={percent} phase={phase} />
+      <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
@@ -223,10 +222,10 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, pha
   );
 }
 
-export function EducationStep({ state, patch, onBack, onNext, react, percent, phase, sprite }: StepProps) {
+export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
     <div className="w-full">
-      <CardHud percent={percent} phase={phase} />
+      <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
         {/* one horizontal line, per feedback — a different rhythm from the
@@ -253,7 +252,9 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, ph
               >
                 {(() => { const Icon = EDUCATION_ICONS[optionIndex]; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
                 <span className="block text-[14px] font-bold text-[var(--color-night-foreground)]">{option.title}</span>
-                <span className="mt-0.5 block text-[12px] font-medium" style={{ color: "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)" }}>{option.subtitle}</span>
+                {option.subtitle && (
+                  <span className="mt-0.5 block text-[12px] font-medium" style={{ color: "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)" }}>{option.subtitle}</span>
+                )}
               </button>
             );
           })}
@@ -312,23 +313,23 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
   );
 }
 
-// Figma Profile frame (3009:15398): underline text inputs (question as
-// placeholder), pill groups for grade/GPA — no dropdowns. Copy verbatim from
-// the reference: field questions as placeholders/labels, the GPA reassurance as
-// the card subline, "Use your school email if you have one." as the email hint.
-export function ProfileStep({ state, patch, onBack, onNext, react, percent, phase, almostDone, sprite }: StepProps) {
+// Figma Profile frame (3009:15398): underline text inputs, dropdowns for
+// grade/GPA. Fields are labelled, not asked — "Full Name" beats "What is your
+// full name?" on a form where the answer is obvious, and four questions in a
+// row was the flow's densest block of reading.
+export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
   const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
   return (
     <div className="w-full">
-      <CardHud percent={percent} phase={phase} almostDone={almostDone} />
+      <CardHud percent={percent} almostDone={almostDone} />
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="Profile Basics" subtitle="Name, email, grade, and GPA" />
+        <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
           <input
             className={UNDERLINE_INPUT}
             style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-            placeholder="What is your full name?"
-            aria-label="What is your full name?"
+            placeholder="Full Name"
+            aria-label="Full name"
             value={state.fullName}
             onChange={(e) => patch({ fullName: e.target.value })}
             autoComplete="name"
@@ -338,21 +339,21 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, phas
               type="email"
               className={UNDERLINE_INPUT}
               style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-              placeholder="What is your school email?"
-              aria-label="What is your school email?"
+              placeholder="School Email"
+              aria-label="School email"
               value={state.email}
               onChange={(e) => patch({ email: e.target.value })}
               autoComplete="email"
             />
-            <p className="mt-1 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">Use your school email if you have one.</p>
+            <p className="mt-1 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">Use your school one if you have it.</p>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <SelectField label="What grade are you in?" options={GRADE_OPTIONS} value={state.grade} placeholder="Select your grade" onChange={(grade) => { react(); patch({ grade }); }} />
-            <SelectField label="What is your current GPA?" options={GPA_OPTIONS} value={state.gpa} placeholder="Select your GPA" onChange={(gpa) => { react(); patch({ gpa }); }} />
+            <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+            <SelectField label="GPA" options={GPA_OPTIONS} value={state.gpa} placeholder="Select" onChange={(gpa) => { react(); patch({ gpa }); }} />
           </div>
           <div>
             <p className="mt-1.5 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">
-              Your GPA does not define you. It just helps Dreamari find realistic schools and pathways.
+              Your GPA does not define you. It just helps us find realistic schools.
             </p>
           </div>
         </div>
@@ -381,9 +382,7 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
     <div className="mx-auto w-full max-w-[560px]">
       <CardHud percent={percent} />
       <GlassCard className="text-center">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: "color-mix(in srgb, var(--color-feedback-success-dark-surface) 55%, var(--color-night-foreground))" }}>
-          50% Complete
-        </p>
+        {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
         <div className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />

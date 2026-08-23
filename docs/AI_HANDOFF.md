@@ -4,7 +4,48 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 ## Current session
 
-- Date: 2026-08-22
+- Date: 2026-08-24
+
+### 2026-08-24 Build flow: card contrast, BUILD label, copy cull (PUSHED)
+
+- QA round on /flow. Six files, all inside src/components/build/ except one
+  scoped block in globals.css. NOTHING under design-tokens/, no regeneration
+  of design-tokens.generated.css, no edit to the contract files
+  (marketing/tokens.css, docs/handoff/*) — verified by `git status` on those
+  paths before the push.
+- CONTRAST (globals.css, new `.flow-surfaces` class on the flow's root
+  <section>): the generated glass film is 3.1% white on a 9% white hairline,
+  which over the nebula is all but invisible and nowhere near 3:1 non-text
+  contrast. The class raises it to 6.5% / 16% for dark and firms the light
+  edge from 12% to 18% black. This SHADOWS two generated token names
+  (--color-glass-surface-1, --color-glass-border) inside that subtree only —
+  the same trick, on the same token, that the html.light block a few lines
+  down already uses. Nothing outside the build flow sees it: the only other
+  consumer of the token is match-lab/MatchLab.tsx, which is not inside
+  .flow-surfaces. Elevation order is preserved on purpose (6.5% stays under
+  glass-surface-2's 9%). PROPER FIX when the ramp allows: author a "raised"
+  glass rung in the DTCG source and delete this block — the 3.1% film is
+  arguably too faint everywhere it is used, not just here.
+- HUD: "Phase 1..4" retired. The bar names the CHAPTER now — a constant
+  "BUILD" at 14/15px extrabold — so a student knows which leg of
+  Build -> Match -> Play they are on. Because it no longer varies, the
+  `phase` field is gone from STAGES, StepProps, CardHud and PhaseProgress
+  rather than repeated nine times. Side effect (wanted): Cost and Location
+  never passed a phase, so they showed no label at all; they do now.
+- COPY: education options re-worded to the QA list (Work after HS / 1-2 years
+  / 4 years / 5 years+ / Not sure yet — "Work after HS" has NO subline per
+  the list, so the subtitle span is now conditional); Cost step asked for a
+  range three times (subtitle, "SELECTED RANGE" eyebrow, placeholder) and now
+  asks once, with the readout mirroring the thumb's resting stop in muted ink
+  and Next still disabled until the slider moves; Profile Basics fields are
+  labelled not asked ("Full Name", "School Email"), subtitle dropped, selects
+  relabelled Grade/GPA, hint and GPA reassurance trimmed; the 50%
+  interstitial no longer prints "50% Complete" twice.
+- Citation ("source" line) left unfilled by design and taken from 80% to 60%
+  opacity so it recedes now that the cards carry weight.
+- Validation: tsc, eslint (one pre-existing <img> warning in ui.tsx),
+  tokens:check, isolated-worktree production build, and a click-through of
+  every step in both themes at 1280 and 375.
 
 ### 2026-08-22 Connect: multi-event Events tab (PUSHED)
 

@@ -40,14 +40,16 @@ export function GlassCard({ children, className = "" }: { children: React.ReactN
   return <div className={`w-full px-1 ${className}`}>{children}</div>;
 }
 
-// The in-flow progress bar. Speaks in PHASES per
-// direct feedback - no "Step x of 8" counters, no BUILD badge repetition. When the
-// percent GROWS, the bar animates its fill, fires a spark fan off the leading edge
-// (Duolingo-style), and plays a short rising chime; module-level memory of the last
-// percent survives step remounts so going Previous never re-celebrates.
+// The in-flow progress bar. It names the CHAPTER, not the step: "BUILD" sits over
+// the bar on every question so the flow reads as one leg of Build → Match → Play,
+// never as "Step x of 8" (counters make it feel long). The old "Phase 1..4" labels
+// meant nothing to a student and are retired. When the percent GROWS, the bar
+// animates its fill, fires a spark fan off the leading edge (Duolingo-style);
+// module-level memory of the last percent survives step remounts so going Previous
+// never re-celebrates.
 let lastCelebratedPercent = 0;
 
-export function PhaseProgress({ percent, phase, almostDone }: { percent: number; phase?: string; almostDone?: boolean }) {
+export function PhaseProgress({ percent, almostDone }: { percent: number; almostDone?: boolean }) {
   const [sparkNonce, setSparkNonce] = useState(0);
   const mounted = useRef(false);
 
@@ -65,11 +67,12 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
   return (
     <div>
       <div className="flex items-center gap-2.5">
-        {phase && (
-          <span className="text-[11px] font-bold tracking-wide" style={{ color: "color-mix(in srgb, var(--color-brand-400) 55%, var(--color-night-foreground))" }}>
-            {phase}
-          </span>
-        )}
+        <span
+          className="text-[14px] leading-none font-extrabold tracking-[0.14em] sm:text-[15px]"
+          style={{ color: "color-mix(in srgb, var(--color-brand-400) 55%, var(--color-night-foreground))" }}
+        >
+          BUILD
+        </span>
         {almostDone && (
           <span className="text-[11px] font-bold" style={{ color: "color-mix(in srgb, var(--color-feedback-success-dark-surface) 55%, var(--color-night-foreground))" }}>
             Almost done
@@ -116,10 +119,10 @@ export function PhaseProgress({ percent, phase, almostDone }: { percent: number;
 }
 
 // Progress renders in-flow above the heading (frameless Figma frame 3214-7363).
-export function CardHud({ percent, phase, almostDone }: { percent: number; phase?: string; almostDone?: boolean }) {
+export function CardHud({ percent, almostDone }: { percent: number; almostDone?: boolean }) {
   return (
     <div className="mb-3 sm:mb-5">
-      <PhaseProgress percent={percent} phase={phase} almostDone={almostDone} />
+      <PhaseProgress percent={percent} almostDone={almostDone} />
     </div>
   );
 }
@@ -155,8 +158,17 @@ export function QuestionHeading({ title, subtitle, sprite }: { title: string; su
   );
 }
 
+// The source line. Deliberately unfilled — it sits straight on the background
+// while the cards above it carry the surface, so it never reads as another tile.
 export function Citation({ children }: { children: ReactNode }) {
-  return <p className="mt-4 text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-80">{children}</p>;
+  return (
+    <p
+      className="mt-4 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
+      style={{ background: "transparent" }}
+    >
+      {children}
+    </p>
+  );
 }
 
 export function StepFooter({

@@ -75,7 +75,7 @@ export function BuildFlowExperience() {
   const isComplete = stageId === "complete" && phase === "build";
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
-  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, phase: stage.phase, almostDone: stage.almostDone, sprite: dreamy?.sprite };
+  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite };
 
   let content: ReactNode = null;
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;
@@ -111,7 +111,7 @@ export function BuildFlowExperience() {
            the viewport, and the whole group centers when it is not. The CTA
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
-        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
+        <section className="flow-surfaces relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
           {/* Same 860px column for BOTH variants — per direct feedback the framed
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">

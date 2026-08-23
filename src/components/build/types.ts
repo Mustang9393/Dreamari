@@ -15,19 +15,17 @@ export type StageId =
   | "complete";
 
 // Progress percentages are exact per the reference flow: 13/25/38/50/63/75/88/100.
-// Phase labels follow the Figma HUD's "speak in phases" vocabulary ("Phase 1:
-// Discovering Vibes" / "Phase 3: Pathway Filter" sighted in the frames) instead of
-// any "Step x of 8" counter — per direct feedback, counters make it feel long.
-// Phase names are the Figma frames' own HUD labels, verbatim (all four sighted).
-export const STAGES: { id: StageId; percent: number; phase?: string; almostDone?: boolean }[] = [
-  { id: "interests", percent: 13, phase: "Phase 1" },
-  { id: "subjects", percent: 25, phase: "Phase 1" },
-  { id: "workVibe", percent: 38, phase: "Phase 2" },
+// The HUD labels the chapter ("BUILD") rather than the stage — see PhaseProgress —
+// so no per-stage label lives here; counters would make the flow feel long.
+export const STAGES: { id: StageId; percent: number; almostDone?: boolean }[] = [
+  { id: "interests", percent: 13 },
+  { id: "subjects", percent: 25 },
+  { id: "workVibe", percent: 38 },
   { id: "milestone", percent: 50 },
-  { id: "education", percent: 63, phase: "Phase 3" },
-  { id: "cost", percent: 75, phase: "Phase 3" },
-  { id: "location", percent: 88, phase: "Phase 3", almostDone: true },
-  { id: "profile", percent: 100, phase: "Phase 4", almostDone: true },
+  { id: "education", percent: 63 },
+  { id: "cost", percent: 75 },
+  { id: "location", percent: 88, almostDone: true },
+  { id: "profile", percent: 100, almostDone: true },
   { id: "complete", percent: 100 },
 ];
 
@@ -73,11 +71,11 @@ export const ENERGY_OPTIONS = ["Fast pace", "Balanced", "Calm"];
 export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
 export const EDUCATION_OPTIONS: { title: string; subtitle: string }[] = [
-  { title: "Work after HS", subtitle: "HS or short training" },
-  { title: "1–2 more years", subtitle: "Certificate or 2-year college" },
-  { title: "4 more years", subtitle: "4-year college" },
-  { title: "4+ more years", subtitle: "Advanced degree paths" },
-  { title: "Not sure yet", subtitle: "Show different options" },
+  { title: "Work after HS", subtitle: "" },
+  { title: "1–2 years", subtitle: "Certificate or 2-year college" },
+  { title: "4 years", subtitle: "Bachelor’s degree" },
+  { title: "5 years+", subtitle: "Advanced degree" },
+  { title: "Not sure yet", subtitle: "Show me options" },
 ];
 
 // Slider stop labels, in track order. Index -1 = untouched ("Select a range").

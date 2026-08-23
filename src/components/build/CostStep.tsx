@@ -1,7 +1,7 @@
 "use client";
 
 import { COST_STOPS } from "./types";
-import { CardHud, Citation, GlassCard, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 
 // Education Cost — the "enhance interactive elements like sliders" showcase. A real
@@ -27,18 +27,21 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
     <div className="w-full">
       <CardHud percent={percent} />
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" subtitle="Select a range. You can change it later." />
+      <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
 
       <div
         className="rounded-2xl border px-4 py-5 sm:px-6"
         style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
       >
-        <p className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">Selected Range</p>
+        {/* One readout, no eyebrow and no placeholder: the question above already
+           asks for a range, so saying "select a range" twice more was pure noise.
+           Untouched, the readout mirrors the thumb's resting stop in muted ink and
+           Next stays disabled until the student actually moves it. */}
         <p
-          className="mt-1 text-lg font-extrabold transition-colors sm:text-xl"
+          className="text-lg font-extrabold transition-colors sm:text-xl"
           style={{ color: touched ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)" }}
         >
-          {touched ? COST_STOPS[index] : "Select a range"}
+          {COST_STOPS[value]}
         </p>
 
         <div className="relative mt-5 mb-2 h-8">
@@ -74,7 +77,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
             step={1}
             value={value}
             aria-label="What total school or training cost feels realistic?"
-            aria-valuetext={touched ? COST_STOPS[index] : "Select a range"}
+            aria-valuetext={COST_STOPS[value]}
             onChange={(e) => setIndex(Number(e.target.value))}
             className="absolute inset-0 w-full cursor-pointer opacity-0"
           />
@@ -131,7 +134,6 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
         </div>
       </div>
 
-      <Citation>These answers help Dreamari compare options, not rule out your dreams. You can change them later.</Citation>
       </GlassCard>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!touched} />
     </div>
