@@ -123,9 +123,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   then "Do this next", then the activity strip.
 - Removed with it: splitDuration(), careerSummary, the avgLoan/loan derivation
   and the onGoReport prop, since nothing else used them.
-- CONSEQUENCE TO WATCH: Overview no longer links to the Report at all. The
-  Report tab is now its only entry point. Flagged to the user; add a doorway
-  back if that turns out to be too hidden.
+- Report returned as a fourth bento tile (round 27), so Overview links to it
+  again.
+
+### 2026-08-23 Round 27: report snapshot tile (PUSHED)
+
+- The report is back in the Overview bento as a SNAPSHOT rather than a copy
+  block: a 36x46 page glyph built from ruled divs (accent line for the
+  heading, muted lines for text) plus "Ready / 4 sections". No description,
+  because the picture does the describing.
+- Bento is now 3-up: the path tile spans the full row, then plan | resume |
+  report. On a phone the path and report tiles span both columns.
 
 ### 2026-08-23 Round 25: 4 tabs, CTA pattern, Paths rename (PUSHED)
 

@@ -365,8 +365,8 @@ export function ProfileExperience() {
           <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
             <OverviewTab
               focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress}
-              stillExploring={stillExploring}
-              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoResume={() => setTab("resume")} onOpenEvidence={() => setEvidenceOpen(true)}
+              stillExploring={stillExploring} sharedAt={sharedAt}
+              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoResume={() => setTab("resume")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
               onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
             />
           </div>
@@ -639,16 +639,18 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 
 function OverviewTab({
   focus, chosenRoute, nextTask, planProgress, stillExploring,
-  onGoRoutes, onGoPlan, onGoResume, onOpenEvidence, onGoLocker, onGoSettings,
+  sharedAt, onGoRoutes, onGoPlan, onGoResume, onGoReport, onOpenEvidence, onGoLocker, onGoSettings,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   nextTask: (career: ProfileCareer) => PlanTask | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
   stillExploring: boolean;
+  sharedAt: string | null;
   onGoRoutes: () => void;
   onGoPlan: () => void;
   onGoResume: () => void;
+  onGoReport: () => void;
   onOpenEvidence: () => void;
   onGoLocker: () => void;
   onGoSettings: () => void;
@@ -675,14 +677,14 @@ function OverviewTab({
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* Bento: pathway, plan and report at a glance. One number each, and
           every tile is a door into the tab that owns the detail. */}
-      <section aria-labelledby="bento-title" className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
+      <section aria-labelledby="bento-title" className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-3">
         <h3 id="bento-title" className="sr-only">Your pathway, plan and report at a glance</h3>
 
         {/* Route — the widest tile, because it sets everything else */}
         <button
           type="button"
           onClick={onGoRoutes}
-          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left md:col-span-3"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
@@ -746,6 +748,32 @@ function OverviewTab({
             <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Draft started</span>
             <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               Two jobs and one club added
+            </span>
+          </span>
+        </button>
+        {/* Report — a miniature of the document rather than copy describing it */}
+        <button
+          type="button"
+          onClick={onGoReport}
+          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left md:col-span-1"
+          style={GLASS}
+        >
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
+            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          </span>
+          <span className="flex items-end gap-[var(--space-3)]">
+            <span aria-hidden className="flex h-[46px] w-[36px] flex-none flex-col gap-[3px] rounded-[3px] p-[5px]" style={{ background: "var(--glass-surface-3)" }}>
+              <span className="h-[4px] w-[70%] rounded-[1px]" style={{ background: "var(--accent-subtle)" }} />
+              <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
+              <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
+              <span className="h-[2px] w-[60%] rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
+              <span className="mt-[2px] h-[3px] w-[45%] rounded-[1px]" style={{ background: "var(--accent-subtle)", opacity: 0.7 }} />
+              <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
+            </span>
+            <span className="flex flex-col gap-[1px]">
+              <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
+              <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>4 sections</span>
             </span>
           </span>
         </button>
