@@ -366,7 +366,7 @@ export function ProfileExperience() {
             <OverviewTab
               focus={focus} chosenRoute={chosenRoute} nextTask={nextTask} planProgress={planProgress}
               stillExploring={stillExploring}
-              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoResume={() => setTab("resume")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
+              onGoRoutes={() => setTab("routes")} onGoPlan={() => setTab("plan")} onGoResume={() => setTab("resume")} onOpenEvidence={() => setEvidenceOpen(true)}
               onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
             />
           </div>
@@ -600,15 +600,6 @@ function CompactSwitcher({ top3, focus, setFocusId, onAdd, onRemove }: { top3: s
   );
 }
 
-// "2 to 4 years to a first flying job" -> big "2 to 4 years", small trailing
-// note. Keeps the stat row scannable without dropping the qualifier.
-function splitDuration(value: string): { value: string; note: string | null } {
-  const trimmed = value.replace(/^about\s+/i, "");
-  const match = trimmed.match(/^(.*?\b(?:years?|months?|weeks?))\b\s*(.*)$/i);
-  if (!match) return { value: trimmed, note: null };
-  return { value: match[1], note: match[2] ? match[2] : null };
-}
-
 // ---- Compare my Top 3 ----
 // Lives beside My Top 3, not inside the report: a report is one career's
 // document, and stacking three of them in it made it read as a bundle.
@@ -648,7 +639,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 
 function OverviewTab({
   focus, chosenRoute, nextTask, planProgress, stillExploring,
-  onGoRoutes, onGoPlan, onGoReport, onGoResume, onOpenEvidence, onGoLocker, onGoSettings,
+  onGoRoutes, onGoPlan, onGoResume, onOpenEvidence, onGoLocker, onGoSettings,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
@@ -657,7 +648,6 @@ function OverviewTab({
   stillExploring: boolean;
   onGoRoutes: () => void;
   onGoPlan: () => void;
-  onGoReport: () => void;
   onGoResume: () => void;
   onOpenEvidence: () => void;
   onGoLocker: () => void;
@@ -677,79 +667,12 @@ function OverviewTab({
   }
 
   const route = chosenRoute(focus);
-  const careerSummary = reportV2(focus.id);
-  // Loans vary, so the figure is approximate and "None" when there is no debt.
-  const avgLoan = routeDetail(route.id)?.payoff.avgLoan;
-  const loan = !avgLoan ? null : /^\$?0/.test(avgLoan) ? "None" : `~${avgLoan}`;
   const next = nextTask(focus);
   const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const progress = planProgress(focus);
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* The TLDR: what this career is, in three numbers and one line */}
-      {careerSummary && (
-        <section aria-labelledby="summary-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-            <span className="flex min-w-0 flex-col gap-[3px]">
-              <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: WORLD_COLORS[focus.world] }}>{focus.world}</span>
-              <h3 id="summary-title" className="text-[24px] leading-[28px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{focus.title}</h3>
-              <span className="max-w-[52ch] text-[15px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{careerSummary.glance.whatYouDo}</span>
-            </span>
-            <button type="button" onClick={onGoReport} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              Full report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 gap-[var(--space-2)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
-            {[
-              { label: "Time to get in", ...splitDuration(careerSummary.comparison.timeToEnter) },
-              { label: "Median pay", value: careerSummary.salary.median, note: "/yr" },
-              // Loan beats outlook here: "faster than average" needs a second
-              // line to mean anything, and debt is the question students ask.
-              ...(loan ? [{ label: "Typical loan", value: loan, note: null as string | null }] : []),
-            ].map((stat) => (
-              <span key={stat.label} className="flex items-baseline justify-between gap-[var(--space-3)] sm:flex-col sm:items-start sm:gap-[2px]">
-                <span className="flex-none text-[12px] font-bold tracking-[1px] whitespace-nowrap uppercase" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
-                <span className="flex flex-wrap items-baseline gap-x-[5px]">
-                  <span className="whitespace-nowrap text-[24px] leading-[28px] font-extrabold tracking-[-0.02em] sm:text-[27px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{stat.value}</span>
-                  {stat.note && <span className="text-[15px] leading-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{stat.note}</span>}
-                </span>
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* The one thing to do next */}
-      <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          <span className="flex min-w-0 flex-col gap-[3px]">
-            <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
-            <h3 id="next-title" className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-              {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
-            </h3>
-          </span>
-          {next ? (
-            <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
-              <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
-            </Link>
-          ) : (
-            <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
-          )}
-        </div>
-        <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="flex items-baseline justify-between gap-[var(--space-2)]">
-            <span className="text-[14px] font-bold">{progress.complete} of {progress.total} steps done</span>
-            <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          </span>
-          <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
-          </span>
-        </div>
-      </section>
-
       {/* Bento: pathway, plan and report at a glance. One number each, and
           every tile is a door into the tab that owns the detail. */}
       <section aria-labelledby="bento-title" className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
@@ -826,6 +749,36 @@ function OverviewTab({
             </span>
           </span>
         </button>
+      </section>
+
+      {/* The one thing to do next */}
+      <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+          <span className="flex min-w-0 flex-col gap-[3px]">
+            <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
+            <h3 id="next-title" className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+              {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
+            </h3>
+          </span>
+          {next ? (
+            <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+              <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
+            </Link>
+          ) : (
+            <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
+          )}
+        </div>
+        <div className="flex flex-col gap-[7px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="flex items-baseline justify-between gap-[var(--space-2)]">
+            <span className="text-[14px] font-bold">{progress.complete} of {progress.total} steps done</span>
+            <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          </span>
+          <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
+            <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
+          </span>
+        </div>
       </section>
 
       {/* Secondary: activity and controls, kept out of the identity block */}

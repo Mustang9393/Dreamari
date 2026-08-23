@@ -116,6 +116,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   on dreamari.vercel.app. Figma handoff pack (docs/handoff/profile-figma)
   is now a full generation stale.
 
+### 2026-08-23 Round 26: Overview leads with the bento (PUSHED)
+
+- The career summary card (world, title, one-liner, three stats) is REMOVED.
+  Overview now opens with the bento — Current path / My plan / My resume —
+  then "Do this next", then the activity strip.
+- Removed with it: splitDuration(), careerSummary, the avgLoan/loan derivation
+  and the onGoReport prop, since nothing else used them.
+- CONSEQUENCE TO WATCH: Overview no longer links to the Report at all. The
+  Report tab is now its only entry point. Flagged to the user; add a doorway
+  back if that turns out to be too hidden.
+
 ### 2026-08-23 Round 25: 4 tabs, CTA pattern, Paths rename (PUSHED)
 
 - FIVE TABS DO NOT FIT A PHONE. Resume went back to a labelled header button
