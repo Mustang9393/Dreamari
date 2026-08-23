@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
@@ -153,7 +154,12 @@ export function MatchLab() {
   }
 
   function toReport() {
-    router.push("/career-report?from=match-lab");
+    // Their ranking travels with them: the chooser and the profile read this
+    // order as the Top 3, and storage keeps it after a refresh. Deck ids ARE
+    // catalogue ids, so each one resolves to a real report on the far side.
+    const ids = liked.map((career) => career.id);
+    writePicks({ ids, focus: null });
+    router.push(`/career-report?picks=${picksParam(ids)}`);
   }
 
   function reorder(slot: number, dir: -1 | 1) {

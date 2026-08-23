@@ -4,7 +4,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -39,6 +39,7 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
+import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import {
   ACADEMIC_RECORD,
@@ -68,12 +69,36 @@ function careerById(id: string | null): ProfileCareer | null {
 const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase";
 const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
 
-export function ProfileExperience() {
+// Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
+// navigates with (so the right career server-renders, no flash of someone
+// else's), then stored picks on a later visit, and finally the demo default so
+// /profile still stands up on its own with nothing saved.
+const DEMO_TOP3 = ["investment-banking", "airline-pilot"];
+
+export function ProfileExperience({ initialPicks = [], initialFocus = null }: { initialPicks?: string[]; initialFocus?: string | null } = {}) {
   const [tab, setTab] = useState<TabId>("overview");
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");
-  const [top3, setTop3] = useState<string[]>(["investment-banking", "airline-pilot"]);
-  const [focusId, setFocusId] = useState<string | null>("investment-banking");
+  // Storage is an external store, so it is READ, never copied into state by an
+  // effect: the handoff wins if there is one, then whatever they last chose,
+  // then the demo default. Their own edits below layer on top of that.
+  const fromHandoff = initialPicks.length > 0;
+  const stored = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  const [edits, setEdits] = useState<{ ids: string[]; focus: string | null } | null>(null);
+  const base = useMemo(() => {
+    if (fromHandoff) return { ids: initialPicks, focus: initialFocus ?? initialPicks[0] };
+    const valid = stored.ids.filter((id) => ALL_PROFILE_CAREERS.some((career) => career.id === id));
+    if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : valid[0] };
+    return { ids: DEMO_TOP3, focus: DEMO_TOP3[0] as string | null };
+  }, [fromHandoff, initialPicks, initialFocus, stored]);
+  const top3 = edits?.ids ?? base.ids;
+  const focusId = edits ? edits.focus : base.focus;
+  const setTop3 = (next: string[] | ((previous: string[]) => string[])) =>
+    setEdits((current) => {
+      const previous = current ?? base;
+      return { ids: typeof next === "function" ? next(previous.ids) : next, focus: previous.focus };
+    });
+  const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? base).ids, focus: id }));
   const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
   const [done, setDone] = useState<Record<string, string[]>>({});
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
@@ -122,6 +147,14 @@ export function ProfileExperience() {
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
+
+  // Swapping a career or changing the focus here is a real choice too, so it
+  // persists the way the chooser's did. Only actual edits are written -- a
+  // first-time visitor looking at the demo default has not chosen anything.
+  useEffect(() => {
+    if (!edits) return;
+    writePicks(edits);
+  }, [edits]);
 
   const focus = careerById(focusId);
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);

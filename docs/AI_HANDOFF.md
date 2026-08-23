@@ -6,6 +6,57 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-24
 
+### 2026-08-24 Match -> report chooser -> profile, on one career catalogue (PUSHED)
+
+- NEW SCREEN. /career-report is now the chooser the student lands on after
+  Match: their Top 3 as the REAL reports, one centred and readable with the
+  others peeking in from the edges (arrows, dots, swipe, tap-a-peek-to-centre).
+  The centred report IS the choice -- no separate select step -- and confirming
+  goes to /profile focused on it. Destination was a deliberate call: not the
+  homepage (an anticlimax right after a commitment) and not straight into Plan
+  (11 tasks is the second thing you want, not the first); Overview already
+  answers "so what now" in one skim.
+- ONE CAREER CATALOGUE. The deck used to carry its own ids ("FIN-001") and its
+  own six careers, so whatever a student swiped could not be looked up
+  downstream -- only 1 of 6 had a designed report. DECK now uses the shared
+  catalogue ids (investment-banking, private-equity, software-engineer,
+  airline-pilot, registered-nurse, food-scientist) with poster art that already
+  existed in public/images/app. Adding a deck card now means adding the career
+  to PROFILE_CAREERS/LOCKER_EXTRAS and CAREER_REPORTS_V2 too, which is the
+  point.
+- Authored two full V2 reports (registered-nurse, food-scientist) plus their
+  COURSE_SUGGESTIONS, so all six deck careers resolve to a real report, pathway
+  and plan. NJ/NY-centric college lists like the existing ones, 2 per band.
+- src/lib/picks.ts (NEW): the Match -> chooser -> profile handoff. ?picks= in
+  the URL is the authority on navigation (so the right career SERVER-renders,
+  no flash of someone else's report) and localStorage survives refreshes and
+  later visits. Read through useSyncExternalStore with a cached snapshot --
+  the repo lints setState-in-effect as an error, and copying storage into
+  state on mount is exactly that; the cache exists because a fresh object per
+  call spins the renderer.
+- ProfileExperience takes initialPicks/initialFocus and derives top3/focusId
+  from handoff -> storage -> demo default, with local setTop3/setFocusId
+  wrappers so every existing call site is untouched. Only real edits are
+  written back: a first-time visitor looking at the demo default has not
+  chosen anything.
+- CareerReport.tsx exports CareerReportDocument -- the document with no rail,
+  toolbar or export preview -- so the chooser renders the SAME component the
+  profile renders and the printer prints. idPrefix keeps three copies from
+  colliding on element ids. There is still exactly one report implementation.
+- DELETED the legacy /career-report experience (CareerReportExperience.tsx,
+  reportData.ts): hardcoded to Computer Science, its own data file, a stale
+  duplicate of the designed report. NOTE: src/components/student-app/
+  StudentAppShell.tsx was only ever imported by it and is now unreferenced --
+  left in place rather than deleted unasked, but it is dead code today.
+- Copy: report masthead and footer say "Career Report", not "Career & Pathway
+  Report" (per direct request, in the template itself). Chooser copy cut to a
+  heading plus five words.
+- Verified end to end in the browser: deck -> chooser -> confirm -> profile
+  focused on the chosen career, with the pathway, plan and report all following
+  it (registered-nurse lands on the ADN route, 2 yrs, $65-80K, its own 4-step
+  plan). tsc, eslint (3 pre-existing <img> warnings), tokens:check, isolated
+  worktree build.
+
 ### 2026-08-24 Glass rung: MatchLab adopts it + app-repo mirror spec (PUSHED)
 
 - Both items the previous entry left open, approved by the user.

@@ -12,7 +12,7 @@ import {
   type CareerReportV2,
 } from "./report-data";
 
-// The Career & Pathway Report.
+// The Career Report.
 //
 // A document, not a dashboard: a warm paper surface inside Dreamari's dark
 // shell, numbered sections, a contextual table of contents, and progressive
@@ -189,6 +189,8 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
 
 // The one-page meeting summary. Print-only by default; the export preview can
 // show it on screen. Everything a counselor needs in the first two minutes.
+const REPORT_DATE = "Aug 22, 2026";
+
 export type ReportViewProps = {
   student: { name: string; grade: string; school: string };
   career: ProfileCareer;
@@ -222,7 +224,7 @@ function ReportDocument({
         {/* Masthead */}
         <header data-print-keep>
           <p className="text-[30px] leading-[33px] font-extrabold uppercase sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink-faint)", letterSpacing: "0.004em" }}>
-            Career &amp; Pathway Report
+            Career Report
           </p>
           <h2 className="mt-[2px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
           <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
@@ -369,13 +371,29 @@ function ReportDocument({
 
       {/* Running footer: repeats on every printed page */}
       <div className="dm-print-footer" aria-hidden>
-        {student.name} · Career &amp; Pathway Report · {reportDate} · v1.0 · Prepared with Dreamari
+        {student.name} · Career Report · {reportDate} · v1.0 · Prepared with Dreamari
       </div>
     </article>
   );
 }
 
 export { ComparisonTable, Portal };
+
+// The document on its own, with no rail, no toolbar and no export preview --
+// for places that show the report rather than let you work on it (the report
+// chooser renders three of these side by side). Same component the profile
+// renders and the printer prints, so there is still only one report.
+export function CareerReportDocument({
+  student, career, idPrefix,
+}: {
+  student: { name: string; grade: string; school: string };
+  career: ProfileCareer;
+  idPrefix: string;
+}) {
+  const report = reportV2(career.id);
+  if (!report) return null;
+  return <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} idPrefix={idPrefix} />;
+}
 
 export function CareerReportView(props: ReportViewProps) {
   const { student, career } = props;
@@ -399,7 +417,7 @@ export function CareerReportView(props: ReportViewProps) {
     return () => observer.disconnect();
   }, [career.id]);
 
-  const reportDate = "Aug 22, 2026";
+  const reportDate = REPORT_DATE;
 
 
 

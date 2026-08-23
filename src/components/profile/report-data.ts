@@ -1,4 +1,4 @@
-// Career & Pathway Report v2 — the student-owned artifact.
+// Career Report v2 — the student-owned artifact.
 //
 // Shape follows the Career Intelligence Layer V3 doc: careers carry a simple
 // explanation and a real-life example (CIL 5), pathways carry cost/time/
@@ -453,6 +453,162 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "Aug 2026", url: "https://www.onetonline.org/" },
     ],
   },
+
+  "registered-nurse": {
+    glance: {
+      simple: "Registered nurses keep patients safe and are the person actually at the bedside all shift.",
+      example: "Someone comes into the ER short of breath at 2am. The nurse takes their vitals, spots that oxygen is dropping, starts treatment and gets the doctor before it becomes an emergency.",
+      whatYouDo: "Assess patients, give treatment, and catch problems early.",
+      responsibilities: [
+        "Take vitals and assess how a patient is doing",
+        "Give medication and track how patients respond",
+        "Run IVs, wound care and other hands-on procedures",
+        "Chart everything in the patient record",
+        "Explain what is happening to patients and families",
+        "Hand off clearly to the next shift",
+      ],
+      environment: "Hospitals, clinics, schools and home health. On your feet most of the shift.",
+      schedule: "Often three 12-hour shifts a week. Nights, weekends and holidays are part of it, and three-day weeks are the trade-off.",
+      skills: ["Staying calm under pressure", "Noticing small changes", "Explaining things simply", "Physical stamina"],
+      industries: ["Hospitals", "Outpatient clinics", "Schools and public health", "Home health"],
+      employers: ["Hackensack Meridian Health", "RWJBarnabas Health", "NewYork-Presbyterian", "County and school health services"],
+      education: "Associate or bachelor's degree in nursing, plus the NCLEX-RN license.",
+      alternatives: ["Two-year ADN now, employer-paid BSN later", "Start as a CNA and work while you study", "Accelerated BSN if you already have a degree"],
+    },
+    salary: {
+      median: "$93,600",
+      entry: "$65,000 to $80,000 in year one, higher in and around New York City",
+      experienced: "$100,000 to $130,000 with specialty certification or charge duty",
+      geography: "Metro New York and New Jersey pay well above the national number. Rural hospitals pay less.",
+      variablePay: "Night, weekend and overtime differentials add real money, and picking up extra shifts is common.",
+      outlook: "Faster than average",
+      outlookDetail: "Employment of registered nurses is projected to grow faster than the average for all occupations, with most openings coming from replacing nurses who retire.",
+      source: bls("Registered nurse pay and outlook", "May 2024", "https://www.bls.gov/ooh/healthcare/registered-nurses.htm"),
+    },
+    education: [
+      { name: "Bachelor's: Nursing (BSN)", kind: "Degree", time: "4 years", prerequisites: "High school diploma, biology and chemistry", licensure: "NCLEX-RN after you graduate", common: true, note: "Most large hospitals now prefer or require the BSN to start." },
+      { name: "Associate: Nursing (ADN)", kind: "Degree", time: "2 years", prerequisites: "High school diploma, prerequisite science courses", licensure: "NCLEX-RN after you graduate", common: false, note: "Cheapest way to a license. Many employers pay for the BSN afterwards." },
+    ],
+    majors: [
+      { name: "Nursing", teaches: "Patient assessment, pharmacology and clinical practice, with supervised hospital rotations.", connection: "It is the direct route, and the only one that leads to the license.", alternatives: ["Accelerated BSN after another degree"] },
+      { name: "Biology", teaches: "How the body works at the system and cell level.", connection: "A common route into an accelerated nursing program later.", alternatives: ["Health sciences", "Public health"] },
+      { name: "Public Health", teaches: "Why populations get sick and what actually changes outcomes.", connection: "Pairs with nursing for school, community and policy roles.", alternatives: ["Health administration", "Nutrition"] },
+    ],
+    colleges: [
+      { name: "University of Pennsylvania", location: "Philadelphia, PA", control: "Private", length: "4-year", program: "BSN", cost: "About $66K a year tuition before aid", outcome: "96% graduate within 6 years", requirements: "Among the most competitive nursing programs in the country", why: "The best-known nursing school on this list, and it meets full demonstrated need.", status: "Reach" },
+      { name: "New York University (Rory Meyers)", location: "New York, NY", control: "Private", length: "4-year", program: "BSN", cost: "About $62K a year tuition before aid", outcome: "87% graduate within 6 years", requirements: "Very competitive, check aid before assuming the sticker price", why: "Clinical rotations in major Manhattan hospitals from early on.", status: "Reach" },
+      { name: "Rutgers School of Nursing", location: "Newark, NJ", control: "Public", length: "4-year", program: "BSN", cost: "About $17K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "Direct admission to nursing is separate and competitive", why: "In-state tuition with rotations across the state's biggest hospital systems.", status: "Target" },
+      { name: "The College of New Jersey", location: "Ewing, NJ", control: "Public", length: "4-year", program: "BSN", cost: "About $18K a year in-state tuition and fees", outcome: "86% graduate within 6 years", requirements: "Nursing is the most competitive major on campus", why: "Small cohort and a consistently high NCLEX pass rate.", status: "Target" },
+      { name: "Ramapo College of New Jersey", location: "Mahwah, NJ", control: "Public", length: "4-year", program: "BSN", cost: "About $17K a year in-state tuition and fees", outcome: "72% graduate within 6 years", requirements: "Check the science course requirements", why: "Public BSN with a friendlier admissions bar than the two above.", status: "Safety" },
+      { name: "Bergen Community College", location: "Paramus, NJ", control: "Public", length: "2-year", program: "ADN, then RN-to-BSN", cost: "About $6K a year in-district tuition and fees", outcome: "Strong NCLEX pass rate", requirements: "Nursing admission is by points, and there is a waitlist", why: "Licensed and earning in two years, with the BSN often paid for by your employer.", status: "Safety" },
+    ],
+    comparison: {
+      careerId: "registered-nurse",
+      work: "Assess and treat patients at the bedside for a whole shift.",
+      setting: "Hospital or clinic, on your feet, always on a team",
+      education: "ADN or BSN, plus the NCLEX-RN license",
+      timeToEnter: "2 to 4 years",
+      costBand: "Low",
+      costNote: "Very low through a community college ADN, medium at a private BSN",
+      salaryRange: "$65K to $80K starting",
+      outlook: "Faster than average",
+      majors: ["Nursing", "Biology", "Public Health"],
+      tradeoff: "You matter to someone every shift, and the shifts are long.",
+      whySaved: "You passed the triage scenario and saved two more health careers after it.",
+      evidence: "Strong interest",
+      investigate: "Whether three 12-hour shifts suits you better than five short days.",
+    },
+    actions: [
+      { id: "rn-a1", label: "Compare the two-year ADN against the four-year BSN", reason: "One licenses you two years sooner, the other starts you higher.", due: "Before spring registration", href: "#pathway", destination: "My Pathway" },
+      { id: "rn-a2", label: "Ask a working nurse what nights actually feel like", reason: "Shift pattern is the trade-off you have not tested yet.", due: null, href: "/explore", destination: "Connect" },
+      { id: "rn-a3", label: "Check whether your school offers a CNA course or a hospital volunteer program", reason: "It is the cheapest way to find out if the floor is for you.", due: null, href: "/explore", destination: "Explore" },
+      { id: "rn-a4", label: "Look up the Bergen nursing waitlist and its points system", reason: "The cheap route has an application timeline you can miss.", due: null, href: "/colleges", destination: "College lookup" },
+      { id: "rn-a5", label: "Bring this report to your next counselor meeting", reason: "Nursing admission is often separate from the university's, and worth asking about.", due: null, href: "#report", destination: "Career Report" },
+    ],
+    sources: [
+      bls("Registered nurse pay and outlook", "May 2024", "https://www.bls.gov/ooh/healthcare/registered-nurses.htm"),
+      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Licensure requirements", org: "National Council of State Boards of Nursing", year: "2025", verified: "Aug 2026", url: "https://www.ncsbn.org/" },
+    ],
+  },
+
+  "food-scientist": {
+    glance: {
+      simple: "Food scientists work out how food is made, kept safe, and made to taste the same every time.",
+      example: "An oat milk keeps separating on the shelf. A food scientist tests why, reformulates it, and runs the samples until it holds for the full shelf life.",
+      whatYouDo: "Develop and test food products in a lab and a pilot kitchen.",
+      responsibilities: [
+        "Formulate and reformulate recipes at production scale",
+        "Run shelf-life, texture and safety tests",
+        "Sit on sensory panels and read the results",
+        "Keep products inside FDA and USDA rules",
+        "Document every batch and result",
+        "Work with production to make it repeatable in a factory",
+      ],
+      environment: "Lab and pilot plant, some office. Small research teams, occasional factory floor visits.",
+      schedule: "Regular weekday hours, which is unusual for a science job. Occasional production-line trips.",
+      skills: ["Careful measurement", "Patience with repetition", "Chemistry", "Writing up what you found"],
+      industries: ["Food and beverage manufacturers", "Ingredient suppliers", "Government food safety", "University research"],
+      employers: ["PepsiCo", "Nestlé", "Church & Dwight", "State and federal food safety labs"],
+      education: "Bachelor's degree in food science, chemistry, or biology.",
+      alternatives: ["Chemistry degree plus a food industry internship", "Two-year college, then transfer into food science", "Lab technician first, degree part-time"],
+    },
+    salary: {
+      median: "$76,400",
+      entry: "$55,000 to $70,000 in year one",
+      experienced: "$95,000 to $125,000 as a senior scientist or R&D lead",
+      geography: "Pay follows where the manufacturers are. New Jersey has an unusually high concentration of food and flavor companies.",
+      variablePay: null,
+      outlook: "As fast as average",
+      outlookDetail: "Employment of agricultural and food scientists is projected to grow about as fast as the average for all occupations.",
+      source: bls("Agricultural and food scientist pay and outlook", "May 2024", "https://www.bls.gov/ooh/life-physical-and-social-science/agricultural-and-food-scientists.htm"),
+    },
+    education: [
+      { name: "Bachelor's: Food Science", kind: "Degree", time: "4 years", prerequisites: "High school diploma, chemistry and biology", licensure: null, common: true, note: "Look for a program with a pilot plant. Employers ask about hands-on time." },
+      { name: "Two-year college, then transfer", kind: "Degree", time: "2 + 2 years", prerequisites: "High school diploma", licensure: null, common: false, note: "New Jersey has a transfer agreement into Rutgers. Check it before you pick courses." },
+    ],
+    majors: [
+      { name: "Food Science", teaches: "The chemistry, microbiology and engineering of turning ingredients into a safe product.", connection: "The direct route, and the degree employers name in job postings.", alternatives: ["Food engineering", "Nutrition science"] },
+      { name: "Chemistry", teaches: "How substances behave and react, with heavy lab time.", connection: "Formulation is chemistry, so this transfers straight across.", alternatives: ["Biochemistry", "Chemical engineering"] },
+      { name: "Nutrition", teaches: "How food affects the body, and how products are labelled and regulated.", connection: "Pairs with product development and the health claims side of the industry.", alternatives: ["Dietetics", "Public health"] },
+    ],
+    colleges: [
+      { name: "Cornell University", location: "Ithaca, NY", control: "Private", length: "4-year", program: "BS Food Science", cost: "About $69K a year tuition before aid", outcome: "95% graduate within 6 years", requirements: "Very competitive, check aid before assuming the sticker price", why: "The strongest food science department in the region, with its own dairy plant.", status: "Reach" },
+      { name: "University of Wisconsin-Madison", location: "Madison, WI", control: "Public", length: "4-year", program: "BS Food Science", cost: "About $40K a year out-of-state tuition and fees", outcome: "89% graduate within 6 years", requirements: "Competitive out-of-state, check requirements", why: "A national name in the field, but out-of-state cost and distance are real.", status: "Reach" },
+      { name: "Rutgers University", location: "New Brunswick, NJ", control: "Public", length: "4-year", program: "BS Food Science", cost: "About $17K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "Check the science course requirements", why: "In-state tuition, and most of New Jersey's food companies recruit here.", status: "Target" },
+      { name: "Penn State", location: "University Park, PA", control: "Public", length: "4-year", program: "BS Food Science", cost: "About $40K a year out-of-state tuition and fees", outcome: "86% graduate within 6 years", requirements: "Check requirements for the College of Agricultural Sciences", why: "Strong department with a pilot plant, at out-of-state cost.", status: "Target" },
+      { name: "Delaware Valley University", location: "Doylestown, PA", control: "Private", length: "4-year", program: "BS Food Science", cost: "About $45K a year tuition before aid, strong merit aid", outcome: "62% graduate within 6 years", requirements: "Check merit scholarship criteria", why: "Small program, hands-on from year one, and merit aid moves the real price a lot.", status: "Safety" },
+      { name: "Middlesex College", location: "Edison, NJ", control: "Public", length: "2-year", program: "Science transfer track, then Rutgers Food Science", cost: "About $5K a year in-county tuition and fees", outcome: "Transfer agreement with Rutgers", requirements: "Open admission, but the transfer course list is strict", why: "Two cheap years first, then the same Rutgers degree. Confirm the course list early.", status: "Safety" },
+    ],
+    comparison: {
+      careerId: "food-scientist",
+      work: "Develop and test food products in a lab and pilot kitchen.",
+      setting: "Lab and pilot plant, small research team",
+      education: "Bachelor's degree in food science or chemistry",
+      timeToEnter: "About 4 years",
+      costBand: "Low",
+      costNote: "Low in-state or by transfer, high out-of-state or private",
+      salaryRange: "$55K to $70K starting",
+      outlook: "As fast as average",
+      majors: ["Food Science", "Chemistry", "Nutrition"],
+      tradeoff: "Steady hours and real science, and breakthroughs take patience.",
+      whySaved: "You kept coming back to the lab-based careers and saved this one twice.",
+      evidence: "Needs more exploration",
+      investigate: "Whether you want the lab bench or the factory floor side of it.",
+    },
+    actions: [
+      { id: "fs-a1", label: "Compare Rutgers in-state against the out-of-state programs", reason: "Same degree, about $23K a year apart.", due: "Before spring registration", href: "#pathway", destination: "My Pathway" },
+      { id: "fs-a2", label: "Check whether your chemistry teacher knows anyone in food R&D", reason: "New Jersey has more of these companies than almost anywhere.", due: null, href: "/explore", destination: "Connect" },
+      { id: "fs-a3", label: "Take AP Chemistry next year if it fits", reason: "Every route on this list starts there.", due: "Course selection", href: "#pathway", destination: "My Pathway" },
+      { id: "fs-a4", label: "Look up the Middlesex to Rutgers transfer course list", reason: "Transfer agreements only hold if you take the right courses from term one.", due: null, href: "/colleges", destination: "College lookup" },
+      { id: "fs-a5", label: "Bring this report to your next counselor meeting", reason: "You saved this one but have not tested it yet.", due: null, href: "#report", destination: "Career Report" },
+    ],
+    sources: [
+      bls("Agricultural and food scientist pay and outlook", "May 2024", "https://www.bls.gov/ooh/life-physical-and-social-science/agricultural-and-food-scientists.htm"),
+      { label: "College cost and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "Aug 2026", url: "https://www.onetonline.org/" },
+    ],
+  },
 };
 
 export const reportV2 = (careerId: string): CareerReportV2 | undefined => CAREER_REPORTS_V2[careerId];
@@ -550,6 +706,16 @@ export const COURSE_SUGGESTIONS: Record<string, { label: string; why: string }[]
     { label: "Computer science", why: "Confirms the interest before you commit a degree." },
     { label: "Math through pre-calculus", why: "Most CS programs expect it." },
     { label: "One finished personal project", why: "Worth more than a certificate." },
+  ],
+  "registered-nurse": [
+    { label: "Anatomy and physiology", why: "The prerequisite every nursing program asks for." },
+    { label: "Chemistry", why: "Pharmacology later assumes you have had it." },
+    { label: "Hospital volunteering or a CNA course", why: "The cheapest way to test the floor before you commit." },
+  ],
+  "food-scientist": [
+    { label: "AP Chemistry", why: "Formulation is chemistry, and every route starts there." },
+    { label: "Biology", why: "Food safety is microbiology before it is anything else." },
+    { label: "Statistics", why: "Sensory panels and shelf-life tests are read statistically." },
   ],
 };
 
