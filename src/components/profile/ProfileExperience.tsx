@@ -39,7 +39,7 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
-import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
+import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import {
   ACADEMIC_RECORD,
   COURSE_SUGGESTIONS,
@@ -761,7 +761,7 @@ function OverviewTab({
           </span>
           <span className="flex items-center justify-between gap-[var(--space-2)] border-t pt-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
             <span>{EVIDENCE.length} signals</span>
-            <span>{focus.title}</span>
+            <span>{REPORT_SECTIONS.length} sections</span>
           </span>
         </button>
         {/* Resume — the report already has a doorway in the summary card above */}
