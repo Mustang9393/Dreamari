@@ -130,8 +130,10 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - The report is back in the Overview bento as a SNAPSHOT rather than a copy
   block: a 36x46 page glyph built from ruled divs (accent line for the
-  heading, muted lines for text) plus "Ready / 4 sections". No description,
-  because the picture does the describing.
+  heading, muted lines for text) beside the signals that decide whether it is
+  worth opening: "Updated today", share state, then a footer row with the
+  evidence count and which career the report is for. "Ready / 4 sections" was
+  too thin and left the tile looking empty.
 - Bento is now 3-up: the path tile spans the full row, then plan | resume |
   report. On a phone the path and report tiles span both columns.
 

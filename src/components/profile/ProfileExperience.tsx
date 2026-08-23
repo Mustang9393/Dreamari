@@ -751,7 +751,8 @@ function OverviewTab({
             </span>
           </span>
         </button>
-        {/* Report — a miniature of the document rather than copy describing it */}
+        {/* Report — a miniature of the document plus the signals that tell a
+            student whether it is worth opening: freshness and share state. */}
         <button
           type="button"
           onClick={onGoReport}
@@ -762,19 +763,24 @@ function OverviewTab({
             <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="flex items-end gap-[var(--space-3)]">
-            <span aria-hidden className="flex h-[46px] w-[36px] flex-none flex-col gap-[3px] rounded-[3px] p-[5px]" style={{ background: "var(--glass-surface-3)" }}>
-              <span className="h-[4px] w-[70%] rounded-[1px]" style={{ background: "var(--accent-subtle)" }} />
+          <span className="flex items-center gap-[var(--space-3)]">
+            <span aria-hidden className="flex h-[40px] w-[31px] flex-none flex-col gap-[3px] rounded-[3px] p-[4px]" style={{ background: "var(--glass-surface-3)" }}>
+              <span className="h-[3px] w-[70%] rounded-[1px]" style={{ background: "var(--accent-subtle)" }} />
               <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
               <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
-              <span className="h-[2px] w-[60%] rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
-              <span className="mt-[2px] h-[3px] w-[45%] rounded-[1px]" style={{ background: "var(--accent-subtle)", opacity: 0.7 }} />
+              <span className="mt-[1px] h-[3px] w-[45%] rounded-[1px]" style={{ background: "var(--accent-subtle)", opacity: 0.7 }} />
               <span className="h-[2px] w-full rounded-[1px]" style={{ background: "var(--muted-foreground)", opacity: 0.5 }} />
             </span>
-            <span className="flex flex-col gap-[1px]">
-              <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{sharedAt ? "Shared" : "Ready"}</span>
-              <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>4 sections</span>
+            <span className="flex min-w-0 flex-col gap-[1px]">
+              <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Updated today</span>
+              <span className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                {sharedAt ? `Shared ${sharedAt}` : "Not shared yet"}
+              </span>
             </span>
+          </span>
+          <span className="flex items-center justify-between gap-[var(--space-2)] border-t pt-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+            <span>{EVIDENCE.length} signals</span>
+            <span>{focus.title}</span>
           </span>
         </button>
       </section>
