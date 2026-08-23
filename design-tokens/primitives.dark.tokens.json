@@ -1205,6 +1205,19 @@
         },
         "$description": "Figma var(--glass-surface-3) #0c1023cc - deep glass panel fill (cards)."
       },
+      "surface-raised": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.066667
+        },
+        "$description": "Figma var(--glass-raised) #ffffff11 - the white-alpha rung between surface-1 and surface-2. The rest fill for glass tiles that a reader has to be able to FIND: surface-1's #ffffff08 over a night background leaves no perceivable tile edge, which fails WCAG 2.2 non-text contrast (1.4.11) for the option cards in the build flow. Reach for surface-1 only for decorative film that nobody has to locate."
+      },
       "border": {
         "$type": "color",
         "$value": {
@@ -1217,6 +1230,19 @@
           "alpha": 0.09
         },
         "$description": "Figma var(--glass-border) #ffffff17."
+      },
+      "border-raised": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.160784
+        },
+        "$description": "Figma var(--glass-border-raised) #ffffff29 - the hairline that pairs with surface-raised. Sits between border (#ffffff17, decorative) and hover (#ffffff2e), so a resting tile has a visible boundary without borrowing the hover state's weight."
       },
       "stroke": {
         "$type": "color",

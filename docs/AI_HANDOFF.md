@@ -6,6 +6,38 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-24
 
+### 2026-08-24 Glass: raised rung authored in the DTCG source (PUSHED)
+
+- Follow-up to the entry below, at the user's request: the `.flow-surfaces`
+  override that shadowed --color-glass-surface-1 / --color-glass-border is
+  GONE. The values it carried now exist as real tokens.
+- design-tokens/primitives.{dark,light}.tokens.json gain two primitives in
+  the color.glass group: `surface-raised` and `border-raised`. Dark is
+  #ffffff11 fill / #ffffff29 hairline; light is frosted WHITE #ffffffad fill
+  / #0000002e hairline — light deliberately does NOT follow the black-alpha
+  rungs, because that film reads muddy over the pastel aurora (this is the
+  same reasoning the html.light block in globals.css already gives for
+  surface-1, now authored in the source for this rung instead of patched in
+  CSS). Descriptions state the WCAG 1.4.11 reason and when to reach for
+  surface-1 instead. `npm run tokens:build` regenerated
+  src/app/design-tokens.generated.css; validator goes 583 -> 587 tokens and
+  passes, including light/dark path parity.
+- All 27 references in src/components/build/{steps,ui,CostStep,LocationStep}
+  .tsx moved from surface-1/border to surface-raised/border-raised.
+- ZERO visual change, and that was checked rather than assumed: the shipped
+  CSS had already quantised 0.065 -> #fff1 and 0.16 -> #ffffff29, so the
+  token values were authored to those exact 8-bit steps. Chips compute to
+  rgba(255,255,255,0.067) / rgba(255,255,255,0.16) — identical to what is
+  live — and --color-glass-surface-1 reads #ffffff08 again, unshadowed.
+- STILL OPEN, deliberately not done: src/components/match-lab/MatchLab.tsx is
+  now the only consumer of the faint surface-1 (9 references) and has the
+  same legibility problem. Moving it to the raised rung is a visual change to
+  a screen nobody asked about, so it waits for a decision.
+- MIRROR IN THE APP REPO: these two primitives need to land in
+  packages/ui/tokens (and as Figma variables) or the prototype and the real
+  system diverge. Additive only — no existing token changed value, so a pull
+  cannot alter anything already built against the glass set.
+
 ### 2026-08-24 Build flow: card contrast, BUILD label, copy cull (PUSHED)
 
 - QA round on /flow. Six files, all inside src/components/build/ except one

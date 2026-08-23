@@ -286,8 +286,8 @@ export function ChipGrid({
               isLocked ? "cursor-not-allowed opacity-40" : "hover:-translate-y-px"
             }`}
             style={{
-              background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-1))` : "var(--color-glass-surface-1)",
-              borderColor: isSelected ? accent : "var(--color-glass-border)",
+              background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-raised))` : "var(--color-glass-surface-raised)",
+              borderColor: isSelected ? accent : "var(--color-glass-border-raised)",
               color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
               ...(expandedBy === "tap" && index >= PREVIEW
                 ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
@@ -324,7 +324,7 @@ export function ChipGrid({
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
           style={{
             background: "var(--color-glass-surface-2)",
-            borderColor: "var(--color-glass-border)",
+            borderColor: "var(--color-glass-border-raised)",
             color: "var(--color-night-muted-foreground)",
           }}
         >
@@ -344,7 +344,7 @@ export function ChipGrid({
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
           style={{
             background: "var(--color-glass-surface-2)",
-            borderColor: "var(--color-glass-border)",
+            borderColor: "var(--color-glass-border-raised)",
             color: "var(--color-night-muted-foreground)",
           }}
         >

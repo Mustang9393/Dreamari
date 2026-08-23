@@ -67,7 +67,7 @@ export function InterestsStep({ state, patch, onNext, react, percent, sprite }: 
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
            flex-wrap lets two long names break onto a second line cleanly. */}
-        <div className="mb-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+        <div className="mb-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
@@ -142,7 +142,7 @@ function VibeButtonRow({
   onChange: (next: string) => void;
 }) {
   return (
-    <div className="rounded-2xl border px-4 py-3.5" style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}>
+    <div className="rounded-2xl border px-4 py-3.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
       <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">{label}</p>
       <div className="mt-2.5 grid grid-cols-3 gap-2">
         {options.map((option) => {
@@ -158,8 +158,8 @@ function VibeButtonRow({
               }}
               className="rounded-xl border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px"
               style={{
-                background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-1))" : "var(--color-glass-surface-2)",
-                borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border)",
+                background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
+                borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
                 color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
               }}
             >
@@ -202,7 +202,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, spr
           </div>
           <div
             className="flex flex-col justify-center gap-4 rounded-xl border px-4 py-4"
-            style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+            style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
           >
             <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
             <div>
@@ -245,8 +245,8 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                 }}
                 className="h-full min-w-[168px] flex-none rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px sm:min-w-0"
                 style={{
-                  background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-1))" : "var(--color-glass-surface-1)",
-                  borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border)",
+                  background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
+                  borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
                   ...cascade(optionIndex),
                 }}
               >
@@ -282,8 +282,8 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
           onChange={(e) => onChange(e.target.value)}
           className="w-full cursor-pointer appearance-none rounded-xl border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)]"
           style={{
-            background: "var(--color-glass-surface-1)",
-            borderColor: value ? "var(--color-brand-400)" : "var(--color-glass-border)",
+            background: "var(--color-glass-surface-raised)",
+            borderColor: value ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
             color: value ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
           }}
         >

@@ -111,7 +111,7 @@ export function BuildFlowExperience() {
            the viewport, and the whole group centers when it is not. The CTA
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
-        <section className="flow-surfaces relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
+        <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
           {/* Same 860px column for BOTH variants — per direct feedback the framed
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">

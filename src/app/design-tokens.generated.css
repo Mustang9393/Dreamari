@@ -47,11 +47,13 @@
   --color-feedback-success: #007a55;
   --color-feedback-success-dark-surface: #33c78c;
   --color-glass-border: rgb(0 0 0 / 0.12);
+  --color-glass-border-raised: rgb(0 0 0 / 0.180392);
   --color-glass-hover: rgb(0 0 0 / 0.14);
   --color-glass-stroke: rgb(0 0 0 / 0.28);
   --color-glass-surface-1: rgb(0 0 0 / 0.031);
   --color-glass-surface-2: rgb(0 0 0 / 0.09);
   --color-glass-surface-3: rgb(255 255 255 / 0.72);
+  --color-glass-surface-raised: rgb(255 255 255 / 0.678431);
   --color-green-450: #01be58;
   --color-green-500: #10b981;
   --color-green-600: #009966;
@@ -384,11 +386,13 @@
   --color-feedback-success: #33c78c;
   --color-feedback-success-dark-surface: #33c78c;
   --color-glass-border: rgb(255 255 255 / 0.09);
+  --color-glass-border-raised: rgb(255 255 255 / 0.160784);
   --color-glass-hover: rgb(255 255 255 / 0.18);
   --color-glass-stroke: rgb(255 255 255 / 0.3);
   --color-glass-surface-1: rgb(255 255 255 / 0.031);
   --color-glass-surface-2: rgb(255 255 255 / 0.09);
   --color-glass-surface-3: rgb(12 16 35 / 0.8);
+  --color-glass-surface-raised: rgb(255 255 255 / 0.066667);
   --color-green-450: #01be58;
   --color-green-500: #10b981;
   --color-green-600: #009966;

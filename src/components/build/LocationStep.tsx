@@ -106,7 +106,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
       {/* Map | List segmented toggle. */}
       <div
         className="mb-4 grid grid-cols-2 gap-1 rounded-xl border p-1"
-        style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+        style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
       >
         {(["map", "list"] as const).map((tab) => (
           <button
@@ -128,7 +128,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
       {view === "map" ? (
         <div
           className="rounded-2xl border p-2.5 sm:p-3"
-          style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+          style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
         >
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">United States</span>
@@ -190,7 +190,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                       : isFull
                         ? "color-mix(in srgb, var(--color-night-card) 60%, black)"
                         : "color-mix(in srgb, var(--color-night-card) 85%, var(--color-brand-900))",
-                    stroke: isSelected ? "var(--color-brand-300)" : "var(--color-glass-border)",
+                    stroke: isSelected ? "var(--color-brand-300)" : "var(--color-glass-border-raised)",
                     strokeWidth: isSelected ? 1.5 : 0.75,
                     opacity: isFull ? 0.55 : 1,
                   }}
@@ -242,8 +242,8 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
               onChange={(e) => setSlot(slot, e.target.value)}
               className="w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] disabled:opacity-50"
               style={{
-                background: "var(--color-glass-surface-1)",
-                borderColor: "var(--color-glass-border)",
+                background: "var(--color-glass-surface-raised)",
+                borderColor: "var(--color-glass-border-raised)",
               }}
             >
               <option value="">{label}</option>

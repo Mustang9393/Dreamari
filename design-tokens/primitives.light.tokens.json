@@ -1205,6 +1205,19 @@
         },
         "$description": "Light-mode glass panel: translucent white over the light wash (Semantic.Light surface treatment)."
       },
+      "surface-raised": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 0.678431
+        },
+        "$description": "Light-mode partner to the dark surface-raised: frosted WHITE, not the black-alpha film. The black-alpha rungs read as muddy grey over the pastel aurora the flow and match screens sit on, so the light glass recipe for those night-token surfaces is a translucent white panel."
+      },
       "border": {
         "$type": "color",
         "$value": {
@@ -1217,6 +1230,19 @@
           "alpha": 0.12
         },
         "$description": "Light-mode hairline."
+      },
+      "border-raised": {
+        "$type": "color",
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "alpha": 0.180392
+        },
+        "$description": "Light-mode partner to the dark border-raised: #0000002e, a step past the decorative border (#0000001f) so a resting tile keeps a visible edge on the light wash."
       },
       "stroke": {
         "$type": "color",

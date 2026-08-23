@@ -474,21 +474,6 @@ body {
   }
 }
 
-/* Build-flow / match surfaces: the generated glass film (3.1% white, 9% white
-   hairline) all but disappears over the nebula, which fails non-text contrast
-   for low-vision readers and makes the option tiles read as loose text. Lift
-   the fill and the border a step while staying translucent. Light keeps the
-   frosted-white film and only firms up its edge. Author these rungs in the
-   token source when the glass ramp gains a "raised" step. */
-.flow-surfaces {
-  --color-glass-surface-1: rgb(255 255 255 / 0.065);
-  --color-glass-border: rgb(255 255 255 / 0.16);
-}
-html.light .flow-surfaces {
-  --color-glass-surface-1: rgb(255 255 255 / 0.68);
-  --color-glass-border: rgb(0 0 0 / 0.18);
-}
-
 /* Build-flow phone fades: masked blur instead of painted gradient slabs — the
    flat-color gradient bands read as hard-edged cutouts over the nebula
    background. A mask fades the WHOLE element (tint included) so there is no

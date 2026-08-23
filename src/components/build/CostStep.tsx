@@ -31,7 +31,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
 
       <div
         className="rounded-2xl border px-4 py-5 sm:px-6"
-        style={{ background: "var(--color-glass-surface-1)", borderColor: "var(--color-glass-border)" }}
+        style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
       >
         {/* One readout, no eyebrow and no placeholder: the question above already
            asks for a range, so saying "select a range" twice more was pure noise.
