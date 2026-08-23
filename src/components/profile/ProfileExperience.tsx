@@ -677,14 +677,14 @@ function OverviewTab({
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* Bento: pathway, plan and report at a glance. One number each, and
           every tile is a door into the tab that owns the detail. */}
-      <section aria-labelledby="bento-title" className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-3">
+      <section aria-labelledby="bento-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         <h3 id="bento-title" className="sr-only">Your pathway, plan and report at a glance</h3>
 
         {/* Route — the widest tile, because it sets everything else */}
         <button
           type="button"
           onClick={onGoRoutes}
-          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left md:col-span-3"
+          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left sm:col-span-3"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
@@ -732,31 +732,12 @@ function OverviewTab({
             <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>steps done</span>
           </span>
         </button>
-
-        {/* Resume — the report already has a doorway in the summary card above */}
-        <button
-          type="button"
-          onClick={onGoResume}
-          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
-          style={GLASS}
-        >
-          <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My resume</span>
-            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-          </span>
-          <span className="flex flex-col gap-[2px]">
-            <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Draft started</span>
-            <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              Two jobs and one club added
-            </span>
-          </span>
-        </button>
         {/* Report — a miniature of the document plus the signals that tell a
             student whether it is worth opening: freshness and share state. */}
         <button
           type="button"
           onClick={onGoReport}
-          className="dm-tap col-span-2 flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left md:col-span-1"
+          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
           style={GLASS}
         >
           <span className="flex items-start justify-between gap-[var(--space-2)]">
@@ -781,6 +762,24 @@ function OverviewTab({
           <span className="flex items-center justify-between gap-[var(--space-2)] border-t pt-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
             <span>{EVIDENCE.length} signals</span>
             <span>{focus.title}</span>
+          </span>
+        </button>
+        {/* Resume — the report already has a doorway in the summary card above */}
+        <button
+          type="button"
+          onClick={onGoResume}
+          className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left"
+          style={GLASS}
+        >
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="text-[12px] font-semibold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My resume</span>
+            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          </span>
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Draft started</span>
+            <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              Two jobs and one club added
+            </span>
           </span>
         </button>
       </section>

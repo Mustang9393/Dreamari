@@ -134,8 +134,10 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   worth opening: "Updated today", share state, then a footer row with the
   evidence count and which career the report is for. "Ready / 4 sections" was
   too thin and left the tile looking empty.
-- Bento is now 3-up: the path tile spans the full row, then plan | resume |
-  report. On a phone the path and report tiles span both columns.
+- Bento: the path tile spans the full row, then plan | report | resume as
+  three EQUAL cells — one per row on a phone, three across from sm. No tile
+  gets a col-span of its own any more; that is what made one look accidentally
+  huge at some widths. Verified equal at 375 and 744.
 
 ### 2026-08-23 Round 25: 4 tabs, CTA pattern, Paths rename (PUSHED)
 
