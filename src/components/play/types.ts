@@ -47,6 +47,13 @@ type BeatBase = {
    *  unillustrated beats read as happening in the same room. */
   art?: string;
   artAlt?: string;
+  /** Deliberately breaks the sticky-art chain at this beat, even though it
+   *  has no `art` of its own -- for when the beats that follow move to a
+   *  different character/scene than the one the last hero illustration was
+   *  for (an offer letter's own art bleeding into the onboarding steps that
+   *  come after it, say). The beat falls straight through to its own
+   *  location instead of inheriting a stale picture. */
+  resetScene?: boolean;
   /** Which face Dreamy wears on this beat. Only used when Dreamy is speaking. */
   pose?: DreamyPose;
   /** Overrides the level's mood for this beat. Level 2 runs three screens in

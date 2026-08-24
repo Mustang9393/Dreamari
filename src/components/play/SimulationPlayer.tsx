@@ -752,6 +752,10 @@ function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
       if (index - i <= SCENE_FRESH_BEATS) return { mode: "hero", src: candidate.art, alt: candidate.artAlt ?? "" };
       break;
     }
+    // A beat can mark itself as the start of a new scene without owning art
+    // of its own -- stop looking further back, same as running out of
+    // freshness, rather than inheriting a picture from before the reset.
+    if (candidate.resetScene) break;
   }
   const location = locationFor(beat.id);
   if (location) {

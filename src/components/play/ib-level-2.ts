@@ -60,8 +60,9 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-02",
-      art: `${ART}/l2-02.webp`,
-      artAlt: "Christina at a desk, city windows behind.",
+      // The offer card's own art is for the offer letter, not for Christina --
+      // it stops here rather than bleeding into her onboarding steps.
+      resetScene: true,
       speaker: "Christina",
       step: { at: 1, of: 5 },
       setup: '"Interns prove they can learn. Analysts prove they can be trusted."',
