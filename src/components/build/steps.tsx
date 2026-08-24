@@ -15,6 +15,7 @@ import {
   ENERGY_OPTIONS,
   GPA_OPTIONS,
   GRADE_OPTIONS,
+  TRAVEL_DISTANCE_OPTIONS,
   INTEREST_WORLDS,
   SUBJECTS,
   TEAM_OPTIONS,
@@ -356,6 +357,24 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
               Your GPA does not define you. It just helps us find realistic schools.
             </p>
           </div>
+          <input
+            className={UNDERLINE_INPUT}
+            style={{ borderBottomColor: "var(--color-glass-stroke)" }}
+            placeholder="Zip Code"
+            aria-label="Zip code"
+            inputMode="numeric"
+            maxLength={5}
+            value={state.zipCode}
+            onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
+            autoComplete="postal-code"
+          />
+          <SelectField
+            label="How far would you go for school?"
+            options={TRAVEL_DISTANCE_OPTIONS}
+            value={state.travelDistance}
+            placeholder="Select"
+            onChange={(travelDistance) => { react(); patch({ travelDistance }); }}
+          />
         </div>
       </GlassCard>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />

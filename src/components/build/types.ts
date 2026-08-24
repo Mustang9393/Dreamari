@@ -90,6 +90,8 @@ export const COST_STOPS = [
 
 export const GRADE_OPTIONS = ["8th grade", "9th grade", "10th grade", "11th grade", "12th grade", "College", "Other"];
 
+export const TRAVEL_DISTANCE_OPTIONS = ["Within 25 miles", "Within 50 miles", "Within 100 miles", "Anywhere around your preferred state"];
+
 export const GPA_OPTIONS = [
   "4.0 or higher",
   "3.5 to 3.9",
@@ -113,11 +115,13 @@ export type BuildState = {
   teamStyle: string | null;
   education: string | null;
   costIndex: number; // -1 until the slider is touched
-  states: string[]; // ordered; first = top preference; max 3
+  state: string; // the one state they're open to going to; "" = none picked
   fullName: string;
   email: string;
   grade: string;
   gpa: string;
+  zipCode: string;
+  travelDistance: string;
   path: "college" | "trades" | "both" | null;
 };
 
@@ -128,11 +132,13 @@ export const INITIAL_BUILD_STATE: BuildState = {
   teamStyle: null,
   education: null,
   costIndex: -1,
-  states: [],
+  state: "",
   fullName: "",
   email: "",
   grade: "",
   gpa: "",
+  zipCode: "",
+  travelDistance: "",
   path: null,
 };
 

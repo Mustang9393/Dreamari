@@ -6,9 +6,8 @@ import { CardHud, Citation, GlassCard, QuestionHeading, StepFooter } from "./ui"
 import type { StepProps } from "./steps";
 
 // Location — a REAL USA map (actual state shapes via @svg-maps/usa path data, not
-// the reference's grid of abbreviation chips, per direct instruction) plus the
-// reference's List view of three dropdowns. Selection order is preference order
-// ("Your first choice is your top preference"), max 3, shared between both views.
+// the reference's grid of abbreviation chips, per direct instruction) plus a
+// List view with the same single dropdown. Choose exactly one state.
 
 type UsaMap = { viewBox: string; locations: { id: string; name: string; path: string }[] };
 const USA = (usaMapModule as unknown as { default?: UsaMap }).default ?? (usaMapModule as unknown as UsaMap);
@@ -51,7 +50,7 @@ const GREEN = "var(--color-world-food-farming-nature)";
 
 export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
   const [view, setView] = useState<"map" | "list">("map");
-  const selected = state.states;
+  const selected = state.state;
   const svgRef = useRef<SVGSVGElement | null>(null);
   // Label anchor per state, measured from the real rendered path bounds (the path
   // data has no precomputed centroids). Tiny north-east states are skipped - at
@@ -73,35 +72,18 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
     setLabelPos(next);
   }, [view]);
 
-  function toggleState(name: string) {
-    if (selected.includes(name)) {
-      patch({ states: selected.filter((item) => item !== name) });
-      return;
-    }
-    if (selected.length >= 3) return;
+  function pickState(name: string) {
     react();
-    patch({ states: [...selected, name] });
-  }
-
-  function setSlot(slot: number, name: string) {
-    const next = [...selected];
-    if (name === "") {
-      next.splice(slot, 1);
-    } else {
-      // Prevent duplicates across slots: remove it elsewhere first.
-      const existing = next.indexOf(name);
-      if (existing !== -1 && existing !== slot) next.splice(existing, 1);
-      next[slot] = name;
-    }
-    react();
-    patch({ states: next.filter(Boolean).slice(0, 3) });
+    // Tap the selected state again to clear it; otherwise it replaces
+    // whatever was picked before — only one state at a time.
+    patch({ state: selected === name ? "" : name });
   }
 
   return (
     <div className="w-full">
       <CardHud percent={percent} almostDone={almostDone} />
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose up to 3 states. Your first choice is your top preference." />
+      <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
       {/* Map | List segmented toggle. */}
       <div
@@ -132,40 +114,16 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
         >
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">United States</span>
-            <span className="text-[12.5px] font-bold" style={{ color: selected.length ? GREEN : "var(--color-night-muted-foreground)" }}>
-              {selected.length}/3 selected
+            <span className="text-[12.5px] font-bold" style={{ color: selected ? GREEN : "var(--color-night-muted-foreground)" }}>
+              {selected || "None selected"}
             </span>
           </div>
-
-          {/* Selection chips in preference order. */}
-          {selected.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-1.5 px-1">
-              {selected.map((name, i) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => toggleState(name)}
-                  className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-bold"
-                  style={{
-                    background: "color-mix(in srgb, var(--color-brand-500) 24%, transparent)",
-                    borderColor: "var(--color-brand-400)",
-                    color: "var(--color-night-foreground)",
-                  }}
-                >
-                  <span className="opacity-70">#{i + 1}</span>
-                  {name}
-                  <span aria-hidden className="opacity-70">×</span>
-                </button>
-              ))}
-            </div>
-          )}
 
           <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[52vh] w-[calc(100%+8px)]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
-              const order = selected.indexOf(name);
-              const isSelected = order !== -1;
-              const isFull = selected.length >= 3 && !isSelected;
+              const isSelected = selected === name;
+              const isFull = !!selected && !isSelected;
               return (
                 <path
                   key={location.id}
@@ -176,11 +134,11 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                   aria-label={name}
                   aria-pressed={isSelected}
                   tabIndex={0}
-                  onClick={() => toggleState(name)}
+                  onClick={() => pickState(name)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      toggleState(name);
+                      pickState(name);
                     }
                   }}
                   className="cursor-pointer outline-none transition-[fill] duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand-300)]"
@@ -206,7 +164,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
               const move = REPOSITION[location.name];
               const pos = move ? { x: move.tx + move.s * rawPos.x, y: move.ty + move.s * rawPos.y } : rawPos;
               const name = displayName(location.name);
-              const isSelected = selected.includes(name);
+              const isSelected = selected === name;
               return (
                 <text
                   key={`label-${location.id}`}
@@ -227,39 +185,31 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
               );
             })}
           </svg>
-          <p className="mt-2 px-1 text-[12px] font-medium text-[var(--color-night-muted-foreground)] opacity-70">Tap a state to add it.</p>
+          <p className="mt-2 px-1 text-[12px] font-medium text-[var(--color-night-muted-foreground)] opacity-70">Tap a state to select it.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {["Choose a state", "Choose state 2 (optional)", "Choose state 3 (optional)"].map((label, slot) => (
-            <select
-              key={label}
-              aria-label={label}
-              value={selected[slot] ?? ""}
-              // Slot N stays disabled until slot N-1 is chosen, mirroring the
-              // "first choice is your top preference" ordering.
-              disabled={slot > selected.length}
-              onChange={(e) => setSlot(slot, e.target.value)}
-              className="w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] disabled:opacity-50"
-              style={{
-                background: "var(--color-glass-surface-raised)",
-                borderColor: "var(--color-glass-border-raised)",
-              }}
-            >
-              <option value="">{label}</option>
-              {STATE_NAMES.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+        <select
+          aria-label="Choose a state"
+          value={selected}
+          onChange={(e) => pickState(e.target.value)}
+          className="w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)]"
+          style={{
+            background: "var(--color-glass-surface-raised)",
+            borderColor: "var(--color-glass-border-raised)",
+          }}
+        >
+          <option value="">Choose a state</option>
+          {STATE_NAMES.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
           ))}
-        </div>
+        </select>
       )}
 
       <Citation>MIT CAPD Job Search + BLS OEWS</Citation>
       </GlassCard>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={selected.length === 0} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!selected} />
     </div>
   );
 }

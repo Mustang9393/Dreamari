@@ -100,7 +100,11 @@ function PlayDemo() {
              without it next/image assumes 100vw and serves a w=3840 file.
              objectPosition centers on the two presenting characters + the kickoff
              screen (the new scene's subject band sits in the upper-middle of a
-             landscape frame; the POV hand at the bottom can crop freely).
+             landscape frame; the POV hand at the bottom can crop freely). 35% cut
+             Marcus's head off entirely at this panel's real rendered aspect ratio
+             (~2.8:1, measured live — much wider/shorter than the source photo's
+             4:3) — 8% clears both characters' heads with room to spare and still
+             shows the "DEAL TEAM KICKOFF" screen behind them.
              mkt-sim-drift is the slow ambient Ken Burns zoom — see animations.css. */}
           {/* sim-deal-kickoff.jpg is the same asset formerly saved over
              play-illustration.jpg — renamed because same-name image swaps kept
@@ -108,7 +112,7 @@ function PlayDemo() {
              key on the URL; this bit three times this session, including the user
              seeing an old Investment Banking photo on their own machine). Any future
              image REPLACEMENT here should get a fresh filename, not overwrite. */}
-          <Image src="/images/sim-deal-kickoff.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="mkt-sim-drift object-cover" style={{ objectPosition: "center 35%" }} />
+          <Image src="/images/sim-deal-kickoff.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="mkt-sim-drift object-cover" style={{ objectPosition: "center 8%" }} />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 bottom-0"
