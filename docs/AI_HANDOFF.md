@@ -64,6 +64,28 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   skip links are undefined (D-decide), and "Unlock Analyst Level" is inert with
   a line saying the level is not built.
 
+### 2026-08-24 Connect: whole-card targets, and the jargon out (PUSHED)
+
+- Whole post cards and whole community cards are now tappable, via an absolute
+  overlay button rather than wrapping the card in one: like/comment/save and
+  Join/dismiss are buttons themselves and buttons cannot nest. The overlay sits
+  at z-10 with the action rows raised to z-20 (z-30 for the dismiss sticker),
+  and the overlay's accessible name is the post title. The title and the answer
+  block stopped being their own buttons -- under the overlay they would have
+  been unreachable controls. Verified by elementFromPoint at each target's real
+  centre; an earlier probe sampled the card's PADDING and wrongly looked like
+  the overlay was swallowing the buttons.
+- JARGON OUT, per direct feedback ("what does routed mean? This is Gen Z
+  American highschoolers"). "Routed" and "Awaiting answer" described what the
+  moderation queue was doing, not anything a student needs: both waiting states
+  now read "Waiting for an answer", the thread header no longer prints "Routed
+  to <scope>" at all, the ask sheet says "Sent to"/"Goes to", the board filter
+  reads "Unanswered" instead of "Awaiting answer", and "Professional insights"
+  is just "Insights". The routed state still exists in the data -- it is our
+  plumbing, and it stays invisible.
+- One name for one number: the thread and insight cards said "Helpful · 34"
+  for the same count the feed shows as a like. All three now say Like.
+
 ### 2026-08-24 Connect: the feed rebuilt as a discussion board (PUSHED)
 
 - The old feed was an avatar, a title and two counts per row. On a 1440px page

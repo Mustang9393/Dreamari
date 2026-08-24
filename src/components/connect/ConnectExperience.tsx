@@ -68,11 +68,15 @@ import {
 // photos, no gradients per card). Status = text + color, never color alone.
 
 // ——— status vocabulary (handoff 11.3 / 8.4): text plus color ———
+// Plain English for a 15 year old. "Routed" and "Awaiting answer" were
+// moderation-queue words describing what the SYSTEM is doing; a student only
+// needs to know whether someone has answered yet, so the two waiting states
+// read the same and the difference stays internal.
 const STATE_LABEL: Record<Thread["state"], string> = {
-  awaiting: "Awaiting answer",
-  routed: "Routed",
-  answered: "Pro answered",
-  resolved: "Resolved",
+  awaiting: "Waiting for an answer",
+  routed: "Waiting for an answer",
+  answered: "Answered",
+  resolved: "Answered",
 };
 const STATE_COLOR: Record<Thread["state"], string> = {
   awaiting: "var(--muted-foreground)",
@@ -267,9 +271,15 @@ function PostRow({
   const answerPro = post.answer ? proById(post.answer.proId) : null;
   return (
     <article
-      className="dm-tap flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)] motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both] sm:p-[var(--space-5)]"
+      className="dm-tap relative flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)] motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both] sm:p-[var(--space-5)]"
       style={{ animationDelay: `${Math.min(index, 6) * 45}ms`, background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
     >
+      {/* The whole card is the target. An overlay rather than wrapping the card
+         in a button, because the like/comment/save controls are buttons too and
+         buttons cannot nest -- those sit above this layer. */}
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
+        <span className="sr-only">{post.title}</span>
+      </button>
       {/* Three bands, ruled apart: SIGNALS (who/where/when), CONTENT (the
          question and the answer), SIGNALS (what you can do). Mixing them into
          one stack is what made a post hard to skim -- your eye could not tell
@@ -305,17 +315,13 @@ function PostRow({
       <Rule />
 
       <div className="flex flex-col gap-[var(--space-3)] py-[var(--space-4)]">
-        <button type="button" onClick={onOpen} className="cursor-pointer text-left">
-          <h3 className="m-0 text-[17.5px] leading-[25px] font-extrabold sm:text-[20px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {post.title}
-          </h3>
-        </button>
+        <h3 className="m-0 text-[17.5px] leading-[25px] font-extrabold sm:text-[20px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          {post.title}
+        </h3>
 
         {post.answer && answerPro && (
-          <button
-            type="button"
-            onClick={onOpen}
-            className="dm-quiet cursor-pointer rounded-[14px] border px-[13px] py-[12px] text-left"
+          <div
+            className="rounded-[14px] border px-[13px] py-[12px]"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
           >
             {answerPro.name !== post.authorName && (
@@ -327,13 +333,13 @@ function PostRow({
             <span className="line-clamp-2 text-[14.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>
               {post.answer.body}
             </span>
-          </button>
+          </div>
         )}
       </div>
 
       <Rule />
 
-      <div className="flex items-center gap-[var(--space-4)] pt-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      <div className="relative z-20 flex items-center gap-[var(--space-4)] pt-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <button
           type="button"
           onClick={onLike}
@@ -344,7 +350,7 @@ function PostRow({
           <ThumbsUp className="h-[16px] w-[16px]" aria-hidden style={{ color: liked ? "var(--primary)" : "inherit" }} />
           <span style={{ color: liked ? "var(--foreground)" : "inherit" }}>{post.helpful + (liked ? 1 : 0)}</span>
         </button>
-        <button type="button" onClick={onOpen} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full" aria-label={`${post.replies} comments`}>
+        <button type="button" onClick={onOpen} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full" aria-label={`${post.replies} ${post.replies === 1 ? "comment" : "comments"}`}>
           <MessageCircle className="h-[16px] w-[16px]" aria-hidden />
           {post.replies}
         </button>
@@ -687,7 +693,7 @@ function CommunityCard({
   const accent = WORLD_COLORS[community.world] ?? "var(--primary)";
   return (
     <div
-      className="relative overflow-hidden rounded-[var(--radius-xl)] border"
+      className="dm-tap relative overflow-hidden rounded-[var(--radius-xl)] border"
       style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, var(--color-glass-surface-3)) 0%, var(--color-glass-surface-3) 78%)`, borderColor: "var(--glass-border)" }}
     >
       {/* Ambient color only — blurred and fully behind the content, so it
@@ -697,16 +703,21 @@ function CommunityCard({
       {/* Two of these sit side by side at every width, so the card has to hold
          together in a ~160px column: the name wraps instead of truncating, the
          stats stack, and the action goes full width. */}
-      <button type="button" onClick={onOpen} className="dm-link relative flex w-full cursor-pointer items-start gap-[9px] p-[var(--space-3)] pb-[var(--space-2)] text-left sm:items-center sm:gap-[10px] sm:p-[var(--space-4)] sm:pb-[var(--space-3)]">
+      {/* Whole card, one target. Same overlay trick as the feed posts: Join and
+         the dismiss sticker are buttons, so they cannot be nested inside one. */}
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open {community.name}</span>
+      </button>
+      <div className="relative flex items-start gap-[9px] p-[var(--space-3)] pb-[var(--space-2)] sm:items-center sm:gap-[10px] sm:p-[var(--space-4)] sm:pb-[var(--space-3)]">
         <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[var(--radius-md)] sm:size-8" style={{ background: "var(--color-glass-surface-3)", color: accent }}>
           <Users className="h-4 w-4" />
         </span>
         <span className="min-w-0 flex-1 text-[14.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</span>
-      </button>
+      </div>
 
       <div className="relative mx-[var(--space-3)] border-t sm:mx-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }} />
 
-      <div className="relative flex flex-col items-stretch gap-[8px] p-[var(--space-3)] pt-[var(--space-2)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)] sm:p-[var(--space-4)] sm:pt-[var(--space-3)]">
+      <div className="relative z-20 flex flex-col items-stretch gap-[8px] p-[var(--space-3)] pt-[var(--space-2)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)] sm:p-[var(--space-4)] sm:pt-[var(--space-3)]">
         {/* One stat. Size is the only number that helps you choose; the rest
            belongs inside the board. */}
         <span className="inline-flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -779,7 +790,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
       <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
       <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {thread.helpful + (helpful ? 1 : 0)}
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {thread.helpful + (helpful ? 1 : 0)}
         </button>
         <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
@@ -804,7 +815,7 @@ function InsightCard({ insight, saved, onSave, helpful, onHelpful }: { insight: 
       <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
       <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {insight.helpful + (helpful ? 1 : 0)}
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
         </button>
         <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
@@ -1302,7 +1313,7 @@ function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { commun
         onClick={onDismiss}
         aria-label={`Remove ${community.name} from recommended`}
         title="Not interested"
-        className="dm-quiet absolute -top-[11px] -right-[11px] z-10 flex size-[28px] cursor-pointer items-center justify-center rounded-full border"
+        className="dm-quiet absolute -top-[11px] -right-[11px] z-30 flex size-[28px] cursor-pointer items-center justify-center rounded-full border"
         style={{
           background: "var(--color-glass-surface-3)",
           borderColor: "var(--glass-border)",
@@ -1382,9 +1393,9 @@ function BoardView({
         options={[
           { key: "all", label: "All" },
           { key: "questions", label: "Questions" },
-          { key: "insights", label: "Professional insights" },
+          { key: "insights", label: "Insights" },
           { key: "opportunities", label: "Opportunities" },
-          { key: "awaiting", label: "Awaiting answer" },
+          { key: "awaiting", label: "Unanswered" },
           { key: "answered", label: "Answered" },
         ]}
         active={filter}
@@ -1562,9 +1573,8 @@ function ThreadView({
         </div>
 
         <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-[11.5px] leading-[16px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+          {/* Who it went to is our plumbing, not their business. */}
           <StatusChip state={thread.state} />
-          {!answered && <span aria-hidden>·</span>}
-          {!answered && <span>Routed to {thread.routedScope.toLowerCase()}</span>}
           <span aria-hidden>·</span>
           <span>Shown as {thread.handle} · {thread.grade}</span>
         </div>
@@ -1631,7 +1641,7 @@ function ThreadView({
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <button type="button" onClick={p.onHelpful} aria-pressed={p.helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.helpful ? "var(--accent-subtle)" : undefined }}>
-            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful · {thread.helpful + (p.helpful ? 1 : 0)}
+            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {thread.helpful + (p.helpful ? 1 : 0)}
           </button>
           <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
             <Bookmark className="h-3.5 w-3.5" aria-hidden /> {p.saved ? "Saved" : "Save"}
@@ -1701,7 +1711,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
             </h2>
             <div className="mt-[10px] flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: submitted === "routed" ? "var(--world-food-farming-nature)" : "var(--muted-foreground)" }}>
               {submitted === "routed" ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : <Clock className="h-4 w-4" aria-hidden />}
-              {submitted === "review" ? "Quick safety check in progress" : `Routed to ${board.scope}`}
+              {submitted === "review" ? "Quick safety check" : `Sent to ${board.scope}`}
             </div>
             <ul className="mt-[12px] flex flex-col gap-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
               <li>Editable for 15 min</li>
@@ -1785,7 +1795,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
             </fieldset>
 
             <p className="mt-[var(--space-4)] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-              Posts as <strong style={{ color: "var(--foreground)" }}>Jordan · Junior</strong>. Routed to {board.scope}.
+              Posts as <strong style={{ color: "var(--foreground)" }}>Jordan · Junior</strong>. Goes to {board.scope}.
             </p>
 
             <label className="dm-link mt-[var(--space-3)] flex cursor-pointer items-start gap-[var(--space-3)]">
