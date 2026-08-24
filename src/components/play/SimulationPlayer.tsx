@@ -987,7 +987,16 @@ function BeatStage({
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
         <div
-          className={`relative flex w-full flex-col ${interactive ? "max-w-[720px]" : "max-w-[620px]"} ${
+          className={`relative flex w-full flex-col ${
+            // Fixed max-widths only ever changed once, at the sm: breakpoint,
+            // then stayed flat forever after -- a 13" laptop and a 5K
+            // external monitor got the identical box. clamp()'s middle term
+            // is pure vw, so it scales linearly with viewport width; picked
+            // so it equals the old flat value exactly at 1440px (a 13"
+            // MacBook Air's default scaled width) and grows past that point,
+            // capped well short of comic-book-sized on anything wider.
+            interactive ? "max-w-[720px] sm:max-w-[clamp(720px,50vw,1000px)]" : "max-w-[620px] sm:max-w-[clamp(620px,43vw,880px)]"
+          } ${
             // Lifted off the very bottom edge on a plain dialogue/card beat --
             // it used to sit flush against it with only its own small padding,
             // reading as pinned to the floor rather than a deliberately placed
@@ -1224,7 +1233,7 @@ function DialogueBox({
       )}
       <div
         onClick={step}
-        className="flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[20px] border-2 px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[20px] sm:pt-[22px] [scrollbar-width:thin]"
+        className="flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[20px] border-2 px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] [scrollbar-width:thin]"
         style={{ background: "color-mix(in srgb, var(--background) 86%, transparent)", borderColor: edge }}
       >
         {/* HIERARCHY: the situation is a bold subheading, ruled off from the
@@ -1239,7 +1248,13 @@ function DialogueBox({
                 className="mt-[2px] flex-none overflow-hidden rounded-[14px] border-2"
                 style={{ borderColor: accent, background: "color-mix(in srgb, var(--background) 60%, transparent)" }}
               >
-                <Image src={portrait} alt="" width={112} height={112} className="h-[52px] w-[52px] object-cover object-top sm:h-[62px] sm:w-[62px]" />
+                <Image
+                  src={portrait}
+                  alt=""
+                  width={112}
+                  height={112}
+                  className="h-[52px] w-[52px] object-cover object-top sm:h-[clamp(62px,4.3vw,90px)] sm:w-[clamp(62px,4.3vw,90px)]"
+                />
               </span>
             )}
             <span className="min-w-0 flex-1">
@@ -1252,7 +1267,7 @@ function DialogueBox({
                  on screen, ahead of the question and its answers -- title,
                  subheading, body, in that order, rather than the question
                  outsizing the line that gives it context. */}
-              <p className="m-0 text-[23px] leading-[1.28] font-extrabold sm:text-[27px]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+              <p className="m-0 text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
                 {visible}
                 {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>
