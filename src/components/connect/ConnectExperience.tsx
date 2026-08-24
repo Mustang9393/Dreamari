@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowBigUp,
   Bookmark,
   Calendar,
+  MessageCircle,
   CheckCircle2,
   ChevronRight,
   CornerDownRight,
@@ -13,8 +15,10 @@ import {
   ExternalLink,
   Flag,
   KeyRound,
+  Lightbulb,
   MapPin,
   MessageCircleQuestion,
+  Newspaper,
   Pin,
   Search,
   ShieldCheck,
@@ -37,6 +41,7 @@ import {
   type EventBoard,
   type Insight,
   type Opportunity,
+  type ProResponse,
   type Thread,
 } from "./data";
 
@@ -79,13 +84,13 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 const EVENT_ACCENT = "var(--chart-3)";
 
 type View =
-  | { kind: "home"; tab: "foryou" | "communities" | "events" | "saved" }
+  | { kind: "home"; tab: "feed" | "communities" | "events" | "saved" }
   | { kind: "board"; id: string; filter: string }
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string };
 
 function viewToQuery(view: View): string {
-  if (view.kind === "home") return view.tab === "foryou" ? "" : `?tab=${view.tab}`;
+  if (view.kind === "home") return view.tab === "feed" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   return `?thread=${view.id}`;
@@ -97,7 +102,7 @@ function queryToView(search: string): View {
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "all" };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "communities" || tab === "events" || tab === "saved" ? tab : "foryou" };
+  return { kind: "home", tab: tab === "communities" || tab === "events" || tab === "saved" ? tab : "feed" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -114,87 +119,457 @@ function communityById(id: string) {
   return COMMUNITIES.find((c) => c.id === id);
 }
 
-// ——— For You feed: a fixed, hand-picked mix — answered questions, a
-// volunteer insight, one thing trending in a board the student hasn't
-// joined — read as posts (Twitter/Reddit-shaped, not Reddit-dense): an
-// avatar+name header, the post text, a like/comment stat row. Community
-// content only (Events stays its own surface). Insights have no standalone
-// page in this prototype (they only ever live inside a board feed), so an
-// insight card opens its board; a question card opens the thread.
-type FeedItem = {
-  key: string;
-  target: { kind: "thread"; id: string } | { kind: "board"; id: string };
-  authorName: string;
-  verified: boolean;
-  tag?: string; // "Trending in X" — only when discovery framing applies
-  tagColor?: string;
-  byline: string; // org/board + time, one short line under the name
-  title: string;
-  likes: number;
-  comments: number;
+// ——— The feed. Rebuilt to read like a discussion board rather than a list of
+// titles. What makes Reddit or a good forum feel ALIVE is not decoration, it is
+// that you can see: (1) the actual answer, not just the question, (2) who is
+// here and how fast they reply, (3) a vote you can cast, (4) which community
+// each post belongs to. The old rows had none of those -- an avatar, a title
+// and two counts -- so a page full of them read as a settings list.
+//
+// Everything below is derived from the same data the boards use. Nothing is
+// invented for effect: "answering today" counts real activePros, the snippet is
+// the real first answer, the reply faces are the real responders.
+
+type Sort = "hot" | "new" | "unanswered";
+
+type PostKind = "question" | "insight" | "event";
+
+// The post's kind reads as an icon, not a word: three of them on a card was
+// three more words to skim past. The name still travels for screen readers and
+// on hover.
+const POST_KIND: Record<PostKind, { label: string; color: string; Icon: LucideIcon }> = {
+  question: { label: "Question", color: "var(--primary)", Icon: MessageCircleQuestion },
+  insight: { label: "Insight", color: "var(--world-teaching-learning)", Icon: Lightbulb },
+  event: { label: "Event", color: "var(--chart-3)", Icon: Calendar },
 };
 
-const FEED_THREAD_IDS = ["t-cs-degree", "t-nurse-shadow", "t-ib-hours", "t-ds-vs-ai"] as const;
-const FEED_INSIGHT_IDS = ["i-first-internship", "i-day-in-life"] as const;
+type Post = {
+  key: string;
+  kind: PostKind;
+  target: { kind: "thread"; id: string } | { kind: "board"; id: string };
+  /** who is asking (a student handle) or posting (a pro) */
+  authorName: string;
+  authorVerified: boolean;
+  authorMeta: string;
+  boardId: string;
+  title: string;
+  /** the top answer, which is the whole point of showing a post at all */
+  answer?: { proId: string; body: string; postedAgo: string };
+  helpful: number;
+  replies: number;
+  postedAgo: string;
+  minutesAgo: number;
+};
 
-function buildFeed(joined: Record<string, boolean>): FeedItem[] {
-  const items: FeedItem[] = [];
-  for (const id of FEED_THREAD_IDS) {
-    const t = THREADS.find((x) => x.id === id);
-    if (!t) continue;
-    const answer = t.responses.find((r) => r.kind === "answer");
-    const board = communityById(t.boardId);
-    const isJoined = joined[t.boardId];
-    const boardName = board?.name ?? "a community";
-    if (answer && answer.kind === "answer") {
-      const pro = proById(answer.proId);
-      items.push({
-        key: t.id, target: { kind: "thread", id: t.id }, authorName: pro.name, verified: true,
-        tag: !isJoined ? `Trending in ${boardName}` : undefined, tagColor: "var(--chart-3)",
-        byline: `${pro.org} · ${answer.postedAgo}`, title: t.title, likes: t.helpful, comments: t.responses.length,
-      });
-    } else {
-      // Unanswered: the asker (a student handle, never a full name) is the author.
-      items.push({
-        key: t.id, target: { kind: "thread", id: t.id }, authorName: t.handle, verified: false,
-        tag: !isJoined ? `Trending in ${boardName}` : `New in ${boardName}`, tagColor: !isJoined ? "var(--chart-3)" : "var(--accent-subtle)",
-        byline: `${t.grade} · ${t.postedAgo}`, title: t.title, likes: t.helpful, comments: t.responses.length,
-      });
-    }
-  }
-  for (const id of FEED_INSIGHT_IDS) {
-    const i = INSIGHTS.find((x) => x.id === id);
-    if (!i) continue;
-    const pro = proById(i.proId);
-    items.push({
-      key: i.id, target: { kind: "board", id: i.boardId }, authorName: pro.name, verified: true,
-      byline: `${pro.org} · ${i.postedAgo}`, title: i.title, likes: i.helpful, comments: 0,
-    });
-  }
-  // A fixed interleave reads less like two lists stapled together.
-  const order = ["t-cs-degree", "i-first-internship", "t-nurse-shadow", "t-ib-hours", "i-day-in-life", "t-ds-vs-ai"];
-  return items.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+/** "14h ago" / "5d ago" / "just now" -> minutes, so New can actually sort. */
+function agoMinutes(ago: string): number {
+  const match = /(\d+)\s*(m|h|d|w)/.exec(ago);
+  if (!match) return 0;
+  const value = Number(match[1]);
+  const unit = match[2];
+  return value * (unit === "m" ? 1 : unit === "h" ? 60 : unit === "d" ? 1440 : 10080);
 }
 
-function FeedRow({ item, onOpen }: { item: FeedItem; onOpen: () => void }) {
+function buildPosts(): Post[] {
+  const posts: Post[] = [];
+  for (const thread of [...THREADS, ...EVENT_THREADS]) {
+    const answer = thread.responses.find((response) => response.kind === "answer") as ProResponse | undefined;
+    posts.push({
+      key: thread.id,
+      kind: eventById(thread.boardId) ? "event" : "question",
+      target: { kind: "thread", id: thread.id },
+      authorName: thread.handle,
+      authorVerified: false,
+      // The grade is the identity signal that matters on a student question.
+      authorMeta: thread.grade,
+      boardId: thread.boardId,
+      title: thread.title,
+      answer: answer ? { proId: answer.proId, body: answer.body, postedAgo: answer.postedAgo } : undefined,
+      helpful: thread.helpful,
+      replies: thread.responses.length,
+      postedAgo: thread.postedAgo,
+      minutesAgo: agoMinutes(thread.postedAgo),
+    });
+  }
+  for (const insight of INSIGHTS) {
+    const pro = proById(insight.proId);
+    posts.push({
+      key: insight.id,
+      kind: "insight",
+      // Insights have no page of their own in this prototype, so they open
+      // the board they live in.
+      target: { kind: "board", id: insight.boardId },
+      authorName: pro.name,
+      authorVerified: true,
+      // A pro posting an insight: the firm is the credibility signal, and the
+      // full role reads as a sentence in a meta line.
+      authorMeta: pro.org,
+      boardId: insight.boardId,
+      title: insight.title,
+      answer: { proId: insight.proId, body: insight.body, postedAgo: insight.postedAgo },
+      helpful: insight.helpful,
+      replies: 0,
+      postedAgo: insight.postedAgo,
+      minutesAgo: agoMinutes(insight.postedAgo),
+    });
+  }
+  return posts;
+}
+
+function sortPosts(posts: Post[], sort: Sort): Post[] {
+  const list = [...posts];
+  if (sort === "new") return list.sort((a, b) => a.minutesAgo - b.minutesAgo);
+  if (sort === "unanswered") return list.filter((post) => !post.answer).sort((a, b) => a.minutesAgo - b.minutesAgo);
+  // Hot: engagement, decayed by age, the shape every board uses.
+  const heat = (post: Post) => (post.helpful + post.replies * 4) / Math.pow(post.minutesAgo / 60 + 2, 0.45);
+  return list.sort((a, b) => heat(b) - heat(a));
+}
+
+/** A community's chip: the world colour is what puts any colour on this page. */
+function BoardChip({ boardId }: { boardId: string }) {
+  const community = communityById(boardId);
+  const event = eventById(boardId);
+  const name = community?.name ?? event?.name ?? "Community";
+  const color = community ? (WORLD_COLORS[community.world] ?? "var(--primary)") : EVENT_ACCENT;
+  // The world colour is an ACCENT, not a text colour: several of them measure
+  // under 4.5:1 on the card at this size. The dot carries the identity (a
+  // graphic needs 3:1) and the name stays foreground.
   return (
-    <button type="button" onClick={onOpen} className="dm-tap flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-      {/* Tag sits on its own line above the identity row — beside the name
-         it fought long names for space and both wrapped badly. */}
-      {item.tag && <span className="text-[10px] font-bold" style={{ color: item.tagColor }}>{item.tag}</span>}
-      <div className="flex items-center gap-[10px]">
-        <Avatar name={item.authorName} verified={item.verified} size={34} />
-        <div className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{item.authorName}</span>
-          <span className="block truncate text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)" }}>{item.byline}</span>
-        </div>
+    <span className="flex min-w-0 items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--foreground)" }}>
+      <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: color }} />
+      <span className="truncate">{name}</span>
+    </span>
+  );
+}
+
+/** A hairline that reaches the card's edges, so the bands read as bands. */
+function Rule() {
+  return <span aria-hidden className="-mx-[var(--space-4)] border-t sm:-mx-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} />;
+}
+
+function PostRow({
+  post,
+  index,
+  liked,
+  onLike,
+  saved,
+  onSave,
+  onOpen,
+}: {
+  post: Post;
+  index: number;
+  liked: boolean;
+  onLike: () => void;
+  saved: boolean;
+  onSave: () => void;
+  onOpen: () => void;
+}) {
+  const answerPro = post.answer ? proById(post.answer.proId) : null;
+  return (
+    <article
+      className="dm-tap flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)] motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both] sm:p-[var(--space-5)]"
+      style={{ animationDelay: `${Math.min(index, 6) * 45}ms`, background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
+    >
+      {/* Three bands, ruled apart: SIGNALS (who/where/when), CONTENT (the
+         question and the answer), SIGNALS (what you can do). Mixing them into
+         one stack is what made a post hard to skim -- your eye could not tell
+         metadata from the thing it was about. */}
+      <header className="flex min-w-0 items-start gap-[10px] pb-[var(--space-3)] text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
+        <Avatar name={post.authorName} size={34} verified={post.kind === "insight"} />
+        {/* No middot separators: the row wraps on a phone and every wrap left a
+           dangling "·" at the end of a line. Spacing does the same job. */}
+        {/* Two lines, on purpose. A person's name and their grade are one thing;
+           the community is a different thing and never shares the line with
+           them. The timestamp moved down to the actions row, where the other
+           signals live. */}
+        <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+          <span className="flex min-w-0 items-baseline gap-[6px]">
+            <span className="truncate font-bold" style={{ color: "var(--foreground)" }}>{post.authorName}</span>
+            {post.authorMeta && <span className="flex-none whitespace-nowrap">{post.authorMeta}</span>}
+          </span>
+          <BoardChip boardId={post.boardId} />
+        </span>
+        <span
+          title={POST_KIND[post.kind].label}
+          className="flex size-[26px] flex-none items-center justify-center self-start rounded-full"
+          style={{ background: `color-mix(in srgb, ${POST_KIND[post.kind].color} 30%, transparent)`, color: "var(--foreground)" }}
+        >
+          {(() => {
+            const Icon = POST_KIND[post.kind].Icon;
+            return <Icon className="h-[15px] w-[15px]" aria-hidden />;
+          })()}
+          <span className="sr-only">{POST_KIND[post.kind].label}</span>
+        </span>
+      </header>
+
+      <Rule />
+
+      <div className="flex flex-col gap-[var(--space-3)] py-[var(--space-4)]">
+        <button type="button" onClick={onOpen} className="cursor-pointer text-left">
+          <h3 className="m-0 text-[17.5px] leading-[25px] font-extrabold sm:text-[20px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {post.title}
+          </h3>
+        </button>
+
+        {post.answer && answerPro && (
+          <button
+            type="button"
+            onClick={onOpen}
+            className="dm-quiet cursor-pointer rounded-[14px] border px-[13px] py-[12px] text-left"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+          >
+            {answerPro.name !== post.authorName && (
+              <span className="mb-[7px] flex items-center gap-[7px] text-[12.5px]">
+                <Avatar name={answerPro.name} size={22} verified />
+                <span className="truncate font-extrabold" style={{ color: "var(--foreground)" }}>{answerPro.name}</span>
+              </span>
+            )}
+            <span className="line-clamp-2 text-[14.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>
+              {post.answer.body}
+            </span>
+          </button>
+        )}
       </div>
-      <span className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</span>
-      <div className="flex items-center gap-[16px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <span className="flex items-center gap-[5px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {item.likes}</span>
-        {item.comments > 0 && <span className="flex items-center gap-[5px]"><MessageCircleQuestion className="h-3.5 w-3.5" aria-hidden /> {item.comments}</span>}
+
+      <Rule />
+
+      <div className="flex items-center gap-[var(--space-4)] pt-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <button
+          type="button"
+          onClick={onLike}
+          aria-pressed={liked}
+          aria-label={liked ? "Remove your like" : "Like this"}
+          className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full transition-transform duration-150 active:scale-90"
+        >
+          <ThumbsUp className="h-[16px] w-[16px]" aria-hidden style={{ color: liked ? "var(--primary)" : "inherit" }} />
+          <span style={{ color: liked ? "var(--foreground)" : "inherit" }}>{post.helpful + (liked ? 1 : 0)}</span>
+        </button>
+        <button type="button" onClick={onOpen} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full" aria-label={`${post.replies} comments`}>
+          <MessageCircle className="h-[16px] w-[16px]" aria-hidden />
+          {post.replies}
+        </button>
+        <span className="whitespace-nowrap">{post.postedAgo}</span>
+        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-quiet ml-auto flex cursor-pointer items-center gap-[6px] rounded-full">
+          <Bookmark className="h-[16px] w-[16px]" aria-hidden style={{ color: saved ? "var(--primary)" : "inherit" }} />
+          <span style={{ color: saved ? "var(--foreground)" : "inherit" }}>{saved ? "Saved" : "Save"}</span>
+        </button>
       </div>
+    </article>
+  );
+}
+
+/** The one ask affordance. A box you can type into is an invitation; a button
+ *  is a door you have to decide to open. Where the question goes is chosen in
+ *  the sheet that opens, so this reads the same on every tab. */
+function Composer({ onAsk, placeholder = "Ask anything about a career…" }: { onAsk: () => void; placeholder?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onAsk}
+      className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border-2 px-[var(--space-4)] py-[var(--space-3)] text-left"
+      style={{
+        // Carries more weight than the post cards around it: this is the one
+        // thing the whole surface exists to make easy.
+        background: "color-mix(in srgb, var(--primary) 12%, var(--color-glass-surface-3))",
+        borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))",
+      }}
+    >
+      <Avatar name="Jordan Rivera" size={38} />
+      <span className="flex-1 truncate text-[15.5px] font-medium" style={{ color: "var(--foreground)" }}>
+        {placeholder}
+      </span>
+      <span
+        className="flex flex-none items-center gap-[7px] rounded-full px-[18px] py-[11px] text-[14.5px] font-extrabold"
+        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+      >
+        Ask
+        <ArrowRight className="h-[16px] w-[16px]" aria-hidden />
+      </span>
     </button>
+  );
+}
+
+/** The feed tab: a live strip, a composer, a sort row, the posts, and on wide
+ *  screens a sidebar. The sidebar is not decoration -- a single 700px column on
+ *  a 1440px page is most of why this surface felt empty. */
+function FeedTab({
+  joined,
+  saves,
+  helpfuls,
+  onSave,
+  onHelpful,
+  onOpenBoard,
+  onOpenThread,
+  onOpenEvent,
+  onAsk,
+}: {
+  joined: Record<string, boolean>;
+  saves: Record<string, boolean>;
+  helpfuls: Record<string, boolean>;
+  onSave: (id: string, what?: string) => void;
+  onHelpful: (id: string) => void;
+  onOpenBoard: (id: string) => void;
+  onOpenThread: (id: string) => void;
+  onOpenEvent: (id: string) => void;
+  onAsk: () => void;
+}) {
+  const [sort, setSort] = useState<Sort>("hot");
+  const posts = sortPosts(buildPosts(), sort);
+  // One live number, counted from the data. Three stats stacked here was the
+  // clutter that made the page hard to skim.
+  const prosToday = COMMUNITIES.reduce((total, community) => total + community.activePros, 0);
+
+  return (
+    <div className="flex w-full items-start gap-[var(--space-6)]">
+      <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
+        {/* Sort. Also the cue that this is a stream, not a page. */}
+        <div className="flex items-center gap-[6px]">
+          {(
+            [
+              { key: "hot", label: "Hot" },
+              { key: "new", label: "New" },
+              { key: "unanswered", label: "Unanswered" },
+            ] as const
+          ).map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => setSort(option.key)}
+              aria-pressed={sort === option.key}
+              className="dm-quiet cursor-pointer rounded-full border px-[13px] py-[6px] text-[12.5px] font-bold"
+              style={{
+                background: sort === option.key ? "color-mix(in srgb, var(--primary) 20%, transparent)" : "transparent",
+                borderColor: sort === option.key ? "var(--primary)" : "var(--glass-border)",
+                color: sort === option.key ? "var(--foreground)" : "var(--muted-foreground)",
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+          <span className="ml-auto flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span aria-hidden className="relative flex h-[7px] w-[7px]">
+              <span className="absolute inset-0 rounded-full motion-safe:animate-[connect-ping_1.8s_ease-in-out_infinite]" style={{ background: "var(--world-food-farming-nature)" }} />
+              <span className="absolute inset-[1px] rounded-full" style={{ background: "var(--world-food-farming-nature)" }} />
+            </span>
+            <span className="hidden sm:inline">{prosToday} pros answering</span>
+            <span className="sm:hidden">{prosToday} pros</span>
+          </span>
+        </div>
+
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Feed">
+          {posts.map((post, index) => (
+            <PostRow
+              key={post.key}
+              post={post}
+              index={index}
+              liked={!!helpfuls[post.key]}
+              onLike={() => onHelpful(post.key)}
+              saved={!!saves[post.key]}
+              onSave={() => onSave(post.key, post.answer ? "answer" : "question")}
+              onOpen={() => (post.target.kind === "thread" ? onOpenThread(post.target.id) : onOpenBoard(post.target.id))}
+            />
+          ))}
+          {posts.length === 0 && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
+              Everything here has an answer. Try Hot or New.
+            </p>
+          )}
+        </section>
+      </div>
+
+      <FeedRail joined={joined} onOpenBoard={onOpenBoard} onOpenEvent={onOpenEvent} />
+    </div>
+  );
+}
+
+/** Wide-screen sidebar: your communities and what is coming up. */
+function FeedRail({
+  joined,
+  onOpenBoard,
+  onOpenEvent,
+}: {
+  joined: Record<string, boolean>;
+  onOpenBoard: (id: string) => void;
+  onOpenEvent: (id: string) => void;
+}) {
+  const mine = COMMUNITIES.filter((community) => joined[community.id]);
+  const suggested = COMMUNITIES.filter((community) => !joined[community.id]).slice(0, 3);
+  const upcoming = EVENTS.find((event) => event.lifecycle === "Upcoming") ?? EVENTS[0];
+
+  return (
+    <aside className="hidden w-[268px] flex-none flex-col gap-[var(--space-3)] lg:flex" aria-label="Your communities and what's coming up">
+      <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+        <p className="mb-[10px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          Your communities
+        </p>
+        <ul className="m-0 flex list-none flex-col gap-[2px] p-0">
+          {mine.map((community) => (
+            <li key={community.id}>
+              <button
+                type="button"
+                onClick={() => onOpenBoard(community.id)}
+                className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[10px] px-[8px] py-[7px] text-left text-[13px] font-bold"
+                style={{ color: "var(--foreground)" }}
+              >
+                <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: WORLD_COLORS[community.world] ?? "var(--primary)" }} />
+                <span className="min-w-0 flex-1 truncate">{community.name}</span>
+                {community.unreadAnswers > 0 && (
+                  <span
+                    className="flex-none rounded-full px-[7px] py-[1px] text-[11px] font-extrabold tabular-nums"
+                    style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+                  >
+                    {community.unreadAnswers}
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+          {mine.length === 0 && (
+            <li className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
+              Join one to see it here.
+            </li>
+          )}
+        </ul>
+        {suggested.length > 0 && (
+          <>
+            <p className="mt-[var(--space-3)] mb-[6px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+              Also active
+            </p>
+            <ul className="m-0 flex list-none flex-col gap-[2px] p-0">
+              {suggested.map((community) => (
+                <li key={community.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenBoard(community.id)}
+                    className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[10px] px-[8px] py-[7px] text-left text-[13px] font-semibold"
+                    style={{ color: "var(--muted-foreground)" }}
+                  >
+                    <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: WORLD_COLORS[community.world] ?? "var(--primary)" }} />
+                    <span className="min-w-0 flex-1 truncate">{community.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+
+      {upcoming && (
+        <button
+          type="button"
+          onClick={() => onOpenEvent(upcoming.id)}
+          className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left"
+          style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
+        >
+          <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>
+            <Calendar className="h-[13px] w-[13px]" aria-hidden />
+            {upcoming.lifecycle}
+          </span>
+          <span className="mt-[5px] block text-[13.5px] leading-[18px] font-extrabold" style={{ color: "var(--foreground)" }}>{upcoming.name}</span>
+          <span className="mt-[3px] block text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>{upcoming.date}</span>
+        </button>
+      )}
+    </aside>
   );
 }
 
@@ -223,14 +598,16 @@ function Avatar({ name, size = 34, verified }: { name: string; size?: number; ve
         style={{
           background: verified ? "var(--primary)" : "var(--secondary)",
           color: verified ? "#FFFFFF" : "var(--foreground)",
-          fontSize: size * 0.38,
+          // Floor of 11px: the 0.38 ratio alone put the initials on a small
+          // avatar at 8px, which is not readable text by any measure.
+          fontSize: Math.max(11, size * 0.4),
           fontFamily: "var(--font-body)",
         }}
       >
         {initials}
       </span>
       {verified && (
-        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--card)", borderColor: "var(--card)" }}>
+        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
           <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
         </span>
       )}
@@ -311,31 +688,30 @@ function CommunityCard({
   return (
     <div
       className="relative overflow-hidden rounded-[var(--radius-xl)] border"
-      style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, var(--card)) 0%, var(--card) 78%)`, borderColor: "var(--glass-border)" }}
+      style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, var(--color-glass-surface-3)) 0%, var(--color-glass-surface-3) 78%)`, borderColor: "var(--glass-border)" }}
     >
       {/* Ambient color only — blurred and fully behind the content, so it
          never competes for horizontal space or forces a wrap. */}
       <span aria-hidden className="pointer-events-none absolute top-[-30px] right-[-30px] h-[120px] w-[120px] rounded-full blur-[34px]" style={{ background: `color-mix(in srgb, ${accent} 45%, transparent)` }} />
 
-      <button type="button" onClick={onOpen} className="dm-link relative flex w-full cursor-pointer items-center gap-[10px] p-[var(--space-4)] pb-[var(--space-3)] text-left">
-        <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "var(--card)", color: accent }}>
+      {/* Two of these sit side by side at every width, so the card has to hold
+         together in a ~160px column: the name wraps instead of truncating, the
+         stats stack, and the action goes full width. */}
+      <button type="button" onClick={onOpen} className="dm-link relative flex w-full cursor-pointer items-start gap-[9px] p-[var(--space-3)] pb-[var(--space-2)] text-left sm:items-center sm:gap-[10px] sm:p-[var(--space-4)] sm:pb-[var(--space-3)]">
+        <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[var(--radius-md)] sm:size-8" style={{ background: "var(--color-glass-surface-3)", color: accent }}>
           <Users className="h-4 w-4" />
         </span>
-        <span className="min-w-0 flex-1 text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</span>
+        <span className="min-w-0 flex-1 text-[14.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</span>
       </button>
 
-      <div className="relative mx-[var(--space-4)] border-t" style={{ borderColor: "var(--glass-border)" }} />
+      <div className="relative mx-[var(--space-3)] border-t sm:mx-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }} />
 
-      <div className="relative flex items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] pt-[var(--space-3)]">
-        <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[2px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="inline-flex items-center gap-[5px]">
-            <Users className="h-3 w-3" aria-hidden style={{ color: accent }} />
-            {community.students} students
-          </span>
-          <span className="inline-flex items-center gap-[5px]">
-            <ShieldCheck className="h-3 w-3" aria-hidden style={{ color: accent }} />
-            {community.activePros} pros
-          </span>
+      <div className="relative flex flex-col items-stretch gap-[8px] p-[var(--space-3)] pt-[var(--space-2)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)] sm:p-[var(--space-4)] sm:pt-[var(--space-3)]">
+        {/* One stat. Size is the only number that helps you choose; the rest
+           belongs inside the board. */}
+        <span className="inline-flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <Users className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} />
+          {community.students} students
         </span>
         {trailing}
       </div>
@@ -345,7 +721,7 @@ function CommunityCard({
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`} style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
       {children}
     </div>
   );
@@ -421,7 +797,7 @@ function InsightCard({ insight, saved, onSave, helpful, onHelpful }: { insight: 
     <Card>
       {/* Eyebrow sits on its own line, above the name row — inline it fought
          the pro's name/company text for space and both wrapped badly. */}
-      <span className="text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>Pro insight</span>
+      <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>Pro insight</span>
       <div className="mt-[8px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} /></div>
       <h3 className="mt-[10px] text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h3>
       <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{insight.body}</p>
@@ -443,7 +819,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
     <Card>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="text-[12px] leading-[16px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>{opp.org}</span>
-        <span className="flex-none text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: EVENT_ACCENT, fontFamily: "var(--font-body)" }}>{opp.kind}</span>
+        <span className="flex-none text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: EVENT_ACCENT, fontFamily: "var(--font-body)" }}>{opp.kind}</span>
       </div>
       <h3 className="mt-[6px] text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{opp.title}</h3>
       <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{opp.body}</p>
@@ -467,7 +843,9 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
 // ——— filter row (mobile: horizontal scroll with edge cue, never clipped) ———
 
-function FilterRow({ options, active, onPick }: { options: { key: string; label: string }[]; active: string; onPick: (key: string) => void }) {
+type LucideIcon = React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+
+function FilterRow({ options, active, onPick }: { options: { key: string; label: string; Icon?: LucideIcon }[]; active: string; onPick: (key: string) => void }) {
   return (
     <div className="relative -mx-1">
       <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Filter feed">
@@ -478,13 +856,14 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
             role="tab"
             aria-selected={active === option.key}
             onClick={() => onPick(option.key)}
-            className="dm-quiet min-h-[44px] flex-none cursor-pointer rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12px] leading-[16px] font-bold whitespace-nowrap"
+            className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
             style={
               active === option.key
                 ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-body)" }
                 : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }
             }
           >
+            {option.Icon && <option.Icon className="h-[15px] w-[15px]" aria-hidden />}
             {option.label}
           </button>
         ))}
@@ -497,7 +876,7 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
 // ——— the experience ———
 
 export function ConnectExperience() {
-  const [view, setViewState] = useState<View>({ kind: "home", tab: "foryou" });
+  const [view, setViewState] = useState<View>({ kind: "home", tab: "feed" });
   const [askOpen, setAskOpen] = useState<null | { boardId: string; boardName: string; scope: string }>(null);
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
@@ -566,7 +945,13 @@ export function ConnectExperience() {
 
       <div aria-live="polite" className="sr-only">{announce}</div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[880px] flex-col gap-[var(--space-8)] px-5 pt-[var(--space-6)] pb-[120px] md:px-8 md:pt-[var(--space-10)]">
+      {/* The home view carries a sidebar on wide screens, so it gets a wider
+          column than a thread or a board, which are reading surfaces. */}
+      <main
+        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-8)] px-5 pt-[var(--space-6)] pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
+          view.kind === "home" ? "max-w-[1120px]" : "max-w-[880px]"
+        }`}
+      >
         {view.kind === "home" && (
           <HomeView
             tab={view.tab}
@@ -576,10 +961,13 @@ export function ConnectExperience() {
             onDismissRec={(id) => setDismissedRecs((d) => ({ ...d, [id]: true }))}
             onJoin={(id) => {
               setJoined((j) => ({ ...j, [id]: true }));
-              say("Joined. You'll see new answers here and under For You.");
+              say("Joined. New answers show up in your feed.");
             }}
             eventJoined={eventJoined}
             saves={saves}
+            helpfuls={helpfuls}
+            onSave={toggleSave}
+            onHelpful={toggleHelpful}
             onOpenBoard={(id) => setView({ kind: "board", id, filter: "all" })}
             onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
             onOpenThread={(id) => setView({ kind: "thread", id })}
@@ -598,7 +986,7 @@ export function ConnectExperience() {
               say("Joined this community.");
             }}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
-            onBack={() => setView({ kind: "home", tab: "foryou" })}
+            onBack={() => setView({ kind: "home", tab: "feed" })}
             onAsk={() => openAskFor(view.id)}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
@@ -615,7 +1003,7 @@ export function ConnectExperience() {
                   event={event}
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
-                  onBack={() => setView({ kind: "home", tab: "foryou" })}
+                  onBack={() => setView({ kind: "home", tab: "feed" })}
                   onAsk={() => openAskFor(event.id)}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
@@ -692,20 +1080,26 @@ function HomeView({
   onJoin,
   eventJoined,
   saves,
+  helpfuls,
+  onSave,
+  onHelpful,
   onOpenBoard,
   onOpenEvent,
   onOpenThread,
   onAsk,
   onEnterCode,
 }: {
-  tab: "foryou" | "communities" | "events" | "saved";
-  onTab: (tab: "foryou" | "communities" | "events" | "saved") => void;
+  tab: "feed" | "communities" | "events" | "saved";
+  onTab: (tab: "feed" | "communities" | "events" | "saved") => void;
   joined: Record<string, boolean>;
   dismissedRecs: Record<string, boolean>;
   onDismissRec: (id: string) => void;
   onJoin: (id: string) => void;
   eventJoined: Record<string, boolean>;
   saves: Record<string, boolean>;
+  helpfuls: Record<string, boolean>;
+  onSave: (id: string, what?: string) => void;
+  onHelpful: (id: string) => void;
   onOpenBoard: (id: string) => void;
   onOpenEvent: (id: string) => void;
   onOpenThread: (id: string) => void;
@@ -713,6 +1107,7 @@ function HomeView({
   onEnterCode: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const myCommunities = COMMUNITIES.filter((c) => joined[c.id]);
   const recommended = COMMUNITIES.filter((c) => !joined[c.id] && c.recommendedBecause && !dismissedRecs[c.id]).slice(0, 3);
   const savedThreads = ALL_THREADS.filter((t) => saves[t.id]);
@@ -721,45 +1116,83 @@ function HomeView({
 
   return (
     <>
-      <div>
-        <h1 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
-        <p className="mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Ask real people about careers you are exploring.</p>
-        {/* Enter-event-code lives only where event cards do (the Events tab)
-           — it doesn't need a permanent slot next to the primary action on
-           every tab when most sessions have no code to redeem. */}
-        <div className="mt-[var(--space-5)]">
-          <PrimaryCta onClick={onAsk}><MessageCircleQuestion className="h-4 w-4" aria-hidden /> Ask a question</PrimaryCta>
+      {/* Title, search, composer. ONE ask affordance for the whole surface: the
+         composer is the same on every tab, and you pick the destination while
+         you write (the sheet's "Posting to ... Change"), so no tab needs its
+         own button. Enter-event-code still lives with the event cards. */}
+      <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex items-center gap-[var(--space-3)]">
+          <h1 className="flex-1 text-[28px] leading-[34px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
+          {(tab === "feed" || tab === "communities") && (
+            <button
+              type="button"
+              onClick={() => setSearchOpen((open) => !open)}
+              aria-expanded={searchOpen}
+              aria-label="Search"
+              className="dm-quiet flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border"
+              style={{ borderColor: "var(--glass-border)", background: searchOpen ? "var(--glass-surface-2)" : "transparent", color: "var(--foreground)" }}
+            >
+              <Search className="h-[18px] w-[18px]" aria-hidden />
+            </button>
+          )}
         </div>
+
+        {searchOpen && (tab === "feed" || tab === "communities") && (
+          <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px] motion-safe:animate-[fade-slide-up_0.28s_ease-out_both]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+            <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+            <span className="sr-only">Search {tab === "feed" ? "posts" : "communities"}</span>
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={tab === "feed" ? "Search posts" : "Search communities and topics"}
+              className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+              style={{ color: "var(--foreground)" }}
+            />
+            {query && (
+              <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex size-6 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            )}
+          </label>
+        )}
+
+        <Composer onAsk={onAsk} />
       </div>
 
       <FilterRow
         options={[
-          { key: "foryou", label: "For You" },
-          { key: "communities", label: "Communities" },
-          { key: "events", label: "Events" },
-          { key: "saved", label: "Saved" },
+          { key: "feed", label: "Feed", Icon: Newspaper },
+          { key: "communities", label: "Communities", Icon: Users },
+          { key: "events", label: "Events", Icon: Calendar },
+          { key: "saved", label: "Saved", Icon: Bookmark },
         ]}
         active={tab}
-        onPick={(key) => onTab(key as "foryou")}
+        onPick={(key) => onTab(key as "feed")}
       />
 
-      {/* For You is just a feed — a question, an insight, something trending
-         in a board you haven't joined, nothing to read beyond the posts
-         themselves. No section headers, no status explainers. */}
-      {tab === "foryou" && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Feed">
-          {buildFeed(joined).map((item) => (
-            <FeedRow key={item.key} item={item} onOpen={() => (item.target.kind === "thread" ? onOpenThread(item.target.id) : onOpenBoard(item.target.id))} />
-          ))}
-        </section>
+      {tab === "feed" && (
+        <FeedTab
+          joined={joined}
+          saves={saves}
+          helpfuls={helpfuls}
+          onSave={onSave}
+          onHelpful={onHelpful}
+          onOpenBoard={onOpenBoard}
+          onOpenThread={onOpenThread}
+          onOpenEvent={onOpenEvent}
+          onAsk={onAsk}
+        />
       )}
 
       {tab === "communities" && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <SectionHead>Your communities</SectionHead>
-          {myCommunities.map((c) => (
-            <CommunityRow key={c.id} community={c} joined onOpen={() => onOpenBoard(c.id)} />
-          ))}
+          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+            {myCommunities.map((c) => (
+              <CommunityRow key={c.id} community={c} joined onOpen={() => onOpenBoard(c.id)} />
+            ))}
+          </div>
           {myCommunities.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>You haven&apos;t joined a community yet — start with one below.</p>
           )}
@@ -769,29 +1202,22 @@ function HomeView({
       {tab === "communities" && recommended.length > 0 && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Recommended communities">
           <SectionHead>Recommended for you</SectionHead>
-          {recommended.map((c) => (
-            <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} onDismiss={() => onDismissRec(c.id)} />
-          ))}
+          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+            {recommended.map((c) => (
+              <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} onDismiss={() => onDismissRec(c.id)} />
+            ))}
+          </div>
         </section>
       )}
 
       {tab === "communities" && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse all communities">
-          <SectionHead>Browse all</SectionHead>
-          <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-            <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-            <span className="sr-only">Search communities</span>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search communities and topics"
-              className="min-w-0 flex-1 bg-transparent text-[13px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-              style={{ color: "var(--foreground)" }}
-            />
-          </label>
-          {searched.filter((c) => !joined[c.id]).map((c) => (
-            <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
-          ))}
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="All communities">
+          <SectionHead>{query ? `Matching “${query}”` : "All communities"}</SectionHead>
+          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+            {searched.filter((c) => !joined[c.id]).map((c) => (
+              <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
+            ))}
+          </div>
         </section>
       )}
 
@@ -800,14 +1226,14 @@ function HomeView({
           <SectionHead>Your events</SectionHead>
           {EVENTS.map((event) =>
             eventJoined[event.id] ? (
-              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
-                <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
+              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
+                <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
                 <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
                 <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</span>
               </button>
             ) : event.lifecycle === "Upcoming" ? (
-              <div key={event.id} className="rounded-[var(--radius-xl)] border p-[var(--space-5)] opacity-70" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-                <span className="flex items-center gap-[5px] text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+              <div key={event.id} className="rounded-[var(--radius-xl)] border p-[var(--space-5)] opacity-70" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+                <span className="flex items-center gap-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
                   <Clock className="h-3 w-3" aria-hidden /> Upcoming · {event.date}
                 </span>
                 <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
@@ -816,7 +1242,7 @@ function HomeView({
               </div>
             ) : (
               <Card key={event.id}>
-                <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
+                <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
                 <p className="mt-[3px] text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</p>
                 <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</p>
                 <div className="mt-[10px]"><QuietCta onClick={() => onEnterCode(event.id)}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
@@ -831,14 +1257,14 @@ function HomeView({
           <SectionHead>Saved</SectionHead>
           <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Private to you unless you choose to share it.</p>
           {savedThreads.map((t) => (
-            <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
               <span className="min-w-0 truncate text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
               <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
             </button>
           ))}
           {savedInsights.map((i) => (
-            <div key={i.id} className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-              <span className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Pro insight</span>
+            <div key={i.id} className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+              <span className="text-[11px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Pro insight</span>
               <p className="mt-[2px] text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{i.title}</p>
             </div>
           ))}
@@ -854,25 +1280,40 @@ function HomeView({
 function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; onDismiss?: () => void }) {
   const trailing = joined ? (
     community.unreadAnswers > 0 ? (
-      <span className="flex-none rounded-full px-[10px] py-[4px] text-[11px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      <span className="self-start rounded-full px-[10px] py-[4px] text-[11px] font-bold sm:flex-none" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
         {community.unreadAnswers} new
       </span>
     ) : (
-      <ChevronRight className="h-5 w-5 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+      <ChevronRight className="hidden h-5 w-5 flex-none sm:block" aria-hidden style={{ color: "var(--muted-foreground)" }} />
     )
   ) : (
-    <span className="flex flex-none flex-col items-end gap-[4px]">
-      <button type="button" onClick={onJoin} className="dm-quiet flex min-h-[44px] cursor-pointer items-center rounded-[999px] px-[var(--space-5)] text-[12px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-        Join
-      </button>
-      {onDismiss && (
-        <button type="button" onClick={onDismiss} className="dm-link cursor-pointer text-[10px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
-          Not interested
-        </button>
-      )}
-    </span>
+    <button type="button" onClick={onJoin} className="dm-quiet flex min-h-[40px] w-full cursor-pointer items-center justify-center rounded-[999px] px-[var(--space-4)] text-[12.5px] font-bold sm:min-h-[44px] sm:w-auto sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      Join
+    </button>
   );
-  return <CommunityCard community={community} trailing={trailing} onOpen={onOpen} />;
+  if (!onDismiss) return <CommunityCard community={community} trailing={trailing} onOpen={onOpen} />;
+  // Sticker placement: the card keeps overflow-hidden for its glow, so the
+  // dismiss button is a sibling sitting half on and half off the corner.
+  return (
+    <div className="relative">
+      <CommunityCard community={community} trailing={trailing} onOpen={onOpen} />
+      <button
+        type="button"
+        onClick={onDismiss}
+        aria-label={`Remove ${community.name} from recommended`}
+        title="Not interested"
+        className="dm-quiet absolute -top-[11px] -right-[11px] z-10 flex size-[28px] cursor-pointer items-center justify-center rounded-full border"
+        style={{
+          background: "var(--color-glass-surface-3)",
+          borderColor: "var(--glass-border)",
+          color: "var(--muted-foreground)",
+          boxShadow: "0 6px 16px -6px rgba(0,0,0,0.6)",
+        }}
+      >
+        <X className="h-[15px] w-[15px]" aria-hidden />
+      </button>
+    </div>
+  );
 }
 
 // ——— community board (handoff 8) ———
@@ -933,7 +1374,8 @@ function BoardView({
           ))}
           {community.topics.length > 3 && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{community.topics.length - 3} more</span>}
         </div>
-        <PrimaryCta onClick={onAsk} className="w-full sm:w-fit"><MessageCircleQuestion className="h-4 w-4" aria-hidden /> Ask a question</PrimaryCta>
+        {/* Same composer as the home surface: one way to ask, everywhere. */}
+        <Composer onAsk={onAsk} placeholder={`Ask ${community.name}…`} />
       </section>
 
       <FilterRow
@@ -1003,7 +1445,7 @@ function EventView({
       </button>
 
       <section aria-label="Event context" className="rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, " + EVENT_ACCENT + " 8%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
-        <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>{event.lifecycle}</span>
+        <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>{event.lifecycle}</span>
         <h1 className="mt-[4px] text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</h1>
         <p className="mt-[3px] flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[2px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
           <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {event.date}</span>
@@ -1013,13 +1455,13 @@ function EventView({
         <p className="mt-[8px] flex items-center gap-[5px] text-[12px] leading-[17px] font-semibold" style={{ color: "var(--foreground)" }}>
           <ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: EVENT_ACCENT }} /> Attendees + event pros only
         </p>
-        <div className="mt-[var(--space-4)]"><PrimaryCta onClick={onAsk}><MessageCircleQuestion className="h-4 w-4" aria-hidden /> Ask what you missed</PrimaryCta></div>
+        <div className="mt-[var(--space-4)]"><Composer onAsk={onAsk} placeholder="Ask what you missed…" /></div>
       </section>
 
       {/* Pinned host recap with three takeaways (handoff 10.3) */}
       {event.recap && (
         <Card>
-          <span className="flex items-center gap-[6px] text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
           </span>
           <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
@@ -1041,7 +1483,7 @@ function EventView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Event resources">
           <SectionHead>Resources from the event</SectionHead>
           {event.resources.map((r) => (
-            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
               <div className="min-w-0">
                 <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
                 <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
@@ -1113,7 +1555,7 @@ function ThreadView({
 
       <article className="flex flex-col gap-[var(--space-4)]">
         <div>
-          <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Question</span>
+          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Question</span>
           <h1 className="mt-[3px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h1>
           {thread.context && <p className="mt-[6px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{thread.context}</p>}
           <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
@@ -1131,11 +1573,11 @@ function ThreadView({
           if (r.kind === "answer") {
             const rid = thread.id + "-a" + index;
             return (
-              <div key={rid} className="rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
+              <div key={rid} className="rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
                 <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
                   <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
                   {r.primary && (
-                    <span className="flex-none rounded-[999px] px-[10px] py-[3px] text-[10px] font-bold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
+                    <span className="flex-none rounded-[999px] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
                       Primary answer
                     </span>
                   )}
@@ -1175,7 +1617,7 @@ function ThreadView({
           }
           return (
             <div key={thread.id + "-p" + index} className="rounded-[var(--radius-lg)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-              <span className="text-[10px] font-bold tracking-[0.05em] uppercase" style={{ color: EVENT_ACCENT }}>Peer · {r.handle} · {r.grade} · {r.postedAgo}</span>
+              <span className="text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ color: EVENT_ACCENT }}>Peer · {r.handle} · {r.grade} · {r.postedAgo}</span>
               <p className="mt-[3px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
             </div>
           );
@@ -1203,7 +1645,7 @@ function ThreadView({
           <section className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} aria-label="Related answered questions">
             <SectionHead>Related answered questions</SectionHead>
             {related.map((t) => (
-              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
                 <span className="min-w-0 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
                 <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               </button>
@@ -1251,7 +1693,7 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Ask a question">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div ref={dialogRef} className="relative z-[1] max-h-[92dvh] w-full max-w-[560px] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      <div ref={dialogRef} className="relative z-[1] max-h-[92dvh] w-full max-w-[560px] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
         {submitted ? (
           <div aria-live="polite">
             <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
@@ -1394,10 +1836,10 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
         {confirming ? (
           <div aria-live="polite">
-            <span className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
+            <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
             <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
             <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.location} · Hosted by {event.host}</p>
             <p className="mt-[10px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>

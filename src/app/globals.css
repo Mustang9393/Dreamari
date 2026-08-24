@@ -513,6 +513,21 @@ body {
   }
 }
 
+/* Connect: the presence dot. A community that shows nothing moving reads as
+   abandoned, so live counts and unread answers get one slow pulse -- not a
+   blink, which would be noise on a page you are trying to read. */
+@keyframes connect-ping {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+}
+
 /* Career simulations (/play): a visual-novel stage. The scene drifts in behind
    the dialogue box, the box's contents rise as the typewriter finishes, and
    reputation deltas float off the HUD. All motion-safe only. */

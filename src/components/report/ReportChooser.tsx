@@ -86,7 +86,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] pt-[var(--space-8)] pb-[130px] md:pt-[var(--space-10)]">
         <header className="flex flex-wrap items-baseline gap-x-[var(--space-4)] gap-y-[2px] px-5 md:px-[var(--space-10)]">
-          <h1 className="text-[30px] leading-[1.05] font-extrabold sm:text-[40px]" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-[30px] leading-[1.05] font-extrabold uppercase sm:text-[40px]" style={{ fontFamily: "var(--font-display)" }}>
             Choose where to start
           </h1>
           <p className="text-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>

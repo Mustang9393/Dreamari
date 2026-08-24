@@ -302,7 +302,7 @@ export function MatchLab() {
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
           {/* ---- header: title + live counter ---- */}
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
-            <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
+            <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
             <span
               className="flex flex-none items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}

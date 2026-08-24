@@ -6,6 +6,23 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-24
 
+### 2026-08-24 Page titles in caps + light-mode card surface (PUSHED)
+
+- Direct request from Joshua: every page title reads in caps. Explore already
+  did; Connect, Play, College Lookup, the report chooser and the Match deck's
+  title now do too, via `uppercase` rather than shouting in the string, so the
+  accessible name stays natural-cased. Per-step and content headings (the build
+  flow's questions, thread titles, community names) are deliberately NOT
+  uppercased -- they are content, not page names.
+- LIGHT MODE: `--card` is #d8dbe8 against a #f4f7ff page, so every card came
+  out DARKER than the surface it sat on. Connect's 18 card surfaces moved to
+  `--color-glass-surface-3`, which is frosted white in light and deep navy
+  glass in dark -- correct in both without an override. `--card` itself is a
+  contract token (marketing/tokens.css) so it was left alone, but it is wrong
+  for a card-on-tinted-background design and the same darker-than-background
+  effect will show anywhere else that uses it in light mode. Worth correcting
+  at the source.
+
 ### 2026-08-24 Play: the games hub and the IB simulation, Level 1 (PUSHED)
 
 - NEW SURFACE. /play is the games hub (the nav's Play slot was href="#"), and

@@ -470,11 +470,16 @@ export const EVENT_THREADS: Thread[] = [
     responses: [],
   },
   {
-    id: "et-stay-in-touch",
+    // Replaces a "how do I stay in touch with someone professionally" thread.
+    // On a board where minors and adults share a space, modelling one-to-one
+    // follow-up with a professional is the wrong thing to teach, however
+    // well-meant the answer was. The useful part of that question -- what to do
+    // with what you heard -- survives here, in public.
+    id: "et-what-to-do-next",
     boardId: "event-ey",
     type: "question",
-    title: "How do you stay in touch with someone professionally without it feeling awkward?",
-    context: "I connected with a few people at the event but I'm not sure what to say when I reach out. I don't want it to come across like I'm just asking for something.",
+    title: "What should I actually do with what I learned today?",
+    context: "I took a page of notes at the panel and I do not want it to just sit in my bag until I forget it.",
     handle: "Riley",
     grade: "Sophomore",
     postedAgo: "8h ago",
@@ -490,7 +495,7 @@ export const EVENT_THREADS: Thread[] = [
         proId: "pro-martinez",
         primary: true,
         postedAgo: "5h ago",
-        body: "The trick is to give before you ask. Message something like: 'You mentioned X on the panel — I tried it / read about it, and here's what I found.' That's a conversation, not a request. Keep it short, don't apologize for reaching out, and don't attach your resume unless they ask. One real follow-up like that is worth more than ten generic thank-you notes. Ask a follow-up in this thread if you want help wording yours.",
+        body: "Pick one thing and act on it this month. If a panelist named a skill, find the free version of it and spend two hours there. If they named a class, check whether your school offers it next term. Then post what you found back here so the next person gets it too. Notes you act on once beat notes you reread five times.",
         disclosure: "Personal approach — different professionals prefer different styles.",
       },
     ],
