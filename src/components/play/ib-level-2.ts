@@ -9,8 +9,10 @@ import type { Level } from "./types";
 // Production changes from the sheet that ARE applied here:
 // - L2-01: "and it's all worth it" cut from the offer card. It told the student
 //   the answer to the question the app exists to help them decide (D10).
-// - L2-02..06: onboarding is handed to Christina rather than an unnamed HR
-//   character (D11) -- she is the one who reviews Analyst work anyway.
+// - L2-02..06: reverted back to an unnamed "Cobalt HR" character (undoing an
+//   earlier D11 experiment that briefly handed onboarding to Christina),
+//   per direct instruction -- HR runs the onboarding carousel, then
+//   Christina's own introduction (L2-07) follows right after it.
 // - L2-21d: the sentence fragment is a question now, and "Flag it fast" is
 //   lengthened so the right answer is not the conspicuously short one (D16).
 // - Narrative cards do NOT advance the progress bar, per the Scoring Model tab,
@@ -44,6 +46,7 @@ export const IB_LEVEL_2: Level = {
     Christina: `${ART}/face-christina.webp`,
     Jordan: `${ART}/face-jordan.webp`,
     Marcus: `${ART}/face-marcus.webp`,
+    "Cobalt HR": `${ART}/face-cobalt-hr.webp`,
   },
   beats: [
     {
@@ -68,10 +71,10 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-02",
-      // The offer card's own art is for the offer letter, not for Christina --
-      // it stops here rather than bleeding into her onboarding steps.
+      // The offer card's own art is for the offer letter, not for HR -- it
+      // stops here rather than bleeding into her onboarding steps.
       resetScene: true,
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 1, of: 5 },
       setup: '"Interns prove they can learn. Analysts prove they can be trusted."',
       title: "Research the client.",
@@ -82,7 +85,7 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-03",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 2, of: 5 },
       title: "Build the numbers.",
       body: "Help calculate revenue, costs, profit, and deal value.",
@@ -92,7 +95,7 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-04",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 3, of: 5 },
       title: "Check for mistakes.",
       body: "Catch errors before senior leaders or clients see them.",
@@ -102,7 +105,7 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-05",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 4, of: 5 },
       title: "Update slides.",
       body: "Make sure the pitch deck is clear and accurate.",
@@ -112,7 +115,7 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "step",
       id: "L2-06",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 5, of: 5 },
       title: "Take meeting notes.",
       body: "Track decisions, questions, and next steps.",

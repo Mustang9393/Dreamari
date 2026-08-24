@@ -128,7 +128,7 @@ function OptionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group flex w-full cursor-pointer items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left text-[15px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none ${
+      className={`group flex w-full cursor-pointer items-center gap-[14px] rounded-[16px] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
         bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
       } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
       style={{
@@ -141,7 +141,7 @@ function OptionButton({
     >
       <span
         aria-hidden
-        className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full border text-[12px] font-extrabold"
+        className="flex h-[29px] w-[29px] flex-none items-center justify-center rounded-full border text-[13px] font-extrabold"
         style={{
           borderColor: mark ? paint : "var(--color-glass-border-raised)",
           background: mark ? paint : "transparent",
@@ -161,7 +161,7 @@ function OptionButton({
 // title, sized above this; the answers below are body text, sized under it.
 function Question({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[17px] leading-[1.25] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}
     </p>
   );
@@ -323,7 +323,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
             type="button"
             disabled={locked !== null}
             onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
-            className="cursor-pointer rounded-full border px-[15px] py-[12px] text-[15px] font-bold transition-[transform,border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none"
+            className="cursor-pointer rounded-full border px-[18px] py-[15px] text-[16px] font-bold transition-[transform,border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
             style={{
               animationDelay: `${index * 55}ms`,
               background:
@@ -573,8 +573,8 @@ function MatchTile({
       onClick={onClick}
       disabled={state === "done"}
       aria-pressed={state === "picked"}
-      className={`flex min-h-[52px] w-full items-center rounded-[14px] border-2 px-[11px] py-[10px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
-        strong ? "text-[15px] font-extrabold" : "text-[13.5px] font-semibold"
+      className={`flex min-h-[58px] w-full items-center rounded-[16px] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
+        strong ? "text-[16px] font-extrabold" : "text-[14.5px] font-semibold"
       } ${state === "done" ? "opacity-45" : "cursor-pointer"} ${
         state === "wrong" ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
       } ${state === "picked" ? "-translate-y-px" : ""} motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]`}

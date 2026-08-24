@@ -318,7 +318,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // anchors had. A held frame never crops itself.
           <div
             className="absolute inset-0 transition-[filter] duration-500"
-            style={{ filter: dimmed ? "blur(3px) brightness(0.78)" : undefined }}
+            style={{ filter: dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined }}
           >
             <SceneLayers src={scene.src} alt={scene.alt} />
           </div>
@@ -379,6 +379,19 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           </div>
         )}
       </div>
+
+      {/* Center-stage vignette: only on a standalone interactive screen, the
+         same moment the backdrop blurs and desaturates -- darkens the
+         corners so the answers in the middle read as the thing lit up, not
+         a card floating over a still-bright room. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+        style={{
+          opacity: dimmed ? 1 : 0,
+          background: "radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, var(--background) 60%, transparent) 100%)",
+        }}
+      />
 
       <div
         aria-hidden
@@ -665,13 +678,13 @@ function LocationBackdrop({
   focal: { x: number; y: number };
   mobileFocal: { x: number; y: number };
   offset: { x: number; y: number };
-  /** Ace Attorney frames a speaking character against a soft, simple
-   *  backdrop, not a room competing for attention -- true while a character
-   *  is on screen to be looked at (a card, or a beat still being read), false
-   *  once the interactive controls are up and the room itself is the focus. */
+  /** True only on a standalone interactive question-answer screen -- once
+   *  the real controls are up and the room itself would otherwise compete
+   *  with them. Never true for a card, review, or a beat still being read;
+   *  those want the room clear so the character standing in it reads. */
   dimmed?: boolean;
 }) {
-  const filter = dimmed ? "blur(3px) brightness(0.78)" : undefined;
+  const filter = dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
     <>
       <Image
@@ -944,18 +957,24 @@ function BeatStage({
   // revealed) is dialogue, and dialogue docks at the bottom like a card,
   // never centered over the character's middle.
   const interactive = revealed && beat.kind !== "card" && beat.kind !== "review";
+  // The review beat is its own case: it's never a card (bottom-docked
+  // dialogue) or a scored question (centered, wide, focused) -- it's the
+  // liminal wait on the colorful ambient backdrop with Dreamy, and reads
+  // better centered on that backdrop than pinned to the bottom edge like a
+  // regular narrative card.
+  const centered = interactive || beat.kind === "review";
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
       <div
         aria-hidden={hidden || undefined}
-        className={`relative z-10 order-3 flex min-h-0 flex-none justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5 ${interactive ? "items-center" : "items-end"}`}
+        className={`relative z-10 order-3 flex min-h-0 flex-none justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
         style={{ opacity: hidden ? 0 : 1 }}
       >
         {/* Dreamy is positioned OVER the box's top edge rather than stacked
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
-        <div className="relative flex w-full max-w-[620px] flex-col">
+        <div className={`relative flex w-full flex-col ${interactive ? "max-w-[720px]" : "max-w-[620px]"}`}>
           {narrated && ambient && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} onAdvance={() => setRevealed(true)}>

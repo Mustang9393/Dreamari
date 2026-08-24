@@ -52,6 +52,10 @@ const DEFAULT_EXPRESSION: Partial<Record<string, string>> = {
   // all. Extend EXPRESSION_PORTRAITS for either once more variants arrive.
   Marcus: `${E}/marcus-assessing.webp`,
   Lamisa: `${E}/lamisa-composed.webp`,
+  // Level 2's Analyst onboarding carousel only -- reverted from D11's "hand
+  // it to Christina" back to its own unnamed HR character, per direct
+  // instruction. One expression, same as Marcus/Lamisa.
+  "Cobalt HR": `${E}/cobalt-hr-welcoming.webp`,
 };
 
 export function defaultExpressionFor(speaker: string | undefined): string | undefined {
