@@ -11,9 +11,10 @@ import type { Level } from "./types";
 // the second sort. Same collapse Levels 1 and 2 use for their rapid sets.
 //
 // Production changes from the sheet that ARE applied here:
-// - Onboarding is Christina's, not a fourth unnamed HR character (D11). She is
-//   the VP reviewing your work now, so she is the one who says what the job is.
-//   Level 2 made the same move.
+// - Onboarding (L3-01..05) is an unnamed "Cobalt HR" character's, not
+//   Christina's (D11) -- reverted per direct instruction, same reversion
+//   Level 2's onboarding carousel got. Christina's own introduction (L3-06)
+//   still follows right after it.
 // - Narrative cards do NOT advance the progress bar (D22). The sheet flags four
 //   screens that moved it with no choice on them.
 // - Marcus's promotion to Executive Director is SAID on screen (D26) rather than
@@ -56,6 +57,7 @@ export const IB_LEVEL_3: Level = {
     Christina: `${ART}/face-christina.webp`,
     Marcus: `${ART}/face-marcus.webp`,
     Lamisa: `${ART}/face-lamisa.webp`,
+    "Cobalt HR": `${ART}/face-cobalt-hr.webp`,
   },
   beats: [
     {
@@ -63,11 +65,9 @@ export const IB_LEVEL_3: Level = {
       variant: "step",
       id: "L3-01",
       // l3-01.webp is the same mismatched-design "HR" character art the
-      // handoff sheet flags for Level 2's onboarding (D11) -- Level 3's
-      // header comment already says this level made the same move to
-      // Christina; the art just never actually got swapped out. Falls
-      // through to her real cutout at the beat's own location instead.
-      speaker: "Christina",
+      // handoff sheet flags (D11). Falls through to her real cutout at the
+      // beat's own location instead of using that flagged art directly.
+      speaker: "Cobalt HR",
       step: { at: 1, of: 5 },
       setup: '"Analysts prove they can do the work. Associates prove they can guide others."',
       title: "Review Analyst work.",
@@ -78,7 +78,7 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "step",
       id: "L3-02",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 2, of: 5 },
       title: "Manage deadlines.",
       body: "The team should always know what is due and when.",
@@ -88,7 +88,7 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "step",
       id: "L3-03",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 3, of: 5 },
       title: "Guide Analysts.",
       body: "Help them improve without doing it all for them.",
@@ -98,7 +98,7 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "step",
       id: "L3-04",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 4, of: 5 },
       title: "Prepare for clients.",
       body: "Turn rough work into materials a client can read.",
@@ -108,7 +108,7 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "step",
       id: "L3-05",
-      speaker: "Christina",
+      speaker: "Cobalt HR",
       step: { at: 5, of: 5 },
       title: "Speak up with senior leaders.",
       body: "Say what you are thinking so they can trust your judgement.",
@@ -133,7 +133,10 @@ export const IB_LEVEL_3: Level = {
       // The seated hero illustration was a low, near-square aspect ratio --
       // badly cropped and pixelated once stretched to fill a wide screen.
       // Falls through to her standing cutout at this beat's own location
-      // instead, same treatment as everywhere else she appears.
+      // instead, same treatment as everywhere else she appears. resetScene
+      // is load-bearing here: without it, sceneFor() walks back and finds
+      // L3-06's still-fresh Christina hero art and shows HER instead.
+      resetScene: true,
       speaker: "Lamisa",
       setup: '"Managing Director. The client relationship is mine, which means the work is mine too."',
       title: "Lamisa · Managing Director",
