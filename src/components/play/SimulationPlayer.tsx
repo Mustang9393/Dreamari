@@ -107,7 +107,20 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // steps aside for the dialogue box's small portrait, the same way it always
   // has for cards -- a person standing over the answer options would compete
   // with them, but a person standing next to the line they just said would not.
-  const [revealed, setRevealed] = useState(true);
+  const stageable = Boolean(beat.setup) && beat.kind !== "card" && beat.kind !== "review";
+  const [revealed, setRevealed] = useState(!stageable);
+  // Resets synchronously on a beat change instead of waiting on BeatStage's
+  // own mount effect to report back -- that round trip left the FIRST paint
+  // of a new beat holding the previous beat's revealed value for one frame,
+  // which showed the wrong character (or none) for an instant. This is
+  // React's own pattern for resetting derived state when an input changes,
+  // adjusted during render rather than in an effect, so the corrected value
+  // is what actually paints.
+  const [revealedForBeat, setRevealedForBeat] = useState(beat.id);
+  if (beat.id !== revealedForBeat) {
+    setRevealedForBeat(beat.id);
+    setRevealed(!stageable);
+  }
 
   const resolve = useCallback<Resolve>(
     (tier, why, id) => {
