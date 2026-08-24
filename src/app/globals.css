@@ -716,13 +716,17 @@ body {
    would render 110% of the window tall — content "sits low" and the bottom
    clips. Every exact-height surface below divides by --vz to compensate. */
 :root { --vz: 1; }
+/* html.play-no-zoom: set while the Play simulation is mounted (see
+   SimulationPlayer.tsx) -- a full-bleed game view has no business scaling
+   to a marketing baseline, and doing it anyway shrank the whole stage into
+   a corner of the window at these sizes. */
 @media (min-width: 1441px) and (min-height: 800px) {
-  body { zoom: 1.1; }
-  :root { --vz: 1.1; }
+  html:not(.play-no-zoom) body { zoom: 1.1; }
+  html:not(.play-no-zoom) { --vz: 1.1; }
 }
 @media (min-width: 1800px) and (min-height: 900px) {
-  body { zoom: 1.25; }
-  :root { --vz: 1.25; }
+  html:not(.play-no-zoom) body { zoom: 1.25; }
+  html:not(.play-no-zoom) { --vz: 1.25; }
 }
 
 /* Light-mode CTA remap (2026-08-22): the component.cta tokens ship dark-theme

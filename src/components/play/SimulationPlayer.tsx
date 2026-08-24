@@ -101,6 +101,22 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
+  // The site-wide "scale to a 1440px baseline" zoom (globals.css) is built
+  // for marketing/flow pages that want proportional type and spacing at
+  // large sizes. A full-bleed game view doesn't want that: at >=1800x900 the
+  // 1.25x body zoom shrank this entire stage into a fraction of the real
+  // viewport -- the whole scene, every character, the dialogue box, all of
+  // it rendered small in a corner with the rest of the window left black.
+  // Canceling the zoom on this element with a matching local `zoom` value
+  // does not visually undo it (confirmed: getBoundingClientRect reports the
+  // correct full-viewport size, but the actual paint stays shrunk -- a
+  // Chromium quirk with compounding zoom under dvh units, not something
+  // fixable from inside this subtree). Opting the whole document out of the
+  // rule for as long as Play is mounted is the only fix that actually works.
+  useEffect(() => {
+    document.documentElement.classList.add("play-no-zoom");
+    return () => document.documentElement.classList.remove("play-no-zoom");
+  }, []);
   // Mirrors BeatStage's own staged/revealed state (see onRevealChange there).
   // While the player is still reading the setup line, the big scene character
   // is the one carrying the speaker; once the interactive controls are up, it
