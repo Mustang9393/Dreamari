@@ -17,10 +17,16 @@ import type { Level } from "./types";
 //   even though the build moved it to 91 and 100 percent on them.
 //
 // Left as the sheet has it, deliberately:
-// - L2-09's art is flagged for regeneration (the wall reads COLBALT, and the
-//   binder carries a real luxury monogram). No art shipped for it here.
 // - L2-15's two market sizes: which one is correct is still open (D06). The beat
 //   works either way, because the mistake IS the contradiction.
+//
+// L2-09, L2-10 and L2-19 each shipped, at one point, with their own hero art
+// that read "LOUIS VUITTON" outright (a real trademark, and a contradiction
+// of the story's own fictional client, Maison Laurent) -- the same defect
+// hit L3-19 and L3-20. All five have had their `art`/`artAlt` removed rather
+// than patched; each falls through to its own location instead. Do not
+// re-add art for any of these five beats without confirming the replacement
+// doesn't repeat the same mistake.
 
 const ART = "/images/play/ib";
 
@@ -30,7 +36,7 @@ export const IB_LEVEL_2: Level = {
   role: "Analyst",
   title: "Your First Big Deal",
   blurb: "Christina picked you for Cobalt's $30B Maison Laurent pitch. Jordan is on the same team.",
-  cover: `${ART}/l2-09.webp`,
+  cover: `${ART}/l2-23.webp`,
   mood: "day",
   cast: {
     Christina: `${ART}/face-christina.webp`,
@@ -140,8 +146,6 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "chapter",
       id: "L2-09",
-      art: `${ART}/l2-09.webp`,
-      artAlt: "Christina handing over a black deal binder, Jordan at a monitor behind her.",
       speaker: "Narrator",
       pose: "alert",
       setup: "Next episode · Level 2",
@@ -155,8 +159,7 @@ export const IB_LEVEL_2: Level = {
       layout: "options",
       id: "L2-10",
       progress: 0.1,
-      art: `${ART}/l2-10.webp`,
-      artAlt: "Christina gesturing toward Marcus, a wall screen reading DEAL TEAM KICKOFF, seen from the boardroom table.",
+      castMember: "Christina",
       speaker: "Narrator",
       pose: "happy",
       setup: "Christina introduces you to Marcus, the VP. The team pitches Maison Laurent tomorrow.",
@@ -334,8 +337,6 @@ export const IB_LEVEL_2: Level = {
       layout: "options",
       id: "L2-19",
       progress: 0.7,
-      art: `${ART}/l2-19.webp`,
-      artAlt: "Christina standing at a laptop, a figure at the window behind, your hands taking notes.",
       speaker: "Christina",
       setup: '"You earned a seat in the Maison Laurent meeting. Listen closely and take notes."',
       question: "What should you do during the meeting?",

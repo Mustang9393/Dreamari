@@ -11,10 +11,7 @@ export const ART_RATIO: Record<string, number> = {
   "/images/play/ib/l2-02.webp": 1.7766,
   "/images/play/ib/l2-07.webp": 1.7766,
   "/images/play/ib/l2-08.webp": 1.7766,
-  "/images/play/ib/l2-09.webp": 1.1102,
-  "/images/play/ib/l2-10.webp": 1.3333,
   "/images/play/ib/l2-18.webp": 1.7766,
-  "/images/play/ib/l2-19.webp": 1.7766,
   "/images/play/ib/l2-23.webp": 1.4989,
   "/images/play/ib/l3-01.webp": 1.7766,
   "/images/play/ib/l3-06.webp": 1.3333,
@@ -23,6 +20,4 @@ export const ART_RATIO: Record<string, number> = {
   "/images/play/ib/l3-14.webp": 1.4989,
   "/images/play/ib/l3-16.webp": 1.4989,
   "/images/play/ib/l3-17.webp": 1.4989,
-  "/images/play/ib/l3-19.webp": 1.7766,
-  "/images/play/ib/l3-20.webp": 1.7766,
 };

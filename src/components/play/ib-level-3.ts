@@ -34,6 +34,13 @@ import type { Level } from "./types";
 //   with real numbers, not invented ones.
 // - L3-29's three-way outcome screen is the ending sequence this engine already
 //   renders from `endings`, so it is not a beat.
+//
+// L3-19 and L3-20 each shipped, at one point, with their own hero art that
+// read "LOUIS VUITTON" outright -- a real trademark, and a direct
+// contradiction of the client being Maison Laurent throughout (see above).
+// Same defect hit L2-09, L2-10 and L2-19. All five have had their
+// `art`/`artAlt` removed rather than patched. Do not re-add art for either
+// beat without confirming the replacement doesn't repeat the same mistake.
 
 const ART = "/images/play/ib";
 
@@ -374,8 +381,6 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "chapter",
       id: "L3-19",
-      art: `${ART}/l3-19.webp`,
-      artAlt: "Lamisa stopping the player in a glass hallway, a pitch book in the player's hands.",
       speaker: "Lamisa",
       setup: '"You led the Analysts, worked well with the Associates, and stayed on Maison Laurent the whole way."',
       title: "After the pitch.",
@@ -385,8 +390,6 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "chapter",
       id: "L3-20",
-      art: `${ART}/l3-20.webp`,
-      artAlt: "Christina in the same hallway giving the player a thumbs up.",
       speaker: "Christina",
       setup: '"You got Lamisa\'s attention. That is a big deal. I am proud of you."',
       title: "Christina catches you after.",
