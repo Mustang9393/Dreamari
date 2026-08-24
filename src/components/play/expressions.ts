@@ -62,3 +62,25 @@ export function defaultExpressionFor(speaker: string | undefined): string | unde
   if (!speaker) return undefined;
   return DEFAULT_EXPRESSION[speaker];
 }
+
+// Real width/height ratio of each portrait file. SceneCharacter renders these
+// at a fixed CSS height with `object-contain`, and next/image derives its
+// fitting box from the width/height props rather than the decoded pixels --
+// a mismatched ratio there (a generic guess) doesn't crop anything, but it
+// does letterbox: contain shrinks to fit the WRONG box, leaving transparent
+// space above or below the actual art and pushing the visible character
+// noticeably smaller/higher than the assigned height implies. Christina's
+// welcoming pose is a real outlier (0.73 vs ~0.49-0.61 for everyone else's
+// upright poses) because it has an arm extended out to the side, not a
+// processing error -- measured directly off each file, not guessed.
+export const PORTRAIT_RATIO: Record<string, number> = {
+  [`${E}/christina-concerned.webp`]: 0.4856,
+  [`${E}/christina-proud.webp`]: 0.4933,
+  [`${E}/christina-welcoming.webp`]: 0.7283,
+  [`${E}/cobalt-hr-welcoming.webp`]: 0.5578,
+  [`${E}/jordan-confident.webp`]: 0.5144,
+  [`${E}/jordan-focused.webp`]: 0.61,
+  [`${E}/jordan-uncertain.webp`]: 0.5083,
+  [`${E}/lamisa-composed.webp`]: 0.5128,
+  [`${E}/marcus-assessing.webp`]: 0.4978,
+};

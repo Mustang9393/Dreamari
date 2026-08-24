@@ -8,7 +8,7 @@ import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 import { ART_RATIO } from "./art-ratios";
-import { defaultExpressionFor, expressionFor } from "./expressions";
+import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
 import { locationFor } from "./locations";
 import {
   BossOverlay,
@@ -293,10 +293,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
     >
       {/* ---- the scene ----
-           The art is landscape. Filling a portrait phone with it crops two
-           thirds of the picture away, so on phones it becomes an art panel
-           across the top and the whole frame is visible; from sm up it goes
-           full-bleed behind everything. */}
+           Full-bleed behind everything, on every breakpoint. This USED to be
+           an in-flow panel on phones sized by whatever vertical space the box
+           below it left over -- so the same character rendered at a different
+           effective zoom on every beat depending on how tall that beat's box
+           was, reading as "floating"/inconsistently scaled rather than a
+           steady backdrop. Pinning it full-screen always (matching desktop)
+           makes its size, and therefore every character anchor computed
+           against it, constant across beats; the box now overlaps it instead
+           of shrinking it. SceneLayers' own blurred-edge feathering is what
+           keeps a landscape image from cropping its sides away on a portrait
+           screen -- that part is unchanged, it just now has the full
+           viewport height to work with instead of a shrinking sliver. */}
       {/* ONE plane with a slow zoom. The two-plane parallax is gone: the
          background plate still contains the characters that were lifted out of
          it, so any relative motion dragged a ghost of them out from behind the
@@ -307,7 +315,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       <div
         ref={sceneHost}
         aria-hidden={scene.mode === "none" || !scene.alt}
-        className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
       >
         {scene.mode === "none" ? (
           <AmbientBackdrop mood={mood} accent={accent} />
@@ -445,7 +453,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       />
 
       {phase === "ending" ? (
-        <div className="relative z-10 order-3 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:order-none sm:px-5 sm:pb-5">
+        <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5">
           <EndingCard
             ending={ending}
             reputation={reputation}
@@ -466,7 +474,6 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           beat={beat}
           accent={accent}
           cast={level.cast}
-          reputation={reputation}
           locked={locked}
           paused={phase !== "beat"}
           ambient={scene.mode === "none"}
@@ -793,9 +800,16 @@ function SceneCharacter({
         key={src}
         src={src}
         alt=""
-        width={520}
+        width={Math.round((PORTRAIT_RATIO[src] ?? 0.55) * 900)}
         height={900}
-        className="h-full w-auto object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] motion-safe:animate-[play-character-enter_0.42s_cubic-bezier(0.16,1,0.3,1)_both]"
+        // max-w-none overrides Tailwind preflight's `img { max-width: 100% }`
+        // -- inside this absolutely positioned, auto-width span, that rule's
+        // percentage resolved against an indefinite container and silently
+        // clamped the sprite to a fraction of its real size (confirmed live:
+        // removing it took a 188px-wide render to its correct 639px). That
+        // clamp, not the anchor math, was the actual cause of characters
+        // reading as small and "floating" far above the dialogue box.
+        className="h-full w-auto max-w-none object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] motion-safe:animate-[play-character-enter_0.42s_cubic-bezier(0.16,1,0.3,1)_both]"
       />
     </span>
   );
@@ -865,7 +879,6 @@ function BeatStage({
   beat,
   accent,
   cast,
-  reputation,
   locked,
   paused,
   hidden,
@@ -878,7 +891,6 @@ function BeatStage({
   beat: Beat;
   accent: string;
   cast?: Record<string, string>;
-  reputation: number;
   locked: string | null;
   paused: boolean;
   /** True while the verdict card is up: the stage steps back rather than
@@ -968,7 +980,7 @@ function BeatStage({
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
       <div
         aria-hidden={hidden || undefined}
-        className={`relative z-10 order-3 flex min-h-0 flex-none justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
+        className={`relative z-10 flex min-h-0 flex-1 justify-center px-3 pb-3 transition-opacity duration-300 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
         style={{ opacity: hidden ? 0 : 1 }}
       >
         {/* Dreamy is positioned OVER the box's top edge rather than stacked
@@ -992,7 +1004,7 @@ function BeatStage({
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
               ambient={ambient}
             >
-              <BeatBody beat={beat} reputation={reputation} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
+              <BeatBody beat={beat} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
           )}
         </div>
@@ -1005,20 +1017,18 @@ function BeatStage({
 
 function BeatBody({
   beat,
-  reputation,
   locked,
   remaining,
   onResolve,
   onNext,
 }: {
   beat: Beat;
-  reputation: number;
   locked: string | null;
   remaining: number;
   onResolve: Resolve;
   onNext: () => void;
 }) {
-  if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} reputation={reputation} />;
+  if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} />;
   if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
   if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
@@ -1229,7 +1239,7 @@ function DialogueBox({
                  on screen, ahead of the question and its answers -- title,
                  subheading, body, in that order, rather than the question
                  outsizing the line that gives it context. */}
-              <p className="m-0 text-[20px] leading-[1.25] font-extrabold sm:text-[23px]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+              <p className="m-0 text-[23px] leading-[1.28] font-extrabold sm:text-[27px]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
                 {visible}
                 {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>

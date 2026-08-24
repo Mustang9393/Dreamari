@@ -32,7 +32,7 @@ export type Resolve = (tier: Tier, why: string, id?: string) => void;
  *  derived from ELAPSED TIME, not from how many ticks fired: counting ticks
  *  drifted against React's commits and stalled halfway through a long line.
  *  Mounted fresh per beat (the stage is keyed), so there is no reset to do. */
-export function useTypewriter(text: string, speed = 12) {
+export function useTypewriter(text: string, speed = 26) {
   const [shown, setShown] = useState(0);
 
   useEffect(() => {
@@ -169,7 +169,7 @@ function Question({ children }: { children: React.ReactNode }) {
 
 // ------------------------------------------------------------------ the card
 
-export function CardBody({ beat, onNext, reputation }: { beat: CardBeat; onNext: () => void; reputation: number }) {
+export function CardBody({ beat, onNext }: { beat: CardBeat; onNext: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       {beat.step && (
@@ -216,7 +216,7 @@ export function CardBody({ beat, onNext, reputation }: { beat: CardBeat; onNext:
       {beat.note && (
         <p className="text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>{beat.note}</p>
       )}
-      {beat.showBands && <BandLadder reputation={reputation} />}
+      {beat.showBands && <BandLadder />}
       <button
         type="button"
         onClick={() => {
@@ -233,28 +233,22 @@ export function CardBody({ beat, onNext, reputation }: { beat: CardBeat; onNext:
   );
 }
 
-function BandLadder({ reputation }: { reputation: number }) {
+// Shown once, on the "Your Reputation" explainer before the level starts --
+// a reference table of the rules, not a readout of where the player stands
+// (reputation is still the untouched baseline here, which happens to fall
+// inside "Cautious" -- highlighting it as a "current" band read as if the
+// player had already earned that standing before making a single choice).
+function BandLadder() {
   return (
     <ul className="flex list-none flex-col gap-[5px] p-0">
-      {[...BANDS].reverse().map((band) => {
-        const here = reputation >= band.min && reputation <= band.max;
-        return (
-          <li
-            key={band.name}
-            className="flex items-center justify-between rounded-[10px] border px-[11px] py-[8px] text-[13px] font-bold"
-            style={{
-              background: here ? "var(--glass-surface-2)" : "transparent",
-              borderColor: here ? "var(--color-glass-border-raised)" : "transparent",
-              color: here ? "var(--foreground)" : "var(--muted-foreground)",
-            }}
-          >
-            <span>{band.name}</span>
-            <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-              {band.max === 100 ? `${band.min}+` : `${band.min} to ${band.max}`}
-            </span>
-          </li>
-        );
-      })}
+      {[...BANDS].reverse().map((band) => (
+        <li key={band.name} className="flex items-center justify-between rounded-[10px] border px-[11px] py-[8px] text-[13px] font-bold" style={{ borderColor: "transparent", color: "var(--muted-foreground)" }}>
+          <span>{band.name}</span>
+          <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+            {band.max === 100 ? `${band.min}+` : `${band.min} to ${band.max}`}
+          </span>
+        </li>
+      ))}
     </ul>
   );
 }

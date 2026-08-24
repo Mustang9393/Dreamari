@@ -28,6 +28,11 @@ export type LocationId =
   // generic room for it.
   | "l1-reception";
 
+// baselineY is a fraction of the scene's height, measured from the top --
+// 1.0 would put the sprite's own bottom edge exactly on the scene's bottom
+// edge. Every anchor here goes slightly past that (1.02) so the sprite's own
+// cutoff always lands just behind the dialogue box's bottom-docked panel
+// rather than stopping exactly at the visible edge, a hair short of it.
 type CharacterSlot = { x: number; baselineY: number; heightFrac: number; centered?: boolean };
 
 type LocationArt = {
@@ -56,7 +61,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
     focal: { x: 0.58, y: 0.43 },
     mobileFocal: { x: 0.57, y: 0.36 },
-    characterAnchor: { x: 0.74, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.74, baselineY: 1.02, heightFrac: 0.58 },
   },
   "cobalt-internal-boardroom-sunset": {
     src: `${L}/internal-boardroom-sunset.webp`,
@@ -67,21 +72,21 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // by the window read as a scaling/positioning bug, not a deliberate
     // sense of distance. Christina's treatment is the reference for every
     // scene shaped like this one.
-    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.91, baselineY: 1.02, heightFrac: 0.58 },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
     alt: "Cobalt Capital's trading floor at night, monitors lit against the city.",
     focal: { x: 0.58, y: 0.45 },
     mobileFocal: { x: 0.6, y: 0.37 },
-    characterAnchor: { x: 0.75, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.75, baselineY: 1.02, heightFrac: 0.58 },
   },
   "cobalt-cafe-lounge-sunset": {
     src: `${L}/cafe-lounge-sunset.webp`,
     alt: "A cafe lounge near the office, quiet seating at sunset.",
     focal: { x: 0.66, y: 0.42 },
     mobileFocal: { x: 0.69, y: 0.36 },
-    characterAnchor: { x: 0.76, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.76, baselineY: 1.02, heightFrac: 0.58 },
   },
   "cobalt-client-boardroom-sunset": {
     src: `${L}/client-boardroom-sunset.webp`,
@@ -90,14 +95,14 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     mobileFocal: { x: 0.67, y: 0.35 },
     // Centered and full scale like every other location -- see the note on
     // cobalt-internal-boardroom-sunset above.
-    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.9, baselineY: 1.02, heightFrac: 0.58 },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
     alt: "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
     focal: { x: 0.55, y: 0.45 },
     mobileFocal: { x: 0.53, y: 0.4 },
-    characterAnchor: { x: 0.4, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.4, baselineY: 1.02, heightFrac: 0.58 },
   },
   "l1-reception": {
     src: `${L}/reception.webp`,
@@ -105,15 +110,16 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // scene.json's own focal point for this exact plate.
     focal: { x: 0.52, y: 0.42 },
     mobileFocal: { x: 0.52, y: 0.34 },
-    // Full figures, feet near the bottom edge, headroom above -- fills the
-    // frame cinematically without cropping the head or feet off-screen.
+    // Full figures, deliberately anchored PAST the bottom edge (baselineY
+    // > 1, see the type's own comment) so their feet always land behind the
+    // dialogue box rather than floating above it with a visible gap.
     characterAnchors: [
-      { x: 0.38, baselineY: 0.99, heightFrac: 0.88, centered: false },
-      { x: 0.64, baselineY: 0.99, heightFrac: 0.9, centered: false },
+      { x: 0.38, baselineY: 1.02, heightFrac: 0.55, centered: false },
+      { x: 0.64, baselineY: 1.02, heightFrac: 0.58, centered: false },
     ],
     // The single-character anchor used when only one of them is present
     // (L1-15, Christina alone): her own slot, fully in frame.
-    characterAnchor: { x: 0.5, baselineY: 0.99, heightFrac: 0.88 },
+    characterAnchor: { x: 0.5, baselineY: 1.02, heightFrac: 0.55 },
   },
 };
 
