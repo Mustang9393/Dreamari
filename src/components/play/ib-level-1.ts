@@ -231,6 +231,7 @@ export const IB_LEVEL_1: Level = {
     {
       kind: "choice",
       layout: "document",
+      doc: "Nike Deal • Intern Summary",
       id: "L1-10",
       progress: 0.7,
       speaker: "Christina",

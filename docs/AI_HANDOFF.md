@@ -40,6 +40,50 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: Level 3, drag ranking, keyboard play, scene fixes (PUSHED)
+
+- **Level 3 (Associate) is built** -- `src/components/play/ib-level-3.ts`, so all
+  three levels documented in the handoff sheet now exist. Its 46 sheet screens
+  become 28 beats: the sheet's sub-screens (L3-12a..f, L3-14a..e, L3-24a..e) are
+  children of one interaction each, the same collapse Levels 1 and 2 use. Header
+  comments name every production change applied and the two screens left out --
+  L3-30's Vice President offer card, whose salary and hours are "TO BE
+  RESEARCHED" in the sheet, belongs at the top of Level 4 with real numbers.
+- Lamisa's portrait was cut from `IB L3-07.png` with the macOS Vision framework,
+  same pipeline as the other three faces. All four speakers now have one.
+- **Level-to-level flow.** The advance button reads "Start Level 3 · Associate"
+  rather than "Claim Your Reward", so promotion runs straight into the next level
+  instead of looking like a dead end. When the ladder does run out it names what
+  is coming ("Vice President is coming soon") rather than talking about the build.
+- **Ranking is draggable**, by mouse and by finger (pointer events + `touch-none`),
+  with the rows SLIDING out of the way rather than swapping: the committed order
+  is left alone mid-drag and each passed row is translated one slot, because
+  reordering the array moves rows by re-layout, which no transition can animate.
+  The arrow buttons stay -- they are the keyboard and screen-reader route.
+- **Keyboard play, no instructions on screen.** Enter/space/right advances
+  dialogue AND presses a card's single button (two thirds of a level is cards, so
+  without that most of the game was unplayable from a keyboard); number keys pick
+  options in choice, rapid, chain and sort beats. The hints are the controls
+  themselves -- each option's badge IS its digit, a keycap glyph sits on the
+  advance -- and both hide behind `@media (hover: hover) and (pointer: fine)`.
+- **Scene fixes.** Mood is no longer a full-frame wash: at the weight crunch
+  needed to read, it drained the art, so the tint now rides the edges where the
+  scrims already darken. On phones the two blurred beds fill the frame and the
+  sharp plate sits inside them at its true aspect ratio (`art-ratios.ts`), with
+  its fade aligned to the PICTURE's edges -- masking against the frame left a
+  hard line partway down the screen. Faces are never cropped.
+- The verdict card is centred and the beat behind it steps back, so no half-cut
+  question sits under it. The resume notice retires itself after ten seconds, in
+  CSS, so no timer or state exists for it.
+- **Bug: a run ending wiped its own scores.** `advance` cleared storage before
+  the run took ownership of it, and reputation is derived from the per-beat
+  outcomes -- so a player who closed the app on the final review screen came back
+  and got the worst ending whatever they had earned. Fixed by promoting the run
+  first.
+- Copy: repeated carousel headers, notes restating their own card title or
+  button, and duplicate "morning review" lines are gone.
+- No token changes in this batch; contract files untouched.
+
 ### 2026-08-24 Play: Level 2, checkpoints, portraits, keyboard play (PUSHED)
 
 - **Level 2 (Analyst) is built**: `src/components/play/ib-level-2.ts`, 31 screens

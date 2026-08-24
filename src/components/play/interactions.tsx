@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronUp, FileText, Flag, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
 
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
@@ -69,6 +69,22 @@ export function useDigitKeys(count: number, pick: (index: number) => void, enabl
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [count, pick, enabled]);
+}
+
+/** A single keycap glyph, shown only where there is a real keyboard. The whole
+ *  keyboard story is told by glyphs on the controls themselves -- the digit on
+ *  each option, this cap on the advance -- rather than a line of instructions
+ *  under every screen. Touch players never see any of it. */
+export function Keycap({ children, tint }: { children: string; tint: string }) {
+  return (
+    <span
+      aria-hidden
+      className="ml-[2px] hidden h-[19px] min-w-[19px] items-center justify-center rounded-[5px] border px-[4px] text-[11px] leading-none font-bold [@media(hover:hover)_and_(pointer:fine)]:inline-flex"
+      style={{ borderColor: tint, color: tint, opacity: 0.72 }}
+    >
+      {children}
+    </span>
+  );
 }
 
 // -------------------------------------------------------------- shared parts
@@ -205,10 +221,11 @@ export function CardBody({ beat, onNext, reputation }: { beat: CardBeat; onNext:
           playSelect();
           onNext();
         }}
-        className="dm-solid mt-[var(--space-1)] w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         {beat.cta}
+        <Keycap tint="var(--primary-foreground)">⏎</Keycap>
       </button>
     </div>
   );
@@ -342,7 +359,7 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
           style={{ background: "var(--glass-surface-3)", color: "var(--muted-foreground)" }}
         >
           <FileText className="h-[14px] w-[14px]" aria-hidden />
-          Nike Deal • Intern Summary
+          {beat.doc ?? "Document"}
         </p>
         <ul className="m-0 flex list-none flex-col p-0">
           {beat.choices.map((choice, index) => (
@@ -921,41 +938,110 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
   });
   const [locked, setLocked] = useState(false);
 
+  // Dragging is the obvious gesture for a list you are ordering, by mouse and by
+  // finger. The arrows stay as the keyboard and screen-reader route.
+  //
+  // The rows SLIDE rather than swap. The committed order is left alone until the
+  // drag ends; while it is live, the held row follows the pointer and every row
+  // it passes is translated one slot out of its way. Reordering the array
+  // mid-drag would move rows by re-layout, which no transition can animate.
+  const [drag, setDrag] = useState<{ index: number; dy: number; height: number; from: number } | null>(null);
+  const target = drag ? Math.max(0, Math.min(rows.length - 1, drag.index + Math.round(drag.dy / drag.height))) : -1;
+
+  function reorder(list: string[], from: number, to: number): string[] {
+    const next = [...list];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    return next;
+  }
+
+  /** Where a row sits while a drag is live: its slot in the previewed order. */
+  function slot(index: number): number {
+    if (!drag) return index;
+    if (index === drag.index) return target;
+    if (drag.index < target && index > drag.index && index <= target) return index - 1;
+    if (drag.index > target && index >= target && index < drag.index) return index + 1;
+    return index;
+  }
+
   const move = (index: number, by: -1 | 1) => {
     const to = index + by;
     if (to < 0 || to >= rows.length) return;
     playSelect();
-    setRows((current) => {
-      const next = [...current];
-      [next[index], next[to]] = [next[to], next[index]];
-      return next;
-    });
+    setRows((current) => reorder(current, index, to));
   };
+
+  function onPointerDown(event: React.PointerEvent<HTMLLIElement>, index: number) {
+    if (locked || event.button !== 0) return;
+    const height = event.currentTarget.getBoundingClientRect().height + 6; // + the list gap
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDrag({ index, dy: 0, height, from: event.clientY });
+    playSelect();
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLLIElement>) {
+    const y = event.clientY;
+    setDrag((current) => (current ? { ...current, dy: y - current.from } : current));
+  }
+
+  function onPointerUp() {
+    setDrag((current) => {
+      if (current) {
+        const to = Math.max(0, Math.min(rows.length - 1, current.index + Math.round(current.dy / current.height)));
+        if (to !== current.index) {
+          playSelect();
+          setRows((list) => reorder(list, current.index, to));
+        }
+      }
+      return null;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
-        {rows.map((row, index) => (
-          <li
-            key={row}
-            className="flex items-center gap-[10px] rounded-[12px] border px-[11px] py-[9px] motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
-            style={{ animationDelay: `${index * 40}ms`, background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
-          >
-            <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold" style={{ background: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-              {index + 1}
-            </span>
-            <span className="min-w-0 flex-1 text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
-            <span className="flex flex-none gap-[4px]">
-              <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-                <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
-              </button>
-              <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-                <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
-              </button>
-            </span>
-          </li>
-        ))}
+        {rows.map((row, index) => {
+          const held = drag?.index === index;
+          const offset = held ? drag.dy : (slot(index) - index) * (drag?.height ?? 0);
+          return (
+            <li
+              key={row}
+              onPointerDown={(event) => onPointerDown(event, index)}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              className="flex touch-none items-center gap-[10px] rounded-[12px] border px-[11px] py-[9px] select-none"
+              style={{
+                background: "var(--glass-surface-1)",
+                borderColor: held ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
+                cursor: locked ? "default" : held ? "grabbing" : "grab",
+                transform: `translateY(${offset}px)${held ? " scale(1.03)" : ""}`,
+                boxShadow: held ? "0 14px 30px rgb(0 0 0 / 0.42)" : undefined,
+                // The held row must track the pointer exactly; the rows moving
+                // out of its way are the ones that should ease.
+                transition: held ? "box-shadow 0.15s ease-out" : "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                position: "relative",
+                zIndex: held ? 2 : 1,
+                willChange: drag ? "transform" : undefined,
+              }}
+            >
+              <GripVertical className="h-[15px] w-[15px] flex-none opacity-45" aria-hidden />
+              <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold tabular-nums" style={{ background: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                {slot(index) + 1}
+              </span>
+              <span className="min-w-0 flex-1 text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
+                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                  <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
+                </button>
+                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                  <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
+                </button>
+              </span>
+            </li>
+          );
+        })}
       </ul>
       <button
         type="button"
@@ -976,8 +1062,6 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
   );
 }
 
-/** Pick N of M. Selection is visible before submitting, and a harmful card in
- *  the set scores Risky however good the other picks are. */
 export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onResolve: Resolve; remaining: number }) {
   const [chosen, setChosen] = useState<number[]>([]);
   const settled = useRef(false);
@@ -1073,7 +1157,7 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
   const need = passThreshold(beat.items.length);
   const item = beat.items[at];
 
-  function put(into: 0 | 1) {
+  const put = useCallback((into: 0 | 1) => {
     if (flash !== null || !item) return;
     const ok = item.into === into;
     if (ok) playCorrect();
@@ -1096,7 +1180,10 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
       },
       ok ? 420 : 900,
     );
-  }
+  }, [flash, item, right, at, beat.items.length, need, beat.whenRight, beat.whenWrong, onResolve]);
+
+  const pickByKey = useCallback((index: number) => put(index === 0 ? 0 : 1), [put]);
+  useDigitKeys(2, pickByKey, flash === null);
 
   if (!item) return null;
   const correctBucket = item.into;

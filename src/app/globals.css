@@ -587,6 +587,25 @@ body {
 }
 /* The "continue" chevron in a dialogue box: a small nudge, the way an RPG
    blinks its advance marker. */
+/* The resume notice: rises, holds for ten seconds, then retires itself.
+   Done in CSS so no timer or state has to exist for it. */
+@keyframes play-notice {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  4%,
+  88% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+    visibility: hidden;
+  }
+}
+
 @keyframes play-nudge {
   0%,
   100% {

@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
+
+import { ART_RATIO } from "./art-ratios";
 import {
   BossOverlay,
   BucketBody,
@@ -13,6 +15,7 @@ import {
   ChainBody,
   ChoiceBody,
   FlagsBody,
+  Keycap,
   MatchBody,
   PickBody,
   RankBody,
@@ -126,7 +129,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       return;
     }
     if (index + 1 >= level.beats.length) {
-      // The run is over: an ending should never be resumed into.
+      // The run is over: an ending should never be resumed into. Take ownership
+      // of the outcomes FIRST -- clearing storage while the run is still being
+      // read from it would drop every score on the floor, and the ending is
+      // derived from them. A player who closed the app on the final review
+      // screen came back and got the worst ending whatever they had earned.
+      patchRun({});
       clearRun(simulation.id, level.n);
       setPhase("ending");
       return;
@@ -211,6 +219,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         }}
       />
 
+      {/* Mood rides the EDGES, never the whole frame. A full-bleed wash at the
+         weight this needs to read as late-night or crunch also drains the art,
+         which is the one thing on screen worth looking at. So the tint lands
+         where the scrims already darken -- the HUD strip and the ground under
+         the dialogue box -- and the middle of the picture is left alone. */}
       {mood !== "day" && (
         <div
           aria-hidden
@@ -218,8 +231,8 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           style={{
             background:
               mood === "crunch"
-                ? "linear-gradient(180deg, color-mix(in srgb, #4a0d1c 62%, transparent), color-mix(in srgb, #2a0710 78%, transparent))"
-                : "linear-gradient(180deg, color-mix(in srgb, #071033 58%, transparent), color-mix(in srgb, #04081f 76%, transparent))",
+                ? "linear-gradient(180deg, color-mix(in srgb, #4a0d1c 60%, transparent) 0%, transparent 22%, transparent 58%, color-mix(in srgb, #3a0a16 46%, transparent) 84%, color-mix(in srgb, #2a0710 74%, transparent) 100%)"
+                : "linear-gradient(180deg, color-mix(in srgb, #071033 56%, transparent) 0%, transparent 22%, transparent 58%, color-mix(in srgb, #061029 44%, transparent) 84%, color-mix(in srgb, #04081f 72%, transparent) 100%)",
           }}
         />
       )}
@@ -252,6 +265,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         // the countdown its starting value without an effect resetting state.
         <BeatStage
           key={beat.id}
+          hidden={phase === "feedback"}
           beat={beat}
           accent={accent}
           cast={level.cast}
@@ -281,9 +295,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {/* Says so, rather than silently dropping them mid-level. */}
       {resumed && phase === "beat" && (
-        <div className="absolute inset-x-0 top-[74px] z-30 flex justify-center px-3">
+        <div className="pointer-events-none absolute inset-x-0 top-[74px] z-30 flex justify-center px-3 animate-[play-notice_11s_ease-out_both]">
           <span
-            className="flex items-center gap-[10px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px] motion-safe:animate-[play-sheet-up_0.4s_ease-out_both]"
+            className="pointer-events-auto flex items-center gap-[10px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
             Picked up where you left off
@@ -313,10 +327,15 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
  *  layer with no masking at all.
  */
 const SCENE_FADE = [
-  // blur, and the vertical band this layer occupies as a share of the height
-  { blur: 22, stop: 0.02, full: 0.1 },
-  { blur: 9, stop: 0.08, full: 0.2 },
-  { blur: 0, stop: 0.16, full: 0.34 },
+  // Blur, and where this layer's fade starts and finishes as a share of the
+  // PICTURE's own height. The two blurred layers fill the frame behind, so the
+  // picture dissolves into its own colour rather than into a black band; the
+  // sharp layer sits inside them at its true aspect ratio, so no face is ever
+  // cropped, and its fade is aligned to its own edges -- masking it against the
+  // frame is what left a hard line partway down the screen.
+  { blur: 24, stop: 0, full: 0.05 },
+  { blur: 9, stop: 0.03, full: 0.14 },
+  { blur: 0, stop: 0.08, full: 0.26 },
 ] as const;
 
 /** Long, symmetric vertical falloff: transparent at the very edge, solid by
@@ -328,25 +347,40 @@ function fadeMask(stop: number, full: number): string {
 }
 
 function SceneLayers({ src, alt }: { src: string; alt: string }) {
+  const ratio = ART_RATIO[src] ?? 16 / 9;
   return (
     <>
-      {SCENE_FADE.map((band) => (
-        <Image
-          key={`${src}-${band.blur}`}
-          src={src}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          aria-hidden
-          className="object-contain object-center sm:hidden"
-          style={{
-            filter: band.blur ? `blur(${band.blur}px)` : undefined,
-            maskImage: fadeMask(band.stop, band.full),
-            WebkitMaskImage: fadeMask(band.stop, band.full),
-          }}
-        />
-      ))}
+      {SCENE_FADE.map((band) =>
+        band.blur > 0 ? (
+          <Image
+            key={`${src}-${band.blur}`}
+            src={src}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            aria-hidden
+            className="object-cover object-center sm:hidden"
+            style={{
+              filter: `blur(${band.blur}px)`,
+              maskImage: fadeMask(band.stop, band.full),
+              WebkitMaskImage: fadeMask(band.stop, band.full),
+            }}
+          />
+        ) : (
+          <span
+            key={`${src}-sharp`}
+            className="pointer-events-none absolute inset-0 m-auto block h-auto max-h-full w-full sm:hidden"
+            style={{
+              aspectRatio: `${ratio}`,
+              maskImage: fadeMask(band.stop, band.full),
+              WebkitMaskImage: fadeMask(band.stop, band.full),
+            }}
+          >
+            <Image src={src} alt={alt} fill priority sizes="100vw" className="object-contain object-center" />
+          </span>
+        ),
+      )}
       {/* Desktop: one sharp cover layer, nothing stacked, nothing masked. */}
       <Image
         key={src}
@@ -381,6 +415,7 @@ function BeatStage({
   reputation,
   locked,
   paused,
+  hidden,
   onResolve,
   onNext,
 }: {
@@ -390,6 +425,9 @@ function BeatStage({
   reputation: number;
   locked: string | null;
   paused: boolean;
+  /** True while the verdict card is up: the stage steps back rather than
+   *  showing half a question behind it. */
+  hidden?: boolean;
   onResolve: Resolve;
   onNext: () => void;
 }) {
@@ -440,7 +478,11 @@ function BeatStage({
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
-      <div className="relative z-10 order-3 flex min-h-0 flex-none items-end justify-center px-3 pb-3 sm:order-none sm:flex-1 sm:px-5 sm:pb-5">
+      <div
+        aria-hidden={hidden || undefined}
+        className="relative z-10 order-3 flex min-h-0 flex-none items-end justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5"
+        style={{ opacity: hidden ? 0 : 1 }}
+      >
         {/* Dreamy is positioned OVER the box's top edge rather than stacked
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
@@ -459,6 +501,7 @@ function BeatStage({
               tone={"tone" in beat ? beat.tone : undefined}
               held={!revealed}
               onAdvance={() => setRevealed(true)}
+              onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
             >
               <BeatBody beat={beat} reputation={reputation} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
@@ -578,6 +621,7 @@ function DialogueBox({
   tone,
   gold,
   held,
+  onPrimary,
   onAdvance,
   children,
 }: {
@@ -590,6 +634,8 @@ function DialogueBox({
   gold?: boolean;
   /** true while the player is still reading: the question stays hidden. */
   held?: boolean;
+  /** The beat's single action, for beats with no question to reveal. */
+  onPrimary?: () => void;
   onAdvance?: () => void;
   children: React.ReactNode;
 }) {
@@ -615,12 +661,28 @@ function DialogueBox({
         // Never hijack a key the player is aiming at a button.
         if (document.activeElement instanceof HTMLButtonElement) return;
         event.preventDefault();
-        step();
+        if (!done) {
+          skip();
+          return;
+        }
+        if (held && onAdvance) {
+          playSelect();
+          onAdvance();
+          return;
+        }
+        // A card has no question to open, so the same key presses its one
+        // button. Without this, two thirds of the level could not be played
+        // from the keyboard at all. Deliberately NOT wired to the box's click,
+        // which would double-fire with the button underneath it.
+        if (!held && onPrimary) {
+          playSelect();
+          onPrimary();
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [step]);
+  }, [done, held, onAdvance, onPrimary, skip]);
   const edge = gold
     ? "var(--world-business-money-office)"
     : tone === "alarm"
@@ -830,22 +892,6 @@ function Clock({ remaining, total }: { remaining: number; total: number }) {
   );
 }
 
-/** A single keycap glyph, shown only where there is a real keyboard. The whole
- *  keyboard story is told by glyphs on the controls themselves -- the digit on
- *  each option, this cap on the advance -- rather than a line of instructions
- *  under every screen. Touch players never see any of it. */
-function Keycap({ children, tint }: { children: string; tint: string }) {
-  return (
-    <span
-      aria-hidden
-      className="ml-[2px] hidden h-[19px] min-w-[19px] items-center justify-center rounded-[5px] border px-[4px] text-[11px] leading-none font-bold [@media(hover:hover)_and_(pointer:fine)]:inline-flex"
-      style={{ borderColor: tint, color: tint, opacity: 0.72 }}
-    >
-      {children}
-    </span>
-  );
-}
-
 // --------------------------------------------------------------- the feedback
 
 function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
@@ -855,8 +901,21 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
   const skills = "skills" in beat ? beat.skills : [];
 
+  // The card owns the key rather than leaning on the focused button's default
+  // activation: the sheet is the only thing on screen, so enter, space and right
+  // should all dismiss it whatever happens to hold focus.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Enter" && event.key !== " " && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      onNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onNext]);
+
   return (
-    <div className="absolute inset-0 z-30 flex items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}>
+    <div className="absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)" }}>
       <div
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[20px] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
@@ -959,7 +1018,7 @@ function EndingCard({
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
-            {ending.primary}
+            Start Level {next.n} · {next.role}
             <ArrowRight className="h-[17px] w-[17px]" aria-hidden />
           </Link>
         ) : ending.advances ? (
@@ -969,7 +1028,6 @@ function EndingCard({
             aria-disabled
           >
             {ending.primary}
-            <ArrowRight className="h-[17px] w-[17px]" aria-hidden />
           </span>
         ) : misses > 0 ? (
           <>
@@ -1008,9 +1066,9 @@ function EndingCard({
             {ending.primary}
           </button>
         )}
-        {ending.advances && !next && (
+        {ending.advances && !next && simulation.upcoming[0] && (
           <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            The next level is not built yet.
+            {simulation.upcoming[0]} is coming soon.
           </p>
         )}
         <Link
@@ -1023,7 +1081,7 @@ function EndingCard({
         </Link>
       </div>
       <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {ADVANCE_AT} and above advances. {simulation.firm} applies the same bar at every level.
+        {ADVANCE_AT} and above advances.
       </p>
     </div>
   );

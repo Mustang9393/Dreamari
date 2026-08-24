@@ -98,6 +98,9 @@ export type ChoiceBeat = BeatBase & {
    *  is not the same as someone who invented numbers. */
   timer?: number;
   tone?: "normal" | "conflict" | "alarm";
+  /** Header for the `document` layout's window chrome. The label was hardcoded
+   *  to Level 1's Nike summary, which is wrong on every other beat. */
+  doc?: string;
 };
 
 /** Tap a term, then its definition. Nothing scores until Check Matches. All
