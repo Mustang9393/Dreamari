@@ -27,7 +27,18 @@ import {
   type Resolve,
 } from "./interactions";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { mutedSnapshot, playSelect, playSweep, playTick, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
+import {
+  mutedSnapshot,
+  playCharacterEnter,
+  playFocusMoment,
+  playSceneChange,
+  playSelect,
+  playSweep,
+  playTick,
+  serverMutedSnapshot,
+  setMuted,
+  subscribeMuted,
+} from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, bandFor, clamp, endingFor } from "./scoring";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Mood, type Simulation, type Tier } from "./types";
 
@@ -258,6 +269,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     (scene.characterAnchors && beat.castMembers
       ? beat.castMembers.some((name, i) => Boolean(scene.characterAnchors?.[i]) && Boolean(defaultExpressionFor(name)))
       : Boolean(scene.characterAnchor) && Boolean(defaultExpressionFor(beat.castMember ?? beat.speaker)));
+
+  // A soft cue exactly when the backdrop itself swaps -- not on every beat,
+  // only when the picture actually changes (a new location, or a fresh hero
+  // plate taking over from the last one).
+  const lastSceneSrc = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastSceneSrc.current !== null && lastSceneSrc.current !== scene.src) playSceneChange();
+    lastSceneSrc.current = scene.src;
+  }, [scene.src]);
+  // A distinct cue the moment a standalone interactive screen actually takes
+  // over -- fires once on the false-to-true edge, not on every render while
+  // it stays true.
+  const wasDimmed = useRef(false);
+  useEffect(() => {
+    if (dimmed && !wasDimmed.current) playFocusMoment();
+    wasDimmed.current = dimmed;
+  }, [dimmed]);
 
   return (
     <div
@@ -715,6 +743,12 @@ function SceneCharacter({
   neutralTier?: Tier;
 }) {
   const src = (tier && expressionFor(speaker, tier)) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
+  // Pairs with the entrance animation below, which is keyed on the same
+  // `src` for the same reason: a genuinely new image (a new speaker, or an
+  // expression swap), not just this component re-rendering.
+  useEffect(() => {
+    if (src) playCharacterEnter();
+  }, [src]);
   if (!src || sceneHeight === 0) return null;
   // Centered and filling the room is the norm -- whoever is speaking is the
   // thing to look at, the same treatment Jordan's introduction got. The two

@@ -130,3 +130,50 @@ export function playTick(urgent = false) {
   if (!at) return;
   tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
 }
+
+/** A frequency glide rather than a fixed pitch -- the shape a whoosh or a
+ *  soft stinger actually needs, which the fixed-pitch `tone` above can't do. */
+function sweep(at: AudioContext, from: number, to: number, start: number, duration: number, peak: number, shape: Shape = "sine") {
+  const osc = at.createOscillator();
+  const gain = at.createGain();
+  osc.type = shape;
+  osc.frequency.setValueAtTime(from, start);
+  osc.frequency.exponentialRampToValueAtTime(to, start + duration);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(peak, start + duration * 0.3);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(gain);
+  gain.connect(at.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+
+/** The room changes -- a new location, or a hero illustration taking over.
+ *  A soft downward breath, not a doorbell: it fires every time the backdrop
+ *  actually swaps, which is often enough that anything more present would
+ *  turn into background noise fast. */
+export function playSceneChange() {
+  const at = audio();
+  if (!at) return;
+  sweep(at, 520, 220, at.currentTime, 0.32, 0.045);
+}
+
+/** A character's cutout steps into the scene -- pairs with its own fade-in-
+ *  and-rise animation. A small bright glint, brief enough to survive firing
+ *  twice at once when two people enter the same reception together. */
+export function playCharacterEnter() {
+  const at = audio();
+  if (!at) return;
+  sweep(at, 700, 980, at.currentTime, 0.16, 0.06, "triangle");
+}
+
+/** The moment a scored beat's real controls take the screen -- the backdrop
+ *  blurs, the character steps aside, this is what the player is actually
+ *  being asked to do. One low, weighted note, deliberately unlike the
+ *  brighter correct/wrong/select sounds so it never reads as a verdict --
+ *  it marks attention, not an outcome. */
+export function playFocusMoment() {
+  const at = audio();
+  if (!at) return;
+  tone(at, 220, at.currentTime, 0.22, 0.07, "sine");
+}
