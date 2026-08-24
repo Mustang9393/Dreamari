@@ -60,13 +60,17 @@ tokens above, in both modes).
 ### 2026-08-24 Progressive blur on phones, and two app-repo items closed (PUSHED)
 
 - PHONES no longer crop the cast out of a scene. The frame is CONTAINED, so
-  everyone in it stays in frame, and the space that leaves is filled by the same
-  image stacked four times with increasing blur (0 / 6 / 18 / 40px), each layer
-  masked to start further out, over a heavily magnified colour wash. Focus falls
-  away toward the edges and the picture dissolves into the dark instead of
-  stopping at a border -- one blurred fill layer left exactly the hard line the
-  brief was about. Desktop is wide enough to cover without losing anyone, so it
-  stays a single sharp layer.
+  everyone stays in shot, and the space that leaves is filled with NOTHING: the
+  picture dissolves into the page's own dark, losing focus as it goes. Three
+  layers, sharp on top, each masked with a long vertical falloff, the outer ones
+  blurred 9px and 22px, so focus and opacity fade together.
+  WHAT NOT TO DO, since two attempts got there first: a single blurred fill
+  behind the frame leaves a visible line where sharp meets soft, and a magnified
+  blurred copy of the image puts a grey haze on screen that reads as a second
+  picture. The reference (a Dribbble profile card) has no boundary at all -- the
+  photo melts into flat colour -- and that only works if nothing opaque sits
+  behind it. Desktop covers without losing anyone, so it stays one sharp
+  unmasked layer.
 - `--card` light-mode fix and the StudentAppShell deletion are done; see the
   app-repo block at the top of this file for what is left, which is only the
   Figma/token-source side.

@@ -196,49 +196,40 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   );
 }
 
-/** The scene, on phones, as a PROGRESSIVE blur.
+/** The scene, on phones.
  *
- *  The frame is contained so nobody in it gets cropped out at the sides, which
- *  leaves space above and below on a portrait screen. Filling that with one
- *  blurred copy left a visible line where sharp met blurred. Instead the same
- *  image is stacked four times with increasing blur, each layer masked to start
- *  further out, so focus falls away toward the edges and the picture dissolves
- *  into the dark rather than stopping at a border.
+ *  The frame is CONTAINED so nobody in it gets cropped out. The space that
+ *  leaves is not filled with anything: the picture simply DISSOLVES into the
+ *  page's own dark, losing focus as it goes. A magnified blurred copy behind it
+ *  (the previous attempt) put a grey haze on screen and read as a second image;
+ *  the reference is a photo with no boundary at all, melting into flat colour.
  *
- *  Desktop is wide enough to cover without losing anyone, so it stays a single
- *  sharp cover layer.
+ *  Three layers, sharp on top: each is masked with a long vertical falloff, and
+ *  the further out a layer reaches the blurrier it is, so focus and opacity fade
+ *  together. Nothing is opaque behind them, which is what keeps it clean.
+ *
+ *  Desktop is wide enough to cover without losing anyone, so it stays one sharp
+ *  layer with no masking at all.
  */
-const SCENE_BANDS = [
-  // blur, and where this layer starts appearing measured from the frame's edge
-  { blur: 0, from: 0.0, to: 0.4 },
-  { blur: 6, from: 0.34, to: 0.6 },
-  { blur: 18, from: 0.55, to: 0.8 },
-  { blur: 40, from: 0.74, to: 1.0 },
+const SCENE_FADE = [
+  // blur, and the vertical band this layer occupies as a share of the height
+  { blur: 22, stop: 0.02, full: 0.1 },
+  { blur: 9, stop: 0.08, full: 0.2 },
+  { blur: 0, stop: 0.16, full: 0.34 },
 ] as const;
 
-/** A mask that is opaque in the middle and fades out past `edge`, on both axes. */
-function bandMask(from: number, to: number): string {
-  const a = (from * 50).toFixed(1);
-  const b = (to * 50).toFixed(1);
-  const vertical = `linear-gradient(to bottom, transparent ${a}%, #000 ${b}%, #000 ${(100 - Number(b)).toFixed(1)}%, transparent ${(100 - Number(a)).toFixed(1)}%)`;
-  return vertical;
+/** Long, symmetric vertical falloff: transparent at the very edge, solid by
+ *  `full`, and the same coming back up. */
+function fadeMask(stop: number, full: number): string {
+  const a = (stop * 100).toFixed(1);
+  const b = (full * 100).toFixed(1);
+  return `linear-gradient(to bottom, transparent ${a}%, #000 ${b}%, #000 ${(100 - Number(b)).toFixed(1)}%, transparent ${(100 - Number(a)).toFixed(1)}%)`;
 }
 
 function SceneLayers({ src, alt }: { src: string; alt: string }) {
   return (
     <>
-      {/* The wash that carries colour all the way to the screen edge. */}
-      <Image
-        src={src}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="scale-[2.4] object-cover object-center blur-[54px] brightness-[0.66] saturate-[1.25] sm:hidden"
-      />
-      {/* Sharp in the middle, progressively softer outward. Reversed so the
-         sharpest layer paints last and sits on top. */}
-      {[...SCENE_BANDS].reverse().map((band) => (
+      {SCENE_FADE.map((band) => (
         <Image
           key={`${src}-${band.blur}`}
           src={src}
@@ -250,12 +241,12 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
           className="object-contain object-center sm:hidden"
           style={{
             filter: band.blur ? `blur(${band.blur}px)` : undefined,
-            maskImage: band.blur ? bandMask(band.from, band.to) : bandMask(0, 0.42),
-            WebkitMaskImage: band.blur ? bandMask(band.from, band.to) : bandMask(0, 0.42),
+            maskImage: fadeMask(band.stop, band.full),
+            WebkitMaskImage: fadeMask(band.stop, band.full),
           }}
         />
       ))}
-      {/* Desktop: one sharp cover layer, nothing stacked. */}
+      {/* Desktop: one sharp cover layer, nothing stacked, nothing masked. */}
       <Image
         key={src}
         src={src}
