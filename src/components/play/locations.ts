@@ -18,7 +18,17 @@ export type LocationId =
   | "cobalt-trading-floor-night"
   | "cobalt-cafe-lounge-sunset"
   | "cobalt-client-boardroom-sunset"
-  | "cobalt-elevator-hallway-sunset";
+  | "cobalt-elevator-hallway-sunset"
+  // The one genuinely bespoke scene in the handoff, not a reusable generic
+  // room: a clean plate of L1's reception with the ORIGINAL two-character
+  // slot layout from its own scene.json (christina left at 0.30/0.88,
+  // jordan right at 0.72/0.92). Everywhere else uses the six-location
+  // library; this exists because this exact background-plus-slots pair was
+  // supplied for this exact scene, so there is no reason to substitute a
+  // generic room for it.
+  | "l1-reception";
+
+type CharacterSlot = { x: number; baselineY: number; heightFrac: number; centered?: boolean };
 
 type LocationArt = {
   src: string;
@@ -31,7 +41,11 @@ type LocationArt = {
    *  behind the last chair, by the window -- not inside the seating, which
    *  the handoff's foreground-mask requirement exists to protect against and
    *  which no mask asset exists to occlude correctly yet. */
-  characterAnchor?: { x: number; baselineY: number; heightFrac: number };
+  characterAnchor?: CharacterSlot;
+  /** Two or more characters on screen together, in named story order (not by
+   *  screen position) -- used only where the handoff supplied an actual
+   *  multi-character slot layout (today, just l1-reception). */
+  characterAnchors?: CharacterSlot[];
 };
 
 const L = "/images/play/ib/locations";
@@ -42,7 +56,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
     focal: { x: 0.58, y: 0.43 },
     mobileFocal: { x: 0.57, y: 0.36 },
-    characterAnchor: { x: 0.74, baselineY: 0.98, heightFrac: 0.6 },
+    characterAnchor: { x: 0.74, baselineY: 1.05, heightFrac: 1.3 },
   },
   "cobalt-internal-boardroom-sunset": {
     src: `${L}/internal-boardroom-sunset.webp`,
@@ -53,35 +67,54 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // last chair. Small scale on purpose -- it reads as standing at the back
     // of the room, not seated in the furniture the mask would otherwise need
     // to occlude.
-    characterAnchor: { x: 0.91, baselineY: 0.85, heightFrac: 0.4 },
+    characterAnchor: { x: 0.91, baselineY: 1.02, heightFrac: 0.55, centered: false },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
     alt: "Cobalt Capital's trading floor at night, monitors lit against the city.",
     focal: { x: 0.58, y: 0.45 },
     mobileFocal: { x: 0.6, y: 0.37 },
-    characterAnchor: { x: 0.75, baselineY: 0.98, heightFrac: 0.58 },
+    characterAnchor: { x: 0.75, baselineY: 1.05, heightFrac: 1.3 },
   },
   "cobalt-cafe-lounge-sunset": {
     src: `${L}/cafe-lounge-sunset.webp`,
     alt: "A cafe lounge near the office, quiet seating at sunset.",
     focal: { x: 0.66, y: 0.42 },
     mobileFocal: { x: 0.69, y: 0.36 },
-    characterAnchor: { x: 0.76, baselineY: 0.9, heightFrac: 0.48 },
+    characterAnchor: { x: 0.76, baselineY: 1.05, heightFrac: 1.3 },
   },
   "cobalt-client-boardroom-sunset": {
     src: `${L}/client-boardroom-sunset.webp`,
     alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
     focal: { x: 0.62, y: 0.4 },
     mobileFocal: { x: 0.67, y: 0.35 },
-    characterAnchor: { x: 0.9, baselineY: 0.84, heightFrac: 0.38 },
+    characterAnchor: { x: 0.9, baselineY: 1.02, heightFrac: 0.53, centered: false },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
     alt: "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
     focal: { x: 0.55, y: 0.45 },
     mobileFocal: { x: 0.53, y: 0.4 },
-    characterAnchor: { x: 0.4, baselineY: 1, heightFrac: 0.66 },
+    characterAnchor: { x: 0.4, baselineY: 1.08, heightFrac: 1.35 },
+  },
+  "l1-reception": {
+    src: `${L}/reception.webp`,
+    alt: "Cobalt Capital's reception, trading floor and city skyline behind.",
+    // scene.json's own focal point for this exact plate.
+    focal: { x: 0.52, y: 0.42 },
+    mobileFocal: { x: 0.52, y: 0.34 },
+    // The original composite (l1-04.webp) crops them tight: hair to the top
+    // edge, standing close together, cropped off below the waist by the desk
+    // -- not full figures with headroom and floor showing. baselineY past 1
+    // and a heightFrac this large intentionally push the crop off both edges
+    // to match that framing with a thigh-length sprite.
+    characterAnchors: [
+      { x: 0.34, baselineY: 1.06, heightFrac: 1.05, centered: false },
+      { x: 0.66, baselineY: 1.06, heightFrac: 1.08, centered: false },
+    ],
+    // The single-character anchor used when only one of them is present
+    // (L1-15, Christina alone): her own slot, same tight crop.
+    characterAnchor: { x: 0.34, baselineY: 1.06, heightFrac: 1.05 },
   },
 };
 
@@ -103,10 +136,10 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
 // public working-floor moment -> trading floor, private transition -> hallway.
 export const BEAT_LOCATION: Record<string, LocationId> = {
   // Level 1 -- Intern
-  "L1-01": "cobalt-elevator-hallway-sunset",
-  "L1-02": "cobalt-elevator-hallway-sunset",
-  "L1-03": "cobalt-elevator-hallway-sunset",
-  "L1-04": "cobalt-elevator-hallway-sunset",
+  "L1-01": "l1-reception",
+  "L1-02": "l1-reception",
+  "L1-03": "l1-reception",
+  "L1-04": "l1-reception",
   "L1-05": "cobalt-cafe-lounge-sunset",
   "L1-06": "cobalt-cafe-lounge-sunset",
   "L1-07": "cobalt-trading-floor-sunset",
@@ -117,7 +150,7 @@ export const BEAT_LOCATION: Record<string, LocationId> = {
   "L1-12": "cobalt-trading-floor-sunset",
   "L1-13": "cobalt-trading-floor-night",
   "L1-14": "cobalt-trading-floor-night",
-  "L1-15": "cobalt-elevator-hallway-sunset",
+  "L1-15": "l1-reception",
 
   // Level 2 -- Analyst
   "L2-01": "cobalt-elevator-hallway-sunset",

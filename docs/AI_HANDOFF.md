@@ -40,6 +40,73 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: composition fixes found by comparing against the original art (PUSHED)
+
+- Playing every location beat against the actual original composites (the
+  user pulled up `l1-04.webp` directly) surfaced a real bug and a real
+  misread of composition, not just taste:
+  1. **Every character sprite's canvas was much wider/taller than its actual
+     content** -- `christina-welcoming`, for one, was on a 1448x1086 canvas
+     with the figure only in the left 55% of it (bbox 247,0-1040,1086).
+     Sizing by canvas height with `object-contain` put a huge transparent
+     margin into the box being centered, which is why two characters in one
+     scene overlapped and landed at visibly different scales even with
+     matching anchor math. Re-exported all eight sprites cropped to their
+     alpha bounding box (2% padding) -- every one of them had this problem,
+     not just Christina's.
+  2. **A genuine matting defect**: opaque off-white pixels trapped between
+     strands of curly hair on every sprite (christina-welcoming alone had
+     4,762 of them), left over from the source generation's background not
+     being fully removed. Not alpha-edge fringe -- interior, fully-opaque
+     pixels. Cleaned with a targeted pass: connected-component analysis finds
+     small bright islands whose surrounding ring is mostly dark hair, and
+     recolors them to the local median. Applied to all eight sprites.
+  3. **A real CSS bug, not a sizing choice**: a character's height was set as
+     a `%` of an absolutely-positioned ancestor two layers deep. Past 100%
+     this measured correctly via `getBoundingClientRect` but visibly PAINTED
+     as if the browser had ignored it -- a live discrepancy between layout
+     and paint confirmed by reading the DOM directly, not a screenshot
+     artifact. Switched to a `ResizeObserver`-measured pixel height, which
+     has no such ambiguity. This is almost certainly why earlier scale
+     attempts in this same session looked unchanged no matter the number
+     used -- percentages past 100% weren't taking effect at all.
+  4. **Composition, once the above were fixed**: the original crops
+     characters tight -- hair to the top edge, cropped off at the desk below
+     the waist, standing close together -- not full figures with headroom
+     above and floor below. Every location's character anchor is now sized
+     and positioned to match that framing, with the crop line pushed just
+     past the bottom of the frame everywhere so it is never visible sitting
+     out in the open (behind nothing, in the original photograph's terms).
+- The reception scene (`l1-reception` in `locations.ts`) now composes L1-01,
+  L1-04, and L1-15 the same way, using the exact two-person layout
+  (`characterAnchors`, positional by story order via a new `castMembers` on
+  `BeatBase`) supplied in the handoff's own `scene.json` for this exact plate
+  -- this is the one location that started from a genuine separated
+  background-plus-slots pair rather than a generic room.
+- **Removed all motion tied to the pointer or to an idle loop.** The location
+  parallax added earlier this session moved with the mouse, which read as
+  things moving for no reason on desktop and had nothing to trigger it on the
+  touch devices most players are on -- backgrounds and characters are static
+  now. The character's continuous idle bob was worse than static: two people
+  in one scene animating on independent unsynced loops drift in and out of
+  alignment with each other, which is what actually looked like a
+  positioning bug rather than "different scale." The one-time entrance
+  animation is the only motion a scene character has left.
+- **A character now shows big while their line is being read, and steps back
+  to the dialogue box's small portrait once the interactive controls are up**
+  -- tied directly to the same staged/revealed state that already governs
+  when a beat's controls appear (`BeatStage` now reports it up via
+  `onRevealChange`), not to the beat's kind. A card was always "revealed"
+  immediately, so this generalizes what already worked for cards to every
+  beat with a setup line to read.
+- Marcus and Lamisa's sprites from the v3 handoff went through the same
+  crop/cleanup/pixel-sizing pipeline as Christina and Jordan.
+- Also, per a direct question: reordered the dialogue panel's own text to a
+  title/subheading/body hierarchy -- what the speaker says is now the
+  biggest text on screen, ahead of the question, ahead of the answers, not
+  the other way around.
+- No copy changed; no token changes; contract files untouched.
+
 ### 2026-08-24 Play: v3 handoff (Marcus/Lamisa sprites) + interaction-screen fixes (PUSHED)
 
 - A third handoff drop (`Dreamari-IB-Claude-Production-Handoff-v3.zip`) mostly

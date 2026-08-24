@@ -83,7 +83,31 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // unillustrated beats feel like they happen in the same room.
   const scene = sceneFor(level, index, beat);
   const sceneHost = useRef<HTMLDivElement>(null);
-  const sceneOffset = useScenePointer(sceneHost);
+  const sceneOffset = useScenePointer();
+  // Character height is set in real pixels, not a CSS percentage: a
+  // percentage taller than 100% on an absolutely positioned element nested a
+  // couple of layers deep resolved inconsistently between what the browser
+  // reported for layout (correct) and what it actually painted (as if the
+  // percentage were invalid), which is a browser quirk, not a sizing choice
+  // -- pixels sidestep it entirely.
+  const [sceneHeight, setSceneHeight] = useState(0);
+  useEffect(() => {
+    const element = sceneHost.current;
+    if (!element) return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setSceneHeight(entry.contentRect.height);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  // Mirrors BeatStage's own staged/revealed state (see onRevealChange there).
+  // While the player is still reading the setup line, the big scene character
+  // is the one carrying the speaker; once the interactive controls are up, it
+  // steps aside for the dialogue box's small portrait, the same way it always
+  // has for cards -- a person standing over the answer options would compete
+  // with them, but a person standing next to the line they just said would not.
+  const [revealed, setRevealed] = useState(true);
 
   const resolve = useCallback<Resolve>(
     (tier, why, id) => {
@@ -202,24 +226,52 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       >
         {scene.mode === "none" ? (
           <AmbientBackdrop mood={mood} accent={accent} />
-        ) : (
+        ) : scene.mode === "hero" ? (
+          // The soft zoom is this mode's only motion: these 21 plates still
+          // have their characters baked in, so real parallax would drag a
+          // ghost of them out from behind their own cutout (see the note
+          // above). A location plate needs no such compensation -- it has
+          // its own pointer-tracked drift instead, below.
           <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
-            {scene.mode === "hero" ? (
-              <SceneLayers src={scene.src} alt={scene.alt} />
-            ) : (
-              <>
-                <LocationBackdrop src={scene.src} alt={scene.alt} focal={scene.focal} mobileFocal={scene.mobileFocal} offset={sceneOffset} />
-                {scene.characterAnchor && (
+            <SceneLayers src={scene.src} alt={scene.alt} />
+          </div>
+        ) : (
+          <div className="absolute inset-0">
+            <LocationBackdrop src={scene.src} alt={scene.alt} focal={scene.focal} mobileFocal={scene.mobileFocal} offset={sceneOffset} />
+            {/* A card or the review is never staged (see BeatStage's own
+               `stageable`), so it is always in its "revealed" state -- the
+               character shows for its whole beat, same as it always has. An
+               interactive beat IS staged: the character carries the speaker
+               while its setup line is being read, then steps aside the
+               moment the controls appear, handing the speaker off to the
+               dialogue box's small portrait so nothing stands over the
+               answers the player is actually working with. */}
+            {(beat.kind === "card" || beat.kind === "review" || !revealed) &&
+              (scene.characterAnchors && beat.castMembers ? (
+                // Two or more named people in one room, in story order -- the
+                // reception's Christina-left, Jordan-right layout from its own
+                // scene.json, not a rule that applies anywhere else yet.
+                beat.castMembers.map((name, i) => {
+                  const slot = scene.characterAnchors?.[i];
+                  return slot ? (
+                    <SceneCharacter key={name} speaker={name} anchor={slot} offset={sceneOffset} sceneHeight={sceneHeight} />
+                  ) : null;
+                })
+              ) : (
+                scene.characterAnchor && (
                   <SceneCharacter
                     speaker={beat.castMember ?? beat.speaker}
+                    // The same scale everywhere a location shows a
+                    // character, matching the proportion the original flat
+                    // illustrations used (close, nearly filling the frame) --
+                    // not shrunk to dodge the dialogue panel underneath it.
                     anchor={scene.characterAnchor}
                     tier={phase === "feedback" ? result?.tier : undefined}
                     offset={sceneOffset}
-                    spotlight={Boolean(beat.castMember)}
+                    sceneHeight={sceneHeight}
                   />
-                )}
-              </>
-            )}
+                )
+              ))}
           </div>
         )}
       </div>
@@ -300,6 +352,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           locked={locked}
           paused={phase !== "beat"}
           ambient={scene.mode === "none"}
+          onRevealChange={setRevealed}
           onResolve={resolve}
           onNext={advance}
         />
@@ -472,36 +525,16 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-/** Tracks pointer position over the scene as a -1..1 offset on each axis, for
- *  the location parallax below. Only these six plates get it: they are the
- *  genuinely clean, character-free rooms the earlier parallax attempt could
- *  never ship with -- the 21 hero illustrations still have their subjects
- *  baked into the same plate, so moving those layers independently drags a
- *  ghost of them out from behind their own cutout (see the note on the single
- *  soft-zoom scene wrapper). Disabled under reduced motion entirely. */
-function useScenePointer(host: React.RefObject<HTMLDivElement | null>) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const element = host.current;
-    if (!element) return;
-    const onMove = (event: PointerEvent) => {
-      const rect = element.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-      setOffset({ x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) });
-    };
-    const onLeave = () => setOffset({ x: 0, y: 0 });
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerleave", onLeave);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerleave", onLeave);
-    };
-  }, [host]);
-  return offset;
+/** Locations no longer drift with the pointer -- static was the right call:
+ *  it read as things moving on their own for no reason on desktop, and had
+ *  nothing to respond to on the touch devices most players are actually on.
+ *  The layer separation (room and character as independent images) stays; it
+ *  is what makes the scene compose correctly, not what made it move. */
+function useScenePointer() {
+  return ZERO_OFFSET;
 }
+
+const ZERO_OFFSET = { x: 0, y: 0 };
 
 /** A recurring Cobalt Capital location (see locations.ts), shown when the
  *  current beat has no hero illustration of its own. Unlike SceneLayers this
@@ -564,37 +597,43 @@ function SceneCharacter({
   anchor,
   tier,
   offset,
-  spotlight,
+  sceneHeight,
 }: {
   speaker?: string;
-  anchor: { x: number; baselineY: number; heightFrac: number };
+  anchor: { x: number; baselineY: number; heightFrac: number; centered?: boolean };
   /** Set only once the player has answered. Swaps the character's face to the
    *  Character Bible's tier reaction -- the same welcoming/concerned/proud and
    *  confident/focused/uncertain mapping the feedback card uses -- so the
    *  consequence lands somewhere big enough to actually see, not a 44px icon. */
   tier?: Tier;
   offset: { x: number; y: number };
-  /** True on a "character" card introducing this person -- centered and at
-   *  full height rather than parked to one side, since the whole point of the
-   *  beat is to look at them. */
-  spotlight?: boolean;
+  /** The scene container's real height in px (see the ResizeObserver at the
+   *  call site). `bottom`/`height` are set in px, not `%` -- a percentage
+   *  past 100% on this nested an absolutely positioned element measured
+   *  correctly via getBoundingClientRect but painted as though the browser
+   *  had silently ignored it, which pixels do not have any ambiguity about. */
+  sceneHeight: number;
 }) {
   const src = (tier && expressionFor(speaker, tier)) || defaultExpressionFor(speaker);
-  if (!src) return null;
-  // The character stays exactly where the room puts them and swaps face in
-  // place -- the room is the backdrop, the question is the point, and a
-  // character who leaps to center stage on every answer would make the
-  // moment about the performance rather than the explanation underneath it.
-  const x = spotlight ? 0.5 : anchor.x;
-  const heightFrac = spotlight ? Math.max(anchor.heightFrac, 0.7) : anchor.heightFrac;
+  if (!src || sceneHeight === 0) return null;
+  // Centered and filling the room is the norm -- whoever is speaking is the
+  // thing to look at, the same treatment Jordan's introduction got. The two
+  // boardrooms are the one exception: `centered: false` there keeps a
+  // character in the single strip of open floor by the window, since the
+  // rest of the room is furniture with no mask asset yet to occlude it.
+  const x = anchor.centered === false ? anchor.x : 0.5;
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute motion-safe:animate-[play-hover_5.2s_ease-in-out_infinite]"
+      // No idle bob: two characters sharing a scene, animating on independent
+      // unsynced loops, drift in and out of alignment with each other and
+      // read as a positioning bug rather than a subtle idle. The entrance
+      // animation plus pointer parallax is motion enough.
+      className="pointer-events-none absolute"
       style={{
         left: `${x * 100}%`,
-        bottom: `${(1 - anchor.baselineY) * 100}%`,
-        height: `${heightFrac * 100}%`,
+        bottom: `${(1 - anchor.baselineY) * sceneHeight}px`,
+        height: `${anchor.heightFrac * sceneHeight}px`,
         transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
       }}
     >
@@ -624,6 +663,8 @@ function SceneCharacter({
 // anything and an ambient backdrop takes over instead.
 const SCENE_FRESH_BEATS = 3;
 
+type CharSlot = { x: number; baselineY: number; heightFrac: number; centered?: boolean };
+
 type SceneCue =
   | { mode: "hero"; src: string; alt: string }
   | {
@@ -632,7 +673,8 @@ type SceneCue =
       alt: string;
       focal: { x: number; y: number };
       mobileFocal: { x: number; y: number };
-      characterAnchor?: { x: number; baselineY: number; heightFrac: number };
+      characterAnchor?: CharSlot;
+      characterAnchors?: CharSlot[];
     }
   | { mode: "none"; src: string; alt: string };
 
@@ -650,20 +692,14 @@ function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
   }
   const location = locationFor(beat.id);
   if (location) {
-    // The room is scenery either way, but a standing character is only
-    // appropriate on a beat the player is reading, not one they're actively
-    // working -- on a scored beat (any kind but a card or the review) a
-    // person standing over the options competes with the thing that actually
-    // matters. The room itself stays: an empty photograph is calmer than the
-    // same room with somebody planted in it, not a blank gradient.
-    const interactive = beat.kind !== "card" && beat.kind !== "review";
     return {
       mode: "location",
       src: location.src,
       alt: location.alt,
       focal: location.focal,
       mobileFocal: location.mobileFocal,
-      characterAnchor: interactive ? undefined : location.characterAnchor,
+      characterAnchor: location.characterAnchor,
+      characterAnchors: location.characterAnchors,
     };
   }
   return { mode: "none", src: level.cover, alt: "" };
@@ -682,6 +718,7 @@ function BeatStage({
   paused,
   hidden,
   ambient,
+  onRevealChange,
   onResolve,
   onNext,
 }: {
@@ -698,6 +735,10 @@ function BeatStage({
    *  picture -- Dreamy's floating cloud and name pill only earn their place
    *  here, since a beat WITH a scene already has someone in it to look at. */
   ambient?: boolean;
+  /** Reports the staged/revealed transition to the parent, which uses it to
+   *  decide whether the big scene character or the dialogue box's small
+   *  portrait carries the speaker right now (see the render site). */
+  onRevealChange?: (revealed: boolean) => void;
   onResolve: Resolve;
   onNext: () => void;
 }) {
@@ -716,6 +757,10 @@ function BeatStage({
     beat.kind !== "card" &&
     beat.kind !== "review";
   const [revealed, setRevealed] = useState(!stageable);
+  useEffect(() => {
+    onRevealChange?.(revealed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed]);
 
   const seconds = "timer" in beat && typeof beat.timer === "number" ? beat.timer : 0;
   const [remaining, setRemaining] = useState(seconds);
@@ -1013,9 +1058,13 @@ function DialogueBox({
                   {speaker}
                 </span>
               )}
-              <p className="m-0 text-[16px] leading-[24px] font-bold sm:text-[17px] sm:leading-[26px]" style={{ color: "var(--foreground)" }}>
+              {/* Title tier: what the speaker actually says is the biggest text
+                 on screen, ahead of the question and its answers -- title,
+                 subheading, body, in that order, rather than the question
+                 outsizing the line that gives it context. */}
+              <p className="m-0 text-[20px] leading-[1.25] font-extrabold sm:text-[23px]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
                 {visible}
-                {!done && <span className="ml-[2px] inline-block h-[16px] w-[7px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
+                {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>
             </span>
           </div>

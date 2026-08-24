@@ -157,9 +157,11 @@ function OptionButton({
 
 /** The HEADING of a beat. Has to stay clearly above the situation text, which
  *  is now bold itself. */
+// Subheading tier: what the speaker says (DialogueBox's own text) is the
+// title, sized above this; the answers below are body text, sized under it.
 function Question({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[21px] leading-[1.16] font-extrabold sm:text-[25px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <p className="text-[17px] leading-[1.25] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}
     </p>
   );

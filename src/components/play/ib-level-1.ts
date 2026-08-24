@@ -5,12 +5,15 @@ import type { Level } from "./types";
 // feedback, no em dashes, written for a 13 year old. Scores are the PRODUCTION
 // column, not the prototype's. Ten scored beats at 10% each.
 //
-// Art file names carry their beat id (IB L1-04 -> l1-04.webp). Four of the
-// twenty-one screens have art; the rest inherit the last scene, which is why
-// `art` is sticky in the player.
+// Art file names carry their beat id (IB L1-04 -> l1-04.webp). Three of the
+// twenty-one screens still have their own hero illustration; the rest either
+// inherit the last one (sticky, see SCENE_FRESH_BEATS in SimulationPlayer)
+// or resolve a Cobalt Capital location instead (locations.ts). L1-01, L1-04
+// and L1-15 dropped their shared l1-04.webp in favor of the reception scene
+// supplied with a genuine separated background and character slots -- see
+// "l1-reception" in locations.ts.
 //
 // Known gaps from the sheet, deliberately left as the sheet has them:
-// - L1-11 Jordan has no portrait yet (decision D12).
 // - Feedback for the rapid-fire set is the sheet's own copy.
 
 const ART = "/images/play/ib";
@@ -32,8 +35,7 @@ export const IB_LEVEL_1: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-01",
-      art: `${ART}/l1-04.webp`,
-      artAlt: "Christina welcoming you at Cobalt Capital reception, Jordan beside you, trading floor behind.",
+      castMembers: ["Christina", "Jordan"],
       speaker: "Dreamy",
       pose: "happy",
       setup: "Intern • Week 1",
@@ -70,8 +72,6 @@ export const IB_LEVEL_1: Level = {
       layout: "options",
       id: "L1-04",
       progress: 0.1,
-      art: `${ART}/l1-04.webp`,
-      artAlt: "Christina in a navy blazer gesturing welcome at reception, Jordan beside her with a shoulder bag.",
       speaker: "Narrator",
       pose: "happy",
       setup: "Christina welcomes you to Cobalt Capital. Jordan, another Intern, is starting too.",
@@ -356,8 +356,7 @@ export const IB_LEVEL_1: Level = {
       kind: "card",
       variant: "chapter",
       id: "L1-15",
-      art: `${ART}/l1-04.webp`,
-      artAlt: "Christina holding a notebook, speaking to you over your shoulder, trading floor behind.",
+      castMember: "Christina",
       speaker: "Christina",
       setup: '"You stood out. You came in early, worked late, and made careful decisions under pressure."',
       title: "Your internship is complete.",

@@ -58,6 +58,10 @@ type BeatBase = {
    *  who is talking -- a "character" card is narrated by Dreamy but ABOUT the
    *  person it introduces, so the scene needs their name, not the narrator's. */
   castMember?: string;
+  /** Two or more people on screen together (the reception's Christina and
+   *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
+   *  only usable on a location with `characterAnchors` for that many people. */
+  castMembers?: string[];
   setup?: string;
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
    *  beats, so narrative cards never move it. */
