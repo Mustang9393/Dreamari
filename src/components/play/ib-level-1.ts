@@ -267,6 +267,7 @@ export const IB_LEVEL_1: Level = {
       layout: "options",
       id: "L1-12",
       progress: 0.8,
+      showdown: { opponent: "Jordan" },
       art: `${ART}/l1-12.webp`,
       artAlt: "Jordan presenting a spreadsheet on a monitor to a seated manager, your coffee mug in the foreground.",
       speaker: "Narrator",

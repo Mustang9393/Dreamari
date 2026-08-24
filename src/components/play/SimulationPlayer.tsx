@@ -237,7 +237,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           </div>
         ) : (
           <div className="absolute inset-0">
-            <LocationBackdrop src={scene.src} alt={scene.alt} focal={scene.focal} mobileFocal={scene.mobileFocal} offset={sceneOffset} />
+            <LocationBackdrop
+              src={scene.src}
+              alt={scene.alt}
+              focal={scene.focal}
+              mobileFocal={scene.mobileFocal}
+              offset={sceneOffset}
+              dimmed={beat.kind === "card" || beat.kind === "review" || !revealed}
+            />
             {/* A card or the review is never staged (see BeatStage's own
                `stageable`), so it is always in its "revealed" state -- the
                character shows for its whole beat, same as it always has. An
@@ -549,13 +556,20 @@ function LocationBackdrop({
   focal,
   mobileFocal,
   offset,
+  dimmed,
 }: {
   src: string;
   alt: string;
   focal: { x: number; y: number };
   mobileFocal: { x: number; y: number };
   offset: { x: number; y: number };
+  /** Ace Attorney frames a speaking character against a soft, simple
+   *  backdrop, not a room competing for attention -- true while a character
+   *  is on screen to be looked at (a card, or a beat still being read), false
+   *  once the interactive controls are up and the room itself is the focus. */
+  dimmed?: boolean;
 }) {
+  const filter = dimmed ? "blur(3px) brightness(0.78)" : undefined;
   return (
     <>
       <Image
@@ -564,8 +578,8 @@ function LocationBackdrop({
         fill
         priority
         sizes="100vw"
-        className="object-cover sm:hidden"
-        style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%` }}
+        className="object-cover transition-[filter] duration-500 sm:hidden"
+        style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%`, filter }}
       />
       <Image
         src={src}
@@ -573,10 +587,11 @@ function LocationBackdrop({
         fill
         priority
         sizes="100vw"
-        className="hidden object-cover motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
+        className="hidden object-cover transition-[filter] duration-500 motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
         style={{
           objectPosition: `${focal.x * 100}% ${focal.y * 100}%`,
           transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(1.03)`,
+          filter,
         }}
       />
     </>
@@ -757,6 +772,10 @@ function BeatStage({
     beat.kind !== "card" &&
     beat.kind !== "review";
   const [revealed, setRevealed] = useState(!stageable);
+  // One-time "VS" card for the game's few head-to-head beats -- shown once
+  // per beat (this component remounts fresh per beat.id already), dismissed
+  // the same way the dialogue box itself advances.
+  const [showdownSeen, setShowdownSeen] = useState(!beat.showdown);
   useEffect(() => {
     onRevealChange?.(revealed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -796,6 +815,9 @@ function BeatStage({
   // caption under a picture, now that the picture behind it is a real room
   // rather than something cropped to leave the bottom third free for it.
   const interactive = beat.kind !== "card" && beat.kind !== "review";
+  if (beat.showdown && !showdownSeen) {
+    return <ShowdownCard opponent={beat.showdown.opponent} accent={accent} onDismiss={() => setShowdownSeen(true)} />;
+  }
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
@@ -911,6 +933,76 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
  *  moves most against the scene; idles with a slow float; the pose comes from
  *  the beat rather than being one permanent face. Sits on the RIGHT so it never
  *  collides with the speaker plate on the left. */
+/** Ace Attorney's Cross-Examination transition, repurposed for the game's few
+ *  genuine head-to-head beats: a full-screen split card announcing "this is
+ *  now a confrontation" before the beat itself loads, rather than every
+ *  scored question getting the same weight. Invents no story text -- just
+ *  the two names -- so it never collides with "don't change copy". Dismisses
+ *  on tap, click, or the same keys that already advance dialogue. */
+function ShowdownCard({ opponent, accent, onDismiss }: { opponent: string; accent: string; onDismiss: () => void }) {
+  const portrait = defaultExpressionFor(opponent);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " " || event.key === "ArrowRight") {
+        event.preventDefault();
+        onDismiss();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onDismiss}
+      className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center overflow-hidden motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+      style={{ background: "#05070f" }}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[58%]"
+        style={{ background: "color-mix(in srgb, var(--foreground) 10%, #05070f)", clipPath: "polygon(0 0, 100% 0, 82% 100%, 0 100%)" }}
+      />
+      <span
+        aria-hidden
+        className="absolute inset-y-0 right-0 w-[58%]"
+        style={{ background: `color-mix(in srgb, ${accent} 38%, #05070f)`, clipPath: "polygon(28% 0, 100% 0, 100% 100%, 0 100%)" }}
+      />
+      <div className="relative z-10 flex w-full max-w-[560px] items-center justify-between px-[28px]">
+        <span className="text-[26px] font-extrabold tracking-[0.04em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          You
+        </span>
+        <span
+          className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full border-2 text-[13px] font-extrabold"
+          style={{ borderColor: accent, color: accent, background: "#05070f" }}
+        >
+          VS
+        </span>
+        <span className="flex flex-col items-end gap-[10px]">
+          {portrait && (
+            <Image
+              src={portrait}
+              alt=""
+              aria-hidden
+              width={200}
+              height={200}
+              className="h-[92px] w-[92px] rounded-[16px] border-2 object-cover object-top"
+              style={{ borderColor: accent }}
+            />
+          )}
+          <span className="text-[26px] font-extrabold tracking-[0.04em] uppercase" style={{ fontFamily: "var(--font-display)", color: accent }}>
+            {opponent}
+          </span>
+        </span>
+      </div>
+      <span className="absolute bottom-[36px] text-[12px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        Tap to continue
+      </span>
+    </div>
+  );
+}
+
 function Dreamy({ pose }: { pose: DreamyPose }) {
   return (
     <div

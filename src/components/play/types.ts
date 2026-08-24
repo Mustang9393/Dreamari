@@ -62,6 +62,12 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** Plays a one-time "VS" split-card before this beat -- Ace Attorney's
+   *  Cross-Examination transition, repurposed for the game's few genuine
+   *  head-to-head moments (a rivalry beat, a senior assessment) rather than
+   *  every scored question. Names who the player is up against; the card
+   *  supplies no new story text of its own. */
+  showdown?: { opponent: string };
   setup?: string;
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
    *  beats, so narrative cards never move it. */

@@ -40,6 +40,35 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: Ace Attorney references -- a showdown card and softer dialogue backdrops (PUSHED)
+
+- The user shared Ace Attorney and Disco Elysium reference screenshots. Two
+  ideas came out of it, both implemented:
+  1. **A one-time "VS" split card** (`ShowdownCard` in SimulationPlayer.tsx),
+     directly modeled on Ace Attorney's Cross-Examination transition --
+     announces a genuine head-to-head moment before it starts, rather than
+     every scored beat carrying the same weight. New `showdown?: { opponent }`
+     on `BeatBase` (types.ts); set on the three beats that are actually
+     confrontational: L1-12 and L2-18 (Jordan's rivalry), L2-21 (Marcus's
+     assessment). Invents no story text -- just the two names on screen -- so
+     it doesn't touch copy. Dismisses on tap/click/Enter, same as the rest of
+     the dialogue system.
+  2. **The location background now blurs and dims while a character is on
+     screen to be read** (a card, or a beat still in its staged/setup
+     reading), and returns to full sharpness the moment the interactive
+     controls appear. Matches Ace Attorney's own convention -- a character is
+     framed against a soft, simple backdrop, not a fully-detailed room
+     competing with them for attention -- while keeping the earlier decision
+     that an interactive beat's room stays crisp, since that's the one moment
+     the environment itself is the thing to read.
+  - Also corrected a mischaracterization from earlier in the session: the six
+    Cobalt Capital location plates were being called "photographic" as the
+    reason to keep character compositing conservative. The user corrected
+    this -- they are anime-generated too. Noted for anyone continuing this:
+    the earlier "sticker on a photo" caution doesn't actually apply; it just
+    happened to land on reasonable defaults anyway.
+- No token changes; contract files untouched.
+
 ### 2026-08-24 Build flow: single-state location, Zip + travel distance; Play landing crop fix (PUSHED)
 
 - Unrelated to the Play simulation work above — this is the onboarding
