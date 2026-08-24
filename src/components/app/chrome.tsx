@@ -53,6 +53,7 @@ const QUICK_LINKS = [
   { label: "Explore", href: "/explore" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
+  { label: "Play", href: "/play" },
   { label: "My Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
   { label: "Connect", href: "/connect" },

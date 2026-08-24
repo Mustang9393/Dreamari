@@ -40,6 +40,48 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: level-navigation bug, ambient backdrop, light mode, nav link (PUSHED)
+
+- **Bug: `SimulationPlayer` never remounted between levels.** `/play/[game]`
+  is one route; clicking "Start Level 3" only changes the `?level=` query, so
+  Next.js reused the same component instance rather than mounting a fresh one.
+  Its internal `phase`/`run`/`result` state (still "ending", still the OLD
+  level's reputation) survived into the new level and rendered as THAT level's
+  own ending card on a run that was never played -- what looked like "the
+  images are out of order" and "I can't get to the next level" was one root
+  cause: stale state, not art or routing. Fixed with `key={level.id}` on the
+  component in `src/app/play/[game]/page.tsx`. Confirmed the whole ladder end
+  to end afterward: Intern ending -> Analyst offer card -> Associate.
+- **Ambient backdrop for stale scenes.** Art is sticky by design (a beat
+  without its own picture keeps the last one, so unillustrated beats read as
+  the same room) but every level runs long unillustrated tails -- the final
+  review sequence, a stretch of pure interaction beats -- where the sticky
+  image was doing nothing but sitting there. Beyond `SCENE_FRESH_BEATS` (3)
+  beats since the picture's own beat, the scene swaps to `AmbientBackdrop`: three
+  independently drifting colour fields plus a fixed (not `Math.random()`, so
+  hydration never mismatches) sparkle field, tinted by the level's mood and
+  world accent. Dreamy's floating cloud and its "DREAMY" name pill now show
+  ONLY in that ambient state -- when a real scene is on screen there is already
+  someone in it to look at, so the mascot stayed out of the way; when the
+  screen goes ambient, Dreamy is the only thing telling the player who's
+  talking. Threshold tuned against the sheet: covers the long narrative closers
+  every level ends on without cutting into an onboarding card's own 2-3 beat
+  run showing the same picture.
+- **Play was unreadable in light mode.** Its hub used the same starfield image
+  every hero-style app surface uses (`/images/app/background-space.svg`) but
+  was missing the `data-space-backdrop` attribute the marketing tokens contract
+  already keys light mode off of (`html.light .marketing-v2.themeable
+  [data-space-backdrop] { display: none }` -- see `marketing/tokens.css`).
+  Without it the dark starfield painted over the light gradient regardless of
+  theme. One attribute; matches Home/Explore/Colleges/Profile/ReportChooser
+  exactly. The in-game screens (dialogue box, cards, HUD) were already
+  correctly theme-aware through the same `--background`/`--foreground` tokens
+  -- confirmed a full level in light mode reads fine.
+- **Play was missing from the hamburger menu's quick links.** `QUICK_LINKS` in
+  `src/components/app/chrome.tsx` never had an entry for it, even though it is
+  one of the four bottom-nav destinations. Added, ordered next to Match.
+- No token changes; contract files untouched.
+
 ### 2026-08-24 Play: Level 3, drag ranking, keyboard play, scene fixes (PUSHED)
 
 - **Level 3 (Associate) is built** -- `src/components/play/ib-level-3.ts`, so all

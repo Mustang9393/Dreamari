@@ -589,6 +589,26 @@ body {
    blinks its advance marker. */
 /* The resume notice: rises, holds for ten seconds, then retires itself.
    Done in CSS so no timer or state has to exist for it. */
+/* The ambient backdrop that stands in once a scene's picture has gone stale:
+   three soft colour fields drifting independently so it never looks like it is
+   orbiting, plus a slow sparkle twinkle. */
+@keyframes play-ambient-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 8%) scale(1.08); }
+}
+@keyframes play-ambient-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-8%, 6%) scale(1.1); }
+}
+@keyframes play-ambient-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5%, -10%) scale(1.05); }
+}
+@keyframes play-ambient-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.85; }
+}
+
 @keyframes play-notice {
   0% {
     opacity: 0;

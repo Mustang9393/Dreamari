@@ -27,7 +27,7 @@ import {
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { mutedSnapshot, playSelect, playSweep, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, bandFor, clamp, endingFor } from "./scoring";
-import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Simulation, type Tier } from "./types";
+import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Mood, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
@@ -191,10 +191,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
          cloning) erased them cleanly enough to ship. A soft push is the effect
          that survives that honestly. If character-free plates ever arrive from
          the artist, real parallax is a small change. */}
-      <div aria-hidden={!scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none">
-        <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
-          <SceneLayers src={scene.src} alt={scene.alt} />
-        </div>
+      <div aria-hidden={!scene.fresh || !scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none">
+        {scene.fresh ? (
+          <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
+            <SceneLayers src={scene.src} alt={scene.alt} />
+          </div>
+        ) : (
+          <AmbientBackdrop mood={mood} accent={accent} />
+        )}
       </div>
 
       <div
@@ -272,6 +276,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           reputation={reputation}
           locked={locked}
           paused={phase !== "beat"}
+          ambient={!scene.fresh}
           onResolve={resolve}
           onNext={advance}
         />
@@ -346,6 +351,55 @@ function fadeMask(stop: number, full: number): string {
   return `linear-gradient(to bottom, transparent ${a}%, #000 ${b}%, #000 ${(100 - Number(b)).toFixed(1)}%, transparent ${(100 - Number(a)).toFixed(1)}%)`;
 }
 
+// Deterministic sparkle field: fixed coordinates, not Math.random(), so the
+// server and client render the same markup and hydration never mismatches.
+const AMBIENT_SPARKS = [
+  { x: 12, y: 20, delay: 0 },
+  { x: 82, y: 14, delay: 1.1 },
+  { x: 66, y: 64, delay: 2.3 },
+  { x: 24, y: 72, delay: 0.6 },
+  { x: 90, y: 46, delay: 1.7 },
+  { x: 44, y: 32, delay: 2.9 },
+  { x: 58, y: 84, delay: 1.4 },
+] as const;
+
+const AMBIENT_MOOD_WASH: Record<Mood, [string, string]> = {
+  day: ["#3452e6", "#7c5cff"],
+  night: ["#1c3f9e", "#4b3ba8"],
+  crunch: ["#a8123a", "#7a1650"],
+};
+
+/** Stands in for a scene once its picture has gone stale (see SCENE_FRESH_BEATS):
+ *  slow drifting colour, not a still frame with nothing left to say. Dreamy's
+ *  cloud floats over this, which is the one place it still earns a name pill --
+ *  there is no one else in the room to look at. */
+function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
+  const [a, b] = AMBIENT_MOOD_WASH[mood];
+  return (
+    <div aria-hidden className="absolute inset-0 overflow-hidden" style={{ background: "var(--background)" }}>
+      <span
+        className="absolute -top-[15%] -left-[10%] h-[65%] w-[65%] rounded-full opacity-60 motion-safe:animate-[play-ambient-drift-a_18s_ease-in-out_infinite]"
+        style={{ background: a, filter: "blur(70px)" }}
+      />
+      <span
+        className="absolute top-[10%] -right-[15%] h-[55%] w-[55%] rounded-full opacity-50 motion-safe:animate-[play-ambient-drift-b_22s_ease-in-out_infinite]"
+        style={{ background: b, filter: "blur(80px)" }}
+      />
+      <span
+        className="absolute -bottom-[20%] left-[20%] h-[60%] w-[60%] rounded-full opacity-40 motion-safe:animate-[play-ambient-drift-c_26s_ease-in-out_infinite]"
+        style={{ background: accent, filter: "blur(90px)" }}
+      />
+      {AMBIENT_SPARKS.map((spark, index) => (
+        <span
+          key={index}
+          className="absolute h-[3px] w-[3px] rounded-full bg-white motion-safe:animate-[play-ambient-twinkle_3.6s_ease-in-out_infinite]"
+          style={{ left: `${spark.x}%`, top: `${spark.y}%`, animationDelay: `${spark.delay}s` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function SceneLayers({ src, alt }: { src: string; alt: string }) {
   const ratio = ART_RATIO[src] ?? 16 / 9;
   return (
@@ -396,12 +450,21 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
 }
 
 /** Walks back from the current beat to the last one that carried art. */
-function sceneFor(level: Level, index: number): { src: string; alt: string } {
+// How many beats an image is allowed to outlive the beat that owns it before
+// it reads as stale rather than "the same room". Tuned against the sheet: it
+// covers a card explaining itself over 2-3 follow-up questions (the onboarding
+// steps, a beat immediately followed by its own question) without covering the
+// long unillustrated tails every level ends on (a run of narrative cards into
+// the final review), which is exactly where a still image stops adding
+// anything and an ambient backdrop takes over instead.
+const SCENE_FRESH_BEATS = 3;
+
+function sceneFor(level: Level, index: number): { src: string; alt: string; fresh: boolean } {
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
-    if (candidate.art) return { src: candidate.art, alt: candidate.artAlt ?? "" };
+    if (candidate.art) return { src: candidate.art, alt: candidate.artAlt ?? "", fresh: index - i <= SCENE_FRESH_BEATS };
   }
-  return { src: level.cover, alt: "" };
+  return { src: level.cover, alt: "", fresh: false };
 }
 
 /** The stage for one beat, mounted fresh per beat. It owns the shared
@@ -416,6 +479,7 @@ function BeatStage({
   locked,
   paused,
   hidden,
+  ambient,
   onResolve,
   onNext,
 }: {
@@ -428,6 +492,10 @@ function BeatStage({
   /** True while the verdict card is up: the stage steps back rather than
    *  showing half a question behind it. */
   hidden?: boolean;
+  /** True when the scene behind this beat is the ambient backdrop, not a real
+   *  picture -- Dreamy's floating cloud and name pill only earn their place
+   *  here, since a beat WITH a scene already has someone in it to look at. */
+  ambient?: boolean;
   onResolve: Resolve;
   onNext: () => void;
 }) {
@@ -487,9 +555,9 @@ function BeatStage({
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
         <div className="relative flex w-full max-w-[620px] flex-col">
-          {narrated && <Dreamy pose={beat.pose ?? "happy"} />}
+          {narrated && ambient && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} onAdvance={() => setRevealed(true)}>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
@@ -502,6 +570,7 @@ function BeatStage({
               held={!revealed}
               onAdvance={() => setRevealed(true)}
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
+              ambient={ambient}
             >
               <BeatBody beat={beat} reputation={reputation} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
@@ -621,6 +690,7 @@ function DialogueBox({
   tone,
   gold,
   held,
+  ambient,
   onPrimary,
   onAdvance,
   children,
@@ -634,6 +704,11 @@ function DialogueBox({
   gold?: boolean;
   /** true while the player is still reading: the question stays hidden. */
   held?: boolean;
+  /** True when there is no scene behind this box. A speaker WITH a portrait
+   *  already reads as someone in the room; Dreamy has none, so its name pill
+   *  is the only thing telling a player who is talking, and only earns its
+   *  place when there is no picture doing that job instead. */
+  ambient?: boolean;
   /** The beat's single action, for beats with no question to reveal. */
   onPrimary?: () => void;
   onAdvance?: () => void;
@@ -696,7 +771,7 @@ function DialogueBox({
       {/* A speaker with a portrait gets a Nintendo-style row inside the box
          instead of a floating name tag, so the line reads as something a person
          in the scene said rather than as narration about them. */}
-      {speaker && !portrait && (
+      {speaker && !portrait && ambient && (
         <span
           className="absolute -top-[13px] left-[14px] z-10 rounded-full px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}

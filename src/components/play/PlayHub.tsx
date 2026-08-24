@@ -47,7 +47,7 @@ export function PlayHub() {
       }}
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img alt="" src="/images/app/background-space.svg" className="absolute inset-0 h-full w-full max-w-none object-cover" />
+        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       </div>
 
       <DesktopNavigation active="Play" />
