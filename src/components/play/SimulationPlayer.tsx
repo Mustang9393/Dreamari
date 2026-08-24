@@ -986,7 +986,20 @@ function BeatStage({
         {/* Dreamy is positioned OVER the box's top edge rather than stacked
            above it. In the flow it claimed its own ~84px row on a phone, which
            is the black gap that opened up between the art and the question. */}
-        <div className={`relative flex w-full flex-col ${interactive ? "max-w-[720px]" : "max-w-[620px]"}`}>
+        <div
+          className={`relative flex w-full flex-col ${interactive ? "max-w-[720px]" : "max-w-[620px]"} ${
+            // Lifted off the very bottom edge on a plain dialogue/card beat --
+            // it used to sit flush against it with only its own small padding,
+            // reading as pinned to the floor rather than a deliberately placed
+            // caption. A vh-based margin (not a fixed px one) so the lift
+            // scales with the viewport instead of reading as a rounding error
+            // on a short phone and invisible on a tall one. Safe to lift here:
+            // the character's own art ends right around the true bottom edge
+            // (see locations.ts' baselineY), so the strip this uncovers is
+            // either more of the character or plain floor, never a hard seam.
+            centered ? "" : "mb-[3dvh] sm:mb-[4dvh]"
+          }`}
+        >
           {narrated && ambient && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} onAdvance={() => setRevealed(true)}>
