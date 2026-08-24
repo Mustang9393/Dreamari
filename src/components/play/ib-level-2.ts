@@ -23,10 +23,12 @@ import type { Level } from "./types";
 // L2-09, L2-10 and L2-19 each shipped, at one point, with their own hero art
 // that read "LOUIS VUITTON" outright (a real trademark, and a contradiction
 // of the story's own fictional client, Maison Laurent) -- the same defect
-// hit L3-19 and L3-20. All five have had their `art`/`artAlt` removed rather
-// than patched; each falls through to its own location instead. Do not
-// re-add art for any of these five beats without confirming the replacement
-// doesn't repeat the same mistake.
+// hit L3-19 and L3-20. L2-10 and L2-19 have since been recomposed with the
+// branding removed (see their own beat comments). L2-09 has NOT been
+// corrected -- it currently runs the raw handoff art with the real
+// branding still in it, deliberately, as a temporary placeholder on the
+// pre-launch internal deployment (D08/D09 remain open). Swap it for
+// corrected art before any public release.
 
 const ART = "/images/play/ib";
 
@@ -146,14 +148,15 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "chapter",
       id: "L2-09",
-      // Marcus's own portrait card (L2-08) is his moment -- a chapter
-      // transition into a new episode is not the place for it to keep
-      // lingering, and L2-10 right after needs to reach ITS OWN scene
-      // (Christina) rather than inheriting his.
+      // TEMPORARY PLACEHOLDER: raw handoff art, real Louis Vuitton branding
+      // baked in (see D08/D09 in this file's header comment). Live on the
+      // pre-launch internal deployment ONLY, per explicit instruction --
+      // swap for the corrected Maison Laurent art before any public
+      // release and remove this note (resetScene kept so removing `art`
+      // again falls back cleanly).
       resetScene: true,
-      // The original art was Christina handing over the deal binder --
-      // she carries this beat even with that specific image gone.
-      castMember: "Christina",
+      art: `${ART}/l2-09.webp`,
+      artAlt: "Christina handing over a deal binder, Jordan at a monitor behind her.",
       speaker: "Narrator",
       pose: "alert",
       setup: "Next episode · Level 2",
