@@ -601,20 +601,20 @@ function Top3Tab({
         ];
         return (
           <div key={id} className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", background: isFocus ? "color-mix(in srgb, var(--primary) 8%, var(--glass-surface-1))" : "var(--glass-surface-1)" }}>
-            {/* Identity and actions are on separate lines — sharing one row
-               left the badge and overflow menu as flex-none siblings that
-               could eat most of a narrow phone's width, forcing the title
-               into a near-vertical letter stack. Stacking removes the
-               competition entirely, at any width. */}
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+            {/* Identity and actions stack on a narrow phone (sharing one row
+               there left the badge and overflow menu as flex-none siblings
+               crushing the title into a near-vertical letter stack) but sit
+               side by side from sm: up, where there's room and stacking just
+               leaves dead space between two half-height rows. */}
+            <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-[var(--space-3)] sm:flex-1">
                 <span className="flex size-[30px] flex-none items-center justify-center rounded-full text-[14px] font-extrabold" style={{ background: "var(--glass-surface-3)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
                 <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]">
                   <Image src={career.photo} alt="" fill sizes="52px" className="object-cover" />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
                   <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>Career</span>
-                  <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                  <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
               </div>
               <div className="relative flex flex-none items-center justify-end gap-[6px]">
@@ -777,10 +777,7 @@ function OverviewTab({
             <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="flex flex-col gap-[6px]">
-            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{top3Count} of 3 careers chosen</span>
-            <span className="text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>View Top Three</span>
-          </span>
+          <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
         <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
@@ -789,7 +786,7 @@ function OverviewTab({
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{progress.complete} of {progress.total} steps done</span>
+            <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{progress.complete} of {progress.total} steps done</span>
             <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
             </span>
@@ -801,10 +798,7 @@ function OverviewTab({
             <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="flex flex-col gap-[6px]">
-            <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{REPORT_SECTIONS.length} sections ready</span>
-            <span className="text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>View Career Report</span>
-          </span>
+          <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{REPORT_SECTIONS.length} sections ready</span>
         </button>
       </section>
 
@@ -812,7 +806,7 @@ function OverviewTab({
       <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <span className="flex min-w-0 flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
-          <h3 id="next-title" className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 id="next-title" className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
             {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
           </h3>
         </span>
@@ -823,21 +817,6 @@ function OverviewTab({
         ) : (
           <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
         )}
-      </section>
-
-      {/* Overall plan progress — its own plain section, not nested inside
-          "Do this next" (that box is for the single next action only). */}
-      <section aria-labelledby="progress-title" className="flex flex-col gap-[7px] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
-        <span className="flex items-baseline justify-between gap-[var(--space-2)]">
-          <span id="progress-title" className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Overall plan progress</span>
-          <button type="button" onClick={onGoPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-            My plan <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </button>
-        </span>
-        <span className="text-[14px] font-bold">{progress.complete} of {progress.total} steps done</span>
-        <span className="relative h-[7px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-          <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
-        </span>
       </section>
 
       {/* Coming up — the same reminders My Plan shows, surfaced here too so a
