@@ -40,6 +40,41 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Build flow: single-state location, Zip + travel distance; Play landing crop fix (PUSHED)
+
+- Unrelated to the Play simulation work above — this is the onboarding
+  "Build" flow (src/components/build/) and the marketing landing page's
+  Play chapter, both untouched by anything else in this log.
+- LocationStep: was up to 3 states (map chips + 3 dropdown slots),
+  changed to exactly 1 per direct request. BuildState.states: string[]
+  -> BuildState.state: string (confirmed nothing else in the codebase
+  consumed the old field before renaming). Tapping a state replaces the
+  current pick; tapping the same one clears it. List view collapsed to
+  one dropdown.
+- Profile Basics: added Zip Code (digits-only, 5 char cap) and "How far
+  would you go for school?" (Within 25/50/100 miles, or anywhere in the
+  preferred state) — TRAVEL_DISTANCE_OPTIONS in types.ts, same SelectField
+  pattern as Grade/GPA. Neither is required to finish.
+- marketing/chapters/Play.tsx: the demo card's image (sim-deal-kickoff.jpg)
+  used object-position "center 35%", which at this panel's REAL rendered
+  aspect ratio (measured live: 493x174px, ~2.8:1 — much wider/shorter than
+  the source photo's 4:3) cropped Marcus's head off entirely above the
+  frame. Moved to "center 8%" (verified both against the live DOM
+  bounding box and an isolated same-dimension test harness) — both
+  characters' heads now clear, plus the "DEAL TEAM KICKOFF" screen stays
+  in frame.
+- Validation: same isolated-worktree pattern as prior pushes in this log
+  (real `npm install`, not a symlink) since other local work kept landing
+  on `main` mid-session — tsc/eslint/tokens:check/`next build` all clean,
+  re-checked against HEAD as it moved twice more. Verified live: clicked
+  through the full Build flow (single-state pick/replace/clear in both
+  Map and List views, zip sanitization, travel-distance dropdown, Finish
+  reached with no errors); Play crop fix confirmed via computed
+  `object-position` on the live image element plus a pixel-matched
+  standalone reproduction (screenshots of the real landing page kept
+  rendering blank in this pane — a known scroll-reveal/stale-screenshot
+  gotcha noted elsewhere in this file, not a app bug).
+
 ### 2026-08-24 Play: composition fixes found by comparing against the original art (PUSHED)
 
 - Playing every location beat against the actual original composites (the
