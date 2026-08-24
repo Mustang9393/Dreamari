@@ -3,13 +3,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, Trophy, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { BossOverlay, CardBody, ChoiceBody, MatchBody, RapidBody, useTypewriter, type Resolve } from "./interactions";
+import {
+  BossOverlay,
+  BucketBody,
+  CardBody,
+  ChainBody,
+  ChoiceBody,
+  FlagsBody,
+  MatchBody,
+  PickBody,
+  RankBody,
+  RapidBody,
+  SliderBody,
+  useTypewriter,
+  type Resolve,
+} from "./interactions";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { mutedSnapshot, playSelect, playSweep, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
-import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, applyScore, bandFor, endingFor } from "./scoring";
+import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, bandFor, clamp, endingFor } from "./scoring";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
@@ -30,16 +44,28 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, level.n);
   const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
   const base = resumable
-    ? { index: resumable.index, reputation: resumable.reputation, scored: resumable.scored }
-    : { index: 0, reputation: START_REPUTATION, scored: 0 };
+    ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
+    : { index: 0, scores: {} as Record<string, Tier> };
 
   /** null until the player does something; then it owns the run. */
-  const [run, setRun] = useState<{ index: number; reputation: number; scored: number } | null>(null);
+  const [run, setRun] = useState<{ index: number; scores: Record<string, Tier> } | null>(null);
   const live = run ?? base;
-  const { index, reputation, scored } = live;
+  const index = live.index;
+  // Reputation is DERIVED from the per-beat outcomes rather than carried as a
+  // running total. That is what makes a repair round possible: correcting a beat
+  // overwrites its entry and the total simply follows.
+  const reputation = clamp(START_REPUTATION + Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0));
+  const scored = Object.keys(live.scores).length;
+  const misses = Object.entries(live.scores)
+    .filter(([, tier]) => tier === "wrong" || tier === "risky")
+    .map(([id]) => id);
   const patchRun = (change: Partial<typeof base>) => setRun((current) => ({ ...(current ?? base), ...change }));
   // Showing the resumed state exactly while the save is still what is on screen.
   const resumed = run === null && resumable !== null;
+
+  /** Ids still to be replayed in a repair round, or null when playing normally. */
+  const [repair, setRepair] = useState<string[] | null>(null);
+
 
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
@@ -61,19 +87,44 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // land, and longer on a miss so the revealed right answer is readable
       // before the explanation covers it.
       const hold = tier === "wrong" || tier === "risky" ? 1150 : 420;
+      // A repair can rescue a beat but never earn full marks for it: getting it
+      // right the first time has to stay worth more than fixing it later.
+      const banked: Tier = repair && (tier === "best" || tier === "acceptable") ? "acceptable" : tier;
+      // beat.id is in this callback's dependencies on purpose. Without it the
+      // memoised closure went stale and filed every score under whichever beat
+      // was on screen when the callback was first created -- so the repair round
+      // would have replayed the wrong beats. It is stable within a beat, so the
+      // countdown that depends on this callback does not restart mid-question.
+      const beatId = beat.id;
       window.setTimeout(() => {
-        patchRun({ reputation: applyScore(reputation, tier), scored: scored + 1 });
-        setResult({ tier, why, delta });
+        setRun((current) => {
+          const from = current ?? base;
+          return { ...from, scores: { ...from.scores, [beatId]: banked } };
+        });
+        setResult({ tier: banked, why, delta: TIER_SCORE[banked] });
         setPhase("feedback");
       }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locked, reputation, scored],
+    [locked, repair, beat.id],
   );
+
+  const reviewIndex = level.beats.findIndex((entry) => entry.kind === "review");
 
   const advance = useCallback(() => {
     setLocked(null);
     setResult(null);
+    if (repair) {
+      // Repair round: walk the queue of missed beats, then go straight to the
+      // review rather than replaying the whole level.
+      const [, ...rest] = repair;
+      const next = rest[0];
+      setRepair(rest);
+      setPhase("beat");
+      const to = next ? level.beats.findIndex((entry) => entry.id === next) : reviewIndex;
+      patchRun({ index: to >= 0 ? to : level.beats.length - 1 });
+      return;
+    }
     if (index + 1 >= level.beats.length) {
       // The run is over: an ending should never be resumed into.
       clearRun(simulation.id, level.n);
@@ -82,22 +133,38 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     }
     setPhase("beat");
     patchRun({ index: index + 1 });
-    saveRun({ gameId: simulation.id, level: level.n, index: index + 1, reputation, scored });
+    saveRun({ gameId: simulation.id, level: level.n, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, level.beats.length, level.n, simulation.id, reputation, scored]);
+  }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
 
   const restart = () => {
     // "Reputation resets to 50 and the level restarts from screen 1" -- the
     // rules tab. A fresh run must not inherit the old save.
     clearRun(simulation.id, level.n);
-    setRun({ index: 0, reputation: START_REPUTATION, scored: 0 });
+    setRun({ index: 0, scores: {} });
+    setRepair(null);
     setLocked(null);
     setResult(null);
     setPhase("beat");
   };
 
+  /** Replay only the beats that went wrong. */
+  const startRepair = () => {
+    if (!misses.length) return;
+    const queue = level.beats.filter((entry) => misses.includes(entry.id)).map((entry) => entry.id);
+    setRepair(queue);
+    setLocked(null);
+    setResult(null);
+    setPhase("beat");
+    const to = level.beats.findIndex((entry) => entry.id === queue[0]);
+    patchRun({ index: to });
+  };
+
   const band = bandFor(reputation);
   const ending = endingFor(level.endings, reputation);
+  // A beat can override the level's mood: Level 2 runs three screens in
+  // late-night navy and comes back, Level 3 has a maroon Crunch Time stretch.
+  const mood = beat.mood ?? level.mood;
 
   return (
     <div
@@ -144,6 +211,19 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         }}
       />
 
+      {mood !== "day" && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 transition-colors duration-700"
+          style={{
+            background:
+              mood === "crunch"
+                ? "linear-gradient(180deg, color-mix(in srgb, #4a0d1c 62%, transparent), color-mix(in srgb, #2a0710 78%, transparent))"
+                : "linear-gradient(180deg, color-mix(in srgb, #071033 58%, transparent), color-mix(in srgb, #04081f 76%, transparent))",
+          }}
+        />
+      )}
+
       <Hud
         simulation={simulation}
         level={level}
@@ -156,7 +236,16 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {phase === "ending" ? (
         <div className="relative z-10 order-3 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:order-none sm:px-5 sm:pb-5">
-          <EndingCard ending={ending} reputation={reputation} band={band} simulation={simulation} onReplay={restart} />
+          <EndingCard
+            ending={ending}
+            reputation={reputation}
+            band={band}
+            simulation={simulation}
+            next={simulation.levels.find((entry) => entry.n === level.n + 1)}
+            misses={misses.length}
+            onRepair={startRepair}
+            onReplay={restart}
+          />
         </div>
       ) : (
         // Keyed on the beat: a new beat is a fresh mount, which is what gives
@@ -176,6 +265,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {phase === "feedback" && result && (
         <FeedbackSheet beat={beat} result={result} reputation={reputation} onNext={advance} />
+      )}
+
+      {repair && repair.length > 0 && phase === "beat" && (
+        <div className="absolute inset-x-0 top-[74px] z-30 flex justify-center px-3">
+          <span
+            className="flex items-center gap-[9px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
+            style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--primary)", color: "var(--foreground)" }}
+          >
+            <Wrench className="h-[14px] w-[14px]" aria-hidden />
+            Fixing {repair.length} {repair.length === 1 ? "answer" : "answers"}
+          </span>
+        </div>
       )}
 
       {/* Says so, rather than silently dropping them mid-level. */}
@@ -302,7 +403,10 @@ function BeatStage({
   const narrated = beat.speaker === "Dreamy" || beat.speaker === "Narrator";
   const speaker = narrated ? "Dreamy" : beat.speaker;
   const portrait = speaker ? cast?.[speaker] : undefined;
-  const stageable = Boolean(beat.setup) && (beat.kind === "choice" || beat.kind === "match" || beat.kind === "rapid");
+  const stageable =
+    Boolean(beat.setup) &&
+    beat.kind !== "card" &&
+    beat.kind !== "review";
   const [revealed, setRevealed] = useState(!stageable);
 
   const seconds = "timer" in beat && typeof beat.timer === "number" ? beat.timer : 0;
@@ -386,6 +490,12 @@ function BeatBody({
   if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
   if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+  if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
+  if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
+  if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+  if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
+  if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+  if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
   return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} />;
 }
 
@@ -408,10 +518,11 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
         <button
           type="button"
           onClick={onNext}
-          className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           See the decision
+          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
         </button>
       ) : (
         <p className="flex items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
@@ -573,7 +684,8 @@ function DialogueBox({
           >
             Continue
             <ChevronRight className="h-[16px] w-[16px] motion-safe:animate-[play-nudge_1.1s_ease-in-out_infinite]" aria-hidden />
-            <span className="sr-only">or press space</span>
+            <Keycap tint={accent}>⏎</Keycap>
+            <span className="sr-only">or press enter</span>
           </button>
         )}
         {done && !held && (
@@ -652,13 +764,23 @@ function Hud({
           />
         </span>
         <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${SCORED_BEATS} decisions made`}>
-          {Array.from({ length: SCORED_BEATS }, (_, dot) => (
-            <span
-              key={dot}
-              className="h-[5px] w-[5px] rounded-full transition-colors duration-300"
-              style={{ background: dot < scored ? accent : "var(--color-glass-border-raised)" }}
-            />
-          ))}
+          {/* Every third dot is a checkpoint: the run is saved at each beat, and
+             marking them makes that visible instead of hoping the player trusts
+             it. */}
+          {Array.from({ length: SCORED_BEATS }, (_, dot) => {
+            const checkpoint = (dot + 1) % 3 === 0;
+            return (
+              <span
+                key={dot}
+                className={`rounded-full transition-colors duration-300 ${checkpoint ? "h-[8px] w-[8px]" : "h-[5px] w-[5px]"}`}
+                style={{
+                  background: dot < scored ? accent : "transparent",
+                  border: checkpoint ? `1.5px solid ${dot < scored ? accent : "var(--color-glass-border-raised)"}` : "none",
+                  boxShadow: dot < scored ? "none" : "inset 0 0 0 5px var(--color-glass-border-raised)",
+                }}
+              />
+            );
+          })}
         </span>
       </div>
     </header>
@@ -705,6 +827,22 @@ function Clock({ remaining, total }: { remaining: number; total: number }) {
         {Math.ceil(remaining)}s
       </span>
     </div>
+  );
+}
+
+/** A single keycap glyph, shown only where there is a real keyboard. The whole
+ *  keyboard story is told by glyphs on the controls themselves -- the digit on
+ *  each option, this cap on the advance -- rather than a line of instructions
+ *  under every screen. Touch players never see any of it. */
+function Keycap({ children, tint }: { children: string; tint: string }) {
+  return (
+    <span
+      aria-hidden
+      className="ml-[2px] hidden h-[19px] min-w-[19px] items-center justify-center rounded-[5px] border px-[4px] text-[11px] leading-none font-bold [@media(hover:hover)_and_(pointer:fine)]:inline-flex"
+      style={{ borderColor: tint, color: tint, opacity: 0.72 }}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -756,10 +894,11 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
           type="button"
           onClick={onNext}
           autoFocus
-          className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {cta}
+          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
         </button>
       </div>
     </div>
@@ -773,12 +912,20 @@ function EndingCard({
   reputation,
   band,
   simulation,
+  next,
+  misses,
+  onRepair,
   onReplay,
 }: {
   ending: ReturnType<typeof endingFor>;
   reputation: number;
   band: ReturnType<typeof bandFor>;
   simulation: Simulation;
+  /** The next built level, if there is one. */
+  next?: Level;
+  /** How many beats went wrong, so they can be offered as a repair round. */
+  misses: number;
+  onRepair: () => void;
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
@@ -806,7 +953,16 @@ function EndingCard({
         {ending.subline}
       </p>
       <div className="mt-[var(--space-1)] flex w-full flex-col gap-[8px]">
-        {ending.advances ? (
+        {ending.advances && next ? (
+          <Link
+            href={`/play/${simulation.id}?level=${next.n}`}
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+          >
+            {ending.primary}
+            <ArrowRight className="h-[17px] w-[17px]" aria-hidden />
+          </Link>
+        ) : ending.advances ? (
           <span
             className="flex w-full items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
@@ -815,6 +971,32 @@ function EndingCard({
             {ending.primary}
             <ArrowRight className="h-[17px] w-[17px]" aria-hidden />
           </span>
+        ) : misses > 0 ? (
+          <>
+            {/* Replaying twenty screens to fix three answers is what makes a
+               student close the app. Fixing the three is what makes them stay. */}
+            <button
+              type="button"
+              onClick={onRepair}
+              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+            >
+              <Wrench className="h-[16px] w-[16px]" aria-hidden />
+              Fix your {misses} {misses === 1 ? "miss" : "misses"}
+            </button>
+            <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              Replays only what you got wrong. A fix is worth +2, not the full +5.
+            </p>
+            <button
+              type="button"
+              onClick={onReplay}
+              className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-full border px-[18px] py-[12px] text-[15px] font-bold"
+              style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+            >
+              <RotateCcw className="h-[15px] w-[15px]" aria-hidden />
+              {ending.primary}
+            </button>
+          </>
         ) : (
           <button
             type="button"
@@ -826,9 +1008,9 @@ function EndingCard({
             {ending.primary}
           </button>
         )}
-        {ending.advances && (
+        {ending.advances && !next && (
           <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            The Analyst level is next. It is not built yet.
+            The next level is not built yet.
           </p>
         )}
         <Link

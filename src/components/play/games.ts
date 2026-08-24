@@ -1,4 +1,5 @@
 import { IB_LEVEL_1 } from "./ib-level-1";
+import { IB_LEVEL_2 } from "./ib-level-2";
 import type { Simulation } from "./types";
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
@@ -12,9 +13,10 @@ export const INVESTMENT_BANKING: Simulation = {
   world: "Business & Money",
   firm: "Cobalt Capital",
   cover: "/images/play/ib/l1-04.webp",
-  levels: [IB_LEVEL_1],
-  // The ladder from the handoff: six levels, three documented, three unbuilt.
-  upcoming: ["Analyst", "Associate", "Vice President", "Executive Director", "Managing Director"],
+  levels: [IB_LEVEL_1, IB_LEVEL_2],
+  // The ladder from the handoff: six levels. Three are documented in the sheet;
+  // the top three are not built anywhere.
+  upcoming: ["Vice President", "Executive Director", "Managing Director"],
 };
 
 export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING];

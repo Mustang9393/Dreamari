@@ -40,6 +40,41 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: Level 2, checkpoints, portraits, keyboard play (PUSHED)
+
+- **Level 2 (Analyst) is built**: `src/components/play/ib-level-2.ts`, 31 screens
+  authored from the handoff sheet. Its header comments list the production
+  changes applied and the two sheet ambiguities deliberately left alone.
+  `games.ts` now ships `[IB_LEVEL_1, IB_LEVEL_2]`. **Level 3 (Associate, 46
+  screens) is in the sheet and NOT built yet** -- its interaction types (rank,
+  pick, bucket, the 5-question rapid set, the `crunch` mood) are all implemented
+  already, so it is authoring work, not engine work.
+- **Six new interaction bodies** in `interactions.tsx`: chain, slider, flags,
+  rank, pick, bucket. Every one has Duolingo-standard feedback (immediate
+  reveal, tick/cross, shake on a miss, sound) rather than a bare submit.
+- **Checkpoints and a repair round.** A run no longer stores a running
+  reputation total; it stores `scores: Record<beatId, Tier>` and DERIVES the
+  total (`progress.ts`). That is what makes correction possible: a repaired beat
+  overwrites its entry and the number follows. Missed beats come back before the
+  final review, capped at `acceptable` so a repair cannot score as a first-time
+  best. Old saves without `scores` still resume.
+- **Nintendo-style portraits.** `Level.cast` maps a speaker name to a face, and
+  a beat with a `speaker` renders that face inside the dialogue box with the
+  line in quotes. Faces for Christina, Jordan and Marcus live in
+  `public/images/play/ib/face-*.webp`, cut from the scene art with the macOS
+  Vision framework (foreground mask + face rectangle) -- no network, no
+  third-party service. Setups were rewritten into first person so a character
+  speaks rather than being described; `Narrator` renders as Dreamy, since Dreamy
+  is the only narrator.
+- **Keyboard play, without instructions on screen.** Enter / space / right
+  advances dialogue; number keys pick options in choice, rapid and chain beats.
+  The affordances carry the hint themselves -- each option's badge IS its digit,
+  and a small keycap glyph sits on the advance button -- and both are hidden
+  behind `@media (hover: hover) and (pointer: fine)` so touch players never see
+  keyboard furniture. Every control was already a real `<button>`, so tab order
+  and Enter-to-activate needed nothing.
+- No token changes in this batch; contract files untouched.
+
 ### 2026-08-24 Page titles in caps + light-mode card surface (PUSHED)
 
 - Direct request from Joshua: every page title reads in caps. Explore already

@@ -49,6 +49,10 @@ type BeatBase = {
   artAlt?: string;
   /** Which face Dreamy wears on this beat. Only used when Dreamy is speaking. */
   pose?: DreamyPose;
+  /** Overrides the level's mood for this beat. Level 2 runs three screens in
+   *  late-night navy and comes back to day; Level 3 has a maroon Crunch Time
+   *  stretch. The two are different on purpose (Interaction Rules tab). */
+  mood?: Mood;
   speaker?: string;
   setup?: string;
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
@@ -56,16 +60,26 @@ type BeatBase = {
   progress?: number;
 };
 
-/** Intro, narrative and character cards: one button, no score. */
+export type Mood = "day" | "night" | "crunch";
+
+/** Intro, narrative and character cards: one button, no score. `offer` carries
+ *  the salary/hours tiles the level-opening contract screens use, and `step`
+ *  is a numbered card in an onboarding or character carousel. */
 export type CardBeat = BeatBase & {
   kind: "card";
-  variant: "intro" | "character" | "chapter";
+  variant: "intro" | "character" | "chapter" | "offer" | "step";
   title: string;
   body?: string;
   /** Grey EXAMPLE box under the body. */
   example?: string;
   /** Show the reputation bands and where the player currently sits. */
   showBands?: boolean;
+  /** offer variant: the three tiles (role, pay, hours). */
+  facts?: { label: string; value: string }[];
+  /** step variant: "1 of 5". */
+  step?: { at: number; of: number };
+  /** A warning or aside under the body, in the level's accent. */
+  note?: string;
   cta: string;
 };
 
@@ -74,7 +88,7 @@ export type CardBeat = BeatBase & {
  *  identically and differ only in how the options are drawn. */
 export type ChoiceBeat = BeatBase & {
   kind: "choice";
-  layout: "options" | "blank" | "document" | "boss";
+  layout: "options" | "blank" | "tiles" | "document" | "boss";
   question: string;
   choices: Choice[];
   feedback: string;
@@ -106,7 +120,8 @@ export type MatchBeat = BeatBase & {
 export type RapidBeat = BeatBase & {
   kind: "rapid";
   question: string;
-  timer: number;
+  /** Level 1 and 3 share one clock across the set; Level 2's model has none. */
+  timer?: number;
   items: { question: string; options: { label: string; correct: boolean; why: string }[] }[];
   whenPass: string;
   whenFail: string;
@@ -123,7 +138,104 @@ export type ReviewBeat = BeatBase & {
   body: string;
 };
 
-export type Beat = CardBeat | ChoiceBeat | MatchBeat | RapidBeat | ReviewBeat;
+/** Build the Strongest Answer: chained steps, each adding a sentence to the
+ *  answer being assembled. ONE score for the whole chain -- all steps right is
+ *  Best, anything less is Wrong, because the steps form a single argument and
+ *  partial credit would teach three separate facts instead of one skill. */
+export type ChainBeat = BeatBase & {
+  kind: "chain";
+  question: string;
+  steps: { label: string; prompt: string; options: { label: string; correct: boolean }[] }[];
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
+/** Risk Slider: drag across labelled segments, then submit. Only the correct
+ *  segment scores its tier; neighbours are not partial credit. */
+export type SliderBeat = BeatBase & {
+  kind: "slider";
+  question: string;
+  /** In order, low to high. Each carries its own tier and explanation. */
+  steps: { label: string; tier: Tier; why: string }[];
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+  timer?: number;
+};
+
+/** Find All Red Flags: tap every row that is wrong, then submit. */
+export type FlagsBeat = BeatBase & {
+  kind: "flags";
+  question: string;
+  rows: { label: string; flag: boolean; why: string }[];
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+  timer?: number;
+};
+
+/** Rank the Order: shuffled rows, moved with up/down, then submitted. Every
+ *  position must be right. */
+export type RankBeat = BeatBase & {
+  kind: "rank";
+  question: string;
+  /** In the CORRECT order. The player always sees them shuffled. */
+  order: string[];
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
+/** Pick N of M: choose exactly N cards, then submit. A harmful card in the set
+ *  scores Risky however good the rest are. */
+export type PickBeat = BeatBase & {
+  kind: "pick";
+  question: string;
+  pick: number;
+  cards: { label: string; role: "pick" | "leave" | "harmful" }[];
+  whenRight: string;
+  whenWrong: string;
+  whenHarmful?: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+  timer?: number;
+};
+
+/** Two-Bucket Sort: one item at a time, two buttons. Passes at three quarters
+ *  of the items, rounded up. */
+export type BucketBeat = BeatBase & {
+  kind: "bucket";
+  question: string;
+  buckets: [string, string];
+  /** `into` is the index of the bucket this item belongs in. */
+  items: { label: string; into: 0 | 1 }[];
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
+export type Beat =
+  | CardBeat
+  | ChoiceBeat
+  | MatchBeat
+  | RapidBeat
+  | ReviewBeat
+  | ChainBeat
+  | SliderBeat
+  | FlagsBeat
+  | RankBeat
+  | PickBeat
+  | BucketBeat;
 
 export type Ending = {
   /** Inclusive floor. Matched highest-first. */
@@ -149,7 +261,7 @@ export type Level = {
   cover: string;
   /** Late-night navy in Level 2, Crunch Time maroon in Level 3: different on
    *  purpose. */
-  mood: "day" | "night" | "crunch";
+  mood: Mood;
   /** Speaker name -> portrait, for the dialogue box. Faces are cropped from
    *  this level's own scene art (Vision's face detection found the boxes), so a
    *  character who appears in a scene can also speak with a face. */

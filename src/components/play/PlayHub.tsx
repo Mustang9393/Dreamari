@@ -154,13 +154,15 @@ function GameCard({ game }: { game: Simulation }) {
         {/* The ladder, so the whole arc is visible from the card. */}
         <ol className="m-0 flex list-none flex-wrap items-center gap-[6px] p-0">
           {game.levels.map((level) => (
-            <li
-              key={level.id}
-              className="flex items-center gap-[6px] rounded-full border px-[10px] py-[5px] text-[12px] font-extrabold"
-              style={{ borderColor: accent, color: "var(--foreground)" }}
-            >
-              <Play className="h-[11px] w-[11px]" aria-hidden />
-              {level.n}. {level.role}
+            <li key={level.id}>
+              <Link
+                href={`/play/${game.id}?level=${level.n}`}
+                className="dm-quiet flex items-center gap-[6px] rounded-full border px-[10px] py-[5px] text-[12px] font-extrabold"
+                style={{ borderColor: accent, color: "var(--foreground)" }}
+              >
+                <Play className="h-[11px] w-[11px]" aria-hidden />
+                {level.n}. {level.role}
+              </Link>
             </li>
           ))}
           {game.upcoming.map((role, index) => (

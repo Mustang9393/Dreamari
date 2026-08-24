@@ -17,6 +17,10 @@ export type RunSave = {
   level: number;
   /** index of the NEXT beat to show: the last completed screen, plus one */
   index: number;
+  /** Per-beat outcome, keyed by beat id. Reputation is DERIVED from this rather
+   *  than stored as a running total, which is what makes a repair round
+   *  possible: correcting a beat overwrites its entry and the total follows. */
+  scores: Record<string, string>;
   reputation: number;
   /** how many of the ten scored beats are done, for the progress dots */
   scored: number;
@@ -51,6 +55,9 @@ function parse(raw: string | null): Store {
           gameId: save.gameId,
           level: save.level,
           index: Math.max(0, Math.floor(save.index)),
+          // A save written before per-beat scores existed just resumes with an
+          // empty record; its reputation still shows on the hub.
+          scores: save.scores && typeof save.scores === "object" ? (save.scores as Record<string, string>) : {},
           reputation: Math.max(0, Math.min(100, Math.round(save.reputation))),
           scored: Math.max(0, Math.floor(save.scored)),
           at: typeof save.at === "number" ? save.at : 0,

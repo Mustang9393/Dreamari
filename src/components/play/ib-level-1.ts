@@ -74,7 +74,7 @@ export const IB_LEVEL_1: Level = {
       artAlt: "Christina in a navy blazer gesturing welcome at reception, Jordan beside her with a shoulder bag.",
       speaker: "Narrator",
       pose: "happy",
-      setup: "Christina (Associate) welcomes you to Cobalt Capital. Jordan, another Intern, is starting too.",
+      setup: "Christina welcomes you to Cobalt Capital. Jordan, another Intern, is starting too.",
       question: "Day 1: What should you do first?",
       choices: [
         { id: "a", label: "Join a client call", tier: "wrong", why: "Eager, but you can't help yet. Someone senior would cover for you." },
@@ -162,7 +162,7 @@ export const IB_LEVEL_1: Level = {
       artAlt: "Over-the-shoulder view of hands at a laptop showing charts, sunset skyline through the windows.",
       speaker: "Narrator",
       pose: "nervous",
-      setup: "Christina (Associate) gives you your first real assignment: a Nike slide due by 5 PM. It is 4 PM, and key numbers are missing.",
+      setup: "Christina gives you your first real assignment: a Nike slide due by 5 PM. It is 4 PM, and key numbers are missing.",
       question: "What do you do?",
       choices: [
         {
@@ -357,9 +357,9 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-04.webp`,
       artAlt: "Christina holding a notebook, speaking to you over your shoulder, trading floor behind.",
       speaker: "Christina",
-      setup: "Your internship is complete. Before the team decides whether to offer you a job after college, Christina (Associate) pulls you aside.",
-      title: "“You stood out. You came in early, worked late, and made careful decisions under pressure.”",
-      body: "“I hope this works out. I'd like to see you back here as an Analyst.”",
+      setup: '"You stood out. You came in early, worked late, and made careful decisions under pressure."',
+      title: "Your internship is complete.",
+      body: '"I hope this works out. I would like to see you back here as an Analyst."',
       cta: "Begin Final Review",
     },
     {
@@ -388,7 +388,7 @@ export const IB_LEVEL_1: Level = {
       band: "Respected",
       headline: "So Close",
       message:
-        'No return offer this summer. Christina (Associate) is straight with you. "You were good. Good is most people. The ones who get offers are the ones I never had to check twice."',
+        'No return offer this summer. Christina is straight with you. "You were good. Good is most people. The ones who get offers are the ones I never had to check twice."',
       subline: "You will play the internship again, the same one, from the beginning.",
       primary: "Play the internship again",
       advances: false,
@@ -398,7 +398,7 @@ export const IB_LEVEL_1: Level = {
       band: "Cautious",
       headline: "No Return Offer This Summer",
       message:
-        'Cobalt is not extending an offer this summer. Christina (Associate) walks you out. "You have the work ethic. The judgment takes another run, and most people need one."',
+        'Cobalt is not extending an offer this summer. Christina walks you out. "You have the work ethic. The judgment takes another run, and most people need one."',
       subline: "You will play the internship again, the same one, from the beginning.",
       primary: "Play the internship again",
       advances: false,
