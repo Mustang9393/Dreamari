@@ -236,6 +236,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-10",
       progress: 0.7,
       speaker: "Christina",
+      tone: "conflict",
       setup: '"Review the Nike summary before Marcus sees it. One line has a mistake."',
       // Production change from the sheet: the prompt now says the mistake is a
       // WRITING error, not a fact error (decision D07).
@@ -268,7 +269,6 @@ export const IB_LEVEL_1: Level = {
       layout: "options",
       id: "L1-12",
       progress: 0.8,
-      showdown: { opponent: "Jordan" },
       art: `${ART}/l1-12.webp`,
       artAlt: "Jordan presenting a spreadsheet on a monitor to a seated manager, your coffee mug in the foreground.",
       speaker: "Narrator",

@@ -304,6 +304,7 @@ export const IB_LEVEL_2: Level = {
       speaker: "Narrator",
       pose: "alert",
       castMember: "Jordan",
+      tone: "alarm",
       setup: "It is 10:10 AM. The meeting is in 20 minutes. There are errors in Jordan's work, and you have to fix them before Christina and Marcus come in.",
       question: "Tap every red flag in Jordan's work.",
       rows: [
@@ -323,7 +324,6 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "character",
       id: "L2-18",
-      showdown: { opponent: "Jordan" },
       art: `${ART}/l2-18.webp`,
       artAlt: "Jordan standing over a desk of printouts, Christina working behind him.",
       speaker: "Jordan",
@@ -374,7 +374,6 @@ export const IB_LEVEL_2: Level = {
       kind: "rapid",
       id: "L2-21",
       progress: 0.9,
-      showdown: { opponent: "Marcus" },
       speaker: "Marcus",
       setup: '"Let me check you actually understand this deal, not just the tasks. I noticed your answer at kickoff."',
       question: "Four questions, scored as one beat.",
