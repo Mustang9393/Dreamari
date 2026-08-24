@@ -648,22 +648,22 @@ function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
       break;
     }
   }
-  // A location plate is scenery for a narrative beat -- it sets a room, then
-  // gets out of the way. On a beat the player is actively working (any kind
-  // but a card or the review), a full location plus a standing character
-  // competes with the thing that actually matters: the question and its
-  // options. Those beats fall straight to the plain ambient backdrop instead,
-  // location or not, unless they carry their own authored hero art above.
-  const interactive = beat.kind !== "card" && beat.kind !== "review";
-  const location = interactive ? undefined : locationFor(beat.id);
+  const location = locationFor(beat.id);
   if (location) {
+    // The room is scenery either way, but a standing character is only
+    // appropriate on a beat the player is reading, not one they're actively
+    // working -- on a scored beat (any kind but a card or the review) a
+    // person standing over the options competes with the thing that actually
+    // matters. The room itself stays: an empty photograph is calmer than the
+    // same room with somebody planted in it, not a blank gradient.
+    const interactive = beat.kind !== "card" && beat.kind !== "review";
     return {
       mode: "location",
       src: location.src,
       alt: location.alt,
       focal: location.focal,
       mobileFocal: location.mobileFocal,
-      characterAnchor: location.characterAnchor,
+      characterAnchor: interactive ? undefined : location.characterAnchor,
     };
   }
   return { mode: "none", src: level.cover, alt: "" };
@@ -745,12 +745,18 @@ function BeatStage({
     return () => window.clearInterval(tick);
   }, [seconds, paused, locked, revealed, beat, onResolve]);
 
+  // A card or the review is read against the scene, bottom-anchored like a
+  // dialogue box always has been. A beat the player is actively working sits
+  // in the center of the frame instead -- it's the thing on screen, not a
+  // caption under a picture, now that the picture behind it is a real room
+  // rather than something cropped to leave the bottom third free for it.
+  const interactive = beat.kind !== "card" && beat.kind !== "review";
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
       <div
         aria-hidden={hidden || undefined}
-        className="relative z-10 order-3 flex min-h-0 flex-none items-end justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5"
+        className={`relative z-10 order-3 flex min-h-0 flex-none justify-center px-3 pb-3 transition-opacity duration-300 sm:order-none sm:flex-1 sm:px-5 sm:pb-5 ${interactive ? "items-center" : "items-end"}`}
         style={{ opacity: hidden ? 0 : 1 }}
       >
         {/* Dreamy is positioned OVER the box's top edge rather than stacked

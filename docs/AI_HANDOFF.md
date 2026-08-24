@@ -40,6 +40,38 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: v3 handoff (Marcus/Lamisa sprites) + interaction-screen fixes (PUSHED)
+
+- A third handoff drop (`Dreamari-IB-Claude-Production-Handoff-v3.zip`) mostly
+  reconciles coverage across the three EXISTING levels (a production tracker
+  and per-beat asset checklist) rather than adding new gameplay levels; the
+  one real addition is one approved expression each for Marcus (`assessing`)
+  and Lamisa (`composed`), plus Cobalt HR's (`welcoming`), which this repo has
+  no speaker for -- Level 2's onboarding was deliberately handed to Christina
+  earlier in production rather than an unnamed HR character, so her sprite is
+  intentionally not wired in; introducing her would be a storyline change, not
+  an art integration. Marcus and Lamisa are now in `defaultExpressionFor`
+  (`expressions.ts`) and can stand in a location scene like Christina and
+  Jordan already could -- at their one available expression only, since
+  neither has a tier set yet to react with.
+- **Corrected two misreadings of earlier feedback, found by actually playing
+  Level 1 start to finish**, which is unusually hero-art-heavy (most of its 16
+  beats are covered by one of five illustrations via the sticky window), so
+  the location work from earlier in the session barely showed up in it at
+  all -- exactly what got reported back.
+  1. "Blank background, no characters" on an interactive beat had been built
+     as the abstract ambient gradient -- no location, no character. The actual
+     ask was the room MINUS the character: `sceneFor` now still resolves the
+     location for every beat kind, and only the character composite is
+     skipped on a scored beat. A real photograph, not a gradient, is what
+     shows behind an interactive beat now.
+  2. The dialogue/question panel was still bottom-anchored on every beat, a
+     convention that made sense when art was cropped to leave room for it but
+     not now that a scored beat sits over a full, real photograph. Interactive
+     beats (any kind but a card or the review) now center the panel in the
+     frame instead.
+- No copy changed; no token changes; contract files untouched.
+
 ### 2026-08-24 Play: tuning the location library after live review (PUSHED)
 
 - Refined the location-library batch above after watching it play. In order:

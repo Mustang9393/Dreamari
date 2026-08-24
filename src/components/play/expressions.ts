@@ -46,6 +46,12 @@ export function expressionFor(speaker: string | undefined, tier: Tier): string |
 const DEFAULT_EXPRESSION: Partial<Record<string, string>> = {
   Christina: `${E}/christina-welcoming.webp`,
   Jordan: `${E}/jordan-confident.webp`,
+  // Marcus and Lamisa each shipped with exactly one approved expression in the
+  // v3 handoff (assessing, composed) -- no tier set to react with yet, so they
+  // stand in the room at this single expression rather than not appearing at
+  // all. Extend EXPRESSION_PORTRAITS for either once more variants arrive.
+  Marcus: `${E}/marcus-assessing.webp`,
+  Lamisa: `${E}/lamisa-composed.webp`,
 };
 
 export function defaultExpressionFor(speaker: string | undefined): string | undefined {
