@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, Briefcase, ChevronLeft, FileText, RotateCcw, Trophy, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, Trophy, Volume2, VolumeX, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { BossOverlay, CardBody, ChoiceBody, MatchBody, RapidBody, useTypewriter, type Resolve } from "./interactions";
+import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
+import { mutedSnapshot, playSelect, playSweep, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, applyScore, bandFor, endingFor } from "./scoring";
-import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Simulation, type Tier } from "./types";
+import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
@@ -20,12 +22,28 @@ type Phase = "beat" | "feedback" | "ending";
 type Result = { tier: Tier; why: string; delta: number };
 
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
-  const [index, setIndex] = useState(0);
-  const [reputation, setReputation] = useState(START_REPUTATION);
+  // AUTOSAVE. Storage is read as an external store, and the run is DERIVED from
+  // it rather than seeded into useState: a state initialiser runs during
+  // hydration, when useSyncExternalStore still reports the server snapshot, so
+  // seeding silently threw the save away and every resume started at beat one.
+  // Deriving means the saved run appears as soon as the store hydrates.
+  const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, level.n);
+  const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
+  const base = resumable
+    ? { index: resumable.index, reputation: resumable.reputation, scored: resumable.scored }
+    : { index: 0, reputation: START_REPUTATION, scored: 0 };
+
+  /** null until the player does something; then it owns the run. */
+  const [run, setRun] = useState<{ index: number; reputation: number; scored: number } | null>(null);
+  const live = run ?? base;
+  const { index, reputation, scored } = live;
+  const patchRun = (change: Partial<typeof base>) => setRun((current) => ({ ...(current ?? base), ...change }));
+  // Showing the resumed state exactly while the save is still what is on screen.
+  const resumed = run === null && resumable !== null;
+
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
-  const [scored, setScored] = useState(0);
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
@@ -42,30 +60,35 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // A short beat on the locked option before the card, so the player sees
       // what they picked land.
       window.setTimeout(() => {
-        setReputation((current) => applyScore(current, tier));
-        setScored((current) => current + 1);
+        patchRun({ reputation: applyScore(reputation, tier), scored: scored + 1 });
         setResult({ tier, why, delta });
         setPhase("feedback");
       }, 340);
     },
-    [locked],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locked, reputation, scored],
   );
 
   const advance = useCallback(() => {
     setLocked(null);
     setResult(null);
     if (index + 1 >= level.beats.length) {
+      // The run is over: an ending should never be resumed into.
+      clearRun(simulation.id, level.n);
       setPhase("ending");
       return;
     }
     setPhase("beat");
-    setIndex(index + 1);
-  }, [index, level.beats.length]);
+    patchRun({ index: index + 1 });
+    saveRun({ gameId: simulation.id, level: level.n, index: index + 1, reputation, scored });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, level.beats.length, level.n, simulation.id, reputation, scored]);
 
   const restart = () => {
-    setIndex(0);
-    setReputation(START_REPUTATION);
-    setScored(0);
+    // "Reputation resets to 50 and the level restarts from screen 1" -- the
+    // rules tab. A fresh run must not inherit the old save.
+    clearRun(simulation.id, level.n);
+    setRun({ index: 0, reputation: START_REPUTATION, scored: 0 });
     setLocked(null);
     setResult(null);
     setPhase("beat");
@@ -84,33 +107,46 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
            thirds of the picture away, so on phones it becomes an art panel
            across the top and the whole frame is visible; from sm up it goes
            full-bleed behind everything. */}
-      <div aria-hidden={!scene.alt} className="pointer-events-none absolute inset-x-0 top-0 h-[38dvh] sm:inset-0 sm:h-auto">
-        <Image
-          key={scene.src}
-          src={scene.src}
-          alt={scene.alt}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-top sm:object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
-        />
+      {/* ONE plane with a slow zoom. The two-plane parallax is gone: the
+         background plate still contains the characters that were lifted out of
+         it, so any relative motion dragged a ghost of them out from behind the
+         cutout, and no fill I tried (diffusion, colour propagation, horizontal
+         cloning) erased them cleanly enough to ship. A soft push is the effect
+         that survives that honestly. If character-free plates ever arrive from
+         the artist, real parallax is a small change. */}
+      <div aria-hidden={!scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 sm:absolute sm:inset-0 sm:order-none">
+        <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
+          <Image
+            key={scene.src}
+            src={scene.src}
+            alt={scene.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+          />
+        </div>
       </div>
+
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 hidden sm:block"
         style={{
+          // Light touch on purpose. The art is the point and the copy already
+          // sits in its own boxes, so the scrim only has to keep the HUD
+          // readable at the top and soften the box's edge at the bottom.
           background:
-            "linear-gradient(180deg, color-mix(in srgb, var(--background) 78%, transparent) 0%, color-mix(in srgb, var(--background) 28%, transparent) 26%, color-mix(in srgb, var(--background) 72%, transparent) 62%, var(--background) 100%)",
+            "linear-gradient(180deg, color-mix(in srgb, var(--background) 62%, transparent) 0%, transparent 16%, transparent 58%, color-mix(in srgb, var(--background) 72%, transparent) 88%, var(--background) 100%)",
         }}
       />
       {/* Phones: darken only the top strip behind the HUD, and fade the panel's
          bottom edge into the stage so it is a scene, not a pasted rectangle. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[38dvh] sm:hidden"
+        className="pointer-events-none absolute inset-0 sm:hidden"
         style={{
           background:
-            "linear-gradient(180deg, color-mix(in srgb, var(--background) 82%, transparent) 0%, transparent 22%, transparent 68%, var(--background) 100%)",
+            "linear-gradient(180deg, color-mix(in srgb, var(--background) 68%, transparent) 0%, transparent 15%, transparent 66%, var(--background) 100%)",
         }}
       />
 
@@ -125,7 +161,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       />
 
       {phase === "ending" ? (
-        <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5">
+        <div className="relative z-10 order-3 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:order-none sm:px-5 sm:pb-5">
           <EndingCard ending={ending} reputation={reputation} band={band} simulation={simulation} onReplay={restart} />
         </div>
       ) : (
@@ -135,6 +171,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           key={beat.id}
           beat={beat}
           accent={accent}
+          cast={level.cast}
           reputation={reputation}
           locked={locked}
           paused={phase !== "beat"}
@@ -145,6 +182,21 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {phase === "feedback" && result && (
         <FeedbackSheet beat={beat} result={result} reputation={reputation} onNext={advance} />
+      )}
+
+      {/* Says so, rather than silently dropping them mid-level. */}
+      {resumed && phase === "beat" && (
+        <div className="absolute inset-x-0 top-[74px] z-30 flex justify-center px-3">
+          <span
+            className="flex items-center gap-[10px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px] motion-safe:animate-[play-sheet-up_0.4s_ease-out_both]"
+            style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+          >
+            Picked up where you left off
+            <button type="button" onClick={restart} className="dm-quiet cursor-pointer underline" style={{ color: "var(--muted-foreground)" }}>
+              Start over
+            </button>
+          </span>
+        </div>
       )}
     </div>
   );
@@ -166,6 +218,7 @@ function sceneFor(level: Level, index: number): { src: string; alt: string } {
 function BeatStage({
   beat,
   accent,
+  cast,
   reputation,
   locked,
   paused,
@@ -174,12 +227,26 @@ function BeatStage({
 }: {
   beat: Beat;
   accent: string;
+  cast?: Record<string, string>;
   reputation: number;
   locked: string | null;
   paused: boolean;
   onResolve: Resolve;
   onNext: () => void;
 }) {
+  // RPG pacing: read the situation first, advance when YOU are ready, and only
+  // then does the question and its options appear. The situation stays on
+  // screen underneath, because several beats cannot be answered without it.
+  // Cards and the review beat are not staged -- their "setup" is a label like
+  // "Intern • Week 1", not a paragraph to read.
+  // Dreamy narrates. "Narrator" was a separate voice on screen even though it
+  // is the same guide talking, so it speaks as Dreamy with Dreamy's face.
+  const narrated = beat.speaker === "Dreamy" || beat.speaker === "Narrator";
+  const speaker = narrated ? "Dreamy" : beat.speaker;
+  const portrait = speaker ? cast?.[speaker] : undefined;
+  const stageable = Boolean(beat.setup) && (beat.kind === "choice" || beat.kind === "match" || beat.kind === "rapid");
+  const [revealed, setRevealed] = useState(!stageable);
+
   const seconds = "timer" in beat && typeof beat.timer === "number" ? beat.timer : 0;
   const [remaining, setRemaining] = useState(seconds);
   // The clock survives a pause (the feedback card) by remembering where it got
@@ -188,7 +255,9 @@ function BeatStage({
   const settled = useRef(false);
 
   useEffect(() => {
-    if (!seconds || paused || locked) return;
+    // A timed beat must not burn its clock while the player is still reading
+    // the situation. The timer starts when the question does.
+    if (!seconds || paused || locked || !revealed) return;
     const deadline = Date.now() + remainingRef.current * 1000;
     const tick = window.setInterval(() => {
       const left = Math.max(0, (deadline - Date.now()) / 1000);
@@ -204,19 +273,28 @@ function BeatStage({
       }
     }, 100);
     return () => window.clearInterval(tick);
-  }, [seconds, paused, locked, beat, onResolve]);
+  }, [seconds, paused, locked, revealed, beat, onResolve]);
 
   return (
     <>
-      {seconds > 0 && !paused && <Clock remaining={remaining} total={seconds} />}
-      <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5">
+      {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
+      <div className="relative z-10 order-3 flex min-h-0 flex-none items-end justify-center px-3 pb-3 sm:order-none sm:flex-1 sm:px-5 sm:pb-5">
         <div className="flex w-full max-w-[620px] flex-col gap-[10px]">
+          {narrated && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={beat.speaker} setup={beat.setup} accent={accent} gold>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
-            <DialogueBox speaker={beat.speaker} setup={beat.setup} accent={accent} tone={"tone" in beat ? beat.tone : undefined}>
+            <DialogueBox
+              speaker={speaker}
+              portrait={portrait}
+              setup={beat.setup}
+              accent={accent}
+              tone={"tone" in beat ? beat.tone : undefined}
+              held={!revealed}
+              onAdvance={() => setRevealed(true)}
+            >
               <BeatBody beat={beat} reputation={reputation} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
           )}
@@ -292,25 +370,85 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
   );
 }
 
+/** Dreamy, standing beside the box it is speaking from. Nearest plane, so it
+ *  moves most against the scene; idles with a slow float; the pose comes from
+ *  the beat rather than being one permanent face. Sits on the RIGHT so it never
+ *  collides with the speaker plate on the left. */
+function Dreamy({ pose }: { pose: DreamyPose }) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none -mb-[22px] flex justify-end pr-[12px] sm:-mb-[26px] sm:pr-[20px]"
+    >
+      {/* A gentle hover, not the ambient cloud drift: that one travels 24px and
+         made Dreamy look detached from the line it is speaking. */}
+      <span className="block motion-safe:animate-[play-hover_4.4s_ease-in-out_infinite]">
+        <Image
+          key={pose}
+          src={`/images/dreamy/v2/dreamy-${pose}.png`}
+          alt=""
+          width={144}
+          height={144}
+          className="h-[96px] w-[96px] drop-shadow-[0_12px_26px_rgba(0,0,0,0.6)] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both] sm:h-[128px] sm:w-[128px]"
+        />
+      </span>
+    </div>
+  );
+}
+
 // -------------------------------------------------------------- the dialogue
 
 function DialogueBox({
   speaker,
+  portrait,
   setup,
   accent,
   tone,
   gold,
+  held,
+  onAdvance,
   children,
 }: {
   speaker?: string;
+  /** Face for the speaker, when this level's cast has one. */
+  portrait?: string;
   setup?: string;
   accent: string;
   tone?: "normal" | "conflict" | "alarm";
   gold?: boolean;
+  /** true while the player is still reading: the question stays hidden. */
+  held?: boolean;
+  onAdvance?: () => void;
   children: React.ReactNode;
 }) {
   const line = setup ?? "";
   const { visible, done, skip } = useTypewriter(line);
+
+  // One gesture does the obvious thing: finish the line if it is still typing,
+  // otherwise open the question. Tap the box, or press space / enter / right.
+  const step = useCallback(() => {
+    if (!done) {
+      skip();
+      return;
+    }
+    if (held && onAdvance) {
+      playSelect();
+      onAdvance();
+    }
+  }, [done, held, onAdvance, skip]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === " " || event.key === "Enter" || event.key === "ArrowRight" || event.key.toLowerCase() === "a") {
+        // Never hijack a key the player is aiming at a button.
+        if (document.activeElement instanceof HTMLButtonElement) return;
+        event.preventDefault();
+        step();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [step]);
   const edge = gold
     ? "var(--world-business-money-office)"
     : tone === "alarm"
@@ -321,7 +459,10 @@ function DialogueBox({
 
   return (
     <div className="relative">
-      {speaker && (
+      {/* A speaker with a portrait gets a Nintendo-style row inside the box
+         instead of a floating name tag, so the line reads as something a person
+         in the scene said rather than as narration about them. */}
+      {speaker && !portrait && (
         <span
           className="absolute -top-[13px] left-[14px] z-10 rounded-full px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}
@@ -330,17 +471,56 @@ function DialogueBox({
         </span>
       )}
       <div
-        onClick={() => !done && skip()}
+        onClick={step}
         className="flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[20px] border-2 px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[20px] sm:pt-[22px] [scrollbar-width:thin]"
         style={{ background: "color-mix(in srgb, var(--background) 86%, transparent)", borderColor: edge }}
       >
+        {/* HIERARCHY: the situation is a bold subheading, ruled off from the
+           question and its options below. They were one undifferentiated stack
+           of text, so a player could not tell the setup from the thing they had
+           to answer. */}
         {line && (
-          <p className="text-[15.5px] leading-relaxed font-medium sm:text-[16.5px]" style={{ color: "var(--foreground)" }}>
-            {visible}
-            {!done && <span className="ml-[2px] inline-block h-[15px] w-[7px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
-          </p>
+          <div className="flex items-start gap-[12px]">
+            {portrait && (
+              <span
+                aria-hidden
+                className="mt-[2px] flex-none overflow-hidden rounded-[14px] border-2"
+                style={{ borderColor: accent, background: "color-mix(in srgb, var(--background) 60%, transparent)" }}
+              >
+                <Image src={portrait} alt="" width={112} height={112} className="h-[52px] w-[52px] object-cover object-top sm:h-[62px] sm:w-[62px]" />
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              {portrait && speaker && (
+                <span className="mb-[3px] block text-[12px] font-extrabold tracking-[0.1em] uppercase" style={{ color: accent, fontFamily: "var(--font-display)" }}>
+                  {speaker}
+                </span>
+              )}
+              <p className="m-0 text-[16px] leading-[24px] font-bold sm:text-[17px] sm:leading-[26px]" style={{ color: "var(--foreground)" }}>
+                {visible}
+                {!done && <span className="ml-[2px] inline-block h-[16px] w-[7px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
+              </p>
+            </span>
+          </div>
         )}
-        {done && <div className="motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">{children}</div>}
+        {done && held && (
+          <button
+            type="button"
+            onClick={step}
+            className="flex cursor-pointer items-center gap-[8px] self-start text-[13px] font-extrabold tracking-[0.06em] uppercase motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+            style={{ color: accent }}
+          >
+            Continue
+            <ChevronRight className="h-[16px] w-[16px] motion-safe:animate-[play-nudge_1.1s_ease-in-out_infinite]" aria-hidden />
+            <span className="sr-only">or press space</span>
+          </button>
+        )}
+        {done && !held && (
+          <>
+            {line && <span aria-hidden className="-mx-[16px] border-t sm:-mx-[20px]" style={{ borderColor: "var(--color-glass-border-raised)" }} />}
+            <div className="motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">{children}</div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -377,13 +557,14 @@ function Hud({
           <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
         </Link>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
           </span>
           <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: accent }}>
             Level {level.n} · {level.role}
           </span>
         </span>
+        <MuteToggle />
         <span className="relative flex flex-none items-baseline gap-[5px]">
           <span className="text-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BAND_COLOR[band] }}>
             {reputation}
@@ -420,6 +601,28 @@ function Hud({
         </span>
       </div>
     </header>
+  );
+}
+
+/** Sound on/off, one tap, always visible. This gets played in classrooms; a
+ *  game you cannot silence in one tap is a game you do not open at school. */
+function MuteToggle() {
+  const muted = useSyncExternalStore(subscribeMuted, mutedSnapshot, serverMutedSnapshot);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const next = !muted;
+        setMuted(next);
+        if (!next) playSelect();
+      }}
+      aria-pressed={muted}
+      aria-label={muted ? "Turn sound on" : "Turn sound off"}
+      className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+      style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}
+    >
+      {muted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
+    </button>
   );
 }
 
@@ -518,6 +721,9 @@ function EndingCard({
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
+  useEffect(() => {
+    if (ending.advances) playSweep();
+  }, [ending.advances]);
   return (
     <div
       className="mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[22px] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"

@@ -36,12 +36,19 @@ export type Choice = {
   why: string;
 };
 
+/** Dreamy's poses (public/images/dreamy/v2). The guide should look like it
+ *  means what it is saying, so a beat picks the face rather than always
+ *  wearing the same one. */
+export type DreamyPose = "happy" | "glasses" | "idea" | "curious" | "alert" | "nervous" | "party" | "puzzle" | "heart";
+
 type BeatBase = {
   id: string;
   /** Scene art. Sticky: a beat without its own art keeps the last one, so the
    *  unillustrated beats read as happening in the same room. */
   art?: string;
   artAlt?: string;
+  /** Which face Dreamy wears on this beat. Only used when Dreamy is speaking. */
+  pose?: DreamyPose;
   speaker?: string;
   setup?: string;
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
@@ -143,6 +150,10 @@ export type Level = {
   /** Late-night navy in Level 2, Crunch Time maroon in Level 3: different on
    *  purpose. */
   mood: "day" | "night" | "crunch";
+  /** Speaker name -> portrait, for the dialogue box. Faces are cropped from
+   *  this level's own scene art (Vision's face detection found the boxes), so a
+   *  character who appears in a scene can also speak with a face. */
+  cast?: Record<string, string>;
   beats: Beat[];
   endings: Ending[];
 };

@@ -8,6 +8,7 @@ import { Lock, Play } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { SIMULATIONS, SOON } from "./games";
 import type { Simulation } from "./types";
 
@@ -58,7 +59,7 @@ export function PlayHub() {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
         <h1 className="text-[32px] leading-[1.05] font-extrabold uppercase sm:text-[44px]" style={{ fontFamily: "var(--font-display)" }}>
-          Play the job
+          Play
         </h1>
 
         {mine.length > 0 && <Shelf label="From your Top 3" games={mine} />}
@@ -122,6 +123,10 @@ function Shelf({ label, games }: { label: string; games: Simulation[] }) {
 function GameCard({ game }: { game: Simulation }) {
   const accent = WORLD_COLORS[game.world] ?? "var(--primary)";
   const first = game.levels[0];
+  // A run in progress should say so on the card, not hide behind "Start".
+  const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
+  const run = readRun(progress, game.id, first.n);
+  const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   return (
     <article
       className="dm-tap relative overflow-hidden rounded-[22px] border"
@@ -134,7 +139,7 @@ function GameCard({ game }: { game: Simulation }) {
           className="absolute inset-0"
           style={{ background: "linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--background) 94%, transparent) 100%)" }}
         />
-        <span className="absolute right-[14px] bottom-[12px] left-[14px] block text-[26px] leading-[1.05] sm:text-[30px]" style={{ ...posterTitleFont(game.world), color: "var(--foreground)" }}>
+        <span className="absolute right-[14px] bottom-[12px] left-[14px] block text-[26px] leading-[1.05] uppercase sm:text-[30px]" style={{ ...posterTitleFont(game.world), color: "var(--foreground)" }}>
           {game.title}
         </span>
         <span
@@ -176,8 +181,13 @@ function GameCard({ game }: { game: Simulation }) {
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           <Play className="h-[16px] w-[16px]" aria-hidden />
-          Start Level 1 · {first.role}
+          {resumable ? `Continue Level ${first.n} · ${first.role}` : `Start Level ${first.n} · ${first.role}`}
         </Link>
+        {resumable && (
+          <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            Saved at {resumable.reputation} reputation
+          </p>
+        )}
       </div>
     </article>
   );

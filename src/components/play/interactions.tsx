@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, FileText, Trophy } from "lucide-react";
 
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
+import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
 import type { CardBeat, ChoiceBeat, MatchBeat, RapidBeat, Tier } from "./types";
 
 // The interaction bodies. Each one owns its own rules from the Interaction
@@ -42,6 +43,15 @@ export function useTypewriter(text: string, speed = 12) {
 
 // -------------------------------------------------------------- shared parts
 
+/** Every pick in the game gets the same treatment -- the chosen tile colours to
+ *  its tier, a bad one shakes, a sound fires. A game where only the matching
+ *  screen reacts feels broken on the other nine. */
+function tierSound(tier: Tier) {
+  if (tier === "best" || tier === "acceptable") playCorrect();
+  else if (tier === "wrong" || tier === "risky") playWrong();
+  else playSelect();
+}
+
 function OptionButton({
   label,
   index,
@@ -64,7 +74,9 @@ function OptionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="group flex w-full cursor-pointer items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left text-[15px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none"
+      className={`group flex w-full cursor-pointer items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left text-[15px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none ${
+        picked && (tier === "wrong" || tier === "risky") ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
+      }`}
       style={{
         animationDelay: `${index * 55}ms`,
         background: picked ? `color-mix(in srgb, ${TIER_COLOR[tier ?? "none"]} 18%, var(--glass-surface-1))` : "var(--glass-surface-1)",
@@ -89,9 +101,11 @@ function OptionButton({
   );
 }
 
+/** The HEADING of a beat. Has to stay clearly above the situation text, which
+ *  is now bold itself. */
 function Question({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[19px] leading-[1.2] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <p className="text-[21px] leading-[1.16] font-extrabold sm:text-[25px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}
     </p>
   );
@@ -122,7 +136,10 @@ export function CardBody({ beat, onNext, reputation }: { beat: CardBeat; onNext:
       {beat.showBands && <BandLadder reputation={reputation} />}
       <button
         type="button"
-        onClick={onNext}
+        onClick={() => {
+          playSelect();
+          onNext();
+        }}
         className="dm-solid mt-[var(--space-1)] w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
@@ -176,7 +193,7 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
             picked={locked === choice.id}
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
-            onClick={() => onResolve(choice.tier, choice.why, choice.id)}
+            onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
       </div>
@@ -210,7 +227,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
             key={choice.id}
             type="button"
             disabled={locked !== null}
-            onClick={() => onResolve(choice.tier, choice.why, choice.id)}
+            onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
             className="cursor-pointer rounded-full border px-[15px] py-[10px] text-[15px] font-bold transition-[transform,border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none"
             style={{
               animationDelay: `${index * 55}ms`,
@@ -247,7 +264,7 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
               <button
                 type="button"
                 disabled={locked !== null}
-                onClick={() => onResolve(choice.tier, choice.why, choice.id)}
+                onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
                 className="w-full cursor-pointer border-t px-[12px] py-[11px] text-left text-[14.5px] leading-snug font-medium transition-colors duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
                 style={{
                   animationDelay: `${index * 45}ms`,
@@ -289,7 +306,7 @@ export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onR
             picked={locked === choice.id}
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
-            onClick={() => onResolve(choice.tier, choice.why, choice.id)}
+            onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
       </div>
@@ -299,104 +316,161 @@ export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onR
 
 // ----------------------------------------------------------------- matching
 
+/** Match pairs, the way a language app does it: tap one tile, tap another, and
+ *  find out immediately. The old version waited for a Check button, highlighted
+ *  only the left column, and stacked the chosen definition UNDERNEATH the term,
+ *  which made the pairing invisible until you submitted.
+ *
+ *  Now: either column can start a pair, a right answer flashes green and clears
+ *  both tiles off the board, a wrong one shakes red and lets go. The board
+ *  emptying is the progress bar. The handoff's rule still holds -- no partial
+ *  credit, one wrong pair scores the beat Wrong -- it is just enforced by
+ *  remembering that a mistake happened rather than by a submit step.
+ */
+type Side = "term" | "def";
+type TileState = "idle" | "picked" | "right" | "wrong" | "done";
+
 export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Resolve }) {
   // Definitions are shuffled once per mount, deterministically per beat so the
-  // layout does not jump between renders.
-  const defs = useMemo(() => {
-    const order = beat.pairs.map((pair, index) => ({ ...pair, index }));
-    return order.slice().sort((a, b) => ((a.def.length * 7 + a.index * 3) % 11) - ((b.def.length * 7 + b.index * 3) % 11));
-  }, [beat.pairs]);
+  // layout never jumps between renders.
+  const defs = useMemo(
+    () =>
+      beat.pairs
+        .map((pair, index) => ({ ...pair, index }))
+        .slice()
+        .sort((a, b) => ((a.def.length * 7 + a.index * 3) % 11) - ((b.def.length * 7 + b.index * 3) % 11)),
+    [beat.pairs],
+  );
 
-  const [activeTerm, setActiveTerm] = useState<string | null>(null);
-  // term -> def
-  const [links, setLinks] = useState<Record<string, string>>({});
-  const all = Object.keys(links).length === beat.pairs.length;
+  const [picked, setPicked] = useState<{ side: Side; term: string } | null>(null);
+  const [done, setDone] = useState<string[]>([]);
+  // BOTH tiles in the attempt are flashed, identified by side as well as key:
+  // a definition tile is keyed by the term it belongs to, so flashing by key
+  // alone lit up the wrong tile and left the one you actually tapped grey.
+  const [flash, setFlash] = useState<{ a: { side: Side; term: string }; b: { side: Side; term: string }; ok: boolean } | null>(null);
+  const missed = useRef(false);
+  const settled = useRef(false);
 
-  function tapDef(def: string) {
-    if (!activeTerm) return;
-    setLinks((current) => {
-      const next = { ...current };
-      for (const [term, linked] of Object.entries(next)) if (linked === def) delete next[term];
-      next[activeTerm] = def;
-      return next;
-    });
-    setActiveTerm(null);
+  const total = beat.pairs.length;
+
+  function attempt(side: Side, term: string) {
+    if (flash || done.includes(term)) return;
+    // Nothing held, or re-picking on the same side: just select.
+    if (!picked || picked.side === side) {
+      playSelect();
+      setPicked({ side, term });
+      return;
+    }
+    const ok = picked.term === term;
+    if (!ok) missed.current = true;
+    if (ok) playCorrect();
+    else playWrong();
+    setFlash({ a: picked, b: { side, term }, ok });
+    window.setTimeout(() => {
+      setFlash(null);
+      setPicked(null);
+      if (!ok) return;
+      const cleared = [...done, term];
+      setDone(cleared);
+      if (cleared.length < total || settled.current) return;
+      settled.current = true;
+      playSweep();
+      window.setTimeout(() => {
+        const right = !missed.current;
+        onResolve(right ? "best" : "wrong", right ? beat.whenRight : beat.whenWrong);
+      }, 420);
+    }, ok ? 260 : 520);
   }
 
-  function check() {
-    const right = beat.pairs.every((pair) => links[pair.term] === pair.def);
-    onResolve(right ? "best" : "wrong", right ? beat.whenRight : beat.whenWrong);
-  }
-
-  const linkedDefs = new Set(Object.values(links));
+  const tileState = (term: string, side: Side): TileState => {
+    if (done.includes(term)) return "done";
+    if (flash) {
+      const isA = flash.a.side === side && flash.a.term === term;
+      const isB = flash.b.side === side && flash.b.term === term;
+      if (isA || isB) return flash.ok ? "right" : "wrong";
+    }
+    if (picked && picked.side === side && picked.term === term) return "picked";
+    return "idle";
+  };
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <div className="grid grid-cols-2 gap-[8px]">
         <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
-          {beat.pairs.map((pair, index) => {
-            const linked = links[pair.term];
-            const active = activeTerm === pair.term;
-            return (
-              <li key={pair.term}>
-                <button
-                  type="button"
-                  onClick={() => setActiveTerm(active ? null : pair.term)}
-                  className="w-full cursor-pointer rounded-[12px] border px-[11px] py-[10px] text-left text-[15px] font-extrabold transition-[border-color,background] duration-200 motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
-                  style={{
-                    animationDelay: `${index * 45}ms`,
-                    background: active ? "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))" : "var(--glass-surface-1)",
-                    borderColor: active ? "var(--primary)" : linked ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {pair.term}
-                  {linked && (
-                    <span className="mt-[2px] block truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                      {linked}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
+          {beat.pairs.map((pair, index) => (
+            <li key={pair.term}>
+              <MatchTile
+                label={pair.term}
+                state={tileState(pair.term, "term")}
+                index={index}
+                strong
+                onClick={() => attempt("term", pair.term)}
+              />
+            </li>
+          ))}
         </ul>
         <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
-          {defs.map((pair, index) => {
-            const used = linkedDefs.has(pair.def);
-            return (
-              <li key={pair.def}>
-                <button
-                  type="button"
-                  onClick={() => tapDef(pair.def)}
-                  disabled={!activeTerm && !used}
-                  className="w-full cursor-pointer rounded-[12px] border px-[11px] py-[10px] text-left text-[13.5px] leading-snug font-semibold transition-[border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
-                  style={{
-                    animationDelay: `${index * 45}ms`,
-                    background: "var(--glass-surface-1)",
-                    borderColor: "var(--color-glass-border-raised)",
-                    color: "var(--foreground)",
-                    opacity: used ? 0.35 : activeTerm ? 1 : 0.75,
-                  }}
-                >
-                  {pair.def}
-                </button>
-              </li>
-            );
-          })}
+          {defs.map((pair, index) => (
+            <li key={pair.def}>
+              <MatchTile
+                label={pair.def}
+                state={tileState(pair.term, "def")}
+                index={index}
+                onClick={() => attempt("def", pair.term)}
+              />
+            </li>
+          ))}
         </ul>
       </div>
-      <button
-        type="button"
-        disabled={!all}
-        onClick={check}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
-        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-      >
-        Check Matches
-      </button>
+      <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        {done.length} of {total} matched
+      </p>
     </div>
+  );
+}
+
+function MatchTile({
+  label,
+  state,
+  index,
+  strong,
+  onClick,
+}: {
+  label: string;
+  state: TileState;
+  index: number;
+  strong?: boolean;
+  onClick: () => void;
+}) {
+  const green = "var(--color-feedback-success)";
+  const red = "var(--destructive)";
+  const style =
+    state === "done"
+      ? { background: `color-mix(in srgb, ${green} 12%, transparent)`, borderColor: `color-mix(in srgb, ${green} 40%, transparent)`, color: "var(--muted-foreground)" }
+      : state === "right"
+        ? { background: `color-mix(in srgb, ${green} 26%, var(--glass-surface-1))`, borderColor: green, color: "var(--foreground)" }
+        : state === "wrong"
+          ? { background: `color-mix(in srgb, ${red} 24%, var(--glass-surface-1))`, borderColor: red, color: "var(--foreground)" }
+          : state === "picked"
+            ? { background: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", borderColor: "var(--primary)", color: "var(--foreground)" }
+            : { background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={state === "done"}
+      aria-pressed={state === "picked"}
+      className={`flex min-h-[52px] w-full items-center rounded-[14px] border-2 px-[11px] py-[10px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
+        strong ? "text-[15px] font-extrabold" : "text-[13.5px] font-semibold"
+      } ${state === "done" ? "opacity-45" : "cursor-pointer"} ${
+        state === "wrong" ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
+      } ${state === "picked" ? "-translate-y-px" : ""} motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]`}
+      style={{ animationDelay: state === "idle" ? `${index * 45}ms` : undefined, ...style }}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -433,7 +507,10 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
   function pick(index: number) {
     if (picked !== null) return;
     setPicked(index);
-    const correct = item.options[index]?.correct ? right + 1 : right;
+    const hit = Boolean(item.options[index]?.correct);
+    if (hit) playCorrect();
+    else playWrong();
+    const correct = hit ? right + 1 : right;
     setRight(correct);
     window.setTimeout(() => {
       if (step + 1 >= beat.items.length) finish(correct);

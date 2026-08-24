@@ -23,6 +23,64 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   effect will show anywhere else that uses it in light mode. Worth correcting
   at the source.
 
+### 2026-08-24 Play: RPG pacing, autosave, portraits, sound (PUSHED)
+
+- AUTOSAVE + RESUME, which the Interaction Rules tab asks for by name
+  ("students play in short bursts between classes"). src/components/play/
+  progress.ts stores {index, reputation, scored} per game+level at the LAST
+  COMPLETED screen; reopening lands there with a "Picked up where you left off /
+  Start over" banner, and the hub's button reads Continue with the saved
+  reputation under it. Cleared when a level ends or the player starts over.
+  TRAP WORTH KNOWING: the run must be DERIVED from the store, not seeded into
+  useState. A state initialiser runs during hydration, when
+  useSyncExternalStore still reports the server snapshot, so the first version
+  silently threw every save away and always started at beat one.
+- RPG PACING. A beat with a situation now reads in two steps: the line types
+  out, the player advances at their own pace (tap the box, or space / enter /
+  right / A), and only then do the question and its options appear -- with the
+  situation still on screen above them, ruled off, because several beats cannot
+  be answered without it. Cards and the review beat are not staged; their
+  "setup" is a label, not a paragraph. A timed beat's clock now starts when the
+  QUESTION does, so reading no longer eats the timer.
+- DIALOGUE PORTRAITS, Nintendo-style. Vision's face detector found the faces in
+  the scene art, so Christina and Jordan speak with real portraits cropped from
+  the frames they appear in (face-christina.webp, face-jordan.webp), shown
+  beside their line with their name. The sheet's reported speech
+  ("Christina (Associate) says, ...") became direct speech on those three beats,
+  since the box now attributes it visually. DEVIATION FROM THE SHEET, on
+  request. Narrator IS Dreamy: same guide, so it speaks as Dreamy with Dreamy's
+  face, and each narrated beat picks a pose.
+- MATCHING REBUILT to the Duolingo model, on request: either column can start a
+  pair, a right answer flashes green on BOTH tiles and clears them off the
+  board, a wrong one flashes red and shakes, and the board emptying is the
+  progress. No Check Matches button any more -- a DEVIATION from the
+  Interaction Rules tab, which says nothing scores until Check is tapped. The
+  scoring rule it protects is intact: any wrong attempt scores the beat Wrong,
+  so there is still no partial credit. Bug found while testing: flashing by
+  pairing key alone lit the wrong tile and left the tapped one grey, because a
+  definition tile is keyed by the term it belongs to.
+- SOUND across every interaction, synthesized (no assets) in play/sound.ts:
+  a tick on select, a two-note rise on a good answer, a soft low thud on a bad
+  one, a sweep when a board clears or a level is won. MUTE IS A VISIBLE HUD
+  TOGGLE, persisted -- this gets played in classrooms, and a game that cannot be
+  silenced in one tap is a game nobody opens at school.
+- PARALLAX REMOVED, and this is worth recording so nobody re-tries it blind. The
+  scene art has the characters baked in, so a cutout riding in front of the same
+  plate shows a ghost of itself the moment the planes move relative to each
+  other -- from a scale mismatch, from the pointer, and worst from the two
+  planes carrying opposite ambient drifts (~4% of the width). Erasing them needs
+  an inpainting model: diffusion averaging produced a white cloud, edge colour
+  propagation produced diagonal smears, horizontal patch cloning produced
+  repeating stripes. The 19 cutout assets were deleted rather than left unused.
+  What ships is one plane with a slow camera push. THE REAL FIX is
+  character-free background plates from the artist -- they generated these, so a
+  background-only render is a cheap ask, and then real parallax is a small
+  change (the cutout tool was ~30 lines of Vision).
+- Also: art is no longer dimmed (the scrim only covers what the HUD and the box
+  edge need), the career title reads in caps, the hub header is PLAY, and on
+  phones the art is a flex region that takes whatever the dialogue box leaves,
+  so there is no dead gap between picture and text.
+
 ### 2026-08-24 Play: the games hub and the IB simulation, Level 1 (PUSHED)
 
 - NEW SURFACE. /play is the games hub (the nav's Play slot was href="#"), and

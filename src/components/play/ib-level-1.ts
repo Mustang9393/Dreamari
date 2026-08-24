@@ -23,6 +23,10 @@ export const IB_LEVEL_1: Level = {
   blurb: "Week one at Cobalt Capital. Learn the language, hit your first deadline, and find out what the team says about you.",
   cover: `${ART}/l1-04.webp`,
   mood: "day",
+  cast: {
+    Christina: `${ART}/face-christina.webp`,
+    Jordan: `${ART}/face-jordan.webp`,
+  },
   beats: [
     {
       kind: "card",
@@ -31,6 +35,7 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-04.webp`,
       artAlt: "Christina welcoming you at Cobalt Capital reception, Jordan beside you, trading floor behind.",
       speaker: "Dreamy",
+      pose: "happy",
       setup: "Intern • Week 1",
       title: "Welcome to Cobalt Capital.",
       body: "You're starting your summer internship in investment banking.",
@@ -41,6 +46,7 @@ export const IB_LEVEL_1: Level = {
       variant: "intro",
       id: "L1-02",
       speaker: "Dreamy",
+      pose: "glasses",
       setup: "How Investment Banking Works",
       title: "Investment bankers help companies raise money and buy or sell businesses.",
       example:
@@ -52,6 +58,7 @@ export const IB_LEVEL_1: Level = {
       variant: "intro",
       id: "L1-03",
       speaker: "Dreamy",
+      pose: "idea",
       setup: "Your Reputation",
       title: "Every decision changes your reputation.",
       body: "Your reputation decides if you get promoted, keep your position, or lose your job.",
@@ -66,6 +73,7 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-04.webp`,
       artAlt: "Christina in a navy blazer gesturing welcome at reception, Jordan beside her with a shoulder bag.",
       speaker: "Narrator",
+      pose: "happy",
       setup: "Christina (Associate) welcomes you to Cobalt Capital. Jordan, another Intern, is starting too.",
       question: "Day 1: What should you do first?",
       choices: [
@@ -82,7 +90,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-05",
       progress: 0.2,
       speaker: "Christina",
-      setup: 'Christina (Associate) says, "Before client work, learn the language of banking."',
+      setup: '"Before client work, learn the language of banking."',
       question: "Tap a term, then tap its match.",
       pairs: [
         { term: "Comps", def: "A list of similar companies" },
@@ -102,6 +110,7 @@ export const IB_LEVEL_1: Level = {
       progress: 0.3,
       timer: 45,
       speaker: "Dreamy",
+      pose: "alert",
       setup: "Christina checks if you understand how Interns communicate before giving you client work.",
       question: "Four quick questions on one shared timer.",
       items: [
@@ -152,6 +161,7 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-07.webp`,
       artAlt: "Over-the-shoulder view of hands at a laptop showing charts, sunset skyline through the windows.",
       speaker: "Narrator",
+      pose: "nervous",
       setup: "Christina (Associate) gives you your first real assignment: a Nike slide due by 5 PM. It is 4 PM, and key numbers are missing.",
       question: "What do you do?",
       choices: [
@@ -184,6 +194,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-08",
       progress: 0.5,
       speaker: "Narrator",
+      pose: "party",
       setup: "Your name made the deal email to the whole bank. You're on the record for helping close it.",
       question: "What do you do?",
       choices: [
@@ -205,7 +216,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-09",
       progress: 0.6,
       speaker: "Christina",
-      setup: "Before sharing files, Christina (Associate) reminds you: client materials must stay secure.",
+      setup: '"Before you share anything: client files stay secure."',
       question: "Client files belong in the secure ___.",
       choices: [
         { id: "a", label: "data room", tier: "best", why: "Right. A data room is a locked folder only approved people can open." },
@@ -223,7 +234,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-10",
       progress: 0.7,
       speaker: "Christina",
-      setup: "Christina (Associate) asks you to review the Nike summary before Marcus (VP) sees it. One line has a mistake.",
+      setup: '"Review the Nike summary before Marcus sees it. One line has a mistake."',
       // Production change from the sheet: the prompt now says the mistake is a
       // WRITING error, not a fact error (decision D07).
       question: "Tap the line with the writing mistake, not a fact mistake.",
@@ -243,6 +254,7 @@ export const IB_LEVEL_1: Level = {
       variant: "character",
       id: "L1-11",
       speaker: "Dreamy",
+      pose: "curious",
       setup: "Jordan, Summer Intern",
       title: "Another intern.",
       body: "Same goal as you.",
@@ -256,6 +268,7 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-12.webp`,
       artAlt: "Jordan presenting a spreadsheet on a monitor to a seated manager, your coffee mug in the foreground.",
       speaker: "Narrator",
+      pose: "puzzle",
       tone: "conflict",
       setup: "You built the comparison spreadsheet over three days. While you grabbed coffee, Jordan told your manager 'I made that.' You overheard it.",
       question: "What do you do?",
@@ -294,6 +307,7 @@ export const IB_LEVEL_1: Level = {
       art: `${ART}/l1-13.webp`,
       artAlt: "A desk buried in sticky notes and crumpled paper, a figure walking out with a box, an I'M OUT note on the door.",
       speaker: "Narrator",
+      pose: "alert",
       setup: "Your intern partner quits at 3 PM, leaving half the 6 PM presentation undone. You've never even opened their slides.",
       question: "What do you do?",
       choices: [
@@ -323,6 +337,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-14",
       progress: 1,
       speaker: "Narrator",
+      pose: "curious",
       setup: "7 PM. Another intern is re-sorting 200 misprinted pages. Her deadline: 40 minutes. Yours: tomorrow. She hasn't asked for help.",
       question: "What do you do?",
       choices: [
@@ -351,6 +366,7 @@ export const IB_LEVEL_1: Level = {
       kind: "review",
       id: "L1-16",
       speaker: "Dreamy",
+      pose: "party",
       setup: "Final Review",
       title: "Cobalt Capital is reviewing your internship.",
       body: "Your reputation will decide if you earn the return offer.",

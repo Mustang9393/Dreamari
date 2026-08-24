@@ -541,6 +541,69 @@ body {
     transform: scale(1);
   }
 }
+/* Ambient camera for a scene: a slow push and drift applied to the WHOLE scene,
+   both planes together. Moving the planes against each other looked like the
+   obvious way to get ambient depth, and it was wrong -- the background plate
+   still contains the characters that were lifted out of it, so any relative
+   motion slides a ghost of them out from behind the cutout. A camera move gives
+   the same cinematic life and cannot expose anything, and the real parallax
+   comes from the pointer (a few pixels, covered by the cutout's oversize) and
+   from Dreamy, which is a genuinely separate sprite. */
+@keyframes play-camera {
+  0% {
+    transform: translate3d(-0.4%, 0.3%, 0) scale(1.005);
+  }
+  50% {
+    /* A push worth noticing. 3.5% over seventeen seconds was technically
+       correct and visually nothing. */
+    transform: translate3d(0.4%, -0.5%, 0) scale(1.095);
+  }
+  100% {
+    transform: translate3d(-0.4%, 0.3%, 0) scale(1.005);
+  }
+}
+/* Dreamy hovering beside the line it is speaking. Small travel on purpose. */
+@keyframes play-hover {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+/* The "continue" chevron in a dialogue box: a small nudge, the way an RPG
+   blinks its advance marker. */
+@keyframes play-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+}
+/* A wrong pair in the matching game: a short shake, not a long one. */
+@keyframes play-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
 @keyframes play-sheet-up {
   from {
     opacity: 0;
