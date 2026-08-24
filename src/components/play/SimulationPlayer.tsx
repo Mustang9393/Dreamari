@@ -27,7 +27,7 @@ import {
   type Resolve,
 } from "./interactions";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { mutedSnapshot, playSelect, playSweep, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
+import { mutedSnapshot, playSelect, playSweep, playTick, serverMutedSnapshot, setMuted, subscribeMuted } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, bandFor, clamp, endingFor } from "./scoring";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Mood, type Simulation, type Tier } from "./types";
 
@@ -1341,6 +1341,16 @@ function MuteToggle() {
 function Clock({ remaining, total }: { remaining: number; total: number }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
+  // One tick per second, not per 100ms render (the countdown's own interval
+  // granularity) -- fires on the second the displayed number actually
+  // changes, sharper once the clock reads urgent.
+  const lastTick = useRef<number | null>(null);
+  useEffect(() => {
+    const second = Math.ceil(remaining);
+    if (lastTick.current === second) return;
+    lastTick.current = second;
+    if (second > 0) playTick(urgent);
+  }, [remaining, urgent]);
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const color = urgent ? "var(--destructive)" : "var(--world-business-money-office)";

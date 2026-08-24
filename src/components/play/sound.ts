@@ -118,3 +118,15 @@ export function playSweep() {
   const now = at.currentTime;
   [523.25, 659.25, 783.99, 1046.5].forEach((freq, index) => tone(at, freq, now + index * 0.075, 0.24, 0.12));
 }
+
+/** One second of a timed beat's shared clock passing. Deliberately the
+ *  smallest, driest sound in the set -- it repeats every second for as long
+ *  as a countdown is up, so anything more than a short, quiet click would
+ *  wear out its welcome fast. Sharper and a touch louder in the last
+ *  stretch (matching the clock face's own urgent color/pulse), the same way
+ *  a kitchen timer's tick reads differently once you notice it running out. */
+export function playTick(urgent = false) {
+  const at = audio();
+  if (!at) return;
+  tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
+}
