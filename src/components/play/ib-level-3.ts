@@ -62,8 +62,11 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "step",
       id: "L3-01",
-      art: `${ART}/l3-01.webp`,
-      artAlt: "Christina at a desk, city windows behind her.",
+      // l3-01.webp is the same mismatched-design "HR" character art the
+      // handoff sheet flags for Level 2's onboarding (D11) -- Level 3's
+      // header comment already says this level made the same move to
+      // Christina; the art just never actually got swapped out. Falls
+      // through to her real cutout at the beat's own location instead.
       speaker: "Christina",
       step: { at: 1, of: 5 },
       setup: '"Analysts prove they can do the work. Associates prove they can guide others."',

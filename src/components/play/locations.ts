@@ -64,10 +64,10 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     focal: { x: 0.61, y: 0.4 },
     mobileFocal: { x: 0.66, y: 0.36 },
     // The only clear floor in this plate: the strip by the window past the
-    // last chair. Small scale on purpose -- it reads as standing at the back
-    // of the room, not seated in the furniture the mask would otherwise need
-    // to occlude.
-    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.55, centered: false },
+    // last chair. Full scale like every other location -- the window has
+    // headroom to spare, and a small figure here read as a scaling bug
+    // rather than a deliberate sense of distance.
+    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.9, centered: false },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
@@ -88,7 +88,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
     focal: { x: 0.62, y: 0.4 },
     mobileFocal: { x: 0.67, y: 0.35 },
-    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.53, centered: false },
+    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.9, centered: false },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
@@ -133,6 +133,10 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
 // public working-floor moment -> trading floor, private transition -> hallway.
 export const BEAT_LOCATION: Record<string, LocationId> = {
   // Level 1 -- Intern
+  // L1-01..03 are Dreamy's own intro cards -- no castMember/speaker resolves
+  // to a character on any of them, so the reception shows as an empty room,
+  // not a starfield. Neither character has entered the story yet; the room
+  // itself already has.
   "L1-01": "l1-reception",
   "L1-02": "l1-reception",
   "L1-03": "l1-reception",

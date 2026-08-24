@@ -151,6 +151,9 @@ export const IB_LEVEL_2: Level = {
       // lingering, and L2-10 right after needs to reach ITS OWN scene
       // (Christina) rather than inheriting his.
       resetScene: true,
+      // The original art was Christina handing over the deal binder --
+      // she carries this beat even with that specific image gone.
+      castMember: "Christina",
       speaker: "Narrator",
       pose: "alert",
       setup: "Next episode · Level 2",
