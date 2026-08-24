@@ -130,8 +130,10 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "character",
       id: "L3-07",
-      art: `${ART}/l3-07.webp`,
-      artAlt: "Lamisa seated in a corner office, hands folded, city windows behind her.",
+      // The seated hero illustration was a low, near-square aspect ratio --
+      // badly cropped and pixelated once stretched to fill a wide screen.
+      // Falls through to her standing cutout at this beat's own location
+      // instead, same treatment as everywhere else she appears.
       speaker: "Lamisa",
       setup: '"Managing Director. The client relationship is mine, which means the work is mine too."',
       title: "Lamisa · Managing Director",

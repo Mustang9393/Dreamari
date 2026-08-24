@@ -63,11 +63,11 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "An internal boardroom at Cobalt Capital, empty chairs around the table at sunset.",
     focal: { x: 0.61, y: 0.4 },
     mobileFocal: { x: 0.66, y: 0.36 },
-    // The only clear floor in this plate: the strip by the window past the
-    // last chair. Full scale like every other location -- the window has
-    // headroom to spare, and a small figure here read as a scaling bug
-    // rather than a deliberate sense of distance.
-    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.9, centered: false },
+    // Centered and full scale like every other location -- off-to-the-side
+    // by the window read as a scaling/positioning bug, not a deliberate
+    // sense of distance. Christina's treatment is the reference for every
+    // scene shaped like this one.
+    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.9 },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
@@ -88,7 +88,9 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
     focal: { x: 0.62, y: 0.4 },
     mobileFocal: { x: 0.67, y: 0.35 },
-    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.9, centered: false },
+    // Centered and full scale like every other location -- see the note on
+    // cobalt-internal-boardroom-sunset above.
+    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.9 },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
