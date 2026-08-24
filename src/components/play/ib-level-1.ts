@@ -255,6 +255,7 @@ export const IB_LEVEL_1: Level = {
       variant: "character",
       id: "L1-11",
       speaker: "Dreamy",
+      castMember: "Jordan",
       pose: "curious",
       setup: "Jordan, Summer Intern",
       title: "Another intern.",

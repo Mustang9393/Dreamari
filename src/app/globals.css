@@ -592,6 +592,21 @@ body {
 /* The ambient backdrop that stands in once a scene's picture has gone stale:
    three soft colour fields drifting independently so it never looks like it is
    orbiting, plus a slow sparkle twinkle. */
+/* A character stepping into a location scene: fades and rises in, rather
+   than a flat image just appearing or silently swapping underneath the
+   player. Replays whenever the sprite src changes (new speaker, or an
+   expression swap on commit), since the component is keyed on it. */
+@keyframes play-character-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes play-ambient-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(6%, 8%) scale(1.08); }

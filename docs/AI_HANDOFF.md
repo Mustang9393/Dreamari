@@ -40,6 +40,51 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: Cobalt Capital location library from the production art handoff (PUSHED)
+
+- A teammate handed off `Dreamari-IB-Claude-Production-Handoff-v2.zip`: a UX
+  audit, a character bible, a learning-design spec, and six real photographic
+  Cobalt Capital location plates (trading floor day/night, internal boardroom,
+  client boardroom, cafe lounge, elevator hallway) plus expression sprites for
+  Christina and Jordan. Full read-through and the resulting judgment calls are
+  below; nothing in this batch touched any beat's copy, scoring, or order.
+- **Where I followed it.** The six locations now stand in for the ambient
+  gradient on any beat with no illustration of its own (`src/components/play/
+  locations.ts`), routed per-beat from the handoff's own `background-library
+  .json` beat lists, with its own tie-break rule applied to beats it listed
+  under more than one room. The 21 hand-authored hero illustrations still win
+  outright when fresh -- these are a REPLACEMENT for the abstract ambient
+  backdrop, not for real art. Christina and Jordan's expression sprites now
+  drive two things straight from the Character Bible's tier mapping: a
+  character stepping into a location scene (chest-up, floating over the plate
+  the way Dreamy already floats over the dialogue box, entrance-animated,
+  drifting a few px against the pointer -- these six plates are the first
+  genuinely clean, character-free backgrounds this game has had, so this is
+  also the first place parallax could safely come back after being pulled
+  earlier for ghosting on the old illustrations), and the feedback card's
+  reaction portrait, enlarged after review to actually read at a glance.
+- **Where I deliberately did not follow it.** The brief asks for full-body
+  sprites composited directly onto the location photographs as the primary
+  staging model. The six plates are photographic renders; the cast is flat
+  anime illustration. Pasting one onto the other reads as a sticker on a
+  photo, worse in a boardroom where the brief itself flags that a sprite
+  cannot be placed over the chairs without a foreground furniture mask that
+  does not exist yet -- so both boardrooms anchor a character only in the one
+  strip of open floor by the window, small and to the back, never at the
+  table. This is a judgment call, not a rejection of the direction: if a
+  matching illustration style or real masks arrive, full staging is a small
+  extension of what's here now, not a rebuild.
+- Also skipped, and worth someone's attention separately: a mastery model
+  distinct from reputation, first-run accessibility settings, and analytics
+  instrumentation. All three are described well in the handoff's learning
+  spec, but each is its own multi-surface feature (new persistent stores, new
+  settings UI, an event pipeline) rather than something that belongs folded
+  into an art-integration pass.
+- No copy changed anywhere in this batch -- not a beat's text, not a score, not
+  a band label (the brief's own "call 50 Building Trust, not Cautious"
+  suggestion is exactly the kind of copy edit intentionally left alone here).
+  No token changes; contract files untouched.
+
 ### 2026-08-24 Play: level-navigation bug, ambient backdrop, light mode, nav link (PUSHED)
 
 - **Bug: `SimulationPlayer` never remounted between levels.** `/play/[game]`

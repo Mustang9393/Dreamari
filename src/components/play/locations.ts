@@ -1,0 +1,176 @@
+// Cobalt Capital's six recurring locations, from the production art handoff
+// (Dreamari-IB-Claude-Production-Handoff-v2). These replace the plain ambient
+// gradient on any beat that has no illustration of its own: instead of a
+// stretch of screens fading to an abstract drifting backdrop, the player sees
+// an actual room that means something -- the trading floor for ordinary work,
+// the night floor for crunch, the cafe for coaching, the boardrooms for
+// judgment and pitches, the hallway for arrivals and private consequence.
+//
+// A location is chosen ONLY when the current beat has no fresh illustration of
+// its own (see SCENE_FRESH_BEATS in SimulationPlayer.tsx) -- the 21 hand-drawn
+// hero scenes always win. Locations are not sticky the way hero art is: each
+// beat resolves its own location directly from BEAT_LOCATION, since virtually
+// every beat has one, so there is no need to carry a stale room forward.
+
+export type LocationId =
+  | "cobalt-trading-floor-sunset"
+  | "cobalt-internal-boardroom-sunset"
+  | "cobalt-trading-floor-night"
+  | "cobalt-cafe-lounge-sunset"
+  | "cobalt-client-boardroom-sunset"
+  | "cobalt-elevator-hallway-sunset";
+
+type LocationArt = {
+  src: string;
+  alt: string;
+  /** Fraction of the image width/height, left-to-right and top-to-bottom. */
+  focal: { x: number; y: number };
+  mobileFocal: { x: number; y: number };
+  /** Where a single speaking character stands, as a fraction of the frame.
+   *  On the two boardrooms this is deliberately the one strip of open floor
+   *  behind the last chair, by the window -- not inside the seating, which
+   *  the handoff's foreground-mask requirement exists to protect against and
+   *  which no mask asset exists to occlude correctly yet. */
+  characterAnchor?: { x: number; baselineY: number; heightFrac: number };
+};
+
+const L = "/images/play/ib/locations";
+
+export const LOCATION_ART: Record<LocationId, LocationArt> = {
+  "cobalt-trading-floor-sunset": {
+    src: `${L}/trading-floor-sunset.webp`,
+    alt: "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
+    focal: { x: 0.58, y: 0.43 },
+    mobileFocal: { x: 0.57, y: 0.36 },
+    characterAnchor: { x: 0.74, baselineY: 0.98, heightFrac: 0.86 },
+  },
+  "cobalt-internal-boardroom-sunset": {
+    src: `${L}/internal-boardroom-sunset.webp`,
+    alt: "An internal boardroom at Cobalt Capital, empty chairs around the table at sunset.",
+    focal: { x: 0.61, y: 0.4 },
+    mobileFocal: { x: 0.66, y: 0.36 },
+    // The only clear floor in this plate: the strip by the window past the
+    // last chair. Small scale on purpose -- it reads as standing at the back
+    // of the room, not seated in the furniture the mask would otherwise need
+    // to occlude.
+    characterAnchor: { x: 0.91, baselineY: 0.88, heightFrac: 0.5 },
+  },
+  "cobalt-trading-floor-night": {
+    src: `${L}/trading-floor-night.webp`,
+    alt: "Cobalt Capital's trading floor at night, monitors lit against the city.",
+    focal: { x: 0.58, y: 0.45 },
+    mobileFocal: { x: 0.6, y: 0.37 },
+    characterAnchor: { x: 0.75, baselineY: 0.98, heightFrac: 0.86 },
+  },
+  "cobalt-cafe-lounge-sunset": {
+    src: `${L}/cafe-lounge-sunset.webp`,
+    alt: "A cafe lounge near the office, quiet seating at sunset.",
+    focal: { x: 0.66, y: 0.42 },
+    mobileFocal: { x: 0.69, y: 0.36 },
+    characterAnchor: { x: 0.76, baselineY: 0.96, heightFrac: 0.85 },
+  },
+  "cobalt-client-boardroom-sunset": {
+    src: `${L}/client-boardroom-sunset.webp`,
+    alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
+    focal: { x: 0.62, y: 0.4 },
+    mobileFocal: { x: 0.67, y: 0.35 },
+    characterAnchor: { x: 0.9, baselineY: 0.86, heightFrac: 0.48 },
+  },
+  "cobalt-elevator-hallway-sunset": {
+    src: `${L}/elevator-hallway-sunset.webp`,
+    alt: "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
+    focal: { x: 0.55, y: 0.45 },
+    mobileFocal: { x: 0.53, y: 0.4 },
+    characterAnchor: { x: 0.4, baselineY: 1, heightFrac: 0.94 },
+  },
+};
+
+// Per-beat routing. Every beat is listed, including ones with their own hero
+// illustration -- assigning them a location is inert today (hero art always
+// wins) but keeps the map complete if a beat's art is ever retired. Review
+// beats (L1-16, L2-25, L3-28) are deliberately absent: the final-review wait
+// reads better as the abstract, liminal AmbientBackdrop than as any one room.
+//
+// Routed from the handoff's background-library.json where a beat is listed
+// there; filled in by narrative judgment elsewhere, using its own tie-break
+// rule for beats it lists under more than one room: internal prep/review ->
+// internal boardroom, formal client pitch/deal decision -> client boardroom,
+// public working-floor moment -> trading floor, private transition -> hallway.
+export const BEAT_LOCATION: Record<string, LocationId> = {
+  // Level 1 -- Intern
+  "L1-01": "cobalt-elevator-hallway-sunset",
+  "L1-02": "cobalt-elevator-hallway-sunset",
+  "L1-03": "cobalt-elevator-hallway-sunset",
+  "L1-04": "cobalt-elevator-hallway-sunset",
+  "L1-05": "cobalt-cafe-lounge-sunset",
+  "L1-06": "cobalt-cafe-lounge-sunset",
+  "L1-07": "cobalt-trading-floor-sunset",
+  "L1-08": "cobalt-trading-floor-sunset",
+  "L1-09": "cobalt-trading-floor-sunset",
+  "L1-10": "cobalt-trading-floor-sunset",
+  "L1-11": "cobalt-cafe-lounge-sunset",
+  "L1-12": "cobalt-trading-floor-sunset",
+  "L1-13": "cobalt-trading-floor-night",
+  "L1-14": "cobalt-trading-floor-night",
+  "L1-15": "cobalt-elevator-hallway-sunset",
+
+  // Level 2 -- Analyst
+  "L2-01": "cobalt-elevator-hallway-sunset",
+  "L2-02": "cobalt-trading-floor-sunset",
+  "L2-03": "cobalt-trading-floor-sunset",
+  "L2-04": "cobalt-trading-floor-sunset",
+  "L2-05": "cobalt-trading-floor-sunset",
+  "L2-06": "cobalt-trading-floor-sunset",
+  "L2-07": "cobalt-trading-floor-sunset",
+  "L2-08": "cobalt-internal-boardroom-sunset",
+  "L2-09": "cobalt-trading-floor-sunset",
+  "L2-10": "cobalt-internal-boardroom-sunset",
+  "L2-11": "cobalt-internal-boardroom-sunset",
+  "L2-12": "cobalt-trading-floor-night",
+  "L2-13": "cobalt-trading-floor-night",
+  "L2-14": "cobalt-trading-floor-night",
+  "L2-15": "cobalt-trading-floor-night",
+  "L2-16": "cobalt-trading-floor-night",
+  "L2-17": "cobalt-trading-floor-sunset",
+  "L2-18": "cobalt-trading-floor-sunset",
+  "L2-19": "cobalt-client-boardroom-sunset",
+  "L2-20": "cobalt-trading-floor-sunset",
+  "L2-21": "cobalt-internal-boardroom-sunset",
+  "L2-22": "cobalt-trading-floor-night",
+  "L2-23": "cobalt-internal-boardroom-sunset",
+  "L2-24": "cobalt-elevator-hallway-sunset",
+
+  // Level 3 -- Associate
+  "L3-01": "cobalt-trading-floor-sunset",
+  "L3-02": "cobalt-trading-floor-sunset",
+  "L3-03": "cobalt-trading-floor-sunset",
+  "L3-04": "cobalt-trading-floor-sunset",
+  "L3-05": "cobalt-trading-floor-sunset",
+  "L3-06": "cobalt-trading-floor-sunset",
+  "L3-07": "cobalt-internal-boardroom-sunset",
+  "L3-08": "cobalt-elevator-hallway-sunset",
+  "L3-09": "cobalt-internal-boardroom-sunset",
+  "L3-10": "cobalt-trading-floor-night",
+  "L3-11": "cobalt-trading-floor-night",
+  "L3-12": "cobalt-trading-floor-night",
+  "L3-13": "cobalt-trading-floor-night",
+  "L3-14": "cobalt-trading-floor-night",
+  "L3-15": "cobalt-internal-boardroom-sunset",
+  "L3-16": "cobalt-internal-boardroom-sunset",
+  "L3-17": "cobalt-internal-boardroom-sunset",
+  "L3-18": "cobalt-client-boardroom-sunset",
+  "L3-19": "cobalt-elevator-hallway-sunset",
+  "L3-20": "cobalt-elevator-hallway-sunset",
+  "L3-21": "cobalt-trading-floor-sunset",
+  "L3-22": "cobalt-client-boardroom-sunset",
+  "L3-23": "cobalt-trading-floor-sunset",
+  "L3-24": "cobalt-trading-floor-sunset",
+  "L3-25": "cobalt-trading-floor-sunset",
+  "L3-26": "cobalt-trading-floor-sunset",
+  "L3-27": "cobalt-trading-floor-sunset",
+};
+
+export function locationFor(beatId: string): LocationArt | undefined {
+  const id = BEAT_LOCATION[beatId];
+  return id ? LOCATION_ART[id] : undefined;
+}

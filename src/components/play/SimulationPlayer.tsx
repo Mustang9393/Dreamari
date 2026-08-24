@@ -8,6 +8,8 @@ import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 import { ART_RATIO } from "./art-ratios";
+import { defaultExpressionFor, expressionFor } from "./expressions";
+import { locationFor } from "./locations";
 import {
   BossOverlay,
   BucketBody,
@@ -79,7 +81,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
-  const scene = sceneFor(level, index);
+  const scene = sceneFor(level, index, beat.id);
+  const sceneHost = useRef<HTMLDivElement>(null);
+  const sceneOffset = useScenePointer(sceneHost);
 
   const resolve = useCallback<Resolve>(
     (tier, why, id) => {
@@ -191,13 +195,32 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
          cloning) erased them cleanly enough to ship. A soft push is the effect
          that survives that honestly. If character-free plates ever arrive from
          the artist, real parallax is a small change. */}
-      <div aria-hidden={!scene.fresh || !scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none">
-        {scene.fresh ? (
-          <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
-            <SceneLayers src={scene.src} alt={scene.alt} />
-          </div>
-        ) : (
+      <div
+        ref={sceneHost}
+        aria-hidden={scene.mode === "none" || !scene.alt}
+        className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none"
+      >
+        {scene.mode === "none" ? (
           <AmbientBackdrop mood={mood} accent={accent} />
+        ) : (
+          <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
+            {scene.mode === "hero" ? (
+              <SceneLayers src={scene.src} alt={scene.alt} />
+            ) : (
+              <>
+                <LocationBackdrop src={scene.src} alt={scene.alt} focal={scene.focal} mobileFocal={scene.mobileFocal} offset={sceneOffset} />
+                {scene.characterAnchor && (
+                  <SceneCharacter
+                    speaker={beat.castMember ?? beat.speaker}
+                    anchor={scene.characterAnchor}
+                    tier={phase === "feedback" ? result?.tier : undefined}
+                    offset={sceneOffset}
+                    spotlight={Boolean(beat.castMember)}
+                  />
+                )}
+              </>
+            )}
+          </div>
         )}
       </div>
 
@@ -276,7 +299,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           reputation={reputation}
           locked={locked}
           paused={phase !== "beat"}
-          ambient={!scene.fresh}
+          ambient={scene.mode === "none"}
           onResolve={resolve}
           onNext={advance}
         />
@@ -449,6 +472,144 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
   );
 }
 
+/** Tracks pointer position over the scene as a -1..1 offset on each axis, for
+ *  the location parallax below. Only these six plates get it: they are the
+ *  genuinely clean, character-free rooms the earlier parallax attempt could
+ *  never ship with -- the 21 hero illustrations still have their subjects
+ *  baked into the same plate, so moving those layers independently drags a
+ *  ghost of them out from behind their own cutout (see the note on the single
+ *  soft-zoom scene wrapper). Disabled under reduced motion entirely. */
+function useScenePointer(host: React.RefObject<HTMLDivElement | null>) {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const element = host.current;
+    if (!element) return;
+    const onMove = (event: PointerEvent) => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+      setOffset({ x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) });
+    };
+    const onLeave = () => setOffset({ x: 0, y: 0 });
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerleave", onLeave);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerleave", onLeave);
+    };
+  }, [host]);
+  return offset;
+}
+
+/** A recurring Cobalt Capital location (see locations.ts), shown when the
+ *  current beat has no hero illustration of its own. Unlike SceneLayers this
+ *  is a single cover image at its own focal point on both mobile and desktop
+ *  -- there is no named character in the plate to keep uncropped, so it is
+ *  free to bleed off the frame the way a real photo would. Drifts a few
+ *  pixels against the pointer; the character standing in front of it (if any)
+ *  drifts further, per its own layer in the parallax host below. */
+function LocationBackdrop({
+  src,
+  alt,
+  focal,
+  mobileFocal,
+  offset,
+}: {
+  src: string;
+  alt: string;
+  focal: { x: number; y: number };
+  mobileFocal: { x: number; y: number };
+  offset: { x: number; y: number };
+}) {
+  return (
+    <>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover sm:hidden"
+        style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%` }}
+      />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        priority
+        sizes="100vw"
+        className="hidden object-cover motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
+        style={{
+          objectPosition: `${focal.x * 100}% ${focal.y * 100}%`,
+          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(1.03)`,
+        }}
+      />
+    </>
+  );
+}
+
+/** A named character standing in a location scene, chest-up, the same floating
+ *  convention Dreamy already uses rather than an attempt to plant their feet on
+ *  the floor at a matched perspective -- the sprite is a flat anime illustration
+ *  over a photographic room, and pretending they physically stand in it would
+ *  only make that seam harder to miss. This is why boardroom locations have no
+ *  `characterAnchor` at all: a floating half-body sprite reads fine hovering in
+ *  an open room, but not seated at a specific chair. Shows a neutral default
+ *  expression -- the beat has not been answered yet, so there is no tier to
+ *  react with; that happens on the feedback card instead. */
+function SceneCharacter({
+  speaker,
+  anchor,
+  tier,
+  offset,
+  spotlight,
+}: {
+  speaker?: string;
+  anchor: { x: number; baselineY: number; heightFrac: number };
+  /** Set only once the player has answered. Swaps the character's face to the
+   *  Character Bible's tier reaction -- the same welcoming/concerned/proud and
+   *  confident/focused/uncertain mapping the feedback card uses -- so the
+   *  consequence lands somewhere big enough to actually see, not a 44px icon. */
+  tier?: Tier;
+  offset: { x: number; y: number };
+  /** True on a "character" card introducing this person -- centered and at
+   *  full height rather than parked to one side, since the whole point of the
+   *  beat is to look at them. */
+  spotlight?: boolean;
+}) {
+  const src = (tier && expressionFor(speaker, tier)) || defaultExpressionFor(speaker);
+  if (!src) return null;
+  const x = spotlight ? 0.5 : anchor.x;
+  const heightFrac = spotlight ? Math.max(anchor.heightFrac, 0.94) : anchor.heightFrac;
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute motion-safe:animate-[play-hover_5.2s_ease-in-out_infinite]"
+      style={{
+        left: `${x * 100}%`,
+        bottom: `${(1 - anchor.baselineY) * 100}%`,
+        height: `${heightFrac * 100}%`,
+        transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
+      }}
+    >
+      {/* Keyed on the image itself: whenever the speaker changes, or their
+         expression swaps on commit, this remounts and plays its entrance again
+         -- the character visibly steps into the scene rather than a flat image
+         just appearing or silently swapping underneath the player. */}
+      <Image
+        key={src}
+        src={src}
+        alt=""
+        width={520}
+        height={900}
+        className="h-full w-auto object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] motion-safe:animate-[play-character-enter_0.42s_cubic-bezier(0.16,1,0.3,1)_both]"
+      />
+    </span>
+  );
+}
+
 /** Walks back from the current beat to the last one that carried art. */
 // How many beats an image is allowed to outlive the beat that owns it before
 // it reads as stale rather than "the same room". Tuned against the sheet: it
@@ -459,12 +620,42 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
 // anything and an ambient backdrop takes over instead.
 const SCENE_FRESH_BEATS = 3;
 
-function sceneFor(level: Level, index: number): { src: string; alt: string; fresh: boolean } {
+type SceneCue =
+  | { mode: "hero"; src: string; alt: string }
+  | {
+      mode: "location";
+      src: string;
+      alt: string;
+      focal: { x: number; y: number };
+      mobileFocal: { x: number; y: number };
+      characterAnchor?: { x: number; baselineY: number; heightFrac: number };
+    }
+  | { mode: "none"; src: string; alt: string };
+
+function sceneFor(level: Level, index: number, beatId: string): SceneCue {
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
-    if (candidate.art) return { src: candidate.art, alt: candidate.artAlt ?? "", fresh: index - i <= SCENE_FRESH_BEATS };
+    if (candidate.art) {
+      // Found the nearest beat that owns art. Use it while it's fresh; once it
+      // has gone stale, stop looking further back -- the CURRENT beat's own
+      // location (not whatever room the old picture happened to show) is what
+      // should replace it.
+      if (index - i <= SCENE_FRESH_BEATS) return { mode: "hero", src: candidate.art, alt: candidate.artAlt ?? "" };
+      break;
+    }
   }
-  return { src: level.cover, alt: "", fresh: false };
+  const location = locationFor(beatId);
+  if (location) {
+    return {
+      mode: "location",
+      src: location.src,
+      alt: location.alt,
+      focal: location.focal,
+      mobileFocal: location.mobileFocal,
+      characterAnchor: location.characterAnchor,
+    };
+  }
+  return { mode: "none", src: level.cover, alt: "" };
 }
 
 /** The stage for one beat, mounted fresh per beat. It owns the shared
@@ -946,22 +1137,40 @@ function MuteToggle() {
   );
 }
 
+/** A ring, not a bar: the countdown reads as a stopwatch face rather than a
+ *  loading indicator, and the number sits inside it instead of beside a strip
+ *  that is easy to miss in a corner of the eye. Pulses only in the last third,
+ *  so urgency is felt rather than present the whole time a beat is timed. */
 function Clock({ remaining, total }: { remaining: number; total: number }) {
-  const fraction = Math.max(0, remaining / total);
+  const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
+  const radius = 18;
+  const circumference = 2 * Math.PI * radius;
+  const color = urgent ? "var(--destructive)" : "var(--world-business-money-office)";
   return (
-    <div className="relative z-20 mt-[6px] flex flex-none items-center gap-[8px] px-3 sm:px-5">
-      <span className="h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--color-glass-border-raised)" }}>
-        <span
-          className="block h-full rounded-full transition-[width] duration-100 ease-linear"
-          style={{ width: `${fraction * 100}%`, background: urgent ? "var(--destructive)" : "var(--world-business-money-office)" }}
-        />
-      </span>
+    <div className="relative z-20 mt-[8px] flex flex-none justify-center">
       <span
-        className="text-[12px] font-extrabold tabular-nums"
-        style={{ color: urgent ? "var(--destructive)" : "var(--muted-foreground)" }}
+        className={`relative flex h-[46px] w-[46px] items-center justify-center rounded-full border-2 backdrop-blur-[10px] ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
+        style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 62%, transparent)" }}
       >
-        {Math.ceil(remaining)}s
+        <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
+          <circle cx="20" cy="20" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="3" />
+          <circle
+            cx="20"
+            cy="20"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - fraction)}
+            style={{ transition: "stroke-dashoffset 0.1s linear" }}
+          />
+        </svg>
+        <span className="text-[13px] font-extrabold tabular-nums" style={{ color }}>
+          {Math.ceil(remaining)}
+        </span>
       </span>
     </div>
   );
@@ -975,6 +1184,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   const body = "feedback" in beat ? beat.feedback : "";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
   const skills = "skills" in beat ? beat.skills : [];
+  const portrait = expressionFor(beat.speaker, result.tier);
 
   // The card owns the key rather than leaning on the focused button's default
   // activation: the sheet is the only thing on screen, so enter, space and right
@@ -995,9 +1205,26 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[20px] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
       >
-        <p className="flex items-baseline justify-between gap-[var(--space-3)]">
-          <span className="text-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color }}>
-            {TIER_HEADLINE[result.tier]}
+        <p className="flex items-center justify-between gap-[var(--space-3)]">
+          <span className="flex items-baseline gap-[10px]">
+            {/* The reaction as part of the consequence: swaps to the tier's
+               expression the moment the verdict lands, rather than the player
+               having to imagine how the speaker felt about it. */}
+            {portrait && (
+              <Image
+                key={portrait}
+                src={portrait}
+                alt=""
+                aria-hidden
+                width={168}
+                height={168}
+                className="h-[76px] w-[76px] flex-none rounded-[16px] border-2 object-cover object-top motion-safe:animate-[play-character-enter_0.32s_ease-out_both]"
+                style={{ borderColor: color }}
+              />
+            )}
+            <span className="text-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color }}>
+              {TIER_HEADLINE[result.tier]}
+            </span>
           </span>
           <span className="text-[14px] font-extrabold tabular-nums" style={{ color }}>
             {result.delta > 0 ? `+${result.delta}` : result.delta} · {reputation}

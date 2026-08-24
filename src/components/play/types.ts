@@ -54,6 +54,10 @@ type BeatBase = {
    *  stretch. The two are different on purpose (Interaction Rules tab). */
   mood?: Mood;
   speaker?: string;
+  /** Who a location scene should show standing in it, when that differs from
+   *  who is talking -- a "character" card is narrated by Dreamy but ABOUT the
+   *  person it introduces, so the scene needs their name, not the narrator's. */
+  castMember?: string;
   setup?: string;
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
    *  beats, so narrative cards never move it. */
