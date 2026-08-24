@@ -6,6 +6,92 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: the games hub and the IB simulation, Level 1 (PUSHED)
+
+- NEW SURFACE. /play is the games hub (the nav's Play slot was href="#"), and
+  /play/[game] is the player. Level 1 Intern of the Investment Banker
+  simulation is complete and playable end to end; a flawless run lands on
+  exactly 100 / Trusted, which is the arithmetic the handoff's Scoring Model
+  tab is built around.
+- SOURCE: Downloads/DreamAri_IB_Levels1-3_Handoff.xlsx. All 21 screens of tab
+  "Level 1 Intern" are in src/components/play/ib-level-1.ts as DATA, copy
+  verbatim (25-word setups, 10-word options, 20-word feedback, no em dashes),
+  using the PRODUCTION score columns, not the prototype's. The engine
+  implements the Interaction Rules tab: options lock with no confirm step,
+  matching scores nothing until Check Matches and needs all four pairs, the
+  rapid-fire set runs one shared 45s clock that keeps running between
+  questions and passes at three of four, the Boss Moment counts as one of the
+  ten, narrative cards never move the progress bar, reputation floors/ceilings,
+  and a TIMEOUT scores Wrong and never Risky.
+- Adding Level 2 or another career is data plus (for L2) four interaction types
+  it introduces: Build the Strongest Answer, Risk Slider, Find All Red Flags,
+  Word Tile Blank, its untimed rapid-fire model, and the navy late-night theme.
+- ART: 21 anime scenes from the vendor zip, converted to webp at 1400px --
+  41MB -> 2.4MB with no visible loss. File names carry their beat id
+  (IB L1-04 -> l1-04.webp). Only 4 of 21 L1 screens have art, so the player
+  keeps the LAST scene for beats without one; unillustrated beats then read as
+  happening in the same room.
+- Landscape art on a portrait phone cropped two thirds of the scene away, so
+  phones get an art panel across the top (38dvh, cover, top-aligned, faded
+  into the stage) instead of a full-bleed crop. sm and up stays full-bleed.
+- Bugs found by playing it: the band ladder printed "At Risk 0 to 84" because
+  ranges were derived from neighbouring floors (now spelled out, matching the
+  Scoring Model tab); the typewriter counted interval ticks and stalled halfway
+  through long lines (now derived from elapsed time); the countdown lived in the
+  parent and needed a reset effect (now a per-beat keyed child, which is also
+  what satisfies the repo's set-state-in-effect rule).
+- NOT DONE, deliberately: Level 2. Save-and-resume mid-level, which the
+  Interaction Rules tab asks for explicitly ("students play in short bursts
+  between classes") -- leaving mid-level currently loses the run. Banking Dream
+  Score across a restart. Jordan still has no portrait (sheet decision D12),
+  skip links are undefined (D-decide), and "Unlock Analyst Level" is inert with
+  a line saying the level is not built.
+
+### 2026-08-24 Connect: the feed rebuilt as a discussion board (PUSHED)
+
+- The old feed was an avatar, a title and two counts per row. On a 1440px page
+  that is a single narrow column of near-identical grey slabs -- it read as a
+  settings list, not a community. Rebuilt around what actually makes a board
+  feel alive: you can SEE the answer, you can see who is around, and there is
+  something to do.
+- Each post is now three ruled bands, because mixing metadata with content is
+  what made it unskimmable: SIGNALS (face, name + grade, community, type icon),
+  CONTENT (the question, then two lines of the real first answer), SIGNALS
+  (like, comments, time, save). Direct instructions applied along the way: only
+  likes/save/comments (no vote rail, no follower counts, no status chips), the
+  community never shares a line with a student's name, the timestamp sits with
+  the other signals rather than in the identity line, and the post type is an
+  ICON (question / insight / event) rather than a word.
+- The answer snippet is the single biggest change. A board of bare questions
+  reads as a place where nobody replies.
+- ONE composer, everywhere. The header CTA, the board CTA and the event CTA
+  were three buttons for one action; all three are now the same prominent
+  composer, and the destination is chosen while writing (the sheet already had
+  "Posting to X / Change"). Tab labels gained icons; "For You" is renamed FEED
+  because Explore owns For You.
+- Communities: a two-column grid at EVERY width (three from lg), one stat per
+  card instead of three, the buried search bar replaced by a search icon in the
+  header, and "Not interested" replaced by an x sticker on the card's corner.
+- Wide screens get a sidebar (your communities with unread counts, what's
+  coming up). A leaderboard of top answerers was built and then cut: more
+  numbers, against the brief.
+- SAFETY: removed the event thread "How do you stay in touch with someone
+  professionally without it feeling awkward?" and its answer about wording a
+  follow-up DM. On a board shared by minors, professionals and school admins,
+  modelling one-to-one follow-up with an adult is the wrong lesson however
+  well-meant. Replaced with "What should I actually do with what I learned
+  today?", which keeps the useful half in public.
+- ACCESSIBILITY, measured not assumed: a contrast probe over every distinct
+  text style on the feed and the communities tab, in BOTH themes, compositing
+  alpha and walking the real background stack. It found two genuine failures --
+  world-colour community names at 3.94:1 and the primary-blue "Saved" label at
+  3.77:1 -- so the rule is now colour lives in icons and dots (3:1 as graphics)
+  and text stays foreground/muted (85 styles, 0 failures). It also found avatar
+  initials rendering at 8.4px, now floored at 11px, and nine 10px eyebrows
+  raised to 11px. NOTE: the probe must parse `color(srgb ...)`, which is what
+  color-mix resolves to -- the first version mis-read those as 1.04:1 and
+  invented two failures that did not exist.
+
 ### 2026-08-24 Match -> report chooser -> profile, on one career catalogue (PUSHED)
 
 - NEW SCREEN. /career-report is now the chooser the student lands on after

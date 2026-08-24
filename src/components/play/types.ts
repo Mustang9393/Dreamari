@@ -1,0 +1,162 @@
+// The simulation engine's vocabulary. Every career simulation is DATA in this
+// shape -- adding Level 2, or the other 24 careers, means writing beats, not
+// components. The rules here are the ones on the Scoring Model and Interaction
+// Rules tabs of the handoff, which all 25 careers share.
+
+/** The four answer tiers. Exactly one Best per scored beat, roughly one Risky
+ *  per level. `none` is for rapid-fire children, which feed their set's result
+ *  and carry no score of their own. */
+export type Tier = "best" | "acceptable" | "wrong" | "risky" | "none";
+
+export const TIER_SCORE: Record<Tier, number> = {
+  best: 5,
+  acceptable: 2,
+  wrong: -3,
+  risky: -6,
+  none: 0,
+};
+
+// Headlines are DERIVED from the score, never authored per beat -- the handoff
+// is explicit about this, so a writer cannot accidentally congratulate someone
+// for a risky call.
+export const TIER_HEADLINE: Record<Tier, string> = {
+  best: "Strong move!",
+  acceptable: "That works.",
+  wrong: "Not quite.",
+  risky: "Risky call.",
+  none: "",
+};
+
+export type Choice = {
+  id: string;
+  label: string;
+  tier: Tier;
+  /** Why THIS option, so a student who picks badly is told why their pick was
+   *  weak rather than just being read the right answer. */
+  why: string;
+};
+
+type BeatBase = {
+  id: string;
+  /** Scene art. Sticky: a beat without its own art keeps the last one, so the
+   *  unillustrated beats read as happening in the same room. */
+  art?: string;
+  artAlt?: string;
+  speaker?: string;
+  setup?: string;
+  /** 0 to 1. Present only on the ten scored beats -- progress measures scored
+   *  beats, so narrative cards never move it. */
+  progress?: number;
+};
+
+/** Intro, narrative and character cards: one button, no score. */
+export type CardBeat = BeatBase & {
+  kind: "card";
+  variant: "intro" | "character" | "chapter";
+  title: string;
+  body?: string;
+  /** Grey EXAMPLE box under the body. */
+  example?: string;
+  /** Show the reputation bands and where the player currently sits. */
+  showBands?: boolean;
+  cta: string;
+};
+
+/** Pick one option. Locks immediately, no confirm step. Covers Scenario, Timed
+ *  Scenario, Boss Moment, Fill in the Blank and Catch the Mistake -- they score
+ *  identically and differ only in how the options are drawn. */
+export type ChoiceBeat = BeatBase & {
+  kind: "choice";
+  layout: "options" | "blank" | "document" | "boss";
+  question: string;
+  choices: Choice[];
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+  /** Seconds. On timeout the beat scores as Wrong, never Risky: a slow reader
+   *  is not the same as someone who invented numbers. */
+  timer?: number;
+  tone?: "normal" | "conflict" | "alarm";
+};
+
+/** Tap a term, then its definition. Nothing scores until Check Matches. All
+ *  pairs must be right. */
+export type MatchBeat = BeatBase & {
+  kind: "match";
+  question: string;
+  pairs: { term: string; def: string }[];
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+  progress?: number;
+};
+
+/** A set of quick questions on ONE shared countdown that keeps running between
+ *  them. The set is one scored beat; the children score nothing. Passes at
+ *  three quarters of the items, rounded up. */
+export type RapidBeat = BeatBase & {
+  kind: "rapid";
+  question: string;
+  timer: number;
+  items: { question: string; options: { label: string; correct: boolean; why: string }[] }[];
+  whenPass: string;
+  whenFail: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
+/** The level's closing sequence: the review beat, then the ending the final
+ *  reputation earned. */
+export type ReviewBeat = BeatBase & {
+  kind: "review";
+  title: string;
+  body: string;
+};
+
+export type Beat = CardBeat | ChoiceBeat | MatchBeat | RapidBeat | ReviewBeat;
+
+export type Ending = {
+  /** Inclusive floor. Matched highest-first. */
+  min: number;
+  band: BandName;
+  headline: string;
+  message: string;
+  subline: string;
+  primary: string;
+  /** Advancing to the next level, or replaying this one. */
+  advances: boolean;
+};
+
+export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
+
+export type Level = {
+  id: string;
+  n: number;
+  /** "Intern", "Analyst" ... */
+  role: string;
+  title: string;
+  blurb: string;
+  cover: string;
+  /** Late-night navy in Level 2, Crunch Time maroon in Level 3: different on
+   *  purpose. */
+  mood: "day" | "night" | "crunch";
+  beats: Beat[];
+  endings: Ending[];
+};
+
+export type Simulation = {
+  id: string;
+  /** The shared career catalogue id, so a simulation lines up with the report,
+   *  the pathway and the plan for the same career. */
+  careerId: string;
+  title: string;
+  world: string;
+  firm: string;
+  cover: string;
+  levels: Level[];
+  /** Levels named on the ladder but not built yet. */
+  upcoming: string[];
+};

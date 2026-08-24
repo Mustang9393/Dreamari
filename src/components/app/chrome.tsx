@@ -42,7 +42,7 @@ export function Wordmark({ href = "/" }: { href?: string }) {
 const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
-  { label: "Play", href: "#" },
+  { label: "Play", href: "/play" },
   { label: "Connect", href: "/connect" },
 ] as const;
 
@@ -192,7 +192,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
 const MOBILE_ITEMS = [
   { label: "Home", href: "/home", Icon: House },
   { label: "Explore", href: "/explore", Icon: Compass },
-  { label: "Play", href: "#", Icon: CirclePlay },
+  { label: "Play", href: "/play", Icon: CirclePlay },
   { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 
