@@ -7,7 +7,6 @@ import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, 
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
-import { ART_RATIO } from "./art-ratios";
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
 import { locationFor } from "./locations";
 import {
@@ -536,26 +535,6 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
  *  Desktop is wide enough to cover without losing anyone, so it stays one sharp
  *  layer with no masking at all.
  */
-const SCENE_FADE = [
-  // Blur, and where this layer's fade starts and finishes as a share of the
-  // PICTURE's own height. The two blurred layers fill the frame behind, so the
-  // picture dissolves into its own colour rather than into a black band; the
-  // sharp layer sits inside them at its true aspect ratio, so no face is ever
-  // cropped, and its fade is aligned to its own edges -- masking it against the
-  // frame is what left a hard line partway down the screen.
-  { blur: 24, stop: 0, full: 0.05 },
-  { blur: 9, stop: 0.03, full: 0.14 },
-  { blur: 0, stop: 0.08, full: 0.26 },
-] as const;
-
-/** Long, symmetric vertical falloff: transparent at the very edge, solid by
- *  `full`, and the same coming back up. */
-function fadeMask(stop: number, full: number): string {
-  const a = (stop * 100).toFixed(1);
-  const b = (full * 100).toFixed(1);
-  return `linear-gradient(to bottom, transparent ${a}%, #000 ${b}%, #000 ${(100 - Number(b)).toFixed(1)}%, transparent ${(100 - Number(a)).toFixed(1)}%)`;
-}
-
 // Deterministic sparkle field: fixed coordinates, not Math.random(), so the
 // server and client render the same markup and hydration never mismatches.
 const AMBIENT_SPARKS = [
@@ -606,51 +585,21 @@ function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
 }
 
 function SceneLayers({ src, alt }: { src: string; alt: string }) {
-  const ratio = ART_RATIO[src] ?? 16 / 9;
+  // One sharp cover layer, every breakpoint -- mobile used to stack two
+  // blurred copies behind a smaller centered one to avoid cropping a wide
+  // image's sides, but the blurred edges read as a visible defect rather
+  // than a clever fix. Plain cover, same as every location backdrop already
+  // does on mobile with no blur at all.
   return (
-    <>
-      {SCENE_FADE.map((band) =>
-        band.blur > 0 ? (
-          <Image
-            key={`${src}-${band.blur}`}
-            src={src}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            aria-hidden
-            className="object-cover object-center sm:hidden"
-            style={{
-              filter: `blur(${band.blur}px)`,
-              maskImage: fadeMask(band.stop, band.full),
-              WebkitMaskImage: fadeMask(band.stop, band.full),
-            }}
-          />
-        ) : (
-          <span
-            key={`${src}-sharp`}
-            className="pointer-events-none absolute inset-0 m-auto block h-auto max-h-full w-full sm:hidden"
-            style={{
-              aspectRatio: `${ratio}`,
-              maskImage: fadeMask(band.stop, band.full),
-              WebkitMaskImage: fadeMask(band.stop, band.full),
-            }}
-          >
-            <Image src={src} alt={alt} fill priority sizes="100vw" className="object-contain object-center" />
-          </span>
-        ),
-      )}
-      {/* Desktop: one sharp cover layer, nothing stacked, nothing masked. */}
-      <Image
-        key={src}
-        src={src}
-        alt={alt}
-        fill
-        priority
-        sizes="100vw"
-        className="hidden object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
-      />
-    </>
+    <Image
+      key={src}
+      src={src}
+      alt={alt}
+      fill
+      priority
+      sizes="100vw"
+      className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+    />
   );
 }
 
