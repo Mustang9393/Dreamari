@@ -35,7 +35,6 @@ export const IB_LEVEL_1: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-01",
-      castMembers: ["Christina", "Jordan"],
       speaker: "Dreamy",
       pose: "happy",
       setup: "Intern • Week 1",
@@ -72,6 +71,7 @@ export const IB_LEVEL_1: Level = {
       layout: "options",
       id: "L1-04",
       progress: 0.1,
+      castMembers: ["Christina", "Jordan"],
       speaker: "Narrator",
       pose: "happy",
       setup: "Christina welcomes you to Cobalt Capital. Jordan, another Intern, is starting too.",
@@ -111,6 +111,7 @@ export const IB_LEVEL_1: Level = {
       timer: 45,
       speaker: "Dreamy",
       pose: "alert",
+      castMember: "Christina",
       setup: "Christina checks if you understand how Interns communicate before giving you client work.",
       question: "Four quick questions on one shared timer.",
       items: [

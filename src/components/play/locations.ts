@@ -56,7 +56,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
     focal: { x: 0.58, y: 0.43 },
     mobileFocal: { x: 0.57, y: 0.36 },
-    characterAnchor: { x: 0.74, baselineY: 1.05, heightFrac: 1.3 },
+    characterAnchor: { x: 0.74, baselineY: 0.99, heightFrac: 0.9 },
   },
   "cobalt-internal-boardroom-sunset": {
     src: `${L}/internal-boardroom-sunset.webp`,
@@ -67,35 +67,35 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // last chair. Small scale on purpose -- it reads as standing at the back
     // of the room, not seated in the furniture the mask would otherwise need
     // to occlude.
-    characterAnchor: { x: 0.91, baselineY: 1.02, heightFrac: 0.55, centered: false },
+    characterAnchor: { x: 0.91, baselineY: 0.99, heightFrac: 0.55, centered: false },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
     alt: "Cobalt Capital's trading floor at night, monitors lit against the city.",
     focal: { x: 0.58, y: 0.45 },
     mobileFocal: { x: 0.6, y: 0.37 },
-    characterAnchor: { x: 0.75, baselineY: 1.05, heightFrac: 1.3 },
+    characterAnchor: { x: 0.75, baselineY: 0.99, heightFrac: 0.9 },
   },
   "cobalt-cafe-lounge-sunset": {
     src: `${L}/cafe-lounge-sunset.webp`,
     alt: "A cafe lounge near the office, quiet seating at sunset.",
     focal: { x: 0.66, y: 0.42 },
     mobileFocal: { x: 0.69, y: 0.36 },
-    characterAnchor: { x: 0.76, baselineY: 1.05, heightFrac: 1.3 },
+    characterAnchor: { x: 0.76, baselineY: 0.99, heightFrac: 0.9 },
   },
   "cobalt-client-boardroom-sunset": {
     src: `${L}/client-boardroom-sunset.webp`,
     alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
     focal: { x: 0.62, y: 0.4 },
     mobileFocal: { x: 0.67, y: 0.35 },
-    characterAnchor: { x: 0.9, baselineY: 1.02, heightFrac: 0.53, centered: false },
+    characterAnchor: { x: 0.9, baselineY: 0.99, heightFrac: 0.53, centered: false },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
     alt: "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
     focal: { x: 0.55, y: 0.45 },
     mobileFocal: { x: 0.53, y: 0.4 },
-    characterAnchor: { x: 0.4, baselineY: 1.08, heightFrac: 1.35 },
+    characterAnchor: { x: 0.4, baselineY: 0.99, heightFrac: 0.9 },
   },
   "l1-reception": {
     src: `${L}/reception.webp`,
@@ -103,18 +103,15 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // scene.json's own focal point for this exact plate.
     focal: { x: 0.52, y: 0.42 },
     mobileFocal: { x: 0.52, y: 0.34 },
-    // The original composite (l1-04.webp) crops them tight: hair to the top
-    // edge, standing close together, cropped off below the waist by the desk
-    // -- not full figures with headroom and floor showing. baselineY past 1
-    // and a heightFrac this large intentionally push the crop off both edges
-    // to match that framing with a thigh-length sprite.
+    // Full figures, feet near the bottom edge, headroom above -- fills the
+    // frame cinematically without cropping the head or feet off-screen.
     characterAnchors: [
-      { x: 0.34, baselineY: 1.06, heightFrac: 1.05, centered: false },
-      { x: 0.66, baselineY: 1.06, heightFrac: 1.08, centered: false },
+      { x: 0.38, baselineY: 0.99, heightFrac: 0.88, centered: false },
+      { x: 0.64, baselineY: 0.99, heightFrac: 0.9, centered: false },
     ],
     // The single-character anchor used when only one of them is present
-    // (L1-15, Christina alone): her own slot, same tight crop.
-    characterAnchor: { x: 0.34, baselineY: 1.06, heightFrac: 1.05 },
+    // (L1-15, Christina alone): her own slot, fully in frame.
+    characterAnchor: { x: 0.5, baselineY: 0.99, heightFrac: 0.88 },
   },
 };
 

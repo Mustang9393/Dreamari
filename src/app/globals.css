@@ -541,27 +541,6 @@ body {
     transform: scale(1);
   }
 }
-/* Ambient camera for a scene: a slow push and drift applied to the WHOLE scene,
-   both planes together. Moving the planes against each other looked like the
-   obvious way to get ambient depth, and it was wrong -- the background plate
-   still contains the characters that were lifted out of it, so any relative
-   motion slides a ghost of them out from behind the cutout. A camera move gives
-   the same cinematic life and cannot expose anything, and the real parallax
-   comes from the pointer (a few pixels, covered by the cutout's oversize) and
-   from Dreamy, which is a genuinely separate sprite. */
-@keyframes play-camera {
-  0% {
-    transform: translate3d(-0.4%, 0.3%, 0) scale(1.005);
-  }
-  50% {
-    /* A push worth noticing. 3.5% over seventeen seconds was technically
-       correct and visually nothing. */
-    transform: translate3d(0.4%, -0.5%, 0) scale(1.095);
-  }
-  100% {
-    transform: translate3d(-0.4%, 0.3%, 0) scale(1.005);
-  }
-}
 /* The right answer arriving after a wrong pick: a spring-y pop, so the eye goes
    straight to it. */
 @keyframes play-pop {

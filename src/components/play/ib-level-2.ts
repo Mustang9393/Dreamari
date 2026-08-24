@@ -299,6 +299,7 @@ export const IB_LEVEL_2: Level = {
       timer: 60,
       speaker: "Narrator",
       pose: "alert",
+      castMember: "Jordan",
       setup: "It is 10:10 AM. The meeting is in 20 minutes. There are errors in Jordan's work, and you have to fix them before Christina and Marcus come in.",
       question: "Tap every red flag in Jordan's work.",
       rows: [

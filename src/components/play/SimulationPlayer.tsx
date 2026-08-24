@@ -201,6 +201,26 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // A beat can override the level's mood: Level 2 runs three screens in
   // late-night navy and comes back, Level 3 has a maroon Crunch Time stretch.
   const mood = beat.mood ?? level.mood;
+  // Blur ONLY a standalone interactive question-answer screen -- the moment
+  // the controls the player is actually working with are on screen, never
+  // the dialogue leading up to them. Cards and review have no controls to
+  // focus, so they never blur. Applies to a hero plate exactly the same as a
+  // location: the rule is about the screen, not which kind of art is behind it.
+  const dimmed = revealed && beat.kind !== "card" && beat.kind !== "review";
+  // A handful of beats author `tone: "conflict" | "alarm"` on themselves --
+  // borrow the concerned/uncertain tier reaction as the neutral face for
+  // those, so the same character isn't smiling through a tense moment.
+  const neutralTier: Tier | undefined =
+    "tone" in beat && (beat.tone === "conflict" || beat.tone === "alarm") ? "wrong" : undefined;
+  // Mirrors the big-character render condition below exactly, so the
+  // dialogue box knows to hold back its own small portrait rather than
+  // showing the same speaker twice at once.
+  const bigCharacterVisible =
+    scene.mode === "location" &&
+    (beat.kind === "card" || beat.kind === "review" || !revealed) &&
+    (scene.characterAnchors && beat.castMembers
+      ? beat.castMembers.some((name, i) => Boolean(scene.characterAnchors?.[i]) && Boolean(defaultExpressionFor(name)))
+      : Boolean(scene.characterAnchor) && Boolean(defaultExpressionFor(beat.castMember ?? beat.speaker)));
 
   return (
     <div
@@ -227,12 +247,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         {scene.mode === "none" ? (
           <AmbientBackdrop mood={mood} accent={accent} />
         ) : scene.mode === "hero" ? (
-          // The soft zoom is this mode's only motion: these 21 plates still
-          // have their characters baked in, so real parallax would drag a
-          // ghost of them out from behind their own cutout (see the note
-          // above). A location plate needs no such compensation -- it has
-          // its own pointer-tracked drift instead, below.
-          <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
+          // Static on purpose -- the slow zoom this used to carry pushed a
+          // composed illustration past its own edges over the course of a
+          // beat, which read as the same cropping problem the location
+          // anchors had. A held frame never crops itself.
+          <div
+            className="absolute inset-0 transition-[filter] duration-500"
+            style={{ filter: dimmed ? "blur(3px) brightness(0.78)" : undefined }}
+          >
             <SceneLayers src={scene.src} alt={scene.alt} />
           </div>
         ) : (
@@ -243,7 +265,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
               focal={scene.focal}
               mobileFocal={scene.mobileFocal}
               offset={sceneOffset}
-              dimmed={beat.kind === "card" || beat.kind === "review" || !revealed}
+              dimmed={dimmed}
             />
             {/* A card or the review is never staged (see BeatStage's own
                `stageable`), so it is always in its "revealed" state -- the
@@ -260,8 +282,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
                 // scene.json, not a rule that applies anywhere else yet.
                 beat.castMembers.map((name, i) => {
                   const slot = scene.characterAnchors?.[i];
+                  // Christina reads as the host greeting Jordan into the room,
+                  // so she stands in front of him rather than the reverse.
                   return slot ? (
-                    <SceneCharacter key={name} speaker={name} anchor={slot} offset={sceneOffset} sceneHeight={sceneHeight} />
+                    <SceneCharacter
+                      key={name}
+                      speaker={name}
+                      anchor={slot}
+                      offset={sceneOffset}
+                      sceneHeight={sceneHeight}
+                      zIndex={name === "Christina" ? 2 : 1}
+                    />
                   ) : null;
                 })
               ) : (
@@ -274,6 +305,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
                     // not shrunk to dodge the dialogue panel underneath it.
                     anchor={scene.characterAnchor}
                     tier={phase === "feedback" ? result?.tier : undefined}
+                    neutralTier={neutralTier}
                     offset={sceneOffset}
                     sceneHeight={sceneHeight}
                   />
@@ -359,6 +391,10 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           locked={locked}
           paused={phase !== "beat"}
           ambient={scene.mode === "none"}
+          // The big cinematic character already carries the speaker -- the
+          // dialogue box's small round portrait would just be a second,
+          // redundant face on screen at the same time.
+          sceneCharacterVisible={bigCharacterVisible}
           onRevealChange={setRevealed}
           onResolve={resolve}
           onNext={advance}
@@ -613,6 +649,8 @@ function SceneCharacter({
   tier,
   offset,
   sceneHeight,
+  zIndex,
+  neutralTier,
 }: {
   speaker?: string;
   anchor: { x: number; baselineY: number; heightFrac: number; centered?: boolean };
@@ -628,8 +666,17 @@ function SceneCharacter({
    *  correctly via getBoundingClientRect but painted as though the browser
    *  had silently ignored it, which pixels do not have any ambiguity about. */
   sceneHeight: number;
+  /** Stacking order when two characters share a scene (the reception). */
+  zIndex?: number;
+  /** A conflict/alarm beat's setup line reads as tense -- borrow the
+   *  concerned/uncertain tier reaction as the neutral face for THIS beat
+   *  rather than defaulting to the same welcoming/confident look every
+   *  beat gets before an answer exists to react to. Only changes anything
+   *  for the small number of beats that author a `tone`; everything else is
+   *  exactly the default it always was. */
+  neutralTier?: Tier;
 }) {
-  const src = (tier && expressionFor(speaker, tier)) || defaultExpressionFor(speaker);
+  const src = (tier && expressionFor(speaker, tier)) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
   if (!src || sceneHeight === 0) return null;
   // Centered and filling the room is the norm -- whoever is speaking is the
   // thing to look at, the same treatment Jordan's introduction got. The two
@@ -649,6 +696,7 @@ function SceneCharacter({
         left: `${x * 100}%`,
         bottom: `${(1 - anchor.baselineY) * sceneHeight}px`,
         height: `${anchor.heightFrac * sceneHeight}px`,
+        zIndex,
         transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
       }}
     >
@@ -733,6 +781,7 @@ function BeatStage({
   paused,
   hidden,
   ambient,
+  sceneCharacterVisible,
   onRevealChange,
   onResolve,
   onNext,
@@ -750,6 +799,10 @@ function BeatStage({
    *  picture -- Dreamy's floating cloud and name pill only earn their place
    *  here, since a beat WITH a scene already has someone in it to look at. */
   ambient?: boolean;
+  /** True when the big cinematic character is already on screen carrying
+   *  this speaker -- the dialogue box holds back its own small portrait so
+   *  the same face never shows twice at once. */
+  sceneCharacterVisible?: boolean;
   /** Reports the staged/revealed transition to the parent, which uses it to
    *  decide whether the big scene character or the dialogue box's small
    *  portrait carries the speaker right now (see the render site). */
@@ -766,7 +819,7 @@ function BeatStage({
   // is the same guide talking, so it speaks as Dreamy with Dreamy's face.
   const narrated = beat.speaker === "Dreamy" || beat.speaker === "Narrator";
   const speaker = narrated ? "Dreamy" : beat.speaker;
-  const portrait = speaker ? cast?.[speaker] : undefined;
+  const portrait = speaker && !sceneCharacterVisible ? cast?.[speaker] : undefined;
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
@@ -814,7 +867,11 @@ function BeatStage({
   // in the center of the frame instead -- it's the thing on screen, not a
   // caption under a picture, now that the picture behind it is a real room
   // rather than something cropped to leave the bottom third free for it.
-  const interactive = beat.kind !== "card" && beat.kind !== "review";
+  // Centered is for an actionable screen only -- the controls the player is
+  // actually working with. The setup line leading up to them (not yet
+  // revealed) is dialogue, and dialogue docks at the bottom like a card,
+  // never centered over the character's middle.
+  const interactive = revealed && beat.kind !== "card" && beat.kind !== "review";
   if (beat.showdown && !showdownSeen) {
     return <ShowdownCard opponent={beat.showdown.opponent} accent={accent} onDismiss={() => setShowdownSeen(true)} />;
   }
