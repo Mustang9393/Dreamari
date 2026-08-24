@@ -607,10 +607,15 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
   );
 
   // The shared clock is owned by the stage. When it runs out mid-set the
-  // remaining questions are simply never answered, which is the rule.
+  // remaining questions are simply never answered, which is the rule. Only
+  // beats that actually have a timer count as timed out this way -- without
+  // `beat.timer` (Level 2's own rapid-fire model, unlike Level 1's shared
+  // clock), `remaining` is 0 from the very first render, and this used to
+  // fire immediately on mount, resolving the whole set as failed before the
+  // player ever saw question one.
   useEffect(() => {
-    if (remaining <= 0) finish(right);
-  }, [remaining, right, finish]);
+    if (beat.timer && remaining <= 0) finish(right);
+  }, [beat.timer, remaining, right, finish]);
 
   const item = beat.items[step];
 
