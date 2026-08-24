@@ -167,7 +167,12 @@ export const IB_LEVEL_2: Level = {
       layout: "options",
       id: "L2-10",
       progress: 0.1,
-      castMember: "Christina",
+      // From the 2026-08-24 asset package (status READY). The clean
+      // background still had "Louis Vuitton Pitch Materials" printed on a
+      // binder spine on the desk -- patched out locally (the desk surface
+      // extended over it) since the source asset itself wasn't corrected.
+      art: `${ART}/l2-10.webp`,
+      artAlt: "Christina gesturing toward Marcus with arms folded, a wall screen reading Deal Team Kickoff, seen from the boardroom table.",
       speaker: "Narrator",
       pose: "happy",
       setup: "Christina introduces you to Marcus, the VP. The team pitches Maison Laurent tomorrow.",
@@ -345,10 +350,12 @@ export const IB_LEVEL_2: Level = {
       layout: "options",
       id: "L2-19",
       progress: 0.7,
-      // L2-18's art is Jordan's own moment -- it stops here rather than
-      // bleeding into Christina's beat, then Marcus's own assessment two
-      // beats later (L2-21).
-      resetScene: true,
+      // From the 2026-08-24 asset package (status READY). The clean
+      // background still had a "Louis Vuitton Meeting" label on a folder on
+      // the desk -- patched out locally (filled with the folder's own black)
+      // since the source asset itself wasn't corrected.
+      art: `${ART}/l2-19.webp`,
+      artAlt: "Christina standing at a laptop, a colleague at the window behind her, your hands taking notes in the foreground.",
       speaker: "Christina",
       setup: '"You earned a seat in the Maison Laurent meeting. Listen closely and take notes."',
       question: "What should you do during the meeting?",
@@ -365,6 +372,10 @@ export const IB_LEVEL_2: Level = {
       kind: "match",
       id: "L2-20",
       progress: 0.8,
+      // L2-19's art is Christina's own moment in the client meeting -- it
+      // stops here rather than bleeding into Marcus's assessment beat
+      // (L2-21) two beats later.
+      resetScene: true,
       speaker: "Narrator",
       pose: "glasses",
       setup: "You heard these words in the meetings. Learn the deal lingo.",

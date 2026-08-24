@@ -384,6 +384,12 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "chapter",
       id: "L3-19",
+      // From the 2026-08-24 asset package (status READY). The reference
+      // render shows a "Louis Vuitton Pitch" notepad in the player's hands,
+      // but the actual extracted background/foreground layers used here
+      // never included that prop at all -- nothing to patch.
+      art: `${ART}/l3-19.webp`,
+      artAlt: "Lamisa stopping the player in a glass hallway full of colleagues, city skyline behind.",
       speaker: "Lamisa",
       setup: '"You led the Analysts, worked well with the Associates, and stayed on Maison Laurent the whole way."',
       title: "After the pitch.",
@@ -393,6 +399,10 @@ export const IB_LEVEL_3: Level = {
       kind: "card",
       variant: "chapter",
       id: "L3-20",
+      // From the 2026-08-24 asset package (status READY). This layer's
+      // pitch-book prop already ships blank, no client name.
+      art: `${ART}/l3-20.webp`,
+      artAlt: "Christina giving the player a thumbs up in the same hallway, pitch book in the foreground.",
       speaker: "Christina",
       setup: '"You got Lamisa\'s attention. That is a big deal. I am proud of you."',
       title: "Christina catches you after.",
