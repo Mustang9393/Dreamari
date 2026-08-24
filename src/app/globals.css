@@ -707,6 +707,17 @@ html.light body { background: #f4f7ff; }
    light theme's white scrims the yellow/green/cyan measured under 2:1.
    Same mechanical darkening as the marketing scope's light block; author
    real rungs in the token source when the light ramp exists. */
+html.light .marketing-v2.themeable {
+  /* --card is #d8dbe8 against a #f4f7ff page, so every card built on it comes
+     out DARKER than the surface it sits on -- the opposite of how a card reads.
+     Corrected to white here rather than in marketing/tokens.css, which is a
+     contract file the app repo diffs against; author the real value in Figma
+     Semantic.Light and this block goes away. --border firms up with it, since a
+     white card on a near-white page needs its edge to carry the separation. */
+  --card: #ffffff;
+  --border: #c9cddd;
+}
+
 html.light {
   /* flow option tiles / panels: the black-alpha film reads muddy over the
      pastel aurora — frosted white is the light-theme glass */

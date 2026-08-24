@@ -116,17 +116,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
          cloning) erased them cleanly enough to ship. A soft push is the effect
          that survives that honestly. If character-free plates ever arrive from
          the artist, real parallax is a small change. */}
-      <div aria-hidden={!scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 sm:absolute sm:inset-0 sm:order-none">
+      <div aria-hidden={!scene.alt} className="pointer-events-none relative order-2 min-h-0 w-full flex-1 overflow-hidden sm:absolute sm:inset-0 sm:order-none">
         <div className="absolute inset-0 motion-safe:animate-[play-camera_26s_ease-in-out_infinite]">
-          <Image
-            key={scene.src}
-            src={scene.src}
-            alt={scene.alt}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
-          />
+          <SceneLayers src={scene.src} alt={scene.alt} />
         </div>
       </div>
 
@@ -201,6 +193,79 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         </div>
       )}
     </div>
+  );
+}
+
+/** The scene, on phones, as a PROGRESSIVE blur.
+ *
+ *  The frame is contained so nobody in it gets cropped out at the sides, which
+ *  leaves space above and below on a portrait screen. Filling that with one
+ *  blurred copy left a visible line where sharp met blurred. Instead the same
+ *  image is stacked four times with increasing blur, each layer masked to start
+ *  further out, so focus falls away toward the edges and the picture dissolves
+ *  into the dark rather than stopping at a border.
+ *
+ *  Desktop is wide enough to cover without losing anyone, so it stays a single
+ *  sharp cover layer.
+ */
+const SCENE_BANDS = [
+  // blur, and where this layer starts appearing measured from the frame's edge
+  { blur: 0, from: 0.0, to: 0.4 },
+  { blur: 6, from: 0.34, to: 0.6 },
+  { blur: 18, from: 0.55, to: 0.8 },
+  { blur: 40, from: 0.74, to: 1.0 },
+] as const;
+
+/** A mask that is opaque in the middle and fades out past `edge`, on both axes. */
+function bandMask(from: number, to: number): string {
+  const a = (from * 50).toFixed(1);
+  const b = (to * 50).toFixed(1);
+  const vertical = `linear-gradient(to bottom, transparent ${a}%, #000 ${b}%, #000 ${(100 - Number(b)).toFixed(1)}%, transparent ${(100 - Number(a)).toFixed(1)}%)`;
+  return vertical;
+}
+
+function SceneLayers({ src, alt }: { src: string; alt: string }) {
+  return (
+    <>
+      {/* The wash that carries colour all the way to the screen edge. */}
+      <Image
+        src={src}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="scale-[2.4] object-cover object-center blur-[54px] brightness-[0.66] saturate-[1.25] sm:hidden"
+      />
+      {/* Sharp in the middle, progressively softer outward. Reversed so the
+         sharpest layer paints last and sits on top. */}
+      {[...SCENE_BANDS].reverse().map((band) => (
+        <Image
+          key={`${src}-${band.blur}`}
+          src={src}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          aria-hidden
+          className="object-contain object-center sm:hidden"
+          style={{
+            filter: band.blur ? `blur(${band.blur}px)` : undefined,
+            maskImage: band.blur ? bandMask(band.from, band.to) : bandMask(0, 0.42),
+            WebkitMaskImage: band.blur ? bandMask(band.from, band.to) : bandMask(0, 0.42),
+          }}
+        />
+      ))}
+      {/* Desktop: one sharp cover layer, nothing stacked. */}
+      <Image
+        key={src}
+        src={src}
+        alt={alt}
+        fill
+        priority
+        sizes="100vw"
+        className="hidden object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
+      />
+    </>
   );
 }
 

@@ -16,16 +16,19 @@ requires anything of you.
    `docs/handoff/figma-variables-to-add.md` section D. **Purely additive** -- no
    existing token changed value, so pulling this cannot alter anything already
    built against the glass set.
-2. **`--card` is wrong in light mode.** It resolves to `#d8dbe8` against a
-   `#f4f7ff` page, so every card built on it comes out DARKER than the surface
-   it sits on. Connect was moved onto `--color-glass-surface-3` (frosted white
-   in light, deep glass in dark) as a local fix, but `--card` is a contract
-   token in `src/components/marketing/tokens.css` and was deliberately left
-   alone. It wants correcting at the source.
-3. **`src/components/student-app/StudentAppShell.tsx` is orphaned.** Its only
-   importer was the Computer Science career-report page, which was deleted on
-   2026-08-24. Kept rather than removed unasked; delete it if nothing in the app
-   repo wants it.
+2. **`--card` in light mode: fixed here, still wants fixing in Figma.** It
+   resolves to `#d8dbe8` against a `#f4f7ff` page, so every card built on it came
+   out DARKER than the surface it sat on. `globals.css` now corrects it to white
+   (with `--border` firmed to `#c9cddd`, since a white card on a near-white page
+   needs its edge to carry the separation) under
+   `html.light .marketing-v2.themeable`. Done there rather than in
+   `marketing/tokens.css` so the contract file the app repo diffs against stays
+   byte-identical. **Author the real value in Figma Semantic.Light and this
+   override goes away.**
+3. ~~StudentAppShell orphaned~~ **DONE.** Deleted 2026-08-24, along with the
+   Computer Science career-report page that was its only importer.
+   `src/lib/navigation.ts` is also unreferenced but predates this work, so it
+   was left alone.
 
 CONTRACT FILES ARE UNTOUCHED and were checked before every push today:
 `src/components/marketing/tokens.css`, `docs/handoff/shadcn-adapter.css`,
@@ -53,6 +56,24 @@ tokens above, in both modes).
   for a card-on-tinted-background design and the same darker-than-background
   effect will show anywhere else that uses it in light mode. Worth correcting
   at the source.
+
+### 2026-08-24 Progressive blur on phones, and two app-repo items closed (PUSHED)
+
+- PHONES no longer crop the cast out of a scene. The frame is CONTAINED, so
+  everyone in it stays in frame, and the space that leaves is filled by the same
+  image stacked four times with increasing blur (0 / 6 / 18 / 40px), each layer
+  masked to start further out, over a heavily magnified colour wash. Focus falls
+  away toward the edges and the picture dissolves into the dark instead of
+  stopping at a border -- one blurred fill layer left exactly the hard line the
+  brief was about. Desktop is wide enough to cover without losing anyone, so it
+  stays a single sharp layer.
+- `--card` light-mode fix and the StudentAppShell deletion are done; see the
+  app-repo block at the top of this file for what is left, which is only the
+  Figma/token-source side.
+- STILL NOT DONE and cannot be done from this repo: mirroring
+  `color.glass.surface-raised` / `border-raised` into `packages/ui/tokens`. That
+  repo is not checked out on this machine. The drop-in spec is
+  `docs/handoff/glass-raised-rung.md`.
 
 ### 2026-08-24 Play: every question type to the same feedback standard (PUSHED)
 
