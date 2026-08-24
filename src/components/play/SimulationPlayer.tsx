@@ -81,7 +81,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
-  const scene = sceneFor(level, index, beat.id);
+  const scene = sceneFor(level, index, beat);
   const sceneHost = useRef<HTMLDivElement>(null);
   const sceneOffset = useScenePointer(sceneHost);
 
@@ -581,8 +581,12 @@ function SceneCharacter({
 }) {
   const src = (tier && expressionFor(speaker, tier)) || defaultExpressionFor(speaker);
   if (!src) return null;
+  // The character stays exactly where the room puts them and swaps face in
+  // place -- the room is the backdrop, the question is the point, and a
+  // character who leaps to center stage on every answer would make the
+  // moment about the performance rather than the explanation underneath it.
   const x = spotlight ? 0.5 : anchor.x;
-  const heightFrac = spotlight ? Math.max(anchor.heightFrac, 0.94) : anchor.heightFrac;
+  const heightFrac = spotlight ? Math.max(anchor.heightFrac, 0.7) : anchor.heightFrac;
   return (
     <span
       aria-hidden
@@ -632,7 +636,7 @@ type SceneCue =
     }
   | { mode: "none"; src: string; alt: string };
 
-function sceneFor(level: Level, index: number, beatId: string): SceneCue {
+function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
     if (candidate.art) {
@@ -644,7 +648,14 @@ function sceneFor(level: Level, index: number, beatId: string): SceneCue {
       break;
     }
   }
-  const location = locationFor(beatId);
+  // A location plate is scenery for a narrative beat -- it sets a room, then
+  // gets out of the way. On a beat the player is actively working (any kind
+  // but a card or the review), a full location plus a standing character
+  // competes with the thing that actually matters: the question and its
+  // options. Those beats fall straight to the plain ambient backdrop instead,
+  // location or not, unless they carry their own authored hero art above.
+  const interactive = beat.kind !== "card" && beat.kind !== "review";
+  const location = interactive ? undefined : locationFor(beat.id);
   if (location) {
     return {
       mode: "location",
@@ -1206,19 +1217,21 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
       >
         <p className="flex items-center justify-between gap-[var(--space-3)]">
-          <span className="flex items-baseline gap-[10px]">
-            {/* The reaction as part of the consequence: swaps to the tier's
-               expression the moment the verdict lands, rather than the player
-               having to imagine how the speaker felt about it. */}
+          <span className="flex items-baseline gap-[12px]">
+            {/* The character bible's tier reaction, sized to actually read --
+               this is the reliable place to see it: a scene character (when
+               one is on screen) already swaps face in place, but stays at
+               whatever modest scale the room calls for and can end up mostly
+               behind this very card. This is guaranteed visible every time. */}
             {portrait && (
               <Image
                 key={portrait}
                 src={portrait}
                 alt=""
                 aria-hidden
-                width={168}
-                height={168}
-                className="h-[76px] w-[76px] flex-none rounded-[16px] border-2 object-cover object-top motion-safe:animate-[play-character-enter_0.32s_ease-out_both]"
+                width={192}
+                height={192}
+                className="h-[72px] w-[72px] flex-none rounded-[16px] border-2 object-cover object-top motion-safe:animate-[play-character-enter_0.32s_ease-out_both]"
                 style={{ borderColor: color }}
               />
             )}

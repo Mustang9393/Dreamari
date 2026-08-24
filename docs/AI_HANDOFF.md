@@ -40,6 +40,42 @@ tokens above, in both modes).
 
 - Date: 2026-08-24
 
+### 2026-08-24 Play: tuning the location library after live review (PUSHED)
+
+- Refined the location-library batch above after watching it play. In order:
+  the character sprites came out too small to register on a full screen; then,
+  once enlarged, a beat that only NARRATES a character (Dreamy's card
+  introducing Jordan, speaker "Dreamy") still didn't show him, because the
+  scene render keyed off `beat.speaker` and Dreamy narrating is not the same
+  as Jordan being on screen -- added `castMember` to `BeatBase` (types.ts) for
+  the one beat that needed it, and a "spotlight" placement (centered, full
+  height) for exactly that introduction moment; then the tier-reactive
+  expression swap needed to be visible at a glance, which surfaced a real bug
+  (`play-float` is a one-shot fade-to-nothing animation, not a hover loop --
+  wrong keyframe, character was dimming in and out on an infinite loop) fixed
+  by switching to `play-hover`; then, watching it further, decided the
+  feedback card's own portrait was more reliable than the scene sprite for
+  actually seeing the reaction (the sprite can end up mostly behind the
+  dialogue panel depending on how tall a beat's choice list is) -- kept both,
+  restored the card portrait at a size that reads (72px, not the original
+  44px), and left the scene sprite swapping expression in place without
+  jumping to center stage over it.
+- **Interaction beats are text-first now.** A location plus a standing
+  character is scenery for a narrative beat, and was competing with the thing
+  that actually matters on a scored beat: the question and its options. Every
+  beat kind except `card` and `review` now goes straight past the location
+  table to the plain ambient backdrop, whatever its `BEAT_LOCATION` entry says
+  -- the entry stays in the table (harmless, keeps the map complete) but is
+  never read for those kinds. A beat's own hero illustration is unaffected
+  either way; this rule only governs the location-library fallback.
+- Character scale per location came back down from the enlarged pass to the
+  handoff's own documented `maxScale` figures (a person sized against the
+  furniture in frame, not a poster-sized cutout) -- the earlier bump was
+  chasing "too small to see," which the introduction spotlight and the
+  restored feedback portrait both solve without needing every character
+  oversized all the time.
+- No copy changed; no token changes; contract files untouched.
+
 ### 2026-08-24 Play: Cobalt Capital location library from the production art handoff (PUSHED)
 
 - A teammate handed off `Dreamari-IB-Claude-Production-Handoff-v2.zip`: a UX

@@ -42,7 +42,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
     focal: { x: 0.58, y: 0.43 },
     mobileFocal: { x: 0.57, y: 0.36 },
-    characterAnchor: { x: 0.74, baselineY: 0.98, heightFrac: 0.86 },
+    characterAnchor: { x: 0.74, baselineY: 0.98, heightFrac: 0.6 },
   },
   "cobalt-internal-boardroom-sunset": {
     src: `${L}/internal-boardroom-sunset.webp`,
@@ -53,43 +53,48 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // last chair. Small scale on purpose -- it reads as standing at the back
     // of the room, not seated in the furniture the mask would otherwise need
     // to occlude.
-    characterAnchor: { x: 0.91, baselineY: 0.88, heightFrac: 0.5 },
+    characterAnchor: { x: 0.91, baselineY: 0.85, heightFrac: 0.4 },
   },
   "cobalt-trading-floor-night": {
     src: `${L}/trading-floor-night.webp`,
     alt: "Cobalt Capital's trading floor at night, monitors lit against the city.",
     focal: { x: 0.58, y: 0.45 },
     mobileFocal: { x: 0.6, y: 0.37 },
-    characterAnchor: { x: 0.75, baselineY: 0.98, heightFrac: 0.86 },
+    characterAnchor: { x: 0.75, baselineY: 0.98, heightFrac: 0.58 },
   },
   "cobalt-cafe-lounge-sunset": {
     src: `${L}/cafe-lounge-sunset.webp`,
     alt: "A cafe lounge near the office, quiet seating at sunset.",
     focal: { x: 0.66, y: 0.42 },
     mobileFocal: { x: 0.69, y: 0.36 },
-    characterAnchor: { x: 0.76, baselineY: 0.96, heightFrac: 0.85 },
+    characterAnchor: { x: 0.76, baselineY: 0.9, heightFrac: 0.48 },
   },
   "cobalt-client-boardroom-sunset": {
     src: `${L}/client-boardroom-sunset.webp`,
     alt: "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
     focal: { x: 0.62, y: 0.4 },
     mobileFocal: { x: 0.67, y: 0.35 },
-    characterAnchor: { x: 0.9, baselineY: 0.86, heightFrac: 0.48 },
+    characterAnchor: { x: 0.9, baselineY: 0.84, heightFrac: 0.38 },
   },
   "cobalt-elevator-hallway-sunset": {
     src: `${L}/elevator-hallway-sunset.webp`,
     alt: "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
     focal: { x: 0.55, y: 0.45 },
     mobileFocal: { x: 0.53, y: 0.4 },
-    characterAnchor: { x: 0.4, baselineY: 1, heightFrac: 0.94 },
+    characterAnchor: { x: 0.4, baselineY: 1, heightFrac: 0.66 },
   },
 };
 
 // Per-beat routing. Every beat is listed, including ones with their own hero
-// illustration -- assigning them a location is inert today (hero art always
-// wins) but keeps the map complete if a beat's art is ever retired. Review
-// beats (L1-16, L2-25, L3-28) are deliberately absent: the final-review wait
-// reads better as the abstract, liminal AmbientBackdrop than as any one room.
+// illustration, and ones the player actively answers (choice, rank, pick, and
+// the rest) -- assigning them a location is inert for both today (hero art
+// always wins; SimulationPlayer routes every non-card, non-review beat
+// straight past this table to the plain ambient backdrop, on purpose, so a
+// scored question is never competing with a room and a standing character for
+// attention) but keeps the map complete if either rule ever loosens. Review
+// beats (L1-16, L2-25, L3-28) are deliberately absent for a different reason:
+// the final-review wait reads better as the abstract, liminal AmbientBackdrop
+// than as any one room.
 //
 // Routed from the handoff's background-library.json where a beat is listed
 // there; filled in by narrative judgment elsewhere, using its own tie-break
