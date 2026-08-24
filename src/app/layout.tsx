@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import localFont from "next/font/local";
+import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ThemeBoot } from "@/components/app/theme";
 import "./globals.css";
 
@@ -42,7 +43,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col"><ThemeBoot />{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeBoot />
+        <ErrorReporter />
+        {children}
+      </body>
     </html>
   );
 }
