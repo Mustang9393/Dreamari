@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, FileText, Trophy } from "lucide-react";
+import { Check, FileText, Trophy, X } from "lucide-react";
 
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
@@ -59,6 +59,7 @@ function OptionButton({
   picked,
   tier,
   dimmed,
+  revealed,
   onClick,
 }: {
   label: string;
@@ -67,34 +68,41 @@ function OptionButton({
   picked?: boolean;
   tier?: Tier;
   dimmed?: boolean;
+  /** This is the best answer and the round is over: show it even when the player
+   *  chose something else. Being told WHICH one was right, at the moment you get
+   *  it wrong, is most of what instant feedback is for. */
+  revealed?: boolean;
   onClick: () => void;
 }) {
+  const bad = Boolean(picked) && (tier === "wrong" || tier === "risky");
+  const mark = picked ? (bad ? "wrong" : "right") : revealed ? "answer" : null;
+  const paint = mark === "wrong" ? TIER_COLOR[tier ?? "none"] : "var(--color-feedback-success)";
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       className={`group flex w-full cursor-pointer items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left text-[15px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none ${
-        picked && (tier === "wrong" || tier === "risky") ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
-      }`}
+        bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
+      } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
       style={{
         animationDelay: `${index * 55}ms`,
-        background: picked ? `color-mix(in srgb, ${TIER_COLOR[tier ?? "none"]} 18%, var(--glass-surface-1))` : "var(--glass-surface-1)",
-        borderColor: picked ? TIER_COLOR[tier ?? "none"] : "var(--color-glass-border-raised)",
+        background: mark ? `color-mix(in srgb, ${paint} 18%, var(--glass-surface-1))` : "var(--glass-surface-1)",
+        borderColor: mark ? paint : "var(--color-glass-border-raised)",
         color: "var(--foreground)",
-        opacity: dimmed ? 0.4 : 1,
+        opacity: dimmed && !mark ? 0.4 : 1,
       }}
     >
       <span
         aria-hidden
         className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full border text-[12px] font-extrabold"
         style={{
-          borderColor: picked ? TIER_COLOR[tier ?? "none"] : "var(--color-glass-border-raised)",
-          background: picked ? TIER_COLOR[tier ?? "none"] : "transparent",
-          color: picked ? "#05070f" : "var(--muted-foreground)",
+          borderColor: mark ? paint : "var(--color-glass-border-raised)",
+          background: mark ? paint : "transparent",
+          color: mark ? "#05070f" : "var(--muted-foreground)",
         }}
       >
-        {picked ? <Check className="h-[15px] w-[15px]" /> : String.fromCharCode(65 + index)}
+        {mark === "wrong" ? <X className="h-[15px] w-[15px]" /> : mark ? <Check className="h-[15px] w-[15px]" /> : String.fromCharCode(65 + index)}
       </span>
       {label}
     </button>
@@ -193,6 +201,7 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
             picked={locked === choice.id}
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
+            revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
             onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
@@ -231,10 +240,20 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
             className="cursor-pointer rounded-full border px-[15px] py-[10px] text-[15px] font-bold transition-[transform,border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none"
             style={{
               animationDelay: `${index * 55}ms`,
-              background: locked === choice.id ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 20%, var(--glass-surface-1))` : "var(--glass-surface-1)",
-              borderColor: locked === choice.id ? TIER_COLOR[choice.tier] : "var(--color-glass-border-raised)",
+              background:
+                locked === choice.id
+                  ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 20%, var(--glass-surface-1))`
+                  : locked !== null && choice.tier === "best"
+                    ? "color-mix(in srgb, var(--color-feedback-success) 20%, var(--glass-surface-1))"
+                    : "var(--glass-surface-1)",
+              borderColor:
+                locked === choice.id
+                  ? TIER_COLOR[choice.tier]
+                  : locked !== null && choice.tier === "best"
+                    ? "var(--color-feedback-success)"
+                    : "var(--color-glass-border-raised)",
               color: "var(--foreground)",
-              opacity: locked !== null && locked !== choice.id ? 0.4 : 1,
+              opacity: locked !== null && locked !== choice.id && choice.tier !== "best" ? 0.4 : 1,
             }}
           >
             {choice.label}
@@ -269,9 +288,14 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
                 style={{
                   animationDelay: `${index * 45}ms`,
                   borderColor: "var(--glass-border)",
-                  background: locked === choice.id ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 18%, transparent)` : "var(--glass-surface-1)",
+                  background:
+                    locked === choice.id
+                      ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 18%, transparent)`
+                      : locked !== null && choice.tier === "best"
+                        ? "color-mix(in srgb, var(--color-feedback-success) 18%, transparent)"
+                        : "var(--glass-surface-1)",
                   color: "var(--foreground)",
-                  opacity: locked !== null && locked !== choice.id ? 0.45 : 1,
+                  opacity: locked !== null && locked !== choice.id && choice.tier !== "best" ? 0.45 : 1,
                 }}
               >
                 {choice.label}
@@ -306,6 +330,7 @@ export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onR
             picked={locked === choice.id}
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
+            revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
             onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
@@ -512,13 +537,18 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
     else playWrong();
     const correct = hit ? right + 1 : right;
     setRight(correct);
-    window.setTimeout(() => {
-      if (step + 1 >= beat.items.length) finish(correct);
-      else {
-        setStep(step + 1);
-        setPicked(null);
-      }
-    }, 420);
+    window.setTimeout(
+      () => {
+        if (step + 1 >= beat.items.length) finish(correct);
+        else {
+          setStep(step + 1);
+          setPicked(null);
+        }
+      },
+      // Longer on a miss: the green answer has to be readable before the next
+      // question replaces it.
+      hit ? 480 : 1150,
+    );
   }
 
   return (
@@ -551,6 +581,7 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
             picked={picked === index}
             tier={option.correct ? "best" : "wrong"}
             dimmed={picked !== null && picked !== index}
+            revealed={picked !== null && picked !== index && option.correct}
             onClick={() => pick(index)}
           />
         ))}

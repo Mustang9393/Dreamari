@@ -57,13 +57,15 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       if (locked) return;
       setLocked(id ?? "resolved");
       const delta = TIER_SCORE[tier];
-      // A short beat on the locked option before the card, so the player sees
-      // what they picked land.
+      // Hold on the board before the card: long enough to see what you picked
+      // land, and longer on a miss so the revealed right answer is readable
+      // before the explanation covers it.
+      const hold = tier === "wrong" || tier === "risky" ? 1150 : 420;
       window.setTimeout(() => {
         patchRun({ reputation: applyScore(reputation, tier), scored: scored + 1 });
         setResult({ tier, why, delta });
         setPhase("feedback");
-      }, 340);
+      }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locked, reputation, scored],
@@ -279,7 +281,10 @@ function BeatStage({
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
       <div className="relative z-10 order-3 flex min-h-0 flex-none items-end justify-center px-3 pb-3 sm:order-none sm:flex-1 sm:px-5 sm:pb-5">
-        <div className="flex w-full max-w-[620px] flex-col gap-[10px]">
+        {/* Dreamy is positioned OVER the box's top edge rather than stacked
+           above it. In the flow it claimed its own ~84px row on a phone, which
+           is the black gap that opened up between the art and the question. */}
+        <div className="relative flex w-full max-w-[620px] flex-col">
           {narrated && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} onAdvance={() => setRevealed(true)}>
@@ -378,7 +383,7 @@ function Dreamy({ pose }: { pose: DreamyPose }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none -mb-[22px] flex justify-end pr-[12px] sm:-mb-[26px] sm:pr-[20px]"
+      className="pointer-events-none absolute right-[10px] bottom-[calc(100%-26px)] z-20 sm:right-[18px] sm:bottom-[calc(100%-32px)]"
     >
       {/* A gentle hover, not the ambient cloud drift: that one travels 24px and
          made Dreamy look detached from the line it is speaking. */}

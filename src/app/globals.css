@@ -562,6 +562,19 @@ body {
     transform: translate3d(-0.4%, 0.3%, 0) scale(1.005);
   }
 }
+/* The right answer arriving after a wrong pick: a spring-y pop, so the eye goes
+   straight to it. */
+@keyframes play-pop {
+  0% {
+    transform: scale(0.94);
+  }
+  60% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 /* Dreamy hovering beside the line it is speaking. Small travel on purpose. */
 @keyframes play-hover {
   0%,

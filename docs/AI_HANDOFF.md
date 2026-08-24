@@ -2,6 +2,37 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+## Open items for the APP REPO (read this first if you are pulling from here)
+
+Everything below in the log is a record of work in this prototype. These three
+are the only things that need action on the app-repo side. Nothing else here
+requires anything of you.
+
+1. **Mirror the new glass tokens.** `color.glass.surface-raised` and
+   `color.glass.border-raised` were added to this repo's DTCG collection on
+   2026-08-24 and need to land in `packages/ui/tokens`, plus Figma's Semantic
+   collection. Drop-in spec with the exact JSON for both modes:
+   `docs/handoff/glass-raised-rung.md`; Figma variables:
+   `docs/handoff/figma-variables-to-add.md` section D. **Purely additive** -- no
+   existing token changed value, so pulling this cannot alter anything already
+   built against the glass set.
+2. **`--card` is wrong in light mode.** It resolves to `#d8dbe8` against a
+   `#f4f7ff` page, so every card built on it comes out DARKER than the surface
+   it sits on. Connect was moved onto `--color-glass-surface-3` (frosted white
+   in light, deep glass in dark) as a local fix, but `--card` is a contract
+   token in `src/components/marketing/tokens.css` and was deliberately left
+   alone. It wants correcting at the source.
+3. **`src/components/student-app/StudentAppShell.tsx` is orphaned.** Its only
+   importer was the Computer Science career-report page, which was deleted on
+   2026-08-24. Kept rather than removed unasked; delete it if nothing in the app
+   repo wants it.
+
+CONTRACT FILES ARE UNTOUCHED and were checked before every push today:
+`src/components/marketing/tokens.css`, `docs/handoff/shadcn-adapter.css`,
+`docs/handoff/COMPONENT-MAP.md`. The generated
+`src/app/design-tokens.generated.css` changed only by four added lines (the two
+tokens above, in both modes).
+
 ## Current session
 
 - Date: 2026-08-24
@@ -22,6 +53,28 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   for a card-on-tinted-background design and the same darker-than-background
   effect will show anywhere else that uses it in light mode. Worth correcting
   at the source.
+
+### 2026-08-24 Play: every question type to the same feedback standard (PUSHED)
+
+- The Duolingo treatment was only on the matching beat; the rest coloured the
+  pick and moved on. Now EVERY type reveals the right answer when you miss it:
+  scenario/boss option lists, the fill-in-the-blank chips, the catch-the-mistake
+  document rows, and each rapid-fire question. The pick wears a tick or a cross,
+  a wrong pick shakes, and the correct one pops in green.
+- Timing follows from that: the board holds for 1150ms on a miss instead of
+  420ms, so the revealed answer is readable before the explanation card covers
+  it, and rapid-fire waits 1150ms before loading the next question rather than
+  480ms. A correct answer still moves at the quick tempo.
+- MOBILE GAP FIXED, and the cause is worth recording: Dreamy sat in the flow
+  above the dialogue box, claiming its own ~84px row, which is what pushed the
+  art up and left a black band between the picture and the question. Measured
+  on a 812px viewport: art was 183px with an 84px gap; Dreamy is now absolutely
+  positioned over the box's top edge and the art fills 368px with a 0px gap.
+- Also added, and this is for whoever pulls this repo next: the handoff now
+  opens with an "Open items for the APP REPO" block, because the three things
+  that need action on that side (mirror the glass tokens, --card is darker than
+  the page in light mode, StudentAppShell is orphaned) were scattered across
+  nine entries.
 
 ### 2026-08-24 Play: RPG pacing, autosave, portraits, sound (PUSHED)
 
