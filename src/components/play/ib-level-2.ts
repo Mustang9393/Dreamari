@@ -146,6 +146,11 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "chapter",
       id: "L2-09",
+      // Marcus's own portrait card (L2-08) is his moment -- a chapter
+      // transition into a new episode is not the place for it to keep
+      // lingering, and L2-10 right after needs to reach ITS OWN scene
+      // (Christina) rather than inheriting his.
+      resetScene: true,
       speaker: "Narrator",
       pose: "alert",
       setup: "Next episode · Level 2",
@@ -337,6 +342,10 @@ export const IB_LEVEL_2: Level = {
       layout: "options",
       id: "L2-19",
       progress: 0.7,
+      // L2-18's art is Jordan's own moment -- it stops here rather than
+      // bleeding into Christina's beat, then Marcus's own assessment two
+      // beats later (L2-21).
+      resetScene: true,
       speaker: "Christina",
       setup: '"You earned a seat in the Maison Laurent meeting. Listen closely and take notes."',
       question: "What should you do during the meeting?",
@@ -471,6 +480,10 @@ export const IB_LEVEL_2: Level = {
     {
       kind: "review",
       id: "L2-25",
+      // The review is deliberately not routed to any location (see
+      // locations.ts) -- it should read as the abstract, liminal
+      // AmbientBackdrop, not keep showing L2-23's debrief art.
+      resetScene: true,
       speaker: "Dreamy",
       pose: "party",
       setup: "Final review",

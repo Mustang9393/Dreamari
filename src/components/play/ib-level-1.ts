@@ -194,6 +194,10 @@ export const IB_LEVEL_1: Level = {
       layout: "boss",
       id: "L1-08",
       progress: 0.5,
+      // L1-07's laptop POV shot is that beat's own moment -- it stops here
+      // rather than bleeding into an unrelated congratulations beat, then
+      // Christina's own beats after it.
+      resetScene: true,
       speaker: "Narrator",
       pose: "party",
       setup: "Your name made the deal email to the whole bank. You're on the record for helping close it.",
@@ -340,6 +344,10 @@ export const IB_LEVEL_1: Level = {
       layout: "options",
       id: "L1-14",
       progress: 1,
+      // L1-13's art is the specific tableau of a different intern quitting --
+      // it stops here rather than bleeding into an unrelated intern's task
+      // four hours later, then the chapter card and review that follow.
+      resetScene: true,
       speaker: "Narrator",
       pose: "curious",
       setup: "7 PM. Another intern is re-sorting 200 misprinted pages. Her deadline: 40 minutes. Yours: tomorrow. She hasn't asked for help.",

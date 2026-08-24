@@ -173,6 +173,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
 
+  const goBack = useCallback(() => {
+    setLocked(null);
+    setResult(null);
+    setPhase("beat");
+    patchRun({ index: Math.max(0, index - 1) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
   const restart = () => {
     // "Reputation resets to 50 and the level restarts from screen 1" -- the
     // rules tab. A fresh run must not inherit the old save.
@@ -363,6 +371,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         scored={scored}
         delta={phase === "feedback" ? (result?.delta ?? null) : null}
         accent={accent}
+        onBack={index > 0 ? goBack : undefined}
       />
 
       {phase === "ending" ? (
@@ -1179,6 +1188,7 @@ function Hud({
   scored,
   delta,
   accent,
+  onBack,
 }: {
   simulation: Simulation;
   level: Level;
@@ -1187,18 +1197,34 @@ function Hud({
   scored: number;
   delta: number | null;
   accent: string;
+  /** Steps back one beat. Undefined on the level's first beat, where there is
+   *  nowhere within the run to go back to -- the button leaves the
+   *  simulation instead, same as it always has. */
+  onBack?: () => void;
 }) {
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="flex items-center gap-[var(--space-3)]">
-        <Link
-          href="/play"
-          aria-label="Leave the simulation"
-          className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-          style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
-        >
-          <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
-        </Link>
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to the previous screen"
+            className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+            style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+          >
+            <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+          </button>
+        ) : (
+          <Link
+            href="/play"
+            aria-label="Leave the simulation"
+            className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+            style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+          >
+            <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+          </Link>
+        )}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
