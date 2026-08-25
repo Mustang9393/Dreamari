@@ -695,19 +695,26 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         >
           Browse All
         </button>
-        {tab === "browse" && (
-          <button
-            type="button"
-            aria-label="Search"
-            aria-pressed={searchOpen}
-            onClick={() => setSearchOpen((value) => !value)}
-            className="dm-quiet absolute right-4 flex size-9 cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
-          >
-            <Search className="h-4 w-4" />
-          </button>
-        )}
-        <QuickLinksMenu align="left" className="absolute top-1/2 left-4 -translate-y-1/2 [&>button]:size-9" />
+        {/* Hamburger anchored top-right, same corner as every other page's
+           mobile header -- it used to sit at the LEFT edge here, the one
+           page out of step with the rest of the app. Search (Browse tab
+           only) sits just to its left instead of competing for the same
+           corner. */}
+        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-[10px]">
+          {tab === "browse" && (
+            <button
+              type="button"
+              aria-label="Search"
+              aria-pressed={searchOpen}
+              onClick={() => setSearchOpen((value) => !value)}
+              className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          )}
+          <QuickLinksMenu />
+        </div>
       </div>
 
       {/* One standard gap between the navbar and page content everywhere

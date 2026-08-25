@@ -132,8 +132,12 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
 export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
   return (
     <header
-      className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] backdrop-blur-[2px] md:flex"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+      // glass-surface-1 (3% alpha) read as barely-there once real content
+      // scrolled underneath it -- glass-surface-3 is the same near-solid
+      // token MobileNav already uses for this exact job (a persistent bar
+      // over arbitrary scrolling content), plus the same 10px blur.
+      className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] backdrop-blur-[10px] md:flex"
+      style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}
     >
       <Wordmark />
 

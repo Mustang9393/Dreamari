@@ -327,7 +327,10 @@ function HeroBanner() {
 }
 
 type Activity = {
-  badge: string;
+  /** Drives the progress bar/stat accent color -- no longer a badge chip
+      (removed per direct feedback), but kept the name's "badge" root since
+      it's still the card's one accent color, not a generic "color" prop
+      that could be mistaken for the whole card's background. */
   badgeColor: string;
   title: string;
   /** the specific simulation/chapter name, shown italic under the title */
@@ -350,10 +353,9 @@ type Activity = {
 // widths straight from the frame.
 const ACTIVITIES: Activity[] = [
   {
-    badge: "CAREER SIMULATION",
-    badgeColor: "#ffb81f", // bright gold literal: chip sits ON the photo, theme-independent
-    title: "Day in the Life: Investment Banker",
-    chapter: "The $30B Deal",
+    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
+    title: "The $30B Deal",
+    chapter: "Level 1 · Intern",
     sub: "",
     fill: 62,
     stat: "62% · 18 min left",
@@ -362,8 +364,7 @@ const ACTIVITIES: Activity[] = [
     href: `/play/${INVESTMENT_BANKING.id}`,
   },
   {
-    badge: "GLOSSARY GAME",
-    badgeColor: "#ffb81f", // bright gold literal: chip sits ON the photo, theme-independent
+    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
     title: "Finance Essentials",
     chapter: "Learn key finance terms",
     sub: "",
@@ -374,8 +375,7 @@ const ACTIVITIES: Activity[] = [
     href: "/play/glossary/investment-banking",
   },
   {
-    badge: "GAME",
-    badgeColor: "#ffb81f", // bright gold literal: chip sits ON the photo, theme-independent
+    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
     title: "Deal Team Kickoff",
     sub: "Draft the squad, win the pitch",
     fill: 48,
@@ -390,28 +390,26 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const style = { borderColor: "var(--glass-border)", background: "linear-gradient(90deg, var(--card) 0%, var(--background) 62%, var(--background) 100%)" };
   const content = (
     <>
-      <span
-        className="absolute top-[17px] left-[15px] rounded-[999px] sm:left-[19px] border px-[var(--space-3)] py-[5px] text-[10px] leading-[14px] font-semibold"
-        style={{ fontFamily: "var(--font-body)", background: "rgba(5,8,20,0.78)", borderColor: activity.badgeColor, color: activity.badgeColor }}
-      >
-        {activity.badge}
-      </span>
+      {/* Badge chip removed, per direct feedback -- every element below
+         shifted up 30px (the chip's own height plus its gap to the title)
+         to close the gap it left rather than stranding a blank band at the
+         top of the card. */}
       <p
-        className="absolute top-[47px] left-[15px] w-[164px] font-bold sm:left-[19px] sm:w-[226px]"
+        className="absolute top-[17px] left-[15px] w-[164px] font-bold sm:left-[19px] sm:w-[226px]"
         style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", fontSize: activity.title.length > 24 ? 15 : 19, lineHeight: activity.title.length > 24 ? "19px" : "24px" }}
       >
         {activity.title}
       </p>
-      <p className="absolute top-[88px] left-[15px] w-[150px] text-[10.5px] leading-[14px] italic sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+      <p className="absolute top-[58px] left-[15px] w-[150px] text-[10.5px] leading-[14px] italic sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
         {activity.chapter ?? activity.sub}
       </p>
-      <div className="absolute top-[123px] left-[15px] h-[5px] w-[160px] rounded-[999px] sm:top-[109px] sm:left-[19px] sm:w-[200px]" style={{ background: "var(--glass-surface-2)" }}>
+      <div className="absolute top-[93px] left-[15px] h-[5px] w-[160px] rounded-[999px] sm:top-[79px] sm:left-[19px] sm:w-[200px]" style={{ background: "var(--glass-surface-2)" }}>
         <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
       </div>
-      <p className="absolute top-[133px] left-[15px] text-[10px] leading-[14px] font-semibold sm:top-[119px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+      <p className="absolute top-[103px] left-[15px] text-[10px] leading-[14px] font-semibold sm:top-[89px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
         {activity.stat}
       </p>
-      <p className="absolute top-[158px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[150px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+      <p className="absolute top-[128px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[120px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         <span className="inline-flex items-center gap-[4px]">{activity.cta}<ArrowRight size={11} strokeWidth={3} aria-hidden /></span>
       </p>
       <div

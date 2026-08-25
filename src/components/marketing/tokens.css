@@ -152,8 +152,19 @@
      scrolling in all directions). touch-action locks panning gestures to the Y axis so
      a drag that starts slightly off-vertical still only scrolls the page down/up;
      overflow-x/overscroll-behavior-x back that up in case any descendant's layout ever
-     creeps a fraction past 100% width. */
-  overflow-x: hidden;
+     creeps a fraction past 100% width. `clip`, not `hidden`: per the CSS overflow spec,
+     an explicit non-visible value on ONE axis silently computes the other axis's
+     "visible" to "auto" too -- `hidden` here was quietly turning this element into its
+     own scroll container, which broke every `position: sticky` header on every page
+     using this class (a sticky element sticks to its nearest scroll-container ancestor,
+     not necessarily the viewport; this one never actually scrolls internally, so the
+     header just scrolled away with the rest of the page instead of pinning). `clip`
+     achieves the same "never show horizontal overflow" result without establishing a
+     scroll container, so overflow-y stays `visible` and sticky headers stick to the
+     real page scroll again. Confirmed live: before this fix a header at scrollY=500
+     measured top:-500 (moved 1:1 with scroll); after, top:0 (pinned), exactly the
+     bug/fix pattern above describes. */
+  overflow-x: clip;
   overscroll-behavior-x: none;
   touch-action: pan-y;
 }
