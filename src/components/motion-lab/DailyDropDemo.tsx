@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Transition, Variants } from "framer-motion";
@@ -146,6 +147,11 @@ function LightBand({ length = 560, thickness = 120, delay = 0 }: { length?: numb
 // ——— Dreamy in flight: leaning into the band's direction, riding its bright
 // head. A soft bob carries the float; a high-frequency micro-vibration
 // signifies speed; the trail's light washes the body (irid).
+// The real rendered cloud (public/images/hero-cloud-mascot.png), not the
+// vector DreamyRig traced from a different pose -- per direct instruction,
+// use the real art here even though a flat image can't reproduce DreamyRig's
+// own gaze-cycle/blink rig, so the eyes stay fixed instead of following the
+// same drift the vector version did.
 function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: boolean }) {
   const reduced = useReducedMotion();
   return (
@@ -158,8 +164,8 @@ function FlyingDreamy({ size = 150, urgent = false }: { size?: number; urgent?: 
         animate={reduced ? undefined : { y: [0, -(urgent ? 2.5 : 1.2), urgent ? 2.5 : 1.2, 0] }}
         transition={{ duration: urgent ? 0.12 : 0.18, repeat: Infinity, ease: "linear" }}
       >
-        <div className="-rotate-[6deg]">
-          <DreamyRig size={size} lookX={14} shadow={false} irid />
+        <div className="-rotate-[6deg]" style={{ width: size, height: size }}>
+          <Image src="/images/hero-cloud-mascot.png" alt="" width={size} height={size} className="h-full w-full object-contain" draggable={false} priority />
         </div>
       </motion.div>
     </motion.div>
@@ -600,7 +606,7 @@ function QuizPhase({ onSolve }: { onSolve: (clues: number) => void }) {
 // ——— Phase C: the landing. Flash + shockwave + sunburst sell the impact;
 // Dreamy holds a grounded squash-stretch joy hop; the career card, stats,
 // and CTA stage in (copy per the Replit daily-drop flow).
-function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number }) {
+function RevealPhase({ onClose }: { onClose: () => void }) {
   const reduced = useReducedMotion();
   // Fit-to-viewport: the celebration stack (Dreamy + heading + poster card +
   // stats + CTAs) is ~880px tall — taller than most laptop windows, which
@@ -650,7 +656,7 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
       <div style={fit < 1 && columnHeight ? { height: columnHeight * fit, width: "100%" } : { width: "100%" }}>
       <div
         ref={columnRef}
-        className="relative mx-auto flex w-full max-w-[460px] flex-col items-center justify-center gap-4 px-6 py-12 text-center"
+        className="relative mx-auto flex w-full max-w-[460px] flex-col items-center justify-center gap-3 px-6 py-8 text-center"
         style={{ transform: fit < 1 ? `scale(${fit})` : undefined, transformOrigin: "top center" }}
       >
 
@@ -700,57 +706,48 @@ function RevealPhase({ onClose, clues }: { onClose: () => void; clues: number })
       >
         Drop caught!
       </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.3 }}
-        className="relative z-[2] max-w-[340px] text-[13px]"
-        style={{ color: V.muted }}
-      >
-        Solved with {clues} clue{clues > 1 ? "s" : ""} · streak +1
-      </motion.p>
 
+      {/* The card is the payoff -- biggest thing on screen, everything else is
+         a caption. Tier reads as a badge ON the card (matching how a poster
+         card's own salary badge sits on the photo) instead of a floating
+         pill above it, and there's no separate description paragraph
+         anymore -- the card's own title/world already say what this is. */}
       <motion.div
         initial={{ scale: 0, rotate: -6, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={popAt(0.7)}
-        className="relative z-[2] flex flex-col items-center gap-3"
+        className="relative z-[2]"
       >
         <style>{FOIL_CSS}</style>
-        {/* tier chip — our match taxonomy; wildcards carry the foil hues */}
-        <span
-          className="rounded-full px-3.5 py-1 text-[10.5px] font-extrabold uppercase"
-          style={
-            DROP_TIER === "wildcard"
-              ? {
-                  letterSpacing: "0.14em",
-                  background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700)",
-                  color: V.bg,
-                }
-              : {
-                  letterSpacing: "0.14em",
-                  background: DROP_TIER === "strong" ? "var(--accent-subtle)" : V.gold,
-                  color: V.bg,
-                }
-          }
-        >
-          {DROP_TIER === "wildcard" ? "Wildcard" : DROP_TIER === "strong" ? "Strong Match" : "Stretch"}
-        </span>
-        {/* the career's browse card, foil-wrapped when it's a wildcard pull */}
-        <div className={`relative rounded-[19px] ${DROP_TIER === "wildcard" ? "dd-holo-border p-[3px]" : ""}`}>
-          <PosterCard career={DROP_CAREER} className="pointer-events-none" />
-          {DROP_TIER === "wildcard" && (
-            <span aria-hidden className="dd-holo-sheen pointer-events-none absolute inset-[3px] rounded-[16px]" />
-          )}
+        {/* The transform wrapper must shrink-wrap the card (inline-block) --
+           left as a plain block it stretches to the outer wrapper's full
+           294px width instead of hugging the card's real ~216px width,
+           which is what blew the holo-border's conic-gradient background
+           out into an oversized rectangle bleeding past the card's edge. */}
+        <div className="relative" style={{ width: 302, height: 424 }}>
+          <div className="inline-block" style={{ transform: "scale(1.4)", transformOrigin: "top left" }}>
+            <div className={`relative rounded-[19px] ${DROP_TIER === "wildcard" ? "dd-holo-border p-[3px]" : ""}`}>
+              <PosterCard career={DROP_CAREER} className="pointer-events-none" />
+              {DROP_TIER === "wildcard" && (
+                <span aria-hidden className="dd-holo-sheen pointer-events-none absolute inset-[3px] rounded-[16px]" />
+              )}
+            </div>
+          </div>
+          <span
+            className="absolute top-2 left-2 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase"
+            style={
+              DROP_TIER === "wildcard"
+                ? { letterSpacing: "0.1em", background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700)", color: V.bg }
+                : { letterSpacing: "0.1em", background: DROP_TIER === "strong" ? "var(--accent-subtle)" : V.gold, color: V.bg }
+            }
+          >
+            {DROP_TIER === "wildcard" ? "Wildcard" : DROP_TIER === "strong" ? "Strong Match" : "Stretch"}
+          </span>
         </div>
-        <p className="max-w-[320px] text-[12.5px] leading-[18px]" style={{ color: V.muted }}>
-          Ethical Hackers help companies find weak spots before criminals do. They hack with permission to make
-          systems safer.
-        </p>
       </motion.div>
 
       <motion.div
-        className="relative z-[2] grid w-full max-w-[340px] grid-cols-2 items-end gap-3 pt-1"
+        className="relative z-[2] grid w-full max-w-[340px] grid-cols-2 items-end gap-3"
         variants={chipRow}
         initial="hidden"
         animate="shown"
@@ -851,7 +848,6 @@ function TakeoverStage({ onClose }: { onClose: () => void }) {
   const reduced = useReducedMotion();
   // mounts fresh on every open, so initial state IS the reset
   const [phase, setPhase] = useState<"streak" | "quiz" | "reveal">(reduced ? "quiz" : "streak");
-  const [clues, setClues] = useState(1);
 
   useEffect(() => {
     if (phase !== "streak") return;
@@ -870,14 +866,9 @@ function TakeoverStage({ onClose }: { onClose: () => void }) {
       {phase === "streak" ? (
         <StreakPhase />
       ) : phase === "quiz" ? (
-        <QuizPhase
-          onSolve={(c) => {
-            setClues(c);
-            setPhase("reveal");
-          }}
-        />
+        <QuizPhase onSolve={() => setPhase("reveal")} />
       ) : (
-        <RevealPhase clues={clues} onClose={onClose} />
+        <RevealPhase onClose={onClose} />
       )}
       <button
         type="button"
