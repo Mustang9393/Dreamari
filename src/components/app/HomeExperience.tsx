@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
@@ -10,6 +11,7 @@ import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
+import { INVESTMENT_BANKING } from "@/components/play/games";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Today's Drop / Continue / Trending), Continue rail of
@@ -229,7 +231,9 @@ function HeroBanner() {
               </div>
             </div>
             <div>
-              <HeroCta><span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
+              <HeroCta onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
+                <span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
+              </HeroCta>
             </div>
           </div>
           <PanelPhoto photo="/images/app/activity-ib-dossier-hero.png" />
@@ -336,6 +340,10 @@ type Activity = {
   /** "glossary" renders a vocabulary visual instead of a photo (per
       feedback: the glossary game must not wear career-sim imagery) */
   art?: "glossary";
+  /** Where the card's own CTA actually goes. Omitted on Finance Essentials
+      and Deal Team Kickoff -- neither has a built page to send someone to
+      yet, so those two stay display-only rather than linking to a guess. */
+  href?: string;
 };
 
 // Active Activity Cards (Figma 2537:4570/4587/4603) — copy, colors, progress
@@ -351,6 +359,7 @@ const ACTIVITIES: Activity[] = [
     stat: "62% · 18 min left",
     cta: "Resume Simulation",
     photo: "/images/app/activity-ib-dossier.png",
+    href: `/play/${INVESTMENT_BANKING.id}`,
   },
   {
     badge: "GLOSSARY GAME",
@@ -376,11 +385,10 @@ const ACTIVITIES: Activity[] = [
 ];
 
 function ActivityCard({ activity }: { activity: Activity }) {
-  return (
-    <article
-      className="relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:w-[421px]"
-      style={{ borderColor: "var(--glass-border)", background: "linear-gradient(90deg, var(--card) 0%, var(--background) 62%, var(--background) 100%)" }}
-    >
+  const className = `relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:w-[421px] ${activity.href ? "dm-tap block cursor-pointer" : ""}`;
+  const style = { borderColor: "var(--glass-border)", background: "linear-gradient(90deg, var(--card) 0%, var(--background) 62%, var(--background) 100%)" };
+  const content = (
+    <>
       <span
         className="absolute top-[17px] left-[15px] rounded-[999px] sm:left-[19px] border px-[var(--space-3)] py-[5px] text-[10px] leading-[14px] font-semibold"
         style={{ fontFamily: "var(--font-body)", background: "rgba(5,8,20,0.78)", borderColor: activity.badgeColor, color: activity.badgeColor }}
@@ -435,6 +443,18 @@ function ActivityCard({ activity }: { activity: Activity }) {
           <img alt="" src={activity.photo} className="absolute inset-0 h-full w-full object-cover object-top" />
         )}
       </div>
+    </>
+  );
+  if (activity.href) {
+    return (
+      <Link href={activity.href} className={className} style={style}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <article className={className} style={style}>
+      {content}
     </article>
   );
 }
