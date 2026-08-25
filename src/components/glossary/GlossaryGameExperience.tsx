@@ -228,8 +228,10 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
   const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)]">
-      <div className="flex w-full max-w-[520px] items-start gap-[var(--space-4)]">
-        <DreamyFace pose="happy" size={88} />
+      <div className="relative w-full max-w-[520px] pt-[var(--space-6)] pl-[var(--space-8)]">
+        <span className="absolute -top-3 -left-3 z-10">
+          <DreamyFace pose="happy" size={88} />
+        </span>
         <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
       </div>
       <div className="flex w-full max-w-[520px] flex-col gap-[var(--space-3)]">
@@ -481,6 +483,13 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
 // ---------------------------------------------------------------------------
 // Question renderers. Each returns { done, correct } via onAnswer once graded.
 
+// Amber is this game's "active/selected" accent everywhere -- reusing it for
+// a confirmed-correct answer too made the two states read the same color, so
+// a verified-correct answer/input now turns var(--world-food-farming-nature)
+// (this app's already dark/light-calibrated green primitive, reused here for
+// its color rather than its "world" meaning) instead. Wrong stays --danger.
+const CORRECT_COLOR = "var(--world-food-farming-nature)";
+
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
 function OptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
@@ -491,7 +500,7 @@ function OptionList({ options, correctIndex, picked, onPick }: { options: string
         const isCorrect = i === correctIndex;
         const revealed = picked !== null;
         const dim = revealed && !isPicked && !isCorrect;
-        const border = revealed && isCorrect ? "var(--world-business-money-office)" : revealed && isPicked && !isCorrect ? "var(--danger, #e0483e)" : "var(--glass-border)";
+        const border = revealed && isCorrect ? CORRECT_COLOR : revealed && isPicked && !isCorrect ? "var(--danger, #e0483e)" : "var(--glass-border)";
         return (
           <button
             key={option}
@@ -507,7 +516,7 @@ function OptionList({ options, correctIndex, picked, onPick }: { options: string
             <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
               {option}
             </span>
-            {revealed && isCorrect && <Check className="h-5 w-5 flex-none" style={{ color: "var(--world-business-money-office)" }} aria-hidden />}
+            {revealed && isCorrect && <Check className="h-5 w-5 flex-none" style={{ color: CORRECT_COLOR }} aria-hidden />}
             {revealed && isPicked && !isCorrect && <X className="h-5 w-5 flex-none" style={{ color: "var(--danger, #e0483e)" }} aria-hidden />}
           </button>
         );
@@ -543,8 +552,18 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
         disabled={checked !== null}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Or type your answer…"
-        className="w-full rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[15px] font-semibold outline-none"
-        style={{ background: "var(--card)", borderColor: checked === null ? "var(--glass-border)" : checked ? "var(--world-business-money-office)" : "var(--danger, #e0483e)", color: "var(--foreground)" }}
+        className="w-full rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[15px] font-semibold outline-none disabled:opacity-100"
+        style={{
+          background: "var(--card)",
+          borderColor: checked === null ? "var(--glass-border)" : checked ? CORRECT_COLOR : "var(--danger, #e0483e)",
+          // Browsers dim disabled-input text by default regardless of `color`
+          // (Safari especially, via -webkit-text-fill-color) -- once this
+          // input disables after Check Answer, that dimming is exactly what
+          // made the student's own typed answer unreadable. Pin both
+          // properties so the text stays at full, on-brand contrast.
+          color: checked === null ? "var(--foreground)" : checked ? CORRECT_COLOR : "var(--danger, #e0483e)",
+          WebkitTextFillColor: checked === null ? "var(--foreground)" : checked ? CORRECT_COLOR : "var(--danger, #e0483e)",
+        }}
       />
       {checked === null && (
         <button
@@ -603,9 +622,9 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
                 onClick={() => setPickedLeft(p.left)}
                 className="dm-tap flex w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-center text-[14px] font-bold"
                 style={{
-                  background: done ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "color-mix(in srgb, var(--accent) 8%, var(--card))",
-                  borderColor: done ? "var(--world-business-money-office)" : wrong ? "var(--danger, #e0483e)" : active ? "var(--accent)" : "var(--glass-border)",
-                  color: done ? "var(--world-business-money-office)" : "var(--foreground)",
+                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "color-mix(in srgb, var(--accent) 8%, var(--card))",
+                  borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--accent)" : "var(--glass-border)",
+                  color: done ? CORRECT_COLOR : "var(--foreground)",
                 }}
               >
                 {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
@@ -626,9 +645,9 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
                 onClick={() => pickedLeft && tryMatch(pickedLeft, right)}
                 className="dm-tap flex w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-center text-[14px] font-bold"
                 style={{
-                  background: done ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "color-mix(in srgb, var(--amber-400) 10%, var(--card))",
-                  borderColor: done ? "var(--world-business-money-office)" : "var(--glass-border)",
-                  color: done ? "var(--world-business-money-office)" : "var(--foreground)",
+                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "color-mix(in srgb, var(--amber-400) 10%, var(--card))",
+                  borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
+                  color: done ? CORRECT_COLOR : "var(--foreground)",
                 }}
               >
                 {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
@@ -714,8 +733,8 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
                     key={item.text}
                     className="rounded-full px-[var(--space-3)] py-[4px] text-[12px] font-semibold"
                     style={{
-                      background: checked ? (wrongPlacement ? "color-mix(in srgb, var(--danger, #e0483e) 20%, var(--card))" : "color-mix(in srgb, var(--world-business-money-office) 20%, var(--card))") : "color-mix(in srgb, var(--amber-400) 22%, var(--card))",
-                      color: checked ? (wrongPlacement ? "var(--danger, #e0483e)" : "var(--world-business-money-office)") : "var(--foreground)",
+                      background: checked ? (wrongPlacement ? "color-mix(in srgb, var(--danger, #e0483e) 20%, var(--card))" : "color-mix(in srgb, var(--world-food-farming-nature) 20%, var(--card))") : "color-mix(in srgb, var(--amber-400) 22%, var(--card))",
+                      color: checked ? (wrongPlacement ? "var(--danger, #e0483e)" : CORRECT_COLOR) : "var(--foreground)",
                     }}
                   >
                     {item.text}
@@ -766,7 +785,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
             <span className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
               {step.label}
             </span>
-            <div className="flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--card)", borderColor: correct ? "var(--world-business-money-office)" : wrong ? "var(--danger, #e0483e)" : "var(--glass-border)" }}>
+            <div className="flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--card)", borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--glass-border)" }}>
               <span style={{ color: "var(--muted-foreground)" }}>$</span>
               <input
                 type="text"
@@ -774,8 +793,11 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
                 disabled={checked}
                 value={values[i]}
                 onChange={(e) => setValues((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
-                className="w-[100px] bg-transparent text-right text-[15px] font-bold outline-none"
-                style={{ color: "var(--foreground)" }}
+                className="w-[100px] bg-transparent text-right text-[15px] font-bold outline-none disabled:opacity-100"
+                style={{
+                  color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
+                  WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
+                }}
               />
             </div>
           </div>
@@ -821,10 +843,12 @@ function QuestionScreen({
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
 
   return (
-    <div className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className="relative flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
-        <div className="flex items-start gap-[var(--space-3)]">
-          <DreamyFace pose="curious" size={56} />
+        <div className="relative pt-[var(--space-4)] pl-[var(--space-6)]">
+          <span className="absolute -top-8 -left-6 z-10">
+            <DreamyFace pose="curious" size={60} />
+          </span>
           <SpeechBubble>{question.prompt}</SpeechBubble>
         </div>
       )}
@@ -857,34 +881,44 @@ function QuestionScreen({
   );
 }
 
+// A fixed-position modal, not inline content -- feedback used to render
+// below the question and push the Continue button (and sometimes the
+// feedback text itself) below the fold on shorter viewports, per direct
+// report. Same overlay chrome as StreakModal (fixed inset-0, dim backdrop,
+// centered card) for consistency, but deliberately NOT dismissible by
+// tapping the backdrop: StreakModal is an optional celebratory toast,
+// this is the required checkpoint before advancing, so the button stays
+// the only way through.
 function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; text: string; onNext: () => void; isLast: boolean }) {
   return (
-    <div
-      className="flex w-full flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)]"
-      style={{ background: correct ? "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? "var(--world-business-money-office)" : "var(--danger, #e0483e)" }}
-    >
-      <div className="flex items-start gap-[var(--space-3)]">
-        <DreamyFace pose={correct ? "party" : "puzzle"} size={56} />
-        <div className="flex flex-col gap-[3px]">
-          <span className="flex items-center gap-[8px] text-[16px] font-extrabold" style={{ color: correct ? "var(--world-business-money-office)" : "var(--danger, #e0483e)" }}>
-            <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? "var(--world-business-money-office)" : "var(--danger, #e0483e)" }}>
-              {correct ? <Check className="h-4 w-4" style={{ color: "#05070f" }} aria-hidden /> : <X className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden />}
-            </span>
-            {correct ? "Correct!" : "Not quite"}
-          </span>
-          <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-            {text}
-          </p>
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={onNext}
-        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
-        style={{ background: correct ? "var(--world-business-money-office)" : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
+      <div
+        className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)]"
+        style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
       >
-        {isLast ? "See Results" : "Next Question"} <ArrowRight className="h-4 w-4" aria-hidden />
-      </button>
+        <div className="flex items-start gap-[var(--space-3)]">
+          <DreamyFace pose={correct ? "party" : "puzzle"} size={56} />
+          <div className="flex flex-col gap-[3px]">
+            <span className="flex items-center gap-[8px] text-[16px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
+              <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
+                {correct ? <Check className="h-4 w-4" style={{ color: "#05070f" }} aria-hidden /> : <X className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden />}
+              </span>
+              {correct ? "Correct!" : "Not quite"}
+            </span>
+            <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
+              {text}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
+          style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
+        >
+          {isLast ? "See Results" : "Next Question"} <ArrowRight className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
@@ -998,16 +1032,20 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
               disabled={allCorrect}
               value={values[gapIndex]}
               onChange={(e) => setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v)))}
-              className="w-[110px] border-b-2 bg-transparent text-center font-bold outline-none"
-              style={{ color: correct ? "var(--world-business-money-office)" : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)", borderColor: correct ? "var(--world-business-money-office)" : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)" }}
+              className="w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100"
+              style={{
+                color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+              }}
             />
           );
         })}
       </div>
 
       {allCorrect && (
-        <div className="flex flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-center" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
-          <span className="flex items-center gap-[8px] text-[16px] font-extrabold" style={{ color: "var(--world-business-money-office)" }}>
+        <div className="flex flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-center" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))", borderColor: CORRECT_COLOR }}>
+          <span className="flex items-center gap-[8px] text-[16px] font-extrabold" style={{ color: CORRECT_COLOR }}>
             <Trophy className="h-5 w-5" aria-hidden /> Power Play Complete!
           </span>
         </div>
@@ -1018,7 +1056,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         disabled={!allFilled}
         onClick={allCorrect ? onComplete : check}
         className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
-        style={{ background: allCorrect ? "var(--world-business-money-office)" : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
+        style={{ background: allCorrect ? CORRECT_COLOR : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
       >
         {allCorrect ? (
           <>
@@ -1246,7 +1284,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
             <UnlockCompleteScreen lesson={lesson} onStartPractice={() => setScreen("question")} />
           ))}
         {screen === "question" && current && (
-          <div className="flex flex-col gap-[var(--space-4)]">
+          <>
             <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} />
             {pendingResult && (
               <FeedbackPanel
@@ -1256,7 +1294,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
                 onNext={advanceQuestion}
               />
             )}
-          </div>
+          </>
         )}
         {screen === "powerPlayIntro" && <PowerPlayIntroScreen onStart={() => setScreen("powerPlay")} />}
         {screen === "powerPlay" && <PowerPlayScreen lesson={lesson} onComplete={() => setScreen("masteryLoading")} />}
