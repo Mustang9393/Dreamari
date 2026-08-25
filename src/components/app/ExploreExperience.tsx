@@ -235,88 +235,136 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
         <Image src={career.photo} alt="" fill sizes="(max-width: 768px) 100vw, 390px" className="object-cover" priority={active} draggable={false} />
       </div>
 
-      {/* Mobile-only in-card preference rail (desktop keeps it beside the card) */}
-      <div className="absolute top-1/2 right-4 z-[2] flex -translate-y-1/2 flex-col gap-[var(--space-6)] md:hidden">
+      {/* Mobile-only in-card preference rail (desktop keeps it beside the
+         card). Env Card v2 (Figma 3317:15773): moved from a strip centered
+         on the right edge to a compact row at the top-right, clear of the
+         details panel below. */}
+      <div className="absolute top-4 right-4 z-[2] flex flex-col gap-[var(--space-4)] md:hidden">
         <PreferenceButton label="Like this career" Icon={Heart} bare />
         <PreferenceButton label="Not for me" Icon={ThumbsDown} bare />
         <PreferenceButton label="Save for later" Icon={Bookmark} bare />
       </div>
 
-      <div className="relative z-[1] flex flex-col gap-[var(--space-4)] pb-[64px] md:pb-0">
-        {/* Career Details Panel (Figma 2486:43002): two faces sharing one
-           geometry — tap flips Summary <-> Details (major + main skills). */}
-        <button
-          type="button"
-          aria-label={face === "Summary" ? "Show more info" : "Show summary"}
-          onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
-          className="dm-tap flex w-fit max-w-full cursor-pointer flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-4)] text-left"
-          style={{ background: "var(--scrim-heavy)" }}
-        >
-          <div key={face} className="face-swap flex min-h-[151px] w-full flex-col gap-[var(--space-2)] md:w-[326px]">
-            <div className="flex items-start justify-between gap-[var(--space-2)]">
-              <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted-alt)" }}>
-                {face === "Summary" ? career.matchLabel : "MORE INFO"}
-              </span>
-              <span aria-hidden className="flex items-center">
-                <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Summary" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
-                <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Details" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
-              </span>
-            </div>
-            {face === "Summary" ? (
-              <>
-                <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
-                  {career.title}
-                </h2>
-                <p className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
-                  {career.description}
-                </p>
-                <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                  <span style={{ color: "var(--muted-foreground)" }}>SALARY</span>
-                  <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                <div className="flex flex-col gap-[var(--space-1)]">
-                  <span style={{ color: "var(--muted-foreground)" }}>MAJOR</span>
-                  <span style={{ color: "var(--foreground)" }}>{career.major}</span>
-                </div>
-                <div className="flex flex-col gap-[var(--space-1)]">
-                  <span style={{ color: "var(--muted-foreground)" }}>MAIN SKILLS</span>
-                  <span style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
-                </div>
+      <div className="relative flex flex-col pb-[64px] md:pb-0">
+        {/* Career Details Panel (Figma 3317:15773, "Env Card v2"): the whole
+           block, text through the CTA row, sits on ONE continuous backdrop
+           -- not a blurred text panel with the buttons floating over raw
+           photo below it. Figma's own effect is a "Progressive" background
+           blur, start 2 / end 35 -- CSS has no native gradient-radius
+           backdrop-filter, so this is approximated with stacked layers at
+           increasing blur, each faded in via its own mask band (the
+           standard web technique for this effect; every layer samples the
+           same photo independently, and the browser composites the
+           overlapping, differently-blurred results into a smooth ramp). */}
+        <ProgressiveBlur />
+        <div className="relative z-[1] flex w-full flex-col gap-[var(--space-4)] p-[var(--space-4)]">
+          {/* The tap-to-flip Summary <-> Details interaction wraps only the
+             text -- Figma's own mockup nests it inside the same panel as the
+             CTA buttons below, but a <button> cannot contain other buttons,
+             so this stays its own element, just sharing the panel's single
+             backdrop and padding rather than owning a separate one. */}
+          <button
+            type="button"
+            aria-label={face === "Summary" ? "Show more info" : "Show summary"}
+            onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
+            className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-4)] text-left"
+          >
+            <div key={face} className="face-swap flex min-h-[151px] w-full flex-col gap-[var(--space-2)] md:w-[326px]">
+              <div className="flex items-start justify-between gap-[var(--space-2)]">
+                <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted-alt)" }}>
+                  {face === "Summary" ? career.matchLabel : "MORE INFO"}
+                </span>
+                <span aria-hidden className="flex items-center">
+                  <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Summary" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
+                  <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Details" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
+                </span>
               </div>
-            )}
-          </div>
-        </button>
+              {face === "Summary" ? (
+                <>
+                  <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                    {career.title}
+                  </h2>
+                  <p className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                    {career.description}
+                  </p>
+                  <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                    <span style={{ color: "var(--muted-foreground)" }}>SALARY</span>
+                    <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                  <div className="flex flex-col gap-[var(--space-1)]">
+                    <span style={{ color: "var(--muted-foreground)" }}>MAJOR</span>
+                    <span style={{ color: "var(--foreground)" }}>{career.major}</span>
+                  </div>
+                  <div className="flex flex-col gap-[var(--space-1)]">
+                    <span style={{ color: "var(--muted-foreground)" }}>MAIN SKILLS</span>
+                    <span style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </button>
 
-        <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
-          <button
-            type="button"
-            className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
-            /* solid dark glass in BOTH themes: the faint white-alpha surface
-               disappeared against the photos (founder feedback) */
-            style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
-          >
-            <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
-              Play Game
-            </span>
-            <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/career/${careerSlug(career.title)}`)}
-            className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
-            style={{ background: "var(--foreground)" }}
-          >
-            <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}>
-              More Info
-            </span>
-            <Eye aria-hidden className="h-4 w-4" style={{ color: "var(--background)" }} />
-          </button>
+          <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
+            <button
+              type="button"
+              className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
+              /* solid dark glass in BOTH themes: the faint white-alpha surface
+                 disappeared against the photos (founder feedback) */
+              style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
+            >
+              <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
+                Play Game
+              </span>
+              <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/career/${careerSlug(career.title)}`)}
+              className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
+              style={{ background: "var(--foreground)" }}
+            >
+              <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}>
+                More Info
+              </span>
+              <Eye aria-hidden className="h-4 w-4" style={{ color: "var(--background)" }} />
+            </button>
+          </div>
         </div>
       </div>
     </article>
+  );
+}
+
+/** Figma's own effect on the Career Details Panel is a "Progressive"
+ *  background blur (Start 2, End 35) -- CSS has no gradient-radius
+ *  backdrop-filter, so this approximates it with N stacked layers, each
+ *  blurring the same photo independently at its own fixed radius and faded
+ *  in via a soft-edged mask band. Later layers (higher blur) render on top
+ *  and start their band further down, so the very top of the panel reads
+ *  almost photo-sharp and the bottom (behind the CTA row) is fully blurred,
+ *  with a smooth ramp in between rather than a hard seam. */
+const PROGRESSIVE_BLUR_STOPS = [2, 8, 15, 22, 29, 35];
+
+function ProgressiveBlur() {
+  const total = PROGRESSIVE_BLUR_STOPS.length;
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {PROGRESSIVE_BLUR_STOPS.map((blur, index) => {
+        const bandStart = (index / total) * 100;
+        const feather = 100 / total + 6;
+        const mask = `linear-gradient(to bottom, transparent ${Math.max(0, bandStart - feather).toFixed(1)}%, black ${bandStart.toFixed(1)}%, black 100%)`;
+        return (
+          <div
+            key={blur}
+            className="absolute inset-0"
+            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -345,9 +393,13 @@ function VideoCard({ item, active }: { item: VideoReel; active: boolean }) {
     >
       <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline preload={active ? "auto" : "none"} />
       <div className="relative z-[1] p-[var(--space-4)] pb-[64px] md:pb-[var(--space-4)]">
+        {/* Same rounded panel language as the Env Card v2 details panel, but
+           a SOLID scrim rather than the frosted-glass blur -- blurring part
+           of a playing video looks muddy in a way it doesn't over a still
+           photo, and the title needs to stay sharp and legible over motion. */}
         <span
-          className="inline-block rounded-[var(--radius-2xl)] px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold"
-          style={{ background: "var(--scrim-heavy)", color: "#ffffff", fontFamily: "var(--font-display)" }}
+          className="inline-block rounded-[var(--radius-2xl)] border px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold"
+          style={{ background: "var(--scrim-heavy)", borderColor: "var(--glass-border)", color: "#ffffff", fontFamily: "var(--font-display)" }}
         >
           {item.title}
         </span>
