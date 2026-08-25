@@ -266,14 +266,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
           {/* What They Actually Do | Real-life Example */}
           <div className="flex w-full flex-col gap-[var(--space-5)]">
-            <div className="flex items-start gap-[var(--space-4)]">
+            {/* Full-width rows on mobile, side by side from sm: up -- at the
+               Subheading size these labels are too wide to sit side by side
+               on a narrow phone without either wrapping mid-phrase or
+               shrinking the type scale just for this one spot; stacking
+               instead keeps the size and gives each label its own full row
+               to sit on one line. */}
+            <div className="flex flex-col items-stretch gap-[var(--space-3)] sm:flex-row sm:items-start sm:gap-[var(--space-4)]">
               <button type="button" onClick={() => setTab("do")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                <span className={KEY_VALUE} style={{ color: tab === "do" ? "var(--foreground)" : "var(--muted-foreground)" }}>What They Actually Do</span>
+                <span className={`${KEY_VALUE} whitespace-nowrap`} style={{ color: tab === "do" ? "var(--foreground)" : "var(--muted-foreground)" }}>What They Actually Do</span>
                 <span className="h-[2px] w-full" style={{ background: tab === "do" ? "var(--accent)" : "transparent" }} />
               </button>
               {career.realLifeExample && (
                 <button type="button" onClick={() => setTab("example")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                  <span className={KEY_VALUE} style={{ color: tab === "example" ? "var(--foreground)" : "var(--muted-foreground)" }}>Real-life Example</span>
+                  <span className={`${KEY_VALUE} whitespace-nowrap`} style={{ color: tab === "example" ? "var(--foreground)" : "var(--muted-foreground)" }}>Real-life Example</span>
                   <span className="h-[2px] w-full" style={{ background: tab === "example" ? "var(--accent)" : "transparent" }} />
                 </button>
               )}
