@@ -221,7 +221,15 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // review rather than replaying the whole level.
       const [, ...rest] = repair;
       const next = rest[0];
-      setRepair(rest);
+      // `[]` is truthy -- setting repair to an empty array here (instead of
+      // null once the queue is exhausted) meant the NEXT advance() call (the
+      // one from clicking the review beat's own "See the decision" button)
+      // took this same `if (repair)` branch again instead of ever reaching
+      // the end-of-level check below, re-landing on the review beat instead
+      // of completing it. That's the exact "nothing happens when I click"
+      // report -- only reproducible after a repair round, since a run with
+      // no misses never sets `repair` at all.
+      setRepair(rest.length > 0 ? rest : null);
       setPhase("beat");
       const to = next ? level.beats.findIndex((entry) => entry.id === next) : reviewIndex;
       patchRun({ index: to >= 0 ? to : level.beats.length - 1 });

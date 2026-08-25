@@ -10,14 +10,12 @@ import {
   Building2,
   Check,
   ConciergeBell,
-  FileText,
   Flame,
   Home,
   Package,
   PiggyBank,
   Sparkles,
   ShoppingBag,
-  SquarePen,
   Trophy,
   Moon,
   Sun,
@@ -554,14 +552,6 @@ function DocumentOptionList({ options, correctIndex, picked, onPick }: { options
   const revealed = picked !== null;
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-      <div className="flex items-center gap-[var(--space-3)] border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-        <FileText className="h-5 w-5 flex-none" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
-        <div className="flex flex-1 flex-col gap-[6px]">
-          <span className="h-[6px] w-[70%] rounded-full" style={{ background: "var(--glass-surface-2)" }} aria-hidden />
-          <span className="h-[6px] w-[45%] rounded-full" style={{ background: "var(--glass-surface-2)" }} aria-hidden />
-        </div>
-        <SquarePen className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-      </div>
       {options.map((option, i) => {
         const isPicked = picked === i;
         const isCorrect = i === correctIndex;
@@ -1210,9 +1200,14 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
               onChange={(e) => setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v)))}
               className="w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100"
               style={{
-                color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                // The purple accent (Power Play's own theme color, used for
+                // the underline/border below) is too low-contrast against
+                // this dark background to type against comfortably --
+                // direct report of not being able to read their own input.
+                // Text stays plain foreground until there's a real verdict.
+                color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
                 borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
-                WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
               }}
             />
           );

@@ -38,7 +38,48 @@ tokens above, in both modes).
 
 ## Current session
 
-- Date: 2026-08-24
+- Date: 2026-08-25
+
+### 2026-08-25 Glossary Game: Power Play contrast, dead repair-round button, Catch-the-Misuse header (PUSHED)
+
+- **Power Play fill-in-blank text was purple-on-black and unreadable while
+  typing** (direct report, screenshot). `PowerPlayScreen` in
+  `GlossaryGameExperience.tsx`: default (unchecked) input text color changed
+  from `var(--hero-accent-purple)` to `var(--foreground)`; the purple accent
+  stays on the border/underline only, so Power Play keeps its own visual
+  identity without sacrificing legibility. `color`/`WebkitTextFillColor` still
+  pinned together in every state per the existing disabled-input pattern.
+- **SimulationPlayer.tsx (Investment Banking career sim, not the Glossary
+  Game): the repair-round "Final Review" button did nothing on click** (direct
+  report). Root cause: `[]` is truthy in JS -- `advance()`'s repair branch set
+  `setRepair(rest)` even when `rest` was empty, so the *next* `advance()` call
+  (from the review beat's own button) re-entered the same repair branch
+  instead of falling through to the end-of-level check. Fixed:
+  `setRepair(rest.length > 0 ? rest : null)`. `npx tsc --noEmit` clean; live-
+  verified this session is the Power Play/word-bank/header fixes above, not
+  this one specifically -- reproducing a full repair round wasn't done this
+  round, so give this one a real playthrough check if anything looks off.
+- **`DocumentOptionList` (Catch the Misuse) header removed** per direct
+  instruction -- was a file-icon + two placeholder bars + edit-icon row with
+  no function, just a leftover "document" visual treatment from an earlier
+  pass. `FileText`/`SquarePen` imports removed as now-unused.
+- **Investigated a new report: "the 2nd 2 [mastery dots] are always blank."**
+  Live-traced credit counts term-by-term in Lesson 1 (Business Basics) by
+  playing it through in a worktree. The mastery math itself is correct --
+  dots fill exactly at `mastery[termId] >= MASTERY_TARGET` (2), confirmed via
+  DOM inspection at every step. The real issue is structural, in
+  `FIN_L01_QUESTIONS`/`FIN_L01_REVIEW` (data.ts): Product and Service each
+  have only ONE guaranteed credit opportunity plus one all-or-nothing shot
+  (Sort the Buckets item placement) to reach mastery -- Service isn't one of
+  the four Match It Up pairs at all, and `FIN_L01_REVIEW` only contains a
+  remediation question for Company. Miss the Sort the Buckets placement for
+  either term and that dot can never recover for the rest of the lesson.
+  This is exactly "the 2nd/3rd dot" (Product, Service) a player would see
+  stuck blank. Not fixed -- doing so means touching question data or
+  mastery/remediation logic, both explicitly off-limits for this visual-
+  polish pass without direct sign-off. Flagged to the user; awaiting a call
+  on whether/how to add remediation coverage for Product/Service/Customer.
+- No token changes; contract files untouched. `npm run tokens:check` clean.
 
 ### 2026-08-24 Play: Ace Attorney references -- a showdown card and softer dialogue backdrops (PUSHED)
 
