@@ -242,7 +242,10 @@ function SideCard({ candidate, onSelect }: { candidate: FeaturedCandidate; onSel
     <button
       type="button"
       onClick={onSelect}
-      className="dm-tap relative flex w-[120px] flex-none overflow-hidden rounded-[16px] border text-left sm:w-[140px] md:w-[160px]"
+      // Mobile default widened (was 120px, read as too slender) -- still
+      // narrower than the featured card at every breakpoint, just not so
+      // narrow it stops reading as a real card.
+      className="dm-tap relative flex w-[150px] flex-none overflow-hidden rounded-[16px] border text-left sm:w-[170px] md:w-[190px]"
       style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
     >
       <div className="relative h-full w-full">
