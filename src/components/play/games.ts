@@ -49,8 +49,15 @@ export function simulationFor(id: string): Simulation | undefined {
  *  into SOON: it isn't a career simulation, so it doesn't belong in the
  *  "these careers don't have a simulation yet" list, and the hub gives it
  *  its own labeled section. */
-export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string }[] = [
-  { careerSlug: "investment-banking", title: "Finance Essentials", sub: "Learn key finance terms" },
+export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
+  { careerSlug: "investment-banking", title: "Finance Essentials", sub: "Learn key finance terms", cover: "/images/app/poster-investment-banking-v2.png" },
+  // No content authored yet (hasGlossary() gates these into the locked "Soon"
+  // row) -- listed anyway so that row isn't just one lonely card next to
+  // empty space. Reuses each career's own existing Play-tab "Soon" cover art
+  // rather than a new asset per glossary game.
+  { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/soon-registered-nurse.png" },
+  { careerSlug: "private-equity", title: "PE Essentials", sub: "Learn key deal terms", cover: "/images/app/soon-private-equity.png" },
+  { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/soon-software-engineer.png" },
 ];
 
 export const MINI_GAMES: { title: string; sub: string; cover: string }[] = [

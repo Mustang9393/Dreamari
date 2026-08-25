@@ -121,7 +121,7 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
       alt=""
       width={size * 1.5}
       height={size * 1.5}
-      className="motion-safe:animate-[play-hover_4.4s_ease-in-out_infinite] drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
+      className="motion-safe:animate-[play-hover-subtle_4.4s_ease-in-out_infinite] drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
       style={{ width: size, height: size }}
     />
   );
@@ -228,7 +228,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
   const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)]">
-      <div className="relative w-full max-w-[520px] pt-[var(--space-6)] pl-[var(--space-8)]">
+      <div className="relative w-full max-w-[520px] pt-10 pl-12">
         <span className="absolute -top-3 -left-3 z-10">
           <DreamyFace pose="happy" size={88} />
         </span>
@@ -403,7 +403,7 @@ function UnlockScreen({
               {/* min-h keeps the page from resizing (and shoving the Unlock
                  button) as definition/example length varies term to term --
                  sized to the longest of the 5 terms' content at this width. */}
-              <div className="flex min-h-[300px] min-w-0 flex-1 flex-col gap-[var(--space-4)] p-[var(--space-6)]">
+              <div className="flex min-h-[300px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-4)] p-[var(--space-6)]">
                 <h3 className="text-[32px] leading-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   {term.term}
                 </h3>

@@ -81,7 +81,7 @@ export function PlayHub() {
             <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
               Glossary Games
             </h2>
-            <ul className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 max-w-[420px]">
+            <ul className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 max-w-[480px]">
               {glossaryPlayable.map((game) => (
                 <li key={game.careerSlug}>
                   <GlossaryGameCard game={game} />
@@ -93,7 +93,7 @@ export function PlayHub() {
         {glossarySoon.length > 0 && (
           <SoonSection label={glossaryPlayable.length > 0 ? "More Glossary Games" : "Glossary Games"}>
             {glossarySoon.map((game) => (
-              <SoonCard key={game.careerSlug} title={game.title} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
+              <SoonCard key={game.careerSlug} title={game.title} cover={game.cover} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
             ))}
           </SoonSection>
         )}
@@ -185,31 +185,47 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
   );
 }
 
-/** A Glossary Game has no levels, no firm, no cover photo -- it's a single
- *  lesson-based vocabulary game, not a career simulation, so it gets its own
- *  simpler card rather than reusing GameCard's ladder/cover layout. */
-function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string; sub: string } }) {
+/** A Glossary Game has no levels or firm, so it doesn't need GameCard's
+ *  ladder -- but it still gets a real cover image and the same
+ *  image-plus-scrim treatment every other Play card uses, rather than a
+ *  flat icon-in-a-circle row (which read as unfinished next to the photo
+ *  cards above it). */
+function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string; sub: string; cover?: string } }) {
   return (
     <Link
       href={`/play/glossary/${game.careerSlug}`}
-      className="dm-tap flex items-center gap-[var(--space-4)] rounded-[22px] border p-[var(--space-5)]"
+      className="dm-tap relative flex flex-col overflow-hidden rounded-[22px] border"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
     >
-      <span className="flex size-14 flex-none items-center justify-center rounded-[var(--radius-lg)]" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
-        <BookOpen className="h-6 w-6" aria-hidden />
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-        <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-business-money-office)" }}>
+      <div className="relative aspect-[16/9] w-full">
+        {game.cover ? (
+          <Image src={game.cover} alt="" fill sizes="(max-width: 640px) 100vw, 420px" className="object-cover" />
+        ) : (
+          <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 20%, var(--card))" }}>
+            <BookOpen className="h-10 w-10" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
+          </span>
+        )}
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
+        />
+        <span
+          className="absolute top-[12px] left-[12px] rounded-full px-[10px] py-[4px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+          style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
+        >
           Glossary Game
         </span>
+        <Play className="absolute top-[12px] right-[12px] h-5 w-5" style={{ color: "var(--foreground)" }} aria-hidden />
+      </div>
+      <div className="flex flex-col gap-[2px] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)]">
         <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           {game.title}
         </span>
         <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
           {game.sub}
         </span>
-      </span>
-      <Play className="h-5 w-5 flex-none" style={{ color: "var(--foreground)" }} aria-hidden />
+      </div>
     </Link>
   );
 }

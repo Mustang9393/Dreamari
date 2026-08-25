@@ -564,6 +564,18 @@ body {
     transform: translateY(-7px);
   }
 }
+/* Same idea, smaller travel -- the Glossary Game's Dreamy sits right next to
+   or overlapping other content on several screens, where the full 7px
+   play-hover bob read as too much movement close-up. */
+@keyframes play-hover-subtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
 /* The "continue" chevron in a dialogue box: a small nudge, the way an RPG
    blinks its advance marker. */
 /* The resume notice: rises, holds for ten seconds, then retires itself.
