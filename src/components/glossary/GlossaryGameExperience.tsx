@@ -323,13 +323,16 @@ function UnlockScreen({
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center gap-[var(--space-4)] px-5 py-[var(--space-3)] text-center">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-3)] text-center sm:gap-[var(--space-6)] sm:py-[var(--space-6)]">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
          mobile viewport). He's still present on the screens before and
-         after this one. */}
-      <h2 className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+         after this one. Sizing below is mobile-first-compact (guarantees no
+         scroll on a short phone) and scales up at sm: -- the compact sizing
+         only exists to fit a worst-case narrow phone; a tablet/desktop
+         viewport has room to spare and shouldn't look this tight. */}
+      <h2 className="text-[18px] leading-[23px] font-extrabold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -414,13 +417,14 @@ function UnlockScreen({
 
               {/* min-h keeps the page from resizing (and shoving the Unlock
                  button) as definition/example length varies term to term --
-                 sized to the longest of the 5 terms' content at this width. */}
-              <div className="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-2)] p-[var(--space-4)]">
-                <h3 className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                 sized to the longest of the 5 terms' content at this width.
+                 Compact at the mobile-first default, roomier from sm: up. */}
+              <div className="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-2)] p-[var(--space-4)] sm:min-h-[300px] sm:gap-[var(--space-4)] sm:p-[var(--space-6)]">
+                <h3 className="text-[26px] leading-[30px] font-extrabold sm:text-[32px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   {term.term}
                 </h3>
 
-                <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
+                <p className="text-[14px] leading-[19px] sm:text-[15px] sm:leading-[21px]" style={{ color: "var(--foreground)" }}>
                   {term.definition}
                 </p>
 
@@ -430,7 +434,7 @@ function UnlockScreen({
                   <span className="text-[12px] font-bold uppercase tracking-[0.05em]" style={{ color: "var(--world-business-money-office)" }}>
                     {lesson.exampleCompany} Example
                   </span>
-                  <p className="text-[14px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  <p className="text-[14px] leading-[19px] font-semibold sm:text-[15px] sm:leading-[21px]" style={{ color: "var(--foreground)" }}>
                     {term.example}
                   </p>
                 </div>
