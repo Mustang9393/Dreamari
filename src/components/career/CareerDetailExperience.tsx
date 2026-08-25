@@ -193,7 +193,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] pb-[120px] md:pt-[var(--space-4)]">
+      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] pb-[120px] md:pt-[var(--space-4)]">
         {/* Hero */}
         <section className="relative flex min-h-[300px] w-full flex-col overflow-hidden md:min-h-[260px] md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]">
           {/* Mobile: full-bleed background photo behind the full-width text,

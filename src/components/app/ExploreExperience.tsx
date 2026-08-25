@@ -174,34 +174,39 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
       )}
 
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
-         rail, then Tech, Top 5, Might Not Know, Typical Pay. */}
-      {becauseLiked.length > 0 && (
-        <Rail title="Recommended Because You Liked Business & Money">
-          <PosterRail careers={becauseLiked} />
-        </Rail>
-      )}
+         rail, then Tech, Top 5, Might Not Know, Typical Pay. `contents` keeps
+         this div out of main's flex layout (the rails still lay out as if
+         they were main's own direct children) while giving seq-reveal
+         something to stagger the rails' entrance from off of. */}
+      <div className="seq-reveal contents">
+        {becauseLiked.length > 0 && (
+          <Rail title="Recommended Because You Liked Business & Money">
+            <PosterRail careers={becauseLiked} />
+          </Rail>
+        )}
 
-      {worldRail.length > 0 && (
-        <Rail title="Tech & Engineering">
-          <PosterRail careers={worldRail} />
-        </Rail>
-      )}
+        {worldRail.length > 0 && (
+          <Rail title="Tech & Engineering">
+            <PosterRail careers={worldRail} />
+          </Rail>
+        )}
 
-      {trending.length > 0 && (
-        <TrendingRail trending={trending} />
-      )}
+        {trending.length > 0 && (
+          <TrendingRail trending={trending} />
+        )}
 
-      {mightNotKnow.length > 0 && (
-        <Rail title="Careers You Might Not Know">
-          <PosterRail careers={mightNotKnow} />
-        </Rail>
-      )}
+        {mightNotKnow.length > 0 && (
+          <Rail title="Careers You Might Not Know">
+            <PosterRail careers={mightNotKnow} />
+          </Rail>
+        )}
 
-      {typicalPay.length > 0 && (
-        <Rail title="Typical Pay: $100K +">
-          <PosterRail careers={typicalPay} />
-        </Rail>
-      )}
+        {typicalPay.length > 0 && (
+          <Rail title="Typical Pay: $100K +">
+            <PosterRail careers={typicalPay} />
+          </Rail>
+        )}
+      </div>
     </>
   );
 }

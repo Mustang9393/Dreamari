@@ -464,7 +464,7 @@ export function HomeExperience() {
         </span>
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
+      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
         <HeroBanner />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-5)]">
