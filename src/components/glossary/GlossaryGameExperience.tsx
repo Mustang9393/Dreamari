@@ -123,7 +123,7 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
       alt=""
       width={size * 1.5}
       height={size * 1.5}
-      className="motion-safe:animate-[play-hover-subtle_4.4s_ease-in-out_infinite] drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
+      className="drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
       style={{ width: size, height: size }}
     />
   );
@@ -201,8 +201,8 @@ function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) 
 function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () => void }) {
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
-      <DreamyFace pose="idea" size={112} />
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
+      <DreamyFace pose="idea" size={64} />
       <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <h1 className="text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           Meet {lesson.exampleCompany}
@@ -229,16 +229,16 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
 function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)]">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)]">
       {/* Dreamy overlaps down from above the bubble's top edge only -- no
          side padding compensating for him, so the bubble itself stays a
          plain full-width, centered box. Padding the bubble sideways to
          "make room" for him was shifting the bubble (and its text)
          off-center on mobile, where this wrapper is close to the full
          viewport width and the shift reads as a real layout bug. */}
-      <div className="relative w-full max-w-[520px] pt-9">
-        <span className="absolute -top-9 left-5 z-10">
-          <DreamyFace pose="happy" size={72} />
+      <div className="relative w-full max-w-[520px] pt-8">
+        <span className="absolute -top-8 left-5 z-10">
+          <DreamyFace pose="happy" size={64} />
         </span>
         <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
       </div>
@@ -263,9 +263,9 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
   const { theme } = useGlobalTheme();
   const pct = Math.round((lesson.companyValue / lesson.nextCompanyValue) * 100);
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
-      <DreamyFace pose="glasses" size={96} />
-      <h1 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
+      <DreamyFace pose="glasses" size={64} />
+      <h1 className="text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         Learn the Language of Finance
       </h1>
 
@@ -323,9 +323,13 @@ function UnlockScreen({
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center gap-[var(--space-6)] px-5 py-[var(--space-8)] text-center">
-      <DreamyFace pose="glasses" size={80} />
-      <h2 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <div className="flex w-full flex-1 flex-col items-center gap-[var(--space-4)] px-5 py-[var(--space-3)] text-center">
+      {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
+         through terms, and is the tightest screen for vertical space (the
+         binder card + 5-term progress row + button already fill a short
+         mobile viewport). He's still present on the screens before and
+         after this one. */}
+      <h2 className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -411,12 +415,12 @@ function UnlockScreen({
               {/* min-h keeps the page from resizing (and shoving the Unlock
                  button) as definition/example length varies term to term --
                  sized to the longest of the 5 terms' content at this width. */}
-              <div className="flex min-h-[300px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-4)] p-[var(--space-6)]">
-                <h3 className="text-[32px] leading-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              <div className="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-2)] p-[var(--space-4)]">
+                <h3 className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   {term.term}
                 </h3>
 
-                <p className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>
+                <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
                   {term.definition}
                 </p>
 
@@ -456,7 +460,7 @@ function UnlockScreen({
 function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
       <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t) => (
           <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
@@ -1427,7 +1431,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         </div>
       )}
 
-      <main className="relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-6)] md:px-8">
+      <main className="relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("dreamyIntro")} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => setScreen("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => setScreen("unlock")} />}
