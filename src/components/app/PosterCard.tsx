@@ -25,11 +25,12 @@ function breakableTitle(title: string): string {
   return title.replace(/-/g, "-\u200B");
 }
 
-export function PosterCard({ career, className = "" }: { career: CatalogCareer; className?: string }) {
+export function PosterCard({ career, className = "", onClick }: { career: CatalogCareer; className?: string; onClick?: () => void }) {
   const titleSize = posterTitleSize(career.title);
   return (
     <button
       type="button"
+      onClick={onClick}
       className={`dm-tap relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] border text-center uppercase ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
@@ -88,7 +89,7 @@ function rankedTitleSize(title: string): { fontSize: number; lineHeight: string 
   return { fontSize: 24, lineHeight: "28px" };
 }
 
-export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank: number }) {
+export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCareer; rank: number; onClick?: () => void }) {
   const titleSize = rankedTitleSize(career.title);
   return (
     <div className="relative h-[250px] w-[220px] flex-none">
@@ -109,6 +110,7 @@ export function RankedPosterCard({ career, rank }: { career: CatalogCareer; rank
       </p>
       <button
         type="button"
+        onClick={onClick}
         className="dm-tap absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] text-center uppercase"
       >
         <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />

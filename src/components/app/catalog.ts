@@ -97,6 +97,17 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
   C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.png", "$130K"),
 ];
 
+// Every catalogued career, deduped by title, for lookups that need to search
+// across rails instead of rendering one specific rail (Career Detail's
+// "Similar careers" and its own title/world/photo resolution).
+export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
+  const seen = new Map<string, CatalogCareer>();
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
+    if (!seen.has(career.title)) seen.set(career.title, career);
+  }
+  return [...seen.values()];
+})();
+
 // Explore — For You reel: all 8 Env Card variants (section 2530:46431,
 // "Explore: Mobile Reel"), copy and photos verbatim from each variant.
 // (The card UI doesn't render the world; it's kept for data completeness.)

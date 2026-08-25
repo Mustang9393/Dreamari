@@ -22,6 +22,7 @@ import {
   type VideoReel,
 } from "./catalog";
 import { WORLD_LABELS } from "./worlds";
+import { careerSlug } from "@/components/career/slug";
 import "./app.css";
 
 // Explore, both faces of the Figma design:
@@ -80,12 +81,29 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
 }
 
 function PosterRail({ careers }: { careers: CatalogCareer[] }) {
+  const router = useRouter();
   return (
     <>
       {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} />
+        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
       ))}
     </>
+  );
+}
+
+function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
+  const router = useRouter();
+  return (
+    <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
+      <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+        Top 5 Trending Careers Among Gen Z
+      </h2>
+      <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+        {trending.map((career, index) => (
+          <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -170,16 +188,7 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
       )}
 
       {trending.length > 0 && (
-        <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
-          <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-            Top 5 Trending Careers Among Gen Z
-          </h2>
-          <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {trending.map((career) => (
-              <RankedPosterCard key={career.title} career={career} rank={BROWSE_TRENDING.indexOf(career) + 1} />
-            ))}
-          </div>
-        </section>
+        <TrendingRail trending={trending} />
       )}
 
       {mightNotKnow.length > 0 && (
@@ -214,6 +223,7 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
 
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
+  const router = useRouter();
   return (
     <article
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-xl)]"
@@ -295,6 +305,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
           </button>
           <button
             type="button"
+            onClick={() => router.push(`/career/${careerSlug(career.title)}`)}
             className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
             style={{ background: "var(--foreground)" }}
           >
