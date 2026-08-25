@@ -230,15 +230,13 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
 // one side (a desk scene, other people in frame), but the card crops them
 // into a narrow portrait via object-cover -- centered by default. When the
 // subject sits well off-center in the source, a dead-center crop can clip
-// straight through them (Product Designer sits ~42% across the frame; a
-// dead-center crop cut through the middle of his face). Same fix, same idea
-// as Career Detail's own HERO_FOCUS. Creative Director doesn't need an
-// entry: its photo was swapped for a Browse asset (see catalog note below)
-// whose subject already sits close enough to center that the default crop
-// works fine.
-const REEL_PHOTO_FOCUS: Record<string, string> = {
-  "Product Designer": "42% center",
-};
+// straight through them. Same fix, same idea as Career Detail's own
+// HERO_FOCUS. Empty for now: every entry that needed one (Product Designer,
+// Creative Director) has since been swapped to a Browse asset already
+// centered close enough that the default crop works -- kept as a live map
+// rather than deleted, since the next off-center photo swap will need it
+// again.
+const REEL_PHOTO_FOCUS: Record<string, string> = {};
 
 // A flat blur/scrim can't guarantee contrast against every photo -- a light
 // wall or window behind the panel's least-blurred (top) edge washes out
