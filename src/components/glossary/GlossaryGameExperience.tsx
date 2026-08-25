@@ -981,8 +981,15 @@ function QuestionScreen({
   const [picked, setPicked] = useState<number | null>(null);
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
 
+  // No enclosing card here on purpose -- wrapping the whole question (prompt,
+  // Dreamy, and the already-boxed answer options) in one more outer card
+  // was boxes-inside-boxes, per direct feedback. Every renderer below
+  // already carries its own visual weight (option pills, the document
+  // sheet, bordered tiles), so this screen can sit directly on the page's
+  // own background like the intro/unlock screens already do, and use the
+  // taller mobile viewport instead of being squeezed into a fixed card.
   return (
-    <div className="relative flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className="relative flex w-full flex-col gap-[var(--space-6)]">
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
