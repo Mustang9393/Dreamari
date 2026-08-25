@@ -323,16 +323,18 @@ function UnlockScreen({
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-3)] text-center sm:gap-[var(--space-6)] sm:py-[var(--space-6)]">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,3.5dvh,28px)] px-5 py-[clamp(8px,3dvh,32px)] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
          mobile viewport). He's still present on the screens before and
-         after this one. Sizing below is mobile-first-compact (guarantees no
-         scroll on a short phone) and scales up at sm: -- the compact sizing
-         only exists to fit a worst-case narrow phone; a tablet/desktop
-         viewport has room to spare and shouldn't look this tight. */}
-      <h2 className="text-[18px] leading-[23px] font-extrabold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+         after this one. Every size/gap below is a `clamp(min, Ndvh, max)`
+         tied to the ACTUAL available height rather than a width breakpoint
+         -- it shrinks continuously as the viewport gets shorter (guarantees
+         no scroll even on an old, small phone) and grows continuously up to
+         its max on anything roomier, with iPhone 15 Safari's usable height
+         landing comfortably inside that range rather than at either edge. */}
+      <h2 className="text-[clamp(18px,3.2dvh,26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -418,13 +420,14 @@ function UnlockScreen({
               {/* min-h keeps the page from resizing (and shoving the Unlock
                  button) as definition/example length varies term to term --
                  sized to the longest of the 5 terms' content at this width.
-                 Compact at the mobile-first default, roomier from sm: up. */}
-              <div className="flex min-h-[190px] min-w-0 flex-1 flex-col justify-center gap-[var(--space-2)] p-[var(--space-4)] sm:min-h-[300px] sm:gap-[var(--space-4)] sm:p-[var(--space-6)]">
-                <h3 className="text-[26px] leading-[30px] font-extrabold sm:text-[32px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                 Fluid clamp() throughout, tied to dvh, not a width
+                 breakpoint -- see the note above on why. */}
+              <div className="flex min-h-[clamp(180px,34dvh,300px)] min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
+                <h3 className="text-[clamp(24px,5.5dvh,32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   {term.term}
                 </h3>
 
-                <p className="text-[14px] leading-[19px] sm:text-[15px] sm:leading-[21px]" style={{ color: "var(--foreground)" }}>
+                <p className="text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
                   {term.definition}
                 </p>
 
@@ -434,7 +437,7 @@ function UnlockScreen({
                   <span className="text-[12px] font-bold uppercase tracking-[0.05em]" style={{ color: "var(--world-business-money-office)" }}>
                     {lesson.exampleCompany} Example
                   </span>
-                  <p className="text-[14px] leading-[19px] font-semibold sm:text-[15px] sm:leading-[21px]" style={{ color: "var(--foreground)" }}>
+                  <p className="text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
                     {term.example}
                   </p>
                 </div>
@@ -602,10 +605,21 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
     <div className="flex w-full flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)]">
         <div className="flex flex-wrap gap-[var(--space-2)]">
+          {/* Real buttons, not decorative pills -- they look tappable (a
+             rounded, bordered chip), so they need to actually be tappable.
+             Picking one just fills the same input Check Answer already
+             reads; it's a shortcut for typing, not a new answer path. */}
           {question.wordBank.map((word) => (
-            <span key={word} className="rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <button
+              key={word}
+              type="button"
+              disabled={checked !== null}
+              onClick={() => setValue(word)}
+              className="dm-tap rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ borderColor: value === word ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)", background: value === word ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "transparent" }}
+            >
               {word}
-            </span>
+            </button>
           ))}
         </div>
       </div>
