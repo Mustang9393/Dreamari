@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Bookmark, ChevronDown, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
+import { ArrowLeft, Bookmark, BookOpen, ChevronDown, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { hasGlossary } from "@/components/glossary/data";
+import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type LadderRung } from "./data";
 import { careerSlug } from "./slug";
 
@@ -182,6 +184,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const similar = similarCareers(career);
+  const hasSimulation = !!simulationFor(career.slug);
+  const hasGlossaryGame = hasGlossary(career.slug);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 45%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 60%), var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -264,13 +268,34 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             </h1>
             {career.description && <p className={BODY} style={{ color: "var(--muted-foreground)" }}>{career.description}</p>}
             <div className="flex w-full flex-wrap items-center gap-[var(--space-3)]">
-              <button
-                type="button"
-                className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-                style={{ background: "var(--foreground)", color: "var(--background)", fontFamily: "var(--font-display)" }}
-              >
-                Play Game <Gamepad2 className="h-4 w-4" aria-hidden />
-              </button>
+              {hasSimulation && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/play/${career.slug}`)}
+                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+                  style={{ background: "var(--foreground)", color: "var(--background)", fontFamily: "var(--font-display)" }}
+                >
+                  Play Game <Gamepad2 className="h-4 w-4" aria-hidden />
+                </button>
+              )}
+              {hasGlossaryGame ? (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/play/glossary/${career.slug}`)}
+                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
+                  style={{ borderColor: accent, color: "var(--foreground)" }}
+                >
+                  Glossary Game <BookOpen className="h-4 w-4" aria-hidden />
+                </button>
+              ) : (
+                <span
+                  className="flex min-h-[44px] items-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
+                  style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+                  aria-disabled
+                >
+                  Glossary Game <span className={LABEL}>· Coming soon</span>
+                </span>
+              )}
               <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
                 <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>

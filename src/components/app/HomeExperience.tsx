@@ -371,6 +371,7 @@ const ACTIVITIES: Activity[] = [
     stat: "6 of 10 terms mastered",
     cta: "Continue Glossary Game",
     art: "glossary",
+    href: "/play/glossary/investment-banking",
   },
   {
     badge: "GAME",

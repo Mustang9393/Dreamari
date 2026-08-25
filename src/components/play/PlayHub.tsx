@@ -8,6 +8,7 @@ import { BookOpen, Lock, Play } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { GLOSSARY_GAMES, MINI_GAMES, SIMULATIONS, SOON } from "./games";
 import type { Simulation } from "./types";
@@ -34,6 +35,9 @@ export function PlayHub() {
       (game) => !live.has(game.careerId),
     );
   }, [picks.ids]);
+
+  const glossaryPlayable = GLOSSARY_GAMES.filter((game) => hasGlossary(game.careerSlug));
+  const glossarySoon = GLOSSARY_GAMES.filter((game) => !hasGlossary(game.careerSlug));
 
   return (
     <div
@@ -65,17 +69,34 @@ export function PlayHub() {
         {mine.length > 0 && <Shelf label="From your Top 3" games={mine} />}
         {rest.length > 0 && <Shelf label={mine.length > 0 ? "More games" : "Playable now"} games={rest} />}
 
-        {/* Glossary Games and Mini Games: the hub's other two game types
-           alongside career simulations. Neither has a real page to open yet
-           (same as Home's own "Finance Essentials"/"Deal Team Kickoff"
-           activity cards), so they get the exact same locked "Soon"
-           treatment as the career-simulation placeholders below rather than
-           a card that looks playable but goes nowhere. */}
-        <SoonSection label="Glossary Games">
-          {GLOSSARY_GAMES.map((game) => (
-            <SoonCard key={game.title} title={game.title} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
-          ))}
-        </SoonSection>
+        {/* Glossary Games: split by whether the career actually has authored
+           content (hasGlossary) -- Finance Essentials has a real page now,
+           so it gets a real playable card; anything added here before its
+           content exists still gets the same locked "Soon" treatment as the
+           career-simulation placeholders below, same as Home's own
+           "Finance Essentials"/"Deal Team Kickoff" activity cards did before
+           either had a page to open. */}
+        {glossaryPlayable.length > 0 && (
+          <section className="flex flex-col gap-[var(--space-3)]">
+            <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+              Glossary Games
+            </h2>
+            <ul className="grid list-none grid-cols-1 gap-[var(--space-4)] p-0 max-w-[420px]">
+              {glossaryPlayable.map((game) => (
+                <li key={game.careerSlug}>
+                  <GlossaryGameCard game={game} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {glossarySoon.length > 0 && (
+          <SoonSection label={glossaryPlayable.length > 0 ? "More Glossary Games" : "Glossary Games"}>
+            {glossarySoon.map((game) => (
+              <SoonCard key={game.careerSlug} title={game.title} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
+            ))}
+          </SoonSection>
+        )}
 
         <SoonSection label="Mini Games">
           {MINI_GAMES.map((game) => (
@@ -161,6 +182,35 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
         </span>
       </span>
     </li>
+  );
+}
+
+/** A Glossary Game has no levels, no firm, no cover photo -- it's a single
+ *  lesson-based vocabulary game, not a career simulation, so it gets its own
+ *  simpler card rather than reusing GameCard's ladder/cover layout. */
+function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string; sub: string } }) {
+  return (
+    <Link
+      href={`/play/glossary/${game.careerSlug}`}
+      className="dm-tap flex items-center gap-[var(--space-4)] rounded-[22px] border p-[var(--space-5)]"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
+    >
+      <span className="flex size-14 flex-none items-center justify-center rounded-[var(--radius-lg)]" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
+        <BookOpen className="h-6 w-6" aria-hidden />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+        <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-business-money-office)" }}>
+          Glossary Game
+        </span>
+        <span className="text-[17px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          {game.title}
+        </span>
+        <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
+          {game.sub}
+        </span>
+      </span>
+      <Play className="h-5 w-5 flex-none" style={{ color: "var(--foreground)" }} aria-hidden />
+    </Link>
   );
 }
 
