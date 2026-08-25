@@ -70,6 +70,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-04",
+      planLineIfFailed: 'you picked up work on your first morning without asking anyone what mattered most',
       progress: 0.1,
       castMembers: ["Christina", "Jordan"],
       speaker: "Narrator",
@@ -88,6 +89,7 @@ export const IB_LEVEL_1: Level = {
     {
       kind: "match",
       id: "L1-05",
+      planLineIfFailed: 'you used words around the office you could not define when someone asked',
       progress: 0.2,
       speaker: "Christina",
       setup: '"Before client work, learn the language of banking."',
@@ -107,6 +109,7 @@ export const IB_LEVEL_1: Level = {
     {
       kind: "rapid",
       id: "L1-06",
+      planLineIfFailed: 'you got the basics wrong on questions the team expects an intern to know cold',
       progress: 0.3,
       timer: 45,
       speaker: "Dreamy",
@@ -158,6 +161,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-07",
+      planLineIfFailed: 'you handled a request from a senior person without checking it was yours to handle',
       progress: 0.4,
       art: `${ART}/l1-07.webp`,
       artAlt: "Over-the-shoulder view of hands at a laptop showing charts, sunset skyline through the windows.",
@@ -193,6 +197,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "boss",
       id: "L1-08",
+      planLineIfFailed: 'you froze when a senior banker put you on the spot',
       progress: 0.5,
       // L1-07's laptop POV shot is that beat's own moment -- it stops here
       // rather than bleeding into an unrelated congratulations beat, then
@@ -219,6 +224,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "blank",
       id: "L1-09",
+      planLineIfFailed: 'you saved client files somewhere they should never have gone',
       progress: 0.6,
       speaker: "Christina",
       setup: '"Before you share anything: client files stay secure."',
@@ -238,6 +244,7 @@ export const IB_LEVEL_1: Level = {
       layout: "document",
       doc: "Nike Deal • Intern Summary",
       id: "L1-10",
+      planLineIfFailed: 'you sent writing out with mistakes still in it',
       progress: 0.7,
       speaker: "Christina",
       tone: "conflict",
@@ -272,6 +279,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-12",
+      planLineIfFailed: 'you made a call on your own that needed someone above you',
       progress: 0.8,
       art: `${ART}/l1-12.webp`,
       artAlt: "Jordan presenting a spreadsheet on a monitor to a seated manager, your coffee mug in the foreground.",
@@ -309,6 +317,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-13",
+      planLineIfFailed: 'you ran out of time on something that had a clear deadline',
       progress: 0.9,
       timer: 30,
       tone: "alarm",
@@ -343,6 +352,7 @@ export const IB_LEVEL_1: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-14",
+      planLineIfFailed: 'you chose the easy option over the right one when nobody was watching',
       progress: 1,
       // L1-13's art is the specific tableau of a different intern quitting --
       // it stops here rather than bleeding into an unrelated intern's task

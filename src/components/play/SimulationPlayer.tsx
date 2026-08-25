@@ -9,6 +9,8 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
 import { locationFor } from "./locations";
+import { PerformancePlanFlow } from "./PerformancePlanFlow";
+import { randomStepOrders, type PipState } from "./performance-plan";
 import {
   BossOverlay,
   BucketBody,
@@ -38,7 +40,7 @@ import {
   setMuted,
   subscribeMuted,
 } from "./sound";
-import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, bandFor, clamp, endingFor } from "./scoring";
+import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Mood, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
@@ -68,8 +70,13 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const index = live.index;
   // Reputation is DERIVED from the per-beat outcomes rather than carried as a
   // running total. That is what makes a repair round possible: correcting a beat
-  // overwrites its entry and the total simply follows.
-  const reputation = clamp(START_REPUTATION + Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0));
+  // overwrites its entry and the total simply follows. Passing a Performance
+  // Plan moves this baseline instead of touching any beat's own score --
+  // "reputation is SET to exactly 50, not added to" -- so the derivation
+  // stays intact (a repair round afterward still just works) while the
+  // number on screen jumps to 50 the instant the plan is passed.
+  const [reputationBaseline, setReputationBaseline] = useState(START_REPUTATION);
+  const reputation = clamp(reputationBaseline + Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0));
   const scored = Object.keys(live.scores).length;
   const misses = Object.entries(live.scores)
     .filter(([, tier]) => tier === "wrong" || tier === "risky")
@@ -81,6 +88,13 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   /** Ids still to be replayed in a repair round, or null when playing normally. */
   const [repair, setRepair] = useState<string[] | null>(null);
 
+  // THE STRIKE RULE (scoring.ts): a Wrong or Risky answer adds strikes, and
+  // the third one triggers a Performance Plan -- see performance-plan.ts.
+  // `pipUsed` caps it at once per level ("Frequency: Once per level" --
+  // further strikes after that just cost reputation as normal).
+  const [strikes, setStrikes] = useState(0);
+  const [pipUsed, setPipUsed] = useState(false);
+  const [pip, setPip] = useState<PipState | null>(null);
 
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
@@ -166,17 +180,34 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // would have replayed the wrong beats. It is stable within a beat, so the
       // countdown that depends on this callback does not restart mid-question.
       const beatId = beat.id;
+      const triggerLine = beat.planLineIfFailed;
+      // Once a plan has fired this level, further strikes just cost
+      // reputation as normal -- "Frequency: Once per level."
+      const strikeDelta = pipUsed ? 0 : (TIER_STRIKES[banked] ?? 0);
       window.setTimeout(() => {
         setRun((current) => {
           const from = current ?? base;
           return { ...from, scores: { ...from.scores, [beatId]: banked } };
         });
+        if (strikeDelta > 0) {
+          const nextStrikes = strikes + strikeDelta;
+          setStrikes(nextStrikes);
+          if (nextStrikes >= STRIKE_TRIGGER) {
+            // "No feedback. Fires the moment the third strike lands" -- the
+            // plan preempts this beat's own feedback card entirely rather
+            // than following it.
+            setPipUsed(true);
+            setLocked(null);
+            setPip({ triggerLine: triggerLine ?? "", resumeIndex: index + 1, stepOrders: randomStepOrders() });
+            return;
+          }
+        }
         setResult({ tier: banked, why, delta: TIER_SCORE[banked] });
         setPhase("feedback");
       }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locked, repair, beat.id],
+    [locked, repair, beat.id, pipUsed, strikes, index],
   );
 
   const reviewIndex = level.beats.findIndex((entry) => entry.kind === "review");
@@ -222,13 +253,19 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const restart = () => {
     // "Reputation resets to 50 and the level restarts from screen 1" -- the
-    // rules tab. A fresh run must not inherit the old save.
+    // rules tab. A fresh run must not inherit the old save, and that
+    // includes strikes and whether a plan already fired this level --
+    // otherwise a player who restarts after passing a plan on beat 3 would
+    // find themselves unable to ever trigger it again this run.
     clearRun(simulation.id, level.n);
     setRun({ index: 0, scores: {} });
     setRepair(null);
     setLocked(null);
     setResult(null);
     setPhase("beat");
+    setStrikes(0);
+    setPipUsed(false);
+    setReputationBaseline(START_REPUTATION);
   };
 
   /** Replay only the beats that went wrong. */
@@ -451,7 +488,33 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         onBack={index > 0 ? goBack : undefined}
       />
 
-      {phase === "ending" ? (
+      {pip ? (
+        <PerformancePlanFlow
+          level={level.n as 1 | 2 | 3}
+          pip={pip}
+          onPassed={() => {
+            const earned = Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0);
+            setReputationBaseline(50 - earned);
+            setPip(null);
+            setStrikes(0);
+            setPhase("beat");
+            patchRun({ index: pip.resumeIndex });
+            saveRun({ gameId: simulation.id, level: level.n, index: pip.resumeIndex, scores: live.scores, reputation: 50, scored });
+          }}
+          onTerminated={() => {
+            setPip(null);
+            setStrikes(0);
+            setPipUsed(false);
+            setReputationBaseline(START_REPUTATION);
+            clearRun(simulation.id, level.n);
+            setRun({ index: 0, scores: {} });
+            setRepair(null);
+            setLocked(null);
+            setResult(null);
+            setPhase("beat");
+          }}
+        />
+      ) : phase === "ending" ? (
         <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5">
           <EndingCard
             ending={ending}

@@ -172,6 +172,7 @@ export const IB_LEVEL_2: Level = {
       kind: "choice",
       layout: "options",
       id: "L2-10",
+      planLineIfFailed: 'you started on the wrong thing while something urgent sat untouched',
       progress: 0.1,
       // From the 2026-08-24 asset package (status READY). The clean
       // background still had "Louis Vuitton Pitch Materials" printed on a
@@ -195,6 +196,7 @@ export const IB_LEVEL_2: Level = {
     {
       kind: "chain",
       id: "L2-11",
+      planLineIfFailed: 'you built an argument for the client that did not hold together',
       progress: 0.2,
       speaker: "Narrator",
       pose: "idea",
@@ -251,6 +253,7 @@ export const IB_LEVEL_2: Level = {
       kind: "choice",
       layout: "tiles",
       id: "L2-13",
+      planLineIfFailed: 'you could not explain a basic finance term you use every day',
       progress: 0.3,
       mood: "night",
       speaker: "Christina",
@@ -269,6 +272,7 @@ export const IB_LEVEL_2: Level = {
     {
       kind: "slider",
       id: "L2-14",
+      planLineIfFailed: 'you passed work up the chain without checking where the numbers came from',
       progress: 0.4,
       mood: "night",
       speaker: "Christina",
@@ -288,6 +292,7 @@ export const IB_LEVEL_2: Level = {
       kind: "choice",
       layout: "document",
       id: "L2-15",
+      planLineIfFailed: 'you let two slides contradict each other and neither of us caught it',
       progress: 0.5,
       mood: "night",
       speaker: "Christina",
@@ -318,6 +323,7 @@ export const IB_LEVEL_2: Level = {
     {
       kind: "flags",
       id: "L2-17",
+      planLineIfFailed: 'you signed off on someone else\'s work with errors still in it',
       progress: 0.6,
       timer: 60,
       speaker: "Narrator",
@@ -355,6 +361,7 @@ export const IB_LEVEL_2: Level = {
       kind: "choice",
       layout: "options",
       id: "L2-19",
+      planLineIfFailed: 'you handled yourself badly in front of a client',
       progress: 0.7,
       // From the 2026-08-24 asset package (status READY). The clean
       // background still had a "Louis Vuitton Meeting" label on a folder on
@@ -377,6 +384,7 @@ export const IB_LEVEL_2: Level = {
     {
       kind: "match",
       id: "L2-20",
+      planLineIfFailed: 'you mixed up terms in a client conversation',
       progress: 0.8,
       // L2-19's art is Christina's own moment in the client meeting -- it
       // stops here rather than bleeding into Marcus's assessment beat
@@ -402,6 +410,7 @@ export const IB_LEVEL_2: Level = {
       // Level 2's rapid-fire model has NO timer, unlike Level 1's shared clock.
       kind: "rapid",
       id: "L2-21",
+      planLineIfFailed: 'you got quick, everyday questions wrong under time pressure',
       progress: 0.9,
       speaker: "Marcus",
       setup: '"Let me check you actually understand this deal, not just the tasks. I noticed your answer at kickoff."',
@@ -454,6 +463,7 @@ export const IB_LEVEL_2: Level = {
       kind: "choice",
       layout: "options",
       id: "L2-22",
+      planLineIfFailed: 'you missed a deadline that had been on your calendar for a week',
       progress: 1,
       timer: 30,
       mood: "night",

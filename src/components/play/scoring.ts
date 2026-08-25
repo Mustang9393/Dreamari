@@ -9,6 +9,18 @@ export const START_REPUTATION = 50;
 export const SCORED_BEATS = 10;
 export const ADVANCE_AT = 85;
 
+// THE STRIKE RULE, separate from ordinary scoring and tracked alongside it:
+// a Wrong answer adds 1 strike, a Risky one adds 2 -- a single reckless call
+// should weigh more than a merely wrong one -- Best/Acceptable add none, and
+// strikes are never removed by a later correct answer inside the same
+// level. The plan fires immediately after the beat that produces the third
+// strike, once per level. See performance-plan.ts for the plan itself.
+export const TIER_STRIKES: Partial<Record<Tier, number>> = {
+  wrong: 1,
+  risky: 2,
+};
+export const STRIKE_TRIGGER = 3;
+
 // Ranges are spelled out rather than derived from the neighbouring floor: the
 // arithmetic version read "At Risk 0 to 84" on the intro card, and these four
 // numbers are the ones printed on the Scoring Model tab anyway.

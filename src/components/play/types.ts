@@ -79,6 +79,14 @@ type BeatBase = {
   /** 0 to 1. Present only on the ten scored beats -- progress measures scored
    *  beats, so narrative cards never move it. */
   progress?: number;
+  /** Present only on the ten scored beats. One sentence, the supervisor's own
+   *  voice, naming what a Wrong/Risky answer on THIS beat got wrong. Sits
+   *  unused until a Wrong/Risky answer here happens to be the one that lands
+   *  the third strike -- then it fills the {PLAN_LINE} slot opening the
+   *  Performance Plan, so the plan names the actual mistake rather than
+   *  reading as generic. See performance-plan.ts and scoring.ts's strike
+   *  rule comment. */
+  planLineIfFailed?: string;
 };
 
 export type Mood = "day" | "night" | "crunch";

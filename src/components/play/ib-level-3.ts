@@ -159,6 +159,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "rank",
       id: "L3-09",
+      planLineIfFailed: 'you did not seem to know who signs off on what around here',
       speaker: "Dreamy",
       pose: "glasses",
       progress: 0.1,
@@ -188,6 +189,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "pick",
       id: "L3-11",
+      planLineIfFailed: 'you put the team on work that did not move the deal forward',
       mood: "crunch",
       speaker: "Dreamy",
       pose: "curious",
@@ -213,6 +215,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "bucket",
       id: "L3-12",
+      planLineIfFailed: 'you filled the pitch with things the client had not asked about',
       mood: "crunch",
       speaker: "Christina",
       progress: 0.3,
@@ -238,6 +241,7 @@ export const IB_LEVEL_3: Level = {
       layout: "document",
       doc: "Maison Laurent • Slide 4",
       id: "L3-13",
+      planLineIfFailed: 'you left a slide saying nothing when it should have said one clear thing',
       mood: "crunch",
       speaker: "Christina",
       progress: 0.4,
@@ -257,6 +261,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "rapid",
       id: "L3-14",
+      planLineIfFailed: 'you could not answer basic questions about your own deal at speed',
       art: `${ART}/l3-16.webp`,
       artAlt: "The deal team at night, a wall screen showing the 9:00 AM prep and 12:00 PM client meetings.",
       mood: "crunch",
@@ -332,6 +337,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "pick",
       id: "L3-16",
+      planLineIfFailed: 'you handled a disagreement in front of senior leaders badly',
       speaker: "Lamisa",
       progress: 0.6,
       setup: '"What is the client actually worried about?" Jordan guesses: "Profit margins?"',
@@ -364,6 +370,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "pick",
       id: "L3-18",
+      planLineIfFailed: 'you answered the client with reasons that were about us, not about them',
       progress: 0.7,
       timer: 60,
       speaker: "Lamisa",
@@ -441,6 +448,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "rank",
       id: "L3-23",
+      planLineIfFailed: 'you gave your team work before you gave them a goal',
       speaker: "Christina",
       progress: 0.8,
       setup: '"You have an Analyst and an Intern on the Asia work. Show me how you start."',
@@ -455,6 +463,7 @@ export const IB_LEVEL_3: Level = {
     {
       kind: "bucket",
       id: "L3-24",
+      planLineIfFailed: 'you had the team polishing things while a client-facing error sat there',
       speaker: "Christina",
       progress: 0.9,
       setup: '"The deal is won. What does the team do first?"',
@@ -477,6 +486,7 @@ export const IB_LEVEL_3: Level = {
       kind: "choice",
       layout: "tiles",
       id: "L3-25",
+      planLineIfFailed: 'you sent the client an update that told them nothing',
       speaker: "Christina",
       progress: 1,
       setup: '"Send Maison Laurent a short update. Professional, clear, confident."',
