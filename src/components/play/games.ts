@@ -35,3 +35,16 @@ export const SOON: { careerId: string; title: string; world: string; cover: stri
 export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);
 }
+
+/** The two other game types the hub promises alongside career simulations --
+ *  same "Soon" card treatment as SOON above, since neither has a real page
+ *  to send someone to yet (Home's own "Finance Essentials"/"Deal Team
+ *  Kickoff" activity cards are display-only for the same reason). Kept as
+ *  their own arrays rather than folded into SOON: they aren't career
+ *  simulations, so they don't belong in the "these careers don't have a
+ *  simulation yet" list, and the hub gives them their own labeled section. */
+export const GLOSSARY_GAMES: { title: string; sub: string }[] = [{ title: "Finance Essentials", sub: "Learn key finance terms" }];
+
+export const MINI_GAMES: { title: string; sub: string; cover: string }[] = [
+  { title: "Deal Team Kickoff", sub: "Draft the squad, win the pitch", cover: "/images/app/activity-ib-kickoff.png" },
+];

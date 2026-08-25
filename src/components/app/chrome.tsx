@@ -106,7 +106,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+                className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold tracking-[0.08em] uppercase transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
                 style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
               >
                 {link.label}

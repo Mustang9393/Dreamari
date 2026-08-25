@@ -226,6 +226,20 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
   return list;
 }
 
+// Most of these photos are wide landscape exports with the subject off to
+// one side (a desk scene, other people in frame), but the card crops them
+// into a narrow portrait via object-cover -- centered by default. When the
+// subject sits well off-center in the source, a dead-center crop can clip
+// straight through them (Product Designer sits ~42% across the frame; a
+// dead-center crop cut through the middle of his face). Same fix, same idea
+// as Career Detail's own HERO_FOCUS. Creative Director doesn't need an
+// entry: its photo was swapped for a Browse asset (see catalog note below)
+// whose subject already sits close enough to center that the default crop
+// works fine.
+const REEL_PHOTO_FOCUS: Record<string, string> = {
+  "Product Designer": "42% center",
+};
+
 // A flat blur/scrim can't guarantee contrast against every photo -- a light
 // wall or window behind the panel's least-blurred (top) edge washes out
 // even white text. A dark drop shadow is background-independent: it reads
@@ -243,7 +257,16 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
       {/* Env photo: taller-than-card wrapper for parallax (JS translateY),
          slow Ken Burns push-in while the card is the active one. */}
       <div aria-hidden data-parallax className={`absolute inset-x-0 -top-[8%] -bottom-[8%] overflow-hidden will-change-transform ${active ? "env-zoom-active" : ""}`}>
-        <Image src={career.photo} alt="" fill sizes="(max-width: 768px) 100vw, 390px" className="object-cover" priority={active} draggable={false} />
+        <Image
+          src={career.photo}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 390px"
+          className="object-cover"
+          style={{ objectPosition: REEL_PHOTO_FOCUS[career.title] ?? "center" }}
+          priority={active}
+          draggable={false}
+        />
       </div>
 
       {/* Bottom-anchored cluster, bled past the card's own p-4 so both the

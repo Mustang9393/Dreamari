@@ -3,14 +3,6 @@
 import Image from "next/image";
 import { type RefObject, useEffect, useRef } from "react";
 
-// Measured directly from public/images/hero-cloud-mascot.png (1200x1200): the two dark
-// starry eye ellipses sit at these percentages of the image's own bounding box (ending
-// at 61.33%). Mouth starts at y=63.5% — 63% was the old crop line, kept tight enough to
-// never show any of the mouth. Per direct feedback ("I don't see enough of it"), pushed
-// to 70% instead: this does let the very top of the mouth peek in, but the tradeoff of
-// "more of the character actually visible" was worth it over "technically zero mouth."
-const EYE_LEFT = { left: 25.17, top: 42.17, width: 16.83, height: 19.16 };
-const EYE_RIGHT = { left: 58.17, top: 42.17, width: 16.83, height: 19.16 };
 // 0.77, up from 0.7 — per direct feedback the crop should show eyes AND the full
 // mouth before the dissolve takes over. Measured from the PNG's actual pixels: the
 // mouth spans 63.42%..68.83% of the artwork, so a 70% crop with the fade completing
@@ -29,10 +21,6 @@ export function Mascot({ heroRef }: MascotProps) {
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
   const sheenRef = useRef<HTMLDivElement | null>(null);
-  const eyeLeftRef = useRef<HTMLDivElement | null>(null);
-  const eyeRightRef = useRef<HTMLDivElement | null>(null);
-  const canvasLeftRef = useRef<HTMLCanvasElement | null>(null);
-  const canvasRightRef = useRef<HTMLCanvasElement | null>(null);
 
   // ---- hero exit: sinks away + fades as the page scrolls from the hero into the next
   // section, driven straight off scroll position rather than a fixed-duration animation. ----
@@ -114,71 +102,15 @@ export function Mascot({ heroRef }: MascotProps) {
     };
   }, [heroRef]);
 
-  // ---- iris artwork: drawn once per eye onto its canvas, a dark starry gradient with a
-  // highlight, matching the baked-in eye tone already painted into the mascot artwork so
-  // the animated iris reads as the SAME eye rather than a mismatched patch. ----
-  useEffect(() => {
-    function drawIris(canvas: HTMLCanvasElement | null) {
-      if (!canvas) return;
-      const size = 300;
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const g = ctx.createRadialGradient(size * 0.5, size * 0.36, size * 0.04, size * 0.5, size * 0.5, size * 0.58);
-      g.addColorStop(0, "#2a4a80");
-      g.addColorStop(0.55, "#0e1c3f");
-      g.addColorStop(1, "#050a1c");
-      // Fills the full square, not just the inscribed circle, so a shift that outruns
-      // the overhang exposes more of this same dark tone instead of a blank corner.
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, size, size);
-      for (let i = 0; i < 55; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const d = Math.hypot(x - size / 2, y - size / 2);
-        if (d > size * 0.48) continue;
-        ctx.globalAlpha = Math.random() * 0.8 + 0.15;
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(x, y, Math.random() * 1.6 + 0.4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#f4f8ff";
-      ctx.beginPath();
-      ctx.ellipse(size * 0.36, size * 0.34, size * 0.12, size * 0.15, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.save();
-      ctx.translate(size * 0.62, size * 0.58);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.moveTo(0, -size * 0.05);
-      ctx.lineTo(size * 0.014, -size * 0.014);
-      ctx.lineTo(size * 0.05, 0);
-      ctx.lineTo(size * 0.014, size * 0.014);
-      ctx.lineTo(0, size * 0.05);
-      ctx.lineTo(-size * 0.014, size * 0.014);
-      ctx.lineTo(-size * 0.05, 0);
-      ctx.lineTo(-size * 0.014, -size * 0.014);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-    drawIris(canvasLeftRef.current);
-    drawIris(canvasRightRef.current);
-  }, []);
-
-  // ---- page-wide, direction-aware cursor tracking: computes the real angle from the
-  // mascot's on-screen center to the cursor so the eyes point the correct direction no
-  // matter where on the page the character sits. ----
+  // ---- page-wide cursor tracking for the cloud's BODY language only (a lean
+  // toward the cursor, a puff on excitement) -- the eyes stay exactly as
+  // baked into the real artwork, not re-drawn/re-aimed on canvases layered
+  // over them, per direct instruction to use the plain "OG" mascot image
+  // even though that means the eyes themselves no longer track the cursor. ----
   useEffect(() => {
     const wrap = tiltRef.current?.parentElement;
     const tilt = tiltRef.current;
-    const eyeLeftEl = eyeLeftRef.current;
-    const eyeRightEl = eyeRightRef.current;
-    if (!wrap || !tilt || !eyeLeftEl || !eyeRightEl) return;
+    if (!wrap || !tilt) return;
 
     const pointerFine = window.matchMedia("(pointer:fine)").matches;
     let mouseX = window.innerWidth / 2;
@@ -204,16 +136,11 @@ export function Mascot({ heroRef }: MascotProps) {
     let curX = 0;
     let curY = 0;
     let curExcite = 0;
-    let blinkT = performance.now() + 1800 + Math.random() * 2500;
-    let blinking = false;
-    let blinkStart = 0;
-    let blinkDur = 190;
-    let queuedBlink = false;
     let rafId = 0;
 
     function tick(now: number) {
       rafId = requestAnimationFrame(tick);
-      if (!wrap || !tilt || !eyeLeftEl || !eyeRightEl) return;
+      if (!wrap || !tilt) return;
 
       let tx = 0;
       let ty = 0;
@@ -243,46 +170,13 @@ export function Mascot({ heroRef }: MascotProps) {
       curExcite += (targetExcite - curExcite) * 0.08;
       speed *= 0.94;
 
-      const maxShift = eyeLeftEl.clientWidth * 0.34;
-      const txPx = curX * maxShift;
-      const tyPx = curY * maxShift * 0.85;
-      const eyeScale = 1 + curExcite * 0.16;
-
-      let blinkScale = 1;
-      if (!blinking && now > blinkT) {
-        blinking = true;
-        blinkStart = now;
-        blinkDur = 160 + Math.random() * 70;
-        queuedBlink = Math.random() < 0.22;
-      }
-      if (blinking) {
-        const p = (now - blinkStart) / blinkDur;
-        if (p >= 1) {
-          blinking = false;
-          if (queuedBlink) {
-            queuedBlink = false;
-            blinkT = now + 140;
-          } else {
-            blinkT = now + 2200 + Math.random() * 4200;
-          }
-        } else {
-          blinkScale = Math.max(0.04, p < 0.5 ? 1 - p * 2 : (p - 0.5) * 2);
-        }
-      }
-
-      [canvasLeftRef.current, canvasRightRef.current].forEach((c) => {
-        if (c) c.style.transform = `translate(${txPx}px, ${tyPx}px) scale(${eyeScale}) scaleY(${blinkScale / eyeScale})`;
-      });
-
-      // Body language, not just eye tracking: the whole cloud leans toward the
-      // cursor (a few px of translate + a slight cartoon z-tilt in the lean's
-      // direction) and puffs up a touch as excitement rises — the same curExcite
-      // the eyes already use, so body and eyes react as one creature rather than
-      // two independent systems. All of this happens INSIDE the masked float
-      // wrapper, so the bottom dissolve stays glued to the artwork no matter how
-      // far it leans. Kept to single-digit px/degrees: past that the lean starts
-      // reading as the sticker sliding around its frame instead of a character
-      // shifting its weight.
+      // Body language: the whole cloud leans toward the cursor (a few px of
+      // translate + a slight cartoon z-tilt in the lean's direction) and
+      // puffs up a touch as excitement rises. All of this happens INSIDE the
+      // masked float wrapper, so the bottom dissolve stays glued to the
+      // artwork no matter how far it leans. Kept to single-digit px/degrees:
+      // past that the lean starts reading as the sticker sliding around its
+      // frame instead of a character shifting its weight.
       const rotY = curX * 9;
       const rotX = -curY * 6.5;
       const leanX = curX * 7;
@@ -306,15 +200,6 @@ export function Mascot({ heroRef }: MascotProps) {
       cancelAnimationFrame(rafId);
     };
   }, []);
-
-  const socketBase =
-    "absolute overflow-hidden rounded-full pointer-events-none [background:radial-gradient(ellipse_at_50%_40%,#16264a_0%,#0d1730_62%,#05070f_100%)]";
-  // Canvas overhangs the round socket by comfortably more than maxShift (0.34 of the
-  // socket's own width) can ever travel — 260%/-80% leaves wide margin over that, so an
-  // off-center shift never exposes the socket's own background at the edge (this is the
-  // documented failure mode: a thin margin here reads as a "closed" or glitched eye at
-  // off-center angles, worse on real browsers than in headless testing).
-  const canvasClass = "absolute [width:260%] [height:260%] [left:-80%] [top:-80%] [transition:transform_.04s_linear]";
 
   return (
     <div
@@ -425,20 +310,6 @@ export function Mascot({ heroRef }: MascotProps) {
               maskRepeat: "no-repeat",
             }}
           />
-          <div
-            ref={eyeLeftRef}
-            className={socketBase}
-            style={{ left: `${EYE_LEFT.left}%`, top: `${EYE_LEFT.top}%`, width: `${EYE_LEFT.width}%`, height: `${EYE_LEFT.height}%` }}
-          >
-            <canvas ref={canvasLeftRef} className={canvasClass} />
-          </div>
-          <div
-            ref={eyeRightRef}
-            className={socketBase}
-            style={{ left: `${EYE_RIGHT.left}%`, top: `${EYE_RIGHT.top}%`, width: `${EYE_RIGHT.width}%`, height: `${EYE_RIGHT.height}%` }}
-          >
-            <canvas ref={canvasRightRef} className={canvasClass} />
-          </div>
         </div>
       </div>
     </div>

@@ -3,13 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
-import { Lock, Play } from "lucide-react";
+import { BookOpen, Lock, Play } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { SIMULATIONS, SOON } from "./games";
+import { GLOSSARY_GAMES, MINI_GAMES, SIMULATIONS, SOON } from "./games";
 import type { Simulation } from "./types";
 
 // The Play tab: every career simulation in one place. A student's own Top 3
@@ -65,35 +65,29 @@ export function PlayHub() {
         {mine.length > 0 && <Shelf label="From your Top 3" games={mine} />}
         {rest.length > 0 && <Shelf label={mine.length > 0 ? "More games" : "Playable now"} games={rest} />}
 
-        <section className="flex flex-col gap-[var(--space-3)]">
-          <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            In the works
-          </h2>
-          <ul className="grid list-none grid-cols-2 gap-[var(--space-3)] p-0 sm:grid-cols-3 lg:grid-cols-5">
-            {soon.map((game) => (
-              <li key={game.careerId}>
-                <span
-                  className="relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-[18px] border p-[10px]"
-                  style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
-                >
-                  <Image src={game.cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover opacity-40 grayscale" />
-                  <span
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{ background: "linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
-                  />
-                  <span className="relative flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-                    <Lock className="h-[12px] w-[12px]" aria-hidden />
-                    Soon
-                  </span>
-                  <span className="relative text-[14px] leading-tight font-extrabold" style={{ color: "var(--foreground)" }}>
-                    {game.title}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {/* Glossary Games and Mini Games: the hub's other two game types
+           alongside career simulations. Neither has a real page to open yet
+           (same as Home's own "Finance Essentials"/"Deal Team Kickoff"
+           activity cards), so they get the exact same locked "Soon"
+           treatment as the career-simulation placeholders below rather than
+           a card that looks playable but goes nowhere. */}
+        <SoonSection label="Glossary Games">
+          {GLOSSARY_GAMES.map((game) => (
+            <SoonCard key={game.title} title={game.title} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
+          ))}
+        </SoonSection>
+
+        <SoonSection label="Mini Games">
+          {MINI_GAMES.map((game) => (
+            <SoonCard key={game.title} title={game.title} cover={game.cover} />
+          ))}
+        </SoonSection>
+
+        <SoonSection label="In the works">
+          {soon.map((game) => (
+            <SoonCard key={game.careerId} title={game.title} cover={game.cover} />
+          ))}
+        </SoonSection>
       </main>
 
       <MobileNav active="Play" />
@@ -117,6 +111,56 @@ function Shelf({ label, games }: { label: string; games: Simulation[] }) {
         ))}
       </ul>
     </section>
+  );
+}
+
+/** A titled row of locked "Soon" cards -- career sims not yet built, and the
+ *  Glossary/Mini Game types that don't have a real page anywhere yet. */
+function SoonSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-[var(--space-3)]">
+      <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        {label}
+      </h2>
+      <ul className="grid list-none grid-cols-2 gap-[var(--space-3)] p-0 sm:grid-cols-3 lg:grid-cols-5">{children}</ul>
+    </section>
+  );
+}
+
+/** One locked card: either a photo cover (dimmed/grayscale, same idiom as a
+ *  career poster) or a flat icon tile when there's no cover art yet (the
+ *  Glossary Game type has no image asset at all, same as Home's own
+ *  "TODAY'S GLOSSARY CHALLENGE" banner uses an icon rather than a photo). */
+function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?: React.ReactNode }) {
+  return (
+    <li>
+      <span
+        className="relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-[18px] border p-[10px]"
+        style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
+      >
+        {cover ? (
+          <>
+            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover opacity-40 grayscale" />
+            <span
+              aria-hidden
+              className="absolute inset-0"
+              style={{ background: "linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
+            />
+          </>
+        ) : (
+          <span aria-hidden className="absolute top-[14px] left-[10px] flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)]" style={{ background: "var(--world-business-money-office)", color: "var(--background)" }}>
+            {icon}
+          </span>
+        )}
+        <span className="relative flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+          <Lock className="h-[12px] w-[12px]" aria-hidden />
+          Soon
+        </span>
+        <span className="relative text-[14px] leading-tight font-extrabold" style={{ color: "var(--foreground)" }}>
+          {title}
+        </span>
+      </span>
+    </li>
   );
 }
 

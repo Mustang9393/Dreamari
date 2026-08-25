@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, RotateCcw, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, Home, Music, RotateCcw, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
@@ -27,6 +27,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
+import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
   mutedSnapshot,
@@ -282,6 +283,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const band = bandFor(reputation);
   const ending = endingFor(level.endings, reputation);
+
+  // Music: the Main Song runs for the whole level, switching to the
+  // Promotion Song only once an ending actually advances the player --
+  // restart()/startRepair() (both "redoing steps") explicitly switch back to
+  // Main themselves, so this effect only ever needs to move forward from
+  // beat/feedback into a promoting ending, never the other direction.
+  const promoted = phase === "ending" && ending.advances;
+  useEffect(() => {
+    playMusic(promoted ? "promotion" : "main");
+  }, [promoted]);
+  useEffect(() => stopMusic, []);
   // A beat can override the level's mood: Level 2 runs three screens in
   // late-night navy and comes back, Level 3 has a maroon Crunch Time stretch.
   const mood = beat.mood ?? level.mood;
@@ -1330,33 +1342,36 @@ function Hud({
   delta: number | null;
   accent: string;
   /** Steps back one beat. Undefined on the level's first beat, where there is
-   *  nowhere within the run to go back to -- the button leaves the
-   *  simulation instead, same as it always has. */
+   *  nowhere within the run to go back to. */
   onBack?: () => void;
 }) {
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="flex items-center gap-[var(--space-3)]">
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Back to the previous screen"
-            className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-            style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
-          >
-            <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
-          </button>
-        ) : (
+        <span className="flex flex-none items-center gap-[6px]">
+          {/* Always available, mid-level or not -- the per-beat back chevron
+             only ever stepped back one beat within the run; there was no way
+             to jump straight out to the Play hub once past the first beat. */}
           <Link
             href="/play"
-            aria-label="Leave the simulation"
+            aria-label="Back to Play"
             className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
-            <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+            <Home className="h-[17px] w-[17px]" aria-hidden />
           </Link>
-        )}
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to the previous screen"
+              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+              style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+            >
+              <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+            </button>
+          )}
+        </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
@@ -1365,7 +1380,10 @@ function Hud({
             Level {level.n} · {level.role}
           </span>
         </span>
-        <MuteToggle />
+        <span className="flex flex-none items-center gap-[6px]">
+          <MusicToggle />
+          <MuteToggle />
+        </span>
         <span className="relative flex flex-none items-baseline gap-[5px]">
           <span className="text-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BAND_COLOR[band] }}>
             {reputation}
@@ -1412,6 +1430,26 @@ function Hud({
         </span>
       </div>
     </header>
+  );
+}
+
+/** Music on/off -- deliberately its own button, independent from the sound
+ *  effects toggle below: "mute it and only hear sound effects" means muting
+ *  the music can never also take the SFX with it the way one shared switch
+ *  would. */
+function MusicToggle() {
+  const musicMuted = useSyncExternalStore(subscribeMusicMuted, musicMutedSnapshot, serverMusicMutedSnapshot);
+  return (
+    <button
+      type="button"
+      onClick={() => setMusicMuted(!musicMuted)}
+      aria-pressed={musicMuted}
+      aria-label={musicMuted ? "Turn music on" : "Turn music off"}
+      className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+      style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: musicMuted ? "var(--muted-foreground)" : "var(--foreground)" }}
+    >
+      <Music className="h-[16px] w-[16px]" aria-hidden />
+    </button>
   );
 }
 
