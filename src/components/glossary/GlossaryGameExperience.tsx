@@ -220,7 +220,11 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
             ${lesson.companyValue.toLocaleString()}
           </span>
           <div className="h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            <div className="h-full rounded-full" style={{ width: `${Math.min(100, pct)}%`, background: "var(--world-business-money-office)" }} />
+            {/* Floored so the bar never opens on a literal empty track --
+               a future lesson's own companyValue/nextCompanyValue numbers
+               could otherwise round to 0%, which reads as "no progress
+               possible here" rather than "the start of a journey." */}
+            <div className="h-full rounded-full" style={{ width: `${Math.max(4, Math.min(100, pct))}%`, background: "var(--world-business-money-office)" }} />
           </div>
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             Next: ${lesson.nextCompanyValue.toLocaleString()} · {lesson.nextMilestone}
@@ -1020,8 +1024,12 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
-  const played = Math.min(queueIndex + (pendingResult ? 1 : 0), queue.length);
-  const percent = queue.length ? Math.round((played / Math.max(mainLoopLength, queue.length)) * 100) : 0;
+  // 1-indexed: the current question already counts toward progress (matching
+  // the reference, which reads "1/7 · 14%" on the very first question, not
+  // 0%) -- a progress bar should never open at zero, that reads as "nothing
+  // done yet" before the student has even had a chance to answer.
+  const currentNumber = Math.min(queueIndex + 1, queue.length);
+  const percent = queue.length ? Math.round((currentNumber / Math.max(mainLoopLength, queue.length)) * 100) : 0;
   const masteredCount = lesson.terms.filter((t) => (mastery[t.id] ?? 0) >= MASTERY_TARGET).length;
 
   function exitToCareer() {
@@ -1085,11 +1093,11 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
           <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
             <span>
-              {Math.min(played + 1, queue.length)}/{Math.max(mainLoopLength, queue.length)} · {percent}%
+              {currentNumber}/{Math.max(mainLoopLength, queue.length)} · {percent}%
             </span>
           </div>
           <div className="h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, background: "var(--world-business-money-office)" }} />
+            <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(4, percent)}%`, background: "var(--world-business-money-office)" }} />
           </div>
           {/* Mastery reads as filled skill dots, one per term (Duolingo's own
              mastery visualization), not just a fraction in text -- seeing
