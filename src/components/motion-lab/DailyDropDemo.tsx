@@ -54,6 +54,10 @@ const DROP_CAREER = {
 };
 // Match taxonomy: strong | stretch | wildcard (wildcards get the foil)
 const DROP_TIER: "strong" | "stretch" | "wildcard" = "wildcard";
+// The card is the actual reward -- direct feedback was to make it bigger,
+// since it's the most important thing on the screen. 1.35x over PosterCard's
+// native 210x297.
+const CARD_SCALE = 1.35;
 
 // The landing's Wildcard "rare pull" foil, scoped for the takeover: rotating
 // conic border + diagonal sheen sweep (see marketing/animations.css).
@@ -719,30 +723,40 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
         className="relative z-[2]"
       >
         <style>{FOIL_CSS}</style>
-        {/* The transform wrapper must shrink-wrap the card (inline-block) --
-           left as a plain block it stretches to the outer wrapper's full
-           294px width instead of hugging the card's real ~216px width,
-           which is what blew the holo-border's conic-gradient background
-           out into an oversized rectangle bleeding past the card's edge. */}
-        <div className="relative" style={{ width: 302, height: 424 }}>
-          <div className="inline-block" style={{ transform: "scale(1.4)", transformOrigin: "top left" }}>
+        {/* Reserving box sized to the SCALED footprint (216x303 unscaled *
+           CARD_SCALE), with flex centering + a matching transform-origin, so
+           the visual size and the layout space it reserves always agree --
+           the earlier version guessed a reserved size separately from the
+           scale factor, and the ancestor's text-align:center then re-centered
+           the (differently-sized) inline-block content inside it, shoving
+           the real card sideways and leaving the badge floating over the
+           gap. flex+justify-center ignores text-align entirely, and
+           transform-origin "top center" makes the scaled element grow
+           exactly into this box: horizontally symmetric from the centered
+           unscaled position, vertically down from the top. */}
+        <div className="relative mx-auto flex items-start justify-center" style={{ width: 216 * CARD_SCALE, height: 303 * CARD_SCALE }}>
+          <div style={{ transform: `scale(${CARD_SCALE})`, transformOrigin: "top center" }}>
             <div className={`relative rounded-[19px] ${DROP_TIER === "wildcard" ? "dd-holo-border p-[3px]" : ""}`}>
               <PosterCard career={DROP_CAREER} className="pointer-events-none" />
               {DROP_TIER === "wildcard" && (
                 <span aria-hidden className="dd-holo-sheen pointer-events-none absolute inset-[3px] rounded-[16px]" />
               )}
+              {/* Badge lives INSIDE the scaled element (not a sibling trying
+                 to match its size from outside), so it scales and positions
+                 with the card automatically -- top-right over the image,
+                 same corner PosterCard's own salary badge uses. */}
+              <span
+                className="absolute top-2 right-2 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase"
+                style={
+                  DROP_TIER === "wildcard"
+                    ? { letterSpacing: "0.1em", background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700)", color: V.bg }
+                    : { letterSpacing: "0.1em", background: DROP_TIER === "strong" ? "var(--accent-subtle)" : V.gold, color: V.bg }
+                }
+              >
+                {DROP_TIER === "wildcard" ? "Wildcard" : DROP_TIER === "strong" ? "Strong Match" : "Stretch"}
+              </span>
             </div>
           </div>
-          <span
-            className="absolute top-2 left-2 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase"
-            style={
-              DROP_TIER === "wildcard"
-                ? { letterSpacing: "0.1em", background: "linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4, #ec4899, #f5b700)", color: V.bg }
-                : { letterSpacing: "0.1em", background: DROP_TIER === "strong" ? "var(--accent-subtle)" : V.gold, color: V.bg }
-            }
-          >
-            {DROP_TIER === "wildcard" ? "Wildcard" : DROP_TIER === "strong" ? "Strong Match" : "Stretch"}
-          </span>
         </div>
       </motion.div>
 
