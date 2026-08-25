@@ -214,28 +214,36 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             {/* object-cover, top-anchored by default: contain avoided
                cropping heads but left a hard-edged letterboxed rectangle
                where the photo's own pixels stopped short of the panel.
-               Cover fills the panel edge to edge (no hard line), and the
-               panel's aspect ratio is kept close enough to a portrait
-               photo's own that top-anchoring shows head-and-shoulders for
-               most of these photos -- HERO_FOCUS above overrides the small
-               minority composed differently. Shortened from a taller
-               version per direct feedback ("too far down, make it ~50%
-               shorter") -- width came down with it, same aspect ratio, so
-               the crop itself doesn't get more aggressive, just smaller.
-               The fade itself stays clear of the seam reaching the centered
-               subject's face (these photos are shot with the subject
-               centered, so a wide even fade landed squarely on half their
-               face) -- multiple eased stops instead of a two-stop linear
-               ramp so it reads as a soft graduated fade, not a hard-edged
-               line, and a slight angle instead of dead-vertical keeps it
-               from looking like a ruled cut. */}
+               Cover fills the panel edge to edge, and the panel's aspect
+               ratio is kept close enough to a portrait photo's own that
+               top-anchoring shows head-and-shoulders for most of these
+               photos -- HERO_FOCUS above overrides the small minority
+               composed differently. Shortened from a taller version per
+               direct feedback ("too far down, make it ~50% shorter") --
+               width came down with it, same aspect ratio, so the crop itself
+               doesn't get more aggressive, just smaller.
+               A background-color overlay on just the left edge (the earlier
+               approach here) only ever faded the seam facing the text --
+               the photo's other three edges stayed a flat rectangular cut
+               against the page, which read as a pasted-in "jpeg with a hard
+               border" once pointed out. mask-image dissolves the photo's own
+               pixels into transparency on every side at once (an off-center
+               ellipse, pulled toward the subject on the right, so the left
+               side -- closest to the text -- fades earliest and most, while
+               the subject stays fully opaque) -- there's no separate color
+               layer to keep in sync with the page's own background, since
+               this reveals whatever's actually behind it. */}
             <div className="absolute inset-y-0 right-0 hidden w-[24%] overflow-hidden md:block">
-              <Image src={career.photo} alt="" fill sizes="24vw" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "top" }} />
-              <div
-                className="absolute inset-0"
+              <Image
+                src={career.photo}
+                alt=""
+                fill
+                sizes="24vw"
+                className="object-cover"
                 style={{
-                  background:
-                    "linear-gradient(100deg, var(--background) 0%, color-mix(in srgb, var(--background) 85%, transparent) 10%, color-mix(in srgb, var(--background) 45%, transparent) 20%, color-mix(in srgb, var(--background) 15%, transparent) 28%, transparent 36%)",
+                  objectPosition: HERO_FOCUS[career.slug] ?? "top",
+                  maskImage: "radial-gradient(85% 105% at 74% 50%, black 30%, transparent 100%)",
+                  WebkitMaskImage: "radial-gradient(85% 105% at 74% 50%, black 30%, transparent 100%)",
                 }}
               />
             </div>
