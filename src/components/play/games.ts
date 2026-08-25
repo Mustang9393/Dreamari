@@ -35,7 +35,19 @@ export const SOON: { careerId: string; title: string; world: string; cover: stri
   { careerId: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", cover: "/images/app/soon-software-engineer.png" },
   { careerId: "private-equity", title: "Private Equity", world: "Business & Money", cover: "/images/app/soon-private-equity.png" },
   { careerId: "food-scientist", title: "Food Scientist", world: "Farming, Animals & Nature", cover: "/images/app/soon-food-scientist.png" },
+  // These three ride in the new Netflix-style featured row (see
+  // FEATURED_ROW_SOON_IDS in PlayHub.tsx) alongside the real Investment
+  // Banking simulation, rather than only appearing in the "In the works"
+  // grid -- PlayHub filters them out of that grid so they don't show twice.
+  { careerId: "accountant", title: "Accountant", world: "Business & Money", cover: "/images/app/soon-accountant.png" },
+  { careerId: "aviation-maintenance-technician", title: "Aviation Maintenance Technician", world: "Fixing Machines & Engines", cover: "/images/app/soon-aviation-maintenance-technician.png" },
+  { careerId: "emergency-medicine-doctor", title: "Emergency Medicine Doctor", world: "Health & Medicine", cover: "/images/app/soon-emergency-medicine-doctor.png" },
 ];
+
+/** The three "coming soon" careers that appear in the top featured row
+ *  (PlayHub's FeaturedRow) rather than only in the generic "In the works"
+ *  grid below. */
+export const FEATURED_ROW_SOON_IDS = ["accountant", "aviation-maintenance-technician", "emergency-medicine-doctor"];
 
 export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);
