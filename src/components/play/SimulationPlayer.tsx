@@ -1408,11 +1408,16 @@ function Hud({
           <MusicToggle />
           <MuteToggle />
         </span>
-        <span className="relative flex flex-none items-baseline gap-[5px]">
-          <span className="text-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BAND_COLOR[band] }}>
+        {/* Band text hides below sm -- at a phone's narrowest widths, four
+           icon buttons plus this cluster left almost no room for the title,
+           which was truncating down to one or two characters. The number
+           alone still says the same thing at a glance; aria-label keeps the
+           full "47, Cautious" available to assistive tech either way. */}
+        <span className="relative flex flex-none items-baseline gap-[5px]" aria-label={`${reputation}, ${band}`}>
+          <span className="text-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BAND_COLOR[band] }} aria-hidden>
             {reputation}
           </span>
-          <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          <span className="hidden text-[11px] font-bold tracking-[0.1em] uppercase sm:inline" style={{ color: "var(--muted-foreground)" }} aria-hidden>
             {band}
           </span>
           {delta !== null && delta !== 0 && (
