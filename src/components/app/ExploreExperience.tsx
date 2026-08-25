@@ -5,7 +5,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, X } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 import {
@@ -226,6 +226,12 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
   return list;
 }
 
+// A flat blur/scrim can't guarantee contrast against every photo -- a light
+// wall or window behind the panel's least-blurred (top) edge washes out
+// even white text. A dark drop shadow is background-independent: it reads
+// against light AND dark photo content, unlike picking a single text color.
+const LEGIBLE_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.85), 0 1px 8px rgba(0,0,0,0.45)";
+
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   const router = useRouter();
@@ -283,10 +289,11 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
               aria-label={face === "Summary" ? "Show more info" : "Show summary"}
               onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
               className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-2)] text-left"
+              style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
-              <div key={face} className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
+              <div className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
                 <div className="flex items-start justify-between gap-[var(--space-2)]">
-                  <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted-alt)" }}>
+                  <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.92)" }}>
                     {face === "Summary" ? career.matchLabel : "MORE INFO"}
                   </span>
                   <span aria-hidden className="flex items-center">
@@ -294,8 +301,16 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                     <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Details" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
                   </span>
                 </div>
-                {face === "Summary" ? (
-                  <>
+                {/* Both faces stay mounted, stacked in the same grid cell, so
+                   the panel's height is always the taller of the two -- it
+                   never shrinks when Details' shorter content shows, which
+                   used to expose a hard blur/photo seam right above the text
+                   and leave part of it sitting on barely-blurred photo. */}
+                <div className="grid">
+                  <div
+                    aria-hidden={face !== "Summary"}
+                    className={`col-start-1 row-start-1 flex flex-col gap-[var(--space-2)] transition-opacity duration-150 ${face === "Summary" ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                  >
                     <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
                       {career.title}
                     </h2>
@@ -303,22 +318,25 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                       {career.description}
                     </p>
                     <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                      <span style={{ color: "var(--muted-foreground)" }}>SALARY</span>
+                      <span style={{ color: "rgba(255,255,255,0.92)" }}>SALARY</span>
                       <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
                     </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                  </div>
+                  <div
+                    aria-hidden={face !== "Details"}
+                    className={`col-start-1 row-start-1 flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold transition-opacity duration-150 ${face === "Details" ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
                     <div className="flex flex-col gap-[var(--space-1)]">
-                      <span style={{ color: "var(--muted-foreground)" }}>MAJOR</span>
+                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MAJOR</span>
                       <span style={{ color: "var(--foreground)" }}>{career.major}</span>
                     </div>
                     <div className="flex flex-col gap-[var(--space-1)]">
-                      <span style={{ color: "var(--muted-foreground)" }}>MAIN SKILLS</span>
+                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MAIN SKILLS</span>
                       <span style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </button>
 
@@ -387,27 +405,64 @@ function ProgressiveBlur() {
 /** A real office-tour/day-in-the-life clip in the reel. Deliberately not
  *  EnvCard with a <video> swapped in: these have no salary, major, or
  *  "Play Game" affordance to show, so the card is just the clip and its
- *  title. Autoplays muted while its card is the active one, per the same
+ *  title. Autoplays while its card is the active one, per the same
  *  IntersectionObserver-driven `active` flag EnvCard's Ken Burns uses;
- *  pauses off-screen instead of playing every card in the feed at once. */
-function VideoCard({ item, active }: { item: VideoReel; active: boolean }) {
+ *  pauses off-screen instead of playing every card in the feed at once.
+ *
+ *  Sound: there is no web API to read a phone's hardware silent switch --
+ *  that's native-only (iOS AVAudioSession / Android AudioManager). Instagram
+ *  and TikTok's own WEB players can't detect it either, so they don't try;
+ *  what they actually do, and what this does: try to autoplay WITH sound,
+ *  let the browser's autoplay policy silently reject that if it's going to
+ *  (mobile Safari/Chrome usually block it on a cold load), fall back to
+ *  muted when it does, and remember whichever way the person last set it --
+ *  `soundOn`/`onSoundChange` are lifted to ForYouFace so every video in the
+ *  reel shares one preference instead of each clip resetting to muted. */
+function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; active: boolean; soundOn: boolean; onSoundChange: (next: boolean) => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Starting a clip: reset to the top and (re)attempt playback. Deliberately
+  // NOT keyed on `soundOn` -- toggling sound on an already-playing clip must
+  // not restart it (the effect below just flips .muted on the live element).
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (active) {
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    } else {
+    if (!active) {
       video.pause();
+      return;
     }
+    video.currentTime = 0;
+    video.muted = !soundOn;
+    video.play().catch(() => {
+      if (!video.muted) {
+        video.muted = true;
+        onSoundChange(false);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) video.muted = !soundOn;
+  }, [soundOn]);
+
   return (
     <article
       className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-xl)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
-      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline preload={active ? "auto" : "none"} />
+      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
+      <button
+        type="button"
+        aria-label={soundOn ? "Mute video" : "Unmute video"}
+        aria-pressed={soundOn}
+        onClick={() => onSoundChange(!soundOn)}
+        className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] z-[1] flex size-9 cursor-pointer items-center justify-center rounded-full border"
+        style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+      >
+        {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+      </button>
       <div className="relative z-[1] p-[var(--space-4)] pb-[64px] md:pb-[var(--space-4)]">
         {/* Same rounded panel language as the Env Card v2 details panel, but
            a SOLID scrim rather than the frosted-glass blur -- blurring part
@@ -425,8 +480,8 @@ function VideoCard({ item, active }: { item: VideoReel; active: boolean }) {
 }
 
 /** One reel slide, either kind. */
-function ForYouCard({ item, active }: { item: ReelItem; active: boolean }) {
-  if (isVideoReel(item)) return <VideoCard item={item} active={active} />;
+function ForYouCard({ item, active, soundOn, onSoundChange }: { item: ReelItem; active: boolean; soundOn: boolean; onSoundChange: (next: boolean) => void }) {
+  if (isVideoReel(item)) return <VideoCard item={item} active={active} soundOn={soundOn} onSoundChange={onSoundChange} />;
   return <EnvCard career={item} active={active} />;
 }
 
@@ -447,10 +502,26 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
   );
 }
 
+const REEL_SOUND_KEY = "dreamari:reel-sound-on";
+
 function ForYouFace() {
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
+
+  // Remember the last sound choice across the reel (and across visits) --
+  // same as Instagram/TikTok's web players. Starts true (attempt sound);
+  // VideoCard flips it false the first time the browser actually blocks an
+  // unmuted autoplay, and every card shares this one value from then on.
+  const [soundOn, setSoundOn] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem(REEL_SOUND_KEY);
+    return stored === null ? true : stored === "true";
+  });
+  const updateSoundOn = useCallback((next: boolean) => {
+    setSoundOn(next);
+    window.localStorage.setItem(REEL_SOUND_KEY, String(next));
+  }, []);
 
   // Active-card tracking (drives the Ken Burns restart + paging state).
   useEffect(() => {
@@ -528,7 +599,7 @@ function ForYouFace() {
       >
         {FOR_YOU_FEED.map((item, index) => (
           <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
-            <ForYouCard item={item} active={index === active} />
+            <ForYouCard item={item} active={index === active} soundOn={soundOn} onSoundChange={updateSoundOn} />
           </div>
         ))}
       </div>
