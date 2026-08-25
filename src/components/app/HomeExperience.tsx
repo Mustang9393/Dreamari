@@ -3,10 +3,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
+import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
@@ -126,6 +128,7 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 }
 
 function HeroBanner() {
+  const router = useRouter();
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
@@ -245,7 +248,13 @@ function HeroBanner() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-8)]">
-              <HeroCta><span className="inline-flex items-center gap-[6px]">Explore this career<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span></HeroCta>
+              {/* Copy says "UX Researcher" but the photo/asset used below is
+                 UI/UX Designer's, and there's no "UX Researcher" entry in
+                 the catalog to route to -- points at the real career the
+                 panel is actually showing. */}
+              <HeroCta onClick={() => router.push(`/career/${careerSlug("UI/UX Designer")}`)}>
+                <span className="inline-flex items-center gap-[6px]">Explore this career<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
+              </HeroCta>
               <span className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>
                 Featured in 3 Career Worlds
               </span>
@@ -431,6 +440,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
 }
 
 export function HomeExperience() {
+  const router = useRouter();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -499,7 +509,7 @@ export function HomeExperience() {
           </div>
           <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {BROWSE_BECAUSE_LIKED.map((career) => (
-              <PosterCard key={career.title} career={career} />
+              <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
             ))}
           </div>
         </section>

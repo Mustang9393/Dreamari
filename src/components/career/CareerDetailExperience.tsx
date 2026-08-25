@@ -93,6 +93,17 @@ function SoftwareLogo({ name }: { name: string }) {
   );
 }
 
+// Most of these source photos are conventional headshots with the subject
+// in the upper half, so a top-anchored crop is the right default -- but not
+// all of them (the asset-manager photo seats him low against a tall bank of
+// monitors, so top-anchoring showed mostly ceiling/screens with his face cut
+// off at the very bottom edge). Rather than pick one global position that's
+// wrong for photos like that, this is a small per-career override, same idea
+// as Play's own characterAnchor overrides in locations.ts.
+const HERO_FOCUS: Record<string, string> = {
+  "asset-management": "center 68%",
+};
+
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -184,38 +195,42 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] pb-[120px] md:pt-[var(--space-4)]">
         {/* Hero */}
-        <section className="relative flex min-h-[300px] w-full flex-col overflow-hidden md:min-h-[500px] md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]">
+        <section className="relative flex min-h-[300px] w-full flex-col overflow-hidden md:min-h-[260px] md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]">
           {/* Mobile: full-bleed background photo behind the full-width text,
              with the Browse-card var(--poster-scrim) treatment for legibility
              (photo peeking through up top, fading to a solid surface below).
              Desktop: NOT full-bleed -- a contained photo panel on the right
-             side only, at plain center-crop (same default PosterCard itself
-             uses) so the actual subject stays in frame instead of getting
-             sliced away by an edge-biased object-position. Only that panel's
-             own left edge fades into the page background, right where the
-             text column ends -- the rest of the photo reads at full
-             brightness, not washed out by a scrim over the whole hero. */}
+             side only (object-position tunable per career via HERO_FOCUS
+             below) so the actual subject stays in frame instead of getting
+             sliced away by one fixed crop. Only that panel's own left edge
+             fades into the page background, right where the text column
+             ends -- the rest of the photo reads at full brightness, not
+             washed out by a scrim over the whole hero. */}
           <div className="absolute inset-0" aria-hidden>
             <div className="absolute inset-0 md:hidden">
               <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover object-top" />
               <div className="absolute inset-0" style={{ backgroundImage: "var(--poster-scrim)" }} />
             </div>
-            {/* object-cover, top-anchored: contain avoided cropping heads but
-               left a hard-edged letterboxed rectangle where the photo's own
-               pixels stopped short of the panel. Cover fills the panel edge
-               to edge (no hard line), and a narrower panel + taller hero
-               keeps its aspect ratio close enough to a portrait photo's own
-               that top-anchoring shows head-and-shoulders, not the sliver of
-               chin/jaw a very short, wide panel forced regardless of
-               object-position. The fade itself stays clear of the seam
-               reaching the centered subject's face (these photos are shot
-               with the subject centered, so a wide even fade landed squarely
-               on half their face) -- multiple eased stops instead of a
-               two-stop linear ramp so it reads as a soft graduated fade, not
-               a hard-edged line, and a slight angle instead of dead-vertical
-               keeps it from looking like a ruled cut. */}
-            <div className="absolute inset-y-0 right-0 hidden w-[45%] overflow-hidden md:block">
-              <Image src={career.photo} alt="" fill sizes="45vw" className="object-cover object-top" />
+            {/* object-cover, top-anchored by default: contain avoided
+               cropping heads but left a hard-edged letterboxed rectangle
+               where the photo's own pixels stopped short of the panel.
+               Cover fills the panel edge to edge (no hard line), and the
+               panel's aspect ratio is kept close enough to a portrait
+               photo's own that top-anchoring shows head-and-shoulders for
+               most of these photos -- HERO_FOCUS above overrides the small
+               minority composed differently. Shortened from a taller
+               version per direct feedback ("too far down, make it ~50%
+               shorter") -- width came down with it, same aspect ratio, so
+               the crop itself doesn't get more aggressive, just smaller.
+               The fade itself stays clear of the seam reaching the centered
+               subject's face (these photos are shot with the subject
+               centered, so a wide even fade landed squarely on half their
+               face) -- multiple eased stops instead of a two-stop linear
+               ramp so it reads as a soft graduated fade, not a hard-edged
+               line, and a slight angle instead of dead-vertical keeps it
+               from looking like a ruled cut. */}
+            <div className="absolute inset-y-0 right-0 hidden w-[24%] overflow-hidden md:block">
+              <Image src={career.photo} alt="" fill sizes="24vw" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "top" }} />
               <div
                 className="absolute inset-0"
                 style={{
