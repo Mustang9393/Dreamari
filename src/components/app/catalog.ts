@@ -196,3 +196,51 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     mainSkills: "Art Direction · Branding · Leadership · Concepting · Taste",
   },
 ];
+
+// Real office-tour/day-in-the-life clips, seeded into the reel at every
+// third card (Pic, Pic, Video) so real footage breaks up the illustrated
+// Env Cards rather than being buried in its own separate tab. Discriminated
+// from ReelCareer by the presence of `video` -- these clips have no salary,
+// major, or "Play Game" affordance, so they get their own, much simpler
+// card (see VideoCard in ExploreExperience.tsx) instead of reusing EnvCard.
+export type VideoReel = {
+  title: string;
+  video: string;
+};
+
+export type ReelItem = ReelCareer | VideoReel;
+
+export function isVideoReel(item: ReelItem): item is VideoReel {
+  return "video" in item;
+}
+
+const FOR_YOU_VIDEOS: VideoReel[] = [
+  { title: "Kellanova · Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4" },
+  { title: "JPMorgan Chase, London — Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4" },
+  { title: "Kellogg's — Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4" },
+  { title: "A Day at JPMorgan Chase, Ohio", video: "/videos/app/reel-povywa-jpmc-ohio.mp4" },
+  { title: "AT&T — Office Tour", video: "/videos/app/reel-att-office-tour.mp4" },
+];
+
+// Pic, Pic, Video, repeating, until the videos run out. FOR_YOU_REEL only
+// has 8 cards -- four "every-other" slots -- for 5 videos, so the last lap
+// cycles back to the first two cards rather than ending on two videos in a
+// row with nothing between them.
+export const FOR_YOU_FEED: ReelItem[] = (() => {
+  const items: ReelItem[] = [];
+  let videoIndex = 0;
+  let cycle = 0;
+  while (videoIndex < FOR_YOU_VIDEOS.length) {
+    items.push(FOR_YOU_REEL[(cycle * 2) % FOR_YOU_REEL.length]);
+    items.push(FOR_YOU_REEL[(cycle * 2 + 1) % FOR_YOU_REEL.length]);
+    items.push(FOR_YOU_VIDEOS[videoIndex]);
+    videoIndex += 1;
+    cycle += 1;
+  }
+  // Any remaining cards that never got a turn keep the reel from ending
+  // abruptly right after the last video.
+  for (let i = cycle * 2; i < FOR_YOU_REEL.length; i += 1) {
+    items.push(FOR_YOU_REEL[i]);
+  }
+  return items;
+})();

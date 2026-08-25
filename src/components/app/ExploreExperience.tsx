@@ -14,9 +14,12 @@ import {
   BROWSE_TRENDING,
   BROWSE_TYPICAL_PAY,
   BROWSE_WORLD_RAIL,
-  FOR_YOU_REEL,
+  FOR_YOU_FEED,
+  isVideoReel,
   type CatalogCareer,
   type ReelCareer,
+  type ReelItem,
+  type VideoReel,
 } from "./catalog";
 import { WORLD_LABELS } from "./worlds";
 import "./app.css";
@@ -306,6 +309,48 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   );
 }
 
+/** A real office-tour/day-in-the-life clip in the reel. Deliberately not
+ *  EnvCard with a <video> swapped in: these have no salary, major, or
+ *  "Play Game" affordance to show, so the card is just the clip and its
+ *  title. Autoplays muted while its card is the active one, per the same
+ *  IntersectionObserver-driven `active` flag EnvCard's Ken Burns uses;
+ *  pauses off-screen instead of playing every card in the feed at once. */
+function VideoCard({ item, active }: { item: VideoReel; active: boolean }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (active) {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [active]);
+  return (
+    <article
+      className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-xl)]"
+      style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
+    >
+      <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline preload={active ? "auto" : "none"} />
+      <div className="relative z-[1] p-[var(--space-4)] pb-[64px] md:pb-[var(--space-4)]">
+        <span
+          className="inline-block rounded-[var(--radius-2xl)] px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold"
+          style={{ background: "var(--scrim-heavy)", color: "#ffffff", fontFamily: "var(--font-display)" }}
+        >
+          {item.title}
+        </span>
+      </div>
+    </article>
+  );
+}
+
+/** One reel slide, either kind. */
+function ForYouCard({ item, active }: { item: ReelItem; active: boolean }) {
+  if (isVideoReel(item)) return <VideoCard item={item} active={active} />;
+  return <EnvCard career={item} active={active} />;
+}
+
 function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: typeof Heart; bare?: boolean }) {
   return (
     <button
@@ -324,7 +369,7 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
 }
 
 function ForYouFace() {
-  const total = FOR_YOU_REEL.length;
+  const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
 
@@ -402,9 +447,9 @@ function ForYouFace() {
         data-night-scene
         className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
       >
-        {FOR_YOU_REEL.map((career, index) => (
-          <div key={career.title} data-reel-index={index} className="h-full w-full snap-start snap-always">
-            <EnvCard career={career} active={index === active} />
+        {FOR_YOU_FEED.map((item, index) => (
+          <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
+            <ForYouCard item={item} active={index === active} />
           </div>
         ))}
       </div>
