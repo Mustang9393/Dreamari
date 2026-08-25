@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowLeft,
@@ -10,12 +10,14 @@ import {
   Building2,
   Check,
   ConciergeBell,
+  FileText,
   Flame,
   Home,
   Package,
   PiggyBank,
   Sparkles,
   ShoppingBag,
+  SquarePen,
   Trophy,
   Moon,
   Sun,
@@ -228,9 +230,15 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
   const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)]">
-      <div className="relative w-full max-w-[520px] pt-10 pl-12">
-        <span className="absolute -top-3 -left-3 z-10">
-          <DreamyFace pose="happy" size={88} />
+      {/* Dreamy overlaps down from above the bubble's top edge only -- no
+         side padding compensating for him, so the bubble itself stays a
+         plain full-width, centered box. Padding the bubble sideways to
+         "make room" for him was shifting the bubble (and its text)
+         off-center on mobile, where this wrapper is close to the full
+         viewport width and the shift reads as a real layout bug. */}
+      <div className="relative w-full max-w-[520px] pt-9">
+        <span className="absolute -top-9 left-5 z-10">
+          <DreamyFace pose="happy" size={72} />
         </span>
         <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
       </div>
@@ -525,6 +533,53 @@ function OptionList({ options, correctIndex, picked, onPick }: { options: string
   );
 }
 
+// "Catch the Misuse" presented as reviewing a short business document --
+// the question is literally "spot the wrong sentence," so a document frame
+// fits naturally (per the project's own "lightweight presentational
+// treatment where relevant" allowance). Same options/correctIndex/onPick
+// contract as OptionList, just laid out as one bordered sheet with divided
+// rows instead of separately boxed buttons -- no interaction change.
+function DocumentOptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+  const revealed = picked !== null;
+  return (
+    <div className="flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex items-center gap-[var(--space-3)] border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+        <FileText className="h-5 w-5 flex-none" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
+        <div className="flex flex-1 flex-col gap-[6px]">
+          <span className="h-[6px] w-[70%] rounded-full" style={{ background: "var(--glass-surface-2)" }} aria-hidden />
+          <span className="h-[6px] w-[45%] rounded-full" style={{ background: "var(--glass-surface-2)" }} aria-hidden />
+        </div>
+        <SquarePen className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </div>
+      {options.map((option, i) => {
+        const isPicked = picked === i;
+        const isCorrect = i === correctIndex;
+        const dim = revealed && !isPicked && !isCorrect;
+        const textColor = revealed && isCorrect ? CORRECT_COLOR : revealed && isPicked && !isCorrect ? "var(--danger, #e0483e)" : "var(--foreground)";
+        return (
+          <button
+            key={option}
+            type="button"
+            disabled={revealed}
+            onClick={() => onPick(i)}
+            className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] border-b p-[var(--space-4)] text-left last:border-b-0 transition-opacity"
+            style={{ borderColor: "var(--glass-border)", background: revealed && isPicked ? "color-mix(in srgb, var(--foreground) 6%, transparent)" : "transparent", opacity: dim ? 0.45 : 1 }}
+          >
+            <span className="flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: revealed && (isCorrect || isPicked) ? textColor : "var(--muted-foreground)", color: textColor }}>
+              {String.fromCharCode(65 + i)}
+            </span>
+            <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
+              {option}
+            </span>
+            {revealed && isCorrect && <Check className="h-5 w-5 flex-none" style={{ color: CORRECT_COLOR }} aria-hidden />}
+            {revealed && isPicked && !isCorrect && <X className="h-5 w-5 flex-none" style={{ color: "var(--danger, #e0483e)" }} aria-hidden />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void }) {
   const [value, setValue] = useState("");
   const [checked, setChecked] = useState<boolean | null>(null);
@@ -586,6 +641,19 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
   const [wrongFlash, setWrongFlash] = useState<string | null>(null);
   const rightOrder = useMemo(() => shuffleStable(question.pairs.map((p) => p.right), question.id), [question]);
 
+  // A real line drawn between a matched pair's own dots, like the reference
+  // -- but a brief confirmation flash, not a permanent line: with several
+  // pairs matched the screen would fill with crossing diagonal lines,
+  // exactly the "awkward" look flagged directly. The green dots/checkmarks/
+  // border are the lasting "this is matched" signal; the line itself is a
+  // one-time snap animation. Measured via ref since the two dots aren't in
+  // the same row once the right side (shuffled on purpose, so this stays a
+  // real matching exercise) reorders.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const leftDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
+  const rightDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
+  const [flashLine, setFlashLine] = useState<{ x1: number; y1: number; x2: number; y2: number; fading: boolean } | null>(null);
+
   function tryMatch(left: string, right: string) {
     const pair = question.pairs.find((p) => p.left === left);
     if (!pair) return;
@@ -595,6 +663,25 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
       next.add(left);
       setMatched(next);
       setPickedLeft(null);
+
+      const grid = gridRef.current;
+      const leftEl = leftDotRefs.current.get(left);
+      const rightEl = rightDotRefs.current.get(right);
+      if (grid && leftEl && rightEl) {
+        const gridRect = grid.getBoundingClientRect();
+        const lr = leftEl.getBoundingClientRect();
+        const rr = rightEl.getBoundingClientRect();
+        setFlashLine({
+          x1: lr.left + lr.width / 2 - gridRect.left,
+          y1: lr.top + lr.height / 2 - gridRect.top,
+          x2: rr.left + rr.width / 2 - gridRect.left,
+          y2: rr.top + rr.height / 2 - gridRect.top,
+          fading: false,
+        });
+        setTimeout(() => setFlashLine((prev) => (prev ? { ...prev, fading: true } : prev)), 350);
+        setTimeout(() => setFlashLine(null), 750);
+      }
+
       if (next.size === question.pairs.length) {
         onAnswer({ correct: true, creditedTermIds: question.pairs.map((p) => p.termId) });
       }
@@ -607,8 +694,30 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
   }
 
   return (
-    <div className="flex w-full flex-col gap-[var(--space-4)]">
+    <div className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="grid grid-cols-2 gap-[var(--space-3)]">
+        <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          Term
+        </span>
+        <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          Example
+        </span>
+      </div>
+      <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]">
+        {flashLine && (
+          <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+            <line
+              x1={flashLine.x1}
+              y1={flashLine.y1}
+              x2={flashLine.x2}
+              y2={flashLine.y2}
+              stroke={CORRECT_COLOR}
+              strokeWidth={2}
+              className="transition-opacity duration-300"
+              style={{ opacity: flashLine.fading ? 0 : 1 }}
+            />
+          </svg>
+        )}
         <div className="flex flex-col gap-[var(--space-2)]">
           {question.pairs.map((p) => {
             const done = matched.has(p.left);
@@ -620,15 +729,28 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
                 type="button"
                 disabled={done}
                 onClick={() => setPickedLeft(p.left)}
-                className="dm-tap flex w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-center text-[14px] font-bold"
+                className="dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
                 style={{
-                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "color-mix(in srgb, var(--accent) 8%, var(--card))",
-                  borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--accent)" : "var(--glass-border)",
+                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
+                  borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--world-business-money-office)" : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
                 }}
               >
-                {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
-                {p.left}
+                <span className="flex flex-1 items-center justify-center gap-[6px]">
+                  {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
+                  {p.left}
+                </span>
+                {/* Connector dot -- anchor point for the SVG line above once
+                   this pair is matched. */}
+                <span
+                  aria-hidden
+                  ref={(el) => {
+                    if (el) leftDotRefs.current.set(p.left, el);
+                    else leftDotRefs.current.delete(p.left);
+                  }}
+                  className="size-[9px] flex-none rounded-full border-2"
+                  style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
+                />
               </button>
             );
           })}
@@ -643,15 +765,26 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
                 type="button"
                 disabled={done || !pickedLeft}
                 onClick={() => pickedLeft && tryMatch(pickedLeft, right)}
-                className="dm-tap flex w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-center text-[14px] font-bold"
+                className="dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
                 style={{
-                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "color-mix(in srgb, var(--amber-400) 10%, var(--card))",
+                  background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
                 }}
               >
-                {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
-                {right}
+                <span
+                  aria-hidden
+                  ref={(el) => {
+                    if (el) rightDotRefs.current.set(right, el);
+                    else rightDotRefs.current.delete(right);
+                  }}
+                  className="size-[9px] flex-none rounded-full border-2"
+                  style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
+                />
+                <span className="flex flex-1 items-center justify-center gap-[6px]">
+                  {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
+                  {right}
+                </span>
               </button>
             );
           })}
@@ -782,7 +915,13 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
         const wrong = checked && !correct;
         return (
           <div key={step.order} className="flex items-center justify-between gap-[var(--space-3)]">
-            <span className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+            <span className="flex items-center gap-[var(--space-3)] text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+              <span
+                className="flex size-6 flex-none items-center justify-center rounded-full border-[1.5px] text-[12px] font-bold"
+                style={{ borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--muted-foreground)", color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)" }}
+              >
+                {step.order}
+              </span>
               {step.label}
             </span>
             <div className="flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--card)", borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--glass-border)" }}>
@@ -845,9 +984,13 @@ function QuestionScreen({
   return (
     <div className="relative flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
-        <div className="relative pt-[var(--space-4)] pl-[var(--space-6)]">
-          <span className="absolute -top-8 -left-6 z-10">
-            <DreamyFace pose="curious" size={60} />
+        // No side padding here -- it was only ever there to "make room" for
+        // Dreamy, but since he's absolutely positioned he doesn't need it,
+        // and it was shifting the bubble (and the question text) off-center
+        // on mobile, where this row is close to the full card width.
+        <div className="relative pt-[var(--space-7)]">
+          <span className="absolute -top-8 left-2 z-10">
+            <DreamyFace pose="curious" size={56} />
           </span>
           <SpeechBubble>{question.prompt}</SpeechBubble>
         </div>
@@ -858,21 +1001,25 @@ function QuestionScreen({
         </p>
       )}
 
-      {question.kind === "choice" && (
-        <OptionList
-          options={shuffledOptions.map((s) => s.o)}
-          correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
-          picked={picked}
-          onPick={(i) => {
-            if (picked !== null) return;
-            setPicked(i);
-            const correct = shuffledOptions[i].i === question.correctIndex;
-            if (correct) playCorrect();
-            else playWrong();
-            onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
-          }}
-        />
-      )}
+      {question.kind === "choice" &&
+        (() => {
+          const ListComponent = question.type === "Catch the Misuse" ? DocumentOptionList : OptionList;
+          return (
+            <ListComponent
+              options={shuffledOptions.map((s) => s.o)}
+              correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
+              picked={picked}
+              onPick={(i) => {
+                if (picked !== null) return;
+                setPicked(i);
+                const correct = shuffledOptions[i].i === question.correctIndex;
+                if (correct) playCorrect();
+                else playWrong();
+                onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
+              }}
+            />
+          );
+        })()}
       {question.kind === "typeTerm" && <TypeTermCard question={question} onAnswer={onAnswer} />}
       {question.kind === "matchUp" && <MatchUpCard question={question} onAnswer={onAnswer} />}
       {question.kind === "sortBuckets" && <SortBucketsCard question={question} onAnswer={onAnswer} />}

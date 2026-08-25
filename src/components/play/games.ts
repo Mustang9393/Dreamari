@@ -50,7 +50,7 @@ export function simulationFor(id: string): Simulation | undefined {
  *  "these careers don't have a simulation yet" list, and the hub gives it
  *  its own labeled section. */
 export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
-  { careerSlug: "investment-banking", title: "Finance Essentials", sub: "Learn key finance terms", cover: "/images/app/poster-investment-banking-v2.png" },
+  { careerSlug: "investment-banking", title: "Finance Essentials", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb.png" },
   // No content authored yet (hasGlossary() gates these into the locked "Soon"
   // row) -- listed anyway so that row isn't just one lonely card next to
   // empty space. Reuses each career's own existing Play-tab "Soon" cover art
@@ -58,8 +58,4 @@ export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; c
   { careerSlug: "registered-nurse", title: "Medical Terms", sub: "Learn key nursing terms", cover: "/images/app/soon-registered-nurse.png" },
   { careerSlug: "private-equity", title: "PE Essentials", sub: "Learn key deal terms", cover: "/images/app/soon-private-equity.png" },
   { careerSlug: "software-engineer", title: "Tech Terms", sub: "Learn key engineering terms", cover: "/images/app/soon-software-engineer.png" },
-];
-
-export const MINI_GAMES: { title: string; sub: string; cover: string }[] = [
-  { title: "Deal Team Kickoff", sub: "Draft the squad, win the pitch", cover: "/images/app/activity-ib-kickoff.png" },
 ];

@@ -10,7 +10,7 @@ import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { GLOSSARY_GAMES, MINI_GAMES, SIMULATIONS, SOON } from "./games";
+import { GLOSSARY_GAMES, SIMULATIONS, SOON } from "./games";
 import type { Simulation } from "./types";
 
 // The Play tab: every career simulation in one place. A student's own Top 3
@@ -97,12 +97,6 @@ export function PlayHub() {
             ))}
           </SoonSection>
         )}
-
-        <SoonSection label="Mini Games">
-          {MINI_GAMES.map((game) => (
-            <SoonCard key={game.title} title={game.title} cover={game.cover} />
-          ))}
-        </SoonSection>
 
         <SoonSection label="In the works">
           {soon.map((game) => (
