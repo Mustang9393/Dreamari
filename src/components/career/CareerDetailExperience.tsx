@@ -29,10 +29,66 @@ import { careerSlug } from "./slug";
 //   Body            -> 13px Montserrat (description, tab copy, one-liners)
 //   Label/metadata  -> 10-11px Montserrat SemiBold, uppercase, muted
 
-const HEADING = "text-[22px] leading-[28px] font-bold";
-const KEY_VALUE = "text-[16px] leading-[22px] font-semibold";
-const BODY = "text-[13px] leading-[18px]";
-const LABEL = "text-[10px] leading-[14px] font-semibold tracking-[0.4px] uppercase";
+// Same proportional-scaling convention as SimulationPlayer's dialogue box:
+// clamp()'s middle term is pure vw, so it's linear with viewport width; each
+// floor matches the old flat value exactly at 1440px (the 13" MacBook Air
+// reference width) and grows past that point, capped so it doesn't run away
+// on an ultrawide monitor. Below 1440px (including all of mobile) nothing
+// changes -- these are plain unprefixed sizes, not sm:-gated, since this
+// page's text doesn't need a separate phone-vs-tablet step, only a
+// desktop-vs-desktop one.
+const HEADING = "text-[clamp(22px,1.5278vw,32px)] leading-[clamp(28px,1.9444vw,41px)] font-bold";
+const KEY_VALUE = "text-[clamp(16px,1.1111vw,23px)] leading-[clamp(22px,1.5278vw,32px)] font-semibold";
+const BODY = "text-[clamp(13px,0.9028vw,19px)] leading-[clamp(18px,1.25vw,26px)]";
+const LABEL = "text-[clamp(10px,0.6944vw,15px)] leading-[clamp(14px,0.9722vw,20px)] font-semibold tracking-[0.4px] uppercase";
+
+// Simple Icons (cdn.simpleicons.org) covers the well-known consumer/dev tools
+// with a confident slug; specialty industry software (Bloomberg Terminal,
+// Epic, LIMS, ForeFlight, etc.) has no reliable brand mark there, so those
+// names render as plain text — no icon is safer than a wrong one. The swatch
+// is a fixed dark chip behind a white glyph (same idea as PosterCard's salary
+// badge) so the logo reads the same regardless of theme, since Simple Icons
+// serves a single flat color per request rather than following currentColor.
+const SOFTWARE_LOGO_SLUGS: Record<string, string> = {
+  Excel: "microsoftexcel",
+  PowerPoint: "microsoftpowerpoint",
+  "Microsoft Excel": "microsoftexcel",
+  "Microsoft Word": "microsoftword",
+  Figma: "figma",
+  Slack: "slack",
+  Jira: "jira",
+  "Git / GitHub": "github",
+  Docker: "docker",
+  "VS Code": "visualstudiocode",
+  SAP: "sap",
+  Zoom: "zoom",
+  Notion: "notion",
+  Asana: "asana",
+  "Adobe Acrobat": "adobeacrobatreader",
+  "Adobe Creative Suite": "adobecreativecloud",
+  "R / RStudio": "rstudio",
+  Sketch: "sketch",
+  Miro: "miro",
+  AutoCAD: "autodesk",
+  MATLAB: "mathworks",
+};
+
+function SoftwareLogo({ name }: { name: string }) {
+  const slug = SOFTWARE_LOGO_SLUGS[name];
+  if (!slug) return null;
+  return (
+    <span className="flex size-5 flex-none items-center justify-center rounded-full" style={{ background: "rgba(5,8,20,0.85)" }}>
+      <img
+        src={`https://cdn.simpleicons.org/${slug}/ffffff`}
+        alt=""
+        className="size-3"
+        onError={(e) => {
+          e.currentTarget.parentElement?.style.setProperty("display", "none");
+        }}
+      />
+    </span>
+  );
+}
 
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
   return (
@@ -74,10 +130,19 @@ function LadderRow({ rung }: { rung: LadderRung }) {
           </span>
         </div>
         <div className="flex flex-none items-center justify-end gap-[var(--space-3)]">
-          <span className="flex-none text-[24px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{rung.salary}</span>
+          <span className="flex-none text-[clamp(24px,1.6667vw,35px)] leading-[clamp(30px,2.0833vw,43px)] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{rung.salary}</span>
           <ChevronDown className="h-5 w-5 flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
         </div>
       </div>
+      {open && rung.skills.length > 0 && (
+        <div className="flex w-full flex-wrap gap-[var(--space-2)] pl-[52px]">
+          {rung.skills.map((skill) => (
+            <span key={skill} className={LABEL} style={{ color: "var(--muted-foreground)", background: "var(--glass-surface-1)", borderRadius: "var(--radius-sm)", padding: "4px 10px" }}>
+              {skill}
+            </span>
+          ))}
+        </div>
+      )}
     </button>
   );
 }
@@ -116,10 +181,34 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] pb-[120px] md:pt-[var(--space-4)]">
         {/* Hero */}
-        <section className="relative flex w-full flex-col overflow-hidden md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]" style={{ minHeight: "300px" }}>
+        <section className="relative flex min-h-[300px] w-full flex-col overflow-hidden md:min-h-[500px] md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]">
+          {/* Mobile: full-bleed background photo behind the full-width text,
+             with the Browse-card var(--poster-scrim) treatment for legibility
+             (photo peeking through up top, fading to a solid surface below).
+             Desktop: NOT full-bleed -- a contained photo panel on the right
+             side only, at plain center-crop (same default PosterCard itself
+             uses) so the actual subject stays in frame instead of getting
+             sliced away by an edge-biased object-position. Only that panel's
+             own left edge fades into the page background, right where the
+             text column ends -- the rest of the photo reads at full
+             brightness, not washed out by a scrim over the whole hero. */}
           <div className="absolute inset-0" aria-hidden>
-            <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover opacity-40 md:opacity-30" style={{ objectPosition: "top" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, var(--background) 0%, color-mix(in srgb, var(--background) 65%, transparent) 40%, var(--background) 100%)" }} />
+            <div className="absolute inset-0 md:hidden">
+              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover object-top" />
+              <div className="absolute inset-0" style={{ backgroundImage: "var(--poster-scrim)" }} />
+            </div>
+            {/* object-cover, top-anchored: contain avoided cropping heads but
+               left a hard-edged letterboxed rectangle where the photo's own
+               pixels stopped short of the panel. Cover fills the panel edge
+               to edge (no hard line), and a narrower panel + taller hero
+               keeps its aspect ratio close enough to a portrait photo's own
+               that top-anchoring shows head-and-shoulders, not the sliver of
+               chin/jaw a very short, wide panel forced regardless of
+               object-position. */}
+            <div className="absolute inset-y-0 right-0 hidden w-[45%] overflow-hidden md:block">
+              <Image src={career.photo} alt="" fill sizes="45vw" className="object-cover object-top" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, var(--background) 0%, transparent 40%)" }} />
+            </div>
           </div>
           <div className="relative z-[1] flex w-full flex-col items-start gap-[var(--space-3)] px-5 py-[var(--space-8)] md:max-w-[650px] md:px-8">
             <button
@@ -132,7 +221,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <ArrowLeft className="h-4 w-4" aria-hidden />
             </button>
             <span className={LABEL} style={{ color: accent }}>{career.world}</span>
-            <h1 className="w-full text-[30px] leading-[36px] uppercase sm:text-[36px] sm:leading-[42px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
+            <h1 className="w-full text-[30px] leading-[36px] uppercase sm:text-[clamp(36px,2.5vw,52px)] sm:leading-[clamp(42px,2.9167vw,60px)]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
               {career.title}
             </h1>
             {career.description && <p className={BODY} style={{ color: "var(--muted-foreground)" }}>{career.description}</p>}
@@ -169,8 +258,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               { label: "Common Majors", value: career.commonMajors },
             ].map((stat) => (
               <div key={stat.label} className="flex flex-col gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-[8px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-                <span className={LABEL} style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
-                <span className={KEY_VALUE}>{stat.value}</span>
+                <span className={KEY_VALUE}>{stat.label}</span>
+                <span className={BODY} style={{ color: "var(--muted-foreground)" }}>{stat.value}</span>
               </div>
             ))}
           </div>
@@ -179,17 +268,17 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <div className="flex w-full flex-col gap-[var(--space-5)]">
             <div className="flex items-start gap-[var(--space-4)]">
               <button type="button" onClick={() => setTab("do")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                <span className={`${BODY} font-semibold`} style={{ color: tab === "do" ? "var(--foreground)" : "var(--muted-foreground)" }}>What They Actually Do</span>
+                <span className={KEY_VALUE} style={{ color: tab === "do" ? "var(--foreground)" : "var(--muted-foreground)" }}>What They Actually Do</span>
                 <span className="h-[2px] w-full" style={{ background: tab === "do" ? "var(--accent)" : "transparent" }} />
               </button>
               {career.realLifeExample && (
                 <button type="button" onClick={() => setTab("example")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                  <span className={`${BODY} font-semibold`} style={{ color: tab === "example" ? "var(--foreground)" : "var(--muted-foreground)" }}>Real-life Example</span>
+                  <span className={KEY_VALUE} style={{ color: tab === "example" ? "var(--foreground)" : "var(--muted-foreground)" }}>Real-life Example</span>
                   <span className="h-[2px] w-full" style={{ background: tab === "example" ? "var(--accent)" : "transparent" }} />
                 </button>
               )}
             </div>
-            <p className={`${KEY_VALUE} w-full`} style={{ fontFamily: "var(--font-display)" }}>
+            <p className={`${BODY} w-full`}>
               {tab === "do" ? career.whatTheyActuallyDo : career.realLifeExample}
             </p>
           </div>
@@ -211,7 +300,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <h2 className={HEADING} style={{ fontFamily: "var(--font-body)" }}>{career.software.length} Common Softwares Needed</h2>
               <div className="flex flex-wrap gap-[var(--space-3)]">
                 {career.software.map((name) => (
-                  <span key={name} className={`${KEY_VALUE} rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+                  <span
+                    key={name}
+                    className={`${KEY_VALUE} flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]`}
+                    style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
+                  >
+                    <SoftwareLogo name={name} />
                     {name}
                   </span>
                 ))}
