@@ -43,12 +43,18 @@ const BODY = "text-[clamp(13px,0.9028vw,19px)] leading-[clamp(18px,1.25vw,26px)]
 const LABEL = "text-[clamp(10px,0.6944vw,15px)] leading-[clamp(14px,0.9722vw,20px)] font-semibold tracking-[0.4px] uppercase";
 
 // Simple Icons (cdn.simpleicons.org) covers the well-known consumer/dev tools
-// with a confident slug; specialty industry software (Bloomberg Terminal,
-// Epic, LIMS, ForeFlight, etc.) has no reliable brand mark there, so those
-// names render as plain text — no icon is safer than a wrong one. The swatch
-// is a fixed dark chip behind a white glyph (same idea as PosterCard's salary
-// badge) so the logo reads the same regardless of theme, since Simple Icons
-// serves a single flat color per request rather than following currentColor.
+// with a confident, exact slug; specialty industry software (Bloomberg
+// Terminal, Epic, LIMS, ForeFlight, etc.) has no reliable brand mark there,
+// so those names render as plain text — no icon is safer than a wrong one.
+// Per direct instruction, the same rule applies to anything that's close but
+// not exact: AutoCAD and MATLAB were dropped because Simple Icons only has
+// the parent company's mark (Autodesk / MathWorks), not the product's own
+// logo, and "Adobe Creative Suite" was dropped because the only Adobe icon
+// available is Creative Cloud's current logo, a different (later) product
+// under that name. The swatch is a fixed dark chip behind a white glyph
+// (same idea as PosterCard's salary badge) so it reads the same regardless
+// of theme, since Simple Icons serves one flat color per request rather than
+// following currentColor.
 const SOFTWARE_LOGO_SLUGS: Record<string, string> = {
   Excel: "microsoftexcel",
   PowerPoint: "microsoftpowerpoint",
@@ -65,12 +71,9 @@ const SOFTWARE_LOGO_SLUGS: Record<string, string> = {
   Notion: "notion",
   Asana: "asana",
   "Adobe Acrobat": "adobeacrobatreader",
-  "Adobe Creative Suite": "adobecreativecloud",
   "R / RStudio": "rstudio",
   Sketch: "sketch",
   Miro: "miro",
-  AutoCAD: "autodesk",
-  MATLAB: "mathworks",
 };
 
 function SoftwareLogo({ name }: { name: string }) {
@@ -204,10 +207,22 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                keeps its aspect ratio close enough to a portrait photo's own
                that top-anchoring shows head-and-shoulders, not the sliver of
                chin/jaw a very short, wide panel forced regardless of
-               object-position. */}
+               object-position. The fade itself stays clear of the seam
+               reaching the centered subject's face (these photos are shot
+               with the subject centered, so a wide even fade landed squarely
+               on half their face) -- multiple eased stops instead of a
+               two-stop linear ramp so it reads as a soft graduated fade, not
+               a hard-edged line, and a slight angle instead of dead-vertical
+               keeps it from looking like a ruled cut. */}
             <div className="absolute inset-y-0 right-0 hidden w-[45%] overflow-hidden md:block">
               <Image src={career.photo} alt="" fill sizes="45vw" className="object-cover object-top" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, var(--background) 0%, transparent 40%)" }} />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(100deg, var(--background) 0%, color-mix(in srgb, var(--background) 85%, transparent) 10%, color-mix(in srgb, var(--background) 45%, transparent) 20%, color-mix(in srgb, var(--background) 15%, transparent) 28%, transparent 36%)",
+                }}
+              />
             </div>
           </div>
           <div className="relative z-[1] flex w-full flex-col items-start gap-[var(--space-3)] px-5 py-[var(--space-8)] md:max-w-[650px] md:px-8">
