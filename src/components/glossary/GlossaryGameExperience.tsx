@@ -3,19 +3,22 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
   Check,
+  ConciergeBell,
   Flame,
-  Footprints,
   Home,
-  Palette,
+  Package,
   PiggyBank,
   Sparkles,
   ShoppingBag,
   Trophy,
+  Moon,
+  Sun,
   Volume2,
   VolumeX,
   X,
@@ -23,6 +26,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
   playCorrect,
@@ -73,14 +77,33 @@ type Screen =
 const MASTERY_TARGET = 2;
 const DREAM_SCORE_PER_XP = 100;
 
+// The amber fill (--world-business-money-office) that works well on this
+// game's near-black dark background reads muddy once its own light-mode
+// value (darkened for text contrast, not fill contrast) gets used as a
+// full-width button. Rather than lean on that token for buttons in light
+// mode, swap to the marketing-v2 scope's own foreground/background pair,
+// which is already correctly inverted per theme (light mode: near-black on
+// near-white) -- no new tokens, just picking the right existing one per mode.
+function primaryCtaColors(theme: GlobalTheme) {
+  return theme === "light"
+    ? { background: "var(--foreground)", color: "var(--background)" }
+    : { background: "var(--world-business-money-office)", color: "#05070f" };
+}
+
 // Term icons are a semantic slug from the content template (its Icon column
 // is plain words -- "building", "sneaker" -- not an emoji), resolved here to
 // a real icon from the design system. No raw emoji anywhere in this game --
 // unmapped slugs fall back to a plain circle rather than guessing wrong.
 const TERM_ICON_MAP: Record<string, LucideIcon> = {
   building: Building2,
-  sneaker: Footprints,
-  palette: Palette,
+  // "sneaker"/"palette" are the workbook's own descriptive words for these
+  // two terms' Dream Sneakers tie-in (the product IS a sneaker; the service
+  // IS custom design) -- kept as the content's chosen slugs, but resolved
+  // here to icons that read as their finance concept at a glance (a shipped
+  // box for "product," a service bell for "service") rather than literal
+  // sneaker/paint-palette art.
+  sneaker: Package,
+  palette: ConciergeBell,
   "shopping-bag": ShoppingBag,
   "money-bag": PiggyBank,
 };
@@ -135,6 +158,24 @@ function MuteToggle() {
   );
 }
 
+// Same global light/dark switch already on every other app screen
+// (app/chrome.tsx's QuickLinksMenu) -- this game's TopBar has no chrome menu
+// to carry it, so it gets its own button here, same hook, same persistence.
+function ThemeToggle() {
+  const { theme, toggle } = useGlobalTheme();
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+    >
+      {theme === "dark" ? <Sun className="h-[17px] w-[17px]" aria-hidden /> : <Moon className="h-[17px] w-[17px]" aria-hidden />}
+    </button>
+  );
+}
+
 function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
@@ -142,6 +183,7 @@ function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) 
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       <div className="flex items-center gap-[var(--space-2)]">
+        <ThemeToggle />
         <MuteToggle />
         <button type="button" onClick={onHome} aria-label="Exit to career page" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <Home className="h-4 w-4" aria-hidden />
@@ -155,6 +197,7 @@ function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) 
 // Screen: Intro ("Meet {Company}")
 
 function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () => void }) {
+  const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
       <DreamyFace pose="idea" size={112} />
@@ -170,7 +213,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
         type="button"
         onClick={onNext}
         className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-        style={{ background: "var(--world-business-money-office)", color: "#05070f", fontFamily: "var(--font-display)" }}
+        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Next <ArrowRight className="h-4 w-4" aria-hidden />
       </button>
@@ -182,6 +225,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
 // Screen: Dreamy's onboarding line
 
 function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
+  const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)]">
       <div className="flex w-full max-w-[520px] items-start gap-[var(--space-4)]">
@@ -193,7 +237,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
           type="button"
           onClick={onStart}
           className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-          style={{ background: "var(--world-business-money-office)", color: "#05070f", fontFamily: "var(--font-display)" }}
+          style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Start Learning Finance <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
@@ -206,6 +250,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
 // Screen: Lesson intro (company value meter + word chips)
 
 function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStart: () => void }) {
+  const { theme } = useGlobalTheme();
   const pct = Math.round((lesson.companyValue / lesson.nextCompanyValue) * 100);
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
@@ -244,7 +289,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
         type="button"
         onClick={onStart}
         className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-        style={{ background: "var(--world-business-money-office)", color: "#05070f", fontFamily: "var(--font-display)" }}
+        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Lesson {lesson.lessonNumber} <ArrowRight className="h-4 w-4" aria-hidden />
       </button>
@@ -265,6 +310,8 @@ function UnlockScreen({
   onUnlock: () => void;
 }) {
   const term = lesson.terms[index];
+  const reduced = useReducedMotion();
+  const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-[var(--space-6)] px-5 py-[var(--space-8)] text-center">
       <DreamyFace pose="glasses" size={80} />
@@ -273,15 +320,17 @@ function UnlockScreen({
       </h2>
 
       {/* Duolingo-style skill nodes: circular, not tiles -- the shape
-         students already read as "a thing you unlock one at a time." */}
-      <div className="flex flex-wrap items-center justify-center gap-[var(--space-4)]">
+         students already read as "a thing you unlock one at a time."
+         Sized down on narrow phones so all 5 fit on one row instead of
+         the last node wrapping onto its own line. */}
+      <div className="flex flex-nowrap items-start justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t, i) => {
           const done = i < index;
           const active = i === index;
           return (
-            <div key={t.id} className="flex flex-col items-center gap-[6px]">
+            <div key={t.id} className="flex flex-1 flex-col items-center gap-[6px] sm:flex-none">
               <span
-                className="relative flex size-14 items-center justify-center rounded-full border-2"
+                className="relative flex size-11 flex-none items-center justify-center rounded-full border-2 sm:size-14"
                 style={{
                   borderColor: active ? "var(--world-business-money-office)" : done ? "color-mix(in srgb, var(--world-business-money-office) 55%, var(--glass-border))" : "var(--glass-border)",
                   background: done ? "var(--world-business-money-office)" : active ? "var(--card)" : "var(--glass-surface-1)",
@@ -290,15 +339,15 @@ function UnlockScreen({
                 }}
               >
                 <span style={{ color: done ? "#05070f" : active ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>
-                  <TermIcon icon={t.icon} className="h-6 w-6" />
+                  <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
                 </span>
                 {done && (
-                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full border-2" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
-                    <Check className="h-[11px] w-[11px]" style={{ color: "#05070f" }} aria-hidden />
+                  <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
+                    <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
                   </span>
                 )}
               </span>
-              <span className="text-[11px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              <span className="text-[10px] leading-[12px] font-semibold sm:text-[11px] sm:leading-[13px]" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>
                 {t.term}
               </span>
             </div>
@@ -306,44 +355,104 @@ function UnlockScreen({
         })}
       </div>
 
-      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-6)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <div className="flex items-center gap-[var(--space-3)]">
-          <span className="flex size-11 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))", color: "var(--world-business-money-office)" }}>
-            <TermIcon icon={term.icon} className="h-5 w-5" />
-          </span>
-          <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {term.term}
-          </span>
-        </div>
-        <p className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>
-          {term.definition}
-        </p>
-        <p className="rounded-[var(--radius-md)] p-[var(--space-4)] text-[14px] leading-[19px] font-semibold italic" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 12%, var(--card))", color: "var(--foreground)" }}>
-          {term.example}
-        </p>
+      {/* Binder-page term card: a narrow ring-bound edge + one flat page,
+         not a book -- the word is the hero, definition and example are
+         always visible (no flip to reveal them), matching the concept
+         mockup's structure only, not its colors. The page swap reads as a
+         page turning -- pinching to a sliver at the ring-bound edge, then
+         the next page unfurling back out -- built from scaleX + opacity
+         only. A true 3D rotateY version was tried first and reproducibly
+         went invisible after the second swap: Chromium can leave an element
+         that is both 3D-rotated AND clipped with rounded corners on a
+         compositor layer it never repaints once the transform settles back
+         to identity. Plain 2D transforms have no such failure mode, and
+         hinging the scale at the left edge (where the rings are) reads as
+         the same "turning" motion without the risk. Reduced-motion drops to
+         opacity-only per the project's existing convention (see
+         DailyDropDemo.tsx). */}
+      <div className="relative w-full max-w-[440px]">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={term.id}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, scaleX: 0.35 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, scaleX: 0.35 }}
+            transition={{ duration: reduced ? 0.12 : 0.32, ease: [0.4, 0, 0.2, 1] }}
+            style={{ transformOrigin: "left center" }}
+          >
+            <div
+              className="flex w-full overflow-hidden rounded-[var(--radius-xl)] border text-left"
+              style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}
+            >
+              <div
+                aria-hidden
+                className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
+                style={{ background: "color-mix(in srgb, var(--foreground) 5%, var(--card))", borderColor: "var(--glass-border)" }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="size-3 rounded-full border"
+                    style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.25)" }}
+                  />
+                ))}
+              </div>
+
+              {/* min-h keeps the page from resizing (and shoving the Unlock
+                 button) as definition/example length varies term to term --
+                 sized to the longest of the 5 terms' content at this width. */}
+              <div className="flex min-h-[300px] min-w-0 flex-1 flex-col gap-[var(--space-4)] p-[var(--space-6)]">
+                <h3 className="text-[32px] leading-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                  {term.term}
+                </h3>
+
+                <p className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>
+                  {term.definition}
+                </p>
+
+                <div className="h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
+
+                <div className="flex flex-col gap-[6px]">
+                  <span className="text-[12px] font-bold uppercase tracking-[0.05em]" style={{ color: "var(--world-business-money-office)" }}>
+                    {lesson.exampleCompany} Example
+                  </span>
+                  <p className="text-[14px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    {term.example}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <button
+      <motion.button
         type="button"
-        onClick={onUnlock}
+        onClick={() => {
+          playSelect();
+          onUnlock();
+        }}
+        whileTap={reduced ? undefined : { scale: 0.97 }}
+        transition={{ duration: 0.12 }}
         className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-        style={{ background: "linear-gradient(90deg, var(--world-business-money-office), color-mix(in srgb, var(--world-business-money-office) 70%, var(--hero-accent-teal)))", color: "#05070f", fontFamily: "var(--font-display)" }}
+        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Unlock {term.term} <TermIcon icon={term.icon} className="h-4 w-4" />
-      </button>
+      </motion.button>
     </div>
   );
 }
 
 function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
+  const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-5 py-[var(--space-10)] text-center">
-      <div className="flex flex-wrap items-center justify-center gap-[var(--space-4)]">
+      <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t) => (
-          <span key={t.id} className="relative flex size-14 items-center justify-center rounded-full" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
-            <TermIcon icon={t.icon} className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full border-2" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
-              <Check className="h-[11px] w-[11px]" style={{ color: "#05070f" }} aria-hidden />
+          <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
+            <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
+              <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
             </span>
           </span>
         ))}
@@ -361,7 +470,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
         type="button"
         onClick={onStartPractice}
         className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-        style={{ background: "linear-gradient(90deg, var(--world-business-money-office), var(--hero-accent-teal))", color: "#05070f", fontFamily: "var(--font-display)" }}
+        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Practice <ArrowRight className="h-4 w-4" aria-hidden />
       </button>
@@ -956,6 +1065,7 @@ function CompleteScreen({
   onContinue: () => void;
 }) {
   const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
+  const { theme } = useGlobalTheme();
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
       <LocalBurst nonce={1} />
@@ -996,7 +1106,7 @@ function CompleteScreen({
         type="button"
         onClick={onContinue}
         className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
-        style={{ background: "var(--world-business-money-office)", color: "#05070f", fontFamily: "var(--font-display)" }}
+        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Continue <ArrowRight className="h-4 w-4" aria-hidden />
       </button>
