@@ -23,13 +23,18 @@ export const INVESTMENT_BANKING: Simulation = {
 export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
- *  about when. */
+ *  about when. Cover art here is its OWN `soon-*.png` file per career, not
+ *  the shared `poster-*.png` used by Explore's Browse cards / Profile /
+ *  Match Lab / the marketing chapters -- those illustrated covers are for
+ *  this Play tab placeholder ONLY, per direct correction after an earlier
+ *  pass overwrote the shared files and put them on Explore's Browse cards
+ *  too. */
 export const SOON: { careerId: string; title: string; world: string; cover: string }[] = [
-  { careerId: "airline-pilot", title: "Airline Pilot", world: "Driving, Flying & Shipping", cover: "/images/app/poster-airline-pilot-alt.png" },
-  { careerId: "registered-nurse", title: "Registered Nurse", world: "Health & Medicine", cover: "/images/app/poster-registered-nurse.png" },
-  { careerId: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", cover: "/images/app/poster-software-engineer.png" },
-  { careerId: "private-equity", title: "Private Equity", world: "Business & Money", cover: "/images/app/poster-private-equity.png" },
-  { careerId: "food-scientist", title: "Food Scientist", world: "Farming, Animals & Nature", cover: "/images/app/poster-food-scientist.png" },
+  { careerId: "airline-pilot", title: "Airline Pilot", world: "Driving, Flying & Shipping", cover: "/images/app/soon-airline-pilot.png" },
+  { careerId: "registered-nurse", title: "Registered Nurse", world: "Health & Medicine", cover: "/images/app/soon-registered-nurse.png" },
+  { careerId: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", cover: "/images/app/soon-software-engineer.png" },
+  { careerId: "private-equity", title: "Private Equity", world: "Business & Money", cover: "/images/app/soon-private-equity.png" },
+  { careerId: "food-scientist", title: "Food Scientist", world: "Farming, Animals & Nature", cover: "/images/app/soon-food-scientist.png" },
 ];
 
 export function simulationFor(id: string): Simulation | undefined {

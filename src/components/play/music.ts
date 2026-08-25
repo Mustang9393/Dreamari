@@ -21,6 +21,20 @@ const TRACK_SRC: Record<MusicTrack, string> = {
 let el: HTMLAudioElement | null = null;
 let current: MusicTrack | null = null;
 
+// A lowpass filter sitting between the <audio> element and the speakers, so
+// a PIP or a timed focus question can "muffle" the music the way a closed
+// door dulls a room's noise -- ducking volume would just make it quieter,
+// this makes it sound genuinely far away, which is the actual ask. Wiring
+// an element through Web Audio is one-way (createMediaElementSource can
+// only be called once per element, and afterward the element's sound ONLY
+// reaches the speakers via this graph), so it's built once, lazily, the
+// same moment the element itself is created.
+const NORMAL_HZ = 20000;
+const MUFFLED_HZ = 500;
+let audioCtx: AudioContext | null = null;
+let filter: BiquadFilterNode | null = null;
+let focused = false;
+
 function element(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
   if (!el) {
@@ -28,7 +42,26 @@ function element(): HTMLAudioElement | null {
     el.loop = true;
     el.volume = 0.55;
     el.muted = isMusicMuted();
+    try {
+      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (Ctor) {
+        audioCtx = new Ctor();
+        const source = audioCtx.createMediaElementSource(el);
+        filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = NORMAL_HZ;
+        source.connect(filter);
+        filter.connect(audioCtx.destination);
+      }
+    } catch {
+      // No Web Audio support -- music still plays normally, just never muffles.
+    }
   }
+  // Autoplay policies suspend a freshly-created context until a real user
+  // gesture; every call site here already runs off one (a tap, an answer,
+  // a mount that follows the level's own start tap), so resuming eagerly
+  // is safe and means the very first sound isn't silently swallowed.
+  if (audioCtx && audioCtx.state === "suspended") void audioCtx.resume();
   return el;
 }
 
@@ -49,12 +82,30 @@ export function playMusic(track: MusicTrack): void {
   });
 }
 
+/** PIP and timed focus questions duck the music behind a lowpass filter --
+ *  "focused" reads as the room going quiet around you, not the song
+ *  stopping. Ramped (not snapped) so the transition itself is audible
+ *  rather than a jarring cut, and idempotent against repeated calls with
+ *  the same value (a beat re-rendering every second while its clock ticks
+ *  must not restart the ramp from scratch each time). */
+export function setMusicFocused(next: boolean): void {
+  if (focused === next) return;
+  focused = next;
+  if (!filter) return;
+  const ctx = filter.context;
+  const now = ctx.currentTime;
+  filter.frequency.cancelScheduledValues(now);
+  filter.frequency.setValueAtTime(filter.frequency.value, now);
+  filter.frequency.linearRampToValueAtTime(next ? MUFFLED_HZ : NORMAL_HZ, now + 0.5);
+}
+
 /** Leaving the simulation entirely -- the music must not keep playing over
  *  the rest of the app. */
 export function stopMusic(): void {
   if (!el) return;
   el.pause();
   current = null;
+  focused = false;
 }
 
 export function isMusicMuted(): boolean {

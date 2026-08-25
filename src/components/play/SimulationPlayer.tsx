@@ -27,7 +27,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
-import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
+import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
   mutedSnapshot,
@@ -294,6 +294,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     playMusic(promoted ? "promotion" : "main");
   }, [promoted]);
   useEffect(() => stopMusic, []);
+
+  // Muffle the music -- a lowpass, not a mute -- for a PIP or a timed focus
+  // question, so the room reads as going quiet around the player instead of
+  // the song just stopping. `timerActive` is reported up from BeatStage,
+  // the only place that knows whether THIS beat's clock is actually
+  // counting down right now (same guard its own <Clock> render uses).
+  const [timerActive, setTimerActive] = useState(false);
+  const musicFocused = pip !== null || timerActive;
+  useEffect(() => {
+    setMusicFocused(musicFocused);
+  }, [musicFocused]);
   // A beat can override the level's mood: Level 2 runs three screens in
   // late-night navy and comes back, Level 3 has a maroon Crunch Time stretch.
   const mood = beat.mood ?? level.mood;
@@ -556,6 +567,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // redundant face on screen at the same time.
           sceneCharacterVisible={bigCharacterVisible}
           onRevealChange={setRevealed}
+          onTimerActive={setTimerActive}
           onResolve={resolve}
           onNext={advance}
         />
@@ -909,6 +921,7 @@ function BeatStage({
   ambient,
   sceneCharacterVisible,
   onRevealChange,
+  onTimerActive,
   onResolve,
   onNext,
 }: {
@@ -932,6 +945,10 @@ function BeatStage({
    *  decide whether the big scene character or the dialogue box's small
    *  portrait carries the speaker right now (see the render site). */
   onRevealChange?: (revealed: boolean) => void;
+  /** Reports whether THIS beat's countdown is actually counting down right
+   *  now -- same guard its own <Clock> render uses -- so the parent can
+   *  muffle the music for a timed focus question. */
+  onTimerActive?: (active: boolean) => void;
   onResolve: Resolve;
   onNext: () => void;
 }) {
@@ -982,6 +999,13 @@ function BeatStage({
     }, 100);
     return () => window.clearInterval(tick);
   }, [seconds, paused, locked, revealed, beat, onResolve]);
+
+  const timerActive = seconds > 0 && !paused && revealed;
+  useEffect(() => {
+    onTimerActive?.(timerActive);
+    return () => onTimerActive?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerActive]);
 
   // A card or the review is read against the scene, bottom-anchored like a
   // dialogue box always has been. A beat the player is actively working sits
