@@ -242,7 +242,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
          3317:15773's own "Main Content Row" stacks them in that order,
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
-      <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col pb-[64px] md:pb-0">
+      <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
         <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] md:hidden">
           <PreferenceButton label="Like this career" Icon={Heart} bare />
           <PreferenceButton label="Not for me" Icon={ThumbsDown} bare />
@@ -258,10 +258,13 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
            in via its own mask band (the standard web technique for this
            effect; every layer samples the same photo independently, and
            the browser composites the overlapping, differently-blurred
-           results into a smooth ramp). */}
-        <div className="relative flex flex-col">
+           results into a smooth ramp). The bottom-nav clearance (pb-[64px])
+           lives INSIDE this panel, not after it -- ProgressiveBlur is
+           inset-0 to this div, so that reserved strip reads as more blurred
+           scrim, not a band of raw, unblurred photo above the nav bar. */}
+        <div className="relative flex flex-col pb-[64px] md:pb-0">
           <ProgressiveBlur />
-          <div className="relative z-[1] flex w-full flex-col gap-[var(--space-2)] p-[var(--space-4)]">
+          <div className="relative z-[1] flex w-full flex-col gap-[var(--space-3)] p-[var(--space-4)]">
             {/* The tap-to-flip Summary <-> Details interaction wraps only the
                text -- Figma's own mockup nests it inside the same panel as
                the CTA buttons below, but a <button> cannot contain other
@@ -276,7 +279,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
               onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
               className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-2)] text-left"
             >
-              <div key={face} className="face-swap flex min-h-[151px] w-full flex-col gap-[var(--space-2)] md:w-[326px]">
+              <div key={face} className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
                 <div className="flex items-start justify-between gap-[var(--space-2)]">
                   <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted-alt)" }}>
                     {face === "Summary" ? career.matchLabel : "MORE INFO"}
@@ -314,7 +317,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
               </div>
             </button>
 
-            <div className="mt-[var(--space-2)] flex w-full items-stretch justify-between gap-[var(--space-3)]">
+            <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
               <button
                 type="button"
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
