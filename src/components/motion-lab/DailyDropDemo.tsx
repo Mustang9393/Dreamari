@@ -963,7 +963,7 @@ export function DailyDropDemo() {
           </span>
           <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: V.gold }}>
             <Flame size={13} strokeWidth={2.5} aria-hidden /> 12-day streak
-            <span style={{ color: V.muted }}>· 27 cards in your Locker</span>
+            <span style={{ color: V.muted }}>· 27 careers saved</span>
           </span>
         </div>
 

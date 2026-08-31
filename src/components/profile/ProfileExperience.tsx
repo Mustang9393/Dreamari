@@ -17,7 +17,6 @@ import {
   ChevronRight,
   Compass,
   Eye,
-  FileText,
   Flame,
   Gamepad2,
   GraduationCap,
@@ -26,7 +25,6 @@ import {
   Pencil,
   Plus,
   Printer,
-  Send,
   Settings,
   Shield,
   Sparkles,
@@ -136,10 +134,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
     pingTabs(["overview", "routes", "plan", "report"]);
   }, [routeChoice]);
   const [reportOpen, setReportOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [sharedAt, setSharedAt] = useState<string | null>(null);
   // Student-owned report state. Local only: there is no persistence layer yet,
   // so this resets on reload (documented in the handoff).
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
@@ -281,7 +277,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               <span className="truncate text-[15px] leading-[17px] font-bold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
-              {([["locker", "Locker", Archive], ["resume", "Resume", FileText], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
+              {/* Resume moved into the main tablist below -- it deserves the
+                 same first-class standing as Overview/Report, not a small
+                 icon tucked in the header. */}
+              {([["locker", "Saved Careers", Archive], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
                 <button
                   key={id}
                   type="button"
@@ -297,9 +296,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
           </div>
           <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-3)] sm:flex sm:gap-x-[44px]" style={{ borderColor: "var(--glass-border)" }}>
             {[
-              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, verified: false },
-              { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, verified: ACADEMIC_RECORD.verified },
-              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", verified: false },
+              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
+              { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
+              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "Active 142 of 190 days · 75%", verified: false },
             ].map((fact) => (
               <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                 <dt className="flex items-center gap-[4px] text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>
@@ -315,6 +314,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
                   {fact.note && <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
                 </dd>
+                {fact.sub && <span className="text-[11.5px] leading-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
               </div>
             ))}
           </dl>
@@ -323,18 +323,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         {/* SR announcement for focus changes */}
         <span aria-live="polite" className="sr-only">{announce}</span>
 
-        {/* Utility views (Locker, Settings, Resume) take over everything under
+        {/* Utility views (Saved Careers, Settings) take over everything under
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "locker" || tab === "settings" || tab === "resume") ? null : (
+        {(tab === "locker" || tab === "settings") ? null : (
         <>
-        {/* ---- Tabs: real tablist semantics, 44px targets ---- */}
+        {/* ---- Tabs: real tablist semantics, 44px targets ----
+           "Paths" is gone from here -- phenomenal on its own, per direct
+           feedback, but redundant with the new side-by-side Top 3 (which
+           now covers the same trade-school/community-college/university
+           comparison per career), so it's parked for a v2 rather than
+           deleted (RoutesTab/PathTab below are untouched, just
+           unreachable). Resume, previously a small icon in the header,
+           takes its old slot in the main tablist instead -- promoted to
+           the same standing as Overview/Report rather than tucked away. */}
         <div
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "top3", "routes", "plan", "report"];
+            const order: TabId[] = ["overview", "top3", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -353,9 +361,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             [
               { id: "overview", label: "Overview" },
               { id: "top3", label: "Top Three" },
-              { id: "routes", label: "Paths" },
               { id: "plan", label: "Plan" },
               { id: "report", label: "Report" },
+              { id: "resume", label: "Resume" },
             ] as const
           ).map((item) => (
             <button
@@ -398,8 +406,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             />
           </div>
         )}
+        {/* Reachable only via PlanTab's "Change route" link now, not a main
+           tab -- hidden from the tablist per direct feedback (see the
+           comment above), but the underlying route-choice flow still needs
+           a real destination rather than a dead link. */}
         {tab === "routes" && (
-          <div role="tabpanel" id="profile-panel-routes" aria-labelledby="profile-tab-routes">
+          <div role="tabpanel" id="profile-panel-routes" aria-labelledby="profile-tab-plan">
             <RoutesTab
               focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onGoPlan={() => setTab("plan")}
@@ -420,14 +432,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             <CareerReportView
               student={{ name: STUDENT.name, grade: STUDENT.grade, school: STUDENT.school }}
               career={focus}
-              savedMajors={savedMajors} onToggleMajor={toggleMajor} onOpenShare={() => setShareOpen(true)}
+              savedMajors={savedMajors} onToggleMajor={toggleMajor}
               onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
             />
           </div>
         )}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
         {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
-        {tab === "resume" && <ResumeView onClose={() => setTab("overview")} />}
+        {tab === "resume" && (
+          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
+            <ResumeView />
+          </div>
+        )}
       </main>
 
       {compareOpen && (
@@ -441,17 +457,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         />
       )}
 
-      {shareOpen && focus && (
-        <ShareSheet
-          student={STUDENT.name}
-          career={focus.title}
-          sharedAt={sharedAt}
-          onShare={() => { setSharedAt("just now"); }}
-          onRevoke={() => setSharedAt(null)}
-          onClose={() => setShareOpen(false)}
-        />
-      )}
-
       <div className="no-print">
         <MobileNav active="Profile" />
       </div>
@@ -461,7 +466,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         <div className="no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
           <div className="filters-reveal w-full max-w-[440px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
-            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to your locker.</p>
+            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to your Saved Careers.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
               {top3.map((id, index) => {
                 const career = careerById(id)!;
@@ -485,7 +490,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         <div className="no-print fixed inset-0 z-[66] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
           <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
-            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Locker. Nothing is lost.</p>
+            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Saved Careers. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
               <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Cancel</button>
               <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
@@ -501,7 +506,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div>
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
-                <p className="mt-[2px] text-[14px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from your Locker</p>
+                <p className="mt-[2px] text-[14px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from your Saved Careers</p>
               </div>
               <button type="button" aria-label="Close" onClick={() => setAddOpen(false)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
                 <X className="h-4 w-4" />
@@ -509,7 +514,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             </div>
             <div className="mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
               {locker.length === 0 && (
-                <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Locker is empty · swipe careers</Link>
+                <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Nothing saved yet · swipe careers</Link>
               )}
               {locker.map((career) => (
                 <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-2)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -586,11 +591,21 @@ function Top3Tab({
         )}
       </div>
 
+      {/* Side by side from lg: up (stacked on phones, where three columns
+         would be unreadable), info running vertically inside each column --
+         side-by-side comparison per direct feedback ("much easier and
+         faster to skim, analyze and process"). Each card carries its own
+         career-world accent (border tint + ambient glow + labels) so the
+         three read as three different Career Worlds -- accent as glow and
+         tint per the design language, never a solid color block. Copy is
+         unchanged from the stacked version. */}
+      <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-3">
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
         const isFocus = focusId === id;
+        const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
         const facts = [
           { label: "Estimated pay", value: report?.salary.median ?? "Coming soon" },
@@ -600,38 +615,36 @@ function Top3Tab({
           { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
         ];
         return (
-          <div key={id} className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={{ borderColor: isFocus ? "var(--primary)" : "var(--glass-border)", background: isFocus ? "color-mix(in srgb, var(--primary) 8%, var(--glass-surface-1))" : "var(--glass-surface-1)" }}>
-            {/* Identity and actions stack on a narrow phone (sharing one row
-               there left the badge and overflow menu as flex-none siblings
-               crushing the title into a near-vertical letter stack) but sit
-               side by side from sm: up, where there's room and stacking just
-               leaves dead space between two half-height rows. */}
-            <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 items-start gap-[var(--space-3)] sm:flex-1">
-                <span className="flex size-[30px] flex-none items-center justify-center rounded-full text-[14px] font-extrabold" style={{ background: "var(--glass-surface-3)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
-                <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]">
-                  <Image src={career.photo} alt="" fill sizes="52px" className="object-cover" />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
-                  <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: WORLD_COLORS[career.world] }}>Career</span>
-                  <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
-                </span>
-              </div>
-              <div className="relative flex flex-none items-center justify-end gap-[6px]">
-                {isFocus ? (
-                  <span className="flex flex-none items-center gap-[4px] rounded-full px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
-                  </span>
-                ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex-none cursor-pointer rounded-full border px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
-                )}
+          <div
+            key={id}
+            className="relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border"
+            style={{
+              // The focus ring is the career's OWN world accent (full
+              // strength), so #1 reads in that world's color; unfocused
+              // cards keep the quieter 35% border tint.
+              borderColor: isFocus ? accent : `color-mix(in srgb, ${accent} 35%, var(--glass-border))`,
+              background: isFocus ? `color-mix(in srgb, ${accent} 9%, var(--glass-surface-1))` : "var(--glass-surface-1)",
+            }}
+          >
+            {/* The photo carries the card: a wide cover clipped by the card's
+               own radius, not a floating thumbnail square. The rank rides
+               quietly on the photo corner instead of its own chip row. */}
+            <div className="relative aspect-[16/9] w-full flex-none">
+              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" />
+              <span
+                className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-[9px] text-[13px] font-extrabold"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", fontFamily: "var(--font-display)", color: "var(--foreground)" }}
+              >
+                #{index + 1}
+              </span>
+              <div className="absolute top-[6px] right-[6px]">
                 <button
                   type="button"
                   aria-label={`More options for ${career.title}`}
                   aria-expanded={menuFor === id}
                   onClick={() => setMenuFor(menuFor === id ? null : id)}
                   className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
-                  style={{ color: "var(--muted-foreground)" }}
+                  style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", backdropFilter: "blur(6px)", color: "var(--foreground)" }}
                 >
                   <MoreVertical className="h-4 w-4" />
                 </button>
@@ -653,20 +666,39 @@ function Top3Tab({
               </div>
             </div>
 
-            <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+            <span aria-hidden className="pointer-events-none absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
 
-            <dl className="grid grid-cols-1 gap-x-[var(--space-4)] gap-y-[var(--space-3)] border-t pt-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3" style={{ borderColor: "var(--glass-border)" }}>
-              {facts.map((fact) => (
-                <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
-                  <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                  <dd className="text-[14px] leading-[18px] font-extrabold">{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="relative flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+              <div className="flex flex-col gap-[var(--space-3)]">
+                <span className="flex min-w-0 flex-col gap-[1px]">
+                  {/* World name carries the accent, never the career title. */}
+                  <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
+                  <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                </span>
+                {isFocus ? (
+                  <span className="flex w-fit flex-none items-center gap-[4px] rounded-full px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
+                  </span>
+                ) : (
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet w-fit flex-none cursor-pointer rounded-full border px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                )}
+              </div>
 
-            <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              View Career Report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </button>
+              <p className="text-[14px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+
+              <dl className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+                {facts.map((fact) => (
+                  <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
+                    <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
+                    <dd className="text-[14px] leading-[18px] font-semibold">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-link mt-auto flex min-h-[44px] w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                View Career Report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </button>
+            </div>
           </div>
         );
       })}
@@ -675,7 +707,7 @@ function Top3Tab({
         <button
           type="button"
           onClick={onAdd}
-          className="dm-tap flex min-h-[80px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-2xl)] border-2 border-dashed"
+          className="dm-tap flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-2xl)] border-2 border-dashed"
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -684,6 +716,7 @@ function Top3Tab({
           <span className="text-[15px] font-bold">Add a career</span>
         </button>
       )}
+      </div>
 
       {!focusId && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
@@ -754,7 +787,7 @@ function OverviewTab({
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
           <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
-          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Open Locker</button>
+          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Open Saved Careers</button>
         </div>
       </section>
     );
@@ -1724,10 +1757,10 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Career Locker</h2>
+        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Saved Careers</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
-          <button type="button" aria-label="Close Locker" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          <button type="button" aria-label="Close Saved Careers" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
         </span>
@@ -1802,15 +1835,10 @@ function SettingsView({ onClose }: { onClose: () => void }) {
   );
 }
 
-function ResumeView({ onClose }: { onClose: () => void }) {
+function ResumeView() {
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-8)]" style={GLASS}>
-      <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
-        <button type="button" aria-label="Close resume builder" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-          <X className="h-4 w-4" />
-        </button>
-      </div>
+      <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
       <ol className="flex flex-col gap-[var(--space-3)]">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
           <li key={step} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={GLASS}>
@@ -1828,70 +1856,9 @@ function ResumeView({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ---- Sharing: preview what leaves, name who sees it ----
-// The student starts sharing, but access is a school setting, so the copy
-// never promises control the product cannot deliver.
-
-function ShareSheet({ student, career, sharedAt, onShare, onRevoke, onClose }: {
-  student: string;
-  career: string;
-  sharedAt: string | null;
-  onShare: () => void;
-  onRevoke: () => void;
-  onClose: () => void;
-}) {
-  const included = ["My direction and what I wrote", "My top 3 comparison", `${career} at a glance`, "Pay and outlook, with sources", "How people get in", "Majors and colleges I am researching", "My next actions"];
-  return (
-    <div className="no-print fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-labelledby="share-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(8px)" }} />
-      <div className="relative flex max-h-[88dvh] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <div className="flex items-start justify-between gap-[var(--space-3)]">
-          <span className="flex flex-col gap-[3px]">
-            <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Share my report</span>
-            <h3 id="share-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Send this to your counselor</h3>
-          </span>
-          <button type="button" onClick={onClose} className="flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close">
-            <X className="h-5 w-5" aria-hidden />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-[6px] rounded-[var(--radius-xl)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)" }}>
-          <span className="text-[12px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>Who sees it</span>
-          <span className="text-[15px] font-bold">Your school counselor at Westfield High School</span>
-          <span className="text-[14px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}>Sharing with a parent or guardian is turned off by your school. You can always print or download a copy and hand it over yourself.</span>
-        </div>
-
-        <div className="flex flex-col gap-[4px]">
-          <span className="text-[12px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>What is included</span>
-          <ul className="flex list-none flex-col p-0">
-            {included.map((item) => (
-              <li key={item} className="flex items-center gap-[8px] border-t py-[7px] text-[15px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-feedback-success, #33c78c)" }} aria-hidden /> {item}
-              </li>
-            ))}
-          </ul>
-          <p className="pt-[6px] text-[15px] leading-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            Your school already holds your grades and course records separately. Sharing this report does not change what they can see there.
-          </p>
-        </div>
-
-        {sharedAt ? (
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 40%, var(--glass-border))" }}>
-            <span className="text-[15px] font-bold">Shared {sharedAt}</span>
-            <button type="button" onClick={onRevoke} className="min-h-[44px] cursor-pointer text-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>Stop sharing</button>
-          </div>
-        ) : (
-          <button type="button" onClick={onShare} className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <Send className="h-4 w-4" aria-hidden /> Share with {student.split(" ")[0]}&apos;s counselor
-          </button>
-        )}
-        <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-          Prototype: sharing is simulated locally and does not send anything yet.
-        </p>
-      </div>
-    </div>
-  );
-}
+// Sharing moved into the Career Report itself: the Aug 29 doc makes Share a
+// tab on top of the report (see CareerReport.tsx), so the old ShareSheet
+// modal is retired rather than kept as a second, drifting copy.
 
 // ---- Export overlay ----
 

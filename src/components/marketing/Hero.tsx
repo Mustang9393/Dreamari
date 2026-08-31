@@ -93,18 +93,23 @@ export function Hero({ view, onChangeView }: HeroProps) {
           >
             <span style={{ color: "var(--primary-tint)" }}>Dream</span>ari
           </h1>
-          {/* textWrap:balance (not fixed <span className="block"> breaks) — a longer
-             caption now that "Discover your dream career" moved down here from the
-             headline above, so hardcoded 2-line breaks would risk a lone short word
-             stranded on its own line at some widths (a widow). Balance lets the
-             browser pick break points based on the ACTUAL rendered width, keeping
-             every line a reasonably even length instead. */}
+          {/* textWrap:balance so the browser picks break points from the
+             ACTUAL rendered width, keeping every line a reasonably even
+             length instead of stranding a lone short word (a widow). */}
           <p
             className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
-            Dreamari helps students discover careers, find the right education path, build a personalized plan, experience careers through simulations, and connect with professionals who actually work in the fields they are exploring.{" "}
-            <strong style={{ color: "var(--foreground)" }}>Build. Match. Explore. Play. Connect.</strong>
+            Discover careers, find your path, experience the work, and connect with professionals who do it every day.
+          </p>
+          {/* Its own SMALLER line underneath, per direct feedback -- the
+             tagline reads as a quiet signature under the pitch, not a
+             second sentence competing with it. */}
+          <p
+            className="mt-2 max-w-[580px] text-[clamp(13px,0.6vw+10px,15px)] font-bold tracking-[0.08em] uppercase [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[11px]"
+            style={{ color: "var(--foreground)" }}
+          >
+            Build. Match. Explore. Play. Connect.
           </p>
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}

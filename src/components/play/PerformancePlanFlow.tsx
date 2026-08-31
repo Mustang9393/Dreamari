@@ -19,13 +19,14 @@ import { playCorrect, playSweep, playWrong } from "./sound";
 
 type Phase = "warning" | "step" | "passed" | "terminated";
 
-/** Fixed flavor text, identical at every level -- see the handoff's own
- *  Image Description column for exactly when each one shows. Step 1 always
- *  gets the first line; step 2 never gets a card; step 3 only gets the
- *  second line if both earlier steps were missed, since it means this
- *  answer alone decides whether the job is kept. */
-const DREAMY_STEP_ONE = "Three mistakes is a pattern, not bad luck. Two right answers out of three and we keep the job.";
-const DREAMY_LAST_CHANCE = "This one is it. Be specific.";
+/** Fixed flavor text, identical at every level: one line of plain SYSTEM
+ *  text at the foot of the card, no avatar and no name (Dreamy is gone from
+ *  the simulation, D62). Step 1 always gets the first line; step 2 shows
+ *  nothing, and the silence is deliberate; step 3 only gets the second line
+ *  if both earlier steps were missed, since it means this answer alone
+ *  decides whether the job is kept. */
+const SYSTEM_STEP_ONE = "Three mistakes is a pattern, not bad luck. Two right answers out of three and you keep the job.";
+const SYSTEM_LAST_CHANCE = "This one decides it. Be specific.";
 
 export function PerformancePlanFlow({
   level,
@@ -72,10 +73,10 @@ export function PerformancePlanFlow({
     setPhase(correctCount >= 2 ? "passed" : "terminated");
   }
 
-  // Step 3's Dreamy card is conditional on both earlier steps having missed
+  // Step 3's system line is conditional on both earlier steps having missed
   // -- i.e. correctCount is still 0 by the time step 3 is showing.
-  const showDreamy = step === 0 ? true : step === 1 ? false : correctCount === 0;
-  const dreamyLine = step === 2 ? DREAMY_LAST_CHANCE : DREAMY_STEP_ONE;
+  const showSystemLine = step === 0 ? true : step === 1 ? false : correctCount === 0;
+  const systemLine = step === 2 ? SYSTEM_LAST_CHANCE : SYSTEM_STEP_ONE;
 
   return (
     <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 pb-3 sm:px-5 sm:pb-5">
@@ -111,8 +112,8 @@ export function PerformancePlanFlow({
             whyCorrect={current.whyCorrect}
             whyIncorrect={current.whyIncorrect}
             incorrectLabel={current.incorrect}
-            showDreamy={showDreamy}
-            dreamyLine={dreamyLine}
+            showSystemLine={showSystemLine}
+            systemLine={systemLine}
             onPick={pick}
             onContinue={continueStep}
           />
@@ -207,8 +208,8 @@ function StepCard({
   picked,
   whyCorrect,
   whyIncorrect,
-  showDreamy,
-  dreamyLine,
+  showSystemLine,
+  systemLine,
   onPick,
   onContinue,
 }: {
@@ -220,8 +221,8 @@ function StepCard({
   picked: "correct" | "incorrect" | null;
   whyCorrect: string;
   whyIncorrect: string;
-  showDreamy: boolean;
-  dreamyLine: string;
+  showSystemLine: boolean;
+  systemLine: string;
   onPick: (which: "correct" | "incorrect") => void;
   onContinue: () => void;
 }) {
@@ -277,12 +278,12 @@ function StepCard({
           </>
         )}
       </div>
-      {showDreamy && (
+      {showSystemLine && (
         <p
           className="rounded-[16px] border px-[16px] py-[13px] text-[13.5px] leading-relaxed font-semibold"
           style={{ background: "rgba(10,3,6,0.5)", borderColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.85)" }}
         >
-          {dreamyLine}
+          {systemLine}
         </p>
       )}
     </div>

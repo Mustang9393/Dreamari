@@ -56,7 +56,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-02.webp`,
       artAlt: "A first-year analyst's desk at Cobalt Capital, city windows behind.",
       speaker: "Narrator",
-      pose: "party",
       setup: "Your offer",
       title: "Cobalt Capital, Investment Banking Analyst.",
       facts: [
@@ -128,7 +127,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-07.webp`,
       artAlt: "Christina at a desk writing, a monitor of charts beside her, city windows behind.",
       speaker: "Narrator",
-      pose: "curious",
       setup: "Christina · Level 3 · Associate",
       title: "She checks your work before anyone senior sees it.",
       body: "Christina turns Analyst work into client-ready materials. You: Analyst → Christina: Associate.",
@@ -141,7 +139,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-08.webp`,
       artAlt: "Marcus in a navy suit, seated, city windows behind.",
       speaker: "Narrator",
-      pose: "curious",
       setup: "Marcus · Level 4 · Vice President",
       title: "VPs lead deals and present to clients.",
       body: "Marcus is one level above Christina and helps lead the Maison Laurent pitch. Christina: Associate → Marcus: VP.",
@@ -161,7 +158,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-09.webp`,
       artAlt: "Christina handing over a deal binder, Jordan at a monitor behind her.",
       speaker: "Narrator",
-      pose: "alert",
       setup: "Next episode · Level 2",
       title: "Your First Big Deal",
       body: "Christina picked you for Cobalt Capital's $30B Maison Laurent pitch. Watch out for Jordan. He is on the same team.",
@@ -181,7 +177,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-10.webp`,
       artAlt: "Christina gesturing toward Marcus with arms folded, a wall screen reading Deal Team Kickoff, seen from the boardroom table.",
       speaker: "Narrator",
-      pose: "happy",
       setup: "Christina introduces you to Marcus, the VP. The team pitches Maison Laurent tomorrow.",
       question: "What should you do first?",
       choices: [
@@ -199,7 +194,6 @@ export const IB_LEVEL_2: Level = {
       planLineIfFailed: 'you built an argument for the client that did not hold together',
       progress: 0.2,
       speaker: "Narrator",
-      pose: "idea",
       setup: "Build the pitch one sentence at a time. All three parts have to connect.",
       question: "What is Cobalt's case for Maison Laurent?",
       steps: [
@@ -242,8 +236,9 @@ export const IB_LEVEL_2: Level = {
       variant: "chapter",
       id: "L2-12",
       mood: "night",
-      speaker: "Dreamy",
-      pose: "nervous",
+      // Dreamy removed from the simulation (D62): the Narrator sets the
+      // scene -- the office at night, most desks empty, one lamp on.
+      speaker: "Narrator",
       setup: "Late night analyst grind",
       title: "Get through the work for tomorrow's Maison Laurent meeting.",
       note: "Morning review starts soon.",
@@ -313,8 +308,9 @@ export const IB_LEVEL_2: Level = {
       kind: "card",
       variant: "chapter",
       id: "L2-16",
-      speaker: "Dreamy",
-      pose: "happy",
+      // Dreamy removed from the simulation (D62): navy mode ends, morning
+      // light across the same desks, no character on screen.
+      speaker: "Narrator",
       setup: "Next morning",
       title: "You made it through the late-night prep.",
       body: "It is now 9:00 AM, and the Maison Laurent review is about to begin.",
@@ -327,7 +323,6 @@ export const IB_LEVEL_2: Level = {
       progress: 0.6,
       timer: 60,
       speaker: "Narrator",
-      pose: "alert",
       castMember: "Jordan",
       tone: "alarm",
       setup: "It is 10:10 AM. The meeting is in 20 minutes. There are errors in Jordan's work, and you have to fix them before Christina and Marcus come in.",
@@ -391,7 +386,6 @@ export const IB_LEVEL_2: Level = {
       // (L2-21) two beats later.
       resetScene: true,
       speaker: "Narrator",
-      pose: "glasses",
       setup: "You heard these words in the meetings. Learn the deal lingo.",
       question: "Tap a term, then tap its match.",
       pairs: [
@@ -471,7 +465,6 @@ export const IB_LEVEL_2: Level = {
       art: `${ART}/l2-23.webp`,
       artAlt: "Two spreadsheet pages side by side, one arrow up and one down, an empty office behind.",
       speaker: "Narrator",
-      pose: "alert",
       setup: "1 AM. One page says sales went up. Another says the company made less money. Both can't be true. Christina left hours ago.",
       question: "What do you do?",
       choices: [
@@ -514,8 +507,9 @@ export const IB_LEVEL_2: Level = {
       // locations.ts) -- it should read as the abstract, liminal
       // AmbientBackdrop, not keep showing L2-23's debrief art.
       resetScene: true,
-      speaker: "Dreamy",
-      pose: "party",
+      // A SYSTEM card (D62): no avatar, no name. The game talking, not a
+      // person -- the final review is a rule, not a moment.
+      speaker: "System",
       setup: "Final review",
       title: "Cobalt Capital is reviewing your Analyst performance.",
       body: "Your reputation will decide if you are promoted.",
@@ -542,13 +536,24 @@ export const IB_LEVEL_2: Level = {
       advances: false,
     },
     {
-      min: 0,
+      min: 40,
       band: "Cautious",
       headline: "Performance Review",
       message:
         'Cobalt is putting your Analyst year under review. Christina: "The pace is real and it caught you. It catches most people. Go again."',
       subline: "You will play the Analyst year again, the same one, from the beginning.",
       primary: "Play the Analyst year again",
+      advances: false,
+    },
+    {
+      // E-TERM (Endings tab): under 40, or a failed performance plan. Deep
+      // red, no confetti. Reputation resets and the year restarts.
+      min: 0,
+      band: "At Risk",
+      headline: "Contract Ended",
+      message: "Cobalt Capital is ending your contract. Your supervisor walks you out. This is what being let go actually looks like.",
+      subline: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
+      primary: "Play this year again",
       advances: false,
     },
   ],

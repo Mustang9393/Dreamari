@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, BadgeCheck, Check, ChevronDown, Compass, DollarSign, ExternalLink, List, MapPin, Printer, Search, Send, Target, X } from "lucide-react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { AlertCircle, ArrowRight, BadgeCheck, Check, CheckCircle2, ChevronDown, Clock, Compass, Copy, DollarSign, ExternalLink, MapPin, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
+  COURSE_SUGGESTIONS,
   reportV2,
   type CollegeStatus,
   type CareerReportV2,
@@ -15,9 +16,10 @@ import {
 // The Career Report.
 //
 // A document, not a dashboard: a warm paper surface inside Dreamari's dark
-// shell, numbered sections, a contextual table of contents, and progressive
-// disclosure that the print stylesheet undoes so an export is complete
-// without the student expanding anything by hand.
+// shell, numbered sections, and progressive disclosure that the print
+// stylesheet undoes so an export is complete without the student expanding
+// anything by hand. It flows as one document (the Aug 29 doc removed the
+// Contents rail); Share, Counselor Review and Download are tabs on top of it.
 //
 // It is student-owned. Every claim either comes from the student's own
 // activity or carries a named source, year and last-verified date. Nothing
@@ -30,7 +32,8 @@ export const REPORT_SECTIONS = [
   { id: "glance", n: 1, label: "Overview" },
   { id: "majors", n: 2, label: "Three Majors" },
   { id: "education", n: 3, label: "Education" },
-  { id: "colleges", n: 4, label: "Colleges" },
+  { id: "courses", n: 4, label: "Courses to Consider" },
+  { id: "colleges", n: 5, label: "Colleges" },
 ] as const;
 
 
@@ -196,7 +199,6 @@ export type ReportViewProps = {
   career: ProfileCareer;
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
-  onOpenShare: () => void;
   onOpenEvidence: () => void;
   updatedLabel: string;
 };
@@ -237,6 +239,11 @@ function ReportDocument({
               </span>
             )}
             <span>{student.school}</span>
+          </p>
+          {/* suppressHydrationWarning: the generated date is the reader's
+             "today", so a server render across midnight must not error. */}
+          <p className="mt-[6px] text-[13px] leading-[18px] tracking-[-0.008em]" style={{ color: "var(--ink-faint)" }} suppressHydrationWarning>
+            Report generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
         </header>
 
@@ -296,10 +303,29 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 04 — Colleges */}
+        {/* 04 — Courses to Consider. The first two suggestions per career are
+           the actual classes (the third is an experience, which stays on My
+           Plan). Mapping subjects to O*NET knowledge areas and SCED codes is
+           a backend data-model note, not UI. */}
+        <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider">
+          <div data-keep-together>
+            <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Classes that support this route</h4>
+            <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
+              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
+                <li key={course.label}>
+                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
+                    <span className="text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{course.label}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </ReportSection>
+
+        {/* 05 — Colleges */}
         <ReportSection
           id={`${idPrefix}colleges`}
-          n={4}
+          n={5}
           title="Colleges"
           action={
             <Link
@@ -395,31 +421,22 @@ export function CareerReportDocument({
   return <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} idPrefix={idPrefix} />;
 }
 
+// ---- The report surface: one document, four views on top of it ----
+// Share, Counselor Review and Download are TABS above the report (the Aug 29
+// doc), not toolbar buttons opening sheets. "Report" is the document itself.
+
+const REPORT_TABS = [
+  { id: "report", label: "Report" },
+  { id: "share", label: "Share" },
+  { id: "counselor", label: "Counselor Review" },
+  { id: "download", label: "Download" },
+] as const;
+type ReportTabId = (typeof REPORT_TABS)[number]["id"];
+
 export function CareerReportView(props: ReportViewProps) {
   const { student, career } = props;
   const report = reportV2(career.id);
-  const [tocOpen, setTocOpen] = useState(false);
-  const [preview, setPreview] = useState(false);
-  const [active, setActive] = useState<string>("glance");
-  const tocButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id);
-      },
-      { rootMargin: "-20% 0px -70% 0px" },
-    );
-    REPORT_SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [career.id]);
-
-  const reportDate = REPORT_DATE;
-
-
+  const [tab, setTab] = useState<ReportTabId>("report");
 
   if (!report) {
     return (
@@ -430,109 +447,370 @@ export function CareerReportView(props: ReportViewProps) {
     );
   }
 
-  const jump = (id: string) => {
-    setTocOpen(false);
-    setActive(id);
-    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  };
-
-  const print = () => window.print();
-
-
   return (
-    <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start lg:gap-[var(--space-8)]">
-      {/* Contextual table of contents — desktop only, beside the page */}
-      <nav aria-label="Report contents" data-print-hide className="no-print sticky top-[16px] hidden w-[190px] flex-none lg:block">
-        <p className="pb-[10px] text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Contents</p>
-        <ol className="flex list-none flex-col gap-[1px] p-0">
-          {REPORT_SECTIONS.map((section) => (
-            <li key={section.id}>
-              <button
-                type="button"
-                onClick={() => jump(section.id)}
-                aria-current={active === section.id ? "true" : undefined}
-                className="flex w-full cursor-pointer items-baseline gap-[8px] rounded-[var(--radius-md)] px-[8px] py-[7px] text-left text-[12.5px] leading-[17px] font-bold"
-                style={{ background: active === section.id ? "var(--glass-surface-2)" : "transparent", color: active === section.id ? "var(--foreground)" : "var(--muted-foreground)" }}
-              >
-                <span className="text-[12px] tabular-nums" style={{ color: "var(--accent-subtle)" }}>{String(section.n).padStart(2, "0")}</span>
-                {section.label}
-              </button>
-            </li>
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* App chrome, never printed */}
+      <div data-print-hide className="no-print flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
+        <div
+          role="tablist"
+          aria-label="Career report views"
+          onKeyDown={(event) => {
+            const order = REPORT_TABS.map((item) => item.id);
+            const index = order.indexOf(tab);
+            let next: ReportTabId | null = null;
+            if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
+            if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
+            if (next) {
+              event.preventDefault();
+              setTab(next);
+              document.getElementById(`report-tab-${next}`)?.focus();
+            }
+          }}
+          className="flex max-w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] border p-[var(--space-1)] [scrollbar-width:none]"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+        >
+          {REPORT_TABS.map((item) => (
+            <button
+              key={item.id}
+              id={`report-tab-${item.id}`}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              aria-controls={`report-panel-${item.id}`}
+              tabIndex={tab === item.id ? 0 : -1}
+              onClick={() => setTab(item.id)}
+              className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[14px] text-[13.5px] leading-[17px] font-bold whitespace-nowrap"
+              style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
+            >
+              {item.label}
+            </button>
           ))}
-        </ol>
-      </nav>
-
-      <div className="min-w-0 flex-1">
-        {/* Document controls — app chrome, never printed */}
-        <div data-print-hide className="no-print mb-[var(--space-4)] flex flex-wrap items-center gap-[var(--space-2)]">
-          <button type="button" onClick={() => setTocOpen(true)} ref={tocButtonRef} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold lg:hidden" style={{ borderColor: "var(--border)" }}>
-            <List className="h-4 w-4" aria-hidden /> Contents
-          </button>
-          <button type="button" onClick={() => setPreview(true)} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <Printer className="h-4 w-4" aria-hidden /> Export
-          </button>
-          <button type="button" onClick={props.onOpenShare} className="flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[12.5px] font-bold" style={{ borderColor: "var(--border)" }}>
-            <Send className="h-4 w-4" aria-hidden /> Share
-          </button>
-          <span className="order-first w-full text-[11.5px] font-bold sm:order-none sm:ml-auto sm:w-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
         </div>
-
-        {/* ---------------- The document ---------------- */}
-        <ReportDocument student={student} career={career} report={report} reportDate={reportDate} />
-
+        <span className="text-[11.5px] font-bold sm:ml-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
       </div>
 
-      {/* Mobile contents drawer — replaces the horizontally scrolling rail */}
-      {tocOpen && (
-        <Portal>
-        <div data-print-hide className="no-print fixed inset-0 z-[100] lg:hidden">
-          <button type="button" aria-label="Close contents" onClick={() => setTocOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(6px)" }} />
-          <div role="dialog" aria-label="Report contents" className="absolute inset-x-0 bottom-0 max-h-[78dvh] overflow-y-auto rounded-t-[var(--radius-2xl)] border-t px-5 pt-[var(--space-5)] pb-[calc(env(safe-area-inset-bottom)+var(--space-6))]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <div className="flex items-center justify-between pb-[var(--space-3)]">
-              <h3 className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Contents</h3>
-              <button type="button" onClick={() => setTocOpen(false)} className="flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close contents">
-                <X className="h-5 w-5" aria-hidden />
-              </button>
-            </div>
-            <ol className="flex list-none flex-col p-0">
-              {REPORT_SECTIONS.map((section) => (
-                <li key={section.id}>
-                  <button type="button" onClick={() => jump(section.id)} className="flex min-h-[48px] w-full cursor-pointer items-center gap-[12px] border-b text-left text-[15px] font-bold" style={{ borderColor: "var(--glass-border)" }}>
-                    <span className="text-[11px] tabular-nums" style={{ color: "var(--accent-subtle)" }}>{String(section.n).padStart(2, "0")}</span>
-                    {section.label}
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
+      {tab === "report" && (
+        <div role="tabpanel" id="report-panel-report" aria-labelledby="report-tab-report" className="flex flex-col gap-[var(--space-4)]">
+          <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} />
+          {/* Keyed so a focus swap re-reads the right career's saved answers. */}
+          <ReflectionCard key={career.id} careerId={career.id} careerTitle={career.title} />
         </div>
-        </Portal>
       )}
-
-      {/* Export preview: pick the document, see it, then print */}
-      {preview && (
-        <Portal>
-        <div data-print-hide className="no-print fixed inset-0 z-[110] flex flex-col" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", backdropFilter: "blur(8px)" }}>
-          <div className="flex flex-wrap items-center gap-[var(--space-2)] border-b px-5 py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <h3 className="mr-auto text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Export preview</h3>
-            <button type="button" onClick={print} className="flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
-              <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
-            </button>
-            <button type="button" onClick={() => setPreview(false)} className="flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close preview">
-              <X className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5" data-preview="full">
-            <p className="mx-auto mb-[var(--space-3)] max-w-[820px] text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-              This is the document exactly as it will print: US Letter, no app navigation, nothing hidden. Page numbers come from your browser&apos;s print settings.
-            </p>
-            <div className="mx-auto max-w-[816px] overflow-hidden rounded-[6px] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.8)]">
-              <ReportDocument student={student} career={career} report={report} reportDate={reportDate} idPrefix="preview-" />
-            </div>
-          </div>
+      {tab === "share" && (
+        <div role="tabpanel" id="report-panel-share" aria-labelledby="report-tab-share">
+          <ShareTab />
         </div>
-        </Portal>
+      )}
+      {tab === "counselor" && (
+        <div role="tabpanel" id="report-panel-counselor" aria-labelledby="report-tab-counselor">
+          <CounselorReviewTab />
+        </div>
+      )}
+      {tab === "download" && (
+        <div role="tabpanel" id="report-panel-download" aria-labelledby="report-tab-download">
+          <DownloadTab student={student} career={career} report={report} />
+        </div>
       )}
     </div>
   );
 }
+
+// ---- My Reflection (Maisha's section) ----
+// The student's own read on the career after doing the work. Persisted per
+// career the same way picks are: localStorage IS the prototype's backend.
+
+const INTEREST_OPTIONS = ["Very Interested", "Interested", "Not Sure Yet", "Probably Not For Me", "Definitely Not For Me"] as const;
+const INFLUENCE_OPTIONS = ["The actual work", "Salary", "Work-life balance", "Education required", "My skills/interests", "Career opportunities", "Something else"] as const;
+
+type StoredReflection = { interest: string | null; influences: string[]; notes: string };
+
+function readReflection(key: string): StoredReflection | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredReflection>;
+    return {
+      interest: typeof parsed.interest === "string" && (INTEREST_OPTIONS as readonly string[]).includes(parsed.interest) ? parsed.interest : null,
+      influences: Array.isArray(parsed.influences) ? parsed.influences.filter((item): item is string => typeof item === "string" && (INFLUENCE_OPTIONS as readonly string[]).includes(item)) : [],
+      notes: typeof parsed.notes === "string" ? parsed.notes : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTitle: string }) {
+  const storageKey = `dreamari-reflection:${careerId}`;
+  // Lazy init is safe here: the card only ever mounts after an interaction
+  // (a tab click), never in server-rendered HTML, so there is no hydration
+  // pass for a stored value to disagree with. The parent keys this component
+  // by career id, so a focus swap runs the initializer again.
+  const [stored] = useState<StoredReflection | null>(() => readReflection(storageKey));
+  const [interest, setInterest] = useState<string | null>(stored?.interest ?? null);
+  const [influences, setInfluences] = useState<string[]>(stored?.influences ?? []);
+  const [notes, setNotes] = useState(stored?.notes ?? "");
+  const [saved, setSaved] = useState(stored !== null);
+
+  const edit = <T,>(setter: (value: T) => void) => (value: T) => {
+    setter(value);
+    setSaved(false);
+  };
+  const setInterestEdited = edit(setInterest);
+  const setNotesEdited = edit(setNotes);
+  const toggleInfluence = (option: string) => {
+    setInfluences((current) => (current.includes(option) ? current.filter((item) => item !== option) : [...current, option]));
+    setSaved(false);
+  };
+  const save = () => {
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify({ interest, influences, notes } satisfies StoredReflection));
+    } catch {
+      // Private mode etc: the session still holds the state; only persistence is lost.
+    }
+    setSaved(true);
+  };
+
+  const pill = (active: boolean) =>
+    ({
+      background: active ? "var(--ink)" : "var(--paper-raised)",
+      borderColor: active ? "var(--ink)" : "var(--rule-strong)",
+      color: active ? "var(--paper)" : "var(--ink-soft)",
+    }) as const;
+
+  return (
+    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-8)]">
+      <div className="mx-auto max-w-[68ch]">
+        <h3 id="reflection-title" className="text-[23px] leading-[27px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>My Reflection</h3>
+
+        <div className="mt-[16px] flex flex-col gap-[22px] border-t pt-[20px]" style={{ borderColor: "var(--rule-strong)" }}>
+          <fieldset>
+            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+              After learning more about {careerTitle}, how interested are you?
+            </legend>
+            <div className="mt-[10px] flex flex-wrap gap-[8px]">
+              {INTEREST_OPTIONS.map((option) => (
+                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[14px] leading-[18px] font-bold" style={pill(interest === option)}>
+                  {option}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+              What influenced your decision most? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Select all that apply)</span>
+            </legend>
+            <div className="mt-[10px] flex flex-wrap gap-[8px]">
+              {INFLUENCE_OPTIONS.map((option) => (
+                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[14px] leading-[18px] font-bold" style={pill(influences.includes(option))}>
+                  {option}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <label className="block">
+            <span className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+              What stood out to you? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Optional)</span>
+            </span>
+            <textarea
+              value={notes}
+              onChange={(event) => setNotesEdited(event.target.value)}
+              rows={4}
+              placeholder="Jot down any thoughts, questions, or surprising facts here..."
+              className="mt-[10px] w-full resize-y rounded-[10px] border p-[14px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
+              style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
+            />
+          </label>
+
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[10px] px-[22px] text-[15px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
+              Save Reflection
+            </button>
+            <span aria-live="polite" className="flex items-center gap-[5px] text-[13.5px] font-bold" style={{ color: saved ? "var(--ink-soft)" : "var(--ink-faint)" }}>
+              {saved && <Check className="h-3.5 w-3.5" aria-hidden />}
+              {saved ? "Reflection saved" : "Not saved yet"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- Share tab ----
+// The ShareSheet's content, inline. The student starts sharing, but access is
+// a school setting, so the copy never promises control we cannot deliver.
+
+const SHARE_TARGETS = [
+  { id: "counselor", title: "Share with Counselor", note: "Send directly to your assigned counselor" },
+  { id: "family", title: "Share with Parent / Guardian", note: "Email a secure link to your family" },
+] as const;
+
+function ShareTab() {
+  const [shared, setShared] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState(false);
+  const link = "https://dreamari.app/report/3704cbe0-ef";
+  const copy = () => {
+    try {
+      void navigator.clipboard?.writeText(link);
+    } catch {
+      // Clipboard can be unavailable (permissions, http): the field is still selectable.
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <div className="flex flex-col gap-[3px]">
+        <h3 id="share-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Share Your Report</h3>
+        <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Choose who you want to share your career exploration progress with.</p>
+      </div>
+
+      <div className="flex flex-col gap-[var(--space-2)]">
+        {SHARE_TARGETS.map((target) => (
+          <button
+            key={target.id}
+            type="button"
+            onClick={() => setShared((current) => ({ ...current, [target.id]: true }))}
+            className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
+            style={{ background: "var(--glass-surface-1)", borderColor: shared[target.id] ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 45%, var(--glass-border))" : "var(--glass-border)" }}
+          >
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[16px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{target.title}</span>
+              <span className="text-[13.5px] leading-[17px] font-bold" style={{ color: "var(--muted-foreground)" }}>{target.note}</span>
+            </span>
+            {shared[target.id] ? (
+              <span className="flex flex-none items-center gap-[5px] text-[13px] font-bold" style={{ color: "var(--color-feedback-success, #33c78c)" }}>
+                <Check className="h-4 w-4" aria-hidden /> Sent
+              </span>
+            ) : (
+              <Send className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-[6px]">
+        <span className="text-[12px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>Or copy link</span>
+        <div className="flex items-stretch gap-[var(--space-2)]">
+          <input readOnly value={link} onFocus={(event) => event.target.select()} aria-label="Report link" className="min-w-0 flex-1 rounded-[var(--radius-md)] border bg-transparent px-[var(--space-3)] text-[13.5px] font-bold outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }} />
+          <button type="button" onClick={copy} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
+
+      <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+        Prototype: sharing is simulated locally and does not send anything yet.
+      </p>
+    </section>
+  );
+}
+
+// ---- Counselor Review tab ----
+// Staff-facing, so it says so up top. Choices are cards, never color alone.
+
+const PATHWAY_STATUS = [
+  { id: "approve", label: "Approve Pathway", note: "Student has explored sufficiently", Icon: CheckCircle2 },
+  { id: "continue", label: "Continue Exploring", note: "Needs additional exploration", Icon: Clock },
+  { id: "needs-review", label: "Needs Review", note: "Planning considerations to discuss", Icon: AlertCircle },
+] as const;
+
+function CounselorReviewTab() {
+  const [status, setStatus] = useState<string | null>(null);
+  const [notes, setNotes] = useState("");
+  const [reviewedOn, setReviewedOn] = useState<string | null>(null);
+
+  return (
+    <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <div className="flex flex-col gap-[3px]">
+        <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>For staff use only</span>
+        <h3 id="counselor-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Counselor Review</h3>
+      </div>
+
+      <fieldset>
+        <legend className="text-[14px] font-bold">Pathway Status</legend>
+        <div className="mt-[10px] grid grid-cols-1 gap-[var(--space-2)] sm:grid-cols-3">
+          {PATHWAY_STATUS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              aria-pressed={status === option.id}
+              onClick={() => { setStatus(option.id); setReviewedOn(null); }}
+              className="dm-tap flex cursor-pointer flex-col gap-[6px] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left"
+              style={{
+                borderColor: status === option.id ? "var(--primary)" : "var(--glass-border)",
+                background: status === option.id ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+              }}
+            >
+              <option.Icon className="h-[18px] w-[18px]" style={{ color: status === option.id ? "var(--accent-subtle)" : "var(--muted-foreground)" }} aria-hidden />
+              <span className="text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{option.label}</span>
+              <span className="text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}>{option.note}</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <label className="block">
+        <span className="text-[14px] font-bold">Review Notes</span>
+        <textarea
+          value={notes}
+          onChange={(event) => { setNotes(event.target.value); setReviewedOn(null); }}
+          rows={3}
+          placeholder="Add internal notes about this student's pathway..."
+          className="mt-[8px] w-full resize-y rounded-[var(--radius-lg)] border bg-transparent p-[var(--space-3)] text-[14px] leading-[20px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+          style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        />
+      </label>
+
+      <div className="flex flex-wrap items-center gap-[var(--space-4)]">
+        <button
+          type="button"
+          onClick={() => setReviewedOn(new Date().toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }))}
+          className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold"
+          style={{ background: "var(--foreground)", color: "var(--background)" }}
+        >
+          Save Review
+        </button>
+        <span aria-live="polite" className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+          {reviewedOn ? `Reviewed on ${reviewedOn}` : "Not reviewed yet"}
+        </span>
+        <button type="button" onClick={() => { setStatus(null); setNotes(""); setReviewedOn(null); }} className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[5px] text-[13px] font-bold" style={{ color: "var(--destructive)" }}>
+          <Trash2 className="h-3.5 w-3.5" aria-hidden /> Remove Pathway
+        </button>
+      </div>
+
+      <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+        Prototype: reviews are simulated locally and are not sent to the school yet.
+      </p>
+    </section>
+  );
+}
+
+// ---- Download tab ----
+// The old export preview, inline: the page you see IS the page that prints,
+// so the Print button needs no separate modal anymore.
+
+function DownloadTab({ student, career, report }: { student: { name: string; grade: string; school: string }; career: ProfileCareer; report: CareerReportV2 }) {
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex flex-wrap items-center gap-[var(--space-4)]">
+        <button type="button" onClick={() => window.print()} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
+        </button>
+        <p className="min-w-[220px] flex-1 text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
+          This is the document exactly as it will print: US Letter, no app navigation, nothing hidden. Page numbers come from your browser&apos;s print settings.
+        </p>
+      </div>
+      <div data-preview="full">
+        <div className="mx-auto w-full max-w-[816px] overflow-hidden rounded-[6px] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.8)]">
+          <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} idPrefix="download-" />
+        </div>
+      </div>
+    </div>
+  );
+}
+

@@ -192,7 +192,7 @@ function HeroBanner() {
                 <span style={{ color: "var(--chart-3)" }}>12-day streak</span>
                 <span aria-hidden className="h-1 w-1 rounded-[2px]" style={{ background: "var(--muted-foreground)" }} />
                 <span className="sm:hidden" style={{ color: "var(--foreground)" }}>27 cards collected</span>
-                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 cards in your Locker</span>
+                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 careers saved</span>
               </span>
             </div>
           </div>

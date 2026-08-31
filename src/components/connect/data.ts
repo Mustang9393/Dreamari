@@ -90,6 +90,8 @@ export type Community = {
   topics: string[];
   students: number; // from the Replit prototype's real evidence counts
   activePros: number;
+  posts: number;
+  professionalsFrom: string[]; // real company names for the card's "Professionals from" row
   responseWindow: string; // from recent performance, not a static promise
   joined: boolean;
   unreadAnswers: number;
@@ -112,6 +114,8 @@ export const COMMUNITIES: Community[] = [
     topics: ["Investment Banking", "Consulting", "Accounting", "Economics"],
     students: 312,
     activePros: 11,
+    posts: 98,
+    professionalsFrom: ["JPMorgan Chase", "Goldman Sachs", "EY"],
     responseWindow: "Most questions answered within 2 days",
     joined: true,
     unreadAnswers: 2,
@@ -124,6 +128,8 @@ export const COMMUNITIES: Community[] = [
     topics: ["Software Engineering", "Cybersecurity", "AI & Data"],
     students: 389,
     activePros: 16,
+    posts: 156,
+    professionalsFrom: ["Google", "Amazon", "Microsoft"],
     responseWindow: "Most questions answered within 1 day",
     joined: true,
     unreadAnswers: 1,
@@ -136,6 +142,8 @@ export const COMMUNITIES: Community[] = [
     topics: ["Nursing", "Medicine", "Public Health"],
     students: 267,
     activePros: 9,
+    posts: 73,
+    professionalsFrom: ["CVS Health", "Johnson & Johnson", "Pfizer"],
     responseWindow: "Most questions answered within 3 days",
     joined: false,
     unreadAnswers: 0,
@@ -149,6 +157,8 @@ export const COMMUNITIES: Community[] = [
     topics: ["Design", "Media", "Marketing"],
     students: 198,
     activePros: 8,
+    posts: 61,
+    professionalsFrom: ["Disney", "Nike", "Spotify"],
     responseWindow: "Most questions answered within 3 days",
     joined: false,
     unreadAnswers: 0,
@@ -166,6 +176,8 @@ export const COMMUNITIES: Community[] = [
     topics: ["Elementary Teaching", "School Counseling", "Higher Education"],
     students: 428,
     activePros: 14,
+    posts: 124,
+    professionalsFrom: ["Teach For America", "Khan Academy", "College Board"],
     responseWindow: "Most questions answered within 2 days",
     joined: false,
     unreadAnswers: 0,

@@ -139,26 +139,38 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
 // internal boardroom, formal client pitch/deal decision -> client boardroom,
 // public working-floor moment -> trading floor, private transition -> hallway.
 export const BEAT_LOCATION: Record<string, LocationId> = {
-  // Level 1 -- Intern
-  // L1-01..03 are Dreamy's own intro cards -- no castMember/speaker resolves
-  // to a character on any of them, so the reception shows as an empty room,
-  // not a starfield. Neither character has entered the story yet; the room
-  // itself already has.
+  // Level 1 -- Intern (ids from the Aug 31 handoff's restructured sheet).
+  // L1-01..04 are the arrival story/teach/check screens -- no castMember/
+  // speaker resolves to a character on any of them, so the reception shows
+  // as an empty room, not a starfield. Neither character has entered the
+  // story yet; the room itself already has.
   "L1-01": "l1-reception",
   "L1-02": "l1-reception",
   "L1-03": "l1-reception",
   "L1-04": "l1-reception",
-  "L1-05": "cobalt-cafe-lounge-sunset",
-  "L1-06": "cobalt-cafe-lounge-sunset",
+  // Christina's two character cards: "trading floor behind" per the sheet.
+  "L1-05": "cobalt-trading-floor-sunset",
+  "L1-06": "cobalt-trading-floor-sunset",
   "L1-07": "cobalt-trading-floor-sunset",
-  "L1-08": "cobalt-trading-floor-sunset",
+  // Day 1 at reception, with both characters in the supplied two-slot plate.
+  "L1-08": "l1-reception",
   "L1-09": "cobalt-trading-floor-sunset",
   "L1-10": "cobalt-trading-floor-sunset",
+  // Christina's teaching stretch keeps the cafe, same room the old teach/
+  // match/rapid run used.
   "L1-11": "cobalt-cafe-lounge-sunset",
-  "L1-12": "cobalt-trading-floor-sunset",
-  "L1-13": "cobalt-trading-floor-night",
-  "L1-14": "cobalt-trading-floor-night",
-  "L1-15": "l1-reception",
+  "L1-12": "cobalt-cafe-lounge-sunset",
+  "L1-13": "cobalt-cafe-lounge-sunset",
+  // L1-14 has its own hero art (the laptop POV shot).
+  "L1-15": "cobalt-trading-floor-sunset",
+  "L1-16": "cobalt-trading-floor-sunset",
+  "L1-17": "cobalt-trading-floor-sunset",
+  "L1-18": "cobalt-trading-floor-sunset",
+  "L1-19": "cobalt-trading-floor-sunset",
+  "L1-20": "cobalt-cafe-lounge-sunset",
+  // L1-21 and L1-22 carry their own hero art.
+  "L1-23": "cobalt-trading-floor-night",
+  "L1-24": "l1-reception",
 
   // Level 2 -- Analyst
   "L2-01": "cobalt-elevator-hallway-sunset",

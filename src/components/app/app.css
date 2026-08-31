@@ -172,11 +172,27 @@
 
 /* Quiet controls: icon buttons and rail chips that sit on transparent. */
 .dm-quiet {
-  transition: background-color 140ms ease, color 140ms ease;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+/* Default SHAPE for quiet controls, in the components layer so any explicit
+   rounded-* utility on the element still wins (utilities come later in the
+   cascade): without this, an unpadded text control (a bare "Back" label)
+   hover-painted a sharp-cornered rectangle flush against its own glyphs. */
+@layer components {
+  .dm-quiet {
+    border-radius: 999px;
+  }
 }
 .dm-quiet:hover {
   background: var(--glass-surface-2) !important;
   color: var(--foreground) !important;
+  /* Breathing room around the wash without touching layout: the halo reads
+     as padding, and it follows the control's own border-radius, so the
+     hover state is never a hard-edged box hugging the text. */
+  box-shadow: 0 0 0 6px var(--glass-surface-2);
+}
+.dm-quiet:active {
+  box-shadow: 0 0 0 4px var(--glass-surface-2);
 }
 
 /* Text links and inline actions: lift + shadow instead of an underline,

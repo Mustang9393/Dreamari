@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, Home, Music, RotateCcw, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
@@ -16,6 +16,7 @@ import {
   BucketBody,
   CardBody,
   ChainBody,
+  CheckBody,
   ChoiceBody,
   FlagsBody,
   Keycap,
@@ -23,6 +24,7 @@ import {
   PickBody,
   RankBody,
   RapidBody,
+  RevealBody,
   SliderBody,
   useTypewriter,
   type Resolve,
@@ -36,13 +38,13 @@ import {
   playSceneChange,
   playSelect,
   playSweep,
-  playTick,
+  playVoiceBlip,
   serverMutedSnapshot,
   setMuted,
   subscribeMuted,
 } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
-import { TIER_HEADLINE, TIER_SCORE, type Beat, type DreamyPose, type Level, type Mood, type Simulation, type Tier } from "./types";
+import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Mood, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
@@ -167,7 +169,6 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     (tier, why, id) => {
       if (locked) return;
       setLocked(id ?? "resolved");
-      const delta = TIER_SCORE[tier];
       // Hold on the board before the card: long enough to see what you picked
       // land, and longer on a miss so the revealed right answer is readable
       // before the explanation covers it.
@@ -965,11 +966,18 @@ function BeatStage({
   // screen underneath, because several beats cannot be answered without it.
   // Cards and the review beat are not staged -- their "setup" is a label like
   // "Intern • Week 1", not a paragraph to read.
-  // Dreamy narrates. "Narrator" was a separate voice on screen even though it
-  // is the same guide talking, so it speaks as Dreamy with Dreamy's face.
-  const narrated = beat.speaker === "Dreamy" || beat.speaker === "Narrator";
-  const speaker = narrated ? "Dreamy" : beat.speaker;
+  // No mascot in the simulation (Interaction Rules, D62): the Narrator sets
+  // scenes and the System carries the rules, and NEITHER shows an avatar or
+  // a name -- a student should be able to tell at a glance whether the
+  // office is talking (a named character with a face) or the game is.
+  const voiceless = beat.speaker === "Dreamy" || beat.speaker === "Narrator" || beat.speaker === "System";
+  const speaker = voiceless ? undefined : beat.speaker;
   const portrait = speaker && !sceneCharacterVisible ? cast?.[speaker] : undefined;
+  // The three voices, each with its own face, box shape and sound (or
+  // silence): a CHARACTER speaks in the display face with voice blips and
+  // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
+  // SYSTEM card is the game talking -- squared, hairline, silent.
+  const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
@@ -1065,9 +1073,8 @@ function BeatStage({
             centered ? "" : "mb-[3dvh] sm:mb-[4dvh]"
           }`}
         >
-          {narrated && ambient && <Dreamy pose={beat.pose ?? "happy"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} onAdvance={() => setRevealed(true)}>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
@@ -1078,6 +1085,7 @@ function BeatStage({
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
               held={!revealed}
+              voice={voice}
               onAdvance={() => setRevealed(true)}
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
               ambient={ambient}
@@ -1093,6 +1101,36 @@ function BeatStage({
 
 // ------------------------------------------------------------------ the body
 
+/** The fallback Action Prompt per mechanic, in the sheet's own wording --
+ *  used whenever a beat doesn't author its own `prompt`. */
+function DEFAULT_PROMPT(beat: Beat): string | undefined {
+  switch (beat.kind) {
+    case "choice":
+      if (beat.layout === "blank" || beat.layout === "tiles") return "Drag the right word into the space.";
+      if (beat.layout === "document") return "Tap the line with the mistake.";
+      if (beat.layout === "boss") return "Choose one.";
+      return "timer" in beat && beat.timer ? "Tap one before the timer runs out." : "Tap one.";
+    case "match":
+      return "Tap a quote, then tap its match.";
+    case "rapid":
+      return beat.timer ? "Quick questions, one timer. Tap fast." : "Quick questions. Tap fast.";
+    case "slider":
+      return "Slide to your answer, then confirm.";
+    case "flags":
+      return "Tap every problem you can find, then submit.";
+    case "rank":
+      return "Move the rows into order, then submit.";
+    case "pick":
+      return `Pick ${beat.pick}, then submit.`;
+    case "bucket":
+      return "Sort each one into a bucket.";
+    case "chain":
+      return "Build the answer one step at a time.";
+    default:
+      return undefined;
+  }
+}
+
 function BeatBody({
   beat,
   locked,
@@ -1106,17 +1144,41 @@ function BeatBody({
   onResolve: Resolve;
   onNext: () => void;
 }) {
-  if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} />;
-  if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
-  if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
-  if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
-  if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
-  if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
-  if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
-  if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
-  if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
-  if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
-  return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} />;
+  // The Action Prompt (Interaction Rules): every screen states its action
+  // in the same small grey style. A beat can author its own line; the rest
+  // derive one from their mechanic, so no screen ships without one. Cards
+  // and the review are exempt -- there the button label IS the prompt.
+  const promptText =
+    beat.kind === "card" || beat.kind === "review"
+      ? undefined
+      : (beat.prompt ?? DEFAULT_PROMPT(beat));
+  const prompt = promptText && (
+    <p className="text-[12px] font-bold tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>
+      {promptText}
+    </p>
+  );
+  const body = (() => {
+    if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
+    if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+    if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+    if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+    if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
+    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} />;
+  })();
+  if (!prompt) return body;
+  return (
+    <div className="flex flex-col gap-[var(--space-2)]">
+      {prompt}
+      {body}
+    </div>
+  );
 }
 
 /** The Final Review beat: a held breath before the ending. */
@@ -1162,33 +1224,114 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
   );
 }
 
-/** Dreamy, standing beside the box it is speaking from. Nearest plane, so it
- *  moves most against the scene; idles with a slow float; the pose comes from
- *  the beat rather than being one permanent face. Sits on the RIGHT so it never
- *  collides with the speaker plate on the left. */
-function Dreamy({ pose }: { pose: DreamyPose }) {
+/** The reputation number eased between values, so a +5 counts up rather
+ *  than teleporting -- the count is what makes a score read as a SCORE. */
+function useCountUp(value: number) {
+  const [shown, setShown] = useState(value);
+  const previous = useRef(value);
+  useEffect(() => {
+    const from = previous.current;
+    previous.current = value;
+    if (from === value) return;
+    const started = performance.now();
+    const duration = 650;
+    let frame: number;
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+       
+      setShown(Math.round(from + (value - from) * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+  return shown;
+}
+
+/** The reputation score as a SCORE, not a bare number (direct feedback): a
+ *  ring gauge that fills 0-100 in the band's own color, a star badge, a
+ *  count-up/down between values, a pop when it changes, and the floating
+ *  +5/-3 delta. The same ring language as the countdown clock, so the
+ *  HUD's two dials read as one family. */
+function ScoreGauge({ reputation, band, delta }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null }) {
+  const shown = useCountUp(reputation);
+  const color = BAND_COLOR[band];
+  const radius = 15.5;
+  const circumference = 2 * Math.PI * radius;
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute right-[10px] bottom-[calc(100%-26px)] z-20 sm:right-[18px] sm:bottom-[calc(100%-32px)]"
-    >
-      {/* A gentle hover, not the ambient cloud drift: that one travels 24px and
-         made Dreamy look detached from the line it is speaking. */}
-      <span className="block motion-safe:animate-[play-hover_4.4s_ease-in-out_infinite]">
-        <Image
-          key={pose}
-          src={`/images/dreamy/v2/dreamy-${pose}.png`}
-          alt=""
-          width={144}
-          height={144}
-          className="h-[96px] w-[96px] drop-shadow-[0_12px_26px_rgba(0,0,0,0.6)] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both] sm:h-[128px] sm:w-[128px]"
-        />
+    <span className="relative flex flex-none items-center gap-[6px]" aria-label={`Reputation ${reputation}, ${band}`}>
+      {/* Keyed by reputation: every change re-runs the pop, so the gauge
+         visibly REACTS to the choice that moved it. */}
+      <span key={reputation} className="relative flex h-[38px] w-[38px] items-center justify-center motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)]" aria-hidden>
+        <svg viewBox="0 0 38 38" className="absolute inset-0 h-full w-full -rotate-90">
+          <circle cx="19" cy="19" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="3" />
+          <circle
+            cx="19"
+            cy="19"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - shown / 100)}
+            style={{ transition: "stroke-dashoffset 0.65s cubic-bezier(0.16,1,0.3,1), stroke 0.4s" }}
+          />
+        </svg>
+        <span className="text-[13.5px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color }}>
+          {shown}
+        </span>
       </span>
-    </div>
+      <span className="hidden flex-col sm:flex" aria-hidden>
+        <Star className="h-[11px] w-[11px]" fill="currentColor" style={{ color }} />
+        <span className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          {band}
+        </span>
+      </span>
+      {delta !== null && delta !== 0 && (
+        <span
+          key={`delta-${reputation}`}
+          className="absolute -top-[16px] right-0 text-[14px] font-extrabold tabular-nums motion-safe:animate-[play-float_1.4s_ease-out_forwards]"
+          style={{ color: delta > 0 ? "var(--color-feedback-success)" : "var(--destructive)" }}
+        >
+          {delta > 0 ? `+${delta}` : delta}
+        </span>
+      )}
+    </span>
   );
 }
 
+// Dreamy is GONE from the simulation (Interaction Rules, D62): Christina
+// teaches, the Narrator sets scenes, and System Cards carry the rules.
+// Dreamy stays in the mini game, on career pages, and everywhere else in
+// the app -- the simulation asks a student to believe they have a job for
+// thirty minutes, and a mascot is the one thing that cannot survive in
+// that room.
+
 // -------------------------------------------------------------- the dialogue
+
+/** The three voices on screen, each with its own face, box shape and sound
+ *  (or silence), so narration, a person talking, and the game's own rules
+ *  never read as the same thing:
+ *  - character: a chat-notched bubble in the display face, name + portrait,
+ *    with per-character voice blips while the line types (the visual-novel
+ *    idiom -- who is talking is audible before it is read).
+ *  - narrator: quiet italics in the body face, no name, no sound -- scene
+ *    direction, not speech.
+ *  - system: squared corners, hairline edge, utility type, silent -- the
+ *    game talking, visibly different from every in-story card. */
+type DialogueVoice = "character" | "narrator" | "system";
+
+/** Each character speaks at their own pitch, so Christina and Marcus sound
+ *  different before a single line is read. */
+const VOICE_PITCH: Record<string, number> = {
+  Christina: 640,
+  Jordan: 470,
+  Marcus: 360,
+  Lamisa: 560,
+  "Cobalt HR": 600,
+};
 
 function DialogueBox({
   speaker,
@@ -1199,6 +1342,7 @@ function DialogueBox({
   gold,
   held,
   ambient,
+  voice = "narrator",
   onPrimary,
   onAdvance,
   children,
@@ -1213,10 +1357,10 @@ function DialogueBox({
   /** true while the player is still reading: the question stays hidden. */
   held?: boolean;
   /** True when there is no scene behind this box. A speaker WITH a portrait
-   *  already reads as someone in the room; Dreamy has none, so its name pill
-   *  is the only thing telling a player who is talking, and only earns its
+   *  already reads as someone in the room; the name pill only earns its
    *  place when there is no picture doing that job instead. */
   ambient?: boolean;
+  voice?: DialogueVoice;
   /** The beat's single action, for beats with no question to reveal. */
   onPrimary?: () => void;
   onAdvance?: () => void;
@@ -1224,6 +1368,19 @@ function DialogueBox({
 }) {
   const line = setup ?? "";
   const { visible, done, skip } = useTypewriter(line);
+
+  // Voice blips: a tiny syllable every couple of characters while a
+  // CHARACTER's line types, at that character's own pitch. Narrator and
+  // System stay silent on purpose -- the silence is part of the contrast.
+  const blipAt = useRef(0);
+  useEffect(() => {
+    if (voice !== "character" || !speaker || done) return;
+    const chars = visible.length;
+    if (chars - blipAt.current < 2) return;
+    blipAt.current = chars;
+    const glyph = line[chars - 1];
+    if (glyph && /[a-z0-9]/i.test(glyph)) playVoiceBlip(VOICE_PITCH[speaker] ?? 500);
+  }, [visible, done, voice, speaker, line]);
 
   // One gesture does the obvious thing: finish the line if it is still typing,
   // otherwise open the question. Tap the box, or press space / enter / right.
@@ -1272,7 +1429,19 @@ function DialogueBox({
       ? "var(--destructive)"
       : tone === "conflict"
         ? "var(--world-building-construction)"
-        : "var(--color-glass-border-raised)";
+        : voice === "system"
+          ? "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))"
+          : "var(--color-glass-border-raised)";
+  // The box SHAPE is the voice: a character bubble squares the corner
+  // nearest its speaker (the modern chat-bubble notch); narration keeps
+  // the soft uniform card; a system card is squared and hairline all
+  // round, a different object entirely.
+  const shape =
+    voice === "system"
+      ? "rounded-[10px] border"
+      : voice === "character"
+        ? "rounded-[20px] rounded-tl-[6px] border-2"
+        : "rounded-[20px] border-2";
 
   return (
     <div className="relative">
@@ -1289,8 +1458,11 @@ function DialogueBox({
       )}
       <div
         onClick={step}
-        className="flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[20px] border-2 px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] [scrollbar-width:thin]"
-        style={{ background: "color-mix(in srgb, var(--background) 86%, transparent)", borderColor: edge }}
+        className={`flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] [scrollbar-width:thin] ${shape}`}
+        style={{
+          background: voice === "system" ? "color-mix(in srgb, var(--background) 93%, transparent)" : "color-mix(in srgb, var(--background) 86%, transparent)",
+          borderColor: edge,
+        }}
       >
         {/* HIERARCHY: the situation is a bold subheading, ruled off from the
            question and its options below. They were one undifferentiated stack
@@ -1320,10 +1492,24 @@ function DialogueBox({
                 </span>
               )}
               {/* Title tier: what the speaker actually says is the biggest text
-                 on screen, ahead of the question and its answers -- title,
-                 subheading, body, in that order, rather than the question
-                 outsizing the line that gives it context. */}
-              <p className="m-0 text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+                 on screen, ahead of the question and its answers -- and each
+                 VOICE wears its own face: a character speaks in the display
+                 font at full size, the narrator sets scenes in quieter
+                 italics of the body face, and a system card uses plain
+                 utility type -- three visibly different kinds of text. */}
+              <p
+                className={`m-0 ${
+                  voice === "character"
+                    ? "text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]"
+                    : voice === "system"
+                      ? "text-[19px] leading-[1.4] font-bold sm:text-[clamp(21px,1.4vw,28px)]"
+                      : "text-[21px] leading-[1.35] font-semibold italic sm:text-[clamp(23px,1.6vw,33px)]"
+                }`}
+                style={{
+                  color: voice === "narrator" ? "color-mix(in srgb, var(--foreground) 90%, transparent)" : "var(--foreground)",
+                  fontFamily: voice === "character" ? "var(--font-display)" : "var(--font-body)",
+                }}
+              >
                 {visible}
                 {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>
@@ -1418,26 +1604,10 @@ function Hud({
         </span>
         {/* Band text hides below sm -- at a phone's narrowest widths, four
            icon buttons plus this cluster left almost no room for the title,
-           which was truncating down to one or two characters. The number
+           which was truncating down to one or two characters. The gauge
            alone still says the same thing at a glance; aria-label keeps the
            full "47, Cautious" available to assistive tech either way. */}
-        <span className="relative flex flex-none items-baseline gap-[5px]" aria-label={`${reputation}, ${band}`}>
-          <span className="text-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BAND_COLOR[band] }} aria-hidden>
-            {reputation}
-          </span>
-          <span className="hidden text-[11px] font-bold tracking-[0.1em] uppercase sm:inline" style={{ color: "var(--muted-foreground)" }} aria-hidden>
-            {band}
-          </span>
-          {delta !== null && delta !== 0 && (
-            <span
-              key={reputation}
-              className="absolute -top-[16px] right-0 text-[14px] font-extrabold tabular-nums motion-safe:animate-[play-float_1.4s_ease-out_forwards]"
-              style={{ color: delta > 0 ? "var(--color-feedback-success)" : "var(--destructive)" }}
-            >
-              {delta > 0 ? `+${delta}` : delta}
-            </span>
-          )}
-        </span>
+        <ScoreGauge reputation={reputation} band={band} delta={delta} />
       </div>
       <div className="flex items-center gap-[7px]">
         <span className="relative h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--color-glass-border-raised)" }}>
@@ -1515,20 +1685,12 @@ function MuteToggle() {
 /** A ring, not a bar: the countdown reads as a stopwatch face rather than a
  *  loading indicator, and the number sits inside it instead of beside a strip
  *  that is easy to miss in a corner of the eye. Pulses only in the last third,
- *  so urgency is felt rather than present the whole time a beat is timed. */
+ *  so urgency is felt rather than present the whole time a beat is timed.
+ *  SILENT, per direct instruction: no per-second tick sound -- the ring and
+ *  the pulse carry the urgency on their own. */
 function Clock({ remaining, total }: { remaining: number; total: number }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
-  // One tick per second, not per 100ms render (the countdown's own interval
-  // granularity) -- fires on the second the displayed number actually
-  // changes, sharper once the clock reads urgent.
-  const lastTick = useRef<number | null>(null);
-  useEffect(() => {
-    const second = Math.ceil(remaining);
-    if (lastTick.current === second) return;
-    lastTick.current = second;
-    if (second > 0) playTick(urgent);
-  }, [remaining, urgent]);
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const color = urgent ? "var(--destructive)" : "var(--world-business-money-office)";
@@ -1563,10 +1725,13 @@ function Clock({ remaining, total }: { remaining: number; total: number }) {
 
 // --------------------------------------------------------------- the feedback
 
+// D55: a feedback card is a headline of two or three words, then ONE
+// sentence, then the skill chips and the score -- nothing else. The
+// sentence is the Why line for the option the student actually chose
+// (result.why); the beat-level feedback body is no longer shown.
 function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
   const good = result.delta > 0;
   const color = good ? "var(--color-feedback-success)" : result.delta <= -6 ? "var(--destructive)" : "var(--world-building-construction)";
-  const body = "feedback" in beat ? beat.feedback : "";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
   const skills = "skills" in beat ? beat.skills : [];
   const portrait = expressionFor(beat.speaker, result.tier);
@@ -1620,11 +1785,6 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
         <p className="text-[15.5px] leading-relaxed font-semibold" style={{ color: "var(--foreground)" }}>
           {result.why}
         </p>
-        {body && (
-          <p className="text-[14.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-            {body}
-          </p>
-        )}
         {skills.length > 0 && (
           <p className="flex flex-wrap gap-[6px]">
             {skills.map((skill) => (

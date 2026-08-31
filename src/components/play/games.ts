@@ -14,6 +14,22 @@ export const INVESTMENT_BANKING: Simulation = {
   world: "Business & Money",
   firm: "Cobalt Capital",
   cover: "/images/play/ib/l1-04.webp",
+  // The trailer (Trailer tab): plays once before Level 1, skippable, ~20
+  // seconds, no choices, no score. REUSE ONLY -- six of seven cards use art
+  // that already exists; only the finale's ladder is new. The seven-beat
+  // shape (scale, odds, cost, room, consequence, the person at the top,
+  // the ladder) travels to every career.
+  trailer: [
+    { id: "TR-01", seconds: 2.5, text: "Every summer, thousands of students want this job." },
+    { id: "TR-02", seconds: 3, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
+    { id: "TR-03", seconds: 2.5, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
+    { id: "TR-04", seconds: 2.5, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
+    { id: "TR-05", seconds: 2.5, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp" },
+    // Lamisa is SEEN before she is met (Trailer tab) -- her sprite rises
+    // into frame dark-graded, a silhouette until Level 3 introduces her.
+    { id: "TR-06", seconds: 3.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
+    { id: "TR-07", seconds: 4, text: "Six levels. Intern to Managing Director. How far will you get?", finale: true },
+  ],
   levels: [IB_LEVEL_1, IB_LEVEL_2, IB_LEVEL_3],
   // The ladder from the handoff: six levels. The sheet documents three, and all
   // three are built. The top three are not documented anywhere.

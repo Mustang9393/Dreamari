@@ -131,6 +131,21 @@ export function playTick(urgent = false) {
   tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
 }
 
+/** A voice blip: the visual-novel idiom (Ace Attorney, Animal Crossing) --
+ *  a tiny syllable of tone fired every few characters while a CHARACTER's
+ *  line types out, at that character's own pitch, so who is talking is
+ *  audible before it is read. Never fires for the Narrator or a System
+ *  card: silence is part of what separates the office talking from the
+ *  game talking. Kept very small and soft -- it repeats a lot. */
+export function playVoiceBlip(pitch: number) {
+  const at = audio();
+  if (!at) return;
+  // A whisper of detune per blip so a long line reads as speech cadence
+  // rather than a metronome. Bounded, deterministic-ish drift is fine here.
+  const wobble = 1 + (Math.random() - 0.5) * 0.06;
+  tone(at, pitch * wobble, at.currentTime, 0.045, 0.022, "triangle");
+}
+
 /** A frequency glide rather than a fixed pitch -- the shape a whoosh or a
  *  soft stinger actually needs, which the fixed-pitch `tone` above can't do. */
 function sweep(at: AudioContext, from: number, to: number, start: number, duration: number, peak: number, shape: Shape = "sine") {

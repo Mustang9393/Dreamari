@@ -4,10 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowBigUp,
   Bookmark,
   Calendar,
-  MessageCircle,
   CheckCircle2,
   ChevronRight,
   CornerDownRight,
@@ -15,10 +13,7 @@ import {
   ExternalLink,
   Flag,
   KeyRound,
-  Lightbulb,
   MapPin,
-  MessageCircleQuestion,
-  Newspaper,
   Pin,
   Search,
   ShieldCheck,
@@ -41,7 +36,6 @@ import {
   type EventBoard,
   type Insight,
   type Opportunity,
-  type ProResponse,
   type Thread,
 } from "./data";
 
@@ -88,14 +82,14 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 const EVENT_ACCENT = "var(--chart-3)";
 
 type View =
-  | { kind: "home"; tab: "feed" | "communities" | "events" | "saved" }
+  | { kind: "home"; tab: "communities" | "events" }
   | { kind: "board"; id: string; filter: string }
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string };
 
 function viewToQuery(view: View): string {
-  if (view.kind === "home") return view.tab === "feed" ? "" : `?tab=${view.tab}`;
-  if (view.kind === "board") return `?board=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
+  if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
+  if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   return `?thread=${view.id}`;
 }
@@ -104,9 +98,9 @@ function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
-  if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "all" };
+  if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "questions" };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "communities" || tab === "events" || tab === "saved" ? tab : "feed" };
+  return { kind: "home", tab: tab === "events" ? tab : "communities" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -117,251 +111,6 @@ function proById(id: string) {
 
 function eventById(id: string) {
   return EVENTS.find((e) => e.id === id);
-}
-
-function communityById(id: string) {
-  return COMMUNITIES.find((c) => c.id === id);
-}
-
-// ——— The feed. Rebuilt to read like a discussion board rather than a list of
-// titles. What makes Reddit or a good forum feel ALIVE is not decoration, it is
-// that you can see: (1) the actual answer, not just the question, (2) who is
-// here and how fast they reply, (3) a vote you can cast, (4) which community
-// each post belongs to. The old rows had none of those -- an avatar, a title
-// and two counts -- so a page full of them read as a settings list.
-//
-// Everything below is derived from the same data the boards use. Nothing is
-// invented for effect: "answering today" counts real activePros, the snippet is
-// the real first answer, the reply faces are the real responders.
-
-type Sort = "hot" | "new" | "unanswered";
-
-type PostKind = "question" | "insight" | "event";
-
-// The post's kind reads as an icon, not a word: three of them on a card was
-// three more words to skim past. The name still travels for screen readers and
-// on hover.
-const POST_KIND: Record<PostKind, { label: string; color: string; Icon: LucideIcon }> = {
-  question: { label: "Question", color: "var(--primary)", Icon: MessageCircleQuestion },
-  insight: { label: "Insight", color: "var(--world-teaching-learning)", Icon: Lightbulb },
-  event: { label: "Event", color: "var(--chart-3)", Icon: Calendar },
-};
-
-type Post = {
-  key: string;
-  kind: PostKind;
-  target: { kind: "thread"; id: string } | { kind: "board"; id: string };
-  /** who is asking (a student handle) or posting (a pro) */
-  authorName: string;
-  authorVerified: boolean;
-  authorMeta: string;
-  boardId: string;
-  title: string;
-  /** the top answer, which is the whole point of showing a post at all */
-  answer?: { proId: string; body: string; postedAgo: string };
-  helpful: number;
-  replies: number;
-  postedAgo: string;
-  minutesAgo: number;
-};
-
-/** "14h ago" / "5d ago" / "just now" -> minutes, so New can actually sort. */
-function agoMinutes(ago: string): number {
-  const match = /(\d+)\s*(m|h|d|w)/.exec(ago);
-  if (!match) return 0;
-  const value = Number(match[1]);
-  const unit = match[2];
-  return value * (unit === "m" ? 1 : unit === "h" ? 60 : unit === "d" ? 1440 : 10080);
-}
-
-function buildPosts(): Post[] {
-  const posts: Post[] = [];
-  for (const thread of [...THREADS, ...EVENT_THREADS]) {
-    const answer = thread.responses.find((response) => response.kind === "answer") as ProResponse | undefined;
-    posts.push({
-      key: thread.id,
-      kind: eventById(thread.boardId) ? "event" : "question",
-      target: { kind: "thread", id: thread.id },
-      authorName: thread.handle,
-      authorVerified: false,
-      // The grade is the identity signal that matters on a student question.
-      authorMeta: thread.grade,
-      boardId: thread.boardId,
-      title: thread.title,
-      answer: answer ? { proId: answer.proId, body: answer.body, postedAgo: answer.postedAgo } : undefined,
-      helpful: thread.helpful,
-      replies: thread.responses.length,
-      postedAgo: thread.postedAgo,
-      minutesAgo: agoMinutes(thread.postedAgo),
-    });
-  }
-  for (const insight of INSIGHTS) {
-    const pro = proById(insight.proId);
-    posts.push({
-      key: insight.id,
-      kind: "insight",
-      // Insights have no page of their own in this prototype, so they open
-      // the board they live in.
-      target: { kind: "board", id: insight.boardId },
-      authorName: pro.name,
-      authorVerified: true,
-      // A pro posting an insight: the firm is the credibility signal, and the
-      // full role reads as a sentence in a meta line.
-      authorMeta: pro.org,
-      boardId: insight.boardId,
-      title: insight.title,
-      answer: { proId: insight.proId, body: insight.body, postedAgo: insight.postedAgo },
-      helpful: insight.helpful,
-      replies: 0,
-      postedAgo: insight.postedAgo,
-      minutesAgo: agoMinutes(insight.postedAgo),
-    });
-  }
-  return posts;
-}
-
-function sortPosts(posts: Post[], sort: Sort): Post[] {
-  const list = [...posts];
-  if (sort === "new") return list.sort((a, b) => a.minutesAgo - b.minutesAgo);
-  if (sort === "unanswered") return list.filter((post) => !post.answer).sort((a, b) => a.minutesAgo - b.minutesAgo);
-  // Hot: engagement, decayed by age, the shape every board uses.
-  const heat = (post: Post) => (post.helpful + post.replies * 4) / Math.pow(post.minutesAgo / 60 + 2, 0.45);
-  return list.sort((a, b) => heat(b) - heat(a));
-}
-
-/** A community's chip: the world colour is what puts any colour on this page. */
-function BoardChip({ boardId }: { boardId: string }) {
-  const community = communityById(boardId);
-  const event = eventById(boardId);
-  const name = community?.name ?? event?.name ?? "Community";
-  const color = community ? (WORLD_COLORS[community.world] ?? "var(--primary)") : EVENT_ACCENT;
-  // The world colour is an ACCENT, not a text colour: several of them measure
-  // under 4.5:1 on the card at this size. The dot carries the identity (a
-  // graphic needs 3:1) and the name stays foreground.
-  return (
-    <span className="flex min-w-0 items-center gap-[5px] text-[12px] font-bold" style={{ color: "var(--foreground)" }}>
-      <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: color }} />
-      <span className="truncate">{name}</span>
-    </span>
-  );
-}
-
-/** A hairline that reaches the card's edges, so the bands read as bands. */
-function Rule() {
-  return <span aria-hidden className="-mx-[var(--space-4)] border-t sm:-mx-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} />;
-}
-
-function PostRow({
-  post,
-  index,
-  liked,
-  onLike,
-  saved,
-  onSave,
-  onOpen,
-}: {
-  post: Post;
-  index: number;
-  liked: boolean;
-  onLike: () => void;
-  saved: boolean;
-  onSave: () => void;
-  onOpen: () => void;
-}) {
-  const answerPro = post.answer ? proById(post.answer.proId) : null;
-  return (
-    <article
-      className="dm-tap relative flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)] motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both] sm:p-[var(--space-5)]"
-      style={{ animationDelay: `${Math.min(index, 6) * 45}ms`, background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
-    >
-      {/* The whole card is the target. An overlay rather than wrapping the card
-         in a button, because the like/comment/save controls are buttons too and
-         buttons cannot nest -- those sit above this layer. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
-        <span className="sr-only">{post.title}</span>
-      </button>
-      {/* Three bands, ruled apart: SIGNALS (who/where/when), CONTENT (the
-         question and the answer), SIGNALS (what you can do). Mixing them into
-         one stack is what made a post hard to skim -- your eye could not tell
-         metadata from the thing it was about. */}
-      <header className="flex min-w-0 items-start gap-[10px] pb-[var(--space-3)] text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
-        <Avatar name={post.authorName} size={34} verified={post.kind === "insight"} />
-        {/* No middot separators: the row wraps on a phone and every wrap left a
-           dangling "·" at the end of a line. Spacing does the same job. */}
-        {/* Two lines, on purpose. A person's name and their grade are one thing;
-           the community is a different thing and never shares the line with
-           them. The timestamp moved down to the actions row, where the other
-           signals live. */}
-        <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-          <span className="flex min-w-0 items-baseline gap-[6px]">
-            <span className="truncate font-bold" style={{ color: "var(--foreground)" }}>{post.authorName}</span>
-            {post.authorMeta && <span className="flex-none whitespace-nowrap">{post.authorMeta}</span>}
-          </span>
-          <BoardChip boardId={post.boardId} />
-        </span>
-        <span
-          title={POST_KIND[post.kind].label}
-          className="flex size-[26px] flex-none items-center justify-center self-start rounded-full"
-          style={{ background: `color-mix(in srgb, ${POST_KIND[post.kind].color} 30%, transparent)`, color: "var(--foreground)" }}
-        >
-          {(() => {
-            const Icon = POST_KIND[post.kind].Icon;
-            return <Icon className="h-[15px] w-[15px]" aria-hidden />;
-          })()}
-          <span className="sr-only">{POST_KIND[post.kind].label}</span>
-        </span>
-      </header>
-
-      <Rule />
-
-      <div className="flex flex-col gap-[var(--space-3)] py-[var(--space-4)]">
-        <h3 className="m-0 text-[17.5px] leading-[25px] font-extrabold sm:text-[20px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {post.title}
-        </h3>
-
-        {post.answer && answerPro && (
-          <div
-            className="rounded-[14px] border px-[13px] py-[12px]"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-          >
-            {answerPro.name !== post.authorName && (
-              <span className="mb-[7px] flex items-center gap-[7px] text-[12.5px]">
-                <Avatar name={answerPro.name} size={22} verified />
-                <span className="truncate font-extrabold" style={{ color: "var(--foreground)" }}>{answerPro.name}</span>
-              </span>
-            )}
-            <span className="line-clamp-2 text-[14.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>
-              {post.answer.body}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <Rule />
-
-      <div className="relative z-20 flex items-center gap-[var(--space-4)] pt-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <button
-          type="button"
-          onClick={onLike}
-          aria-pressed={liked}
-          aria-label={liked ? "Remove your like" : "Like this"}
-          className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full transition-transform duration-150 active:scale-90"
-        >
-          <ThumbsUp className="h-[16px] w-[16px]" aria-hidden style={{ color: liked ? "var(--primary)" : "inherit" }} />
-          <span style={{ color: liked ? "var(--foreground)" : "inherit" }}>{post.helpful + (liked ? 1 : 0)}</span>
-        </button>
-        <button type="button" onClick={onOpen} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full" aria-label={`${post.replies} ${post.replies === 1 ? "comment" : "comments"}`}>
-          <MessageCircle className="h-[16px] w-[16px]" aria-hidden />
-          {post.replies}
-        </button>
-        <span className="whitespace-nowrap">{post.postedAgo}</span>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-quiet ml-auto flex cursor-pointer items-center gap-[6px] rounded-full">
-          <Bookmark className="h-[16px] w-[16px]" aria-hidden style={{ color: saved ? "var(--primary)" : "inherit" }} />
-          <span style={{ color: saved ? "var(--foreground)" : "inherit" }}>{saved ? "Saved" : "Save"}</span>
-        </button>
-      </div>
-    </article>
-  );
 }
 
 /** The one ask affordance. A box you can type into is an invitation; a button
@@ -392,190 +141,6 @@ function Composer({ onAsk, placeholder = "Ask anything about a career…" }: { o
         <ArrowRight className="h-[16px] w-[16px]" aria-hidden />
       </span>
     </button>
-  );
-}
-
-/** The feed tab: a live strip, a composer, a sort row, the posts, and on wide
- *  screens a sidebar. The sidebar is not decoration -- a single 700px column on
- *  a 1440px page is most of why this surface felt empty. */
-function FeedTab({
-  joined,
-  saves,
-  helpfuls,
-  onSave,
-  onHelpful,
-  onOpenBoard,
-  onOpenThread,
-  onOpenEvent,
-  onAsk,
-}: {
-  joined: Record<string, boolean>;
-  saves: Record<string, boolean>;
-  helpfuls: Record<string, boolean>;
-  onSave: (id: string, what?: string) => void;
-  onHelpful: (id: string) => void;
-  onOpenBoard: (id: string) => void;
-  onOpenThread: (id: string) => void;
-  onOpenEvent: (id: string) => void;
-  onAsk: () => void;
-}) {
-  const [sort, setSort] = useState<Sort>("hot");
-  const posts = sortPosts(buildPosts(), sort);
-  // One live number, counted from the data. Three stats stacked here was the
-  // clutter that made the page hard to skim.
-  const prosToday = COMMUNITIES.reduce((total, community) => total + community.activePros, 0);
-
-  return (
-    <div className="flex w-full items-start gap-[var(--space-6)]">
-      <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
-        {/* Sort. Also the cue that this is a stream, not a page. */}
-        <div className="flex items-center gap-[6px]">
-          {(
-            [
-              { key: "hot", label: "Hot" },
-              { key: "new", label: "New" },
-              { key: "unanswered", label: "Unanswered" },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              onClick={() => setSort(option.key)}
-              aria-pressed={sort === option.key}
-              className="dm-quiet cursor-pointer rounded-full border px-[13px] py-[6px] text-[12.5px] font-bold"
-              style={{
-                background: sort === option.key ? "color-mix(in srgb, var(--primary) 20%, transparent)" : "transparent",
-                borderColor: sort === option.key ? "var(--primary)" : "var(--glass-border)",
-                color: sort === option.key ? "var(--foreground)" : "var(--muted-foreground)",
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-          <span className="ml-auto flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <span aria-hidden className="relative flex h-[7px] w-[7px]">
-              <span className="absolute inset-0 rounded-full motion-safe:animate-[connect-ping_1.8s_ease-in-out_infinite]" style={{ background: "var(--world-food-farming-nature)" }} />
-              <span className="absolute inset-[1px] rounded-full" style={{ background: "var(--world-food-farming-nature)" }} />
-            </span>
-            <span className="hidden sm:inline">{prosToday} pros answering</span>
-            <span className="sm:hidden">{prosToday} pros</span>
-          </span>
-        </div>
-
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Feed">
-          {posts.map((post, index) => (
-            <PostRow
-              key={post.key}
-              post={post}
-              index={index}
-              liked={!!helpfuls[post.key]}
-              onLike={() => onHelpful(post.key)}
-              saved={!!saves[post.key]}
-              onSave={() => onSave(post.key, post.answer ? "answer" : "question")}
-              onOpen={() => (post.target.kind === "thread" ? onOpenThread(post.target.id) : onOpenBoard(post.target.id))}
-            />
-          ))}
-          {posts.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
-              Everything here has an answer. Try Hot or New.
-            </p>
-          )}
-        </section>
-      </div>
-
-      <FeedRail joined={joined} onOpenBoard={onOpenBoard} onOpenEvent={onOpenEvent} />
-    </div>
-  );
-}
-
-/** Wide-screen sidebar: your communities and what is coming up. */
-function FeedRail({
-  joined,
-  onOpenBoard,
-  onOpenEvent,
-}: {
-  joined: Record<string, boolean>;
-  onOpenBoard: (id: string) => void;
-  onOpenEvent: (id: string) => void;
-}) {
-  const mine = COMMUNITIES.filter((community) => joined[community.id]);
-  const suggested = COMMUNITIES.filter((community) => !joined[community.id]).slice(0, 3);
-  const upcoming = EVENTS.find((event) => event.lifecycle === "Upcoming") ?? EVENTS[0];
-
-  return (
-    <aside className="hidden w-[268px] flex-none flex-col gap-[var(--space-3)] lg:flex" aria-label="Your communities and what's coming up">
-      <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
-        <p className="mb-[10px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          Your communities
-        </p>
-        <ul className="m-0 flex list-none flex-col gap-[2px] p-0">
-          {mine.map((community) => (
-            <li key={community.id}>
-              <button
-                type="button"
-                onClick={() => onOpenBoard(community.id)}
-                className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[10px] px-[8px] py-[7px] text-left text-[13px] font-bold"
-                style={{ color: "var(--foreground)" }}
-              >
-                <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: WORLD_COLORS[community.world] ?? "var(--primary)" }} />
-                <span className="min-w-0 flex-1 truncate">{community.name}</span>
-                {community.unreadAnswers > 0 && (
-                  <span
-                    className="flex-none rounded-full px-[7px] py-[1px] text-[11px] font-extrabold tabular-nums"
-                    style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-                  >
-                    {community.unreadAnswers}
-                  </span>
-                )}
-              </button>
-            </li>
-          ))}
-          {mine.length === 0 && (
-            <li className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
-              Join one to see it here.
-            </li>
-          )}
-        </ul>
-        {suggested.length > 0 && (
-          <>
-            <p className="mt-[var(--space-3)] mb-[6px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-              Also active
-            </p>
-            <ul className="m-0 flex list-none flex-col gap-[2px] p-0">
-              {suggested.map((community) => (
-                <li key={community.id}>
-                  <button
-                    type="button"
-                    onClick={() => onOpenBoard(community.id)}
-                    className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[10px] px-[8px] py-[7px] text-left text-[13px] font-semibold"
-                    style={{ color: "var(--muted-foreground)" }}
-                  >
-                    <span aria-hidden className="h-[8px] w-[8px] flex-none rounded-full" style={{ background: WORLD_COLORS[community.world] ?? "var(--primary)" }} />
-                    <span className="min-w-0 flex-1 truncate">{community.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
-
-      {upcoming && (
-        <button
-          type="button"
-          onClick={() => onOpenEvent(upcoming.id)}
-          className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left"
-          style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
-        >
-          <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>
-            <Calendar className="h-[13px] w-[13px]" aria-hidden />
-            {upcoming.lifecycle}
-          </span>
-          <span className="mt-[5px] block text-[13.5px] leading-[18px] font-extrabold" style={{ color: "var(--foreground)" }}>{upcoming.name}</span>
-          <span className="mt-[3px] block text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>{upcoming.date}</span>
-        </button>
-      )}
-    </aside>
   );
 }
 
@@ -683,48 +248,73 @@ function WorldTile({ world, size = 40 }: { world: string; size?: number }) {
 // already says what the board is about was just noise.
 function CommunityCard({
   community,
-  trailing,
+  unreadBadge,
+  action,
   onOpen,
 }: {
   community: Community;
-  trailing?: React.ReactNode;
+  unreadBadge?: React.ReactNode;
+  action: React.ReactNode;
   onOpen: () => void;
 }) {
   const accent = WORLD_COLORS[community.world] ?? "var(--primary)";
+  const shownCompanies = community.professionalsFrom.slice(0, 3);
+  const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
   return (
-    <div
-      className="dm-tap relative overflow-hidden rounded-[var(--radius-xl)] border"
-      style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, var(--color-glass-surface-3)) 0%, var(--color-glass-surface-3) 78%)`, borderColor: "var(--glass-border)" }}
-    >
-      {/* Ambient color only — blurred and fully behind the content, so it
-         never competes for horizontal space or forces a wrap. */}
-      <span aria-hidden className="pointer-events-none absolute top-[-30px] right-[-30px] h-[120px] w-[120px] rounded-full blur-[34px]" style={{ background: `color-mix(in srgb, ${accent} 45%, transparent)` }} />
+    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
+      {/* Ambient color only — blurred and fully behind the content, the same
+         idiom every other card in the app uses to carry a world's accent
+         (Home's activity cards, Browse's posters): a glow, never a solid
+         block competing with the heading/subheading/body hierarchy below. */}
+      <span aria-hidden className="pointer-events-none absolute top-[-40px] right-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 40%, transparent)` }} />
 
-      {/* Two of these sit side by side at every width, so the card has to hold
-         together in a ~160px column: the name wraps instead of truncating, the
-         stats stack, and the action goes full width. */}
-      {/* Whole card, one target. Same overlay trick as the feed posts: Join and
-         the dismiss sticker are buttons, so they cannot be nested inside one. */}
+      {/* Whole card, one target. The bottom action button sits above this
+         layer (z-20) so it's still its own reachable target, the same
+         overlay pattern the rest of Connect uses for a whole-card link. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>
       </button>
-      <div className="relative flex items-start gap-[9px] p-[var(--space-3)] pb-[var(--space-2)] sm:items-center sm:gap-[10px] sm:p-[var(--space-4)] sm:pb-[var(--space-3)]">
-        <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[var(--radius-md)] sm:size-8" style={{ background: "var(--color-glass-surface-3)", color: accent }}>
-          <Users className="h-4 w-4" />
-        </span>
-        <span className="min-w-0 flex-1 text-[14.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</span>
-      </div>
 
-      <div className="relative mx-[var(--space-3)] border-t sm:mx-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }} />
+      {/* Same dark-glass card every other surface uses -- the world color is
+         an accent (icon tile, border tint, ambient glow), never a full-card
+         block, matching the app's own design language rather than the
+         reference doc's literal light-mode mockup. Strict top-down
+         hierarchy regardless of which fact matters most: Heading (name) ->
+         Subheading (the stat row) -> body (professionals, topics, action). */}
+      <div className="relative z-20 flex flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+        <div className="flex items-center gap-[10px]">
+          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: `color-mix(in srgb, ${accent} 22%, var(--glass-surface-1))`, color: accent }}>
+            <Users className="h-[18px] w-[18px]" />
+          </span>
+          <span className="min-w-0 flex-1 text-[15.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {community.name}
+          </span>
+          {unreadBadge}
+        </div>
 
-      <div className="relative z-20 flex flex-col items-stretch gap-[8px] p-[var(--space-3)] pt-[var(--space-2)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)] sm:p-[var(--space-4)] sm:pt-[var(--space-3)]">
-        {/* One stat. Size is the only number that helps you choose; the rest
-           belongs inside the board. */}
-        <span className="inline-flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <Users className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} />
-          {community.students} students
-        </span>
-        {trailing}
+        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[3px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span><strong style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
+          <span><strong style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
+          <span><strong style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
+        </div>
+
+        <div className="flex flex-col gap-[5px]">
+          <span className="text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</span>
+          <div className="flex flex-wrap items-center gap-[6px]">
+            {shownCompanies.map((name) => (
+              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+            ))}
+            {moreCompanies > 0 && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-[6px]">
+          {community.topics.slice(0, 4).map((topic) => (
+            <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
+          ))}
+        </div>
+
+        {action}
       </div>
     </div>
   );
@@ -887,7 +477,7 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
 // ——— the experience ———
 
 export function ConnectExperience() {
-  const [view, setViewState] = useState<View>({ kind: "home", tab: "feed" });
+  const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
   const [askOpen, setAskOpen] = useState<null | { boardId: string; boardName: string; scope: string }>(null);
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
@@ -975,14 +565,8 @@ export function ConnectExperience() {
               say("Joined. New answers show up in your feed.");
             }}
             eventJoined={eventJoined}
-            saves={saves}
-            helpfuls={helpfuls}
-            onSave={toggleSave}
-            onHelpful={toggleHelpful}
-            onOpenBoard={(id) => setView({ kind: "board", id, filter: "all" })}
+            onOpenBoard={(id) => setView({ kind: "board", id, filter: "questions" })}
             onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
-            onOpenThread={(id) => setView({ kind: "thread", id })}
-            onAsk={() => openAskFor(COMMUNITIES.find((c) => joined[c.id])?.id ?? COMMUNITIES[0].id)}
             onEnterCode={(id) => setCodeOpenFor(id)}
           />
         )}
@@ -997,7 +581,7 @@ export function ConnectExperience() {
               say("Joined this community.");
             }}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
-            onBack={() => setView({ kind: "home", tab: "feed" })}
+            onBack={() => setView({ kind: "home", tab: "communities" })}
             onAsk={() => openAskFor(view.id)}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
@@ -1014,7 +598,7 @@ export function ConnectExperience() {
                   event={event}
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
-                  onBack={() => setView({ kind: "home", tab: "feed" })}
+                  onBack={() => setView({ kind: "home", tab: "events" })}
                   onAsk={() => openAskFor(event.id)}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
@@ -1047,7 +631,7 @@ export function ConnectExperience() {
             thread={ALL_THREADS.find((t) => t.id === view.id)!}
             onBack={() => {
               const t = ALL_THREADS.find((x) => x.id === view.id)!;
-              setView(eventById(t.boardId) ? { kind: "event", id: t.boardId, filter: "all" } : { kind: "board", id: t.boardId, filter: "all" });
+              setView(eventById(t.boardId) ? { kind: "event", id: t.boardId, filter: "all" } : { kind: "board", id: t.boardId, filter: "questions" });
             }}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onAddToPlan={() => say("Added to your Plan as a next action.")}
@@ -1090,116 +674,68 @@ function HomeView({
   onDismissRec,
   onJoin,
   eventJoined,
-  saves,
-  helpfuls,
-  onSave,
-  onHelpful,
   onOpenBoard,
   onOpenEvent,
-  onOpenThread,
-  onAsk,
   onEnterCode,
 }: {
-  tab: "feed" | "communities" | "events" | "saved";
-  onTab: (tab: "feed" | "communities" | "events" | "saved") => void;
+  tab: "communities" | "events";
+  onTab: (tab: "communities" | "events") => void;
   joined: Record<string, boolean>;
   dismissedRecs: Record<string, boolean>;
   onDismissRec: (id: string) => void;
   onJoin: (id: string) => void;
   eventJoined: Record<string, boolean>;
-  saves: Record<string, boolean>;
-  helpfuls: Record<string, boolean>;
-  onSave: (id: string, what?: string) => void;
-  onHelpful: (id: string) => void;
   onOpenBoard: (id: string) => void;
   onOpenEvent: (id: string) => void;
-  onOpenThread: (id: string) => void;
-  onAsk: () => void;
   onEnterCode: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const myCommunities = COMMUNITIES.filter((c) => joined[c.id]);
   const recommended = COMMUNITIES.filter((c) => !joined[c.id] && c.recommendedBecause && !dismissedRecs[c.id]).slice(0, 3);
-  const savedThreads = ALL_THREADS.filter((t) => saves[t.id]);
-  const savedInsights = INSIGHTS.filter((i) => saves[i.id]);
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ")).toLowerCase().includes(query.toLowerCase()));
 
   return (
     <>
-      {/* Title, search, composer. ONE ask affordance for the whole surface: the
-         composer is the same on every tab, and you pick the destination while
-         you write (the sheet's "Posting to ... Change"), so no tab needs its
-         own button. Enter-event-code still lives with the event cards. */}
-      <div className="flex flex-col gap-[var(--space-4)]">
-        <div className="flex items-center gap-[var(--space-3)]">
-          <h1 className="flex-1 text-[28px] leading-[34px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
-          {(tab === "feed" || tab === "communities") && (
-            <button
-              type="button"
-              onClick={() => setSearchOpen((open) => !open)}
-              aria-expanded={searchOpen}
-              aria-label="Search"
-              className="dm-quiet flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border"
-              style={{ borderColor: "var(--glass-border)", background: searchOpen ? "var(--glass-surface-2)" : "transparent", color: "var(--foreground)" }}
-            >
-              <Search className="h-[18px] w-[18px]" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        {searchOpen && (tab === "feed" || tab === "communities") && (
-          <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px] motion-safe:animate-[fade-slide-up_0.28s_ease-out_both]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-            <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-            <span className="sr-only">Search {tab === "feed" ? "posts" : "communities"}</span>
-            <input
-              autoFocus
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={tab === "feed" ? "Search posts" : "Search communities and topics"}
-              className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-              style={{ color: "var(--foreground)" }}
-            />
-            {query && (
-              <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex size-6 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                <X className="h-4 w-4" aria-hidden />
-              </button>
-            )}
-          </label>
-        )}
-
-        <Composer onAsk={onAsk} />
+      {/* "Find your community" masthead + Community/Events toggle, same on
+         both tabs -- matches the reference doc's mockup exactly, which shows
+         this identical header on both the Community and the Events screen. */}
+      <div className="flex flex-col gap-[var(--space-2)]">
+        <h1 className="text-[28px] leading-[34px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find Your Community</h1>
+        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
       </div>
 
       <FilterRow
         options={[
-          { key: "feed", label: "Feed", Icon: Newspaper },
-          { key: "communities", label: "Communities", Icon: Users },
+          { key: "communities", label: "Community", Icon: Users },
           { key: "events", label: "Events", Icon: Calendar },
-          { key: "saved", label: "Saved", Icon: Bookmark },
         ]}
         active={tab}
-        onPick={(key) => onTab(key as "feed")}
+        onPick={(key) => onTab(key as "communities" | "events")}
       />
 
-      {tab === "feed" && (
-        <FeedTab
-          joined={joined}
-          saves={saves}
-          helpfuls={helpfuls}
-          onSave={onSave}
-          onHelpful={onHelpful}
-          onOpenBoard={onOpenBoard}
-          onOpenThread={onOpenThread}
-          onOpenEvent={onOpenEvent}
-          onAsk={onAsk}
-        />
+      {tab === "communities" && (
+        <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+          <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          <span className="sr-only">Search communities</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search communities, topics, or companies"
+            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+            style={{ color: "var(--foreground)" }}
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex size-6 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          )}
+        </label>
       )}
 
       {tab === "communities" && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <SectionHead>Your communities</SectionHead>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
             {myCommunities.map((c) => (
               <CommunityRow key={c.id} community={c} joined onOpen={() => onOpenBoard(c.id)} />
             ))}
@@ -1213,7 +749,7 @@ function HomeView({
       {tab === "communities" && recommended.length > 0 && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Recommended communities">
           <SectionHead>Recommended for you</SectionHead>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
             {recommended.map((c) => (
               <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} onDismiss={() => onDismissRec(c.id)} />
             ))}
@@ -1224,12 +760,21 @@ function HomeView({
       {tab === "communities" && (
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="All communities">
           <SectionHead>{query ? `Matching “${query}”` : "All communities"}</SectionHead>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
             {searched.filter((c) => !joined[c.id]).map((c) => (
               <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
             ))}
           </div>
         </section>
+      )}
+
+      {tab === "events" && (
+        <Card>
+          <p className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Keep the conversation going after the event.</p>
+          <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+            A private community for everyone who attended. Ask follow-up questions, hear more from professionals, and access resources shared after the event.
+          </p>
+        </Card>
       )}
 
       {tab === "events" && (
@@ -1262,52 +807,32 @@ function HomeView({
           )}
         </section>
       )}
-
-      {tab === "saved" && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Saved">
-          <SectionHead>Saved</SectionHead>
-          <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Private to you unless you choose to share it.</p>
-          {savedThreads.map((t) => (
-            <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
-              <span className="min-w-0 truncate text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
-              <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-            </button>
-          ))}
-          {savedInsights.map((i) => (
-            <div key={i.id} className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
-              <span className="text-[11px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Pro insight</span>
-              <p className="mt-[2px] text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{i.title}</p>
-            </div>
-          ))}
-          {savedThreads.length === 0 && savedInsights.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet. Tap Save on any answer or insight worth keeping.</p>
-          )}
-        </section>
-      )}
     </>
   );
 }
 
 function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; onDismiss?: () => void }) {
-  const trailing = joined ? (
-    community.unreadAnswers > 0 ? (
-      <span className="self-start rounded-full px-[10px] py-[4px] text-[11px] font-bold sm:flex-none" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-        {community.unreadAnswers} new
-      </span>
-    ) : (
-      <ChevronRight className="hidden h-5 w-5 flex-none sm:block" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-    )
+  const unreadBadge = joined && community.unreadAnswers > 0 && (
+    <span className="flex-none rounded-full px-[9px] py-[3px] text-[11px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      {community.unreadAnswers} new
+    </span>
+  );
+  const action = joined ? (
+    <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      Open Community
+      <ChevronRight className="h-4 w-4" aria-hidden />
+    </button>
   ) : (
-    <button type="button" onClick={onJoin} className="dm-quiet flex min-h-[40px] w-full cursor-pointer items-center justify-center rounded-[999px] px-[var(--space-4)] text-[12.5px] font-bold sm:min-h-[44px] sm:w-auto sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-      Join
+    <button type="button" onClick={onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+      Join Community
     </button>
   );
-  if (!onDismiss) return <CommunityCard community={community} trailing={trailing} onOpen={onOpen} />;
+  if (!onDismiss) return <CommunityCard community={community} unreadBadge={unreadBadge} action={action} onOpen={onOpen} />;
   // Sticker placement: the card keeps overflow-hidden for its glow, so the
   // dismiss button is a sibling sitting half on and half off the corner.
   return (
     <div className="relative">
-      <CommunityCard community={community} trailing={trailing} onOpen={onOpen} />
+      <CommunityCard community={community} unreadBadge={unreadBadge} action={action} onOpen={onOpen} />
       <button
         type="button"
         onClick={onDismiss}
@@ -1353,8 +878,6 @@ function BoardView({
   const threads = THREADS.filter((t) => t.boardId === community.id);
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
   const opps = OPPORTUNITIES.filter((o) => o.boardId === community.id);
-  const showQ = filter === "all" || filter === "questions" || filter === "awaiting" || filter === "answered";
-  const filteredThreads = threads.filter((t) => (filter === "awaiting" ? t.state === "awaiting" || t.state === "routed" : filter === "answered" ? t.state === "answered" || t.state === "resolved" : true));
 
   return (
     <>
@@ -1389,33 +912,43 @@ function BoardView({
         <Composer onAsk={onAsk} placeholder={`Ask ${community.name}…`} />
       </section>
 
+      {/* Just these two, per direct instruction -- the old six-way
+         All/Questions/Insights/Opportunities/Unanswered/Answered chip row is
+         gone. Opportunities (rare -- most communities have none) render
+         inside Student Questions rather than losing their own tab. */}
       <FilterRow
         options={[
-          { key: "all", label: "All" },
-          { key: "questions", label: "Questions" },
-          { key: "insights", label: "Insights" },
-          { key: "opportunities", label: "Opportunities" },
-          { key: "awaiting", label: "Unanswered" },
-          { key: "answered", label: "Answered" },
+          { key: "questions", label: "Student Questions" },
+          { key: "insights", label: "Professional Insights" },
         ]}
         active={filter}
         onPick={onFilter}
       />
 
       <div className="flex flex-col gap-[var(--space-4)]">
-        {showQ &&
-          filteredThreads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
-        {(filter === "all" || filter === "insights") && insights.map((i) => <InsightCard key={i.id} insight={i} {...cardProps(i.id)} />)}
-        {(filter === "all" || filter === "opportunities") && opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
-        {showQ && filteredThreads.length === 0 && (
-          <Card>
-            <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
-            <ul className="mt-[8px] flex flex-col gap-[6px]">
-              {STARTER_PROMPTS.map((p) => (
-                <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
-              ))}
-            </ul>
-          </Card>
+        {filter === "questions" && (
+          <>
+            {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+            {opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
+            {threads.length === 0 && (
+              <Card>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
+                <ul className="mt-[8px] flex flex-col gap-[6px]">
+                  {STARTER_PROMPTS.map((p) => (
+                    <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+          </>
+        )}
+        {filter === "insights" && (
+          <>
+            {insights.map((i) => <InsightCard key={i.id} insight={i} {...cardProps(i.id)} />)}
+            {insights.length === 0 && (
+              <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
+            )}
+          </>
         )}
       </div>
     </>
@@ -1555,7 +1088,6 @@ function ThreadView({
 }) {
   const boardName = eventById(thread.boardId)?.name ?? COMMUNITIES.find((c) => c.id === thread.boardId)?.name ?? "Community";
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
-  const answered = thread.responses.some((r) => r.kind === "answer");
   const p = cardProps(thread.id);
 
   return (

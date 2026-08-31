@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronUp, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, ChevronDown, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
 
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
@@ -9,12 +10,14 @@ import type {
   BucketBeat,
   CardBeat,
   ChainBeat,
+  CheckBeat,
   ChoiceBeat,
   FlagsBeat,
   MatchBeat,
   PickBeat,
   RankBeat,
   RapidBeat,
+  RevealBeat,
   SliderBeat,
   Tier,
 } from "./types";
@@ -216,6 +219,7 @@ export function CardBody({ beat, onNext }: { beat: CardBeat; onNext: () => void 
       {beat.note && (
         <p className="text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>{beat.note}</p>
       )}
+      {beat.ladder && <PowerLadder rungs={beat.ladder} />}
       {beat.showBands && <BandLadder />}
       <button
         type="button"
@@ -250,6 +254,324 @@ function BandLadder() {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** The ladder graphic on a character's POWER card (Characters tab): every
+ *  rung carries its job title, the player and the character this card is
+ *  about are lit, the rest dimmed. Same picture every time, so a student
+ *  learns to read it at a glance -- it shows the hierarchy without any line
+ *  of copy having to state it. Drawn as a DIAGRAM -- a vertical rail of
+ *  connected dots, labelled and clearly non-interactive -- after the
+ *  bordered-row version read as a set of tappable options on a screen
+ *  whose only action is Continue (direct feedback: "I don't understand
+ *  what the use of this screen is"). Rungs come bottom-to-top in data and
+ *  render top-down (highest rung first), the way a ladder is read. */
+function PowerLadder({ rungs }: { rungs: { label: string; lit: boolean }[] }) {
+  const gold = "var(--world-business-money-office)";
+  return (
+    <div
+      className="rounded-[12px] border px-[14px] py-[12px]"
+      style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--glass-surface-1) 60%, transparent)" }}
+    >
+      <p className="mb-[8px] text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        The ladder
+      </p>
+      <ul className="relative flex list-none flex-col gap-[2px] p-0" aria-label="The career ladder">
+        {/* The rail: one thin line connecting every rung, which is what
+           makes this read as a chart rather than a stack of buttons. */}
+        <span aria-hidden className="absolute top-[8px] bottom-[8px] left-[5px] w-[2px] rounded-full" style={{ background: "var(--color-glass-border-raised)" }} />
+        {[...rungs].reverse().map((rung, index) => (
+          <li
+            key={rung.label}
+            className="relative flex items-center gap-[12px] py-[5px] text-[13.5px] motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+            style={{ animationDelay: `${index * 70}ms` }}
+          >
+            <span
+              aria-hidden
+              className="z-[1] h-[12px] w-[12px] flex-none rounded-full border-2"
+              style={{
+                borderColor: rung.lit ? gold : "var(--color-glass-border-raised)",
+                background: rung.lit ? gold : "var(--background)",
+                boxShadow: rung.lit ? `0 0 10px color-mix(in srgb, ${gold} 60%, transparent)` : "none",
+              }}
+            />
+            <span className={rung.lit ? "font-extrabold" : "font-semibold"} style={{ color: rung.lit ? "var(--foreground)" : "var(--muted-foreground)", opacity: rung.lit ? 1 : 0.6 }}>
+              {rung.label}
+            </span>
+            {rung.lit && rung.label.startsWith("You") && (
+              <span className="rounded-full px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
+                You
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ------------------------------------------------ the unscored comprehension check
+
+/** Comprehension Check (Interaction Rules): unscored, never a strike,
+ *  unlimited tries, cannot skip. `tap`: wrong taps shake and stay open.
+ *  `type`: wrong entries shake and clear; after two wrong tries the hint
+ *  fades in. `drag`: a token on a rail dragged onto an answer card -- a
+ *  wrong drop shakes that card and the token springs back, a right drop
+ *  locks. Continue appears only once it is right. */
+export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => void }) {
+  const [solved, setSolved] = useState(false);
+  const [missed, setMissed] = useState<Set<number>>(new Set());
+  const [entry, setEntry] = useState("");
+  const [tries, setTries] = useState(0);
+  const [shakeBox, setShakeBox] = useState(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const options = beat.options ?? [];
+  const rightIndex = options.findIndex((option) => option.correct);
+  const whyRight = beat.method === "type" ? (beat.whyRight ?? "") : (options[rightIndex]?.why ?? "");
+
+  const miss = (index: number) => {
+    playWrong();
+    setMissed((current) => new Set(current).add(index));
+    window.setTimeout(() => setMissed((current) => { const next = new Set(current); next.delete(index); return next; }), 460);
+  };
+  const solve = () => {
+    playCorrect();
+    setSolved(true);
+  };
+
+  const submitTyped = () => {
+    if (solved || !entry.trim()) return;
+    if (entry.trim().toLowerCase() === (beat.answer ?? "").trim().toLowerCase()) {
+      solve();
+    } else {
+      playWrong();
+      setTries((count) => count + 1);
+      setShakeBox((count) => count + 1);
+      setEntry("");
+    }
+  };
+
+  // Drag hit-test: the token is dropped wherever the pointer ends; the card
+  // under that point wins. dragSnapToOrigin gives the sprung-back rail
+  // return on a miss for free.
+  const dropAt = (x: number, y: number) => {
+    if (solved) return;
+    const index = cardRefs.current.findIndex((el) => {
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    });
+    if (index === -1) return;
+    if (options[index].correct) solve();
+    else miss(index);
+  };
+
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+
+      {beat.method === "tap" && (
+        <div className="flex flex-col gap-[8px]">
+          {options.map((option, index) => (
+            <button
+              key={option.label}
+              type="button"
+              disabled={solved && !option.correct}
+              onClick={() => {
+                if (solved) return;
+                if (option.correct) solve();
+                else miss(index);
+              }}
+              className={`flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border px-[18px] py-[15px] text-left text-[16px] font-semibold transition-[border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+              style={{
+                animationDelay: `${index * 55}ms`,
+                background: solved && option.correct ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                borderColor: solved && option.correct ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)",
+                color: "var(--foreground)",
+                opacity: solved && !option.correct ? 0.4 : 1,
+              }}
+            >
+              {solved && option.correct && <Check className="h-[16px] w-[16px] flex-none" style={{ color: "var(--color-feedback-success)" }} aria-hidden />}
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {beat.method === "type" && (
+        <div className="flex flex-col gap-[10px]">
+          <form
+            key={shakeBox}
+            onSubmit={(event) => { event.preventDefault(); submitTyped(); }}
+            className={shakeBox > 0 && !solved ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}
+          >
+            <input
+              value={solved ? (beat.answer ?? "") : entry}
+              onChange={(event) => setEntry(event.target.value)}
+              disabled={solved}
+              autoFocus
+              inputMode={/^\d+$/.test(beat.answer ?? "") ? "numeric" : "text"}
+              aria-label="Your answer"
+              className="w-full rounded-[14px] border-2 bg-transparent px-[16px] py-[14px] text-center text-[24px] font-extrabold tabular-nums outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+              style={{ borderColor: solved ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}
+            />
+          </form>
+          {/* Supporting information fades back in after two wrong tries
+             (Interaction Rules, typed check). */}
+          {!solved && tries >= 2 && beat.hint && (
+            <p className="text-[13px] leading-relaxed font-semibold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" style={{ color: "var(--muted-foreground)" }}>
+              {beat.hint}
+            </p>
+          )}
+          {!solved && (
+            <button type="button" onClick={submitTyped} className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-full px-[18px] py-[13px] text-[16px] font-extrabold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              Check
+            </button>
+          )}
+        </div>
+      )}
+
+      {beat.method === "drag" && (
+        <div className="flex flex-col gap-[14px]">
+          {/* The rail. The token costs a deliberate second to move, which is
+             the point (D75) -- it feels like a game, not a quiz. */}
+          <div className="flex justify-center rounded-[14px] border border-dashed py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+            {solved ? (
+              <span className="flex h-[46px] items-center text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--color-feedback-success)" }}>Locked in</span>
+            ) : (
+              <motion.button
+                type="button"
+                drag
+                dragSnapToOrigin
+                dragMomentum={false}
+                whileDrag={{ scale: 1.15, zIndex: 30 }}
+                onDragEnd={(event) => {
+                  const pointer = event as PointerEvent;
+                  dropAt(pointer.clientX, pointer.clientY);
+                }}
+                className="relative z-20 flex h-[46px] w-[46px] cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-extrabold tracking-[0.06em] text-white uppercase select-none active:cursor-grabbing"
+                style={{ background: "var(--primary)", boxShadow: "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+                aria-label="Drag this token onto an answer"
+              >
+                Drag
+              </motion.button>
+            )}
+          </div>
+          <div className="flex flex-col gap-[8px]">
+            {options.map((option, index) => (
+              <div
+                key={option.label}
+                ref={(el) => { cardRefs.current[index] = el; }}
+                className={`flex items-center gap-[12px] rounded-[16px] border px-[18px] py-[15px] text-[16px] font-semibold sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+                style={{
+                  background: solved && option.correct ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                  borderColor: solved && option.correct ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)",
+                  color: "var(--foreground)",
+                  opacity: solved && !option.correct ? 0.4 : 1,
+                }}
+              >
+                {solved && option.correct && <Check className="h-[16px] w-[16px] flex-none" style={{ color: "var(--color-feedback-success)" }} aria-hidden />}
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {solved && (
+        <>
+          {whyRight && (
+            <p className="text-[14.5px] leading-relaxed font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]" style={{ color: "var(--color-feedback-success)" }}>
+              {whyRight}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => { playSelect(); onNext(); }}
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+          >
+            {beat.cta}
+            <Keycap tint="var(--primary-foreground)">⏎</Keycap>
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------- tap to reveal
+
+/** Tap to Reveal (Interaction Rules): rows hide their payload behind TAP TO
+ *  REVEAL; Continue only appears once every row is open, so nobody can skip
+ *  the lesson. Not scored. */
+export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => void }) {
+  const [open, setOpen] = useState<Set<number>>(new Set());
+  const allOpen = open.size >= beat.rows.length;
+  const ROW_COLOR: Record<string, string> = {
+    red: "var(--destructive)",
+    amber: "var(--world-business-money-office)",
+    green: "var(--color-feedback-success)",
+  };
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.title}</Question>
+      <div className="flex flex-col gap-[8px]">
+        {beat.rows.map((row, index) => {
+          const revealed = open.has(index);
+          const tint = row.color ? ROW_COLOR[row.color] : "var(--accent-subtle)";
+          return (
+            <button
+              key={row.label}
+              type="button"
+              disabled={revealed}
+              onClick={() => {
+                playSelect();
+                setOpen((current) => new Set(current).add(index));
+              }}
+              className="flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[16px] border px-[16px] py-[14px] text-left text-[15px] font-semibold transition-[border-color,background] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[16px]"
+              style={{
+                animationDelay: `${index * 55}ms`,
+                background: revealed ? `color-mix(in srgb, ${tint} 12%, var(--glass-surface-1))` : "var(--glass-surface-1)",
+                borderColor: revealed ? tint : "var(--color-glass-border-raised)",
+                color: "var(--foreground)",
+              }}
+            >
+              <span className="min-w-0">
+                {row.label}
+                {revealed && (
+                  <span className="mt-[3px] block text-[14px] leading-snug font-bold motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]" style={{ color: tint }}>
+                    {row.reveal}
+                  </span>
+                )}
+              </span>
+              {!revealed && (
+                <span className="flex flex-none items-center gap-[5px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>
+                  <Eye className="h-[13px] w-[13px]" aria-hidden /> Tap to reveal
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {beat.note && (
+        <p className="text-[13px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {beat.note}
+        </p>
+      )}
+      {allOpen && (
+        <button
+          type="button"
+          onClick={() => { playSelect(); onNext(); }}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {beat.cta}
+          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -290,15 +612,35 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
   );
 }
 
-/** Fill in the Blank: the sentence keeps its shape and the blank fills in. */
+/** Drag to Blank (Interaction Rules): the sentence keeps its shape, the
+ *  word tiles sit on a rail below, and a tile is DRAGGED into the slot
+ *  rather than tapped (D75 -- a drag costs a deliberate second and feels
+ *  like a game rather than a quiz). One attempt on a scored beat, same as
+ *  every other scored interaction: whichever tile lands in the slot
+ *  commits. Number keys still commit directly (ChoiceBody's useDigitKeys),
+ *  so the keyboard path stays one press. */
 function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const chosen = beat.choices.find((choice) => choice.id === locked);
   const [before, after] = beat.question.split("___");
+  const slotRef = useRef<HTMLSpanElement>(null);
+  const dropTile = (choice: ChoiceBeat["choices"][number], x: number, y: number) => {
+    if (locked !== null) return;
+    const rect = slotRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    // A forgiving halo around the slot -- a drop just shy of a small inline
+    // target should not read as a miss (a real miss springs the tile back).
+    const pad = 26;
+    if (x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad) {
+      tierSound(choice.tier);
+      onResolve(choice.tier, choice.why, choice.id);
+    }
+  };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>
         {before}
         <span
+          ref={slotRef}
           className="mx-[3px] inline-block min-w-[104px] rounded-[8px] border-2 border-dashed px-[9px] text-center align-baseline transition-colors duration-200"
           style={{
             borderColor: chosen ? TIER_COLOR[chosen.tier] : "var(--color-glass-border-raised)",
@@ -312,12 +654,19 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
       </Question>
       <div className={beat.layout === "tiles" ? "grid grid-cols-2 gap-[8px]" : "flex flex-wrap gap-[8px]"}>
         {beat.choices.map((choice, index) => (
-          <button
+          <motion.button
             key={choice.id}
             type="button"
             disabled={locked !== null}
-            onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
-            className="cursor-pointer rounded-full border px-[18px] py-[15px] text-[16px] font-bold transition-[transform,border-color,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
+            drag={locked === null}
+            dragSnapToOrigin
+            dragMomentum={false}
+            whileDrag={{ scale: 1.08, zIndex: 30 }}
+            onDragEnd={(event) => {
+              const pointer = event as PointerEvent;
+              dropTile(choice, pointer.clientX, pointer.clientY);
+            }}
+            className="relative cursor-grab touch-none rounded-full border px-[18px] py-[15px] text-[16px] font-bold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
             style={{
               animationDelay: `${index * 55}ms`,
               background:
@@ -337,7 +686,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
             }}
           >
             {choice.label}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

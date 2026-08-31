@@ -40,7 +40,156 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
-### 2026-08-31 Play tab featured card: CTA onto the artwork, progress bar, Apple-radius button (UNCOMMITTED)
+### 2026-08-31 IB simulation: Aug-31 handoff update, cinematic trailer, voice system, score gauge (UNCOMMITTED, push authorized)
+
+From `DreamAri_IB_Levels1-3_Handoff (2).xlsx` (Aug 31; "(3)" is a
+byte-identical re-download), diffed cell-by-cell against the Aug 25 "(1)"
+version to isolate the changes, plus a round of live direct feedback.
+
+- **Tick-tock removed**: the countdown Clock no longer plays a per-second
+  tick (direct instruction). Ring + pulse carry the urgency.
+- **Level 1 rebuilt** (`ib-level-1.ts`, 18 -> 25 beats, ids L1-01..L1-25):
+  story cards split one-idea-per-screen (D52); System teach card + unscored
+  comprehension checks (D53/D67/D74; the sheet's drag-token check D75 was
+  switched back to TAP per direct feedback -- flag D75/Joshua if it should
+  return); Christina/Marcus two-card intros + Jordan single card at the
+  sheet's positions (D54/D60), with the power card's 3-rung ladder drawn as
+  a rail-and-dots DIAGRAM (per direct feedback that bordered rows read as
+  tappable options); Tap to Reveal skills/reputation screens (D86/D90/D93);
+  typed 85-check (recall, not recognition); matching pairs now
+  request-to-action (D68/D71/D87); Nike -> Maison Laurent with the client
+  introduced on first mention (D88); Catch-the-Mistake carries three errors
+  on one line (D94/D96); Jordan-credit beat rebalanced, best = raise at
+  review (D84); NEW printer beat unchanged; four endings incl. E1-C 40-59
+  and E-TERM under 40 (Endings tab). `locations.ts` L1 map re-keyed to the
+  new ids; hero art files unchanged (l1-07/12/13.webp on L1-14/21/22).
+- **Engine additions** (`types.ts`, `interactions.tsx`, `SimulationPlayer`):
+  new `check` (tap/type/drag) and `reveal` beat kinds; `card` gains
+  `ladder`/`system`; Drag to Blank -- the blank/tiles layouts' word tiles
+  are now framer-motion drags into the slot (D75), digit keys still work;
+  Action Prompt on every screen (authored `prompt` or a per-mechanic
+  default), small grey line above the interaction.
+- **D55 feedback trim**: FeedbackSheet shows derived headline + the CHOSEN
+  option's why + skills + score only; beat-level `feedback` strings are no
+  longer rendered anywhere.
+- **D62 Dreamy removed from the simulation**: Dreamy component deleted from
+  SimulationPlayer; L2-12/16 + L3 narration re-speakered Narrator, final
+  reviews are System cards; performance plan's footer is one line of plain
+  system text ("...you keep the job", "This one decides it. Be specific.").
+  Dreamy stays in the Glossary mini game and career pages.
+- **Three-voice dialogue system** (direct feedback): character = display
+  face, chat-notched bubble corner, per-character VOICE BLIPS while the
+  line types (new `playVoiceBlip` in sound.ts, per-speaker pitch map);
+  narrator = quiet italics in the body face, silent; system = squared
+  hairline card, utility type, silent.
+- **Score gauge** (direct feedback "make it read like a score"): reputation
+  is now a filling ring gauge in the band color with count-up/down, a pop
+  on every change, star + band label, floating +/- delta (`ScoreGauge` +
+  `useCountUp`).
+- **Cinematic trailer** (`TrailerFlow.tsx`, data in games.ts): the Trailer
+  tab's 7 cards, AAA-cut per direct feedback -- letterbox bars, Ken Burns
+  push per plate, film grain + vignette, Viaoda (--font-poster) title cards
+  blurring in, dedicated center text scrim for 100% legibility, Lamisa's
+  sprite rising dark-graded on TR-06, vertical ring-and-line ladder finale
+  ("How far WILL you get?", corrected per direct feedback), pulsing Start
+  Level 1 as the only button-looking thing, music (the sim's main theme)
+  with its own sound toggle, always-visible Skip. Renders through a portal
+  to document.body WITH `marketing-v2 themeable` classes (tokens don't
+  resolve outside the app shell otherwise). NOT auto-played: opened only
+  from a "Watch trailer" chip on the Play hub's featured card, per direct
+  feedback overriding the doc's play-once-on-first-open rule.
+- **dm-quiet hover fix, app-wide** (`app.css`, direct feedback): quiet
+  controls now default to a pill radius (in @layer components, so explicit
+  rounded-* still wins) and the hover wash carries a 6px halo box-shadow --
+  no more sharp-edged rectangles hugging unpadded text buttons.
+- L2/L3 data: L2-21c-region + L3 ladder-rank skill Systems Thinking ->
+  Critical Thinking; E-TERM ending added to both; `pose` fields stripped
+  (dead once Dreamy left).
+- Validation: tsc, eslint (one pre-existing img warning), tokens:check,
+  full build all clean. Live-verified: trailer desktop + mobile (finale,
+  sprite card, legibility scrim, music toggle), L1 walk-through to beat 8
+  (system cards, tap check, reveal screens, typed check untested live but
+  compiled, gauge 50->55 with +5 float, D55 card), glossary Back hover.
+- Push authorized by the user ("After you're done, push").
+
+### 2026-08-31 Aug-29 doc pass: Connect rebuild, Profile/Top 3, Career Report tabs + Reflection, Saved Careers rename (UNCOMMITTED)
+
+Full implementation of the remaining "DREAMARI UPDATES AUGUST 29" items
+(Landing copy, Connect, My Profile, Career Report -- the Play page items were
+already done and pushed). All working-tree only, per instruction: do NOT
+commit/push without explicit go-ahead.
+
+- **Landing** (`marketing/Hero.tsx`): intro paragraph shortened to
+  "Discover careers, find your path, experience the work, and connect with
+  professionals who do it every day." (the old five-clause sentence was too
+  long, per direct feedback), with "Build. Match. Explore. Play. Connect."
+  on its own SMALLER tracked-uppercase line underneath.
+- **Play tab Netflix audit** (`play/PlayHub.tsx`, after direct feedback
+  that the shelves below outweighed the hero): the Career Simulations row
+  is now the dominant billboard -- ROW_HEIGHT h-[212px]/300/380/430,
+  featured card 16:9 (aspect-video; at lg it's 764x430), side cards keep
+  Browse's 210/297 ratio (the sm side card IS PosterCard's own 210x297).
+  The CTA button is GONE: the playable featured card is one whole-card
+  Link with a centered glass play badge on the artwork
+  (`FeaturedPlayOverlay`), and a signal line inside the scrim
+  (`FeaturedMeta`): "Level 1 · Intern" fresh, or "Level 1 · Intern · N%
+  done" plus a real progress bar in the same spot when a run is saved.
+  Titles follow PosterCard's exact proportion rule (24px title at 297px
+  height, ~8%, with the same compact tier for 10+-char words and
+  keep-all/zero-width-space hyphen breaking), scaled per breakpoint.
+  Glossary Games and In the works are now uniform SHELF_HEIGHT
+  (150/170/195) horizontal scroll rows -- glossary card's copy moved
+  INSIDE the artwork's scrim (was an image-plus-caption block that
+  out-sized the hero), soon-cards switched from a grid to a flex shelf at
+  the poster ratio. Row headers brightened to foreground 15/17px (Netflix
+  headers are readable, not micro-labels). Verified live at 1280 and 375,
+  including the resumable progress state via a fake localStorage run.
+- **Connect** (`connect/ConnectExperience.tsx`, `connect/data.ts`): Feed and
+  Saved tabs removed; home = "Find Your Community" + subtitle + Community/
+  Events pill toggle + search + redesigned community cards (Students/Pros/
+  Posts stat row, PROFESSIONALS FROM company chips, topic chips, Open/Join
+  Community). Cards follow the design language, NOT the doc's colored-header
+  mockups: world accent as border tint + ambient blur glow + tinted icon
+  tile, strict Heading > stat row > body hierarchy. Events tab has the
+  "Keep the conversation going after the event." intro card. Board detail
+  has exactly two tabs: Student Questions / Professional Insights.
+- **Profile** (`profile/ProfileExperience.tsx`): Paths removed from the
+  tablist (RoutesTab kept, reachable via Plan's "Change route"); Resume
+  promoted into its slot. Top 3 is a side-by-side `lg:grid-cols-3` layout,
+  info vertical, per-world accent (border tint + glow + accent number chip +
+  world-name eyebrow in the accent color -- accent never on the career
+  title), exact prior copy. Streak fact now carries "Active 142 of 190 days
+  · 75%". Locker renamed "Saved Careers" everywhere user-visible (tab ids/
+  identifiers stay `locker`); also `app/HomeExperience.tsx` and
+  `motion-lab/DailyDropDemo.tsx` ("27 careers saved").
+- **Career Report** (`profile/CareerReport.tsx`): Contents rail/drawer
+  REMOVED (one flowing document). New sub-tab row on top of the report:
+  Report / Share / Counselor Review / Download. Share tab inlines the old
+  ShareSheet content (counselor + parent/guardian rows, copy-link) -- the
+  ShareSheet modal in ProfileExperience is retired, `onOpenShare` dropped
+  from `ReportViewProps` (ReportChooser updated). Counselor Review tab:
+  FOR STAFF USE ONLY eyebrow, three Pathway Status choice cards, Review
+  Notes, Save Review, Remove Pathway. Download tab: the print preview
+  inline (`data-preview` white paper) + window.print, replacing the modal.
+  "Report generated {today}" under the school name (suppressHydrationWarning).
+  New section "4. Courses to Consider" ("Classes that support this route",
+  first two `COURSE_SUGGESTIONS` entries as chips -- the O*NET/SCED note in
+  the doc is a backend data-model note, not UI); Colleges renumbered 5,
+  `REPORT_SECTIONS` updated. "My Reflection" card (Maisha's) under the
+  document in the Report tab: interest single-select, influence
+  multi-select, optional textarea, Save Reflection with Not saved yet /
+  Reflection saved status, persisted per career to localStorage
+  (`dreamari-reflection:<careerId>`, same prototype-backend idiom as
+  `lib/picks.ts`).
+- Validation: `tsc --noEmit` clean; eslint clean on all touched files (one
+  pre-existing `<img>` warning in ReportChooser untouched); `npm run
+  tokens:check` clean; live-verified in the browser at desktop (1440) and
+  mobile (375) -- Top 3 grid/stack, all four report sub-tabs, reflection
+  save + reload persistence, Saved Careers view, Connect home/Events/board.
+- Next step: user review of the working tree, then commit (do not push
+  without explicit authorization).
+
+### 2026-08-31 Play tab featured card: CTA onto the artwork, progress bar, Apple-radius button (PUSHED, be55dc3)
 
 Continuation of the Netflix-style featured row from `6d5b8d1` (that commit's
 own handoff entry was never written -- it rebuilt `PlayHub.tsx`'s
@@ -108,9 +257,7 @@ image:
   second real simulation, or a temporary dummy pressable candidate, to
   actually exercise -- flagged to the user rather than silently making
   "soon" cards clickable again.
-- Not yet committed/pushed -- awaiting confirmation this reads right before
-  pushing (this repo needs explicit go-ahead before `git push` even after
-  local verification).
+- Pushed as `be55dc3` after explicit go-ahead.
 
 - Date: 2026-08-25
 

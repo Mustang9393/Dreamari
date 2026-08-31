@@ -167,7 +167,6 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
               career={readingCareer}
               savedMajors={savedMajors}
               onToggleMajor={toggleMajor}
-              onOpenShare={() => {}}
               onOpenEvidence={() => {}}
               updatedLabel="just now"
             />

@@ -43,6 +43,11 @@ export type DreamyPose = "happy" | "glasses" | "idea" | "curious" | "alert" | "n
 
 type BeatBase = {
   id: string;
+  /** Action Prompt (Interaction Rules): the short grey line telling the
+   *  student what to do on screens whose action is not a labelled button --
+   *  "Tap one.", "Drag the right word into the space.". Button screens skip
+   *  it: there the button label IS the prompt. */
+  prompt?: string;
   /** Scene art. Sticky: a beat without its own art keeps the last one, so the
    *  unillustrated beats read as happening in the same room. */
   art?: string;
@@ -108,6 +113,50 @@ export type CardBeat = BeatBase & {
   /** step variant: "1 of 5". */
   step?: { at: number; of: number };
   /** A warning or aside under the body, in the level's accent. */
+  note?: string;
+  /** character variant, card two of two (the POWER card): the ladder graphic,
+   *  bottom-to-top, each rung "Name - Role" (a rung always carries its job
+   *  title, never a bare name). `lit` rungs are the player and the character
+   *  this card is about; the rest render dimmed. Only ever shows rungs the
+   *  student has actually met (Characters tab). */
+  ladder?: { label: string; lit: boolean }[];
+  /** The game speaking rather than a person: no avatar, no name, thin
+   *  outline, a different card shape from every in-story card -- so a
+   *  student can tell the game talking from the job talking (Interaction
+   *  Rules, System Card). */
+  system?: boolean;
+  cta: string;
+};
+
+/** Comprehension Check: the unscored gate after a Teach Card. Unlimited
+ *  tries, cannot skip, never a strike -- wrong answers shake and stay open
+ *  until the student gets it right (Interaction Rules). `tap` when the
+ *  answer is a concept, `type` when it is a number or exact word the
+ *  student must carry forward (recall, not recognition), `drag` when the
+ *  answer should cost a deliberate second (a token dragged onto a card). */
+export type CheckBeat = BeatBase & {
+  kind: "check";
+  method: "tap" | "type" | "drag";
+  question: string;
+  /** tap/drag methods: exactly one correct option. */
+  options?: { label: string; correct: boolean; why: string }[];
+  /** type method: the accepted entry, compared trimmed and case-insensitive. */
+  answer?: string;
+  /** type method: right answer's confirmation line. */
+  whyRight?: string;
+  /** type method: fades in under the box after two wrong tries. */
+  hint?: string;
+  cta: string;
+};
+
+/** Tap to Reveal: rows that show a label and hide their payload behind TAP
+ *  TO REVEAL. Continue only appears once every row is open, so nobody can
+ *  skip the lesson. Not scored (Interaction Rules). */
+export type RevealBeat = BeatBase & {
+  kind: "reveal";
+  title: string;
+  rows: { label: string; reveal: string; color?: "red" | "amber" | "green" }[];
+  /** Static line under the rows (never a row itself). */
   note?: string;
   cta: string;
 };
@@ -257,6 +306,8 @@ export type BucketBeat = BeatBase & {
 
 export type Beat =
   | CardBeat
+  | CheckBeat
+  | RevealBeat
   | ChoiceBeat
   | MatchBeat
   | RapidBeat
@@ -301,6 +352,22 @@ export type Level = {
   endings: Ending[];
 };
 
+/** One trailer card: full-bleed reused art (none = black), one line of
+ *  plain-English text, auto-advances after `seconds`. The finale card
+ *  carries the six-rung ladder and the Start/Skip buttons instead of
+ *  auto-advancing (Trailer tab). */
+export type TrailerCard = {
+  id: string;
+  seconds: number;
+  text: string;
+  art?: string;
+  /** A character sprite (an existing expression cutout) rising into frame,
+   *  dark-graded -- the trailer's people are silhouettes until the game
+   *  introduces them properly. */
+  sprite?: string;
+  finale?: boolean;
+};
+
 export type Simulation = {
   id: string;
   /** The shared career catalogue id, so a simulation lines up with the report,
@@ -310,6 +377,9 @@ export type Simulation = {
   world: string;
   firm: string;
   cover: string;
+  /** Plays once before Level 1, skippable, no choices, no score -- about 20
+   *  seconds of reused art (Trailer tab). */
+  trailer?: TrailerCard[];
   levels: Level[];
   /** Levels named on the ladder but not built yet. */
   upcoming: string[];
