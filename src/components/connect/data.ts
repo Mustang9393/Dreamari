@@ -247,7 +247,7 @@ export const THREADS: Thread[] = [
         body: "Tutorials are a fine start — just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
-      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/sob.gif", imageAlt: "Sobbing emoji reaction" },
+      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
     ],
   },
   {
@@ -287,6 +287,7 @@ export const THREADS: Thread[] = [
     unreadAnswer: true,
     saved: true,
     responses: [
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
       {
         kind: "answer",
         proId: "pro-okafor",
@@ -496,7 +497,7 @@ export const INSIGHTS: Insight[] = [
       { proId: "pro-chen", body: "Good question — a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
       { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
       { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
-      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/skull.gif", imageAlt: "Skull emoji reaction" },
+      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
       { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 3 },
     ],
   },
@@ -541,7 +542,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "4d ago",
     helpful: 31,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/mindblown.gif", imageAlt: "Mind-blown emoji reaction" },
+      { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
       { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
       { proId: "pro-reyes", body: "The opposite — the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
       { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
@@ -558,7 +559,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 27,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/joy.gif", imageAlt: "Laughing emoji reaction" },
+      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
       { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
     ],
   },
@@ -573,6 +574,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 29,
     replies: [
       { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 5 },
+      { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 7, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
       { proId: "pro-osei", body: "School projects count if you can explain your own contribution. 'We built' is fine; follow it with 'my part was…'", postedAgo: "16h ago", likes: 12 },
     ],
   },
@@ -630,6 +632,7 @@ export const INSIGHTS: Insight[] = [
     replies: [
       { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 10 },
       { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 7 },
+      { handle: "Marcus", grade: "Freshman", body: "everyone at the next career fair when I pull up with actual questions", postedAgo: "1d ago", likes: 9, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
     ],
   },
   {
@@ -642,7 +645,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 48,
     replies: [
-      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/fire.gif", imageAlt: "Fire emoji reaction" },
+      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
       { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 6 },
     ],
   },
@@ -670,7 +673,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "6d ago",
     helpful: 39,
     replies: [
-      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 17 },
+      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 17, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
     ],
   },
   {

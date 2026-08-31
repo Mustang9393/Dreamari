@@ -1417,7 +1417,7 @@ function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, o
            shows them; it's a pitch beat about speaking Gen Z) -- rendered
            unoptimized so the animation actually plays. */}
         {image && (
-          <Image src={image} alt={imageAlt ?? ""} width={512} height={512} unoptimized className="mt-[8px] h-[92px] w-[92px] rounded-[14px] object-contain" style={{ background: "var(--glass-surface-1)" }} />
+          <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[14px] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
         )}
         <button type="button" onClick={() => onLike(id)} aria-pressed={liked} className="dm-link mt-[4px] flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[11.5px] leading-[15px] font-semibold" style={{ color: liked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
           <ThumbsUp className="h-3 w-3" aria-hidden /> {likes + (liked ? 1 : 0)}
