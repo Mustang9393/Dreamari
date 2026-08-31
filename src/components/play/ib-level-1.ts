@@ -35,6 +35,13 @@ export const IB_LEVEL_1: Level = {
     Jordan: `${ART}/face-jordan.webp`,
     Marcus: `${ART}/face-marcus.webp`,
   },
+  // Express mode ("Investment Banker, Level 1, Express mode" doc): the five
+  // teaching screens go -- how-IB-works + its example page, the drag check on
+  // it, the skill-chips intro, the score spotlight, and the typed 85-threshold
+  // check. All ten scored beats survive; both story cards, every character
+  // card and the vocabulary flips card stay. The cut teaching becomes
+  // tappable in the player (score panel, term meanings, character cards).
+  expressCut: ["L1-03", "L1-03b", "L1-04", "L1-07", "L1-09", "L1-10"],
   beats: [
     // ---- arrival: one idea per screen (D52) ----
     {

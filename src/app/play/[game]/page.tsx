@@ -18,14 +18,22 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ game: string }>;
-  searchParams: Promise<{ level?: string | string[] }>;
+  searchParams: Promise<{ level?: string | string[]; mode?: string | string[] }>;
 }) {
   const { game } = await params;
   const query = await searchParams;
   const simulation = simulationFor(game);
   if (!simulation) notFound();
   const wanted = Number(Array.isArray(query.level) ? query.level[0] : query.level);
-  const level = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
+  const picked = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
+  // Express mode: the same level minus its expressCut teaching screens. Every
+  // scored beat, the scoring, the thresholds and the endings are the full
+  // level's own -- the beats array is just shorter, and `express: true` tells
+  // the player to key a separate save slot and offer the tappable panels.
+  const express = (Array.isArray(query.mode) ? query.mode[0] : query.mode) === "express" && !!picked.expressCut?.length;
+  const level = express
+    ? { ...picked, id: `${picked.id}-express`, express: true, beats: picked.beats.filter((beat) => !picked.expressCut!.includes(beat.id)) }
+    : picked;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />

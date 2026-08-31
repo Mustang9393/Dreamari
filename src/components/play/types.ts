@@ -372,6 +372,15 @@ export type Level = {
   cast?: Record<string, string>;
   beats: Beat[];
   endings: Ending[];
+  /** Express mode: beat ids the trimmed demo run drops. All are teaching
+   *  screens -- every scored beat must survive, and scoring, thresholds and
+   *  endings stay untouched (Express handoff doc). Presence of this list is
+   *  what offers the mode at all. */
+  expressCut?: string[];
+  /** True only on the derived level object actually being played in Express
+   *  (the route builds it from `expressCut`) -- the player uses it to key a
+   *  separate save slot and to turn the cut teaching into tappable panels. */
+  express?: boolean;
 };
 
 /** One trailer card: full-bleed reused art (none = black), one line of

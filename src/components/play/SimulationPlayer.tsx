@@ -59,12 +59,16 @@ type Phase = "beat" | "feedback" | "ending";
 type Result = { tier: Tier; why: string; delta: number };
 
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
+  // Express runs save in their own slot (n + 100): the trimmed beats array
+  // indexes differently, so resuming a full-mode save mid-Express (or vice
+  // versa) would land on the wrong beat.
+  const saveSlot = level.express ? level.n + 100 : level.n;
   // AUTOSAVE. Storage is read as an external store, and the run is DERIVED from
   // it rather than seeded into useState: a state initialiser runs during
   // hydration, when useSyncExternalStore still reports the server snapshot, so
   // seeding silently threw the save away and every resume started at beat one.
   // Deriving means the saved run appears as soon as the store hydrates.
-  const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, level.n);
+  const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, saveSlot);
   const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
   const base = resumable
     ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
@@ -108,6 +112,51 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+
+  // EXPRESS: the cut teaching moves from push to pull ("Without these panels
+  // Express is not a faster mode, it is an incomplete one" -- the handoff's
+  // Do Not list). The lexicon is DERIVED from the level's own beats, so it
+  // teaches exactly what the full mode teaches: vocabulary comes from the
+  // flips card's own term/def pairs, and a character's panel is their own
+  // intro card (kicker, one-liner, face). Nothing is authored twice.
+  const expressLexicon = useMemo(() => {
+    if (!level.express) return null;
+    const cast = new Map<string, LexEntry>();
+    const terms = new Map<string, LexEntry & { firstBeat: string | null }>();
+    for (const entry of level.beats) {
+      if (entry.kind === "card" && entry.variant === "character" && entry.castMember && !cast.has(entry.castMember)) {
+        // Setup reads "Christina • Associate" -- the role half is the kicker,
+        // the name is the panel's title.
+        const role = entry.setup?.split("•")[1]?.trim() ?? entry.setup ?? "";
+        cast.set(entry.castMember, { kicker: role, title: entry.castMember, body: entry.title, portrait: level.cast?.[entry.castMember] });
+      }
+      if (entry.kind === "flips") {
+        for (const card of entry.cards) {
+          const key = card.term.toLowerCase();
+          if (!terms.has(key)) terms.set(key, { kicker: "What it means", title: card.term, body: card.def, firstBeat: null });
+        }
+      }
+    }
+    // Industry terms underline ONCE, on first use (the doc's rule) -- find the
+    // first beat whose spoken line uses each term. Character names stay
+    // tappable in every setup line ("their card again").
+    for (const entry of level.beats) {
+      const text = entry.setup ?? "";
+      for (const item of terms.values()) {
+        if (item.firstBeat === null && new RegExp(`\\b${item.title}\\b`, "i").test(text)) item.firstBeat = entry.id;
+      }
+    }
+    return { cast, terms };
+  }, [level]);
+  const annotate = useMemo(() => {
+    if (!expressLexicon) return undefined;
+    const tokens: { token: string; entry: LexEntry }[] = [];
+    for (const [name, entry] of expressLexicon.cast) tokens.push({ token: name, entry });
+    for (const entry of expressLexicon.terms.values()) if (entry.firstBeat === beat.id) tokens.push({ token: entry.title, entry });
+    if (!tokens.length) return undefined;
+    const render = (line: string, open: (entry: LexEntry) => void) => renderTappableLine(line, tokens, open);
+    return render;
+  }, [expressLexicon, beat.id]);
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
@@ -246,13 +295,13 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // derived from them. A player who closed the app on the final review
       // screen came back and got the worst ending whatever they had earned.
       patchRun({});
-      clearRun(simulation.id, level.n);
+      clearRun(simulation.id, saveSlot);
       setPhase("ending");
       return;
     }
     setPhase("beat");
     patchRun({ index: index + 1 });
-    saveRun({ gameId: simulation.id, level: level.n, index: index + 1, scores: live.scores, reputation, scored });
+    saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
 
@@ -270,7 +319,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     // includes strikes and whether a plan already fired this level --
     // otherwise a player who restarts after passing a plan on beat 3 would
     // find themselves unable to ever trigger it again this run.
-    clearRun(simulation.id, level.n);
+    clearRun(simulation.id, saveSlot);
     setRun({ index: 0, scores: {} });
     setRepair(null);
     setLocked(null);
@@ -535,14 +584,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             setStrikes(0);
             setPhase("beat");
             patchRun({ index: pip.resumeIndex });
-            saveRun({ gameId: simulation.id, level: level.n, index: pip.resumeIndex, scores: live.scores, reputation: 50, scored });
+            saveRun({ gameId: simulation.id, level: saveSlot, index: pip.resumeIndex, scores: live.scores, reputation: 50, scored });
           }}
           onTerminated={() => {
             setPip(null);
             setStrikes(0);
             setPipUsed(false);
             setReputationBaseline(START_REPUTATION);
-            clearRun(simulation.id, level.n);
+            clearRun(simulation.id, saveSlot);
             setRun({ index: 0, scores: {} });
             setRepair(null);
             setLocked(null);
@@ -572,6 +621,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           beat={beat}
           accent={accent}
           cast={level.cast}
+          annotate={annotate}
           locked={locked}
           paused={phase !== "beat"}
           ambient={scene.mode === "none"}
@@ -928,6 +978,7 @@ function BeatStage({
   beat,
   accent,
   cast,
+  annotate,
   locked,
   paused,
   hidden,
@@ -941,6 +992,10 @@ function BeatStage({
   beat: Beat;
   accent: string;
   cast?: Record<string, string>;
+  /** Express only: wraps a finished dialogue line's industry terms and
+   *  character names in tappable spans (the pull version of the cut
+   *  teaching screens). */
+  annotate?: (line: string, open: (entry: LexEntry) => void) => React.ReactNode;
   locked: string | null;
   paused: boolean;
   /** True while the verdict card is up: the stage steps back rather than
@@ -1082,7 +1137,7 @@ function BeatStage({
           }`}
         >
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} onAdvance={() => setRevealed(true)}>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
@@ -1094,6 +1149,7 @@ function BeatStage({
               tone={"tone" in beat ? beat.tone : undefined}
               held={!revealed}
               voice={voice}
+              annotate={annotate}
               onAdvance={() => setRevealed(true)}
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
               ambient={ambient}
@@ -1452,6 +1508,46 @@ const VOICE_PITCH: Record<string, number> = {
   "Cobalt HR": 600,
 };
 
+// One tappable meaning, in Express mode: an industry term's plain meaning, or
+// a character's own intro card again. Derived from the level's beats -- see
+// expressLexicon in SimulationPlayer.
+type LexEntry = { kicker: string; title: string; body: string; portrait?: string };
+
+// Wraps every lexicon token in a finished dialogue line with a tappable,
+// dotted-underlined span. Inline buttons inherit the line's own font and
+// color so the sentence still reads as one sentence.
+function renderTappableLine(line: string, tokens: { token: string; entry: LexEntry }[], open: (entry: LexEntry) => void): React.ReactNode {
+  const escaped = tokens.map((item) => item.token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+  for (const match of line.matchAll(pattern)) {
+    const at = match.index ?? 0;
+    const hit = tokens.find((item) => item.token.toLowerCase() === match[0].toLowerCase());
+    if (!hit) continue;
+    if (at > cursor) nodes.push(line.slice(cursor, at));
+    nodes.push(
+      <button
+        key={`${hit.token}-${at}`}
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          playSelect();
+          open(hit.entry);
+        }}
+        className="inline cursor-pointer underline decoration-dotted decoration-2 underline-offset-4"
+        style={{ font: "inherit", color: "inherit", letterSpacing: "inherit", textDecorationColor: "color-mix(in srgb, currentColor 45%, transparent)" }}
+      >
+        {match[0]}
+      </button>,
+    );
+    cursor = at + match[0].length;
+  }
+  if (cursor === 0) return line;
+  nodes.push(line.slice(cursor));
+  return nodes;
+}
+
 function DialogueBox({
   speaker,
   portrait,
@@ -1462,6 +1558,7 @@ function DialogueBox({
   held,
   ambient,
   voice = "narrator",
+  annotate,
   onPrimary,
   onAdvance,
   children,
@@ -1480,6 +1577,8 @@ function DialogueBox({
    *  place when there is no picture doing that job instead. */
   ambient?: boolean;
   voice?: DialogueVoice;
+  /** Express only: renders the finished line with tappable terms/names. */
+  annotate?: (line: string, open: (entry: LexEntry) => void) => React.ReactNode;
   /** The beat's single action, for beats with no question to reveal. */
   onPrimary?: () => void;
   onAdvance?: () => void;
@@ -1487,6 +1586,8 @@ function DialogueBox({
 }) {
   const line = setup ?? "";
   const { visible, done, skip } = useTypewriter(line);
+  /** Express: the meaning panel a tapped term/name opened, if any. */
+  const [lex, setLex] = useState<LexEntry | null>(null);
 
   // Voice blips: a tiny syllable every couple of characters while a
   // CHARACTER's line types, at that character's own pitch. Narrator and
@@ -1629,7 +1730,11 @@ function DialogueBox({
                   fontFamily: voice === "character" ? "var(--font-display)" : "var(--font-body)",
                 }}
               >
-                {visible}
+                {/* Once the line has finished typing, Express swaps in the
+                   annotated version -- identical text, with terms and names
+                   tappable. During typing it stays plain: half-typed tokens
+                   cannot match. */}
+                {done && annotate ? annotate(line, setLex) : visible}
                 {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>
             </span>
@@ -1655,11 +1760,110 @@ function DialogueBox({
           </>
         )}
       </div>
+
+      {/* Express meaning panel: a System-style card (utility voice -- this is
+         the game explaining, not the office talking). Tap anywhere to close. */}
+      {lex && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center p-[var(--space-5)]"
+          onClick={(event) => {
+            event.stopPropagation();
+            setLex(null);
+          }}
+        >
+          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(4px)" }} />
+          <div
+            role="dialog"
+            aria-label={lex.title}
+            className="relative w-full max-w-[360px] rounded-[10px] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            style={{ background: "color-mix(in srgb, var(--background) 95%, transparent)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))" }}
+          >
+            <div className="flex items-start gap-[14px]">
+              {lex.portrait && (
+                <span aria-hidden className="flex-none overflow-hidden rounded-[12px] border" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+                  <Image src={lex.portrait} alt="" width={112} height={112} className="h-[56px] w-[56px] object-cover object-top" />
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{lex.kicker}</span>
+                <span className="mt-[3px] block text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{lex.title}</span>
+                <span className="mt-[6px] block text-[14px] leading-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>{lex.body}</span>
+              </span>
+            </div>
+            <span className="mt-[14px] block text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tap anywhere to close</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // -------------------------------------------------------------------- the HUD
+
+/** Express: the score gauge as a button. Tapping it opens the three outcomes
+ *  -- the exact teaching the cut spotlight screen pushed, now pulled on
+ *  demand. The row the player is currently in is lit. */
+function TappableScore({ reputation, band, delta, accent }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string }) {
+  const [open, setOpen] = useState(false);
+  const OUTCOMES = [
+    { label: "Promoted", range: "85+", active: reputation >= 85 },
+    { label: "No return offer, start over", range: "40–84", active: reputation >= 40 && reputation < 85 },
+    { label: "The run ends", range: "Under 40", active: reputation < 40 },
+  ];
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`Reputation ${Math.round(reputation)}, ${band.name}. What this number decides`}
+        onClick={() => {
+          playSelect();
+          setOpen(true);
+        }}
+        className="dm-quiet cursor-pointer rounded-full"
+      >
+        <ScoreGauge reputation={reputation} band={band} delta={delta} />
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center p-[var(--space-5)]"
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpen(false);
+          }}
+        >
+          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(4px)" }} />
+          <div
+            role="dialog"
+            aria-label="What your reputation decides"
+            className="relative w-full max-w-[360px] rounded-[10px] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            style={{ background: "color-mix(in srgb, var(--background) 95%, transparent)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))" }}
+          >
+            <span className="block text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Reputation</span>
+            <span className="mt-[3px] block text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>This number decides how the level ends.</span>
+            <div className="mt-[12px] flex flex-col gap-[6px]">
+              {OUTCOMES.map((outcome) => (
+                <div
+                  key={outcome.label}
+                  className="flex items-baseline justify-between gap-[12px] rounded-[8px] border px-[12px] py-[9px]"
+                  style={{
+                    borderColor: outcome.active ? accent : "var(--color-glass-border-raised)",
+                    background: outcome.active ? `color-mix(in srgb, ${accent} 12%, transparent)` : "transparent",
+                  }}
+                >
+                  <span className="text-[14px] leading-[19px] font-bold">{outcome.label}</span>
+                  <span className="flex-none text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: outcome.active ? "var(--foreground)" : "var(--muted-foreground)" }}>{outcome.range}</span>
+                </div>
+              ))}
+            </div>
+            <span className="mt-[14px] block text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tap anywhere to close</span>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 function Hud({
   simulation,
@@ -1719,6 +1923,7 @@ function Hud({
           </span>
           <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: accent }}>
             Level {level.n} · {level.role}
+            {level.express ? " · Express" : ""}
           </span>
         </span>
         <span className="flex flex-none items-center gap-[6px]">
@@ -1730,7 +1935,12 @@ function Hud({
            which was truncating down to one or two characters. The gauge
            alone still says the same thing at a glance; aria-label keeps the
            full "47, Cautious" available to assistive tech either way. */}
-        <ScoreGauge reputation={reputation} band={band} delta={delta} demo={spotlightScore} />
+        {/* EXPRESS: reputation shows from screen one but is never explained
+           by a teaching screen -- the number itself is the explainer. Tapping
+           it opens the three outcomes (the cut "That number in the corner
+           just moved" screen, pull instead of push). Full mode keeps the
+           gauge inert; its spotlight beat does this job. */}
+        {level.express ? <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} /> : <ScoreGauge reputation={reputation} band={band} delta={delta} demo={spotlightScore} />}
       </div>
       <div className="flex items-center gap-[7px]">
         <span className="relative h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--color-glass-border-raised)" }}>

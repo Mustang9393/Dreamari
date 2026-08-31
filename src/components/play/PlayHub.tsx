@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { BookOpen, Film, Lock, Play } from "lucide-react";
+import { BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
@@ -358,20 +358,35 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
       >
         <Play className="ml-[3px] h-[22px] w-[22px] sm:h-[26px] sm:w-[26px] md:h-[30px] md:w-[30px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
       </span>
-      {sim.trailer && onTrailer && (
-        // "Watch trailer", the full verb phrase, per direct feedback -- a
-        // chip reading just "Trailer" made the whole featured card sound
-        // like it WAS a trailer rather than the game.
-        <button
-          type="button"
-          onClick={onTrailer}
-          className="dm-quiet absolute top-[10px] right-[10px] z-20 flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
-          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
-        >
-          <Film className="h-[13px] w-[13px]" aria-hidden />
-          Watch trailer
-        </button>
-      )}
+      <span className="absolute top-[10px] right-[10px] z-20 flex items-center gap-[6px]">
+        {/* Express mode: the trimmed demo run (Level 1 minus its teaching
+           screens; every scored beat, threshold and ending intact). Only
+           offered when the level declares an expressCut list. */}
+        {first.expressCut && first.expressCut.length > 0 && (
+          <Link
+            href={`/play/${sim.id}?mode=express`}
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+          >
+            <Zap className="h-[13px] w-[13px]" aria-hidden />
+            Express mode
+          </Link>
+        )}
+        {sim.trailer && onTrailer && (
+          // "Watch trailer", the full verb phrase, per direct feedback -- a
+          // chip reading just "Trailer" made the whole featured card sound
+          // like it WAS a trailer rather than the game.
+          <button
+            type="button"
+            onClick={onTrailer}
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
+          >
+            <Film className="h-[13px] w-[13px]" aria-hidden />
+            Watch trailer
+          </button>
+        )}
+      </span>
     </>
   );
 }
