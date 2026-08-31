@@ -40,6 +40,75 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 IB simulation: Aug-31 handoff (2).xlsx content update, cinematic trailer, voice system (PUSHED with the doc-pass commit)
+
+Applied `DreamAri_IB_Levels1-3_Handoff (2).xlsx` (Aug 31) by DIFFING it
+against the (1) version the sim was built from, so only real changes moved:
+
+- **Level 1 fully restructured** (`ib-level-1.ts`, L1-01..L1-25 + rapid
+  children): story cards split one-idea-per-screen (D52), teach-then-check
+  pacing (D53/D67/D74), the client renamed Maison Laurent and introduced on
+  first mention (D88), Jordan reframed to composure with family cut
+  (D83/D95/D97), review-week beat rebalanced (D84), catch-the-mistake line
+  now carries three errors (D94/D96). `locations.ts` BEAT_LOCATION remapped
+  to the new ids; the three hero illustrations keep their files on their
+  renumbered beats. Four endings now (85+/60-84/40-59/E-TERM under 40,
+  Endings tab): E-TERM "Contract Ended" added to ALL three levels' endings.
+- **New engine mechanics** (`types.ts`, `interactions.tsx`,
+  `SimulationPlayer.tsx`): `check` beats (unscored comprehension gates --
+  tap, typed with fade-in hint after two misses, and a drag variant kept in
+  the engine but NOT used on L1-04, which was switched back to tap per
+  direct feedback overriding the sheet's D75), `reveal` beats (Tap to
+  Reveal rows; Continue only after all open), character POWER cards with a
+  rail-and-dots ladder DIAGRAM (restyled from bordered rows per direct
+  feedback -- they read as tappable options), Drag-to-Blank (the blank/
+  tiles layouts now drag via framer-motion, keyboard digits still work),
+  Action Prompts on every screen (authored `prompt` or a per-mechanic
+  default), D55 feedback cards (headline + chosen option's why + chips +
+  score; feedback bodies no longer render).
+- **Dreamy removed from the simulation** (D62): the Narrator sets scenes
+  (italic body-face, no avatar/name), System cards carry rules (squared
+  corners, hairline edge, utility type), characters speak in the display
+  face with a chat-notched bubble and per-character VOICE BLIPS during the
+  typewriter (`playVoiceBlip` in sound.ts, pitch per character). Dreamy
+  component deleted from SimulationPlayer; L2/L3 Dreamy beats re-speakered
+  per the sheet; poses stripped. Performance plan footer is a system line
+  now ("...you keep the job", "This one decides it. Be specific.").
+- **Cinematic trailer** (`TrailerFlow.tsx`, data in games.ts): AAA-style --
+  letterbox bars, Ken Burns push per plate, film grain, deep vignette +
+  an ORGANIC blurred text pool (backdrop-blur feathered through a mask,
+  never a hard-edged scrim), titles in the world's approved poster serif
+  (Viaoda) with constant tracking (animating letter-spacing rewrapped
+  lines = jitter, per direct feedback), Lamisa's sprite rising dark-graded
+  on TR-06 ABOVE the vignettes, a vertical ring-and-segment ladder finale
+  ("How far WILL you get?", corrected per direct feedback) with the CTA as
+  the only tappable thing, the sim's main theme as score + its own mute
+  toggle. Renders through a portal on document.body WITH the
+  marketing-v2/themeable classes (tokens don't resolve outside the shell).
+  NOT auto-played (the sheet says play-once-on-first-open; overridden per
+  direct feedback): opened only from a "Watch trailer" chip on the Play
+  hub's featured card.
+- **Reputation HUD is a score now** (direct feedback): `ScoreGauge` -- ring
+  gauge filling 0-100 in the band's color, count-up/down between values,
+  pop on change, star + band label, floating +/-delta.
+- **Timer tick sound removed** (direct instruction): the countdown ring is
+  silent; `playTick` is now unused by the player.
+- **dm-quiet hover fix, app-wide** (`app.css`, direct feedback): pill
+  border-radius as a components-layer default (explicit rounded-* still
+  wins) + a 6px same-color box-shadow halo, so the hover wash never paints
+  a sharp-edged rectangle flush against an unpadded text control (the
+  Glossary "Back" button was the visible case).
+- Sheet items deliberately NOT built: sound cues per trailer card beyond
+  the main theme; the Decode the Message interaction (approved, unused per
+  the sheet); L1-04's drag mechanic (built, parked, see above); Levels 4-6.
+- Validation: tsc, eslint (pre-existing img warning only), tokens:check,
+  full build, live playthrough of L1-01..08 verifying trailer, checks,
+  reveals, ladder diagram, voice boxes, gauge and prompts, at desktop and
+  375-wide mobile.
+- NEXT UP (queued by the user): elevate the Glossary Game -- 3D flipbook
+  term cards (sketch-style illustration face / word+definition face),
+  richer feedback loops and sounds.
+
 ### 2026-08-31 Investment Banking photo unified to the founder's image (PUSH AUTHORIZED)
 
 - The founder-supplied "Investment banker.png" (repo root, 1088x1445) is now

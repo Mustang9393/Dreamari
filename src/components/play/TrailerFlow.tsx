@@ -84,12 +84,16 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
             >
               <Image src={card.art} alt="" fill sizes="100vw" className="object-cover" priority />
             </motion.div>
-            {/* A character sprite rising into frame, dark-graded: seen
-               before they are met, a silhouette until the game introduces
-               them properly. */}
+            {/* Deep vignette: the frame stays dark at the edges so the
+               title always owns the center of the screen. */}
+            <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(115% 85% at 50% 46%, transparent 26%, rgba(0,0,0,0.62) 74%, rgba(0,0,0,0.94) 100%)" }} />
+            <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 62%, rgba(0,0,0,0.72) 100%)" }} />
+            {/* A character sprite rising into frame, low-key graded but
+               clearly VISIBLE (above the vignette layers, never buried
+               under them): seen before they are met. */}
             {card.sprite && (
               <motion.div
-                className="absolute right-[4%] bottom-0 h-[72dvh] w-[46vw] sm:right-[10%] sm:w-[34vw]"
+                className="absolute right-[2%] bottom-0 h-[80dvh] w-[60vw] sm:right-[9%] sm:w-[36vw]"
                 initial={reduced ? { opacity: 0 } : { opacity: 0, y: 60 }}
                 animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
@@ -100,14 +104,10 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
                   fill
                   sizes="40vw"
                   className="object-contain object-bottom"
-                  style={{ filter: "brightness(0.42) contrast(1.12) saturate(0.8) drop-shadow(0 0 60px rgba(0,0,0,0.9))" }}
+                  style={{ filter: "brightness(0.68) contrast(1.08) saturate(0.85) drop-shadow(0 0 60px rgba(0,0,0,0.9))" }}
                 />
               </motion.div>
             )}
-            {/* Deep vignette: the frame stays dark at the edges so the
-               title always owns the center of the screen. */}
-            <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(115% 85% at 50% 46%, transparent 26%, rgba(0,0,0,0.62) 74%, rgba(0,0,0,0.94) 100%)" }} />
-            <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 62%, rgba(0,0,0,0.72) 100%)" }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -125,18 +125,32 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
            pool behind the title zone so legibility is 100% on ANY art --
            the bright morning plates were washing the serif out. */}
         {!card.finale && (
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 h-[46dvh] -translate-y-1/2" style={{ background: "radial-gradient(58% 100% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.42) 55%, transparent 100%)" }} />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-1/2 h-[90dvh] w-[160vw] -translate-x-1/2 -translate-y-1/2"
+            style={{
+              // The pool of focus behind the title: a backdrop blur that
+              // FEATHERS out through its mask plus a soft tint whose
+              // gradient dies well inside the element -- organic, never a
+              // rectangle with edges.
+              backdropFilter: "blur(9px)",
+              WebkitBackdropFilter: "blur(9px)",
+              maskImage: "radial-gradient(38% 32% at 50% 50%, black 12%, transparent 62%)",
+              WebkitMaskImage: "radial-gradient(38% 32% at 50% 50%, black 12%, transparent 62%)",
+              background: "radial-gradient(38% 32% at 50% 50%, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.3) 42%, transparent 66%)",
+            }}
+          />
         )}
         {/* The title, set in the world's approved poster serif, breathing in
            from a blur -- one line, film-title sized, gold-warmed white. */}
         <AnimatePresence mode="wait">
           <motion.p
             key={`${card.id}-text`}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(10px)", letterSpacing: "0.16em", y: 8 }}
-            animate={reduced ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", letterSpacing: "0.04em", y: 0 }}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(10px)", y: 8 }}
+            animate={reduced ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", y: 0 }}
             exit={{ opacity: 0, filter: "blur(6px)" }}
             transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-            className="relative max-w-[720px] text-[clamp(26px,5.4vw,52px)] leading-[1.22] text-balance uppercase"
+            className="relative max-w-[720px] text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
             style={{
               fontFamily: "var(--font-poster)",
               fontWeight: 400,
