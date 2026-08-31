@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowRight, BadgeCheck, Check, CheckCircle2, ChevronDown, Clock, Compass, Copy, DollarSign, ExternalLink, MapPin, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -79,36 +79,40 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
   );
 }
 
-// A numbered report section. Nothing here collapses: the export has to carry
-// everything, and a dropdown is exactly how information goes missing from a
-// printed document.
-function ReportSection({ id, n, title, action, children }: { id: string; n: number; title: string; action?: React.ReactNode; children: React.ReactNode }) {
+// A report section. Each one is its own contained module -- a raised card
+// with a labeled header rail -- so a scrolling student sees repeating blocks
+// instead of one continuous column of text. Nothing here collapses: the
+// export has to carry everything, and a dropdown is exactly how information
+// goes missing from a printed document.
+function ReportSection({ id, n, title, icon: Icon, action, children }: { id: string; n: number; title: string; icon?: typeof Check; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] pt-[40px] sm:pt-[46px]">
-      <div className="flex flex-col gap-[12px] sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-[16px] sm:gap-y-[8px]">
-        <span className="flex items-baseline gap-[10px] sm:contents">
-        <span aria-hidden className="dm-report-num flex-none text-[23px] leading-[27px] font-extrabold tabular-nums sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>{String(n).padStart(2, "0")}</span>
-        <h3 id={`${id}-title`} className="text-[23px] leading-[27px] font-extrabold text-balance uppercase sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.004em" }}>
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] overflow-hidden rounded-[14px] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
+      <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[8px] border-b px-[16px] py-[13px] sm:px-[20px]" style={{ borderColor: "var(--rule)" }}>
+        {Icon && <Icon className="h-[16px] w-[16px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+        <span aria-hidden className="dm-report-num sr-only">{String(n).padStart(2, "0")}</span>
+        <h3 id={`${id}-title`} className="text-[14px] leading-[18px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>
           {title}
         </h3>
-        </span>
-        {action && <span className="sm:ml-auto">{action}</span>}
+        {action && <span className="ml-auto">{action}</span>}
       </div>
-      <div className="mt-[16px] border-t pt-[18px]" style={{ borderColor: "var(--rule-strong)" }}>
+      <div className="px-[16px] py-[16px] sm:px-[20px] sm:py-[18px]">
         {children}
       </div>
     </section>
   );
 }
 
-function Fact({ label, value, icon: Icon }: { label: string; value: React.ReactNode; icon?: typeof Check }) {
+// One labeled fact as a sunken tile: caps label on top, value under it. The
+// repeated tile shape is what makes the section skimmable -- the eye reads
+// labels first, values second, and never has to parse a sentence.
+function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
-    <div className="flex gap-[12px] py-[13px]">
-      {Icon && <Icon className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />}
-      <div className="min-w-0">
-        <dt className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{label}</dt>
-        <dd className="mt-[4px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ color: "var(--ink-soft)" }}>{value}</dd>
-      </div>
+    <div className={`rounded-[10px] border px-[14px] py-[12px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+      <dt className="flex items-center gap-[6px] text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>
+        {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
+        {label}
+      </dt>
+      <dd className="mt-[6px] text-[15.5px] leading-[21px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{value}</dd>
     </div>
   );
 }
@@ -220,82 +224,94 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-12)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-9)] sm:py-[var(--space-10)]"
     >
       <div className="mx-auto max-w-[68ch]">
-        {/* Masthead */}
-        <header data-print-keep>
-          <p className="text-[30px] leading-[33px] font-extrabold uppercase sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink-faint)", letterSpacing: "0.004em" }}>
-            Career Report
+        {/* Masthead: one big line (the student's name), everything else as
+           small labeled chips -- the old double stack of 42px lines competed
+           with itself and with every section heading below it. */}
+        <header data-print-keep className="flex flex-col items-start">
+          <p className="inline-flex items-center gap-[7px] rounded-full border px-[13px] py-[6px] text-[11px] leading-[14px] font-bold tracking-[0.11em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+            <BadgeCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--primary)" }} />
+            Dreamari Career Report
           </p>
-          <h2 className="mt-[2px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[18px] flex flex-wrap items-center gap-x-[22px] gap-y-[5px] border-t pt-[14px] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-soft)" }}>
-            <span>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
+          <h2 className="mt-[14px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[40px] sm:leading-[43px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
+          <p className="mt-[12px] flex flex-wrap items-center gap-[7px] text-[13px] leading-[17px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink-soft)" }}>
+            <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
             {ACADEMIC_RECORD.verified && (
-              <span>
+              <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
                 {`${ACADEMIC_RECORD.gpa} GPA`}
-                <BadgeCheck className="ml-[5px] inline h-[15px] w-[15px] align-[-2px]" aria-hidden />
+                <BadgeCheck className="ml-[5px] inline h-[14px] w-[14px] align-[-2.5px]" aria-hidden style={{ color: "var(--primary)" }} />
                 <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
               </span>
             )}
-            <span>{student.school}</span>
+            <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>{student.school}</span>
           </p>
           {/* suppressHydrationWarning: the generated date is the reader's
              "today", so a server render across midnight must not error. */}
-          <p className="mt-[6px] text-[13px] leading-[18px] tracking-[-0.008em]" style={{ color: "var(--ink-faint)" }} suppressHydrationWarning>
+          <p className="mt-[10px] text-[12.5px] leading-[17px] tracking-[-0.008em]" style={{ color: "var(--ink-faint)" }} suppressHydrationWarning>
             Report generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
         </header>
 
-        {/* 01 — At a Glance. Four facts, exactly the reference's set. */}
-        <ReportSection id={`${idPrefix}glance`} n={1} title={`${career.title} Overview`}>
-          <dl className="grid gap-x-[40px] gap-y-[2px] sm:grid-cols-2" data-keep-together>
-            <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} />
+        {/* The sections stack as separate modules with real air between them,
+           not one continuous ruled column. */}
+        <div className="mt-[26px] flex flex-col gap-[16px] sm:mt-[30px] sm:gap-[18px]">
+
+        {/* 01 — At a Glance. The same facts as labeled tiles: what-you-do
+           spans the row, employers and salary sit side by side under it. */}
+        <ReportSection
+          id={`${idPrefix}glance`}
+          n={1}
+          title={`${career.title} Overview`}
+          icon={Target}
+          action={
+            <Link
+              href="/explore?tab=browse"
+              data-print-hide
+              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[11px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em]"
+              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
+            >
+              Career details <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          }
+        >
+          <dl className="grid gap-[10px] sm:grid-cols-2" data-keep-together>
+            <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
             <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
-            <div className="flex gap-[12px] py-[13px]">
-              <Compass className="mt-[2px] h-[18px] w-[18px] flex-none" style={{ color: "var(--ink-faint)" }} aria-hidden />
-              <Link
-                href="/explore?tab=browse"
-                data-print-hide
-                className="dm-tap inline-flex w-fit items-center gap-[7px] rounded-[8px] border px-[12px] py-[5px] text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]"
-                style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
-              >
-                Career details <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
           </dl>
         </ReportSection>
 
         {/* 02 — Three Majors to Explore */}
-        <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore">
-          <div className="grid gap-[12px] sm:grid-cols-3" data-keep-together>
+        <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore" icon={BookOpen}>
+          <div className="grid gap-[10px] sm:grid-cols-3" data-keep-together>
             {report.majors.map((major) => (
-              <div key={major.name} className="rounded-[10px] border px-[16px] py-[15px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                <h4 className="text-[18px] leading-[23px] tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
+              <div key={major.name} className="flex items-center gap-[9px] rounded-[10px] border px-[14px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                <h4 className="text-[15.5px] leading-[20px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
             ))}
           </div>
         </ReportSection>
 
-        {/* 03 — Education */}
-        <ReportSection id={`${idPrefix}education`} n={3} title="Education">
-          <div className="flex flex-col gap-[20px]" data-keep-together>
-            <div>
-              <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Most Common Path</h4>
-              <p className="mt-[5px] max-w-[50ch] text-[17px] leading-[24px] tracking-[-0.012em]" style={{ color: "var(--ink-soft)" }}>
+        {/* 03 — Education. The common path gets the one accented tile on the
+           page; the alternatives are even rows under a caps label. */}
+        <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
+          <div className="flex flex-col gap-[14px]" data-keep-together>
+            <div className="rounded-[10px] border px-[14px] py-[12px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
+              <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
+              <p className="mt-[6px] max-w-[50ch] text-[15.5px] leading-[21px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
                 {report.education.find((route) => route.common)?.name}
               </p>
             </div>
-            <div className="border-t pt-[16px]" style={{ borderColor: "var(--rule)" }}>
-              <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Other Viable Pathways</h4>
-              <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
+            <div>
+              <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
+              <ul className="mt-[8px] grid list-none gap-[8px] p-0 sm:grid-cols-2">
                 {report.education.filter((route) => !route.common).map((route) => (
-                  <li key={route.name}>
-                    <span className="inline-flex items-baseline gap-[7px] rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)" }}>
-                      <span className="text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{route.name}</span>
-                      <span className="text-[15px] leading-[21px] tabular-nums" style={{ color: "var(--ink-faint)" }}>{route.time}</span>
-                    </span>
+                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[10px] border px-[14px] py-[11px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                    <span className="text-[14px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
+                    <span className="flex-none rounded-full border px-[9px] py-[2px] text-[12px] leading-[17px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                   </li>
                 ))}
               </ul>
@@ -307,14 +323,14 @@ function ReportDocument({
            the actual classes (the third is an experience, which stays on My
            Plan). Mapping subjects to O*NET knowledge areas and SCED codes is
            a backend data-model note, not UI. */}
-        <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider">
+        <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
-            <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Classes that support this route</h4>
-            <ul className="mt-[10px] flex list-none flex-wrap gap-[8px] p-0">
+            <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
+            <ul className="mt-[8px] flex list-none flex-wrap gap-[8px] p-0">
               {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
                 <li key={course.label}>
-                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}>
-                    <span className="text-[15px] leading-[21px]" style={{ color: "var(--ink-soft)" }}>{course.label}</span>
+                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                    <span className="text-[14px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
                   </span>
                 </li>
               ))}
@@ -327,31 +343,32 @@ function ReportDocument({
           id={`${idPrefix}colleges`}
           n={5}
           title="Colleges"
+          icon={Building2}
           action={
             <Link
               href="/colleges"
               data-print-hide
-              className="dm-tap inline-flex min-h-[34px] items-center gap-[6px] rounded-[8px] border px-[12px] text-[14px] font-bold tracking-[-0.012em]"
-              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-raised)" }}
+              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[11px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em]"
+              style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
             >
               <Search className="h-3.5 w-3.5" aria-hidden /> College Lookup
             </Link>
           }
         >
-          <div className="grid gap-[12px] sm:grid-cols-2">
+          <div className="grid gap-[10px] sm:grid-cols-2">
             {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
-                className="dm-tap flex flex-col gap-[4px] rounded-[10px] border px-[16px] py-[14px]"
-                style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)" }}
+                className="dm-tap flex flex-col rounded-[10px] border px-[14px] py-[12px]"
+                style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}
                 data-keep-together
               >
-                <span className="mb-[7px] inline-flex w-fit items-center rounded-[5px] border px-[7px] py-[2px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-sunken)" }}>
+                <span className="mb-[8px] inline-flex w-fit items-center rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
                   {college.status}
                 </span>
-                <h4 className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                <span data-print-hide className="mt-[6px] inline-flex items-center gap-[4px] text-[15px]" style={{ color: "var(--ink-faint)" }}>
+                <h4 className="text-[15.5px] leading-[20px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
+                <span data-print-hide className="mt-[5px] inline-flex items-center gap-[4px] text-[13px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
               </Link>
@@ -359,8 +376,9 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* Sources: a footer, not a section a student has to open */}
-        <footer className="mt-[52px] border-t pt-[16px]" style={{ borderColor: "var(--rule-strong)" }}>
+        {/* Sources: the same module shape as the sections, so the page ends
+           contained rather than trailing off into loose text */}
+        <footer className="rounded-[14px] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
           {/* Collapsed on screen to keep the page short. The print stylesheet
               reveals [hidden], so an export still carries every source. */}
           <button
@@ -369,14 +387,14 @@ function ReportDocument({
             aria-expanded={sourcesOpen}
             aria-controls="report-sources"
             onClick={() => setSourcesOpen((open) => !open)}
-            className="dm-link flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-[var(--space-3)] text-left"
+            className="dm-link flex min-h-[48px] w-full cursor-pointer items-center justify-between gap-[var(--space-3)] px-[16px] text-left sm:px-[20px]"
           >
-            <span className="text-[18px] leading-[23px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>Where this comes from</span>
+            <span className="text-[14px] leading-[18px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>Where this comes from</span>
             <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--ink-faint)", transform: sourcesOpen ? "rotate(180deg)" : "none" }} aria-hidden />
           </button>
-          <span aria-hidden className="hidden text-[18px] leading-[23px] font-extrabold tracking-[-0.012em] print:block" style={{ color: "var(--ink)" }}>Where this comes from</span>
-          <div id="report-sources" hidden={!sourcesOpen}>
-          <ul className="mt-[10px] flex list-none flex-col gap-[5px] p-0 text-[15px] leading-[22px]" style={{ color: "var(--ink-faint)" }}>
+          <span aria-hidden className="hidden px-[16px] pt-[14px] text-[14px] leading-[18px] font-extrabold uppercase print:block" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>Where this comes from</span>
+          <div id="report-sources" hidden={!sourcesOpen} className="border-t px-[16px] pt-[14px] pb-[16px] sm:px-[20px]" style={{ borderColor: "var(--rule)" }}>
+          <ul className="flex list-none flex-col gap-[5px] p-0 text-[13.5px] leading-[20px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
                 {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
@@ -384,7 +402,7 @@ function ReportDocument({
               </li>
             ))}
           </ul>
-          <p className="mt-[12px] max-w-[64ch] text-[15px] leading-[22px]" style={{ color: "var(--ink-faint)" }}>
+          <p className="mt-[12px] max-w-[64ch] text-[13.5px] leading-[20px]" style={{ color: "var(--ink-faint)" }}>
             Prepared by the student with Dreamari. It supports a conversation with a counselor; it is not a decision or a prediction.
             Employers are examples of who hires for this work, not job openings.
             Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
@@ -393,6 +411,8 @@ function ReportDocument({
           </p>
           </div>
         </footer>
+
+        </div>
       </div>
 
       {/* Running footer: repeats on every printed page */}
@@ -581,9 +601,12 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
   return (
     <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-8)]">
       <div className="mx-auto max-w-[68ch]">
-        <h3 id="reflection-title" className="text-[23px] leading-[27px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>My Reflection</h3>
+        <h3 id="reflection-title" className="flex items-center gap-[10px] text-[14px] leading-[18px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>
+          <PenLine className="h-[16px] w-[16px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />
+          My Reflection
+        </h3>
 
-        <div className="mt-[16px] flex flex-col gap-[22px] border-t pt-[20px]" style={{ borderColor: "var(--rule-strong)" }}>
+        <div className="mt-[14px] flex flex-col gap-[22px] border-t pt-[18px]" style={{ borderColor: "var(--rule)" }}>
           <fieldset>
             <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
               After learning more about {careerTitle}, how interested are you?
