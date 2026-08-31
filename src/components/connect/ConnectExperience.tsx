@@ -308,18 +308,20 @@ function CommunityCard({
   action,
   onOpen,
   featured,
+  wide,
 }: {
   community: Community;
   action: React.ReactNode;
   onOpen: () => void;
   /** First card wears the mock's "Most Popular" pill on its banner. */
   featured?: boolean;
+  /** The two top bento cards: roomier, and they carry the live ticker. */
+  wide?: boolean;
 }) {
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
-  const latest = THREADS.find((t) => t.boardId === community.id);
   return (
-    <div className="dm-tap group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
+    <div className="dm-tap group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: `color-mix(in srgb, ${communityAccent(community)} 40%, var(--glass-border))`, background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
       {/* Whole card, one target. The bottom action button sits above this
          layer (z-20) so it's still its own reachable target. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
@@ -334,64 +336,85 @@ function CommunityCard({
       />
 
       {/* The art is WOVEN into the card, not clipped into a strip (per the
-         reference): three stacked layers -- the sharp artwork masked so it
-         owns the top, a blurred copy that takes over through the middle
-         (the progressive blur), and a gradient into the card's own surface
-         so the content below sits on the artwork's dissolving tail. */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[280px]">
-        <Image
-          src={community.photo}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 620px, 100vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-          style={{ maskImage: "linear-gradient(to bottom, black 42%, transparent 96%)", WebkitMaskImage: "linear-gradient(to bottom, black 42%, transparent 96%)" }}
-        />
-        <Image
-          src={community.photo}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 620px, 100vw"
-          className="scale-[1.06] object-cover blur-[16px]"
-          style={{ maskImage: "linear-gradient(to bottom, transparent 30%, black 58%, transparent 97%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 30%, black 58%, transparent 97%)" }}
-        />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 18%, color-mix(in srgb, var(--primary) 8%, var(--card)) 97%)" }} />
-      </div>
+         reference). Two compositions:
+         WIDE (top bento row): the artwork owns the card's RIGHT half and
+         dissolves LEFTWARD through a blur band into the content column --
+         the reference's landscape cards exactly.
+         SQUARE (bottom row): the artwork owns the top and dissolves down. */}
+      {wide ? (
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[62%] lg:block">
+          <Image
+            src={community.photo}
+            alt=""
+            fill
+            sizes="620px"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, black 52%, transparent 97%)", WebkitMaskImage: "linear-gradient(to left, black 52%, transparent 97%)" }}
+          />
+          <Image
+            src={community.photo}
+            alt=""
+            fill
+            sizes="620px"
+            className="scale-[1.06] object-cover blur-[16px]"
+            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)", WebkitMaskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)" }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to left, transparent 35%, color-mix(in srgb, var(--primary) 8%, var(--card)) 97%)" }} />
+        </div>
+      ) : null}
+      {(!wide || true) && (
+        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-[250px] ${wide ? "lg:hidden" : ""}`}>
+          <Image
+            src={community.photo}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 620px, 100vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 62%, transparent 98%)", WebkitMaskImage: "linear-gradient(to bottom, black 62%, transparent 98%)" }}
+          />
+          <Image
+            src={community.photo}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 620px, 100vw"
+            className="scale-[1.06] object-cover blur-[16px]"
+            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 52%, black 74%, transparent 99%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 52%, black 74%, transparent 99%)" }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 45%, color-mix(in srgb, var(--primary) 8%, var(--card)) 98%)" }} />
+        </div>
+      )}
       {featured && (
         <span className="absolute top-[12px] left-[12px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
           <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
-      {/* Spacer: the stretch of art the content leaves fully visible. */}
-      <div aria-hidden className="h-[128px] w-full flex-none lg:h-[146px]" />
+      {/* Spacer: the stretch of art the content leaves fully visible --
+         only the square composition needs it (the wide card's art lives
+         beside the content, not above it). */}
+      <div aria-hidden className={`h-[118px] w-full flex-none lg:h-[130px] ${wide ? "lg:hidden" : ""} ${wide && featured ? "" : ""}`} />
+      {wide && <div aria-hidden className="hidden h-[34px] w-full flex-none lg:block" />}
 
-      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+      <div className={`relative z-20 flex flex-1 flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] ${wide ? "lg:w-[60%] lg:px-[var(--space-5)] lg:pb-[var(--space-5)]" : ""}`}>
         <div className="flex items-start gap-[14px]">
           <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
             <WorldGlyph world={community.world} className="h-[20px] w-[20px]" />
           </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              {community.name}
-            </span>
-            <span className="mt-[3px] block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-              {community.purpose}
-            </span>
+          <span className="min-w-0 flex-1 self-center text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {community.name}
           </span>
         </div>
 
-        <div className="flex items-center gap-[var(--space-6)]">
+        {/* One line, inline number + muted label ("Pros", not
+           "Professionals", so it always fits). */}
+        <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[6px]">
           {[
             { Icon: Users, value: community.students, label: "Students" },
-            { Icon: ShieldCheck, value: community.activePros, label: "Professionals" },
+            { Icon: ShieldCheck, value: community.activePros, label: "Pros" },
             { Icon: MessagesSquare, value: community.posts, label: "Posts" },
           ].map(({ Icon, value, label }) => (
-            <span key={label} className="flex items-center gap-[8px]">
-              <Icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-              <span>
-                <strong className="block text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong>
-                <span className="block text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-              </span>
+            <span key={label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
+              <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />
+              <span><strong className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong> {label}</span>
             </span>
           ))}
         </div>
@@ -428,15 +451,6 @@ function CommunityCard({
           </div>
         </div>
 
-        {/* The card's heartbeat: the board's newest question, verbatim from
-           its own thread data -- a reason to open, not another statistic. */}
-        {latest && (
-          <div className="flex items-center gap-[8px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-            <MessagesSquare className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 55%, var(--foreground))` }} />
-            <span className="min-w-0 flex-1 truncate text-[12px] leading-[17px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{latest.title}&rdquo;</span>
-            <span className="flex-none text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{latest.postedAgo}</span>
-          </div>
-        )}
         {/* mt-auto keeps buttons bottom-aligned across the grid row; the
            padding guarantees the button never crowds the chips above it. */}
         <div className="mt-auto pt-[var(--space-2)]">{action}</div>
@@ -725,7 +739,7 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <main
         className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-8)] px-5 pt-[var(--space-6)] pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
-          view.kind === "home" ? "max-w-[1120px]" : "max-w-[880px]"
+          view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
         {view.kind === "home" && (
@@ -943,7 +957,7 @@ function HomeView({
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
               <div key={c.id} className={index < 2 ? "lg:col-span-3" : "lg:col-span-2"}>
-                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
+                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} wide={index < 2} />
               </div>
             ))}
           </div>
@@ -1047,7 +1061,7 @@ function SuggestCommunityCard() {
   );
 }
 
-function CommunityRow({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean }) {
+function CommunityRow({ community, joined, onOpen, onJoin, featured, wide }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean; wide?: boolean }) {
   const action = joined ? (
     <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
       Open Community
@@ -1057,7 +1071,7 @@ function CommunityRow({ community, joined, onOpen, onJoin, featured }: { communi
       Join Community
     </button>
   );
-  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} />;
+  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} wide={wide} />;
 }
 
 // ——— community board (handoff 8) ———
