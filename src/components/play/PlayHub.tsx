@@ -176,7 +176,12 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
          exact idiom Netflix uses for partially-watched titles), per direct
          feedback. Every card shares one fixed ROW_HEIGHT (see above), so
          the featured card is wider than its neighbors, never taller. */}
-      <div className="flex items-start gap-[var(--space-3)] overflow-x-auto pb-1">
+      {/* Full-bleed rail: negative margins let the row run to the viewport
+         edge (matching main's own padding), so the next card is always
+         visibly PEEKING at the screen edge instead of clipping exactly at
+         the content column -- without the peek, nothing said there were
+         more cards to the right (direct feedback). */}
+      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pb-1 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
         <RowCard candidate={featured} large onTrailer={(sim) => setTrailerSim(sim)} />
         {rest.map((c) => (
           <RowCard key={c.id} candidate={c} onSelect={() => setFeaturedId(c.id)} />

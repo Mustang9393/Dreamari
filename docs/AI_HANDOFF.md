@@ -40,6 +40,47 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 (later) IB Level 1 gamification pass from live review (PUSHED)
+
+A rapid feedback round on the rebuilt Level 1, all applied and verified:
+
+- **Teach split + centered system cards**: L1-03's example moved to its own
+  screen (L1-03b, no re-typed headline); system cards now render CENTER
+  SCREEN (BeatStage `centered` includes `card.system`), since a big intro is
+  the game addressing the player, not a scene caption.
+- **Word Cards flipbook** (new `flips` beat kind, `FlipsBody`): L1-11's four
+  terms are now one word per binder-paper card (the glossary flipbook's
+  ruled-paper + sketch-squiggle look, no illustrations per direct feedback),
+  big term + definition together, 3D page-turn between words, dots, Continue
+  only after the last word.
+- **Drag check game-feel** (L1-04, drag REINSTATED per the design mock after
+  an earlier revert): pulsing token, grows/glows while held, the card under
+  the pointer lights up live before the drop, numbered ANSWER eyebrows,
+  3-up grid on sm+, pop on lock-in.
+- **Reputation spotlight** (`spotlight: "score"` on L1-09): the gauge debuts
+  HUGE at screen center on a dark legibility disc, flies smoothly (numeric
+  transform keyframes -- mixed vw/px `left` animation was the jitter) into
+  its corner slot, then a green bouncing arrow + pulsing halo + a worked
+  +5/-3 demo cycle run for the rest of the beat.
+- **Tappable skill chips on the feedback card** (`skills.ts`, the Skills
+  Framework's What It Means lines): the explainer two screens earlier
+  promised chips are tappable, so now they are, everywhere.
+- **Copy**: reveal row "40 to 84 · Cautious" (user's own correction); typed
+  check reworded ("Quick check. Type the number, then press enter." /
+  "What's the minimum amount of points..."); character cards no longer say
+  the name/role twice (the eyebrow chip carries it).
+- **Visual congruence**: the Day-1 morning run (L1-01..10) stays in the
+  daylight reception -- the sunset floor sandwiched between daylight
+  screens read as day -> evening -> day in five slides.
+- **Play hub**: featured rail is full-bleed (negative margins to the
+  viewport edge) so the next card always visibly peeks; trailer chip reads
+  "Watch trailer".
+- NEXT: the Registered Nurse game ("REgistered Nurse Game/" folder,
+  Level 1 fully specced + trailer + characters; Rosa/Denise/Tyler/Yvonne
+  portraits and six hospital scenes supplied). Blockers flagged by its own
+  walkthrough: salary/hours figures are proposals, endings need approval,
+  and the rank-partial-credit rules conflict needs a call.
+
 ### 2026-08-31 IB simulation: Aug-31 handoff (2).xlsx content update, cinematic trailer, voice system (PUSHED with the doc-pass commit)
 
 Applied `DreamAri_IB_Levels1-3_Handoff (2).xlsx` (Aug 31) by DIFFING it

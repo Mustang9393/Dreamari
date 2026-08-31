@@ -147,15 +147,19 @@ export const BEAT_LOCATION: Record<string, LocationId> = {
   "L1-01": "l1-reception",
   "L1-02": "l1-reception",
   "L1-03": "l1-reception",
+  "L1-03b": "l1-reception",
   "L1-04": "l1-reception",
-  // Christina's two character cards: "trading floor behind" per the sheet.
-  "L1-05": "cobalt-trading-floor-sunset",
-  "L1-06": "cobalt-trading-floor-sunset",
-  "L1-07": "cobalt-trading-floor-sunset",
+  // VISUAL CONGRUENCE (direct feedback): the whole Day-1-morning run stays
+  // in the daylight reception -- the sunset floor sandwiched between two
+  // daylight screens read as day -> evening -> day in five slides. Time of
+  // day only ever moves FORWARD through the level from here.
+  "L1-05": "l1-reception",
+  "L1-06": "l1-reception",
+  "L1-07": "l1-reception",
   // Day 1 at reception, with both characters in the supplied two-slot plate.
   "L1-08": "l1-reception",
-  "L1-09": "cobalt-trading-floor-sunset",
-  "L1-10": "cobalt-trading-floor-sunset",
+  "L1-09": "l1-reception",
+  "L1-10": "l1-reception",
   // Christina's teaching stretch keeps the cafe, same room the old teach/
   // match/rapid run used.
   "L1-11": "cobalt-cafe-lounge-sunset",

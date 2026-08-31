@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
 
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
@@ -13,6 +13,7 @@ import type {
   CheckBeat,
   ChoiceBeat,
   FlagsBeat,
+  FlipsBeat,
   MatchBeat,
   PickBeat,
   RankBeat,
@@ -325,10 +326,21 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
   const [entry, setEntry] = useState("");
   const [tries, setTries] = useState(0);
   const [shakeBox, setShakeBox] = useState(0);
+  /** drag method: which answer card the token is currently held over, so
+   *  the target lights up BEFORE the drop -- the reach is part of the fun. */
+  const [over, setOver] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const options = beat.options ?? [];
   const rightIndex = options.findIndex((option) => option.correct);
   const whyRight = beat.method === "type" ? (beat.whyRight ?? "") : (options[rightIndex]?.why ?? "");
+
+  const cardAt = (x: number, y: number) =>
+    cardRefs.current.findIndex((el) => {
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    });
 
   const miss = (index: number) => {
     playWrong();
@@ -435,43 +447,68 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
       {beat.method === "drag" && (
         <div className="flex flex-col gap-[14px]">
           {/* The rail. The token costs a deliberate second to move, which is
-             the point (D75) -- it feels like a game, not a quiz. */}
+             the point (D75) -- it feels like a game, not a quiz. Idle, it
+             breathes; held, it grows and glows; over a card, THAT card
+             lights up before the drop, so the reach itself gives feedback. */}
           <div className="flex justify-center rounded-[14px] border border-dashed py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
             {solved ? (
-              <span className="flex h-[46px] items-center text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--color-feedback-success)" }}>Locked in</span>
+              <span className="flex h-[48px] items-center gap-[6px] text-[12px] font-bold tracking-[0.08em] uppercase motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ color: "var(--color-feedback-success)" }}>
+                <Check className="h-[14px] w-[14px]" aria-hidden /> Locked in
+              </span>
             ) : (
               <motion.button
                 type="button"
                 drag
                 dragSnapToOrigin
                 dragMomentum={false}
-                whileDrag={{ scale: 1.15, zIndex: 30 }}
+                whileDrag={{ scale: 1.22 }}
+                onDragStart={() => setDragging(true)}
+                onDrag={(event) => {
+                  const pointer = event as PointerEvent;
+                  setOver(cardAt(pointer.clientX, pointer.clientY));
+                }}
                 onDragEnd={(event) => {
                   const pointer = event as PointerEvent;
+                  setDragging(false);
+                  setOver(null);
                   dropAt(pointer.clientX, pointer.clientY);
                 }}
-                className="relative z-20 flex h-[46px] w-[46px] cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-extrabold tracking-[0.06em] text-white uppercase select-none active:cursor-grabbing"
-                style={{ background: "var(--primary)", boxShadow: "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+                className={`relative z-30 flex h-[48px] w-[48px] cursor-grab touch-none items-center justify-center rounded-full text-[10px] font-extrabold tracking-[0.06em] text-white uppercase select-none active:cursor-grabbing ${dragging ? "" : "motion-safe:animate-[play-pulse_1.6s_ease-in-out_infinite]"}`}
+                style={{
+                  background: "var(--primary)",
+                  boxShadow: dragging
+                    ? "0 0 0 6px color-mix(in srgb, var(--primary) 30%, transparent), 0 14px 34px -8px color-mix(in srgb, var(--primary) 85%, transparent)"
+                    : "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)",
+                }}
                 aria-label="Drag this token onto an answer"
               >
                 Drag
               </motion.button>
             )}
           </div>
-          <div className="flex flex-col gap-[8px]">
+          <div className="flex flex-col gap-[8px] sm:grid sm:grid-cols-3">
             {options.map((option, index) => (
               <div
                 key={option.label}
                 ref={(el) => { cardRefs.current[index] = el; }}
-                className={`flex items-center gap-[12px] rounded-[16px] border px-[18px] py-[15px] text-[16px] font-semibold sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+                className={`flex flex-col gap-[4px] rounded-[16px] border px-[16px] py-[13px] text-[15.5px] font-semibold transition-[border-color,background,transform,opacity] duration-150 sm:text-[16px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""} ${solved && option.correct ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
                 style={{
-                  background: solved && option.correct ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
-                  borderColor: solved && option.correct ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)",
+                  background:
+                    solved && option.correct
+                      ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))"
+                      : over === index
+                        ? "color-mix(in srgb, var(--primary) 16%, var(--glass-surface-1))"
+                        : "var(--glass-surface-1)",
+                  borderColor: solved && option.correct ? "var(--color-feedback-success)" : over === index ? "var(--primary)" : "var(--color-glass-border-raised)",
                   color: "var(--foreground)",
                   opacity: solved && !option.correct ? 0.4 : 1,
+                  transform: over === index && !solved ? "scale(1.03)" : "scale(1)",
                 }}
               >
-                {solved && option.correct && <Check className="h-[16px] w-[16px] flex-none" style={{ color: "var(--color-feedback-success)" }} aria-hidden />}
+                <span className="flex items-center gap-[6px] text-[10px] font-extrabold tracking-[0.12em] uppercase" style={{ color: solved && option.correct ? "var(--color-feedback-success)" : over === index ? "var(--primary)" : "var(--muted-foreground)" }}>
+                  {solved && option.correct && <Check className="h-[12px] w-[12px]" aria-hidden />}
+                  Answer {index + 1}
+                </span>
                 {option.label}
               </div>
             ))}
@@ -561,6 +598,105 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
         </p>
       )}
       {allOpen && (
+        <button
+          type="button"
+          onClick={() => { playSelect(); onNext(); }}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {beat.cta}
+          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// --------------------------------------------------------------- word cards
+
+/** Word Cards: vocabulary one word per card -- the big term AND its
+ *  definition on the same face, paged with a 3D page turn (no
+ *  flip-to-reveal, per direct feedback). Center-stage like the reputation
+ *  explainer, so the words never read as an afterthought. Continue appears
+ *  only after the last word. Not scored. */
+export function FlipsBody({ beat, onNext }: { beat: FlipsBeat; onNext: () => void }) {
+  const [at, setAt] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const card = beat.cards[Math.min(at, beat.cards.length - 1)];
+  const last = at >= beat.cards.length - 1;
+  const turn = () => {
+    if (finished && last) return;
+    playSelect();
+    if (last) {
+      playCorrect();
+      setFinished(true);
+    } else {
+      setAt((current) => current + 1);
+    }
+  };
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.title}</Question>
+      <div style={{ perspective: "1200px" }}>
+        {/* Keyed per word: each card turns IN like a page. One-directional
+           rotation only -- no backface tricks (see the glossary flipbook's
+           3D-safety note). */}
+        <motion.button
+          key={card.term}
+          type="button"
+          onClick={turn}
+          disabled={finished && last}
+          initial={{ rotateY: -70, opacity: 0 }}
+          animate={{ rotateY: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="flex w-full cursor-pointer flex-col items-center gap-[10px] rounded-[18px] border px-[20px] py-[26px] text-center disabled:cursor-default sm:py-[34px]"
+          style={{
+            transformOrigin: "left center",
+            // The glossary flipbook's binder page: ruled paper over a faint
+            // world-gold tint, with a real paper shadow (direct feedback --
+            // same look, minus the illustration).
+            background:
+              "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 5%, var(--card))",
+            borderColor: finished && last ? "var(--color-feedback-success)" : "var(--glass-border)",
+            boxShadow: "0 18px 40px -22px rgba(0,0,0,0.45)",
+          }}
+        >
+          {/* The hand-drawn wobble, same filter recipe as the glossary. */}
+          <svg width="0" height="0" aria-hidden className="absolute">
+            <filter id="play-sketch">
+              <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
+            </filter>
+          </svg>
+          <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            Word {at + 1} of {beat.cards.length}
+          </span>
+          <span className="flex flex-col items-center gap-[4px]">
+            <span className="text-[34px] leading-[1.1] font-extrabold uppercase sm:text-[44px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch)" }}>
+              {card.term}
+            </span>
+            {/* The hand-drawn underline squiggle, straight off the binder. */}
+            <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[120px]" style={{ color: "var(--world-business-money-office)", filter: "url(#play-sketch)" }}>
+              <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          </span>
+          <span className="max-w-[38ch] text-[16px] leading-relaxed font-semibold sm:text-[17px]" style={{ color: "var(--muted-foreground)" }}>
+            {card.def}
+          </span>
+          {!(finished && last) && (
+            <span className="mt-[4px] flex items-center gap-[6px] text-[12px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
+              {last ? "Got it" : "Next word"} <ChevronRight className="h-[14px] w-[14px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
+            </span>
+          )}
+        </motion.button>
+      </div>
+      {/* One dot per word, filling as the student pages through. */}
+      <span className="flex justify-center gap-[6px]" aria-hidden>
+        {beat.cards.map((entry, index) => (
+          <span key={entry.term} className="h-[6px] w-[6px] rounded-full transition-colors duration-300" style={{ background: index < at + (finished ? 1 : 0) ? "var(--accent-subtle)" : "var(--color-glass-border-raised)" }} />
+        ))}
+      </span>
+      {finished && (
         <button
           type="button"
           onClick={() => { playSelect(); onNext(); }}

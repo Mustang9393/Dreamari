@@ -64,21 +64,33 @@ export const IB_LEVEL_1: Level = {
       speaker: "System",
       setup: "How investment banking works",
       title: "Investment bankers help companies raise money and buy or sell businesses.",
+      cta: "Continue",
+    },
+    {
+      // The example on its OWN screen, per direct feedback -- one idea per
+      // screen applies to the lesson and its illustration too.
+      kind: "card",
+      variant: "intro",
+      id: "L1-03b",
+      system: true,
+      speaker: "System",
+      title: "Here is what that looks like.",
       example: "A company wants to build 100 new hospitals but has no money. A bank finds investors and organises the deal.",
       cta: "Continue",
     },
     {
       // NOT SCORED, NOT A STRIKE: the comprehension check is what stops
       // anyone who tapped through the teach card without reading (D53).
-      // The sheet makes this a token-drag (D75, on Joshua's call); switched
-      // back to TAP per direct feedback -- flag D75 if it should return.
+      // A token-DRAG, not a tap (D75, reinstated per direct feedback with
+      // the design mock): the slide is what differentiates a check from
+      // tap multiple-choice and makes it read as a game.
       kind: "check",
-      method: "tap",
+      method: "drag",
       id: "L1-04",
       speaker: "System",
       setup: "Quick check before you start.",
       question: "A shoe company wants to buy a smaller shoe company. Who helps them do it?",
-      prompt: "Tap the answer.",
+      prompt: "Press and hold the blue dot. Drag it to the answer.",
       options: [
         { label: "An investment bank", correct: true, why: "Right. Buying and selling companies is the job." },
         { label: "A shoe designer", correct: false, why: "Not this one. Try again." },
@@ -95,7 +107,7 @@ export const IB_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Christina",
       setup: "Christina • Associate",
-      title: "Christina. Associate. She sat where you are sitting five years ago.",
+      title: "She sat where you are sitting five years ago.",
       cta: "Continue",
     },
     {
@@ -160,12 +172,13 @@ export const IB_LEVEL_1: Level = {
       kind: "reveal",
       id: "L1-09",
       speaker: "System",
+      spotlight: "score",
       setup: "That number in the corner just moved.",
       title: "Your reputation decides if you get promoted, keep your job, or lose it.",
       prompt: "Tap each outcome to reveal its score.",
       rows: [
         { label: "You lose the internship", reveal: "0 to 39 · At Risk", color: "red" },
-        { label: "No return offer, start over", reveal: "40 to 84 · Cautious or Respected", color: "amber" },
+        { label: "No return offer, start over", reveal: "40 to 84 · Cautious", color: "amber" },
         { label: "Promoted to Analyst", reveal: "85 and above · Trusted", color: "green" },
       ],
       cta: "Continue",
@@ -177,9 +190,8 @@ export const IB_LEVEL_1: Level = {
       method: "type",
       id: "L1-10",
       speaker: "System",
-      setup: "Quick check. Type your answer.",
-      question: "How many points do you need to get promoted to the next level?",
-      prompt: "Type the number, then press enter.",
+      setup: "Quick check. Type the number, then press enter.",
+      question: "What's the minimum amount of points you need to get promoted to the next level?",
       answer: "85",
       whyRight: "Right. 85 and above gets you promoted. Anything less and you play the level again.",
       hint: "At Risk 0 to 39 · Cautious 40 to 59 · Respected 60 to 84 · Trusted 85 to 100",
@@ -188,13 +200,18 @@ export const IB_LEVEL_1: Level = {
 
     // ---- the language, taught before it is tested (D68) ----
     {
-      kind: "card",
-      variant: "intro",
+      kind: "flips",
       id: "L1-11",
       speaker: "Christina",
       setup: '"Before client work, learn the language."',
       title: "Four words you will hear before lunch.",
-      body: "Comps: a list of similar companies. Deck: a slide presentation. Model: a spreadsheet of the numbers. EOD: end of the day.",
+      prompt: "Tap the card for the next word.",
+      cards: [
+        { term: "Comps", def: "A list of similar companies" },
+        { term: "Deck", def: "A slide presentation" },
+        { term: "Model", def: "A spreadsheet of the numbers" },
+        { term: "EOD", def: "End of the day" },
+      ],
       cta: "Continue",
     },
     {
@@ -347,7 +364,7 @@ export const IB_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Marcus",
       setup: "Marcus • Vice President",
-      title: "Marcus. Vice President. Eleven years here. He joined as an Analyst and never left.",
+      title: "Eleven years here. He joined as an Analyst and never left.",
       cta: "Continue",
     },
     {
@@ -399,7 +416,7 @@ export const IB_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Jordan",
       setup: "Jordan • Intern",
-      title: "Jordan. The other Intern from your first morning. He speaks first in every room and never sounds unsure.",
+      title: "The other Intern from your first morning. He speaks first in every room and never sounds unsure.",
       cta: "Continue",
     },
     {

@@ -48,6 +48,10 @@ type BeatBase = {
    *  "Tap one.", "Drag the right word into the space.". Button screens skip
    *  it: there the button label IS the prompt. */
   prompt?: string;
+  /** Calls the player's eye to a HUD element this beat is talking about --
+   *  "score" spotlights the reputation gauge with an arrow nudge and a
+   *  worked increase/decrease demo while the beat is on screen. */
+  spotlight?: "score";
   /** Scene art. Sticky: a beat without its own art keeps the last one, so the
    *  unillustrated beats read as happening in the same room. */
   art?: string;
@@ -146,6 +150,17 @@ export type CheckBeat = BeatBase & {
   whyRight?: string;
   /** type method: fades in under the box after two wrong tries. */
   hint?: string;
+  cta: string;
+};
+
+/** Word Cards: vocabulary taught one word per card, flipbook-style -- a
+ *  big centered term with its definition on the SAME face (no
+ *  flip-to-reveal, per direct feedback), paged through one by one with a
+ *  3D page turn. Continue appears only after the last word. Not scored. */
+export type FlipsBeat = BeatBase & {
+  kind: "flips";
+  title: string;
+  cards: { term: string; def: string }[];
   cta: string;
 };
 
@@ -307,6 +322,7 @@ export type BucketBeat = BeatBase & {
 export type Beat =
   | CardBeat
   | CheckBeat
+  | FlipsBeat
   | RevealBeat
   | ChoiceBeat
   | MatchBeat

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -19,6 +20,7 @@ import {
   CheckBody,
   ChoiceBody,
   FlagsBody,
+  FlipsBody,
   Keycap,
   MatchBody,
   PickBody,
@@ -44,6 +46,7 @@ import {
   subscribeMuted,
 } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
+import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Mood, type Simulation, type Tier } from "./types";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
@@ -517,6 +520,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         scored={scored}
         delta={phase === "feedback" ? (result?.delta ?? null) : null}
         accent={accent}
+        spotlightScore={beat.spotlight === "score"}
         onBack={index > 0 ? goBack : undefined}
       />
 
@@ -1038,7 +1042,11 @@ function BeatStage({
   // liminal wait on the colorful ambient backdrop with Dreamy, and reads
   // better centered on that backdrop than pinned to the bottom edge like a
   // regular narrative card.
-  const centered = interactive || beat.kind === "review";
+  // System teach/intro cards read as the game addressing the player, not a
+  // caption under a scene -- big intros like these sit CENTER SCREEN (direct
+  // feedback). Character cards and narrator story captions keep the
+  // bottom-docked dialogue placement.
+  const centered = interactive || beat.kind === "review" || (beat.kind === "card" && beat.system === true);
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
@@ -1161,6 +1169,7 @@ function BeatBody({
     if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} />;
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "flips") return <FlipsBody beat={beat} onNext={onNext} />;
     if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
@@ -1254,16 +1263,113 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-function ScoreGauge({ reputation, band, delta }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null }) {
-  const shown = useCountUp(reputation);
+function ScoreGauge({ reputation, band, delta, demo = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; demo?: boolean }) {
+  // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
+  // the gauge acts out a worked example -- nudging up 5, back, down 3,
+  // back -- with an arrow calling the eye to it, so "that number in the
+  // corner" is unmissable and its movement is seen, not described.
+  const DEMO_STEPS = useMemo(() => [0, 5, 0, -3, 0] as const, []);
+  const [demoStep, setDemoStep] = useState(0);
+  // The debut flight: the gauge appears HUGE at screen center (where the
+  // player is actually looking when the beat says "that number in the
+  // corner"), then flies up into its corner slot -- and only THEN does the
+  // arrow-and-pulse demo start (direct feedback). Reduced motion skips
+  // straight to docked.
+  const [docked, setDocked] = useState(false);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  /** All FLIGHT coordinates in plain pixels (from -> to), measured once --
+   *  animating transform x/y numerically is what keeps the travel smooth;
+   *  interpolating mixed vw/px `left` keyframes is what made it jitter. */
+  const [flight, setFlight] = useState<{ sx: number; sy: number; tx: number; ty: number } | null>(null);
+  useEffect(() => {
+    if (!demo) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting a one-shot animation when the beat leaves
+      setDocked(false);
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       
+      setDocked(true);
+      return;
+    }
+    const rect = anchorRef.current?.getBoundingClientRect();
+     
+    if (rect) setFlight({ sx: window.innerWidth / 2, sy: window.innerHeight * 0.4, tx: rect.left + rect.width / 2, ty: rect.top + rect.height / 2 });
+    else setDocked(true);
+  }, [demo]);
+  useEffect(() => {
+    if (!demo || !docked) return;
+    const timer = window.setInterval(() => setDemoStep((current) => (current + 1) % DEMO_STEPS.length), 1500);
+    return () => {
+      window.clearInterval(timer);
+      setDemoStep(0);
+    };
+  }, [demo, docked, DEMO_STEPS]);
+  const demoDelta = demo && docked ? DEMO_STEPS[demoStep] : 0;
+  const shown = useCountUp(clamp(reputation + demoDelta));
   const color = BAND_COLOR[band];
   const radius = 15.5;
   const circumference = 2 * Math.PI * radius;
   return (
     <span className="relative flex flex-none items-center gap-[6px]" aria-label={`Reputation ${reputation}, ${band}`}>
+      {demo && !docked && flight && (
+        /* The debut: a big double of the gauge blooms at screen center on
+           its own dark disc (legibility over any scene), holds a beat,
+           then flies smoothly into the corner slot -- pure numeric
+           transform animation, no layout properties. One shot per
+           spotlight beat. */
+        <motion.span
+          aria-hidden
+          className="pointer-events-none fixed top-0 left-0 z-[70] flex flex-col items-center gap-[10px]"
+          initial={{ x: flight.sx, y: flight.sy, translateX: "-50%", translateY: "-50%", scale: 0.85, opacity: 0 }}
+          animate={{
+            x: [flight.sx, flight.sx, flight.tx],
+            y: [flight.sy, flight.sy, flight.ty],
+            scale: [0.85, 1, 0.3],
+            opacity: [0, 1, 1],
+          }}
+          transition={{ duration: 2.4, times: [0, 0.5, 1], ease: [0.6, 0, 0.2, 1] }}
+          onAnimationComplete={() => setDocked(true)}
+        >
+          <span
+            className="relative flex h-[150px] w-[150px] items-center justify-center rounded-full border backdrop-blur-[14px]"
+            style={{
+              background: "color-mix(in srgb, var(--background) 84%, transparent)",
+              borderColor: `color-mix(in srgb, ${color} 45%, transparent)`,
+              boxShadow: `0 24px 80px -12px rgba(0,0,0,0.9), 0 0 60px -10px color-mix(in srgb, ${color} 60%, transparent)`,
+            }}
+          >
+            <svg viewBox="0 0 38 38" className="absolute inset-[10px] -rotate-90">
+              <circle cx="19" cy="19" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="3" />
+              <circle cx="19" cy="19" r={radius} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - reputation / 100)} />
+            </svg>
+            <span className="text-[40px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>
+              {reputation}
+            </span>
+          </span>
+          <span className="rounded-full px-[14px] py-[4px] text-[13px] font-extrabold tracking-[0.3em] uppercase backdrop-blur-[10px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", color, textShadow: `0 0 18px ${color}` }}>
+            Reputation
+          </span>
+        </motion.span>
+      )}
+      {demo && docked && (
+        <>
+          {/* Docked: the halo pulses on the real gauge and a bold arrow
+             points at it while the worked +5/-3 demo cycles. */}
+          <span aria-hidden className="absolute inset-y-[-6px] left-[-6px] w-[50px] rounded-full motion-safe:animate-[play-pulse_1.2s_ease-in-out_infinite]" style={{ boxShadow: `0 0 0 3px color-mix(in srgb, ${color} 55%, transparent)` }} />
+          <span aria-hidden className="absolute top-full left-[2px] mt-[12px] text-[24px] leading-none motion-safe:animate-[play-nudge-up_1s_ease-in-out_infinite]" style={{ color: "var(--color-feedback-success)", textShadow: "0 0 16px var(--color-feedback-success)" }}>
+            ▲
+          </span>
+        </>
+      )}
       {/* Keyed by reputation: every change re-runs the pop, so the gauge
          visibly REACTS to the choice that moved it. */}
-      <span key={reputation} className="relative flex h-[38px] w-[38px] items-center justify-center motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)]" aria-hidden>
+      <span
+        key={`${reputation}-${demo && docked ? "docked" : "rest"}`}
+        ref={anchorRef}
+        className={`relative flex h-[38px] w-[38px] items-center justify-center motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)] ${demo && !docked ? "opacity-0" : ""}`}
+        aria-hidden
+      >
         <svg viewBox="0 0 38 38" className="absolute inset-0 h-full w-full -rotate-90">
           <circle cx="19" cy="19" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="3" />
           <circle
@@ -1289,7 +1395,16 @@ function ScoreGauge({ reputation, band, delta }: { reputation: number; band: Ret
           {band}
         </span>
       </span>
-      {delta !== null && delta !== 0 && (
+      {demo && demoDelta !== 0 && (
+        <span
+          key={`demo-${demoStep}`}
+          className="absolute -top-[16px] right-0 text-[14px] font-extrabold tabular-nums motion-safe:animate-[play-float_1.4s_ease-out_forwards]"
+          style={{ color: demoDelta > 0 ? "var(--color-feedback-success)" : "var(--destructive)" }}
+        >
+          {demoDelta > 0 ? `+${demoDelta}` : demoDelta}
+        </span>
+      )}
+      {!demo && delta !== null && delta !== 0 && (
         <span
           key={`delta-${reputation}`}
           className="absolute -top-[16px] right-0 text-[14px] font-extrabold tabular-nums motion-safe:animate-[play-float_1.4s_ease-out_forwards]"
@@ -1550,6 +1665,7 @@ function Hud({
   scored,
   delta,
   accent,
+  spotlightScore = false,
   onBack,
 }: {
   simulation: Simulation;
@@ -1559,6 +1675,9 @@ function Hud({
   scored: number;
   delta: number | null;
   accent: string;
+  /** True while the current beat is EXPLAINING the score -- the gauge runs
+   *  its arrow-nudge + worked increase/decrease demo. */
+  spotlightScore?: boolean;
   /** Steps back one beat. Undefined on the level's first beat, where there is
    *  nowhere within the run to go back to. */
   onBack?: () => void;
@@ -1607,7 +1726,7 @@ function Hud({
            which was truncating down to one or two characters. The gauge
            alone still says the same thing at a glance; aria-label keeps the
            full "47, Cautious" available to assistive tech either way. */}
-        <ScoreGauge reputation={reputation} band={band} delta={delta} />
+        <ScoreGauge reputation={reputation} band={band} delta={delta} demo={spotlightScore} />
       </div>
       <div className="flex items-center gap-[7px]">
         <span className="relative h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--color-glass-border-raised)" }}>
@@ -1734,6 +1853,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   const color = good ? "var(--color-feedback-success)" : result.delta <= -6 ? "var(--destructive)" : "var(--world-building-construction)";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
   const skills = "skills" in beat ? beat.skills : [];
+  const [openSkill, setOpenSkill] = useState<string | null>(null);
   const portrait = expressionFor(beat.speaker, result.tier);
 
   // The card owns the key rather than leaning on the focused button's default
@@ -1786,17 +1906,34 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
           {result.why}
         </p>
         {skills.length > 0 && (
-          <p className="flex flex-wrap gap-[6px]">
-            {skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold"
-                style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}
-              >
-                {skill}
-              </span>
-            ))}
-          </p>
+          <div className="flex flex-col gap-[6px]">
+            {/* Tappable, as the skills explainer promised two screens ago
+               (Interaction Rules: every chip is tappable from L1-11 onward
+               and shows its What It Means line). */}
+            <p className="flex flex-wrap gap-[6px]">
+              {skills.map((skill) => (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => setOpenSkill((current) => (current === skill ? null : skill))}
+                  aria-expanded={openSkill === skill}
+                  className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold"
+                  style={{
+                    borderColor: openSkill === skill ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
+                    color: openSkill === skill ? "var(--foreground)" : "var(--muted-foreground)",
+                    background: openSkill === skill ? "color-mix(in srgb, var(--accent-subtle) 14%, transparent)" : "transparent",
+                  }}
+                >
+                  {skill}
+                </button>
+              ))}
+            </p>
+            {openSkill && SKILL_MEANING[openSkill] && (
+              <p className="text-[12.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]" style={{ color: "var(--accent-subtle)" }}>
+                {openSkill}: <span style={{ color: "var(--muted-foreground)" }}>{SKILL_MEANING[openSkill]}</span>
+              </p>
+            )}
+          </div>
         )}
         <button
           type="button"
