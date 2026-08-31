@@ -125,86 +125,77 @@ export type ReelCareer = {
   mainSkills: string;
 };
 
+// Recast 2026-08-31: the reel now runs on careers that have real browse-card
+// photography ("BROWSE Images-2", imported as /images/app/browse-*.png;
+// Registered Nurse keeps its existing Figma browse-card poster). The old
+// Figma Env Card lineup (Aerospace Engineer, Marine Biologist, Neurosurgeon,
+// ...) had no browse art and no sourced copy, so those careers left the reel
+// rather than shipping mismatched photos. Every description, salary range,
+// major and skill below is lifted from that career's own Career Report data
+// (report-data.ts, BLS-sourced) -- nothing here is invented.
 export const FOR_YOU_REEL: ReelCareer[] = [
   {
-    title: "Private Equity Analyst",
+    title: "Investment Banking",
     world: "Business & Money",
     matchLabel: "STRONG MATCH",
-    description: "Helps investors buy, improve, and sell companies for long-term returns.",
-    salary: "$95K - $250K+",
-    photo: "/images/app/env-private-equity.png",
-    major: "Finance or Economics",
-    mainSkills: "Analysis · Valuation · Modeling · Research · Communication",
+    description: "Investment bankers help companies raise money and buy or sell businesses.",
+    salary: "$85K - $250K+",
+    // The BROWSE Images-2 IB files are 198x297 thumbnails -- too small for a
+    // full-screen reel card. This poster IS the unified IB browse-card art
+    // (the hi-res founder image), so the reel uses it instead.
+    photo: "/images/app/poster-investment-banking-v3.png",
+    major: "Finance, Economics, or Accounting",
+    mainSkills: "Working with Numbers · Attention to Detail · Clear Writing · Calm Under Deadline",
   },
   {
-    title: "Aerospace Engineer",
-    world: "Tech & Engineering",
-    matchLabel: "STRONG MATCH",
-    description: "Designs aircraft and spacecraft that fly safely through demanding conditions.",
-    salary: "$85K - $190K+",
-    photo: "/images/app/env-aerospace-engineer.png",
-    major: "Aerospace or Mechanical Engineering",
-    mainSkills: "Aerodynamics · CAD · Simulation · Systems Thinking · Math",
-  },
-  {
-    title: "Product Designer",
-    world: "Tech & Engineering",
-    matchLabel: "STRONG MATCH",
-    description: "Shapes useful digital products around people's needs.",
-    salary: "$75K - $180K+",
-    photo: "/images/app/env-product-designer.png",
-    major: "Design, HCI, or Psychology",
-    mainSkills: "UX Research · Prototyping · Visual Design · Figma · Storytelling",
-  },
-  {
-    title: "Biomedical Researcher",
-    world: "Science & Research",
-    matchLabel: "STRONG MATCH",
-    description: "Studies disease to develop better tests and treatments.",
-    salary: "$70K - $160K+",
-    photo: "/images/app/env-biomedical-researcher.png",
-    major: "Biology or Biomedical Sciences",
-    mainSkills: "Lab Methods · Data Analysis · Scientific Writing · Rigor",
-  },
-  {
-    title: "Marine Biologist",
-    world: "Science & Research",
-    matchLabel: "STRONG MATCH",
-    description: "Studies ocean life and protects marine ecosystems.",
-    salary: "$55K - $120K+",
-    photo: "/images/app/env-marine-biologist.png",
-    major: "Marine Biology or Ecology",
-    mainSkills: "Field Research · Diving · Data Collection · Conservation",
-  },
-  {
-    title: "Neurosurgeon",
+    title: "Registered Nurse",
     world: "Health & Medicine",
     matchLabel: "STRONG MATCH",
-    description: "Diagnoses and operates on the brain and nervous system.",
-    salary: "$350K - $800K+",
-    photo: "/images/app/env-neurosurgeon.png",
-    major: "Pre-Med, then Medical School",
-    mainSkills: "Anatomy · Precision · Decision-Making · Stamina · Focus",
+    description: "Registered nurses keep patients safe and are the person actually at the bedside all shift.",
+    salary: "$65K - $130K+",
+    photo: "/images/app/poster-registered-nurse.png",
+    major: "Nursing, Biology, or Public Health",
+    mainSkills: "Calm Under Pressure · Noticing Small Changes · Explaining Simply · Stamina",
   },
   {
-    title: "Constitutional Attorney",
-    world: "Law, Safety & Justice",
+    title: "Software Engineer",
+    world: "Tech & Engineering",
     matchLabel: "STRONG MATCH",
-    description: "Handles cases about rights, laws, and government power.",
-    salary: "$90K - $250K+",
-    photo: "/images/app/env-constitutional-attorney.png",
-    major: "Political Science, then Law School",
-    mainSkills: "Legal Writing · Argumentation · Research · Public Speaking",
+    description: "Software engineers build and improve the apps and systems people use every day.",
+    salary: "$75K - $200K+",
+    photo: "/images/app/browse-software-engineer.png",
+    major: "Computer Science or Software Engineering",
+    mainSkills: "Problem Solving · Logical Thinking · Reading Code · Explaining Simply",
   },
   {
-    title: "Creative Director",
-    world: "Arts, Media & Sport",
+    title: "Airline Pilot",
+    world: "Driving, Flying & Shipping",
     matchLabel: "STRONG MATCH",
-    description: "Leads the visual direction of brands and campaigns.",
-    salary: "$95K - $220K+",
-    photo: "/images/app/env-creative-director.png",
-    major: "Design, Advertising, or Fine Arts",
-    mainSkills: "Art Direction · Branding · Leadership · Concepting · Taste",
+    description: "Airline pilots fly passengers and cargo safely from one airport to another.",
+    salary: "$60K - $250K+",
+    photo: "/images/app/browse-airline-pilot.png",
+    major: "Aeronautical Science or Aviation Management",
+    mainSkills: "Calm Under Pressure · Following Procedure · Quick Decisions · Clear Communication",
+  },
+  {
+    title: "Private Equity",
+    world: "Business & Money",
+    matchLabel: "STRONG MATCH",
+    description: "Private equity firms buy companies, try to make them better, and sell them later for more.",
+    salary: "$100K - $300K+",
+    photo: "/images/app/browse-private-equity.png",
+    major: "Finance, Economics, or Business Administration",
+    mainSkills: "Business Judgment · Modeling & Analysis · Asking Good Questions · Patience",
+  },
+  {
+    title: "Food Scientist",
+    world: "Farming, Animals & Nature",
+    matchLabel: "STRONG MATCH",
+    description: "Food scientists develop and test food products in a lab and a pilot kitchen.",
+    salary: "$55K - $125K+",
+    photo: "/images/app/browse-food-scientist.png",
+    major: "Food Science, Chemistry, or Nutrition",
+    mainSkills: "Careful Measurement · Chemistry · Patience · Writing Up Findings",
   },
 ];
 
@@ -234,9 +225,9 @@ const FOR_YOU_VIDEOS: VideoReel[] = [
 ];
 
 // Pic, Pic, Video, repeating, until the videos run out. FOR_YOU_REEL only
-// has 8 cards -- four "every-other" slots -- for 5 videos, so the last lap
-// cycles back to the first two cards rather than ending on two videos in a
-// row with nothing between them.
+// has 6 cards -- three "every-other" laps -- for 5 videos, so later laps
+// cycle back through the cards rather than ending on two videos in a row
+// with nothing between them.
 export const FOR_YOU_FEED: ReelItem[] = (() => {
   const items: ReelItem[] = [];
   let videoIndex = 0;
