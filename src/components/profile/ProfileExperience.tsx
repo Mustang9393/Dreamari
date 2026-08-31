@@ -672,10 +672,10 @@ function Top3Tab({
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
             <div className="relative aspect-[4/3] w-full flex-none">
-              {/* Focal point sits high (22% down), not center: these career
-                 photos are tall portraits, and a 16:9 window centered on a
-                 portrait frames the chest and beheads the person. */}
-              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover object-[50%_22%]" />
+              {/* Per-photo focal point (data.ts photoFocus): each poster's
+                 subject sits at a different height, so one shared crop puts
+                 faces at different heights across the row. */}
+              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
               <span
                 className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-[9px] text-[13px] font-extrabold"
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", fontFamily: "var(--font-display)", color: "var(--foreground)" }}

@@ -54,6 +54,11 @@ export type ProfileCareer = {
   title: string;
   world: string;
   photo: string;
+  /** object-position for `photo` in cropped covers (Top Three cards). Each
+   *  poster's subject sits at a different height, so a shared crop puts faces
+   *  at different heights card-to-card; this pins each face to the same spot
+   *  (~1/3 down a 4:3 crop). Unset = "50% 25%". */
+  photoFocus?: string;
   match: number; // Career Interest Score (0-100, Tier per doc 14.6)
   receipts: Receipt[]; // behavioral evidence, shown as tiles not sentences
   routes: PathwayRoute[];
@@ -69,6 +74,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     title: "Investment Banking",
     world: "Business & Money",
     photo: "/images/app/poster-investment-banking-v3.png",
+    photoFocus: "50% 40%",
     match: 86,
     receipts: [
       { kind: "sim", value: "2x", label: "IB sim finished" },
@@ -151,6 +157,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     title: "Airline Pilot",
     world: "Driving, Flying & Shipping",
     photo: "/images/app/poster-airline-pilot-alt.png",
+    photoFocus: "50% 72%",
     match: 75,
     receipts: [
       { kind: "watched", value: "3x", label: "Pilot reel watched" },
