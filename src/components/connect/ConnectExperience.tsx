@@ -131,16 +131,16 @@ function eventById(id: string) {
 // same Ask flow -- drafting, AI suggestions and posting live in the sheet.
 function Composer({ onAsk, placeholder = "What do you want to ask?" }: { onAsk: () => void; placeholder?: string }) {
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-3)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <button
         type="button"
         onClick={onAsk}
-        className="dm-tap flex min-h-[64px] w-full cursor-pointer items-start rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left text-[13.5px] leading-[19px] font-medium"
+        className="dm-tap flex min-h-[76px] w-full cursor-pointer items-start rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left text-[13.5px] leading-[19px] font-medium"
         style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
       >
         {placeholder}
       </button>
-      <div className="mt-[10px] flex items-center justify-end gap-[var(--space-2)]">
+      <div className="mt-[12px] flex items-center justify-end gap-[var(--space-2)]">
         <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
           <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
         </button>
@@ -269,7 +269,7 @@ function CommunityCard({
         <span className="sr-only">Open {community.name}</span>
       </button>
 
-      <div className="relative flex items-center gap-[10px] px-[var(--space-4)] py-[13px]" style={{ background: gradientFor(community) }}>
+      <div className="relative flex items-center gap-[12px] px-[var(--space-5)] py-[16px]" style={{ background: gradientFor(community) }}>
         <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
           <WorldGlyph world={community.world} className="h-[16px] w-[16px]" />
         </span>
@@ -278,7 +278,7 @@ function CommunityCard({
         </span>
       </div>
 
-      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
         <div className="flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
           <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
@@ -387,7 +387,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         </div>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
-      <div className="mt-[8px] flex flex-wrap items-center gap-[6px]">
+      <div className="mt-[10px] flex flex-wrap items-center gap-[7px]">
         <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
           <GraduationCap className="h-[12px] w-[12px]" aria-hidden /> {thread.grade}
         </span>
@@ -397,7 +397,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
           </span>
         )}
       </div>
-      <div className="mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
         </button>
@@ -515,6 +515,8 @@ export function ConnectExperience() {
   const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
   const [askOpen, setAskOpen] = useState<null | { boardId: string; boardName: string; scope: string }>(null);
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
+  /** Community awaiting join confirmation in the JoinSheet. */
+  const [joinFor, setJoinFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
   const [eventJoined, setEventJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(EVENTS.map((e) => [e.id, e.entitled])));
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
@@ -592,10 +594,7 @@ export function ConnectExperience() {
             tab={view.tab}
             onTab={(tab) => setView({ kind: "home", tab })}
             joined={joined}
-            onJoin={(id) => {
-              setJoined((j) => ({ ...j, [id]: true }));
-              say("Joined. New answers show up in your feed.");
-            }}
+            onJoin={(id) => setJoinFor(id)}
             eventJoined={eventJoined}
             onOpenBoard={(id) => setView({ kind: "board", id, filter: "questions" })}
             onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
@@ -608,10 +607,7 @@ export function ConnectExperience() {
             community={COMMUNITIES.find((c) => c.id === view.id)!}
             filter={view.filter}
             joined={!!joined[view.id]}
-            onJoin={() => {
-              setJoined((j) => ({ ...j, [view.id]: true }));
-              say("Joined this community.");
-            }}
+            onJoin={() => setJoinFor(view.id)}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
             onBack={() => setView({ kind: "home", tab: "communities" })}
             onAsk={() => openAskFor(view.id)}
@@ -677,6 +673,18 @@ export function ConnectExperience() {
       </main>
 
       {askOpen && <AskSheet board={askOpen} onClose={() => setAskOpen(null)} onChangeBoard={(id) => openAskFor(id)} joined={joined} />}
+      {joinFor && (
+        <JoinSheet
+          community={COMMUNITIES.find((c) => c.id === joinFor)!}
+          onClose={() => setJoinFor(null)}
+          onJoin={() => {
+            const id = joinFor;
+            setJoined((j) => ({ ...j, [id]: true }));
+            setJoinFor(null);
+            say("Joined. New answers show up in your feed.");
+          }}
+        />
+      )}
       {codeOpenFor && (
         <EventCodeSheet
           event={eventById(codeOpenFor)!}
@@ -744,7 +752,7 @@ function HomeView({
       />
 
       {tab === "communities" && (
-        <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[10px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+        <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           <span className="sr-only">Search communities</span>
           <input
@@ -772,7 +780,7 @@ function HomeView({
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{myCommunities.length} joined</span>}
           </div>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
             {searched.map((c) => (
               <CommunityRow key={c.id} community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
             ))}
@@ -798,13 +806,13 @@ function HomeView({
              (star chip, event name, date · location in white), then the
              stats row, the Partner line, and one action for this event's
              state. */}
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
             {EVENTS.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const joined = eventJoined[event.id];
               return (
                 <div key={event.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-                  <div className="flex items-center gap-[10px] px-[var(--space-4)] py-[13px]" style={{ background: "linear-gradient(100deg, #f59e0b, #ea580c)" }}>
+                  <div className="flex items-center gap-[12px] px-[var(--space-5)] py-[16px]" style={{ background: "linear-gradient(100deg, #f59e0b, #ea580c)" }}>
                     <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.25)", color: "#FFFFFF" }}>
                       <Star className="h-[15px] w-[15px]" fill="currentColor" />
                     </span>
@@ -814,7 +822,7 @@ function HomeView({
                     </span>
                   </div>
 
-                  <div className="flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+                  <div className="flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
                     {typeof event.students === "number" && (
                       <div className="flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                         <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{event.students}</strong> Students</span>
@@ -901,7 +909,7 @@ function BoardView({
       {/* The doc's community banner: the community's own gradient, icon +
          name + "Qualified students can join", Feed/About pills, and the big
          Students / Professionals numbers at the right edge. */}
-      <section aria-label="Community overview" className="rounded-[var(--radius-xl)] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ background: gradientFor(community) }}>
+      <section aria-label="Community overview" className="rounded-[var(--radius-xl)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]" style={{ background: gradientFor(community) }}>
         <div className="flex items-start justify-between gap-[var(--space-4)]">
           <div className="min-w-0 flex-1">
             <span aria-hidden className="flex size-9 items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
@@ -921,7 +929,7 @@ function BoardView({
             </span>
           </div>
         </div>
-        <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]">
+        <div className="mt-[var(--space-5)] flex items-center gap-[var(--space-2)]">
           <button
             type="button"
             onClick={() => onFilter(about ? "questions" : filter)}
@@ -965,7 +973,7 @@ function BoardView({
            cuts Industry Updates) and the active panel. The rail collapses
            to a pill row on phones. */
         <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-          <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-3)] md:w-[210px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+          <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-4)] md:w-[220px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
             {[
               { key: "questions", label: "Student Questions", Icon: MessagesSquare },
               { key: "insights", label: "Professional Insights", Icon: ShieldCheck },
@@ -988,7 +996,7 @@ function BoardView({
             ))}
           </nav>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-4)] p-[var(--space-4)] md:p-[var(--space-5)]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-5)] p-[var(--space-5)] md:p-[var(--space-6)]">
             {filter === "questions" && (
               <>
                 <div>
@@ -1309,7 +1317,10 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Ask a question">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div ref={dialogRef} className="relative z-[1] max-h-[92dvh] w-full max-w-[560px] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      {/* SOLID panel, never glass: a modal the page shows through is
+         unreadable (direct feedback -- "modals should never be transparent
+         or translucent"). Same near-solid mix the quick-links menu uses. */}
+      <div ref={dialogRef} className="relative z-[1] max-h-[92dvh] w-full max-w-[560px] overflow-y-auto rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {submitted ? (
           <div aria-live="polite">
             <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
@@ -1421,6 +1432,53 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
   );
 }
 
+// ——— joining a community ———
+
+/** The steps to join, straight from the vetted Replit reference's own
+ *  unlock model: everyone can READ from day one; REPLY and POST unlock
+ *  with Dream Points earned in that community's topic. A SOLID sheet
+ *  (never translucent), headed by the community's own approved accent. */
+function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
+  const steps = [
+    { n: "1", title: "Read", chip: "All students", body: "View posts and save answers from day one." },
+    { n: "2", title: "Reply", chip: "300 Dream Points", body: "Join conversations once you have read around the topic." },
+    { n: "3", title: "Post", chip: "700 Dream Points", body: "Start your own questions for verified professionals." },
+  ];
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="flex items-center gap-[10px] px-[var(--space-5)] py-[14px]" style={{ background: gradientFor(community) }}>
+          <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+            <WorldGlyph world={community.world} className="h-[16px] w-[16px]" />
+          </span>
+          <h2 className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Join {community.name}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <div className="flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
+          <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Read first. Earn points to reply and post.</p>
+          {steps.map((step) => (
+            <div key={step.n} className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>{step.n}</span>
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px]">
+                  <strong className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{step.title}</strong>
+                  <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{step.chip}</span>
+                </span>
+                <span className="mt-[2px] block text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{step.body}</span>
+              </span>
+            </div>
+          ))}
+          <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Points must match the community topic — {community.topics[0]} points unlock {community.name}.</p>
+          <PrimaryCta onClick={onJoin} className="w-full">Join Community</PrimaryCta>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ——— event code redemption (handoff 9) ———
 
 function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
@@ -1452,7 +1510,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
