@@ -167,28 +167,66 @@ function StatusChip({ state }: { state: Thread["state"] }) {
   );
 }
 
-// Initials avatar, never a stock photo (handoff 20: "abstract brand asset").
+// Photo avatars everywhere (direct request), initials only as the fallback
+// for a name with no portrait. The pool is a committed set of demo portraits
+// (public/images/connect/avatars); each named person maps to ONE photo, and
+// no two people who share a screen share a face. Jordan (the signed-in
+// student) wears their real profile photo.
+const AV = "/images/connect/avatars";
+const AVATAR_PHOTO: Record<string, string> = {
+  "Jordan Rivera": "/images/avatar-jordan.jpg",
+  Jordan: "/images/avatar-jordan.jpg",
+  // Verified professionals
+  "David Chen": `${AV}/m36.jpg`,
+  "Elena Martinez": `${AV}/w22.jpg`,
+  "Amara Okafor": `${AV}/w45.jpg`,
+  "Marcus Reyes": `${AV}/m47.jpg`,
+  "Jasmine Cole": `${AV}/w31.jpg`,
+  // Students wear friendly illustrated avatars (micah, generated per
+  // handle), never real photos -- on-brand for a teen product and no real
+  // minor's face is ever implied. Professionals keep realistic portraits:
+  // credibility is their whole job here.
+  Ethan: `${AV}/c-Ethan.png`,
+  Priya: `${AV}/c-Priya.png`,
+  Maya: `${AV}/c-Maya.png`,
+  Zoe: `${AV}/c-Zoe.png`,
+  Sam: `${AV}/c-Sam.png`,
+  Lena: `${AV}/c-Lena.png`,
+  Ava: `${AV}/c-Ava.png`,
+  Diego: `${AV}/c-Diego.png`,
+  Sana: `${AV}/c-Sana.png`,
+  Ruby: `${AV}/c-Ruby.png`,
+  Theo: `${AV}/c-Theo.png`,
+  Jo: `${AV}/c-Jo.png`,
+  Amir: `${AV}/c-Amir.png`,
+  Devon: `${AV}/c-Devon.png`,
+  Riley: `${AV}/c-Riley.png`,
+  Noah: `${AV}/c-Noah.png`,
+  Marcus: `${AV}/c-Riley.png`,
+};
+
 // A verified badge overlaps the corner exactly like the app's other verified
-// affordances — a small ShieldCheck on a solid chip, never color alone. Pros
-// get the primary-tinted circle; a student handle gets the same shape in a
-// quieter, secondary tone so the two read as one family, not two systems.
+// affordances — a small ShieldCheck on a solid chip, never color alone.
 function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
+  const photo = AVATAR_PHOTO[name];
   const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
-      <span
-        className="flex h-full w-full items-center justify-center rounded-full font-bold"
-        style={{
-          background: verified ? "var(--primary)" : "var(--secondary)",
-          color: verified ? "#FFFFFF" : "var(--foreground)",
-          // Floor of 11px: the 0.38 ratio alone put the initials on a small
-          // avatar at 8px, which is not readable text by any measure.
-          fontSize: Math.max(11, size * 0.4),
-          fontFamily: "var(--font-body)",
-        }}
-      >
-        {initials}
-      </span>
+      {photo ? (
+        <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
+      ) : (
+        <span
+          className="flex h-full w-full items-center justify-center rounded-full font-bold"
+          style={{
+            background: verified ? "var(--primary)" : "var(--secondary)",
+            color: verified ? "#FFFFFF" : "var(--foreground)",
+            fontSize: Math.max(11, size * 0.4),
+            fontFamily: "var(--font-body)",
+          }}
+        >
+          {initials}
+        </span>
+      )}
       {verified && (
         <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
           <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
@@ -197,6 +235,7 @@ function Avatar({ name, size = 34, verified }: { name: string; size?: number; ve
     </span>
   );
 }
+
 
 // Student identity: handle + avatar + class year — Twitter-shaped, like the
 // marketing site's own Connect chapter — a first-name-only handle, never a
@@ -316,8 +355,8 @@ function CommunityCard({
             {shownCompanies.map((name) => (
               <span key={name} className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)" }}>{name}</span>
             ))}
+            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
           </div>
-          {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
         </div>
 
         <div className="mt-[var(--space-5)] flex flex-wrap items-center gap-[7px]">
@@ -1668,10 +1707,11 @@ function AskSheet({ board, onClose, onChangeBoard, joined }: { board: { boardId:
  *  with Dream Points earned in that community's topic. A SOLID sheet
  *  (never translucent), headed by the community's own approved accent. */
 function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
-  const steps = [
-    { n: "1", title: "Read", chip: "All students", body: "View posts and save answers from day one." },
-    { n: "2", title: "Reply", chip: "300 Dream Points", body: "Join conversations once you have read around the topic." },
-    { n: "3", title: "Post", chip: "700 Dream Points", body: "Start your own questions for verified professionals." },
+  const [agreed, setAgreed] = useState(false);
+  const perks = [
+    { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
+    { title: "Learn from other students", body: "Read real questions and answers from students on the same path." },
+    { title: "Save what helps", body: "Keep answers and insights in your Locker for later." },
   ];
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
@@ -1687,26 +1727,38 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
           </button>
         </div>
         <div className="flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
-          <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Read first. Earn points to reply and post.</p>
-          {steps.map((step) => (
-            <div key={step.n} className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--accent-subtle)" }}>{step.n}</span>
+          {/* No unlock ladder, no points gate (direct feedback): joining is
+             one agreement away. What you get, then the ground rules. */}
+          {perks.map((perk) => (
+            <div key={perk.title} className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <CheckCircle2 aria-hidden className="mt-[2px] h-[16px] w-[16px] flex-none" style={{ color: "var(--world-food-farming-nature)" }} />
               <span className="min-w-0 flex-1">
-                <span className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px]">
-                  <strong className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{step.title}</strong>
-                  <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{step.chip}</span>
-                </span>
-                <span className="mt-[2px] block text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{step.body}</span>
+                <strong className="block text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{perk.title}</strong>
+                <span className="mt-[2px] block text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{perk.body}</span>
               </span>
             </div>
           ))}
-          <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Points must match the community topic — {community.topics[0]} points unlock {community.name}.</p>
-          <PrimaryCta onClick={onJoin} className="w-full">Join Community</PrimaryCta>
+          <label className="flex cursor-pointer items-start gap-[10px] pt-[2px]">
+            <input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} className="mt-[3px] size-4 flex-none accent-[var(--primary)]" />
+            <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+              I&apos;ll keep it kind and won&apos;t share personal contact details.
+            </span>
+          </label>
+          <button
+            type="button"
+            onClick={onJoin}
+            disabled={!agreed}
+            className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13.5px] font-bold disabled:cursor-default disabled:opacity-50"
+            style={{ background: "var(--primary)", color: "#FFFFFF" }}
+          >
+            Join Community
+          </button>
         </div>
       </div>
     </div>
   );
 }
+
 
 // ——— event code redemption (handoff 9) ———
 
