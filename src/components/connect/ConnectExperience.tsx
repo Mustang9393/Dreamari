@@ -182,6 +182,14 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Amara Okafor": `${AV}/w45.jpg`,
   "Marcus Reyes": `${AV}/m47.jpg`,
   "Jasmine Cole": `${AV}/w31.jpg`,
+  "Nadia Osei": `${AV}/w28.jpg`,
+  "Wei Zhang": `${AV}/m29.jpg`,
+  "Tom Gallagher": `${AV}/m11.jpg`,
+  "Sofia Grant": `${AV}/w5.jpg`,
+  "Andre Whitfield": `${AV}/m55.jpg`,
+  "Keiko Tanaka": `${AV}/w63.jpg`,
+  "Danielle Brooks": `${AV}/w41.jpg`,
+  "Leo Fontaine": `${AV}/m77.jpg`,
   // Students wear friendly illustrated avatars (micah, generated per
   // handle), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:
