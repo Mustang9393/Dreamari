@@ -349,7 +349,7 @@ function CommunityCard({
             fill
             sizes="620px"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, black 52%, transparent 97%)", WebkitMaskImage: "linear-gradient(to left, black 52%, transparent 97%)" }}
+            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, black 45%, transparent 99%)", WebkitMaskImage: "linear-gradient(to left, black 45%, transparent 99%)" }}
           />
           <Image
             src={community.photo}
@@ -359,18 +359,18 @@ function CommunityCard({
             className="scale-[1.06] object-cover blur-[16px]"
             style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)", WebkitMaskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)" }}
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to left, transparent 35%, color-mix(in srgb, var(--primary) 8%, var(--card)) 97%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to left, transparent 30%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 70%, transparent) 62%, color-mix(in srgb, var(--primary) 8%, var(--card)) 96%)" }} />
         </div>
       ) : null}
       {(!wide || true) && (
-        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-[250px] ${wide ? "lg:hidden" : ""}`}>
+        <div aria-hidden className={`pointer-events-none absolute inset-0 ${wide ? "lg:hidden" : ""}`}>
           <Image
             src={community.photo}
             alt=""
             fill
             sizes="(min-width: 1024px) 620px, 100vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 62%, transparent 98%)", WebkitMaskImage: "linear-gradient(to bottom, black 62%, transparent 98%)" }}
+            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 42%, transparent 94%)", WebkitMaskImage: "linear-gradient(to bottom, black 42%, transparent 94%)" }}
           />
           <Image
             src={community.photo}
@@ -378,9 +378,9 @@ function CommunityCard({
             fill
             sizes="(min-width: 1024px) 620px, 100vw"
             className="scale-[1.06] object-cover blur-[16px]"
-            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 52%, black 74%, transparent 99%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 52%, black 74%, transparent 99%)" }}
+            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 32%, black 58%, transparent 96%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 32%, black 58%, transparent 96%)" }}
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 45%, color-mix(in srgb, var(--primary) 8%, var(--card)) 98%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 12%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 62%, transparent) 48%, color-mix(in srgb, var(--primary) 8%, var(--card)) 90%)" }} />
         </div>
       )}
       {featured && (
@@ -391,35 +391,36 @@ function CommunityCard({
       {/* Spacer: the stretch of art the content leaves fully visible --
          only the square composition needs it (the wide card's art lives
          beside the content, not above it). */}
-      <div aria-hidden className={`h-[118px] w-full flex-none lg:h-[130px] ${wide ? "lg:hidden" : ""} ${wide && featured ? "" : ""}`} />
-      {wide && <div aria-hidden className="hidden h-[34px] w-full flex-none lg:block" />}
+      <div aria-hidden className="h-[34px] w-full flex-none" />
 
-      <div className={`relative z-20 flex flex-1 flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] ${wide ? "lg:w-[60%] lg:px-[var(--space-5)] lg:pb-[var(--space-5)]" : ""}`}>
-        <div className="flex items-start gap-[14px]">
-          <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
-            <WorldGlyph world={community.world} className="h-[20px] w-[20px]" />
+      <div className={`relative z-20 flex flex-1 flex-col gap-[var(--space-5)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] ${wide ? "lg:px-[var(--space-5)] lg:pb-[var(--space-5)]" : ""}`}>
+        {/* Header block, the two-row anatomy: the icon spans BOTH rows on
+           the left; the right column reads title on line one, the one-line
+           stats on line two. Then real air before the chip sections. */}
+        <div className="flex items-center gap-[14px]">
+          <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[13px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
+            <WorldGlyph world={community.world} className="h-[22px] w-[22px]" />
           </span>
-          <span className="min-w-0 flex-1 self-center text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {community.name}
-          </span>
-        </div>
-
-        {/* One line, inline number + muted label ("Pros", not
-           "Professionals", so it always fits). */}
-        <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[6px]">
-          {[
-            { Icon: Users, value: community.students, label: "Students" },
-            { Icon: ShieldCheck, value: community.activePros, label: "Pros" },
-            { Icon: MessagesSquare, value: community.posts, label: "Posts" },
-          ].map(({ Icon, value, label }) => (
-            <span key={label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
-              <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />
-              <span><strong className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong> {label}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              {community.name}
             </span>
-          ))}
+            <span className="mt-[5px] flex flex-wrap items-center gap-x-[14px] gap-y-[4px]">
+              {[
+                { Icon: Users, value: community.students, label: "Students" },
+                { Icon: ShieldCheck, value: community.activePros, label: "Pros" },
+                { Icon: MessagesSquare, value: community.posts, label: "Posts" },
+              ].map(({ Icon, value, label }) => (
+                <span key={label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
+                  <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />
+                  <span><strong className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong> {label}</span>
+                </span>
+              ))}
+            </span>
+          </span>
         </div>
 
-        <div className="flex flex-col gap-[8px]">
+        <div className={`flex flex-col gap-[8px] ${wide ? "lg:max-w-[58%]" : ""}`}>
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
           </span>
@@ -431,7 +432,7 @@ function CommunityCard({
           </div>
         </div>
 
-        <div className="flex flex-col gap-[8px]">
+        <div className={`-mt-[6px] flex flex-col gap-[8px] ${wide ? "lg:max-w-[58%]" : ""}`}>
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Top topics
           </span>
@@ -453,7 +454,7 @@ function CommunityCard({
 
         {/* mt-auto keeps buttons bottom-aligned across the grid row; the
            padding guarantees the button never crowds the chips above it. */}
-        <div className="mt-auto pt-[var(--space-2)]">{action}</div>
+        <div className={`mt-auto pt-[var(--space-2)] ${wide ? "lg:max-w-[58%]" : ""}`}>{action}</div>
       </div>
     </div>
   );
