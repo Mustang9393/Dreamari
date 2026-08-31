@@ -275,51 +275,69 @@ function CommunityCard({
          PROFESSIONALS FROM chips, and muted topic chips. No description
          sentence (direct feedback), secondary info stays muted. Hierarchy:
          name (16) > caps label (10.5) > body/chips (11.5-13). */}
-      <div className="relative px-[var(--space-5)] pt-[18px] pb-[16px]" style={{ background: gradientFor(community) }}>
-        <div className="flex items-center gap-[12px]">
-          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
-            <WorldGlyph world={community.world} className="h-[17px] w-[17px]" />
-          </span>
-          <span className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+      {/* Header anatomy per direct request: one icon on the left tall
+         enough to span BOTH rows, and a right column reading name on the
+         first line, the doc's bold-number/muted-label stats on the second
+         -- stats aligned with the name, not tucked under the icon. */}
+      <div className="relative flex items-center gap-[14px] px-[var(--space-5)] py-[16px]" style={{ background: gradientFor(community) }}>
+        <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[12px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+          <WorldGlyph world={community.world} className="h-[22px] w-[22px]" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
             {community.name}
           </span>
-        </div>
-        {/* The doc's stats structure -- bold number, muted label -- riding
-           inside the header band (direct request), labels muted to white/75
-           so the numbers stay the loud part. */}
-        <div className="mt-[12px] flex items-center gap-[var(--space-6)]">
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.students}</strong> Students
+          <span className="mt-[5px] flex items-center gap-[var(--space-5)]">
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.students}</strong> Students
+            </span>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> Pros
+            </span>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.posts}</strong> Posts
+            </span>
           </span>
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> Pros
-          </span>
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.posts}</strong> Posts
-          </span>
-        </div>
+        </span>
       </div>
 
-      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-        <div className="flex flex-col gap-[7px]">
+      <div className="relative z-20 flex flex-1 flex-col p-[var(--space-5)]">
+        {/* Two chip rows, two clearly DIFFERENT treatments (direct feedback:
+           they read too alike). Companies are solid neutral pills with the
+           foreground text -- the credible, factual row. Topics wear the
+           community's own accent as a tinted surface -- the colorful,
+           inviting row -- and sit visibly further down, with "+N more" on
+           its own line the way the doc renders it. */}
+        <div className="flex flex-col gap-[8px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
           </span>
-          <div className="flex flex-wrap items-center gap-[6px]">
+          <div className="flex flex-wrap items-center gap-[7px]">
             {shownCompanies.map((name) => (
-              <span key={name} className="rounded-[999px] border px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+              <span key={name} className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)" }}>{name}</span>
             ))}
-            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
           </div>
+          {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
         </div>
 
-        <div className="flex flex-wrap items-center gap-[6px]">
+        <div className="mt-[var(--space-5)] flex flex-wrap items-center gap-[7px]">
           {community.topics.slice(0, 4).map((topic) => (
-            <span key={topic} className="rounded-[999px] border px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
+            <span
+              key={topic}
+              className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold"
+              style={{
+                background: `color-mix(in srgb, ${communityAccent(community)} 16%, transparent)`,
+                color: `color-mix(in srgb, ${communityAccent(community)} 42%, var(--foreground))`,
+              }}
+            >
+              {topic}
+            </span>
           ))}
         </div>
 
-        <div className="mt-auto">{action}</div>
+        {/* mt-auto keeps buttons bottom-aligned across the grid row; the
+           padding guarantees the button never crowds the chips above it. */}
+        <div className="mt-auto pt-[var(--space-5)]">{action}</div>
       </div>
     </div>
   );
@@ -779,7 +797,7 @@ function HomeView({
           <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
           <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
         </div>
-        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={128} height={128} aria-hidden className="h-[56px] w-[56px] flex-none object-contain sm:h-[64px] sm:w-[64px]" />
+        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={192} height={192} aria-hidden className="h-[88px] w-[88px] flex-none object-contain sm:h-[108px] sm:w-[108px]" />
       </div>
 
       <FilterRow
