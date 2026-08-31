@@ -95,17 +95,20 @@ type View =
   | { kind: "home"; tab: "communities" | "events" }
   | { kind: "board"; id: string; filter: string }
   | { kind: "event"; id: string; filter: string }
-  | { kind: "thread"; id: string };
+  | { kind: "thread"; id: string }
+  | { kind: "insight"; id: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
+  if (view.kind === "insight") return `?insight=${view.id}`;
   return `?thread=${view.id}`;
 }
 
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
+  if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "questions" };
@@ -131,7 +134,7 @@ function eventById(id: string) {
 // same Ask flow -- drafting, AI suggestions and posting live in the sheet.
 function Composer({ onAsk, placeholder = "What do you want to ask?" }: { onAsk: () => void; placeholder?: string }) {
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
       <button
         type="button"
         onClick={onAsk}
@@ -262,46 +265,49 @@ function CommunityCard({
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
   return (
-    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
       {/* Whole card, one target. The bottom action button sits above this
          layer (z-20) so it's still its own reachable target. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>
       </button>
 
-      <div className="relative flex items-center gap-[12px] px-[var(--space-5)] py-[16px]" style={{ background: gradientFor(community) }}>
-        <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
-          <WorldGlyph world={community.world} className="h-[16px] w-[16px]" />
+      {/* DECLUTTERED (direct feedback: "not so cluttered... row after row"):
+         the numbers ride quietly inside the colored header under the name,
+         the purpose line gives the card a welcoming voice, companies stay
+         as the one chip row (they're the draw), and topics collapse to a
+         single muted line instead of a second box pile. Hierarchy inside
+         the card: name (16) > caps label (10.5) > body/chips (11.5-13). */}
+      <div className="relative flex items-center gap-[12px] px-[var(--space-5)] py-[18px]" style={{ background: gradientFor(community) }}>
+        <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+          <WorldGlyph world={community.world} className="h-[17px] w-[17px]" />
         </span>
-        <span className="min-w-0 flex-1 text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-          {community.name}
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+            {community.name}
+          </span>
+          <span className="mt-[3px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>
+            {community.students} students · {community.activePros} pros · {community.posts} posts
+          </span>
         </span>
       </div>
 
       <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-        <div className="flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
-          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
-          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
-        </div>
+        <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
 
-        <div className="flex flex-col gap-[6px]">
+        <div className="flex flex-col gap-[7px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
           </span>
           <div className="flex flex-wrap items-center gap-[6px]">
             {shownCompanies.map((name) => (
-              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+              <span key={name} className="rounded-[999px] border px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
             ))}
             {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-[6px]">
-          {community.topics.slice(0, 4).map((topic) => (
-            <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
-          ))}
-        </div>
+        <p className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</p>
 
         <div className="mt-auto">{action}</div>
       </div>
@@ -324,7 +330,7 @@ function WorldGlyph({ world, className }: { world: string; className?: string })
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`} style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`} style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
       {children}
     </div>
   );
@@ -372,21 +378,33 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // the time at the top right.
 function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const comments = thread.responses.length;
+  const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <div className="min-w-0 flex-1">
+    <Card className="dm-tap">
+      {/* A living row starts with a person: the asker's avatar and handle
+         lead, the time sits at the far edge -- the same anatomy as every
+         social feed a student already reads. */}
+      <div className="flex items-center justify-between gap-[var(--space-3)]">
+        <span className="flex min-w-0 items-center gap-[8px]">
+          <Avatar name={thread.handle} size={26} />
+          <span className="truncate text-[12px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
           {comments === 0 && (
-            <span className="mb-[6px] inline-flex rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
+            <span className="inline-flex flex-none rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
               Unanswered
             </span>
           )}
-          <button type="button" onClick={onOpen} className="dm-link block w-full cursor-pointer text-left">
-            <h3 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-          </button>
-        </div>
+        </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
+      <button type="button" onClick={onOpen} className="dm-link mt-[10px] block w-full cursor-pointer text-left">
+        <h3 className="text-[15px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
+      </button>
+      {answeredBy && (
+        <p className="mt-[8px] flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}>
+          <CheckCircle2 className="h-[13px] w-[13px] flex-none" aria-hidden />
+          Answered by {proById(answeredBy.proId).name} · {proById(answeredBy.proId).org}
+        </p>
+      )}
       <div className="mt-[10px] flex flex-wrap items-center gap-[7px]">
         <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
           <GraduationCap className="h-[12px] w-[12px]" aria-hidden /> {thread.grade}
@@ -415,30 +433,33 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
   );
 }
 
-// The doc's insight row, one for one: avatar, the pro's name with a
-// "Professional" chip and their company chip, the insight's title line,
-// then likes and comments, time at the right.
-function InsightCard({ insight, saved, onSave, helpful, onHelpful }: { insight: Insight; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+// The doc's insight row -- avatar, the pro's name with a "Professional" chip
+// and their company chip, the insight's title line, then likes and comments
+// -- and the whole row OPENS: title and comment count both land on the
+// insight's own thread, where the conversation lives.
+function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
-    <Card>
-      <div className="flex items-start gap-[10px]">
-        <Avatar name={pro.name} verified size={34} />
+    <Card className="dm-tap">
+      <div className="flex items-start gap-[12px]">
+        <Avatar name={pro.name} verified size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
             <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{pro.org}</span>
           </div>
-          <h3 className="mt-[5px] text-[14px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
-          <p className="mt-[3px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
-          <div className="mt-[8px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onOpen} className="dm-link mt-[7px] block w-full cursor-pointer text-left">
+            <h3 className="text-[14.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
+            <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
+          </button>
+          <div className="mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
               <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
             </button>
-            {typeof insight.comments === "number" && (
-              <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.comments} comments</span>
-            )}
+            <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
+              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length} comments
+            </button>
             <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
               <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
             </button>
@@ -612,9 +633,30 @@ export function ConnectExperience() {
             onBack={() => setView({ kind: "home", tab: "communities" })}
             onAsk={() => openAskFor(view.id)}
             onOpenThread={(id) => setView({ kind: "thread", id })}
+            onOpenInsight={(id) => setView({ kind: "insight", id })}
             cardProps={cardProps}
           />
         )}
+
+        {view.kind === "insight" &&
+          (() => {
+            const insight = INSIGHTS.find((i) => i.id === view.id);
+            if (!insight) return null;
+            const p = cardProps(insight.id);
+            return (
+              <InsightThreadView
+                insight={insight}
+                onBack={() => setView({ kind: "board", id: insight.boardId, filter: "insights" })}
+                saved={p.saved}
+                onSave={p.onSave}
+                helpful={p.helpful}
+                onHelpful={p.onHelpful}
+                helpfuls={helpfuls}
+                toggleHelpful={toggleHelpful}
+                onAddToPlan={() => say("Added to your Plan as a next action.")}
+              />
+            );
+          })()}
 
         {view.kind === "event" &&
           (() => {
@@ -780,7 +822,7 @@ function HomeView({
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{myCommunities.length} joined</span>}
           </div>
-          <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searched.map((c) => (
               <CommunityRow key={c.id} community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
             ))}
@@ -806,12 +848,12 @@ function HomeView({
              (star chip, event name, date · location in white), then the
              stats row, the Partner line, and one action for this event's
              state. */}
-          <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {EVENTS.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const joined = eventJoined[event.id];
               return (
-                <div key={event.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+                <div key={event.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
                   <div className="flex items-center gap-[12px] px-[var(--space-5)] py-[16px]" style={{ background: "linear-gradient(100deg, #f59e0b, #ea580c)" }}>
                     <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.25)", color: "#FFFFFF" }}>
                       <Star className="h-[15px] w-[15px]" fill="currentColor" />
@@ -883,6 +925,7 @@ function BoardView({
   onBack,
   onAsk,
   onOpenThread,
+  onOpenInsight,
   cardProps,
 }: {
   community: Community;
@@ -893,6 +936,7 @@ function BoardView({
   onBack: () => void;
   onAsk: () => void;
   onOpenThread: (id: string) => void;
+  onOpenInsight: (id: string) => void;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const threads = THREADS.filter((t) => t.boardId === community.id);
@@ -972,7 +1016,7 @@ function BoardView({
            left rail (Student Questions / Professional Insights -- the doc
            cuts Industry Updates) and the active panel. The rail collapses
            to a pill row on phones. */
-        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
           <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-4)] md:w-[220px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
             {[
               { key: "questions", label: "Student Questions", Icon: MessagesSquare },
@@ -1024,7 +1068,7 @@ function BoardView({
                   <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Professional Insights</h2>
                   <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
                 </div>
-                {insights.map((i) => <InsightCard key={i.id} insight={i} {...cardProps(i.id)} />)}
+                {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
                 {insights.length === 0 && (
                   <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
                 )}
@@ -1171,6 +1215,7 @@ function ThreadView({
   const boardName = eventById(thread.boardId)?.name ?? COMMUNITIES.find((c) => c.id === thread.boardId)?.name ?? "Community";
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
   const p = cardProps(thread.id);
+  const [posted, setPosted] = useState<LocalReply[]>([]);
 
   return (
     <>
@@ -1239,10 +1284,10 @@ function ThreadView({
               </div>
             );
           }
+          const pid = thread.id + "-p" + index;
           return (
-            <div key={thread.id + "-p" + index} className="rounded-[var(--radius-lg)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-              <span className="text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ color: EVENT_ACCENT }}>Peer · {r.handle} · {r.grade} · {r.postedAgo}</span>
-              <p className="mt-[3px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
+            <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+              <CommentRow id={pid} name={r.handle} chip={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} />
             </div>
           );
         })}
@@ -1252,6 +1297,13 @@ function ThreadView({
             <p className="text-[13px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet — we&apos;ll notify you.</p>
           </Card>
         )}
+
+        {posted.map((reply) => (
+          <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+            <CommentRow id={reply.id} name="Jordan" chip="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
+          </div>
+        ))}
+        <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <button type="button" onClick={p.onHelpful} aria-pressed={p.helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.helpful ? "var(--accent-subtle)" : undefined }}>
@@ -1276,6 +1328,172 @@ function ThreadView({
             ))}
           </section>
         )}
+      </article>
+    </>
+  );
+}
+
+// ——— comments: one shape everywhere ———
+
+/** A comment under an insight or thread: avatar, name + role chip, the
+ *  line itself, then a working like button and the time. `likes` is the
+ *  seeded count; the toggle adds the student's own on top. */
+function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, onLike }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
+  const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
+  return (
+    <div className="flex items-start gap-[12px]">
+      <Avatar name={name} verified={chipTone === "pro"} size={32} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-[6px]">
+          <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+          <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
+          <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
+        </div>
+        <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{body}</p>
+        <button type="button" onClick={() => onLike(id)} aria-pressed={liked} className="dm-link mt-[4px] flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[11.5px] leading-[15px] font-semibold" style={{ color: liked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+          <ThumbsUp className="h-3 w-3" aria-hidden /> {likes + (liked ? 1 : 0)}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** The reply box at the foot of a thread: type, post, and the comment
+ *  appears immediately as the signed-in student ("Jordan · Junior"). */
+function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
+  const [text, setText] = useState("");
+  const submit = () => {
+    if (!text.trim()) return;
+    onPost(text.trim());
+    setText("");
+  };
+  return (
+    <div className="flex items-start gap-[12px] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+      <Avatar name="Jordan Rivera" size={32} />
+      <div className="min-w-0 flex-1">
+        <label className="block">
+          <span className="sr-only">Add a comment</span>
+          <textarea
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            rows={2}
+            placeholder="Add a comment…"
+            className="w-full resize-none rounded-[var(--radius-md)] border p-[10px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+            style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
+          />
+        </label>
+        <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
+          <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior</span>
+          <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-full px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A local, this-session comment the student just posted. */
+type LocalReply = { id: string; body: string };
+
+// ——— insight thread (a Professional Insight, opened) ———
+
+function InsightThreadView({
+  insight,
+  onBack,
+  saved,
+  onSave,
+  helpful,
+  onHelpful,
+  helpfuls,
+  toggleHelpful,
+  onAddToPlan,
+}: {
+  insight: Insight;
+  onBack: () => void;
+  saved: boolean;
+  onSave: () => void;
+  helpful: boolean;
+  onHelpful: () => void;
+  helpfuls: Record<string, boolean>;
+  toggleHelpful: (id: string) => void;
+  onAddToPlan: () => void;
+}) {
+  const pro = proById(insight.proId);
+  const boardName = COMMUNITIES.find((c) => c.id === insight.boardId)?.name ?? "Community";
+  const [posted, setPosted] = useState<LocalReply[]>([]);
+
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
+      </button>
+
+      <article className="flex flex-col gap-[var(--space-5)]">
+        <div className="rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
+          <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
+          <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
+          <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
+          <p className="mt-[10px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{pro.verifiedBy}</p>
+          <div className="mt-[14px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+            <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+                <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
+              </button>
+              <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+                <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+              </button>
+              <button type="button" onClick={onAddToPlan} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden /> Add to Plan
+              </button>
+              <button type="button" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[5px]">
+                <Flag className="h-3.5 w-3.5" aria-hidden /> Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section aria-label="Comments" className="flex flex-col gap-[var(--space-4)]">
+          <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            Comments ({insight.replies.length + posted.length})
+          </h2>
+          <div className="flex flex-col gap-[var(--space-4)]">
+            {insight.replies.map((reply, index) => {
+              const rid = `${insight.id}-r${index}`;
+              const isPro = !!reply.proId;
+              return (
+                <CommentRow
+                  key={rid}
+                  id={rid}
+                  name={isPro ? proById(reply.proId!).name : reply.handle!}
+                  chip={isPro ? "Professional" : reply.grade!}
+                  chipTone={isPro ? "pro" : "student"}
+                  body={reply.body}
+                  postedAgo={reply.postedAgo}
+                  likes={reply.likes}
+                  liked={!!helpfuls[rid]}
+                  onLike={toggleHelpful}
+                />
+              );
+            })}
+            {posted.map((reply) => (
+              <CommentRow
+                key={reply.id}
+                id={reply.id}
+                name="Jordan"
+                chip="Junior"
+                chipTone="student"
+                body={reply.body}
+                postedAgo="Just now"
+                likes={0}
+                liked={!!helpfuls[reply.id]}
+                onLike={toggleHelpful}
+              />
+            ))}
+          </div>
+          <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
+        </section>
       </article>
     </>
   );

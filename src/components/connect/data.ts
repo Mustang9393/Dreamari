@@ -24,7 +24,7 @@ export type ProResponse = {
 };
 
 export type FollowUp = { kind: "followup"; body: string; postedAgo: string };
-export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string };
+export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string; likes?: number };
 
 export type Thread = {
   id: string;
@@ -48,6 +48,17 @@ export type Thread = {
   unreadAnswer?: boolean; // powers the For You "new answers" module
 };
 
+/** One comment under a Professional Insight: a student (handle + grade)
+ *  or, occasionally, the pro replying back (proId). Short bodies only. */
+export type InsightReply = {
+  handle?: string;
+  grade?: string;
+  proId?: string;
+  body: string;
+  postedAgo: string;
+  likes: number;
+};
+
 export type Insight = {
   id: string;
   boardId: string;
@@ -57,8 +68,9 @@ export type Insight = {
   body: string;
   postedAgo: string;
   helpful: number;
-  /** Doc's insight row shows a comment count next to likes. */
-  comments?: number;
+  /** The comment thread under the insight -- the card's count derives
+   *  from this list, so the number is never out of step with the page. */
+  replies: InsightReply[];
   saved?: boolean;
 };
 
@@ -222,7 +234,7 @@ export const THREADS: Thread[] = [
         postedAgo: "6h ago",
         body: "Tutorials are a fine start — just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago" },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
     ],
   },
   {
@@ -364,7 +376,7 @@ export const THREADS: Thread[] = [
         body: "Nerves usually mean you care, not that you're unprepared. Practice your first sixty seconds out loud until it's boring to you — the opening is where nerves live, and once it's automatic the rest is a conversation.",
         disclosure: "Personal approach — different interviewers look for different things.",
       },
-      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago" },
+      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 7 },
     ],
   },
   {
@@ -464,8 +476,15 @@ export const INSIGHTS: Insight[] = [
     body: "People assume software engineers code 8 hours straight. In reality, my day is roughly 3 hours of coding, 2 hours of meetings, 1 hour of code review, and the rest reading documentation or unblocking teammates. Communication skills matter more than most people expect.",
     postedAgo: "3d ago",
     helpful: 52,
-    comments: 6,
     saved: true,
+    replies: [
+      { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 14 },
+      { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 6 },
+      { proId: "pro-chen", body: "Good question — a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
+      { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
+      { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
+      { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 3 },
+    ],
   },
   {
     id: "i-first-internship",
@@ -476,7 +495,11 @@ export const INSIGHTS: Insight[] = [
     body: "Nobody expects you to know the technical work on day one — they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
     postedAgo: "5d ago",
     helpful: 38,
-    comments: 3,
+    replies: [
+      { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 12 },
+      { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 5 },
+      { proId: "pro-okafor", body: "Plenty — I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 18 },
+    ],
   },
   {
     id: "i-tell-me-about-yourself",
@@ -487,7 +510,12 @@ export const INSIGHTS: Insight[] = [
     body: "One line on who you are, one on what you've done that you're proud of, one on why you're here. Practice it out loud twice. Interviewers aren't grading your biography — they're checking whether you can organize a thought.",
     postedAgo: "2d ago",
     helpful: 44,
-    comments: 4,
+    replies: [
+      { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 16 },
+      { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 4 },
+      { proId: "pro-martinez", body: "You do — it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
+      { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 7 },
+    ],
   },
   {
     id: "i-nursing-first-year",
@@ -498,7 +526,13 @@ export const INSIGHTS: Insight[] = [
     body: "You will ask hundreds of questions and that's the job, not a weakness. Twelve-hour shifts mean three-day weeks. And the nurses who last are the ones who say something the moment a patient looks different.",
     postedAgo: "4d ago",
     helpful: 31,
-    comments: 5,
+    replies: [
+      { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13 },
+      { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
+      { proId: "pro-reyes", body: "The opposite — the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
+      { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
+      { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds intense.", postedAgo: "1d ago", likes: 5 },
+    ],
   },
   {
     id: "i-what-brands-pay-for",
@@ -509,7 +543,10 @@ export const INSIGHTS: Insight[] = [
     body: "Not prettiness — decisions. Why this color, why this type, why this layout for this audience. The day you can defend your choices out loud is the day you stop being a student and start being a designer.",
     postedAgo: "1d ago",
     helpful: 27,
-    comments: 2,
+    replies: [
+      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10 },
+      { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
+    ],
   },
 ];
 
@@ -674,7 +711,7 @@ export const EVENT_THREADS: Thread[] = [
     helpful: 34,
     followers: 19,
     responses: [
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago" },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 11 },
     ],
   },
   {
