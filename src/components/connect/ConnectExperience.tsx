@@ -317,30 +317,57 @@ function CommunityCard({
 }) {
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
+  const latest = THREADS.find((t) => t.boardId === community.id);
   return (
-    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
+    <div className="dm-tap group relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
       {/* Whole card, one target. The bottom action button sits above this
          layer (z-20) so it's still its own reachable target. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>
       </button>
+      {/* Hover: the card glows in ITS OWN accent -- ring plus a soft cast,
+         so pointing at Finance feels gold and Healthcare feels teal. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-30 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${communityAccent(community)} 60%, transparent), 0 18px 50px -18px color-mix(in srgb, ${communityAccent(community)} 55%, transparent)` }}
+      />
 
-      {/* The bento-card anatomy from the reference mock: banner art on top
-         (generated, people-free, on the community's accent), then icon tile
-         + name + one welcoming line, icon stats with the number stacked
-         over its muted label, the two chip systems, and the button. */}
-      <div className="relative h-[150px] w-full lg:h-[165px]">
-        <Image src={community.photo} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover" />
-        {featured && (
-          <span className="absolute top-[12px] left-[12px] inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
-            <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
-          </span>
-        )}
+      {/* The art is WOVEN into the card, not clipped into a strip (per the
+         reference): three stacked layers -- the sharp artwork masked so it
+         owns the top, a blurred copy that takes over through the middle
+         (the progressive blur), and a gradient into the card's own surface
+         so the content below sits on the artwork's dissolving tail. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[280px]">
+        <Image
+          src={community.photo}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 620px, 100vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+          style={{ maskImage: "linear-gradient(to bottom, black 42%, transparent 96%)", WebkitMaskImage: "linear-gradient(to bottom, black 42%, transparent 96%)" }}
+        />
+        <Image
+          src={community.photo}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 620px, 100vw"
+          className="scale-[1.06] object-cover blur-[16px]"
+          style={{ maskImage: "linear-gradient(to bottom, transparent 30%, black 58%, transparent 97%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 30%, black 58%, transparent 97%)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 18%, color-mix(in srgb, var(--primary) 8%, var(--card)) 97%)" }} />
       </div>
+      {featured && (
+        <span className="absolute top-[12px] left-[12px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+          <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
+        </span>
+      )}
+      {/* Spacer: the stretch of art the content leaves fully visible. */}
+      <div aria-hidden className="h-[128px] w-full flex-none lg:h-[146px]" />
 
       <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
         <div className="flex items-start gap-[14px]">
-          <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: communityAccent(community), color: "#FFFFFF" }}>
+          <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
             <WorldGlyph world={community.world} className="h-[20px] w-[20px]" />
           </span>
           <span className="min-w-0 flex-1">
@@ -401,6 +428,15 @@ function CommunityCard({
           </div>
         </div>
 
+        {/* The card's heartbeat: the board's newest question, verbatim from
+           its own thread data -- a reason to open, not another statistic. */}
+        {latest && (
+          <div className="flex items-center gap-[8px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <MessagesSquare className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 55%, var(--foreground))` }} />
+            <span className="min-w-0 flex-1 truncate text-[12px] leading-[17px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{latest.title}&rdquo;</span>
+            <span className="flex-none text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{latest.postedAgo}</span>
+          </div>
+        )}
         {/* mt-auto keeps buttons bottom-aligned across the grid row; the
            padding guarantees the button never crowds the chips above it. */}
         <div className="mt-auto pt-[var(--space-2)]">{action}</div>
