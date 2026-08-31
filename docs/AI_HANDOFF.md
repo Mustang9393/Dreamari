@@ -65,6 +65,29 @@ tokens above, in both modes).
   reveal + data-keep-together preserved; worth one print-preview QA pass.
 - Verified live at mobile + 1280px, eslint + tokens:check clean. NOT pushed
   -- awaiting go-ahead.
+- **Follow-up rounds (same night, all LOCAL)**:
+  - Strict type hierarchy enforced (user: "heading>Subheading>Body ... no
+    other logic"): report modules now 18px caps heading > 14px caps label >
+    13px body, everywhere incl. ComparisonTable and Reflection. Saved as a
+    standing memory rule.
+  - Majors row 3-across at every width; report content column max-w
+    68ch -> 920px (68ch collapsed once body hit 13px, leaving huge side
+    margins); article side padding trimmed; Reflection card got real bottom
+    padding (sm:pb space-9).
+  - **For You reel recast onto browse cards** (user dropped "BROWSE
+    Images-2" in repo root): six careers with real browse photography +
+    BLS-sourced Career Report copy (IB, RN, SWE, Airline Pilot, PE, Food
+    Scientist) replace the Figma Env lineup (Aerospace Engineer et al. --
+    no art, no sourced copy). Five images imported as
+    public/images/app/browse-*.png; RN keeps its Figma browse poster; IB
+    uses poster-investment-banking-v3.png, which is byte-identical to the
+    user's hi-res "Investment banker.png" -- the folder's own IB files are
+    198x297 thumbnails, DO NOT USE (user: "don't ever let me see this
+    image again" about the cropped thumb).
+  - Landing Play demo typography (Slack): one type scale (H1 20 > question
+    17 > body/answers 16 at cap), title-case blue H1, sentence-case
+    question (all-caps dropped), blue quote bar now spans title+scenario as
+    one block, even section gap for scene -> context -> question -> choices.
 
 ### 2026-08-31 (evening) RN sprites keyed + Profile surface hierarchy (PUSHED)
 
