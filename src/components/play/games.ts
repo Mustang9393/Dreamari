@@ -21,14 +21,14 @@ export const INVESTMENT_BANKING: Simulation = {
   // shape (scale, odds, cost, room, consequence, the person at the top,
   // the ladder) travels to every career.
   trailer: [
-    { id: "TR-01", seconds: 2.5, text: "Every summer, thousands of students want this job." },
-    { id: "TR-02", seconds: 3, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
-    { id: "TR-03", seconds: 2.5, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
-    { id: "TR-04", seconds: 2.5, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
-    { id: "TR-05", seconds: 2.5, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp" },
+    { id: "TR-01", seconds: 4, text: "Every summer, thousands of students want this job." },
+    { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
+    { id: "TR-03", seconds: 4, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
+    { id: "TR-04", seconds: 4, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
+    { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp" },
     // Lamisa is SEEN before she is met (Trailer tab) -- her sprite rises
     // into frame dark-graded, a silhouette until Level 3 introduces her.
-    { id: "TR-06", seconds: 3.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
+    { id: "TR-06", seconds: 4.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
     { id: "TR-07", seconds: 4, text: "Six levels. Intern to Managing Director. How far will you get?", finale: true },
   ],
   levels: [IB_LEVEL_1, IB_LEVEL_2, IB_LEVEL_3],
@@ -50,13 +50,13 @@ export const REGISTERED_NURSE: Simulation = {
   // WITHOUT their numbers, per the sheet's own rule: no numbers we cannot
   // source (D04).
   trailer: [
-    { id: "RN-TR-01", seconds: 2.5, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/locations/lobby.jpg" },
-    { id: "RN-TR-02", seconds: 3, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
-    { id: "RN-TR-03", seconds: 2.5, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
-    { id: "RN-TR-04", seconds: 2.5, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
-    { id: "RN-TR-05", seconds: 2.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg" },
+    { id: "RN-TR-01", seconds: 4, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/locations/lobby.jpg" },
+    { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
+    { id: "RN-TR-03", seconds: 4, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
+    { id: "RN-TR-04", seconds: 4, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
+    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg" },
     // Yvonne is SEEN here and introduced properly at Level 3.
-    { id: "RN-TR-06", seconds: 3, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/yvonne.jpg" },
+    { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/yvonne.jpg" },
     { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
   ],
   levels: [RN_LEVEL_1],

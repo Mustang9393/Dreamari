@@ -148,15 +148,20 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
           />
         )}
         {/* The title, set in the world's approved poster serif, breathing in
-           from a blur -- one line, film-title sized, gold-warmed white. */}
-        <AnimatePresence mode="wait">
+           from a blur -- one line, film-title sized, gold-warmed white.
+           Absolutely stacked inside a relative frame with NO mode="wait":
+           the incoming line arrives while the outgoing one fades, in sync
+           with the plate, so a cut never shows a picture with no words on
+           it (direct feedback). */}
+        <div className="relative flex w-full max-w-[720px] items-center justify-center">
+        <AnimatePresence initial={false}>
           <motion.p
             key={`${card.id}-text`}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(10px)", y: 8 }}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(8px)", y: 8 }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", y: 0 }}
             exit={{ opacity: 0, filter: "blur(6px)" }}
-            transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
-            className="relative max-w-[720px] text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute w-full text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
             style={{
               ...titleFont,
               color: "#f8f3e7",
@@ -166,6 +171,11 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
             {card.text}
           </motion.p>
         </AnimatePresence>
+        {/* Reserves the line's height (the titles are absolute). */}
+        <p aria-hidden className="invisible w-full text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase">
+          {card.text}
+        </p>
+        </div>
 
         {card.finale && (
           <motion.div className="flex w-full max-w-[420px] flex-col items-center gap-[24px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }}>
