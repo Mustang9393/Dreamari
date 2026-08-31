@@ -31,6 +31,28 @@ function trackSrc(track: MusicTrack, simId?: string): string {
 let el: HTMLAudioElement | null = null;
 let current: string | null = null;
 
+// What SHOULD be playing right now, so a play() blocked by the browser's
+// autoplay policy can be retried on the next real gesture. Without this,
+// a level entered without a prior tap on the page (Express mode's direct
+// link, a hard reload, a shared URL) stayed silent for the whole run:
+// `current` was already set when play() rejected, so every later
+// playMusic call short-circuited on the same-src check.
+let wanted: { track: MusicTrack; simId?: string } | null = null;
+let retryArmed = false;
+
+function armGestureRetry(): void {
+  if (retryArmed || typeof window === "undefined") return;
+  retryArmed = true;
+  const retry = () => {
+    retryArmed = false;
+    window.removeEventListener("pointerdown", retry);
+    window.removeEventListener("keydown", retry);
+    if (wanted) playMusic(wanted.track, wanted.simId);
+  };
+  window.addEventListener("pointerdown", retry, { once: true });
+  window.addEventListener("keydown", retry, { once: true });
+}
+
 // A lowpass filter sitting between the <audio> element and the speakers, so
 // a PIP or a timed focus question can "muffle" the music the way a closed
 // door dulls a room's noise -- ducking volume would just make it quieter,
@@ -81,6 +103,7 @@ function element(): HTMLAudioElement | null {
 export function playMusic(track: MusicTrack, simId?: string): void {
   const audio = element();
   if (!audio) return;
+  wanted = { track, simId };
   audio.muted = isMusicMuted();
   const src = trackSrc(track, simId);
   // Keyed by the resolved FILE, not the track name -- switching careers on
@@ -90,8 +113,11 @@ export function playMusic(track: MusicTrack, simId?: string): void {
   audio.src = src;
   audio.currentTime = 0;
   audio.play().catch(() => {
-    // Blocked autoplay (no user gesture yet) -- the level's own first tap
-    // (an answer, the mute toggle, anything) resumes it via the next call.
+    // Blocked autoplay (no user gesture yet). Reset `current` so the retry
+    // is not swallowed by the same-src check, and arm a one-shot gesture
+    // listener -- the player's very first tap starts the song.
+    current = null;
+    armGestureRetry();
   });
 }
 
@@ -115,6 +141,9 @@ export function setMusicFocused(next: boolean): void {
 /** Leaving the simulation entirely -- the music must not keep playing over
  *  the rest of the app. */
 export function stopMusic(): void {
+  // Clear the retry intent FIRST: a blocked track must not spring back to
+  // life on the next tap after the player has already left the simulation.
+  wanted = null;
   if (!el) return;
   el.pause();
   current = null;

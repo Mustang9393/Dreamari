@@ -30,6 +30,44 @@ import type {
 /** id is the picked option, so the shell can show which one locked. */
 export type Resolve = (tier: Tier, why: string, id?: string) => void;
 
+// Answer positions are randomised (so the right answer is never learnable
+// by position -- "harder to game the system", direct request) and STABLE
+// while a question is on screen: options must never move under a player
+// mid-answer. React's render pass has to stay pure, so Math.random cannot
+// roll inside it -- instead a nonce rolls ONCE at page load (module scope),
+// and each beat's order is a pure seeded Fisher-Yates of (nonce, beat id):
+// every visit to the app deals fresh positions, every render of the same
+// question deals the same ones. Display order only -- scoring reads
+// tiers/roles off the option objects themselves, never off positions.
+const SHUFFLE_NONCE = Math.floor(Math.random() * 0xffffffff);
+
+function seededShuffle<T>(items: readonly T[], key: string): T[] {
+  // FNV-1a over the key, mixed with the per-load nonce...
+  let h = SHUFFLE_NONCE >>> 0;
+  for (let i = 0; i < key.length; i += 1) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  // ...driving a mulberry32 stream for the swaps.
+  const rand = () => {
+    h = (h + 0x6d2b79f5) >>> 0;
+    let t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rand() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function useShuffled<T>(items: readonly T[], key: string): T[] {
+  return useMemo(() => seededShuffle(items, key), [items, key]);
+}
+
 // ---------------------------------------------------------------- typewriter
 
 /** Reveals text a character at a time, like a dialogue box should. The count is
@@ -714,23 +752,24 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
 // ----------------------------------------------------------- choice: options
 
 export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+  const choices = useShuffled(beat.choices, beat.id);
   const pickByKey = useCallback(
     (index: number) => {
-      const choice = beat.choices[index];
+      const choice = choices[index];
       if (!choice || locked) return;
       tierSound(choice.tier);
       onResolve(choice.tier, choice.why, choice.id);
     },
-    [beat.choices, locked, onResolve],
+    [choices, locked, onResolve],
   );
-  useDigitKeys(beat.choices.length, pickByKey, locked === null);
+  useDigitKeys(choices.length, pickByKey, locked === null);
   if (beat.layout === "blank" || beat.layout === "tiles") return <BlankBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "document") return <DocumentBody beat={beat} onResolve={onResolve} locked={locked} />;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <div className="flex flex-col gap-[8px]">
-        {beat.choices.map((choice, index) => (
+        {choices.map((choice, index) => (
           <OptionButton
             key={choice.id}
             index={index}
@@ -756,6 +795,7 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
  *  commits. Number keys still commit directly (ChoiceBody's useDigitKeys),
  *  so the keyboard path stays one press. */
 function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+  const choices = useShuffled(beat.choices, beat.id);
   const chosen = beat.choices.find((choice) => choice.id === locked);
   const [before, after] = beat.question.split("___");
   const slotRef = useRef<HTMLSpanElement>(null);
@@ -789,7 +829,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
         {after}
       </Question>
       <div className={beat.layout === "tiles" ? "grid grid-cols-2 gap-[8px]" : "flex flex-wrap gap-[8px]"}>
-        {beat.choices.map((choice, index) => (
+        {choices.map((choice, index) => (
           <motion.button
             key={choice.id}
             type="button"
@@ -831,6 +871,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 
 /** Catch the Mistake: a document window, one line per row. */
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+  const choices = useShuffled(beat.choices, beat.id);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
@@ -843,7 +884,7 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
           {beat.doc ?? "Document"}
         </p>
         <ul className="m-0 flex list-none flex-col p-0">
-          {beat.choices.map((choice, index) => (
+          {choices.map((choice, index) => (
             <li key={choice.id}>
               <button
                 type="button"
@@ -876,6 +917,7 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
 /** Boss Moment: a gold overlay over the current screen, two options, and it
  *  counts as one of the ten scored beats. */
 export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+  const choices = useShuffled(beat.choices, beat.id);
   return (
     <div className="flex flex-col items-center gap-[var(--space-3)] text-center">
       <span
@@ -886,7 +928,7 @@ export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onR
       </span>
       <Question>{beat.question}</Question>
       <div className="flex w-full flex-col gap-[8px]">
-        {beat.choices.map((choice, index) => (
+        {choices.map((choice, index) => (
           <OptionButton
             key={choice.id}
             index={index}
@@ -1069,6 +1111,11 @@ function MatchTile({
 /** Four questions on ONE shared countdown that keeps running between them. The
  *  set is a single scored beat; unanswered questions score as wrong. */
 export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onResolve: Resolve; remaining: number }) {
+  // Question order is the sheet's own; only each question's OPTIONS shuffle.
+  const items = useMemo(
+    () => beat.items.map((item, index) => ({ ...item, options: seededShuffle(item.options, `${beat.id}:${index}`) })),
+    [beat.items, beat.id],
+  );
   const [step, setStep] = useState(0);
   const [right, setRight] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -1096,7 +1143,7 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
     if (beat.timer && remaining <= 0) finish(right);
   }, [beat.timer, remaining, right, finish]);
 
-  const item = beat.items[step];
+  const item = items[step];
 
   const pick = useCallback((index: number) => {
     if (picked !== null || !item) return;
@@ -1555,6 +1602,9 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 }
 
 export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onResolve: Resolve; remaining: number }) {
+  // `chosen` indexes into THIS shuffled array, and submit reads roles off
+  // the same array -- positions and roles can never disagree.
+  const cards = useShuffled(beat.cards, beat.id);
   const [chosen, setChosen] = useState<number[]>([]);
   const settled = useRef(false);
 
@@ -1562,14 +1612,14 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
     (picks: number[]) => {
       if (settled.current) return;
       settled.current = true;
-      const harmful = picks.some((index) => beat.cards[index]?.role === "harmful");
-      const right = !harmful && picks.length === beat.pick && picks.every((index) => beat.cards[index]?.role === "pick");
+      const harmful = picks.some((index) => cards[index]?.role === "harmful");
+      const right = !harmful && picks.length === beat.pick && picks.every((index) => cards[index]?.role === "pick");
       const tier: Tier = harmful ? "risky" : right ? "best" : "wrong";
       if (right) playCorrect();
       else playWrong();
       onResolve(tier, right ? beat.whenRight : harmful ? (beat.whenHarmful ?? beat.whenWrong) : beat.whenWrong);
     },
-    [beat.cards, beat.pick, beat.whenHarmful, beat.whenRight, beat.whenWrong, onResolve],
+    [cards, beat.pick, beat.whenHarmful, beat.whenRight, beat.whenWrong, onResolve],
   );
 
   useEffect(() => {
@@ -1585,7 +1635,7 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
         {chosen.length} of {beat.pick} chosen
       </p>
       <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
-        {beat.cards.map((card, index) => {
+        {cards.map((card, index) => {
           const on = chosen.includes(index);
           return (
             <li key={card.label}>
