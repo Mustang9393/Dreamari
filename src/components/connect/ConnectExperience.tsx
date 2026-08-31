@@ -416,7 +416,7 @@ function CommunityCard({
           </span>
         </div>
 
-        <div className={`flex flex-col gap-[8px] ${wide ? "lg:max-w-[58%]" : ""}`}>
+        <div className="flex flex-col gap-[8px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
           </span>
@@ -424,11 +424,11 @@ function CommunityCard({
             {shownCompanies.map((name) => (
               <span key={name} className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)" }}>{name}</span>
             ))}
-            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
+            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
           </div>
         </div>
 
-        <div className={`-mt-[6px] flex flex-col gap-[8px] ${wide ? "lg:max-w-[58%]" : ""}`}>
+        <div className="-mt-[6px] flex flex-col gap-[8px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Top topics
           </span>
