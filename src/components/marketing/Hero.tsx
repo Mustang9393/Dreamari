@@ -103,7 +103,8 @@ export function Hero({ view, onChangeView }: HeroProps) {
             className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
-            Discover your dream career. Build, match, explore, play, and connect, all in one place. One clear step at a time.
+            Dreamari helps students discover careers, find the right education path, build a personalized plan, experience careers through simulations, and connect with professionals who actually work in the fields they are exploring.{" "}
+            <strong style={{ color: "var(--foreground)" }}>Build. Match. Explore. Play. Connect.</strong>
           </p>
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}

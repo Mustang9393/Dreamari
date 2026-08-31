@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { motion } from "framer-motion";
 import { BookOpen, Lock, Play } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
@@ -39,7 +40,6 @@ export function PlayHub() {
   const featuredRowSoon = useMemo(() => SOON.filter((game) => FEATURED_ROW_SOON_IDS.includes(game.careerId)), []);
 
   const glossaryPlayable = GLOSSARY_GAMES.filter((game) => hasGlossary(game.careerSlug));
-  const glossarySoon = GLOSSARY_GAMES.filter((game) => !hasGlossary(game.careerSlug));
 
   return (
     <div
@@ -93,14 +93,6 @@ export function PlayHub() {
             </ul>
           </section>
         )}
-        {glossarySoon.length > 0 && (
-          <SoonSection label={glossaryPlayable.length > 0 ? "More Glossary Games" : "Glossary Games"}>
-            {glossarySoon.map((game) => (
-              <SoonCard key={game.careerSlug} title={game.title} cover={game.cover} icon={<BookOpen className="h-[22px] w-[22px]" aria-hidden />} />
-            ))}
-          </SoonSection>
-        )}
-
         <SoonSection label="In the works">
           {soon.map((game) => (
             <SoonCard key={game.careerId} title={game.title} cover={game.cover} />
@@ -124,11 +116,23 @@ const LEVEL_ABBREVIATION: Record<string, string> = {
   "Managing Director": "MD",
 };
 
+// Every card in the row shares this height -- the Netflix reference row has
+// no card taller than its neighbors, only wider ones. Width differs per
+// card: the featured slot uses a wide landscape aspect, every other card
+// uses ~0.707 (Browse's own PosterCard ratio, 210x297), so at this shared
+// height they read as normal posters rather than narrow slivers.
+const ROW_HEIGHT = "h-[212px] sm:h-[240px] md:h-[269px]";
+const FEATURED_ASPECT = "aspect-[8/5]";
+const SIDE_ASPECT = "aspect-[210/297]";
+
 /** Netflix-style "one dominant experience + a row of smaller choices"
  *  browsing pattern, replacing the old plain grid of full info-cards.
- *  Clicking a small card promotes it to the featured position -- it doesn't
- *  navigate anywhere by itself, matching "browse the row, then decide" the
- *  way picking a Netflix thumbnail opens its details before you press play. */
+ *  Clicking a card selects it -- the row stays a uniform-height shelf of
+ *  thumbnails (matching the Netflix reference exactly: the featured item is
+ *  wider, never taller), and a details panel below the row carries the
+ *  level ladder / CTA / "Coming soon" state for whichever card is
+ *  currently selected, the way Netflix's own info panel sits below its row
+ *  rather than being baked into one oversized card. */
 function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; soonCareers: SoonCareer[] }) {
   const candidates: FeaturedCandidate[] = useMemo(
     () => [
@@ -147,120 +151,158 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
       <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
         Career Simulations
       </h2>
-      <div className="flex items-stretch gap-[var(--space-3)] overflow-x-auto pb-1">
-        <FeaturedCard candidate={featured} />
+      {/* The featured card and its own CTA/level-line are one column, so the
+         details visually belong to that card, not the row as a whole --
+         the row's shared height (see ROW_HEIGHT) is about the ARTWORK
+         staying uniform like the Netflix reference, not about every column
+         holding the same amount of content below it. Side cards, with
+         nothing below their artwork, just end there. */}
+      <div className="flex items-start gap-[var(--space-3)] overflow-x-auto pb-1">
+        <div className="flex flex-none flex-col gap-[var(--space-3)]">
+          <RowCard candidate={featured} large selected />
+          <SelectedDetails candidate={featured} />
+        </div>
         {rest.map((c) => (
-          <SideCard key={c.id} candidate={c} onSelect={() => setFeaturedId(c.id)} />
+          <RowCard key={c.id} candidate={c} onSelect={() => setFeaturedId(c.id)} />
         ))}
       </div>
     </section>
   );
 }
 
-/** The large card on the left: a real simulation gets its full treatment
- *  (condensed ladder, resumable CTA, subtle reputation) -- a not-yet-built
- *  career gets its artwork and a plain "Coming Soon" state, never a fake
- *  Play button. */
-function FeaturedCard({ candidate }: { candidate: FeaturedCandidate }) {
-  const width = "w-[260px] sm:w-[320px] md:w-[380px]";
-  // Called unconditionally regardless of candidate.kind -- FeaturedCard isn't
-  // remounted when the featured candidate changes kind, so the hook order
-  // must stay stable across renders.
+/** One row thumbnail -- the featured card and every side card are the same
+ *  component, just a different aspect ratio (wide vs. Browse-poster
+ *  portrait) at the shared ROW_HEIGHT. A real simulation is pressable --
+ *  clicking selects it, which is what drives SelectedDetails below. A
+ *  "coming soon" one isn't: there's nothing to select it INTO (the details
+ *  panel would just show the same locked state either way), so it renders
+ *  in full color as a plain, non-interactive card instead of a button, per
+ *  direct feedback ("color but just not pressable"). */
+function RowCard({
+  candidate,
+  large = false,
+  selected = false,
+  onSelect,
+}: {
+  candidate: FeaturedCandidate;
+  /** The one featured card: wide landscape aspect instead of the Browse-
+   *  poster portrait every side card uses, and a bigger title to match --
+   *  the extra width was making a title sized for a narrow poster look
+   *  small and lost, per direct feedback. */
+  large?: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
+}) {
+  const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
+  const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
+  const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
+  // The featured card's own copy reads left-aligned (matching its CTA
+  // column below it); every side card centers its copy instead, matching
+  // Browse's own PosterCard convention, per direct feedback.
+  const className = `dm-tap relative flex flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_ASPECT : SIDE_ASPECT}`;
+  const style = {
+    borderColor: selected ? "var(--primary)" : "var(--color-glass-border-raised)",
+    background: "var(--glass-surface-1)",
+  };
+  // Always uppercase, always scaled with the card -- a title sized (and
+  // cased) for the narrow side cards was reading small/inconsistent on the
+  // much wider featured card, per direct feedback.
+  const titleSize = large ? "text-[20px] sm:text-[26px] md:text-[30px]" : "text-[13px] sm:text-[14px] md:text-[16px]";
+  const worldSize = large ? "text-[12px] sm:text-[13px]" : "text-[9px] sm:text-[10px]";
+  const content = (
+    <div className="relative h-full w-full">
+      <Image src={cover} alt="" fill sizes="560px" className="object-cover" />
+      {candidate.kind === "soon" && (
+        <span className="absolute top-[8px] left-[8px] z-[1] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+          <Lock className="h-[10px] w-[10px]" aria-hidden /> Soon
+        </span>
+      )}
+      {/* Same scrim + title + world-label (in the world's own accent color)
+         as Browse's own PosterCard -- accent color lives on the world
+         label, never the title itself, matching that convention exactly. */}
+      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[3px] px-[10px] pt-[24px] pb-[10px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        <span className={`block leading-[1.2] font-extrabold uppercase ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
+          {title}
+        </span>
+        <span className={`block font-semibold tracking-[0.6px] uppercase ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
+          {world}
+        </span>
+      </span>
+    </div>
+  );
+  // layoutId shared across the featured column and the side row: clicking a
+  // side card doesn't just swap which candidate is featured, Framer Motion
+  // animates that SAME card (by id) sliding/growing from its side-row spot
+  // into the featured position (and the outgoing featured card shrinks back
+  // into a side slot), per direct request for a carousel-style transition
+  // rather than an instant cut.
+  if (candidate.kind === "soon") {
+    return (
+      <motion.div layout layoutId={candidate.id} transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} className={className} style={style}>
+        {content}
+      </motion.div>
+    );
+  }
+  return (
+    <motion.button
+      layout
+      layoutId={candidate.id}
+      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+      type="button"
+      onClick={onSelect}
+      className={className}
+      style={style}
+    >
+      {content}
+    </motion.button>
+  );
+}
+
+/** The level ladder / resume CTA (a real sim) or the locked "Coming soon"
+ *  state (a not-yet-built career), for whichever row card is currently
+ *  selected -- lives below the row itself now that every row card is a
+ *  plain uniform-height thumbnail. */
+function SelectedDetails({ candidate }: { candidate: FeaturedCandidate }) {
+  // Called unconditionally regardless of candidate.kind -- this component
+  // isn't remounted when the selected candidate changes kind, so the hook
+  // order must stay stable across renders.
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
 
   if (candidate.kind === "soon") {
-    const { soon } = candidate;
     return (
-      <article className={`relative flex-none overflow-hidden rounded-[22px] border ${width}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
-        <div className="relative aspect-[16/10] w-full">
-          <Image src={soon.cover} alt="" fill sizes="380px" className="object-cover" />
-          <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--background) 94%, transparent) 100%)" }} />
-          <span className="absolute right-[14px] bottom-[12px] left-[14px] block text-[24px] leading-[1.05] uppercase sm:text-[28px]" style={{ ...posterTitleFont(soon.world), color: "var(--foreground)" }}>
-            {soon.title}
-          </span>
-        </div>
-        <div className="flex items-center gap-[6px] px-[var(--space-4)] py-[var(--space-4)] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <Lock className="h-[13px] w-[13px]" aria-hidden />
-          Coming soon
-        </div>
-      </article>
+      <div className="flex items-center gap-[6px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <Lock className="h-[13px] w-[13px]" aria-hidden />
+        Coming soon
+      </div>
     );
   }
 
   const { sim } = candidate;
-  const accent = WORLD_COLORS[sim.world] ?? "var(--primary)";
   const first = sim.levels[0];
   const run = readRun(progress, sim.id, first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   const roles = [...sim.levels.map((l) => l.role), ...sim.upcoming.map((r) => LEVEL_ABBREVIATION[r] ?? r)];
   const levelLine = roles.length > 4 ? `${roles.slice(0, 3).join(" · ")} · ${roles[3]} · + More` : roles.join(" · ");
-  const heroTitle = sim.id === "investment-banking" ? "Day in the Life of an Investment Banker" : sim.title;
 
   return (
-    <article className={`relative flex-none overflow-hidden rounded-[22px] border ${width}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
-      <div className="relative aspect-[16/10] w-full">
-        <Image src={sim.cover} alt="" fill sizes="380px" className="object-cover" />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 34%, color-mix(in srgb, var(--background) 94%, transparent) 100%)" }} />
-        <span className="absolute right-[14px] bottom-[12px] left-[14px] block text-[22px] leading-[1.1] uppercase sm:text-[26px]" style={{ ...posterTitleFont(sim.world), color: "var(--foreground)" }}>
-          {heroTitle}
-        </span>
-        <span className="absolute top-[12px] left-[12px] rounded-full px-[10px] py-[4px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ background: accent, color: "#05070f" }}>
-          {sim.firm}
-        </span>
-      </div>
-      <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)]">
-        <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {levelLine}
+    <div className="flex flex-col gap-[var(--space-3)] sm:max-w-[420px]">
+      <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        {levelLine}
+      </p>
+      <Link
+        href={`/play/${sim.id}`}
+        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[15px] font-extrabold"
+        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+      >
+        <Play className="h-[15px] w-[15px]" aria-hidden />
+        {resumable ? `Continue Level ${first.n} · ${first.role}` : `Start Level ${first.n} · ${first.role}`}
+      </Link>
+      {resumable && (
+        <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          Saved at {resumable.reputation} reputation
         </p>
-        <Link
-          href={`/play/${sim.id}`}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[15px] font-extrabold"
-          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-        >
-          <Play className="h-[15px] w-[15px]" aria-hidden />
-          {resumable ? `Continue Level ${first.n} · ${first.role}` : `Start Level ${first.n} · ${first.role}`}
-        </Link>
-        {resumable && (
-          <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Saved at {resumable.reputation} reputation
-          </p>
-        )}
-      </div>
-    </article>
-  );
-}
-
-/** A small side card, whichever career it happens to be -- deliberately the
- *  same minimal artwork-plus-title treatment whether it's a real simulation
- *  or a "coming soon" one, since the only thing distinguishing them here is
- *  the lock pill. Clicking promotes it to FeaturedCard's position. */
-function SideCard({ candidate, onSelect }: { candidate: FeaturedCandidate; onSelect: () => void }) {
-  const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
-  const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
-  const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      // Mobile default widened (was 120px, read as too slender) -- still
-      // narrower than the featured card at every breakpoint, just not so
-      // narrow it stops reading as a real card.
-      className="dm-tap relative flex w-[150px] flex-none overflow-hidden rounded-[16px] border text-left sm:w-[170px] md:w-[190px]"
-      style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
-    >
-      <div className="relative h-full w-full">
-        <Image src={cover} alt="" fill sizes="160px" className={`object-cover ${candidate.kind === "soon" ? "opacity-60 grayscale" : ""}`} />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }} />
-        {candidate.kind === "soon" && (
-          <span className="absolute top-[8px] left-[8px] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
-            <Lock className="h-[10px] w-[10px]" aria-hidden /> Soon
-          </span>
-        )}
-        <span className="absolute right-[10px] bottom-[10px] left-[10px] block text-[15px] leading-[1.2] font-extrabold" style={{ ...posterTitleFont(world), color: "var(--foreground)" }}>
-          {title}
-        </span>
-      </div>
-    </button>
+      )}
+    </div>
   );
 }
 

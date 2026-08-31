@@ -41,7 +41,7 @@ export function PlayChapter() {
       // now" — may flip again). The section id has been "play" throughout.
       title="Play"
       color="#3b82f6"
-      oneliner="a day-in-the-life situation where every instinct pays off."
+      oneliner="A day-in-the-life simulation where you make real decisions and see what the job actually feels like."
       flip
       graphicRef={graphicRef}
       playing={false}

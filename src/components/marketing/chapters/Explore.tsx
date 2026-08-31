@@ -156,7 +156,7 @@ export function ExploreChapter() {
       id="explore"
       title="Explore"
       color="#1fc76e"
-      oneliner="careers, companies, and pathways with depth."
+      oneliner="Scroll through careers you never knew existed. Open one and see the pay, the path, and the real work."
       compact
       graphicRef={graphicRef}
       playing={false}
