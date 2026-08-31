@@ -38,14 +38,12 @@ import {
   EVENTS,
   EVENT_THREADS,
   INSIGHTS,
-  OPPORTUNITIES,
   PROS,
   STARTER_PROMPTS,
   THREADS,
   type Community,
   type EventBoard,
   type Insight,
-  type Opportunity,
   type Thread,
 } from "./data";
 
@@ -272,28 +270,32 @@ function CommunityCard({
         <span className="sr-only">Open {community.name}</span>
       </button>
 
-      {/* DECLUTTERED (direct feedback: "not so cluttered... row after row"):
-         the numbers ride quietly inside the colored header under the name,
-         the purpose line gives the card a welcoming voice, companies stay
-         as the one chip row (they're the draw), and topics collapse to a
-         single muted line instead of a second box pile. Hierarchy inside
-         the card: name (16) > caps label (10.5) > body/chips (11.5-13). */}
+      {/* The doc's card structure exactly: gradient identity header (icon +
+         name), then the stats row with BOLD numbers and muted labels, the
+         PROFESSIONALS FROM chips, and muted topic chips. No description
+         sentence (direct feedback), secondary info stays muted. Hierarchy:
+         name (16) > caps label (10.5) > body/chips (11.5-13). */}
       <div className="relative flex items-center gap-[12px] px-[var(--space-5)] py-[18px]" style={{ background: gradientFor(community) }}>
         <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
           <WorldGlyph world={community.world} className="h-[17px] w-[17px]" />
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-            {community.name}
-          </span>
-          <span className="mt-[3px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>
-            {community.students} students · {community.activePros} pros · {community.posts} posts
-          </span>
+        <span className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+          {community.name}
         </span>
       </div>
 
       <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-        <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
+        <div className="flex items-center gap-[var(--space-6)]">
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.students}</strong> Students
+          </span>
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros
+          </span>
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts
+          </span>
+        </div>
 
         <div className="flex flex-col gap-[7px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
@@ -307,7 +309,11 @@ function CommunityCard({
           </div>
         </div>
 
-        <p className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</p>
+        <div className="flex flex-wrap items-center gap-[6px]">
+          {community.topics.slice(0, 4).map((topic) => (
+            <span key={topic} className="rounded-[999px] border px-[10px] py-[3px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
+          ))}
+        </div>
 
         <div className="mt-auto">{action}</div>
       </div>
@@ -380,11 +386,21 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
   const comments = thread.responses.length;
   const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
   return (
-    <Card className="dm-tap">
+    <Card className="dm-tap group relative cursor-pointer">
+      {/* The WHOLE card opens the thread (direct feedback: "make it
+         obviously easily clickable") -- an overlay target under the
+         like/save controls, a hover ring, and a chevron that says "this
+         goes somewhere" before you ever hover. */}
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
+        <span className="sr-only">Open question: {thread.title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] border-2 border-transparent transition-colors duration-150 group-hover:border-[color:color-mix(in_srgb,var(--primary)_55%,transparent)]" />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+
       {/* A living row starts with a person: the asker's avatar and handle
          lead, the time sits at the far edge -- the same anatomy as every
          social feed a student already reads. */}
-      <div className="flex items-center justify-between gap-[var(--space-3)]">
+      <div className="flex items-center justify-between gap-[var(--space-3)] pr-[22px]">
         <span className="flex min-w-0 items-center gap-[8px]">
           <Avatar name={thread.handle} size={26} />
           <span className="truncate text-[12px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
@@ -396,9 +412,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
-      <button type="button" onClick={onOpen} className="dm-link mt-[10px] block w-full cursor-pointer text-left">
-        <h3 className="text-[15px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-      </button>
+      <h3 className="mt-[10px] pr-[22px] text-[15px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
       {answeredBy && (
         <p className="mt-[8px] flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}>
           <CheckCircle2 className="h-[13px] w-[13px] flex-none" aria-hidden />
@@ -415,7 +429,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
           </span>
         )}
       </div>
-      <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      <div className="relative z-20 mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
         </button>
@@ -440,8 +454,16 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
 function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
-    <Card className="dm-tap">
-      <div className="flex items-start gap-[12px]">
+    <Card className="dm-tap group relative cursor-pointer">
+      {/* The WHOLE card opens the insight's thread -- overlay target under
+         the like/save controls, hover ring, and an always-visible chevron. */}
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
+        <span className="sr-only">Open insight: {insight.title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] border-2 border-transparent transition-colors duration-150 group-hover:border-[color:color-mix(in_srgb,var(--primary)_55%,transparent)]" />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+
+      <div className="flex items-start gap-[12px] pr-[22px]">
         <Avatar name={pro.name} verified size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
@@ -449,11 +471,9 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{pro.org}</span>
           </div>
-          <button type="button" onClick={onOpen} className="dm-link mt-[7px] block w-full cursor-pointer text-left">
-            <h3 className="text-[14.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
-            <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
-          </button>
-          <div className="mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <h3 className="mt-[7px] text-[14.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
+          <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
+          <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
               <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
             </button>
@@ -471,32 +491,6 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
   );
 }
 
-function OpportunityCard({ opp }: { opp: Opportunity }) {
-  return (
-    <Card>
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <span className="text-[12px] leading-[16px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>{opp.org}</span>
-        <span className="flex-none text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: EVENT_ACCENT, fontFamily: "var(--font-body)" }}>{opp.kind}</span>
-      </div>
-      <h3 className="mt-[6px] text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{opp.title}</h3>
-      <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{opp.body}</p>
-      <dl className="mt-[10px] flex flex-wrap gap-x-[var(--space-6)] gap-y-[4px] text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-        <div className="flex items-center gap-[5px]"><dt className="font-bold">Who:</dt><dd>{opp.eligibility}</dd></div>
-        <div className="flex items-center gap-[5px]"><MapPin className="h-3 w-3" aria-hidden /><dd>{opp.location}</dd></div>
-        <div className="flex items-center gap-[5px]"><dt className="font-bold">Deadline:</dt><dd>{opp.deadline}</dd></div>
-      </dl>
-      <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-      <div className="mt-[12px] flex items-center justify-between gap-[var(--space-3)]">
-        <span className="text-[10.5px] leading-[14px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{opp.verifiedDate} · Source: {opp.sourceLabel}</span>
-        {/* External destination, accurately labeled (handoff 14.3 / 21). Real
-           URL wiring is backend/partner work — disabled-state until then. */}
-        <span className="flex items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
-          {opp.cta} <ExternalLink className="h-3 w-3" aria-hidden />
-        </span>
-      </div>
-    </Card>
-  );
-}
 
 // ——— filter row (mobile: horizontal scroll with edge cue, never clipped) ———
 
@@ -941,7 +935,6 @@ function BoardView({
 }) {
   const threads = THREADS.filter((t) => t.boardId === community.id);
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
-  const opps = OPPORTUNITIES.filter((o) => o.boardId === community.id);
   const about = filter === "about";
 
   return (
@@ -1048,7 +1041,6 @@ function BoardView({
                   <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
                 </div>
                 {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
-                {opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
                 {threads.length === 0 && (
                   <Card>
                     <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
@@ -1106,7 +1098,6 @@ function EventView({
   onAddToPlan: () => void;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
-  const opps = OPPORTUNITIES.filter((o) => o.boardId === event.id);
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   return (
     <>
@@ -1171,7 +1162,6 @@ function EventView({
           { key: "all", label: "All" },
           { key: "questions", label: "Questions" },
           { key: "insights", label: "Professional insights" },
-          { key: "opportunities", label: "Opportunities" },
         ]}
         active={filter}
         onPick={onFilter}
@@ -1180,7 +1170,6 @@ function EventView({
       <div className="flex flex-col gap-[var(--space-4)]">
         {(filter === "all" || filter === "questions") &&
           threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
-        {(filter === "all" || filter === "opportunities") && opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
         {filter === "insights" && (
           <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
         )}
