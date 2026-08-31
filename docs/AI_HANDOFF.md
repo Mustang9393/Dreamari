@@ -38,6 +38,80 @@ tokens above, in both modes).
 
 ## Current session
 
+- Date: 2026-08-31
+
+### 2026-08-31 Play tab featured card: CTA onto the artwork, progress bar, Apple-radius button (UNCOMMITTED)
+
+Continuation of the Netflix-style featured row from `6d5b8d1` (that commit's
+own handoff entry was never written -- it rebuilt `PlayHub.tsx`'s
+`FeaturedRow`/`RowCard` into the current featured-card-plus-scrollable-row
+shape; see the commit diff for that baseline). This round, in
+`src/components/play/PlayHub.tsx`, after two more rounds of direct
+screenshot feedback the CTA kept reading as visually separate from the
+image:
+
+- **The CTA now lives INSIDE the card's own bottom scrim, on top of the
+  artwork** -- not a second box stacked below the image (tried twice before
+  this and rejected both times: once as a fully separate panel under the
+  row, once as a bordered sub-box nested inside an outer `<article>`).
+  `RowCard` gained an optional `footer` prop rendered right after the
+  title/world-label inside the same absolutely-positioned scrim span, so it
+  shares the card's own border radius and gets clipped by the same
+  `overflow-hidden` -- one visual card, correct rounded corners on every
+  edge including under the button. The old `FeaturedColumn` wrapper
+  component is gone entirely; `RowCard` itself now branches on `large` +
+  `candidate.kind` to decide whether it's a `motion.button` (a pressable
+  side card), a `motion.div` (a non-pressable "soon" side card), or a
+  `motion.article` (the featured card -- never a button, since its footer
+  can hold a real `<Link>`, and a link nested in a button is invalid HTML).
+- **The scrim strengthens when a footer is present**
+  (`linear-gradient(180deg, transparent 0%, var(--scrim-heavy) 50%, var(--scrim-heavy) 100%)`
+  instead of the lighter `--poster-scrim` token) so the button stays legible
+  over bright artwork -- Browse's own poster scrim is tuned for just a
+  title, not a title plus a CTA.
+- **The standalone roles/keyword line ("Intern · Analyst · Associate · +
+  More") is gone** per direct instruction. `LEVEL_ABBREVIATION` (only used
+  to build that line) removed as now-dead code.
+- **A returning player now sees an actual progress bar**, not just
+  different button copy. New `FeaturedCta` component (subscribes to the
+  progress store itself, only ever mounted for a `"sim"` candidate so
+  there's no conditional-hook risk): a thin `rounded-full` track fills to
+  `resumable.index / first.beats.length`, sitting just above a `Continue` /
+  `Start Level N` button.
+- **CTA button corner radius**: flat `10px` (`CTA_RADIUS` constant) instead
+  of the app's usual `rounded-full` pill, per direct instruction to use
+  "Apple's formula" for the rounded corners -- the ~0.2237×size ratio behind
+  iOS's continuous squircle corners, which lands close to 10px at this
+  button's ~44px height. The progress-bar track stays `rounded-full`
+  (half-height is already that same family of corner treatment at that
+  aspect).
+- Row height is back to a single shared `ROW_HEIGHT` for every card (the
+  `items-stretch` + `aspect-ratio` "scale side cards to match a taller
+  featured card" approach from the previous round is gone) -- now that the
+  CTA is overlaid rather than adding a second stacked box, the featured
+  card's total height is just its own image again, so there's no height
+  mismatch to compensate for.
+- `npx tsc --noEmit` and `npx eslint src/components/play/PlayHub.tsx` both
+  clean (one pre-existing, unrelated `no-img-element` warning on the page's
+  decorative background image). Live-verified at desktop and mobile widths,
+  and verified the progress-bar path by writing a fake
+  `dreamari-play-progress` localStorage entry, reloading, and clearing it
+  back out afterward.
+- **Known limitation, not a bug**: there is currently only one real,
+  playable simulation (Investment Banking) and it's already the featured
+  card by default; every side card in the row is a "coming soon" career,
+  deliberately non-pressable per earlier direct instruction ("color but
+  just not pressable"). So there is nothing else to click right now that
+  would demonstrate the featured-slot carousel transition (`layoutId`-based
+  shared-layout animation, confirmed wired correctly by matching ids
+  between the featured `motion.article` and each side card). This needs a
+  second real simulation, or a temporary dummy pressable candidate, to
+  actually exercise -- flagged to the user rather than silently making
+  "soon" cards clickable again.
+- Not yet committed/pushed -- awaiting confirmation this reads right before
+  pushing (this repo needs explicit go-ahead before `git push` even after
+  local verification).
+
 - Date: 2026-08-25
 
 ### 2026-08-25 Glossary Game: Power Play contrast, dead repair-round button, Catch-the-Misuse header (PUSHED)

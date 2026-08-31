@@ -108,22 +108,22 @@ export function PlayHub() {
 type SoonCareer = { careerId: string; title: string; world: string; cover: string };
 type FeaturedCandidate = { kind: "sim"; id: string; sim: Simulation } | { kind: "soon"; id: string; soon: SoonCareer };
 
-// A career already has a full name for its next promotion, but the row only
-// has room for a single-line ladder -- abbreviate the same way a resume does.
-const LEVEL_ABBREVIATION: Record<string, string> = {
-  "Vice President": "VP",
-  "Executive Director": "ED",
-  "Managing Director": "MD",
-};
-
 // Every card in the row shares this height -- the Netflix reference row has
 // no card taller than its neighbors, only wider ones. Width differs per
 // card: the featured slot uses a wide landscape aspect, every other card
 // uses ~0.707 (Browse's own PosterCard ratio, 210x297), so at this shared
-// height they read as normal posters rather than narrow slivers.
+// height they read as normal posters rather than narrow slivers. The
+// featured card's CTA lives ON TOP of its artwork (see RowCard's `footer`),
+// not in a second box stacked below it, so it never adds extra height.
 const ROW_HEIGHT = "h-[212px] sm:h-[240px] md:h-[269px]";
 const FEATURED_ASPECT = "aspect-[8/5]";
 const SIDE_ASPECT = "aspect-[210/297]";
+// Apple's own corner-radius ratio for a "continuous" rounded-rect control
+// (not a full pill) at roughly this button's height -- ~0.2237 x size is
+// the documented formula behind iOS's smooth squircle corners; applied to
+// a ~44px-tall button that lands right around a crisp 10px, which is what
+// this uses on the same-height CTA below.
+const CTA_RADIUS = 10;
 
 /** Netflix-style "one dominant experience + a row of smaller choices"
  *  browsing pattern, replacing the old plain grid of full info-cards.
@@ -151,17 +151,15 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
       <h2 className="text-[13px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
         Career Simulations
       </h2>
-      {/* The featured card and its own CTA/level-line are one column, so the
-         details visually belong to that card, not the row as a whole --
-         the row's shared height (see ROW_HEIGHT) is about the ARTWORK
-         staying uniform like the Netflix reference, not about every column
-         holding the same amount of content below it. Side cards, with
-         nothing below their artwork, just end there. */}
+      {/* The featured card's CTA (or "Coming soon" state) is `footer`,
+         rendered INSIDE RowCard's own bottom scrim -- on top of the
+         artwork, inside the same border/rounded corners as the image
+         itself, per direct feedback against a second box stacked below
+         it. Every card shares one fixed ROW_HEIGHT (see above), so the
+         featured card is wider than its neighbors, never taller,
+         matching the Netflix reference exactly. */}
       <div className="flex items-start gap-[var(--space-3)] overflow-x-auto pb-1">
-        <div className="flex flex-none flex-col gap-[var(--space-3)]">
-          <RowCard candidate={featured} large selected />
-          <SelectedDetails candidate={featured} />
-        </div>
+        <RowCard candidate={featured} large footer={featured.kind === "soon" ? <ComingSoonFooter /> : <FeaturedCta sim={featured.sim} />} />
         {rest.map((c) => (
           <RowCard key={c.id} candidate={c} onSelect={() => setFeaturedId(c.id)} />
         ))}
@@ -171,18 +169,24 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
 }
 
 /** One row thumbnail -- the featured card and every side card are the same
- *  component, just a different aspect ratio (wide vs. Browse-poster
- *  portrait) at the shared ROW_HEIGHT. A real simulation is pressable --
- *  clicking selects it, which is what drives SelectedDetails below. A
- *  "coming soon" one isn't: there's nothing to select it INTO (the details
- *  panel would just show the same locked state either way), so it renders
- *  in full color as a plain, non-interactive card instead of a button, per
- *  direct feedback ("color but just not pressable"). */
+ *  bordered/rounded box at the shared ROW_HEIGHT, just a different aspect
+ *  ratio (wide vs. Browse-poster portrait). `footer`, when given (the
+ *  featured card only), renders INSIDE the card's own bottom scrim, on top
+ *  of the artwork and clipped by the same rounded corners as the image --
+ *  not a second box stacked below it. A real simulation is pressable --
+ *  clicking a side card selects it, which is what FeaturedRow re-renders
+ *  the featured slot from. A "coming soon" one isn't: there's nothing to
+ *  select it INTO (the featured slot would just show the same locked state
+ *  either way), so it renders in full color as a plain, non-interactive
+ *  card instead of a button, per direct feedback ("color but just not
+ *  pressable"). The featured card itself is never a button either -- its
+ *  footer can hold a real `<Link>`, and a link nested inside a button is
+ *  invalid HTML. */
 function RowCard({
   candidate,
   large = false,
-  selected = false,
   onSelect,
+  footer,
 }: {
   candidate: FeaturedCandidate;
   /** The one featured card: wide landscape aspect instead of the Browse-
@@ -190,20 +194,20 @@ function RowCard({
    *  the extra width was making a title sized for a narrow poster look
    *  small and lost, per direct feedback. */
   large?: boolean;
-  selected?: boolean;
   onSelect?: () => void;
+  /** CTA / progress (a real sim) or the locked "Coming soon" line (not yet
+   *  built) -- rendered inside the same scrim as the title, so it reads as
+   *  part of the one card rather than a detached panel underneath it. */
+  footer?: React.ReactNode;
 }) {
   const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
   const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
-  // The featured card's own copy reads left-aligned (matching its CTA
-  // column below it); every side card centers its copy instead, matching
-  // Browse's own PosterCard convention, per direct feedback.
-  const className = `dm-tap relative flex flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_ASPECT : SIDE_ASPECT}`;
-  const style = {
-    borderColor: selected ? "var(--primary)" : "var(--color-glass-border-raised)",
-    background: "var(--glass-surface-1)",
-  };
+  // The featured card's own copy reads left-aligned (matching its CTA);
+  // every side card centers its copy instead, matching Browse's own
+  // PosterCard convention, per direct feedback.
+  const className = `dm-tap relative flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_ASPECT : SIDE_ASPECT}`;
+  const style = { borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" };
   // Always uppercase, always scaled with the card -- a title sized (and
   // cased) for the narrow side cards was reading small/inconsistent on the
   // much wider featured card, per direct feedback.
@@ -212,35 +216,46 @@ function RowCard({
   const content = (
     <div className="relative h-full w-full">
       <Image src={cover} alt="" fill sizes="560px" className="object-cover" />
-      {candidate.kind === "soon" && (
+      {candidate.kind === "soon" && !large && (
         <span className="absolute top-[8px] left-[8px] z-[1] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           <Lock className="h-[10px] w-[10px]" aria-hidden /> Soon
         </span>
       )}
       {/* Same scrim + title + world-label (in the world's own accent color)
          as Browse's own PosterCard -- accent color lives on the world
-         label, never the title itself, matching that convention exactly. */}
-      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[3px] px-[10px] pt-[24px] pb-[10px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+         label, never the title itself, matching that convention exactly.
+         A taller, denser scrim when there's a footer to keep it legible
+         over bright artwork -- Browse's own lighter scrim is tuned for
+         just a title, not a title plus a CTA/progress bar underneath it. */}
+      <span
+        className="absolute inset-x-0 bottom-0 flex flex-col gap-[3px] px-[10px] pt-[24px] pb-[10px]"
+        style={{ backgroundImage: footer ? "linear-gradient(180deg, transparent 0%, var(--scrim-heavy) 50%, var(--scrim-heavy) 100%)" : "var(--poster-scrim)" }}
+      >
         <span className={`block leading-[1.2] font-extrabold uppercase ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
           {title}
         </span>
         <span className={`block font-semibold tracking-[0.6px] uppercase ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
           {world}
         </span>
+        {footer && <div className="mt-[10px]">{footer}</div>}
       </span>
     </div>
   );
-  // layoutId shared across the featured column and the side row: clicking a
-  // side card doesn't just swap which candidate is featured, Framer Motion
-  // animates that SAME card (by id) sliding/growing from its side-row spot
-  // into the featured position (and the outgoing featured card shrinks back
-  // into a side slot), per direct request for a carousel-style transition
-  // rather than an instant cut.
-  if (candidate.kind === "soon") {
+
+  // The featured card is never a button (its footer can hold a real link),
+  // and a "coming soon" side card isn't pressable either -- both render as
+  // a plain div/article. layoutId shared across the featured slot and the
+  // side row: clicking a side card doesn't just swap which candidate is
+  // featured, Framer Motion animates that SAME card (by id) sliding/growing
+  // from its side-row spot into the featured position (and the outgoing
+  // featured card shrinks back into a side slot), per direct request for a
+  // carousel-style transition rather than an instant cut.
+  if (large || candidate.kind === "soon") {
+    const Tag = large ? motion.article : motion.div;
     return (
-      <motion.div layout layoutId={candidate.id} transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} className={className} style={style}>
+      <Tag layout layoutId={candidate.id} transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} className={className} style={style}>
         {content}
-      </motion.div>
+      </Tag>
     );
   }
   return (
@@ -258,50 +273,43 @@ function RowCard({
   );
 }
 
-/** The level ladder / resume CTA (a real sim) or the locked "Coming soon"
- *  state (a not-yet-built career), for whichever row card is currently
- *  selected -- lives below the row itself now that every row card is a
- *  plain uniform-height thumbnail. */
-function SelectedDetails({ candidate }: { candidate: FeaturedCandidate }) {
-  // Called unconditionally regardless of candidate.kind -- this component
-  // isn't remounted when the selected candidate changes kind, so the hook
-  // order must stay stable across renders.
+/** The featured slot's CTA when it's a real, playable simulation --
+ *  subscribes to progress itself (only ever mounted for a "sim" candidate,
+ *  so there's no conditional-hook risk). A returning player sees an actual
+ *  progress bar for how far into the level they got, not just different
+ *  button copy -- "Continue" alone didn't show HOW much was already done. */
+function FeaturedCta({ sim }: { sim: Simulation }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
-
-  if (candidate.kind === "soon") {
-    return (
-      <div className="flex items-center gap-[6px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <Lock className="h-[13px] w-[13px]" aria-hidden />
-        Coming soon
-      </div>
-    );
-  }
-
-  const { sim } = candidate;
   const first = sim.levels[0];
   const run = readRun(progress, sim.id, first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
-  const roles = [...sim.levels.map((l) => l.role), ...sim.upcoming.map((r) => LEVEL_ABBREVIATION[r] ?? r)];
-  const levelLine = roles.length > 4 ? `${roles.slice(0, 3).join(" · ")} · ${roles[3]} · + More` : roles.join(" · ");
-
+  const fraction = resumable ? resumable.index / first.beats.length : 0;
   return (
-    <div className="flex flex-col gap-[var(--space-3)] sm:max-w-[420px]">
-      <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {levelLine}
-      </p>
+    <div className="flex flex-col gap-[8px]">
+      {resumable && (
+        <div className="h-[4px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
+          <div className="h-full rounded-full" style={{ width: `${Math.round(fraction * 100)}%`, background: "var(--primary)" }} />
+        </div>
+      )}
       <Link
         href={`/play/${sim.id}`}
-        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[15px] font-extrabold"
-        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] px-[18px] py-[13px] text-[15px] font-extrabold"
+        style={{ background: "var(--primary)", color: "var(--primary-foreground)", borderRadius: CTA_RADIUS }}
       >
         <Play className="h-[15px] w-[15px]" aria-hidden />
-        {resumable ? `Continue Level ${first.n} · ${first.role}` : `Start Level ${first.n} · ${first.role}`}
+        {resumable ? "Continue" : `Start Level ${first.n}`}
       </Link>
-      {resumable && (
-        <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          Saved at {resumable.reputation} reputation
-        </p>
-      )}
+    </div>
+  );
+}
+
+/** The featured slot's footer for a not-yet-built career -- informational
+ *  only, no button, since there's nothing to press into. */
+function ComingSoonFooter() {
+  return (
+    <div className="flex items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+      <Lock className="h-[13px] w-[13px]" aria-hidden />
+      Coming soon
     </div>
   );
 }
