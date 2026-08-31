@@ -450,7 +450,7 @@ function CommunityCard({
 
         {/* mt-auto keeps buttons bottom-aligned across the grid row; the
            padding guarantees the button never crowds the chips above it. */}
-        <div className={`mt-auto pt-[var(--space-2)] ${wide ? "lg:max-w-[58%]" : ""}`}>{action}</div>
+        <div className="mt-auto pt-[var(--space-2)]">{action}</div>
       </div>
     </div>
   );
