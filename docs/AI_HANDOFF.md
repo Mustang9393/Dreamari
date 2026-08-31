@@ -40,6 +40,48 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 Glossary flipbook, Connect card/Events polish, Top 3 alignment (PUSH AUTHORIZED)
+
+All from live direct feedback, after the c7428e5 push:
+
+- **Glossary Game flipbook** (`GlossaryGameExperience.tsx`): the unlock
+  screen's term card is now a real 3D flipbook page -- sketch-style
+  illustrated FRONT (the term's icon at illustration size through an
+  feTurbulence displacement "pencil wobble" filter, ruled-paper face, gold
+  radiating dashes, squiggle underline, TAP TO FLIP hint) flipping in real
+  rotateY to the written BACK (definition + Dream Sneakers example, ring
+  binding kept). 3D SAFETY: the old Chromium invisibility bug (see the
+  removed comment) is avoided structurally -- the ROTATING element carries
+  no radius/clipping (faces clip themselves), rotation is a user-toggled
+  spring, faces live on backface-visibility; verified across a second-term
+  flip. New `playFlip()` page-flick in sound.ts. Reduced-motion crossfades.
+  The icon-node progress row above the card is REMOVED (redundant with the
+  big illustration) -- a quiet "Term N of 5" line replaced it. Icons made
+  RELEVANT to the story: custom lucide-style SneakerIcon for Product,
+  Paintbrush for Service (custom design), UserRound for Customer,
+  CircleDollarSign for Profit (a pig read as just a pig; an overlaid coin
+  read as clutter; a dollar coin was the direct suggestion). Practice
+  questions bumped to display-font extrabold clamp(18-21px).
+- **Connect community cards**: hairline dividers rule the card into bands
+  (identity / stats / professionals / topics / action), stats carry icons,
+  and each world has its OWN glyph (Landmark/Cpu/Stethoscope/Palette/
+  GraduationCap via `WorldGlyph`) instead of a generic Users icon.
+- **Connect Events tab reworked**: one consistent card for all three event
+  states (was three ad-hoc blocks) -- icon tile + name + status, ruled
+  when/where/partner band with icons, then the single state-appropriate
+  action (Open Event Board / opens-after-note / Enter event code), 2-up on
+  sm+. Matches the reference doc's event card, elevated into the app's
+  language.
+- **Profile Top 3 alignment**: every block reserves its height at lg
+  (title 2-line slot, description line-clamp-2 + min-h, education
+  line-clamp-2 + min-h, single-line pay/years) so the three cards align
+  1:1 regardless of wraps -- verified equal heights to the pixel. Typical
+  employers + Suggested schools moved into a collapsed-by-default
+  "Employers & schools" accordion (`MoreFactsAccordion`).
+- Validation: tsc, eslint, tokens, full build clean; live-verified
+  flipbook (both faces, second-term flip), Connect community + events
+  tabs, Top 3 equal heights at 1280.
+
 ### 2026-08-31 IB simulation: Aug-31 handoff update, cinematic trailer, voice system, score gauge (UNCOMMITTED, push authorized)
 
 From `DreamAri_IB_Levels1-3_Handoff (2).xlsx` (Aug 31; "(3)" is a

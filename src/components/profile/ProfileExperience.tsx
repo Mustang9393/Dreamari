@@ -556,6 +556,37 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
 // changes now; there is no separate always-visible switcher.
 const BAND_ORDER: Record<string, number> = { Target: 0, Reach: 1, Safety: 2 };
 
+/** The Top 3 card's collapsed-by-default drawer for the not-as-critical
+ *  facts (employers, schools) -- keeps the three cards' visible sections
+ *  aligned 1:1 while the detail stays one tap away (direct feedback). */
+function MoreFactsAccordion({ facts, accent }: { facts: { label: string; value: string }[]; accent: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        className="dm-quiet flex min-h-[36px] w-full cursor-pointer items-center justify-between gap-[8px] px-[4px] text-[12px] font-bold tracking-[0.6px] uppercase"
+        style={{ color: "var(--muted-foreground)" }}
+      >
+        Employers & schools
+        <ChevronDown className={`h-4 w-4 flex-none transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden />
+      </button>
+      {open && (
+        <dl className="flex flex-col gap-[var(--space-3)] pt-[var(--space-2)] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]">
+          {facts.map((fact) => (
+            <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
+              <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
+              <dd className="text-[14px] leading-[18px] font-semibold">{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
+}
+
 function Top3Tab({
   top3, focusId, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport,
 }: {
@@ -607,10 +638,16 @@ function Top3Tab({
         const isFocus = focusId === id;
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
+        // Split by criticality (direct feedback): the three decision facts
+        // stay on the card at RESERVED row heights, so all three columns
+        // align 1:1 whatever wraps; employers + schools fold into a
+        // collapsed-by-default accordion below them.
         const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon" },
-          { label: "Years in school", value: route.duration },
+          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1 lg:min-h-[18px]" },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2 lg:min-h-[36px]" },
+          { label: "Years in school", value: route.duration, lines: "line-clamp-1 lg:min-h-[18px]" },
+        ];
+        const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
           { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
         ];
@@ -669,31 +706,37 @@ function Top3Tab({
             <span aria-hidden className="pointer-events-none absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
 
             <div className="relative flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+              {/* Every block below reserves its height at lg (the 3-up
+                 layout), so the three cards' sections line up 1:1 whatever
+                 wraps -- a two-line description next to a three-line one
+                 was making whole cards run long (direct feedback). */}
               <div className="flex flex-col gap-[var(--space-3)]">
                 <span className="flex min-w-0 flex-col gap-[1px]">
                   {/* World name carries the accent, never the career title. */}
                   <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                  <span className="text-balance text-[22px] leading-[26px] font-extrabold lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
                 {isFocus ? (
-                  <span className="flex w-fit flex-none items-center gap-[4px] rounded-full px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                  <span className="flex h-[27px] w-fit flex-none items-center gap-[4px] rounded-full px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
                     <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet w-fit flex-none cursor-pointer rounded-full border px-[10px] py-[5px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet h-[27px] w-fit flex-none cursor-pointer rounded-full border px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
                 )}
               </div>
 
-              <p className="text-[14px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+              <p className="text-[14px] leading-[19px] font-medium lg:line-clamp-2 lg:min-h-[38px]" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
 
               <dl className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd className="text-[14px] leading-[18px] font-semibold">{fact.value}</dd>
+                    <dd className={`text-[14px] leading-[18px] font-semibold ${fact.lines}`}>{fact.value}</dd>
                   </div>
                 ))}
               </dl>
+
+              <MoreFactsAccordion facts={moreFacts} accent={accent} />
 
               <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-link mt-auto flex min-h-[44px] w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                 View Career Report <ArrowRight className="h-3.5 w-3.5" aria-hidden />

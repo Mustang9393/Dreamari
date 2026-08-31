@@ -9,13 +9,12 @@ import {
   ArrowRight,
   Building2,
   Check,
-  ConciergeBell,
+  CircleDollarSign,
   Flame,
   Home,
-  Package,
-  PiggyBank,
+  Paintbrush,
   Sparkles,
-  ShoppingBag,
+  UserRound,
   Trophy,
   Moon,
   Sun,
@@ -23,14 +22,15 @@ import {
   VolumeX,
   X,
   Zap,
+  RotateCw,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
   playCorrect,
   playSelect,
+  playFlip,
   playSweep,
   playWrong,
   serverMutedSnapshot,
@@ -94,18 +94,34 @@ function primaryCtaColors(theme: GlobalTheme) {
 // is plain words -- "building", "sneaker" -- not an emoji), resolved here to
 // a real icon from the design system. No raw emoji anywhere in this game --
 // unmapped slugs fall back to a plain circle rather than guessing wrong.
-const TERM_ICON_MAP: Record<string, LucideIcon> = {
+/** A sneaker, in lucide's own stroke language -- the one drawing the Dream
+ *  Sneakers lesson actually needs and the icon set doesn't have. */
+function SneakerIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      {/* The chunky sole, the unmistakable part. */}
+      <path d="M2.5 15.8h19c0 1.5-1.2 2.7-2.7 2.7H5.2c-1.5 0-2.7-1.2-2.7-2.7z" />
+      {/* Upper: ankle collar at the heel, lace slope, low toe box. */}
+      <path d="M2.5 15.8v-4c0-.8.6-1.4 1.4-1.4h1.7c.6 0 1.1-.3 1.3-.9l.7-1.8c.2-.6.9-.9 1.5-.5l1.4.9c1.9 1.2 4 2 6.2 2.4l2 .4c1.6.3 2.8 1.7 2.8 3.4v1.5" />
+      {/* Laces. */}
+      <path d="M9.6 9.3l2.1 1.2" />
+      <path d="M8.8 11.2l2.1 1.2" />
+      <path d="M8 13.1l2.1 1.2" />
+      {/* The side stripe. */}
+      <path d="M13.5 15.8c.4-1.6 1.6-2.8 3.2-3.2" />
+    </svg>
+  );
+}
+
+// Illustrations stay RELEVANT to the lesson's own story (direct feedback):
+// the product IS a sneaker, the service IS custom design (a brush, not a
+// bell), the customer is a PERSON -- not abstract finance-concept stand-ins.
+const TERM_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   building: Building2,
-  // "sneaker"/"palette" are the workbook's own descriptive words for these
-  // two terms' Dream Sneakers tie-in (the product IS a sneaker; the service
-  // IS custom design) -- kept as the content's chosen slugs, but resolved
-  // here to icons that read as their finance concept at a glance (a shipped
-  // box for "product," a service bell for "service") rather than literal
-  // sneaker/paint-palette art.
-  sneaker: Package,
-  palette: ConciergeBell,
-  "shopping-bag": ShoppingBag,
-  "money-bag": PiggyBank,
+  sneaker: SneakerIcon,
+  palette: Paintbrush,
+  "shopping-bag": UserRound,
+  "money-bag": CircleDollarSign,
 };
 
 function TermIcon({ icon, className }: { icon: string; className?: string }) {
@@ -131,7 +147,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
   const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--card))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--card))" : "var(--glass-surface-1)";
   return (
     <div className="flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={{ background: bg, borderColor: "var(--glass-border)" }}>
-      <p className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>
+      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
     </div>
@@ -308,6 +324,57 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 // ---------------------------------------------------------------------------
 // Screen: Term unlock carousel
 
+/** The flipbook page's front face: the term drawn, not written -- its icon
+ *  blown up to illustration size and run through a wobble displacement
+ *  filter, so the clean vector strokes read as pencil on paper. Ruled
+ *  lines and a hand-placed tilt finish the sketchbook feel without a
+ *  single new image asset. */
+function SketchFace({ term, icon, style }: { term: string; icon: string; style?: React.CSSProperties }) {
+  return (
+    <span
+      className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+      style={{
+        background:
+          "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 4%, var(--card))",
+        borderColor: "var(--glass-border)",
+        boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)",
+        ...style,
+      }}
+    >
+      {/* The wobble filter that makes every stroke look hand-drawn. Defined
+         here, used by the illustration below. */}
+      <svg width="0" height="0" aria-hidden className="absolute">
+        <filter id="glossary-sketch">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
+        </filter>
+      </svg>
+      <span className="relative -rotate-2" style={{ filter: "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
+        <TermIcon icon={icon} className="h-[clamp(72px,16dvh,120px)] w-[clamp(72px,16dvh,120px)]" />
+        {/* Radiating sketch dashes, the doodle around the drawing. */}
+        <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--world-business-money-office)" }}>
+          {[30, 90, 150, 210, 270, 330].map((deg) => (
+            <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
+          ))}
+        </svg>
+      </span>
+      <span className="flex flex-col items-center gap-[3px]">
+        <span className="text-[clamp(26px,5.8dvh,34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
+          {term}
+        </span>
+        {/* The hand-drawn underline squiggle. */}
+        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--world-business-money-office)", filter: "url(#glossary-sketch)" }}>
+          <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+      </span>
+      <span className="flex items-center gap-[6px] text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        <RotateCw className="h-[12px] w-[12px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
+        Tap to flip
+      </span>
+    </span>
+  );
+}
+
 function UnlockScreen({
   lesson,
   index,
@@ -320,6 +387,14 @@ function UnlockScreen({
   const term = lesson.terms[index];
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
+  // The flipbook: each term's page starts on its sketch face and flips in
+  // real 3D to the written side. Reset per term (a new page starts art-up).
+  const [flipped, setFlipped] = useState(false);
+  const [flippedFor, setFlippedFor] = useState(term.id);
+  if (flippedFor !== term.id) {
+    setFlippedFor(term.id);
+    setFlipped(false);
+  }
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,3.5dvh,28px)] px-5 py-[clamp(8px,3dvh,32px)] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
@@ -336,58 +411,28 @@ function UnlockScreen({
         {lesson.title}
       </h2>
 
-      {/* Duolingo-style skill nodes: circular, not tiles -- the shape
-         students already read as "a thing you unlock one at a time."
-         Sized down on narrow phones so all 5 fit on one row instead of
-         the last node wrapping onto its own line. */}
-      <div className="flex flex-nowrap items-start justify-center gap-2 sm:gap-[var(--space-4)]">
-        {lesson.terms.map((t, i) => {
-          const done = i < index;
-          const active = i === index;
-          return (
-            <div key={t.id} className="flex flex-1 flex-col items-center gap-[6px] sm:flex-none">
-              <span
-                className="relative flex size-11 flex-none items-center justify-center rounded-full border-2 sm:size-14"
-                style={{
-                  borderColor: active ? "var(--world-business-money-office)" : done ? "color-mix(in srgb, var(--world-business-money-office) 55%, var(--glass-border))" : "var(--glass-border)",
-                  background: done ? "var(--world-business-money-office)" : active ? "var(--card)" : "var(--glass-surface-1)",
-                  boxShadow: active ? "0 0 0 4px color-mix(in srgb, var(--world-business-money-office) 20%, transparent)" : undefined,
-                  opacity: done || active ? 1 : 0.45,
-                }}
-              >
-                <span style={{ color: done ? "#05070f" : active ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>
-                  <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
-                </span>
-                {done && (
-                  <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
-                    <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
-                  </span>
-                )}
-              </span>
-              <span className="text-[10px] leading-[12px] font-semibold sm:text-[11px] sm:leading-[13px]" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                {t.term}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      {/* The icon-node progress row is GONE (direct feedback): the flipbook
+         card below carries the big illustration now, so a second row of
+         term icons above it was saying the same thing twice. A quiet count
+         keeps orientation without the clutter. */}
+      <p className="text-[12px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        Term {index + 1} of {lesson.terms.length}
+      </p>
 
-      {/* Binder-page term card: a narrow ring-bound edge + one flat page,
-         not a book -- the word is the hero, definition and example are
-         always visible (no flip to reveal them), matching the concept
-         mockup's structure only, not its colors. The page swap reads as a
-         page turning -- pinching to a sliver at the ring-bound edge, then
-         the next page unfurling back out -- built from scaleX + opacity
-         only. A true 3D rotateY version was tried first and reproducibly
-         went invisible after the second swap: Chromium can leave an element
-         that is both 3D-rotated AND clipped with rounded corners on a
-         compositor layer it never repaints once the transform settles back
-         to identity. Plain 2D transforms have no such failure mode, and
-         hinging the scale at the left edge (where the rings are) reads as
-         the same "turning" motion without the risk. Reduced-motion drops to
-         opacity-only per the project's existing convention (see
-         DailyDropDemo.tsx). */}
-      <div className="relative w-full max-w-[440px]">
+      {/* The FLIPBOOK page (direct feedback): illustration side up first --
+         a sketch-style drawing of the term -- and a real 3D flip to the
+         written side with the definition and example. Term-to-term still
+         page-turns via the scaleX swap.
+         3D SAFETY: an earlier rotateY attempt reproducibly went invisible
+         after the second swap -- Chromium can stop repainting an element
+         that is both 3D-rotated AND clipped with rounded corners once its
+         transform settles. This build avoids that trap structurally: the
+         ROTATING wrapper has no border-radius and no overflow clipping
+         (each face clips itself), the rotation is a user-toggled two-state
+         spring rather than an exit/enter identity reset, and the faces sit
+         on backface-visibility rather than remounting. Reduced-motion
+         crossfades instead of rotating. */}
+      <div className="relative w-full max-w-[440px]" style={{ perspective: "1400px" }}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={term.id}
@@ -397,50 +442,72 @@ function UnlockScreen({
             transition={{ duration: reduced ? 0.12 : 0.32, ease: [0.4, 0, 0.2, 1] }}
             style={{ transformOrigin: "left center" }}
           >
-            <div
-              className="flex w-full overflow-hidden rounded-[var(--radius-xl)] border text-left"
-              style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}
+            <motion.button
+              type="button"
+              onClick={() => {
+                playFlip();
+                setFlipped((f) => !f);
+              }}
+              aria-pressed={flipped}
+              aria-label={flipped ? `${term.term}: show the drawing` : `${term.term}: flip to the definition`}
+              animate={reduced ? undefined : { rotateY: flipped ? 180 : 0 }}
+              transition={{ type: "spring", stiffness: 210, damping: 22 }}
+              className="relative block h-[clamp(240px,40dvh,330px)] w-full cursor-pointer text-left"
+              style={{ transformStyle: "preserve-3d" }}
             >
-              <div
-                aria-hidden
-                className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
-                style={{ background: "color-mix(in srgb, var(--foreground) 5%, var(--card))", borderColor: "var(--glass-border)" }}
+              {/* FRONT: the drawing. A direct child of the rotating element,
+                 so its backface-visibility participates in the button's own
+                 3D context rather than being flattened by a wrapper. */}
+              <SketchFace term={term.term} icon={term.icon} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+
+              {/* BACK: the written page, ring-bound edge and all. */}
+              <span
+                className="absolute inset-0 flex overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+                style={{
+                  background: "var(--card)",
+                  borderColor: "var(--glass-border)",
+                  boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)",
+                  transform: reduced ? undefined : "rotateY(180deg)",
+                  opacity: reduced ? (flipped ? 1 : 0) : undefined,
+                  transition: reduced ? "opacity 0.15s" : undefined,
+                }}
               >
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="size-3 rounded-full border"
-                    style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.25)" }}
-                  />
-                ))}
-              </div>
+                <span
+                  aria-hidden
+                  className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
+                  style={{ background: "color-mix(in srgb, var(--foreground) 5%, var(--card))", borderColor: "var(--glass-border)" }}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="size-3 rounded-full border"
+                      style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.25)" }}
+                    />
+                  ))}
+                </span>
 
-              {/* min-h keeps the page from resizing (and shoving the Unlock
-                 button) as definition/example length varies term to term --
-                 sized to the longest of the 5 terms' content at this width.
-                 Fluid clamp() throughout, tied to dvh, not a width
-                 breakpoint -- see the note above on why. */}
-              <div className="flex min-h-[clamp(180px,34dvh,300px)] min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
-                <h3 className="text-[clamp(24px,5.5dvh,32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  {term.term}
-                </h3>
-
-                <p className="text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
-                  {term.definition}
-                </p>
-
-                <div className="h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
-
-                <div className="flex flex-col gap-[6px]">
-                  <span className="text-[12px] font-bold uppercase tracking-[0.05em]" style={{ color: "var(--world-business-money-office)" }}>
-                    {lesson.exampleCompany} Example
+                <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
+                  <span className="block text-[clamp(24px,5.5dvh,32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                    {term.term}
                   </span>
-                  <p className="text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
-                    {term.example}
-                  </p>
-                </div>
-              </div>
-            </div>
+
+                  <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+                    {term.definition}
+                  </span>
+
+                  <span className="block h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
+
+                  <span className="flex flex-col gap-[6px]">
+                    <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--world-business-money-office)" }}>
+                      {lesson.exampleCompany} Example
+                    </span>
+                    <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+                      {term.example}
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </motion.button>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -1015,7 +1082,7 @@ function QuestionScreen({
         </div>
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && (
-        <p className="text-[16px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>
+        <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt}
         </p>
       )}

@@ -5,11 +5,19 @@ import {
   ArrowLeft,
   ArrowRight,
   Bookmark,
+  Briefcase,
   Calendar,
   CheckCircle2,
   ChevronRight,
   CornerDownRight,
   Clock,
+  Cpu,
+  GraduationCap,
+  Landmark,
+  MessagesSquare,
+  Palette,
+  Stethoscope,
+  Tag,
   ExternalLink,
   Flag,
   KeyRound,
@@ -277,14 +285,14 @@ function CommunityCard({
 
       {/* Same dark-glass card every other surface uses -- the world color is
          an accent (icon tile, border tint, ambient glow), never a full-card
-         block, matching the app's own design language rather than the
-         reference doc's literal light-mode mockup. Strict top-down
-         hierarchy regardless of which fact matters most: Heading (name) ->
-         Subheading (the stat row) -> body (professionals, topics, action). */}
-      <div className="relative z-20 flex flex-col gap-[var(--space-3)] p-[var(--space-4)]">
-        <div className="flex items-center gap-[10px]">
+         block. Hairline dividers rule the card into clear bands (identity /
+         stats / people / topics / action) so the data never reads as one
+         cluttered pile (direct feedback), and each world carries its OWN
+         icon rather than a generic people glyph. */}
+      <div className="relative z-20 flex flex-col p-[var(--space-4)]">
+        <div className="flex items-center gap-[10px] pb-[var(--space-3)]">
           <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: `color-mix(in srgb, ${accent} 22%, var(--glass-surface-1))`, color: accent }}>
-            <Users className="h-[18px] w-[18px]" />
+            <WorldGlyph world={community.world} className="h-[18px] w-[18px]" />
           </span>
           <span className="min-w-0 flex-1 text-[15.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             {community.name}
@@ -292,14 +300,20 @@ function CommunityCard({
           {unreadBadge}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[3px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span><strong style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
-          <span><strong style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
-          <span><strong style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
+        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
+
+        <div className="flex items-center gap-[var(--space-5)] py-[var(--space-3)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span className="flex items-center gap-[5px]"><Users className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
+          <span className="flex items-center gap-[5px]"><ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
+          <span className="flex items-center gap-[5px]"><MessagesSquare className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
         </div>
 
-        <div className="flex flex-col gap-[5px]">
-          <span className="text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</span>
+        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
+
+        <div className="flex flex-col gap-[6px] py-[var(--space-3)]">
+          <span className="flex items-center gap-[5px] text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            <Briefcase className="h-[11px] w-[11px]" aria-hidden /> Professionals from
+          </span>
           <div className="flex flex-wrap items-center gap-[6px]">
             {shownCompanies.map((name) => (
               <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
@@ -308,16 +322,36 @@ function CommunityCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-[6px]">
-          {community.topics.slice(0, 4).map((topic) => (
-            <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
-          ))}
+        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
+
+        <div className="flex flex-col gap-[6px] py-[var(--space-3)]">
+          <span className="flex items-center gap-[5px] text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            <Tag className="h-[11px] w-[11px]" aria-hidden /> Topics
+          </span>
+          <div className="flex flex-wrap items-center gap-[6px]">
+            {community.topics.slice(0, 4).map((topic) => (
+              <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
+            ))}
+          </div>
         </div>
 
-        {action}
+        <div className="pt-[var(--space-1)]">{action}</div>
       </div>
     </div>
   );
+}
+
+/** Each community wears its own world's glyph, not a generic people icon --
+ *  the same relevance rule the rest of the app follows. */
+function WorldGlyph({ world, className }: { world: string; className?: string }) {
+  const Icon =
+    world === "Business & Money" ? Landmark
+    : world === "Tech & Engineering" ? Cpu
+    : world === "Health & Medicine" ? Stethoscope
+    : world === "Arts, Media & Sport" ? Palette
+    : world === "Teaching & Education" ? GraduationCap
+    : Users;
+  return <Icon className={className} aria-hidden />;
 }
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -778,33 +812,62 @@ function HomeView({
       )}
 
       {tab === "events" && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your events">
+        <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
           <SectionHead>Your events</SectionHead>
-          {EVENTS.map((event) =>
-            eventJoined[event.id] ? (
-              <button key={event.id} type="button" onClick={() => onOpenEvent(event.id)} className="dm-tap cursor-pointer rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, " + EVENT_ACCENT + " 40%, var(--glass-border))" }}>
-                <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
-                <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
-                <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</span>
-              </button>
-            ) : event.lifecycle === "Upcoming" ? (
-              <div key={event.id} className="rounded-[var(--radius-xl)] border p-[var(--space-5)] opacity-70" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
-                <span className="flex items-center gap-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-                  <Clock className="h-3 w-3" aria-hidden /> Upcoming · {event.date}
-                </span>
-                <span className="mt-[3px] block text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
-                <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.host}</span>
-                <p className="mt-[8px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Discussion opens after the event.</p>
-              </div>
-            ) : (
-              <Card key={event.id}>
-                <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: EVENT_ACCENT }}>Active follow-up</span>
-                <p className="mt-[3px] text-[16px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</p>
-                <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.host}</p>
-                <div className="mt-[10px]"><QuietCta onClick={() => onEnterCode(event.id)}><KeyRound className="h-4 w-4" aria-hidden /> Enter event code</QuietCta></div>
-              </Card>
-            )
-          )}
+          {/* ONE card design for every event state (the old three ad-hoc
+             blocks read as three different components) -- identity, then
+             ruled bands for when/where and partner, then the single action
+             that fits this event's state. Elevated from the reference
+             doc's own event card: same information, the app's design
+             language, nothing competing. */}
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+            {EVENTS.map((event) => {
+              const upcoming = event.lifecycle === "Upcoming";
+              const joined = eventJoined[event.id];
+              return (
+                <div key={event.id} className="flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: joined ? `color-mix(in srgb, ${EVENT_ACCENT} 40%, var(--glass-border))` : "var(--glass-border)" }}>
+                  <div className="flex items-center gap-[10px] pb-[var(--space-3)]">
+                    <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: `color-mix(in srgb, ${EVENT_ACCENT} 20%, var(--glass-surface-1))`, color: EVENT_ACCENT }}>
+                      <Calendar className="h-[17px] w-[17px]" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15.5px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
+                      <span className="block text-[11px] font-extrabold tracking-[0.08em] uppercase" style={{ color: upcoming ? "var(--muted-foreground)" : EVENT_ACCENT }}>
+                        {upcoming ? "Upcoming" : "Active follow-up"}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
+
+                  <div className="flex flex-col gap-[6px] py-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                    <span className="flex items-center gap-[6px]"><Clock className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.date}</span>
+                    <span className="flex items-center gap-[6px]"><MapPin className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.location}</span>
+                    <span className="flex items-center gap-[6px]"><Briefcase className="h-[13px] w-[13px] flex-none" aria-hidden /> Partner: <strong style={{ color: "var(--foreground)" }}>{event.host}</strong></span>
+                  </div>
+
+                  <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
+
+                  <div className="pt-[var(--space-3)]">
+                    {joined ? (
+                      <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                        Open Event Board
+                        <ChevronRight className="h-4 w-4" aria-hidden />
+                      </button>
+                    ) : upcoming ? (
+                      <p className="flex min-h-[44px] items-center justify-center text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+                        Discussion opens after the event
+                      </p>
+                    ) : (
+                      <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                        <KeyRound className="h-4 w-4" aria-hidden /> Enter event code
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
     </>

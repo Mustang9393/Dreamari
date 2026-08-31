@@ -131,6 +131,16 @@ export function playTick(urgent = false) {
   tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
 }
 
+/** A page flick: the glossary flipbook card turning over -- a fast little
+ *  up-down swish, more paper than beep. */
+export function playFlip() {
+  const at = audio();
+  if (!at) return;
+  const now = at.currentTime;
+  sweep(at, 340, 980, now, 0.09, 0.05, "triangle");
+  sweep(at, 980, 480, now + 0.07, 0.1, 0.035, "triangle");
+}
+
 /** A voice blip: the visual-novel idiom (Ace Attorney, Animal Crossing) --
  *  a tiny syllable of tone fired every few characters while a CHARACTER's
  *  line types out, at that character's own pitch, so who is talking is
