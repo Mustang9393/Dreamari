@@ -42,6 +42,21 @@ tokens above, in both modes).
 
 ### 2026-09-01 Connect rebuilt to the doc + Replit; play fixes (PUSHED)
 
+- **Round 2 (also PUSHED, f78b088)**: Join Community matches the Replit --
+  tap opens a SOLID JoinSheet with the vetted unlock steps (Read: all
+  students / Reply: 300 Dream Points / Post: 700; points match the topic),
+  confirm swaps the card in place to Open Community. Creative Careers
+  ships unjoined to demo it. Events tab now lists the three ACTUAL fall
+  events (JPMC Brooklyn Oct 23 / AT&T Dallas Oct 29 / EY New Jersey Nov 4,
+  from Slack) + EY Student Impact Day as the live board demo; the mock
+  JPM Markets Day + Amazon events and their thread are gone. ALL modals
+  solid (Ask/code/join) per "modals should never be transparent". Boards
+  seeded with short questions/insights for every community (new pro
+  Jasmine Cole, Art Director, Nike). Spacing pass for the Replit's
+  airiness. NOT built (flagged): the Replit's standalone first-visit
+  "Welcome to Connect" + "Unlock Connect" onboarding screens -- their
+  content lives in the JoinSheet instead; build them if asked.
+
 - **Connect** now follows the Aug 29 doc and the vetted Replit reference
   (https://dceeai.replit.app/community-boards, checked at desktop width
   first per instruction) one for one: five fall communities (General
