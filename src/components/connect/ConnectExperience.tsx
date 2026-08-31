@@ -275,28 +275,32 @@ function CommunityCard({
          PROFESSIONALS FROM chips, and muted topic chips. No description
          sentence (direct feedback), secondary info stays muted. Hierarchy:
          name (16) > caps label (10.5) > body/chips (11.5-13). */}
-      <div className="relative flex items-center gap-[12px] px-[var(--space-5)] py-[18px]" style={{ background: gradientFor(community) }}>
-        <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
-          <WorldGlyph world={community.world} className="h-[17px] w-[17px]" />
-        </span>
-        <span className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-          {community.name}
-        </span>
+      <div className="relative px-[var(--space-5)] pt-[18px] pb-[16px]" style={{ background: gradientFor(community) }}>
+        <div className="flex items-center gap-[12px]">
+          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+            <WorldGlyph world={community.world} className="h-[17px] w-[17px]" />
+          </span>
+          <span className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+            {community.name}
+          </span>
+        </div>
+        {/* The doc's stats structure -- bold number, muted label -- riding
+           inside the header band (direct request), labels muted to white/75
+           so the numbers stay the loud part. */}
+        <div className="mt-[12px] flex items-center gap-[var(--space-6)]">
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.students}</strong> Students
+          </span>
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> Pros
+          </span>
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
+            <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.posts}</strong> Posts
+          </span>
+        </div>
       </div>
 
       <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-        <div className="flex items-center gap-[var(--space-6)]">
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.students}</strong> Students
-          </span>
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros
-          </span>
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <strong className="text-[14px]" style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts
-          </span>
-        </div>
-
         <div className="flex flex-col gap-[7px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
