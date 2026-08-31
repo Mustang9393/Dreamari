@@ -38,9 +38,34 @@ tokens above, in both modes).
 
 ## Current session
 
-- Date: 2026-08-31
+- Date: 2026-09-01
 
-### 2026-08-31 (late night) IB Express mode (LOCAL, not pushed)
+### 2026-09-01 Connect rebuilt to the doc + Replit; play fixes (PUSHED)
+
+- **Connect** now follows the Aug 29 doc and the vetted Replit reference
+  (https://dceeai.replit.app/community-boards, checked at desktop width
+  first per instruction) one for one: five fall communities (General
+  Professional Development / Finance / Technology / Healthcare / Creative
+  Careers) with the doc's counts/companies/topics, all joined; colored
+  gradient card headers (explicitly allowed now -- earlier "no colored
+  headers" feedback is superseded for Connect) with each community wearing
+  its own APPROVED world accent token; CONNECT header (all caps, per
+  direct instruction, replacing "Find your community") + Dreamy-glasses
+  mascot; events tab with orange-gradient event cards; board = gradient
+  banner + ONE content card (rail: Student Questions / Professional
+  Insights only) with the doc's question cards (quoted title, Unanswered
+  pill, grade/country chips, likes · views · comments), insight rows and
+  the AI Ideas / Polish / Post composer. Verified desktop -> tablet ->
+  mobile.
+- **Play fixes** (same day, pushed earlier): music gesture-retry (Express
+  ran silent -- blocked autoplay left `current` set), seeded answer-order
+  shuffle across choice/blank/tiles/document/boss/pick/rapid (pure render,
+  reshuffles per page load), RN cast reframed to IB's waist-up scale
+  (anchors 1.75x -- IB cutouts are waist-up crops, RN's are full figures),
+  Rosa/Tyler cast into RN1-09/RN1-22. Vercel build failure (band.name type
+  error) fixed in 4678fd7.
+
+### 2026-08-31 (late night) IB Express mode (PUSHED)
 
 Built from "Investment Banker, Level 1, Express mode.pdf". One derived mode,
 zero duplicated content:
