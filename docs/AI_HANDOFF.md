@@ -40,6 +40,32 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 (night) Top Three crop focal points + Career Report modular pass (LOCAL, not pushed)
+
+- **Top Three cover crops** (Slack: "subject should appear in a consistent
+  position"): `ProfileCareer` gained optional `photoFocus` (object-position
+  for cropped covers); the Top3 card image reads it instead of a shared
+  `object-top`. IB `50% 40%`, Airline Pilot `50% 72%` -- both faces now land
+  ~1/3 down the 4:3 crop. Other careers fall back to `50% 25%`; calibrate
+  per-photo if one joins the Top 3 and looks off. The 2:3 locker/compare
+  poster crops were left alone (near-native aspect, no beheading risk).
+- **Career Report scanability** (Slack: dashboard, not document; keep dark,
+  keep all info): rebuilt the report's presentation inside the existing
+  dm-report token system. Each ReportSection is now a contained module
+  (raised card, hairline header rail: blue icon + 14px caps display title,
+  actions right); facts are labeled sunken tiles (11px caps label over
+  15.5px bold value); masthead is pill eyebrow + name + chip meta row
+  (killed the double 42px stack); Education's common path is the page's one
+  accented tile, other pathways are name+time-chip rows; majors are
+  bullet-dot tiles; colleges/courses restyled to the same tile grammar;
+  sources footer is a matching module; ReflectionCard header matches. Type
+  hierarchy is now uniform per section: caps header > caps label > bold
+  value/body. Print/export untouched mechanically -- everything still keys
+  off --paper/--ink/--rule tokens the print stylesheet remaps, [hidden]
+  reveal + data-keep-together preserved; worth one print-preview QA pass.
+- Verified live at mobile + 1280px, eslint + tokens:check clean. NOT pushed
+  -- awaiting go-ahead.
+
 ### 2026-08-31 (evening) RN sprites keyed + Profile surface hierarchy (PUSHED)
 
 - **RN cutout sprites are live**: the RN_Game_Asset_Pack's ten green-screen
