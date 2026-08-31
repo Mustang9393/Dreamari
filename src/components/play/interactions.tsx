@@ -173,7 +173,7 @@ function Question({ children }: { children: React.ReactNode }) {
 
 // ------------------------------------------------------------------ the card
 
-export function CardBody({ beat, onNext }: { beat: CardBeat; onNext: () => void }) {
+export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: CardBeat; onNext: () => void; accent?: string }) {
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       {beat.step && (
@@ -220,7 +220,7 @@ export function CardBody({ beat, onNext }: { beat: CardBeat; onNext: () => void 
       {beat.note && (
         <p className="text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>{beat.note}</p>
       )}
-      {beat.ladder && <PowerLadder rungs={beat.ladder} />}
+      {beat.ladder && <PowerLadder rungs={beat.ladder} accent={accent} />}
       {beat.showBands && <BandLadder />}
       <button
         type="button"
@@ -268,8 +268,8 @@ function BandLadder() {
  *  whose only action is Continue (direct feedback: "I don't understand
  *  what the use of this screen is"). Rungs come bottom-to-top in data and
  *  render top-down (highest rung first), the way a ladder is read. */
-function PowerLadder({ rungs }: { rungs: { label: string; lit: boolean }[] }) {
-  const gold = "var(--world-business-money-office)";
+function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }[]; accent: string }) {
+  const gold = accent;
   return (
     <div
       className="rounded-[12px] border px-[14px] py-[12px]"
@@ -619,7 +619,7 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
  *  flip-to-reveal, per direct feedback). Center-stage like the reputation
  *  explainer, so the words never read as an afterthought. Continue appears
  *  only after the last word. Not scored. */
-export function FlipsBody({ beat, onNext }: { beat: FlipsBeat; onNext: () => void }) {
+export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: FlipsBeat; onNext: () => void; accent?: string }) {
   const [at, setAt] = useState(0);
   const [finished, setFinished] = useState(false);
   const card = beat.cards[Math.min(at, beat.cards.length - 1)];
@@ -656,7 +656,7 @@ export function FlipsBody({ beat, onNext }: { beat: FlipsBeat; onNext: () => voi
             // world-gold tint, with a real paper shadow (direct feedback --
             // same look, minus the illustration).
             background:
-              "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 5%, var(--card))",
+              `repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, ${accent} 5%, var(--card))`,
             borderColor: finished && last ? "var(--color-feedback-success)" : "var(--glass-border)",
             boxShadow: "0 18px 40px -22px rgba(0,0,0,0.45)",
           }}
@@ -676,7 +676,7 @@ export function FlipsBody({ beat, onNext }: { beat: FlipsBeat; onNext: () => voi
               {card.term}
             </span>
             {/* The hand-drawn underline squiggle, straight off the binder. */}
-            <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[120px]" style={{ color: "var(--world-business-money-office)", filter: "url(#play-sketch)" }}>
+            <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[120px]" style={{ color: accent, filter: "url(#play-sketch)" }}>
               <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
             </svg>
           </span>
@@ -1535,9 +1535,15 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
         onClick={() => {
           setLocked(true);
           const right = rows.join("|") === beat.order.join("|");
-          if (right) playCorrect();
+          const placed = rows.filter((row, index) => row === beat.order[index]).length;
+          // Partial credit (RN handoff): one adjacent swap leaves N-2 rows
+          // in place -- "three of four in the right place" on a 4-row beat.
+          const close = !right && Boolean(beat.whenClose) && placed >= beat.order.length - 2;
+          if (right || close) playCorrect();
           else playWrong();
-          onResolve(right ? "best" : "wrong", right ? beat.whenRight : beat.whenWrong);
+          if (right) onResolve("best", beat.whenRight);
+          else if (close) onResolve("acceptable", beat.whenClose ?? beat.whenWrong);
+          else onResolve("wrong", beat.whenWrong);
         }}
         className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:opacity-50"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}

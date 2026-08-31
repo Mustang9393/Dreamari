@@ -6,8 +6,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
+import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
-import type { TrailerCard } from "./types";
+import type { Simulation, TrailerCard } from "./types";
 
 // The trailer (Trailer tab): plays once before Level 1, always skippable,
 // teaches nothing, about 20 seconds. Cut like a AAA game trailer, not a
@@ -19,14 +20,19 @@ import type { TrailerCard } from "./types";
 // from card 1 and is never hidden -- a student who skips goes straight to
 // the level and loses nothing.
 
-const LADDER = ["Intern", "Analyst", "Associate", "Vice President", "Executive Director", "Managing Director"];
-
 // A tiny SVG noise tile -- the film grain layer. Inline so the CSP-clean,
 // asset-free trailer stays asset-free.
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")";
 
-export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: () => void }) {
+export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; onDone: () => void }) {
+  const cards: TrailerCard[] = simulation.trailer ?? [];
+  // Per-career identity: the finale's ladder is this career's own six
+  // rungs, the house mark is its own firm, the accent its own world color,
+  // and the title face its world's approved poster font.
+  const LADDER = [...simulation.levels.map((level) => level.role), ...simulation.upcoming];
+  const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+  const titleFont = posterTitleFont(simulation.world);
   const [index, setIndex] = useState(0);
   // Portal target: fixed positioning inside the app shell gets captured by
   // ancestor transforms/filters (the reveal animations, motion cards), so
@@ -152,8 +158,7 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
             transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
             className="relative max-w-[720px] text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
             style={{
-              fontFamily: "var(--font-poster)",
-              fontWeight: 400,
+              ...titleFont,
               color: "#f8f3e7",
               textShadow: "0 2px 44px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,1)",
             }}
@@ -165,8 +170,8 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
         {card.finale && (
           <motion.div className="flex w-full max-w-[420px] flex-col items-center gap-[24px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }}>
             {/* The house mark, the way a studio card closes a trailer. */}
-            <p className="text-[12px] font-bold tracking-[0.5em] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--world-business-money-office)" }}>
-              Cobalt Capital
+            <p className="text-[12px] font-bold tracking-[0.5em] uppercase" style={{ fontFamily: "var(--font-body)", color: accent }}>
+              {simulation.firm}
             </p>
             {/* The ladder as a vertical stepper, centered as a block: a
                ring per rung, short line segments CONNECTING the rings
@@ -179,7 +184,7 @@ export function TrailerFlow({ cards, onDone }: { cards: TrailerCard[]; onDone: (
               {[...LADDER].reverse().map((role, i) => {
                 const rung = LADDER.length - 1 - i; // 5 = Managing Director
                 const top = rung === 5;
-                const gold = "var(--world-business-money-office)";
+                const gold = accent;
                 return (
                   <motion.div
                     key={role}

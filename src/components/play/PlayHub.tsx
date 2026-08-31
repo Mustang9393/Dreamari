@@ -166,7 +166,7 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
 
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
-      {trailerSim?.trailer && <TrailerFlow cards={trailerSim.trailer} onDone={() => setTrailerSim(null)} />}
+      {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
       <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
         Career Simulations
       </h2>
@@ -182,9 +182,14 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
          the content column -- without the peek, nothing said there were
          more cards to the right (direct feedback). */}
       <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pb-1 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
-        <RowCard candidate={featured} large onTrailer={(sim) => setTrailerSim(sim)} />
-        {rest.map((c) => (
-          <RowCard key={c.id} candidate={c} onSelect={() => setFeaturedId(c.id)} />
+        {[featured, ...rest].map((c) => (
+          <RowCard
+            key={c.id}
+            candidate={c}
+            large={c.id === featured.id}
+            onSelect={c.id === featured.id ? undefined : () => setFeaturedId(c.id)}
+            onTrailer={(sim) => setTrailerSim(sim)}
+          />
         ))}
       </div>
     </section>
@@ -268,35 +273,24 @@ function RowCard({
     </div>
   );
 
-  // The featured card is never a button (it holds a real `<Link>` overlay,
-  // and a link nested inside a button is invalid HTML), and a "coming
-  // soon" side card isn't pressable either -- both render as a plain
-  // div/article. layoutId shared across the featured slot and the side
-  // row: clicking a side card doesn't just swap which candidate is
-  // featured, Framer Motion animates that SAME card (by id) sliding/growing
-  // from its side-row spot into the featured position (and the outgoing
-  // featured card shrinks back into a side slot), per direct request for a
-  // carousel-style transition rather than an instant cut.
-  if (large || candidate.kind === "soon") {
-    const Tag = large ? motion.article : motion.div;
-    return (
-      <Tag layout layoutId={candidate.id} transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} className={className} style={style}>
-        {content}
-      </Tag>
-    );
-  }
+  // ONE persistent element per candidate, whatever its state: the same
+  // keyed motion.article simply grows into the featured size (framer's
+  // `layout` animates the width/aspect change and the row reorder), so the
+  // carousel swap is a smooth morph with no crossfade to get stuck in --
+  // the earlier two-element layoutId version reproducibly froze the
+  // incoming featured card at opacity 0. It is never a <button>: the
+  // featured state holds a real <Link> overlay, so a pressable side card
+  // gets its own absolute overlay button instead (same idiom as the
+  // whole-card links across the app).
   return (
-    <motion.button
-      layout
-      layoutId={candidate.id}
-      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-      type="button"
-      onClick={onSelect}
-      className={className}
-      style={style}
-    >
+    <motion.article layout transition={{ type: "spring", bounce: 0.15, duration: 0.55 }} className={className} style={style}>
       {content}
-    </motion.button>
+      {!large && candidate.kind === "sim" && onSelect && (
+        <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">Feature {candidate.sim.title}</span>
+        </button>
+      )}
+    </motion.article>
   );
 }
 

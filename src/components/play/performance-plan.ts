@@ -47,7 +47,11 @@ export type PerformancePlan = {
   terminatedLeaveCta: string;
 };
 
-export const PERFORMANCE_PLANS: Record<1 | 2 | 3, PerformancePlan> = {
+// Keyed by SIMULATION id, then level -- every career carries its own
+// supervisor voice and step options, but the three plan questions never
+// change across careers (Performance Plan tab).
+export const PERFORMANCE_PLANS: Record<string, Record<1 | 2 | 3, PerformancePlan>> = {
+  "investment-banking": {
   1: {
     warningSetup: "You made three mistakes this year. Cobalt Capital is putting you on a performance plan. Get 2 of 3 right to keep your job.",
     warningQuestion: "What is a performance plan? It is an official warning from your boss. Miss the goals in it and you can be let go.",
@@ -170,6 +174,132 @@ export const PERFORMANCE_PLANS: Record<1 | 2 | 3, PerformancePlan> = {
     terminatedBody: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
     terminatedRestartCta: "Play this year again",
     terminatedLeaveCta: "Back to Games",
+  },
+  },
+  "registered-nurse": {
+    1: {
+      warningSetup: "You have made three mistakes this year. Riverbend is putting you on a performance plan. Get 2 of 3 right to keep your job.",
+      warningQuestion: "What is a performance plan? It is an official warning from your manager. Miss what is in it and you can be let go.",
+      warningCta: "Begin Recovery",
+      steps: [
+        {
+          setup: 'Denise names the most recent one. "Three times this year. The last was when {PLAN_LINE}." How is your work supposed to be checked?',
+          correct: "Ask Rosa to check me once every shift",
+          incorrect: "Promise to be more careful",
+          whyCorrect: "Right. You asked for a check, and a check is something somebody else can see happening.",
+          whyIncorrect: "Careful is not a method. Nothing about tomorrow is actually different.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Active Learning",
+        },
+        {
+          setup: "Silence. She waits. Why did nobody hear about it until it was too late?",
+          correct: "I did not want to look like I could not cope",
+          incorrect: "Nobody asked me about it",
+          whyCorrect: "Right. Saying it out loud is the job. It is not an admission of anything.",
+          whyIncorrect: "On this floor you are expected to say it, not wait to be asked.",
+          skillPrimary: "Social Awareness",
+          skillSecondary: "Verbal Communication",
+        },
+        {
+          setup: "Last one. Name one thing you changed, and show me.",
+          correct: "I write every change on the board before I leave",
+          incorrect: "I feel much more confident now",
+          whyCorrect: "Right. Specific, and somebody else can walk over and look at it.",
+          whyIncorrect: "Feelings are not evidence. Denise cannot check how you feel.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Written Communication",
+        },
+      ],
+      passedSetup: "You made it out.",
+      passedBody: "Rosa trusts you to say something the moment it changes. Back to the floor, and working on your own is still on the table.",
+      passedCta: "Back to work",
+      terminatedSetup: "Riverbend is ending your job here. Denise walks you out. This is what being let go looks like.",
+      terminatedBody: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
+      terminatedRestartCta: "Play this year again",
+      terminatedLeaveCta: "Back to Games",
+    },
+    2: {
+      warningSetup: "You have made three mistakes this year. Riverbend is putting you on a performance plan. Get 2 of 3 right to keep your job.",
+      warningQuestion: "What is a performance plan? It is an official warning from your manager. Miss what is in it and you can be let go.",
+      warningCta: "Begin Recovery",
+      steps: [
+        {
+          setup: 'Denise names the most recent one. "Three times this year. The last was when {PLAN_LINE}." How is your work supposed to be checked?',
+          correct: "Show her my own checks at the end of each shift",
+          incorrect: "Ask Rosa to double check everything again",
+          whyCorrect: "Right. A Staff Nurse owns the check. You do it and you show it.",
+          whyIncorrect: "Going back to being checked is going backwards. You are past that rung.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Active Learning",
+        },
+        {
+          setup: "Silence. She waits. Why did nobody hear about it until it was too late?",
+          correct: "I thought I could fix it before anyone noticed",
+          incorrect: "It did not seem big enough to mention",
+          whyCorrect: "Right. Fixing it quietly is why nobody could help while it was still small.",
+          whyIncorrect: "You do not get to decide alone what is big enough. That is what report is for.",
+          skillPrimary: "Social Awareness",
+          skillSecondary: "Verbal Communication",
+        },
+        {
+          setup: "Last one. Name one thing you changed, and show me.",
+          correct: "I hand over three specific things at every report",
+          incorrect: "I am paying much more attention now",
+          whyCorrect: "Right. Countable, repeatable, and the night nurse can confirm it.",
+          whyIncorrect: "More attention is not a change anyone else can see.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Written Communication",
+        },
+      ],
+      passedSetup: "You made it out.",
+      passedBody: "Your team trusts you to run your own patients again. Back to the floor, and the step up is still live.",
+      passedCta: "Back to work",
+      terminatedSetup: "Riverbend is ending your job here. Denise walks you out. This is what being let go looks like.",
+      terminatedBody: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
+      terminatedRestartCta: "Play this year again",
+      terminatedLeaveCta: "Back to Games",
+    },
+    3: {
+      warningSetup: "You have made three mistakes this year. Riverbend is putting you on a performance plan. Get 2 of 3 right to keep your job.",
+      warningQuestion: "What is a performance plan? It is an official warning from your manager. Miss what is in it and you can be let go.",
+      warningCta: "Begin Recovery",
+      steps: [
+        {
+          setup: 'Yvonne names the most recent one. "Three times this year. The last was when {PLAN_LINE}." How is your work supposed to be checked?',
+          correct: "Set what good looks like before the shift starts",
+          incorrect: "Watch my team more closely all shift",
+          whyCorrect: "Right. Once you lead people, checking means agreeing the standard up front.",
+          whyIncorrect: "Watching harder is not a standard. Nobody knows what you are watching for.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Active Learning",
+        },
+        {
+          setup: "Silence. She waits. Why did nobody hear about it until it was too late?",
+          correct: "I did not want to escalate over my own team",
+          incorrect: "My team should have told me sooner",
+          whyCorrect: "Right. Loyalty that keeps a problem in the room is not loyalty.",
+          whyIncorrect: "Naming your team answers a question nobody asked. You are answerable for them.",
+          skillPrimary: "Social Awareness",
+          skillSecondary: "Verbal Communication",
+        },
+        {
+          setup: "Last one. Name one thing you changed, and show me.",
+          correct: "Two nurses now sign the same check, and here it is",
+          incorrect: "The floor runs much better since then",
+          whyCorrect: "Right. Once you lead people, your evidence is what they do, not how you feel.",
+          whyIncorrect: "Better is not a measurement. Point at something Yvonne can read.",
+          skillPrimary: "Self-Reflection & Improvement",
+          skillSecondary: "Written Communication",
+        },
+      ],
+      passedSetup: "You made it out.",
+      passedBody: "Your floor trusts you to run a shift without being watched. Back to work, and Nurse Manager is still live.",
+      passedCta: "Back to work",
+      terminatedSetup: "Riverbend is ending your job here. Denise walks you out. This is what being let go looks like.",
+      terminatedBody: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
+      terminatedRestartCta: "Play this year again",
+      terminatedLeaveCta: "Back to Games",
+    },
   },
 };
 

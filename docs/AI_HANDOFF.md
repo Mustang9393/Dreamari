@@ -40,6 +40,49 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 (later still) Registered Nurse simulation, Level 1 (PUSHED)
+
+The second career simulation, built to the IB SOP from
+`REgistered Nurse Game/DreamAri_RegisteredNurse_Level1_Handoff.xlsx`:
+
+- **`rn-level-1.ts`**: all 31 screens (RN1-01..26 + rapid children), ten
+  scored beats, sheet copy verbatim with the SOP refinements already
+  standard in IB (example split to its own screen, word-card flipbook for
+  the four terms, spotlit score explainer, typed 85 check with the
+  reworded copy, dedup'd character-card eyebrows, D55 empty feedback
+  bodies). Four endings (three outcomes; 40-84 splits soft/blunt at 60;
+  under 40 = Terminated). Plan lines on every scored beat.
+- **Per-career engine parameterization** (this is what makes career #3
+  cheap): TrailerFlow now takes the SIMULATION -- world poster font, world
+  accent, firm mark and the real ladder all derive from it; PowerLadder/
+  FlipsBody accents thread from the sim's world (IB unchanged, it IS the
+  business gold); PERFORMANCE_PLANS re-keyed by simulation id with the RN
+  sheet's own Denise/Yvonne plans for levels 1-3 (PerformancePlanFlow now
+  receives the plan, not a level index).
+- **Rank partial credit** (`whenClose` on RankBeat): the RN sheet's
+  three-band scoring (all right Best, three of four Acceptable, else
+  Wrong). The rules conflict the walkthrough flags (rank vs the universal
+  3/4 threshold) is still an open call for all 25 careers.
+- **Assets**: `public/images/play/rn/` -- six Riverbend room plates
+  (locations.ts library + RN1-xx beat map, ids prefixed so they can't
+  collide with IB's L1-xx), four character portraits as hero art, four
+  face crops for the dialogue cast. NO cutout sprites yet -- the master
+  prompt for generating them is docs/handoff/sprite-master-prompt.md; the
+  engine's standing-character/expression systems light up when they land.
+- **Carousel bug fixed properly**: the featured-row swap froze the
+  incoming card at opacity 0 (framer layoutId crossfade + the element
+  changing tag button->article = remount). RowCard is now ONE persistent
+  keyed motion.article per candidate that simply grows into the featured
+  size (layout animation, no crossfade), with an absolute overlay button
+  for pressable side cards. First live two-sim carousel works.
+- **Blockers honored, not invented around**: salary/hours are proposals
+  (Level 1 ships no offer card, so nothing displays them); trailer
+  statistic cards ship without their unconfirmed numbers (D04); endings
+  are Draft pending approval.
+- Validation: tsc, eslint (pre-existing img warning only), tokens:check,
+  full build; live-verified hub carousel, RN trailer (Nunito/teal/
+  Riverbend/real ladder), drag check, Rosa hero card, teal HUD.
+
 ### 2026-08-31 (later) IB Level 1 gamification pass from live review (PUSHED)
 
 A rapid feedback round on the rebuilt Level 1, all applied and verified:

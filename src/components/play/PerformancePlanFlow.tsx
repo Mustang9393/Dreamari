@@ -5,7 +5,7 @@ import { FileText, ShieldAlert, Trophy } from "lucide-react";
 import Link from "next/link";
 
 import { Keycap } from "./interactions";
-import { PERFORMANCE_PLANS, type PipState } from "./performance-plan";
+import { type PerformancePlan, type PipState } from "./performance-plan";
 import { playCorrect, playSweep, playWrong } from "./sound";
 
 // The Performance Plan takeover. Deliberately its own small state machine,
@@ -29,17 +29,17 @@ const SYSTEM_STEP_ONE = "Three mistakes is a pattern, not bad luck. Two right an
 const SYSTEM_LAST_CHANCE = "This one decides it. Be specific.";
 
 export function PerformancePlanFlow({
-  level,
+  plan,
   pip,
   onPassed,
   onTerminated,
 }: {
-  level: 1 | 2 | 3;
+  /** This simulation's own plan for this level (PERFORMANCE_PLANS[simId][n]). */
+  plan: PerformancePlan;
   pip: PipState;
   onPassed: () => void;
   onTerminated: () => void;
 }) {
-  const plan = PERFORMANCE_PLANS[level];
   const [phase, setPhase] = useState<Phase>("warning");
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [correctCount, setCorrectCount] = useState(0);

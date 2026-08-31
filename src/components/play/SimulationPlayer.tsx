@@ -11,7 +11,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
 import { locationFor } from "./locations";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
-import { randomStepOrders, type PipState } from "./performance-plan";
+import { PERFORMANCE_PLANS, randomStepOrders, type PipState } from "./performance-plan";
 import {
   BossOverlay,
   BucketBody,
@@ -526,7 +526,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {pip ? (
         <PerformancePlanFlow
-          level={level.n as 1 | 2 | 3}
+          plan={(PERFORMANCE_PLANS[simulation.id] ?? PERFORMANCE_PLANS["investment-banking"])[level.n as 1 | 2 | 3]}
           pip={pip}
           onPassed={() => {
             const earned = Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0);
@@ -1098,7 +1098,7 @@ function BeatStage({
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
               ambient={ambient}
             >
-              <BeatBody beat={beat} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
+              <BeatBody beat={beat} accent={accent} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
           )}
         </div>
@@ -1141,12 +1141,16 @@ function DEFAULT_PROMPT(beat: Beat): string | undefined {
 
 function BeatBody({
   beat,
+  accent,
   locked,
   remaining,
   onResolve,
   onNext,
 }: {
   beat: Beat;
+  /** The simulation's world color -- teach/ladder accents follow the
+   *  career, never a hardcoded world. */
+  accent: string;
   locked: string | null;
   remaining: number;
   onResolve: Resolve;
@@ -1166,10 +1170,10 @@ function BeatBody({
     </p>
   );
   const body = (() => {
-    if (beat.kind === "card") return <CardBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} />;
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
-    if (beat.kind === "flips") return <FlipsBody beat={beat} onNext={onNext} />;
+    if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
     if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;

@@ -26,7 +26,17 @@ export type LocationId =
   // library; this exists because this exact background-plus-slots pair was
   // supplied for this exact scene, so there is no reason to substitute a
   // generic room for it.
-  | "l1-reception";
+  | "l1-reception"
+  // Riverbend Medical Center -- the Registered Nurse simulation's six-room
+  // library, from its own art handoff. No characterAnchors yet: the RN cast
+  // has no alpha-cutout sprites (portraits are baked into backgrounds), so
+  // characters appear via hero art and dialogue face chips instead.
+  | "riverbend-lobby"
+  | "riverbend-station"
+  | "riverbend-patient-room"
+  | "riverbend-corridor"
+  | "riverbend-staff-room"
+  | "riverbend-ward-night";
 
 // baselineY is a fraction of the scene's height, measured from the top --
 // 0.99 puts the sprite's own bottom edge just shy of the scene's bottom
@@ -54,6 +64,7 @@ type LocationArt = {
 };
 
 const L = "/images/play/ib/locations";
+const RN = "/images/play/rn/locations";
 
 export const LOCATION_ART: Record<LocationId, LocationArt> = {
   "cobalt-trading-floor-sunset": {
@@ -119,6 +130,42 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // The single-character anchor used when only one of them is present
     // (L1-15, Christina alone): her own slot, fully in frame.
     characterAnchor: { x: 0.5, baselineY: 0.99, heightFrac: 0.88 },
+  },
+  "riverbend-lobby": {
+    src: `${RN}/lobby.jpg`,
+    alt: "Riverbend Medical Center's main lobby, morning light across the marble floor.",
+    focal: { x: 0.45, y: 0.45 },
+    mobileFocal: { x: 0.4, y: 0.4 },
+  },
+  "riverbend-station": {
+    src: `${RN}/station.jpg`,
+    alt: "The Four West nurses' station, monitors lit, the corridor stretching away.",
+    focal: { x: 0.42, y: 0.45 },
+    mobileFocal: { x: 0.38, y: 0.42 },
+  },
+  "riverbend-patient-room": {
+    src: `${RN}/patient-room.jpg`,
+    alt: "A patient room on Four West, monitors beside the bed, the city through the window.",
+    focal: { x: 0.6, y: 0.5 },
+    mobileFocal: { x: 0.65, y: 0.45 },
+  },
+  "riverbend-corridor": {
+    src: `${RN}/corridor.jpg`,
+    alt: "The Four West corridor, numbered patient doors and warm light down its length.",
+    focal: { x: 0.5, y: 0.45 },
+    mobileFocal: { x: 0.45, y: 0.42 },
+  },
+  "riverbend-staff-room": {
+    src: `${RN}/staff-room.jpg`,
+    alt: "The staff room at Riverbend, coffee shelves and the city beyond the glass.",
+    focal: { x: 0.5, y: 0.45 },
+    mobileFocal: { x: 0.45, y: 0.42 },
+  },
+  "riverbend-ward-night": {
+    src: `${RN}/ward-night.jpg`,
+    alt: "The ward at night, monitors glowing against the city lights.",
+    focal: { x: 0.4, y: 0.45 },
+    mobileFocal: { x: 0.35, y: 0.42 },
   },
 };
 
@@ -230,6 +277,37 @@ export const BEAT_LOCATION: Record<string, LocationId> = {
   "L3-25": "cobalt-trading-floor-sunset",
   "L3-26": "cobalt-trading-floor-sunset",
   "L3-27": "cobalt-trading-floor-sunset",
+
+  // Registered Nurse, Level 1 (ids RN1-xx so they can never collide with
+  // the IB level's L1-xx keys in this shared map). The Day-1 morning run
+  // holds one room before moving forward through the day -- the same
+  // visual-congruence rule the IB opening follows.
+  "RN1-01": "riverbend-corridor",
+  "RN1-02": "riverbend-corridor",
+  "RN1-03": "riverbend-corridor",
+  "RN1-04": "riverbend-corridor",
+  "RN1-04b": "riverbend-corridor",
+  "RN1-05": "riverbend-corridor",
+  "RN1-06": "riverbend-station",
+  "RN1-07": "riverbend-station",
+  "RN1-08": "riverbend-station",
+  "RN1-09": "riverbend-station",
+  "RN1-10": "riverbend-station",
+  "RN1-11": "riverbend-station",
+  "RN1-12": "riverbend-staff-room",
+  "RN1-13": "riverbend-staff-room",
+  "RN1-14": "riverbend-staff-room",
+  "RN1-15": "riverbend-corridor",
+  "RN1-16": "riverbend-station",
+  "RN1-17": "riverbend-station",
+  "RN1-18": "riverbend-station",
+  "RN1-19": "riverbend-station",
+  "RN1-20": "riverbend-station",
+  "RN1-21": "riverbend-station",
+  "RN1-22": "riverbend-station",
+  "RN1-23": "riverbend-patient-room",
+  "RN1-24": "riverbend-ward-night",
+  "RN1-25": "riverbend-ward-night",
 };
 
 export function locationFor(beatId: string): LocationArt | undefined {

@@ -274,14 +274,20 @@ export type FlagsBeat = BeatBase & {
   timer?: number;
 };
 
-/** Rank the Order: shuffled rows, moved with up/down, then submitted. Every
- *  position must be right. */
+/** Rank the Order: shuffled rows, moved with up/down, then submitted. All
+ *  positions right by default; a beat authored with `whenClose` grants
+ *  partial credit instead (all right = Best, exactly one adjacent pair
+ *  swapped = Acceptable, anything else = Wrong -- the RN handoff's
+ *  three-band scoring). */
 export type RankBeat = BeatBase & {
   kind: "rank";
   question: string;
   /** In the CORRECT order. The player always sees them shuffled. */
   order: string[];
   whenRight: string;
+  /** Partial credit line ("three of four in the right place") -- its
+   *  presence is what turns the beat's scoring three-band. */
+  whenClose?: string;
   whenWrong: string;
   feedback: string;
   feedbackCta: string;

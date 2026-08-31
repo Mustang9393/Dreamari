@@ -1,6 +1,7 @@
 import { IB_LEVEL_1 } from "./ib-level-1";
 import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
+import { RN_LEVEL_1 } from "./rn-level-1";
 import type { Simulation } from "./types";
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
@@ -36,7 +37,34 @@ export const INVESTMENT_BANKING: Simulation = {
   upcoming: ["Vice President", "Executive Director", "Managing Director"],
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING];
+export const REGISTERED_NURSE: Simulation = {
+  id: "registered-nurse",
+  careerId: "registered-nurse",
+  title: "Registered Nurse",
+  world: "Health & Medicine",
+  firm: "Riverbend Medical Center",
+  cover: "/images/play/rn/locations/station.jpg",
+  // The trailer (Trailer tab): same seven-beat shape as every career --
+  // the scale, the odds, the cost, the room, the consequence, the person
+  // at the top, the ladder. Reuse only. The two statistic cards ship
+  // WITHOUT their numbers, per the sheet's own rule: no numbers we cannot
+  // source (D04).
+  trailer: [
+    { id: "RN-TR-01", seconds: 2.5, text: "More people work as nurses than any other job in health care.", art: "/images/play/rn/locations/lobby.jpg" },
+    { id: "RN-TR-02", seconds: 3, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
+    { id: "RN-TR-03", seconds: 2.5, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
+    { id: "RN-TR-04", seconds: 2.5, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
+    { id: "RN-TR-05", seconds: 2.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg" },
+    // Yvonne is SEEN here and introduced properly at Level 3.
+    { id: "RN-TR-06", seconds: 3, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/yvonne.jpg" },
+    { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
+  ],
+  levels: [RN_LEVEL_1],
+  // The real six-rung ladder (Career Ladder tab): nursing genuinely has six.
+  upcoming: ["Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
+};
+
+export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not
@@ -47,7 +75,6 @@ export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING];
  *  too. */
 export const SOON: { careerId: string; title: string; world: string; cover: string }[] = [
   { careerId: "airline-pilot", title: "Airline Pilot", world: "Driving, Flying & Shipping", cover: "/images/app/soon-airline-pilot.png" },
-  { careerId: "registered-nurse", title: "Registered Nurse", world: "Health & Medicine", cover: "/images/app/soon-registered-nurse.png" },
   { careerId: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", cover: "/images/app/soon-software-engineer.png" },
   { careerId: "private-equity", title: "Private Equity", world: "Business & Money", cover: "/images/app/soon-private-equity.png" },
   { careerId: "food-scientist", title: "Food Scientist", world: "Farming, Animals & Nature", cover: "/images/app/soon-food-scientist.png" },
