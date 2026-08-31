@@ -1,23 +1,25 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Bookmark,
-  Briefcase,
   Calendar,
   CheckCircle2,
   ChevronRight,
   CornerDownRight,
   Clock,
   Cpu,
+  Eye,
   GraduationCap,
   Landmark,
   MessagesSquare,
   Palette,
+  Sparkles,
+  Star,
   Stethoscope,
-  Tag,
   ExternalLink,
   Flag,
   KeyRound,
@@ -124,31 +126,32 @@ function eventById(id: string) {
 /** The one ask affordance. A box you can type into is an invitation; a button
  *  is a door you have to decide to open. Where the question goes is chosen in
  *  the sheet that opens, so this reads the same on every tab. */
-function Composer({ onAsk, placeholder = "Ask anything about a career…" }: { onAsk: () => void; placeholder?: string }) {
+// The doc's composer, one for one: a "What do you want to ask?" field with
+// AI Ideas / Polish / Post actions along its bottom edge. All three open the
+// same Ask flow -- drafting, AI suggestions and posting live in the sheet.
+function Composer({ onAsk, placeholder = "What do you want to ask?" }: { onAsk: () => void; placeholder?: string }) {
   return (
-    <button
-      type="button"
-      onClick={onAsk}
-      className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border-2 px-[var(--space-4)] py-[var(--space-3)] text-left"
-      style={{
-        // Carries more weight than the post cards around it: this is the one
-        // thing the whole surface exists to make easy.
-        background: "color-mix(in srgb, var(--primary) 12%, var(--color-glass-surface-3))",
-        borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))",
-      }}
-    >
-      <Avatar name="Jordan Rivera" size={38} />
-      <span className="flex-1 truncate text-[15.5px] font-medium" style={{ color: "var(--foreground)" }}>
-        {placeholder}
-      </span>
-      <span
-        className="flex flex-none items-center gap-[7px] rounded-full px-[18px] py-[11px] text-[14.5px] font-extrabold"
-        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+    <div className="rounded-[var(--radius-xl)] border p-[var(--space-3)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        onClick={onAsk}
+        className="dm-tap flex min-h-[64px] w-full cursor-pointer items-start rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left text-[13.5px] leading-[19px] font-medium"
+        style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
       >
-        Ask
-        <ArrowRight className="h-[16px] w-[16px]" aria-hidden />
-      </span>
-    </button>
+        {placeholder}
+      </button>
+      <div className="mt-[10px] flex items-center justify-end gap-[var(--space-2)]">
+        <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
+          <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
+        </button>
+        <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[36px] cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>
+          Polish
+        </button>
+        <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-full px-[15px] text-[12px] leading-[16px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -227,115 +230,80 @@ function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: 
   );
 }
 
-function WorldTile({ world, size = 40 }: { world: string; size?: number }) {
-  return (
-    <span
-      aria-hidden
-      className="flex flex-none items-center justify-center rounded-[var(--radius-md)]"
-      style={{ width: size, height: size, background: "color-mix(in srgb, " + (WORLD_COLORS[world] ?? "var(--primary)") + " 18%, transparent)", color: WORLD_COLORS[world] ?? "var(--primary)" }}
-    >
-      <Users style={{ width: size * 0.45, height: size * 0.45 }} />
-    </span>
-  );
+
+// Colored gradient headers on the community cards are the Aug 29 doc's
+// mockup, followed by direct instruction -- and each community's color is
+// its own APPROVED world accent (WORLD_COLORS tokens), not an invented
+// palette: "each one a distinct color so they feel like different career
+// worlds", using the accents those worlds already carry everywhere else in
+// the app. Mixed toward the app's dark base at both stops so the white
+// header text stays legible on every accent.
+function communityAccent(community: Pick<Community, "world">): string {
+  return WORLD_COLORS[community.world] ?? "var(--primary)";
+}
+function gradientFor(community: Pick<Community, "world">): string {
+  const accent = communityAccent(community);
+  return `linear-gradient(100deg, color-mix(in srgb, ${accent} 80%, #0a0d18), color-mix(in srgb, ${accent} 48%, #0a0d18))`;
 }
 
-// Three distinct organic blob masks (fractional objectBoundingBox paths, so
-// they scale with whatever box they're applied to) — cards read as graphic
-// A world-tinted card (same color-mix idiom the hero panels already use).
-// No board photography — per the handoff's own imagery direction (section
-// 20: "minimal... boards do not need stock photography"; identity is "a
-// small icon or abstract brand asset"), the color IS the graphic: a soft
-// blurred accent glow (the same .mock-glow idiom ChapterShell already uses
-// behind its chapter graphics) sits behind an icon medallion, and every word
-// of copy stays on the plain tinted surface for guaranteed legibility.
-// Editorial masthead composition: icon + headline on one line (nothing
-// floats over the text, so it wraps exactly like normal text always has),
-// a hairline rule, then a stat footer with the trailing action at its own
-// end. No description sentence — the title and the numbers ARE the content;
-// a byline restating "New verified answer · 3h ago" next to a headline that
-// already says what the board is about was just noise.
+// The doc's community card, one for one: a colored gradient header band
+// (icon chip + white name), then stats, "PROFESSIONALS FROM" companies with
+// a "+N more", topic chips, and the Open Community button. One type
+// hierarchy inside the card: header name > caps labels > chips/body.
 function CommunityCard({
   community,
-  unreadBadge,
   action,
   onOpen,
 }: {
   community: Community;
-  unreadBadge?: React.ReactNode;
   action: React.ReactNode;
   onOpen: () => void;
 }) {
-  const accent = WORLD_COLORS[community.world] ?? "var(--primary)";
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
   return (
-    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
-      {/* Ambient color only — blurred and fully behind the content, the same
-         idiom every other card in the app uses to carry a world's accent
-         (Home's activity cards, Browse's posters): a glow, never a solid
-         block competing with the heading/subheading/body hierarchy below. */}
-      <span aria-hidden className="pointer-events-none absolute top-[-40px] right-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 40%, transparent)` }} />
-
+    <div className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
       {/* Whole card, one target. The bottom action button sits above this
-         layer (z-20) so it's still its own reachable target, the same
-         overlay pattern the rest of Connect uses for a whole-card link. */}
+         layer (z-20) so it's still its own reachable target. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>
       </button>
 
-      {/* Same dark-glass card every other surface uses -- the world color is
-         an accent (icon tile, border tint, ambient glow), never a full-card
-         block. Hairline dividers rule the card into clear bands (identity /
-         stats / people / topics / action) so the data never reads as one
-         cluttered pile (direct feedback), and each world carries its OWN
-         icon rather than a generic people glyph. */}
-      <div className="relative z-20 flex flex-col p-[var(--space-4)]">
-        <div className="flex items-center gap-[10px] pb-[var(--space-3)]">
-          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: `color-mix(in srgb, ${accent} 22%, var(--glass-surface-1))`, color: accent }}>
-            <WorldGlyph world={community.world} className="h-[18px] w-[18px]" />
-          </span>
-          <span className="min-w-0 flex-1 text-[15.5px] leading-[19px] font-bold sm:text-[17px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {community.name}
-          </span>
-          {unreadBadge}
+      <div className="relative flex items-center gap-[10px] px-[var(--space-4)] py-[13px]" style={{ background: gradientFor(community) }}>
+        <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+          <WorldGlyph world={community.world} className="h-[16px] w-[16px]" />
+        </span>
+        <span className="min-w-0 flex-1 text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+          {community.name}
+        </span>
+      </div>
+
+      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+        <div className="flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
+          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
+          <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
         </div>
 
-        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
-
-        <div className="flex items-center gap-[var(--space-5)] py-[var(--space-3)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex items-center gap-[5px]"><Users className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.students}</strong> Students</span>
-          <span className="flex items-center gap-[5px]"><ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.activePros}</strong> Pros</span>
-          <span className="flex items-center gap-[5px]"><MessagesSquare className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /><strong style={{ color: "var(--foreground)" }}>{community.posts}</strong> Posts</span>
-        </div>
-
-        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
-
-        <div className="flex flex-col gap-[6px] py-[var(--space-3)]">
-          <span className="flex items-center gap-[5px] text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            <Briefcase className="h-[11px] w-[11px]" aria-hidden /> Professionals from
+        <div className="flex flex-col gap-[6px]">
+          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            Professionals from
           </span>
           <div className="flex flex-wrap items-center gap-[6px]">
             {shownCompanies.map((name) => (
-              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
             ))}
-            {moreCompanies > 0 && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
+            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
           </div>
         </div>
 
-        <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
-
-        <div className="flex flex-col gap-[6px] py-[var(--space-3)]">
-          <span className="flex items-center gap-[5px] text-[10px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            <Tag className="h-[11px] w-[11px]" aria-hidden /> Topics
-          </span>
-          <div className="flex flex-wrap items-center gap-[6px]">
-            {community.topics.slice(0, 4).map((topic) => (
-              <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center gap-[6px]">
+          {community.topics.slice(0, 4).map((topic) => (
+            <span key={topic} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>{topic}</span>
+          ))}
         </div>
 
-        <div className="pt-[var(--space-1)]">{action}</div>
+        <div className="mt-auto">{action}</div>
       </div>
     </div>
   );
@@ -398,52 +366,85 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 
 // ——— feed cards ———
 
+// The doc's question card, one for one: an "Unanswered" pill when nothing
+// has come back yet, the quoted bold question as the card's heading, a chip
+// row for the asker's grade and country, then likes · views · comments, with
+// the time at the top right.
 function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const comments = thread.responses.length;
   return (
     <Card>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} />
-        <StatusChip state={thread.state} />
+        <div className="min-w-0 flex-1">
+          {comments === 0 && (
+            <span className="mb-[6px] inline-flex rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
+              Unanswered
+            </span>
+          )}
+          <button type="button" onClick={onOpen} className="dm-link block w-full cursor-pointer text-left">
+            <h3 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
+          </button>
+        </div>
+        <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
-      <button type="button" onClick={onOpen} className="dm-link mt-[6px] block w-full cursor-pointer text-left">
-        <h3 className="text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h3>
-        {thread.context && (
-          <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{thread.context}</p>
+      <div className="mt-[8px] flex flex-wrap items-center gap-[6px]">
+        <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+          <GraduationCap className="h-[12px] w-[12px]" aria-hidden /> {thread.grade}
+        </span>
+        {thread.location && (
+          <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>
+            <MapPin className="h-[12px] w-[12px]" aria-hidden /> {thread.location}
+          </span>
         )}
-      </button>
-      <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-      <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {thread.helpful + (helpful ? 1 : 0)}
+      </div>
+      <div className="mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
         </button>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+        {typeof thread.views === "number" && (
+          <span className="flex items-center gap-[5px]"><Eye className="h-3.5 w-3.5" aria-hidden /> {thread.views.toLocaleString()}</span>
+        )}
+        <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments} comments
+        </button>
+        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
-        </button>
-        <button type="button" onClick={onOpen} className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[3px]" style={{ color: "var(--accent-subtle)" }}>
-          Open <ChevronRight className="h-3.5 w-3.5" aria-hidden />
         </button>
       </div>
     </Card>
   );
 }
 
+// The doc's insight row, one for one: avatar, the pro's name with a
+// "Professional" chip and their company chip, the insight's title line,
+// then likes and comments, time at the right.
 function InsightCard({ insight, saved, onSave, helpful, onHelpful }: { insight: Insight; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const pro = proById(insight.proId);
   return (
     <Card>
-      {/* Eyebrow sits on its own line, above the name row — inline it fought
-         the pro's name/company text for space and both wrapped badly. */}
-      <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>Pro insight</span>
-      <div className="mt-[8px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} /></div>
-      <h3 className="mt-[10px] text-[15.5px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h3>
-      <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{insight.body}</p>
-      <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-      <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
-        </button>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-          <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
-        </button>
+      <div className="flex items-start gap-[10px]">
+        <Avatar name={pro.name} verified size={34} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-[6px]">
+            <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+            <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
+            <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{pro.org}</span>
+          </div>
+          <h3 className="mt-[5px] text-[14px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
+          <p className="mt-[3px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
+          <div className="mt-[8px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+              <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
+            </button>
+            {typeof insight.comments === "number" && (
+              <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.comments} comments</span>
+            )}
+            <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+              <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+            </button>
+          </div>
+        </div>
+        <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
       </div>
     </Card>
   );
@@ -516,7 +517,6 @@ export function ConnectExperience() {
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   const [joined, setJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(COMMUNITIES.map((c) => [c.id, c.joined])));
   const [eventJoined, setEventJoined] = useState<Record<string, boolean>>(() => Object.fromEntries(EVENTS.map((e) => [e.id, e.entitled])));
-  const [dismissedRecs, setDismissedRecs] = useState<Record<string, boolean>>({});
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
   const [announce, setAnnounce] = useState("");
@@ -592,8 +592,6 @@ export function ConnectExperience() {
             tab={view.tab}
             onTab={(tab) => setView({ kind: "home", tab })}
             joined={joined}
-            dismissedRecs={dismissedRecs}
-            onDismissRec={(id) => setDismissedRecs((d) => ({ ...d, [id]: true }))}
             onJoin={(id) => {
               setJoined((j) => ({ ...j, [id]: true }));
               say("Joined. New answers show up in your feed.");
@@ -704,8 +702,6 @@ function HomeView({
   tab,
   onTab,
   joined,
-  dismissedRecs,
-  onDismissRec,
   onJoin,
   eventJoined,
   onOpenBoard,
@@ -715,8 +711,6 @@ function HomeView({
   tab: "communities" | "events";
   onTab: (tab: "communities" | "events") => void;
   joined: Record<string, boolean>;
-  dismissedRecs: Record<string, boolean>;
-  onDismissRec: (id: string) => void;
   onJoin: (id: string) => void;
   eventJoined: Record<string, boolean>;
   onOpenBoard: (id: string) => void;
@@ -725,17 +719,19 @@ function HomeView({
 }) {
   const [query, setQuery] = useState("");
   const myCommunities = COMMUNITIES.filter((c) => joined[c.id]);
-  const recommended = COMMUNITIES.filter((c) => !joined[c.id] && c.recommendedBecause && !dismissedRecs[c.id]).slice(0, 3);
-  const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ")).toLowerCase().includes(query.toLowerCase()));
+  const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
 
   return (
     <>
       {/* "Find your community" masthead + Community/Events toggle, same on
-         both tabs -- matches the reference doc's mockup exactly, which shows
-         this identical header on both the Community and the Events screen. */}
-      <div className="flex flex-col gap-[var(--space-2)]">
-        <h1 className="text-[28px] leading-[34px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find Your Community</h1>
-        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
+         both tabs -- matches the reference doc's mockup exactly (title case,
+         one-line sub, Dreamy in glasses at the header's right edge). */}
+      <div className="flex items-start justify-between gap-[var(--space-4)]">
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
+          <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
+        </div>
+        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={128} height={128} aria-hidden className="h-[56px] w-[56px] flex-none object-contain sm:h-[64px] sm:w-[64px]" />
       </div>
 
       <FilterRow
@@ -767,38 +763,23 @@ function HomeView({
       )}
 
       {tab === "communities" && (
+        /* One section, exactly like the doc: "Your Communities" with the
+           joined count at the row's end, all five cards in a two-column
+           grid. Search filters this same grid rather than a separate
+           "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
-          <SectionHead>Your communities</SectionHead>
+          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+            <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
+            {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{myCommunities.length} joined</span>}
+          </div>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
-            {myCommunities.map((c) => (
-              <CommunityRow key={c.id} community={c} joined onOpen={() => onOpenBoard(c.id)} />
+            {searched.map((c) => (
+              <CommunityRow key={c.id} community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
             ))}
           </div>
-          {myCommunities.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>You haven&apos;t joined a community yet — start with one below.</p>
+          {searched.length === 0 && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches “{query}” yet.</p>
           )}
-        </section>
-      )}
-
-      {tab === "communities" && recommended.length > 0 && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Recommended communities">
-          <SectionHead>Recommended for you</SectionHead>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
-            {recommended.map((c) => (
-              <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} onDismiss={() => onDismissRec(c.id)} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {tab === "communities" && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="All communities">
-          <SectionHead>{query ? `Matching “${query}”` : "All communities"}</SectionHead>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
-            {searched.filter((c) => !joined[c.id]).map((c) => (
-              <CommunityRow key={c.id} community={c} joined={false} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
-            ))}
-          </div>
         </section>
       )}
 
@@ -813,56 +794,52 @@ function HomeView({
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
-          <SectionHead>Your events</SectionHead>
-          {/* ONE card design for every event state (the old three ad-hoc
-             blocks read as three different components) -- identity, then
-             ruled bands for when/where and partner, then the single action
-             that fits this event's state. Elevated from the reference
-             doc's own event card: same information, the app's design
-             language, nothing competing. */}
+          {/* The doc's event card, one for one: an orange gradient header
+             (star chip, event name, date · location in white), then the
+             stats row, the Partner line, and one action for this event's
+             state. */}
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
             {EVENTS.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const joined = eventJoined[event.id];
               return (
-                <div key={event.id} className="flex flex-col rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: joined ? `color-mix(in srgb, ${EVENT_ACCENT} 40%, var(--glass-border))` : "var(--glass-border)" }}>
-                  <div className="flex items-center gap-[10px] pb-[var(--space-3)]">
-                    <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: `color-mix(in srgb, ${EVENT_ACCENT} 20%, var(--glass-surface-1))`, color: EVENT_ACCENT }}>
-                      <Calendar className="h-[17px] w-[17px]" />
+                <div key={event.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+                  <div className="flex items-center gap-[10px] px-[var(--space-4)] py-[13px]" style={{ background: "linear-gradient(100deg, #f59e0b, #ea580c)" }}>
+                    <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.25)", color: "#FFFFFF" }}>
+                      <Star className="h-[15px] w-[15px]" fill="currentColor" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15.5px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{event.name}</span>
-                      <span className="block text-[11px] font-extrabold tracking-[0.08em] uppercase" style={{ color: upcoming ? "var(--muted-foreground)" : EVENT_ACCENT }}>
-                        {upcoming ? "Upcoming" : "Active follow-up"}
-                      </span>
+                      <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{event.name}</span>
+                      <span className="block text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{event.date} · {event.location}</span>
                     </span>
                   </div>
 
-                  <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
-
-                  <div className="flex flex-col gap-[6px] py-[var(--space-3)] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                    <span className="flex items-center gap-[6px]"><Clock className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.date}</span>
-                    <span className="flex items-center gap-[6px]"><MapPin className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.location}</span>
-                    <span className="flex items-center gap-[6px]"><Briefcase className="h-[13px] w-[13px] flex-none" aria-hidden /> Partner: <strong style={{ color: "var(--foreground)" }}>{event.host}</strong></span>
-                  </div>
-
-                  <div aria-hidden className="border-t" style={{ borderColor: "var(--glass-border)" }} />
-
-                  <div className="pt-[var(--space-3)]">
-                    {joined ? (
-                      <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-                        Open Event Board
-                        <ChevronRight className="h-4 w-4" aria-hidden />
-                      </button>
-                    ) : upcoming ? (
-                      <p className="flex min-h-[44px] items-center justify-center text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-                        Discussion opens after the event
-                      </p>
-                    ) : (
-                      <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                        <KeyRound className="h-4 w-4" aria-hidden /> Enter event code
-                      </button>
+                  <div className="flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+                    {typeof event.students === "number" && (
+                      <div className="flex items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                        <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{event.students}</strong> Students</span>
+                        <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{event.pros}</strong> Pros</span>
+                        <span><strong className="text-[13px]" style={{ color: "var(--foreground)" }}>{event.postCount}</strong> Posts</span>
+                      </div>
                     )}
+                    <p className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      Partner: <strong style={{ color: "var(--foreground)" }}>{event.host === "Ernst & Young" ? "Ernst & Young" : event.host}</strong>
+                    </p>
+                    <div className="mt-auto">
+                      {joined ? (
+                        <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                          Open Event Board
+                        </button>
+                      ) : upcoming ? (
+                        <p className="flex min-h-[44px] items-center justify-center text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+                          Discussion opens after the event
+                        </p>
+                      ) : (
+                        <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[10px] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                          <KeyRound className="h-4 w-4" aria-hidden /> Enter event code
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -874,45 +851,17 @@ function HomeView({
   );
 }
 
-function CommunityRow({ community, joined, onOpen, onJoin, onDismiss }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; onDismiss?: () => void }) {
-  const unreadBadge = joined && community.unreadAnswers > 0 && (
-    <span className="flex-none rounded-full px-[9px] py-[3px] text-[11px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-      {community.unreadAnswers} new
-    </span>
-  );
+function CommunityRow({ community, joined, onOpen, onJoin }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void }) {
   const action = joined ? (
-    <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+    <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
       Open Community
-      <ChevronRight className="h-4 w-4" aria-hidden />
     </button>
   ) : (
-    <button type="button" onClick={onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[999px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+    <button type="button" onClick={onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
       Join Community
     </button>
   );
-  if (!onDismiss) return <CommunityCard community={community} unreadBadge={unreadBadge} action={action} onOpen={onOpen} />;
-  // Sticker placement: the card keeps overflow-hidden for its glow, so the
-  // dismiss button is a sibling sitting half on and half off the corner.
-  return (
-    <div className="relative">
-      <CommunityCard community={community} unreadBadge={unreadBadge} action={action} onOpen={onOpen} />
-      <button
-        type="button"
-        onClick={onDismiss}
-        aria-label={`Remove ${community.name} from recommended`}
-        title="Not interested"
-        className="dm-quiet absolute -top-[11px] -right-[11px] z-30 flex size-[28px] cursor-pointer items-center justify-center rounded-full border"
-        style={{
-          background: "var(--color-glass-surface-3)",
-          borderColor: "var(--glass-border)",
-          color: "var(--muted-foreground)",
-          boxShadow: "0 6px 16px -6px rgba(0,0,0,0.6)",
-        }}
-      >
-        <X className="h-[15px] w-[15px]" aria-hidden />
-      </button>
-    </div>
-  );
+  return <CommunityCard community={community} action={action} onOpen={onOpen} />;
 }
 
 // ——— community board (handoff 8) ———
@@ -941,79 +890,141 @@ function BoardView({
   const threads = THREADS.filter((t) => t.boardId === community.id);
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
   const opps = OPPORTUNITIES.filter((o) => o.boardId === community.id);
+  const about = filter === "about";
 
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Connect
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to all communities
       </button>
 
-      <section aria-label="Community overview" className="flex flex-col gap-[var(--space-4)]">
-        <div className="flex items-start gap-[var(--space-4)]">
-          <WorldTile world={community.world} size={52} />
+      {/* The doc's community banner: the community's own gradient, icon +
+         name + "Qualified students can join", Feed/About pills, and the big
+         Students / Professionals numbers at the right edge. */}
+      <section aria-label="Community overview" className="rounded-[var(--radius-xl)] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ background: gradientFor(community) }}>
+        <div className="flex items-start justify-between gap-[var(--space-4)]">
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name}</h1>
+            <span aria-hidden className="flex size-9 items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+              <WorldGlyph world={community.world} className="h-[18px] w-[18px]" />
+            </span>
+            <h1 className="mt-[10px] text-[21px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{community.name}</h1>
+            <p className="mt-[2px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>Qualified students can join</p>
           </div>
+          <div className="flex flex-none items-start gap-[var(--space-5)] text-center">
+            <span className="flex flex-col">
+              <strong className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{community.students.toLocaleString()}</strong>
+              <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>Students</span>
+            </span>
+            <span className="flex flex-col">
+              <strong className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{community.activePros}</strong>
+              <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>Professionals</span>
+            </span>
+          </div>
+        </div>
+        <div className="mt-[var(--space-4)] flex items-center gap-[var(--space-2)]">
+          <button
+            type="button"
+            onClick={() => onFilter(about ? "questions" : filter)}
+            className="dm-quiet min-h-[34px] cursor-pointer rounded-full px-[16px] text-[12.5px] leading-[17px] font-bold"
+            style={about ? { background: "rgba(255,255,255,0.18)", color: "#FFFFFF" } : { background: "#FFFFFF", color: "#1c2030" }}
+          >
+            Feed
+          </button>
+          <button
+            type="button"
+            onClick={() => onFilter("about")}
+            className="dm-quiet min-h-[34px] cursor-pointer rounded-full px-[16px] text-[12.5px] leading-[17px] font-bold"
+            style={about ? { background: "#FFFFFF", color: "#1c2030" } : { background: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}
+          >
+            About
+          </button>
           {!joined && (
-            <button type="button" onClick={onJoin} className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[999px] px-[var(--space-6)] py-[8px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <button type="button" onClick={onJoin} className="dm-quiet ml-auto min-h-[34px] flex-none cursor-pointer rounded-full border px-[16px] text-[12.5px] font-bold" style={{ borderColor: "rgba(255,255,255,0.5)", color: "#FFFFFF" }}>
               Join
             </button>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[6px] text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex items-center gap-[5px]"><Users className="h-3.5 w-3.5" aria-hidden /> {community.students} students</span>
-          <span className="flex items-center gap-[5px]"><ShieldCheck className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {community.activePros} pros</span>
-          {joined && <span style={{ color: "var(--world-food-farming-nature)" }}>Joined</span>}
-        </div>
-        <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-          {community.topics.slice(0, 3).map((topic) => (
-            <span key={topic} className="rounded-[999px] border px-[10px] py-[3px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "var(--glass-surface-1)" }}>{topic}</span>
-          ))}
-          {community.topics.length > 3 && <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{community.topics.length - 3} more</span>}
-        </div>
-        {/* Same composer as the home surface: one way to ask, everywhere. */}
-        <Composer onAsk={onAsk} placeholder={`Ask ${community.name}…`} />
       </section>
 
-      {/* Just these two, per direct instruction -- the old six-way
-         All/Questions/Insights/Opportunities/Unanswered/Answered chip row is
-         gone. Opportunities (rare -- most communities have none) render
-         inside Student Questions rather than losing their own tab. */}
-      <FilterRow
-        options={[
-          { key: "questions", label: "Student Questions" },
-          { key: "insights", label: "Professional Insights" },
-        ]}
-        active={filter}
-        onPick={onFilter}
-      />
+      {about ? (
+        <Card>
+          <h2 className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>About this community</h2>
+          <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
+          <p className="mt-[10px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</p>
+          <div className="mt-[6px] flex flex-wrap gap-[6px]">
+            {community.professionalsFrom.map((name) => (
+              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+            ))}
+          </div>
+          <p className="mt-[10px] text-[12px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{community.responseWindow}.</p>
+        </Card>
+      ) : (
+        /* The Replit reference's board layout, verified at desktop width:
+           the banner sits above ONE content card that contains both the
+           left rail (Student Questions / Professional Insights -- the doc
+           cuts Industry Updates) and the active panel. The rail collapses
+           to a pill row on phones. */
+        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-3)] md:w-[210px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+            {[
+              { key: "questions", label: "Student Questions", Icon: MessagesSquare },
+              { key: "insights", label: "Professional Insights", Icon: ShieldCheck },
+            ].map(({ key, label, Icon }) => (
+              <button
+                key={key}
+                type="button"
+                aria-current={filter === key}
+                onClick={() => onFilter(key)}
+                className="dm-quiet flex min-h-[44px] flex-1 cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-3)] text-left text-[12.5px] leading-[16px] font-bold md:max-h-[52px] md:flex-none"
+                style={
+                  filter === key
+                    ? { background: "color-mix(in srgb, var(--primary) 16%, var(--card))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)" }
+                    : { background: "transparent", borderColor: "transparent", color: "var(--muted-foreground)" }
+                }
+              >
+                <Icon className="h-[15px] w-[15px] flex-none" aria-hidden />
+                {label}
+              </button>
+            ))}
+          </nav>
 
-      <div className="flex flex-col gap-[var(--space-4)]">
-        {filter === "questions" && (
-          <>
-            {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
-            {opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
-            {threads.length === 0 && (
-              <Card>
-                <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
-                <ul className="mt-[8px] flex flex-col gap-[6px]">
-                  {STARTER_PROMPTS.map((p) => (
-                    <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
-                  ))}
-                </ul>
-              </Card>
+          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-4)] p-[var(--space-4)] md:p-[var(--space-5)]">
+            {filter === "questions" && (
+              <>
+                <div>
+                  <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Questions</h2>
+                  <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
+                </div>
+                {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+                {opps.map((o) => <OpportunityCard key={o.id} opp={o} />)}
+                {threads.length === 0 && (
+                  <Card>
+                    <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
+                    <ul className="mt-[8px] flex flex-col gap-[6px]">
+                      {STARTER_PROMPTS.map((p) => (
+                        <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
+                <Composer onAsk={onAsk} placeholder="What do you want to ask?" />
+              </>
             )}
-          </>
-        )}
-        {filter === "insights" && (
-          <>
-            {insights.map((i) => <InsightCard key={i.id} insight={i} {...cardProps(i.id)} />)}
-            {insights.length === 0 && (
-              <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
+            {filter === "insights" && (
+              <>
+                <div>
+                  <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Professional Insights</h2>
+                  <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
+                </div>
+                {insights.map((i) => <InsightCard key={i.id} insight={i} {...cardProps(i.id)} />)}
+                {insights.length === 0 && (
+                  <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
+                )}
+              </>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -35,6 +35,9 @@ export type Thread = {
   handle: string; // first-name-only handle, never a full/last name
   grade: string; // Freshman / Sophomore / Junior / Senior
   postedAgo: string;
+  /** Doc's question-card stats row: view count + poster's country. */
+  views?: number;
+  location?: string;
   state: QuestionState;
   routedScope: string;
   expectedWindow: string;
@@ -54,6 +57,8 @@ export type Insight = {
   body: string;
   postedAgo: string;
   helpful: number;
+  /** Doc's insight row shows a comment count next to likes. */
+  comments?: number;
   saved?: boolean;
 };
 
@@ -105,83 +110,80 @@ export const PROS: Pro[] = [
   { id: "pro-reyes", name: "Marcus Reyes", role: "Registered Nurse", org: "CVS Health", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Mar 2026" },
 ];
 
+// The five communities, their names, order, counts, companies and topic
+// chips are the Aug 29 doc's own Community-tab mockup, verbatim — all five
+// joined ("Your Communities · 5 joined"). Ids are stable (threads/insights
+// key on them), so the doc's renames land on the existing boards.
 export const COMMUNITIES: Community[] = [
   {
+    id: "teaching-education",
+    name: "General Professional Development",
+    world: "Teaching & Education",
+    purpose: "Resumes, interviews, networking and confidence — the skills every career needs.",
+    topics: ["Resumes", "Interviews", "Networking", "Confidence"],
+    students: 428,
+    activePros: 14,
+    posts: 124,
+    professionalsFrom: ["JPMorgan Chase", "Amazon", "EY", "Google", "Deloitte"],
+    responseWindow: "Most questions answered within 2 days",
+    joined: true,
+    unreadAnswers: 0,
+  },
+  {
     id: "business-money",
-    name: "Business & Money",
+    name: "Finance Careers",
     world: "Business & Money",
-    purpose: "Banking, investing, consulting and business careers — ask people who do the work.",
-    topics: ["Investment Banking", "Consulting", "Accounting", "Economics"],
+    purpose: "Banking, investing, business and economics careers — ask people who do the work.",
+    topics: ["Banking", "Investing", "Business", "Economics"],
     students: 312,
     activePros: 11,
     posts: 98,
-    professionalsFrom: ["JPMorgan Chase", "Goldman Sachs", "EY"],
+    professionalsFrom: ["JPMorgan Chase", "Goldman Sachs", "EY", "Morgan Stanley", "Blackstone"],
     responseWindow: "Most questions answered within 2 days",
     joined: true,
     unreadAnswers: 2,
   },
   {
     id: "tech-engineering",
-    name: "Tech & Engineering",
+    name: "Technology Careers",
     world: "Tech & Engineering",
-    purpose: "Software, cybersecurity, AI and data careers, answered by working engineers.",
-    topics: ["Software Engineering", "Cybersecurity", "AI & Data"],
+    purpose: "Software engineering, cybersecurity, AI and data careers, answered by working engineers.",
+    topics: ["Software Engineering", "Cybersecurity", "AI", "Data"],
     students: 389,
     activePros: 16,
     posts: 156,
-    professionalsFrom: ["Google", "Amazon", "Microsoft"],
+    professionalsFrom: ["Google", "Amazon", "Microsoft", "Meta", "Apple"],
     responseWindow: "Most questions answered within 1 day",
     joined: true,
     unreadAnswers: 1,
   },
   {
     id: "health-medicine",
-    name: "Health & Medicine",
+    name: "Healthcare Careers",
     world: "Health & Medicine",
-    purpose: "Medicine, nursing and public health careers — real paths, real trade-offs.",
-    topics: ["Nursing", "Medicine", "Public Health"],
+    purpose: "Medicine, nursing, public health and biotech careers — real paths, real trade-offs.",
+    topics: ["Medicine", "Nursing", "Public Health", "Biotech"],
     students: 267,
     activePros: 9,
     posts: 73,
-    professionalsFrom: ["CVS Health", "Johnson & Johnson", "Pfizer"],
+    professionalsFrom: ["CVS Health", "Johnson & Johnson", "Pfizer", "Mayo Clinic"],
     responseWindow: "Most questions answered within 3 days",
-    joined: false,
+    joined: true,
     unreadAnswers: 0,
-    recommendedBecause: "Because your Top 3 includes Registered Nurse",
   },
   {
     id: "arts-media",
-    name: "Arts, Media & Sport",
+    name: "Creative Careers",
     world: "Arts, Media & Sport",
-    purpose: "Design, media, content and creative careers, without the gatekeeping.",
-    topics: ["Design", "Media", "Marketing"],
+    purpose: "Marketing, design, media and content careers, without the gatekeeping.",
+    topics: ["Marketing", "Design", "Media", "Content Creation"],
     students: 198,
     activePros: 8,
     posts: 61,
-    professionalsFrom: ["Disney", "Nike", "Spotify"],
+    professionalsFrom: ["Disney", "Nike", "Spotify", "Netflix", "Adobe"],
     responseWindow: "Most questions answered within 3 days",
-    joined: false,
+    joined: true,
     unreadAnswers: 0,
-    recommendedBecause: "Because you saved Art Director in Explore",
-  },
-  {
-    // name/world match exactly, same as every other community — a prior
-    // draft invented "First-Gen & New to This" here under the Teaching &
-    // Education color, which strayed from the app's established 15-world
-    // taxonomy (that world is teaching careers, not general student support).
-    id: "teaching-education",
-    name: "Teaching & Education",
-    world: "Teaching & Education",
-    purpose: "Teaching, school counseling and education careers — from the people doing it.",
-    topics: ["Elementary Teaching", "School Counseling", "Higher Education"],
-    students: 428,
-    activePros: 14,
-    posts: 124,
-    professionalsFrom: ["Teach For America", "Khan Academy", "College Board"],
-    responseWindow: "Most questions answered within 2 days",
-    joined: false,
-    unreadAnswers: 0,
-    recommendedBecause: "Because you saved School Counselor in Explore",
   },
 ];
 
@@ -198,6 +200,8 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Software engineering careers",
     expectedWindow: "within 1 day",
+    views: 3412,
+    location: "United States",
     helpful: 27,
     followers: 8,
     unreadAnswer: true,
@@ -232,6 +236,8 @@ export const THREADS: Thread[] = [
     state: "routed",
     routedScope: "AI & data careers",
     expectedWindow: "within 1 day",
+    views: 1120,
+    location: "United Kingdom",
     helpful: 9,
     followers: 3,
     responses: [],
@@ -248,6 +254,8 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Finance & banking careers",
     expectedWindow: "within 2 days",
+    views: 5891,
+    location: "United States",
     helpful: 34,
     followers: 12,
     unreadAnswer: true,
@@ -274,6 +282,8 @@ export const THREADS: Thread[] = [
     state: "resolved",
     routedScope: "Nursing & patient care careers",
     expectedWindow: "within 3 days",
+    views: 2304,
+    location: "United States",
     helpful: 18,
     followers: 5,
     responses: [
@@ -298,6 +308,7 @@ export const INSIGHTS: Insight[] = [
     body: "People assume software engineers code 8 hours straight. In reality, my day is roughly 3 hours of coding, 2 hours of meetings, 1 hour of code review, and the rest reading documentation or unblocking teammates. Communication skills matter more than most people expect.",
     postedAgo: "3d ago",
     helpful: 52,
+    comments: 6,
     saved: true,
   },
   {
@@ -309,6 +320,7 @@ export const INSIGHTS: Insight[] = [
     body: "Nobody expects you to know the technical work on day one — they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
     postedAgo: "5d ago",
     helpful: 38,
+    comments: 3,
   },
 ];
 
@@ -375,6 +387,10 @@ export type EventBoard = {
   closesOn?: string; // Active follow-up only: when the board goes read-only
   orgs: string[];
   topics: string[];
+  /** Doc's event-card stats row (Students / Pros / Posts). */
+  students?: number;
+  pros?: number;
+  postCount?: number;
   entitled: boolean; // prototype: simulated AccessGrant — real entitlement is server-side (P0)
   code?: string; // prototype: demo redemption token — real tokens are single-use/server-side (handoff 9.2)
   // Upcoming events have neither yet — there's nothing to recap or share
@@ -392,6 +408,9 @@ export const EVENTS: EventBoard[] = [
     location: "EY Dallas Office",
     lifecycle: "Active follow-up",
     closesOn: "September 5, 2026",
+    students: 142,
+    pros: 12,
+    postCount: 48,
     orgs: ["Ernst & Young", "Dreamari"],
     topics: ["Consulting", "Finance", "Networking"],
     entitled: true, // already joined — demonstrates the straight-into-the-board state
@@ -417,6 +436,9 @@ export const EVENTS: EventBoard[] = [
     location: "JPMorgan Chase — New York, NY",
     lifecycle: "Active follow-up",
     closesOn: "September 1, 2026",
+    students: 118,
+    pros: 9,
+    postCount: 36,
     orgs: ["JPMorgan Chase", "Dreamari"],
     topics: ["Investment Banking", "Trading", "Networking"],
     entitled: false, // not joined yet — demonstrates the enter-code state
@@ -459,6 +481,8 @@ export const EVENT_THREADS: Thread[] = [
     state: "awaiting",
     routedScope: "Event professionals",
     expectedWindow: "within 2 days",
+    views: 1908,
+    location: "United States",
     helpful: 34,
     followers: 19,
     responses: [
@@ -477,6 +501,8 @@ export const EVENT_THREADS: Thread[] = [
     state: "routed",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
+    views: 942,
+    location: "United States",
     helpful: 17,
     followers: 4,
     responses: [],
@@ -498,6 +524,8 @@ export const EVENT_THREADS: Thread[] = [
     state: "answered",
     routedScope: "Event professionals",
     expectedWindow: "within 2 days",
+    views: 1655,
+    location: "United States",
     helpful: 29,
     followers: 6,
     unreadAnswer: true,
@@ -524,6 +552,8 @@ export const EVENT_THREADS: Thread[] = [
     state: "answered",
     routedScope: "Event professionals",
     expectedWindow: "within 2 days",
+    views: 731,
+    location: "United States",
     helpful: 14,
     followers: 5,
     responses: [
