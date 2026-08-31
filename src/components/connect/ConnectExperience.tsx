@@ -307,10 +307,13 @@ function CommunityCard({
   community,
   action,
   onOpen,
+  featured,
 }: {
   community: Community;
   action: React.ReactNode;
   onOpen: () => void;
+  /** First card wears the mock's "Most Popular" pill on its banner. */
+  featured?: boolean;
 }) {
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
@@ -322,44 +325,50 @@ function CommunityCard({
         <span className="sr-only">Open {community.name}</span>
       </button>
 
-      {/* The doc's card structure exactly: gradient identity header (icon +
-         name), then the stats row with BOLD numbers and muted labels, the
-         PROFESSIONALS FROM chips, and muted topic chips. No description
-         sentence (direct feedback), secondary info stays muted. Hierarchy:
-         name (16) > caps label (10.5) > body/chips (11.5-13). */}
-      {/* Header anatomy per direct request: one icon on the left tall
-         enough to span BOTH rows, and a right column reading name on the
-         first line, the doc's bold-number/muted-label stats on the second
-         -- stats aligned with the name, not tucked under the icon. */}
-      <div className="relative flex items-center gap-[14px] px-[var(--space-5)] py-[16px]" style={{ background: gradientFor(community) }}>
-        <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[12px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
-          <WorldGlyph world={community.world} className="h-[22px] w-[22px]" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-            {community.name}
+      {/* The bento-card anatomy from the reference mock: banner art on top
+         (generated, people-free, on the community's accent), then icon tile
+         + name + one welcoming line, icon stats with the number stacked
+         over its muted label, the two chip systems, and the button. */}
+      <div className="relative h-[150px] w-full lg:h-[165px]">
+        <Image src={community.photo} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover" />
+        {featured && (
+          <span className="absolute top-[12px] left-[12px] inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+            <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
           </span>
-          <span className="mt-[5px] flex items-center gap-[var(--space-5)]">
-            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.students}</strong> Students
-            </span>
-            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> Pros
-            </span>
-            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
-              <strong className="text-[14px]" style={{ color: "#FFFFFF" }}>{community.posts}</strong> Posts
-            </span>
-          </span>
-        </span>
+        )}
       </div>
 
-      <div className="relative z-20 flex flex-1 flex-col p-[var(--space-5)]">
-        {/* Two chip rows, two clearly DIFFERENT treatments (direct feedback:
-           they read too alike). Companies are solid neutral pills with the
-           foreground text -- the credible, factual row. Topics wear the
-           community's own accent as a tinted surface -- the colorful,
-           inviting row -- and sit visibly further down, with "+N more" on
-           its own line the way the doc renders it. */}
+      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+        <div className="flex items-start gap-[14px]">
+          <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: communityAccent(community), color: "#FFFFFF" }}>
+            <WorldGlyph world={community.world} className="h-[20px] w-[20px]" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              {community.name}
+            </span>
+            <span className="mt-[3px] block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
+              {community.purpose}
+            </span>
+          </span>
+        </div>
+
+        <div className="flex items-center gap-[var(--space-6)]">
+          {[
+            { Icon: Users, value: community.students, label: "Students" },
+            { Icon: ShieldCheck, value: community.activePros, label: "Professionals" },
+            { Icon: MessagesSquare, value: community.posts, label: "Posts" },
+          ].map(({ Icon, value, label }) => (
+            <span key={label} className="flex items-center gap-[8px]">
+              <Icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+              <span>
+                <strong className="block text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong>
+                <span className="block text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+              </span>
+            </span>
+          ))}
+        </div>
+
         <div className="flex flex-col gap-[8px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
             Professionals from
@@ -372,24 +381,29 @@ function CommunityCard({
           </div>
         </div>
 
-        <div className="mt-[var(--space-5)] flex flex-wrap items-center gap-[7px]">
-          {community.topics.slice(0, 4).map((topic) => (
-            <span
-              key={topic}
-              className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold"
-              style={{
-                background: `color-mix(in srgb, ${communityAccent(community)} 16%, transparent)`,
-                color: `color-mix(in srgb, ${communityAccent(community)} 42%, var(--foreground))`,
-              }}
-            >
-              {topic}
-            </span>
-          ))}
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            Top topics
+          </span>
+          <div className="flex flex-wrap items-center gap-[7px]">
+            {community.topics.slice(0, 4).map((topic) => (
+              <span
+                key={topic}
+                className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold"
+                style={{
+                  background: `color-mix(in srgb, ${communityAccent(community)} 16%, transparent)`,
+                  color: `color-mix(in srgb, ${communityAccent(community)} 42%, var(--foreground))`,
+                }}
+              >
+                {topic}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* mt-auto keeps buttons bottom-aligned across the grid row; the
            padding guarantees the button never crowds the chips above it. */}
-        <div className="mt-auto pt-[var(--space-5)]">{action}</div>
+        <div className="mt-auto pt-[var(--space-2)]">{action}</div>
       </div>
     </div>
   );
@@ -836,7 +850,6 @@ function HomeView({
   onEnterCode: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const myCommunities = COMMUNITIES.filter((c) => joined[c.id]);
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
 
   return (
@@ -888,16 +901,20 @@ function HomeView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="flex items-baseline justify-between gap-[var(--space-3)]">
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
-            {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{myCommunities.length} joined</span>}
+            {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{searched.length} communities</span>}
           </div>
-          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
-            {searched.map((c) => (
-              <CommunityRow key={c.id} community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} />
+          {/* The mock's bento rhythm: two wide cards up top, three below. */}
+          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2 lg:grid-cols-6">
+            {searched.map((c, index) => (
+              <div key={c.id} className={index < 2 ? "lg:col-span-3" : "lg:col-span-2"}>
+                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
+              </div>
             ))}
           </div>
           {searched.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches “{query}” yet.</p>
           )}
+          <SuggestCommunityCard />
         </section>
       )}
 
@@ -969,7 +986,32 @@ function HomeView({
   );
 }
 
-function CommunityRow({ community, joined, onOpen, onJoin }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void }) {
+/** The mock's closing row: an invitation, not a dead end. */
+function SuggestCommunityCard() {
+  const [sent, setSent] = useState(false);
+  return (
+    <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:flex-row sm:items-center" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+      <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <Sparkles className="h-[19px] w-[19px]" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Can&apos;t find what you&apos;re looking for?</span>
+        <span className="mt-[2px] block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Request a community or suggest topics you&apos;d love to explore.</span>
+      </span>
+      <button
+        type="button"
+        onClick={() => setSent(true)}
+        disabled={sent}
+        className="dm-quiet flex min-h-[42px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[12.5px] leading-[17px] font-bold disabled:cursor-default"
+        style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
+      >
+        {sent ? <><CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> Request sent</> : <>Suggest a Community <ArrowRight className="h-4 w-4" aria-hidden /></>}
+      </button>
+    </div>
+  );
+}
+
+function CommunityRow({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean }) {
   const action = joined ? (
     <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
       Open Community
@@ -979,7 +1021,7 @@ function CommunityRow({ community, joined, onOpen, onJoin }: { community: Commun
       Join Community
     </button>
   );
-  return <CommunityCard community={community} action={action} onOpen={onOpen} />;
+  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} />;
 }
 
 // ——— community board (handoff 8) ———

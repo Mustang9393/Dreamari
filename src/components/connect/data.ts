@@ -114,6 +114,8 @@ export type Community = {
   posts: number;
   professionalsFrom: string[]; // real company names for the card's "Professionals from" row
   responseWindow: string; // from recent performance, not a static promise
+  /** People-free banner art for the community card (generated, on-accent). */
+  photo: string;
   joined: boolean;
   unreadAnswers: number;
   recommendedBecause?: string; // explicit-interest explanation (Top 3), never internal rankings
@@ -144,7 +146,8 @@ export const COMMUNITIES: Community[] = [
     id: "teaching-education",
     name: "General Professional Development",
     world: "Teaching & Education",
-    purpose: "Resumes, interviews, networking and confidence — the skills every career needs.",
+    purpose: "Grow your skills, build confidence, and connect with mentors who help you level up.",
+    photo: "/images/connect/covers/gpd.png",
     topics: ["Resumes", "Interviews", "Networking", "Confidence"],
     students: 428,
     activePros: 84,
@@ -158,7 +161,8 @@ export const COMMUNITIES: Community[] = [
     id: "business-money",
     name: "Finance Careers",
     world: "Business & Money",
-    purpose: "Banking, investing, business and economics careers — ask people who do the work.",
+    purpose: "Explore finance paths and learn from industry professionals.",
+    photo: "/images/connect/covers/finance.png",
     topics: ["Banking", "Investing", "Business", "Economics"],
     students: 312,
     activePros: 61,
@@ -172,7 +176,8 @@ export const COMMUNITIES: Community[] = [
     id: "tech-engineering",
     name: "Technology Careers",
     world: "Tech & Engineering",
-    purpose: "Software engineering, cybersecurity, AI and data careers, answered by working engineers.",
+    purpose: "Dive into tech roles and stay ahead of what's next.",
+    photo: "/images/connect/covers/technology.png",
     topics: ["Software Engineering", "Cybersecurity", "AI", "Data"],
     students: 389,
     activePros: 77,
@@ -186,7 +191,8 @@ export const COMMUNITIES: Community[] = [
     id: "health-medicine",
     name: "Healthcare Careers",
     world: "Health & Medicine",
-    purpose: "Medicine, nursing, public health and biotech careers — real paths, real trade-offs.",
+    purpose: "Make an impact in healthcare and improve lives.",
+    photo: "/images/connect/covers/healthcare.png",
     topics: ["Medicine", "Nursing", "Public Health", "Biotech"],
     students: 267,
     activePros: 52,
@@ -200,7 +206,8 @@ export const COMMUNITIES: Community[] = [
     id: "arts-media",
     name: "Creative Careers",
     world: "Arts, Media & Sport",
-    purpose: "Marketing, design, media and content careers, without the gatekeeping.",
+    purpose: "Turn ideas into impact across design, media, and storytelling.",
+    photo: "/images/connect/covers/creative.png",
     topics: ["Marketing", "Design", "Media", "Content Creation"],
     students: 198,
     activePros: 39,
