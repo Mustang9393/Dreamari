@@ -40,7 +40,36 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
-### 2026-08-31 (night) Top Three crop focal points + Career Report modular pass (LOCAL, not pushed)
+### 2026-08-31 (late night) IB Express mode (LOCAL, not pushed)
+
+Built from "Investment Banker, Level 1, Express mode.pdf". One derived mode,
+zero duplicated content:
+
+- `Level.expressCut` (types.ts) lists the beats a trimmed run drops;
+  IB_LEVEL_1 cuts L1-03, L1-03b, L1-04, L1-07, L1-09, L1-10 (the five
+  teaching screens; the doc's own list). Every scored beat, the vocabulary
+  flips card, both story cards, all character cards, scoring, thresholds
+  and endings are untouched. First decision lands on screen five (doc's
+  sanity check) -- verified live.
+- The route (`/play/[game]?mode=express`) derives the express level:
+  filtered beats, `express: true`, id suffixed `-express`. Saves go to
+  slot n+100 so full/express runs never collide.
+- Pull-teaching (the doc's Do Not list -- "without these panels Express is
+  an incomplete mode, not a faster one"): the reputation gauge is a button
+  (panel with the three outcomes, current band lit); industry terms
+  (derived from the flips card's own term/def pairs) get a dotted
+  underline on FIRST use in a setup line; character names in setup lines
+  are always tappable and reopen that character's own intro card (kicker =
+  role, face from level.cast). Skill chips were already tappable (D55).
+  All lexicon content derives from the level's beats -- nothing authored
+  twice. Full mode renders byte-identically (annotate undefined, gauge
+  inert).
+- "Express mode" chip (Zap icon) sits next to "Watch trailer" on the hub's
+  IB featured card; offered only when a level declares expressCut.
+- NOT built (flagged): the doc's "log mode alongside score from day one"
+  analytics note -- no analytics infra exists in the prototype.
+
+### 2026-08-31 (night) Top Three crop focal points + Career Report modular pass (PUSHED)
 
 - **Top Three cover crops** (Slack: "subject should appear in a consistent
   position"): `ProfileCareer` gained optional `photoFocus` (object-position
