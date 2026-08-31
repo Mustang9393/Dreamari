@@ -18,7 +18,7 @@ export const HOME_PICKS: CatalogCareer[] = [
   C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
   C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
   C("Private Equity", "Business & Money", "/images/app/poster-private-equity.png"),
-  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v2.png"),
+  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v3.png"),
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
   C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),

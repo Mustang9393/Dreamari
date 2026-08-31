@@ -31,10 +31,11 @@ const CARDS = [
   },
   {
     key: "iba",
-    // -2 suffix: same asset as career-investment-banking.jpg's final version —
-    // renamed for cache busting, since this file was overwritten in place twice and
-    // browsers/optimizers that had cached the URL kept showing an old photo.
-    photo: "/images/app/poster-investment-banking-analyst.png",
+    // -v3 suffix: the founder-supplied "Investment banker.png", renamed for
+    // cache busting (this URL family has been overwritten in place before and
+    // cached optimizer renditions kept showing the old photo). ONE shared v3
+    // file now serves Explore, Match Lab, Profile and this chapter.
+    photo: "/images/app/poster-investment-banking-v3.png",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
     salary: "$85K-150K",

@@ -667,7 +667,10 @@ function Top3Tab({
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
             <div className="relative aspect-[16/9] w-full flex-none">
-              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" />
+              {/* Focal point sits high (22% down), not center: these career
+                 photos are tall portraits, and a 16:9 window centered on a
+                 portrait frames the chest and beheads the person. */}
+              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover object-[50%_22%]" />
               <span
                 className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-[9px] text-[13px] font-extrabold"
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", fontFamily: "var(--font-display)", color: "var(--foreground)" }}

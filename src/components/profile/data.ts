@@ -68,7 +68,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     id: "investment-banking",
     title: "Investment Banking",
     world: "Business & Money",
-    photo: "/images/app/poster-investment-banking.png",
+    photo: "/images/app/poster-investment-banking-v3.png",
     match: 86,
     receipts: [
       { kind: "sim", value: "2x", label: "IB sim finished" },

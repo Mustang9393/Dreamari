@@ -40,6 +40,19 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 Investment Banking photo unified to the founder's image (PUSH AUTHORIZED)
+
+- The founder-supplied "Investment banker.png" (repo root, 1088x1445) is now
+  THE Investment Banking photo everywhere: renamed to
+  `poster-investment-banking-v3.png` for cache busting (this URL family has
+  been overwritten in place before and cached optimizer renditions kept
+  serving the old photo -- the -v2/-analyst files are deleted). References
+  updated in catalog.ts (Explore), match-lab/data.ts, profile/data.ts and
+  marketing/chapters/Match.tsx -- one shared file, four surfaces.
+- Top 3 card covers now crop at a HIGH focal point (`object-[50%_22%]`):
+  a 16:9 window centered on a tall portrait framed the chest and beheaded
+  the person. Verified live: face framed, v3 URL served.
+
 ### 2026-08-31 Glossary flipbook, Connect card/Events polish, Top 3 alignment (PUSH AUTHORIZED)
 
 All from live direct feedback, after the c7428e5 push:
