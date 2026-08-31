@@ -88,9 +88,12 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] overflow-hidden rounded-[14px] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
       <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[8px] border-b px-[16px] py-[13px] sm:px-[20px]" style={{ borderColor: "var(--rule)" }}>
-        {Icon && <Icon className="h-[16px] w-[16px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+        {Icon && <Icon className="h-[17px] w-[17px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
         <span aria-hidden className="dm-report-num sr-only">{String(n).padStart(2, "0")}</span>
-        <h3 id={`${id}-title`} className="text-[14px] leading-[18px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>
+        {/* The one hierarchy, everywhere: section heading (18) > label (14)
+           > body (13). Never let a value render larger than the heading
+           above it, whatever the value "deserves". */}
+        <h3 id={`${id}-title`} className="text-[18px] leading-[23px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           {title}
         </h3>
         {action && <span className="ml-auto">{action}</span>}
@@ -108,11 +111,11 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
 function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
     <div className={`rounded-[10px] border px-[14px] py-[12px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-      <dt className="flex items-center gap-[6px] text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>
-        {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
+      <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>
+        {Icon && <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />}
         {label}
       </dt>
-      <dd className="mt-[6px] text-[15.5px] leading-[21px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{value}</dd>
+      <dd className="mt-[6px] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{value}</dd>
     </div>
   );
 }
@@ -143,11 +146,11 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
           <thead>
             <tr>
-              <th scope="col" className="w-[150px] border-b pb-[10px] text-[11px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+              <th scope="col" className="w-[150px] border-b pb-[10px] text-[14px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
                 Factor
               </th>
               {entries.map(({ career }) => (
-                <th key={career.id} scope="col" className="border-b pb-[10px] pl-[16px] text-[15px] font-extrabold" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
+                <th key={career.id} scope="col" className="border-b pb-[10px] pl-[16px] text-[16px] font-extrabold" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
                   {career.title}
                   {career.id === focusId && <span className="ml-[6px] align-middle text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
                 </th>
@@ -157,7 +160,7 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           <tbody>
             {COMPARE_FIELDS.map((field) => (
               <tr key={field.key}>
-                <th scope="row" className="border-b py-[10px] pr-[12px] align-top text-[11px] font-bold tracking-[0.7px] uppercase" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
+                <th scope="row" className="border-b py-[10px] pr-[12px] align-top text-[14px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
                   {field.label}
                 </th>
                 {entries.map(({ career, report }) => (
@@ -175,14 +178,14 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
       <div className="flex flex-col gap-[20px] md:hidden">
         {entries.map(({ career, report }) => (
           <div key={career.id} data-keep-together>
-            <h4 className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+            <h4 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
               {career.title}
               {career.id === focusId && <span className="ml-[6px] text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
             </h4>
             <dl className="mt-[6px] divide-y" style={{ borderColor: "var(--rule)" }}>
               {COMPARE_FIELDS.map((field) => (
-                <div key={field.key} className="grid grid-cols-[104px_minmax(0,1fr)] gap-[10px] border-t py-[8px]" style={{ borderColor: "var(--rule)" }}>
-                  <dt className="text-[12px] font-bold tracking-[0.5px] uppercase" style={{ color: "var(--ink-faint)" }}>{field.label}</dt>
+                <div key={field.key} className="grid grid-cols-[110px_minmax(0,1fr)] gap-[10px] border-t py-[8px]" style={{ borderColor: "var(--rule)" }}>
+                  <dt className="text-[14px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--ink-faint)" }}>{field.label}</dt>
                   <dd className="text-[13px] leading-[18px]">{field.get(report.comparison)}</dd>
                 </div>
               ))}
@@ -289,7 +292,7 @@ function ReportDocument({
             {report.majors.map((major) => (
               <div key={major.name} className="flex items-center gap-[9px] rounded-[10px] border px-[14px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                 <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                <h4 className="text-[15.5px] leading-[20px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
+                <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
             ))}
           </div>
@@ -300,18 +303,18 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
           <div className="flex flex-col gap-[14px]" data-keep-together>
             <div className="rounded-[10px] border px-[14px] py-[12px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
-              <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
-              <p className="mt-[6px] max-w-[50ch] text-[15.5px] leading-[21px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
+              <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
+              <p className="mt-[6px] max-w-[50ch] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
                 {report.education.find((route) => route.common)?.name}
               </p>
             </div>
             <div>
-              <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
+              <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
               <ul className="mt-[8px] grid list-none gap-[8px] p-0 sm:grid-cols-2">
                 {report.education.filter((route) => !route.common).map((route) => (
                   <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[10px] border px-[14px] py-[11px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-                    <span className="text-[14px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
-                    <span className="flex-none rounded-full border px-[9px] py-[2px] text-[12px] leading-[17px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
+                    <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
+                    <span className="flex-none rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                   </li>
                 ))}
               </ul>
@@ -325,12 +328,12 @@ function ReportDocument({
            a backend data-model note, not UI. */}
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
-            <h4 className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
+            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
             <ul className="mt-[8px] flex list-none flex-wrap gap-[8px] p-0">
               {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
                 <li key={course.label}>
                   <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-                    <span className="text-[14px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
+                    <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
                   </span>
                 </li>
               ))}
@@ -367,8 +370,8 @@ function ReportDocument({
                 <span className="mb-[8px] inline-flex w-fit items-center rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
                   {college.status}
                 </span>
-                <h4 className="text-[15.5px] leading-[20px] font-bold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                <span data-print-hide className="mt-[5px] inline-flex items-center gap-[4px] text-[13px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>
+                <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
+                <span data-print-hide className="mt-[5px] inline-flex items-center gap-[4px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
               </Link>
@@ -389,12 +392,12 @@ function ReportDocument({
             onClick={() => setSourcesOpen((open) => !open)}
             className="dm-link flex min-h-[48px] w-full cursor-pointer items-center justify-between gap-[var(--space-3)] px-[16px] text-left sm:px-[20px]"
           >
-            <span className="text-[14px] leading-[18px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>Where this comes from</span>
+            <span className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>Where this comes from</span>
             <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--ink-faint)", transform: sourcesOpen ? "rotate(180deg)" : "none" }} aria-hidden />
           </button>
-          <span aria-hidden className="hidden px-[16px] pt-[14px] text-[14px] leading-[18px] font-extrabold uppercase print:block" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>Where this comes from</span>
+          <span aria-hidden className="hidden px-[16px] pt-[14px] text-[18px] leading-[23px] font-extrabold uppercase print:block" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>Where this comes from</span>
           <div id="report-sources" hidden={!sourcesOpen} className="border-t px-[16px] pt-[14px] pb-[16px] sm:px-[20px]" style={{ borderColor: "var(--rule)" }}>
-          <ul className="flex list-none flex-col gap-[5px] p-0 text-[13.5px] leading-[20px]" style={{ color: "var(--ink-faint)" }}>
+          <ul className="flex list-none flex-col gap-[5px] p-0 text-[13px] leading-[19px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
                 {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
@@ -402,7 +405,7 @@ function ReportDocument({
               </li>
             ))}
           </ul>
-          <p className="mt-[12px] max-w-[64ch] text-[13.5px] leading-[20px]" style={{ color: "var(--ink-faint)" }}>
+          <p className="mt-[12px] max-w-[64ch] text-[13px] leading-[19px]" style={{ color: "var(--ink-faint)" }}>
             Prepared by the student with Dreamari. It supports a conversation with a counselor; it is not a decision or a prediction.
             Employers are examples of who hires for this work, not job openings.
             Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
@@ -601,19 +604,19 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
   return (
     <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-8)]">
       <div className="mx-auto max-w-[68ch]">
-        <h3 id="reflection-title" className="flex items-center gap-[10px] text-[14px] leading-[18px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.09em" }}>
-          <PenLine className="h-[16px] w-[16px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />
+        <h3 id="reflection-title" className="flex items-center gap-[10px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
+          <PenLine className="h-[17px] w-[17px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />
           My Reflection
         </h3>
 
         <div className="mt-[14px] flex flex-col gap-[22px] border-t pt-[18px]" style={{ borderColor: "var(--rule)" }}>
           <fieldset>
-            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+            <legend className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               After learning more about {careerTitle}, how interested are you?
             </legend>
             <div className="mt-[10px] flex flex-wrap gap-[8px]">
               {INTEREST_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[14px] leading-[18px] font-bold" style={pill(interest === option)}>
+                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[13px] leading-[18px] font-bold" style={pill(interest === option)}>
                   {option}
                 </button>
               ))}
@@ -621,12 +624,12 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
           </fieldset>
 
           <fieldset>
-            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+            <legend className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               What influenced your decision most? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Select all that apply)</span>
             </legend>
             <div className="mt-[10px] flex flex-wrap gap-[8px]">
               {INFLUENCE_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[14px] leading-[18px] font-bold" style={pill(influences.includes(option))}>
+                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[13px] leading-[18px] font-bold" style={pill(influences.includes(option))}>
                   {option}
                 </button>
               ))}
@@ -634,7 +637,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
           </fieldset>
 
           <label className="block">
-            <span className="text-[16px] leading-[21px] font-extrabold tracking-[-0.012em]" style={{ color: "var(--ink)" }}>
+            <span className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               What stood out to you? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Optional)</span>
             </span>
             <textarea
@@ -642,16 +645,16 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
               onChange={(event) => setNotesEdited(event.target.value)}
               rows={4}
               placeholder="Jot down any thoughts, questions, or surprising facts here..."
-              className="mt-[10px] w-full resize-y rounded-[10px] border p-[14px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
+              className="mt-[10px] w-full resize-y rounded-[10px] border p-[14px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
               style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
             />
           </label>
 
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[10px] px-[22px] text-[15px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
+            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[10px] px-[22px] text-[14px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
               Save Reflection
             </button>
-            <span aria-live="polite" className="flex items-center gap-[5px] text-[13.5px] font-bold" style={{ color: saved ? "var(--ink-soft)" : "var(--ink-faint)" }}>
+            <span aria-live="polite" className="flex items-center gap-[5px] text-[13px] font-bold" style={{ color: saved ? "var(--ink-soft)" : "var(--ink-faint)" }}>
               {saved && <Check className="h-3.5 w-3.5" aria-hidden />}
               {saved ? "Reflection saved" : "Not saved yet"}
             </span>
