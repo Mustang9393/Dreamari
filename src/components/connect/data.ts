@@ -149,7 +149,7 @@ export const COMMUNITIES: Community[] = [
     name: "General Professional Development",
     world: "Teaching & Education",
     purpose: "Grow your skills, build confidence, and connect with mentors who help you level up.",
-    photo: "/images/connect/covers/gpd-bulb.webp",
+    photo: "/images/connect/covers/gpd-bulb-violet.webp",
     topics: ["Resumes", "Interviews", "Networking", "Confidence"],
     students: 428,
     activePros: 84,
