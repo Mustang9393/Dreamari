@@ -51,9 +51,9 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
   // own toggle in the trailer chrome.
   const musicMuted = useSyncExternalStore(subscribeMusicMuted, musicMutedSnapshot, serverMusicMutedSnapshot);
   useEffect(() => {
-    playMusic("main");
+    playMusic("main", simulation.id);
     return () => stopMusic();
-  }, []);
+  }, [simulation.id]);
 
   // Auto-advance on a per-card clock; the finale holds for its buttons.
   useEffect(() => {

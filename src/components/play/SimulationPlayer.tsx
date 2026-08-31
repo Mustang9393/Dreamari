@@ -303,8 +303,8 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // beat/feedback into a promoting ending, never the other direction.
   const promoted = phase === "ending" && ending.advances;
   useEffect(() => {
-    playMusic(promoted ? "promotion" : "main");
-  }, [promoted]);
+    playMusic(promoted ? "promotion" : "main", simulation.id);
+  }, [promoted, simulation.id]);
   useEffect(() => stopMusic, []);
 
   // Muffle the music -- a lowpass, not a mute -- for a PIP or a timed focus

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { motion } from "framer-motion";
 import { BookOpen, Film, Lock, Play } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
@@ -118,8 +117,12 @@ type FeaturedCandidate = { kind: "sim"; id: string; sim: Simulation } | { kind: 
 // billboard dwarfs the rows underneath -- at md the featured card is
 // ~676px wide, and the sm side card is literally PosterCard's own 210x297.
 const ROW_HEIGHT = "h-[212px] sm:h-[300px] md:h-[380px] lg:h-[430px]";
-const FEATURED_ASPECT = "aspect-video";
-const SIDE_ASPECT = "aspect-[210/297]";
+// EXPLICIT widths (16:9 and 210/297 of ROW_HEIGHT) rather than aspect-ratio
+// classes: the expand-in-place animation transitions `width` with CSS, so
+// the card RE-LAYS-OUT each frame -- framer's transform-based `layout`
+// animation scaled the contents and read as stretchy (direct feedback).
+const FEATURED_W = "w-[377px] sm:w-[533px] md:w-[676px] lg:w-[764px]";
+const SIDE_W = "w-[150px] sm:w-[212px] md:w-[269px] lg:w-[304px]";
 // Rows BELOW the hero: uniform smaller shelves, Netflix-style.
 const SHELF_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";
 // Netflix's row headers are bold, bright and readable -- not micro-labels.
@@ -231,8 +234,15 @@ function RowCard({
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
   // The featured card's copy reads left-aligned (a billboard); every side
   // card centers its copy, matching Browse's own PosterCard convention.
-  const className = `dm-tap group relative flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_ASPECT : SIDE_ASPECT}`;
-  const style = { borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" };
+  const className = `dm-tap group relative flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
+  const style = {
+    borderColor: "var(--color-glass-border-raised)",
+    background: "var(--glass-surface-1)",
+    // Inline because dm-tap's own transition shorthand (unlayered app.css)
+    // beats any Tailwind transition utility -- this is what animates the
+    // expand-in-place, re-laying-out each frame instead of scaling.
+    transition: "width 0.5s cubic-bezier(0.16,1,0.3,1), transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease",
+  };
   // Proportioned exactly like Browse: PosterCard is a 210x297 card with a
   // 24px title (19px compact) and a 10px world label -- the sm side card
   // here IS that size, and every other step scales the same ~8%-of-height
@@ -258,10 +268,10 @@ function RowCard({
          as Browse's own PosterCard -- accent color lives on the world
          label, never the title itself, matching that convention exactly. */}
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[12px] pt-[32px] pb-[12px] sm:px-[16px] sm:pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className={`block leading-[1.15] font-extrabold uppercase [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
+        <span className={`block leading-[1.15] font-extrabold uppercase transition-[font-size] duration-500 [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
           {breakable(title)}
         </span>
-        <span className={`block font-semibold tracking-[0.6px] uppercase ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
+        <span className={`block font-semibold tracking-[0.6px] uppercase transition-[font-size] duration-500 ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>
           {world}
         </span>
         {large && candidate.kind === "soon" && (
@@ -276,24 +286,23 @@ function RowCard({
     </div>
   );
 
-  // ONE persistent element per candidate, whatever its state: the same
-  // keyed motion.article simply grows into the featured size (framer's
-  // `layout` animates the width/aspect change and the row reorder), so the
-  // carousel swap is a smooth morph with no crossfade to get stuck in --
-  // the earlier two-element layoutId version reproducibly froze the
-  // incoming featured card at opacity 0. It is never a <button>: the
-  // featured state holds a real <Link> overlay, so a pressable side card
-  // gets its own absolute overlay button instead (same idiom as the
-  // whole-card links across the app).
+  // ONE persistent element per candidate: the same keyed <article> simply
+  // transitions its WIDTH into the featured size in place -- a CSS width
+  // transition re-lays-out the contents each frame, where framer's
+  // transform-based layout animation scaled them (read as stretchy), and
+  // the earlier two-element layoutId version froze the incoming card at
+  // opacity 0. It is never a <button>: the featured state holds a real
+  // <Link> overlay, so a pressable side card gets its own absolute overlay
+  // button instead (same idiom as the whole-card links across the app).
   return (
-    <motion.article layout transition={{ type: "spring", bounce: 0.15, duration: 0.55 }} className={className} style={style}>
+    <article className={className} style={style}>
       {content}
       {!large && candidate.kind === "sim" && onSelect && (
         <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer">
           <span className="sr-only">Feature {candidate.sim.title}</span>
         </button>
       )}
-    </motion.article>
+    </article>
   );
 }
 

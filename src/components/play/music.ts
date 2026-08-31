@@ -13,13 +13,23 @@ const MUSIC_MUTE_KEY = "dreamari-play-music-muted";
 
 export type MusicTrack = "main" | "promotion";
 
-const TRACK_SRC: Record<MusicTrack, string> = {
+// Per-simulation scores, falling back to the IB pair (the promotion
+// stinger is generic celebration, so a career without its own borrows it).
+const DEFAULT_TRACKS: Record<MusicTrack, string> = {
   main: "/audio/play/ib-main-song.mp3",
   promotion: "/audio/play/ib-promotion-song.mp3",
 };
+const SIM_TRACKS: Record<string, Partial<Record<MusicTrack, string>>> = {
+  "investment-banking": DEFAULT_TRACKS,
+  "registered-nurse": { main: "/audio/play/rn-main-song.m4a" },
+};
+
+function trackSrc(track: MusicTrack, simId?: string): string {
+  return (simId && SIM_TRACKS[simId]?.[track]) || DEFAULT_TRACKS[track];
+}
 
 let el: HTMLAudioElement | null = null;
-let current: MusicTrack | null = null;
+let current: string | null = null;
 
 // A lowpass filter sitting between the <audio> element and the speakers, so
 // a PIP or a timed focus question can "muffle" the music the way a closed
@@ -68,13 +78,16 @@ function element(): HTMLAudioElement | null {
 /** Switches to a track only if it isn't already the one playing -- calling
  *  this every render (it's driven by plain useEffects, not a one-shot
  *  action) must not restart the song from 0 each time. */
-export function playMusic(track: MusicTrack): void {
+export function playMusic(track: MusicTrack, simId?: string): void {
   const audio = element();
   if (!audio) return;
   audio.muted = isMusicMuted();
-  if (current === track) return;
-  current = track;
-  audio.src = TRACK_SRC[track];
+  const src = trackSrc(track, simId);
+  // Keyed by the resolved FILE, not the track name -- switching careers on
+  // the same "main" track must switch songs.
+  if (current === src) return;
+  current = src;
+  audio.src = src;
   audio.currentTime = 0;
   audio.play().catch(() => {
     // Blocked autoplay (no user gesture yet) -- the level's own first tap
