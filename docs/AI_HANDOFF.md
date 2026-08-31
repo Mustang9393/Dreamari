@@ -40,6 +40,26 @@ tokens above, in both modes).
 
 - Date: 2026-09-01
 
+### 2026-09-01 (cont.) Connect pitch-readiness round (PUSHED, af1acc7)
+
+- Community grid: five EQUAL cards, three top + two centered below (the
+  2-wide/3-square bento is gone per feedback); every CTA reads "Join
+  Community" (joined -> straight into the board, unjoined -> JoinSheet).
+- Covers: user's four cinematic images with tech/health/creative
+  brightened ~1.5x (were too dark to read); GPD = generated hanging
+  Edison-bulb scene (critical thinking) after two rejected attempts
+  (flat chart, vector bulb). Art masks loosened; Most Popular pill
+  top-right with title clearance.
+- Every student question now has 3-4 pro answers from DISTINCT verified
+  pros (15 total; new: Omar Haddad/Pfizer nurse, Camille Vega/Netflix
+  producer) -- "lots of motion, not one person answering." All formerly
+  Unanswered/routed questions are now answered (pill state has no live
+  example anymore, deliberate trade for the pitch).
+- Every board's FIRST insight carries a meme in its replies (pitch beat:
+  Josh only opens the first item). NOTE for future edits: data.ts's
+  single-line empty arrays (`responses: [],`) bit a scripted insert once
+  -- expand them before inserting.
+
 ### 2026-09-01 Connect rebuilt to the doc + Replit; play fixes (PUSHED)
 
 - **Round 2 (also PUSHED, f78b088)**: Join Community matches the Replit --
