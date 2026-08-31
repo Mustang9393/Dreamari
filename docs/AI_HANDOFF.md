@@ -40,6 +40,29 @@ tokens above, in both modes).
 
 - Date: 2026-08-31
 
+### 2026-08-31 (evening) RN sprites keyed + Profile surface hierarchy (PUSHED)
+
+- **RN cutout sprites are live**: the RN_Game_Asset_Pack's ten green-screen
+  masters (generated to docs/handoff/sprite-master-prompt.md) chroma-keyed
+  in-repo (PIL: green-dominance alpha ramp + despill, saved as transparent
+  webp ~100KB each) into public/images/play/rn/expressions/. Wired into
+  expressions.ts (tier sets for Rosa/Denise/Tyler, defaults for all four,
+  ratios 0.5), character cards switched from baked portraits to standing
+  castMember sprites, Riverbend locations gained characterAnchors, the
+  pack's three people-free daytime plates replaced the lobby/station/
+  staff-room backgrounds, and RN-TR-06 is now Yvonne's cutout rising over
+  the lobby (the IB Lamisa treatment). Pack's own queue (patient-room/
+  corridor/ICU people-free masters, evening/night variants) still open.
+- **Profile quick fixes** (Slack): "Active 142 of 190 days · 75%" sits NEXT
+  TO "12 days" (inline in the dd, wraps only on narrow phones); Top Three
+  covers are aspect-[4/3] + object-top so both photos show their subject
+  fully.
+- **Profile surface hierarchy** (Slack): the shared GLASS section surface
+  is solid `var(--card)` now, and the Career Report's Share/Counselor/
+  Download panels match -- page gradient -> solid card -> lighter nested
+  rows, glass kept for atmosphere rather than reading surfaces. Verified
+  on Plan (the called-out screen), Top Three, Share.
+
 ### 2026-08-31 (later still) Registered Nurse simulation, Level 1 (PUSHED)
 
 The second career simulation, built to the IB SOP from

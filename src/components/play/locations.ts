@@ -28,9 +28,9 @@ export type LocationId =
   // generic room for it.
   | "l1-reception"
   // Riverbend Medical Center -- the Registered Nurse simulation's six-room
-  // library, from its own art handoff. No characterAnchors yet: the RN cast
-  // has no alpha-cutout sprites (portraits are baked into backgrounds), so
-  // characters appear via hero art and dialogue face chips instead.
+  // library. The lobby/station/staff-room plates are the asset pack's
+  // people-free daytime masters, so the chroma-keyed cast sprites stand in
+  // them cleanly.
   | "riverbend-lobby"
   | "riverbend-station"
   | "riverbend-patient-room"
@@ -136,36 +136,44 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     alt: "Riverbend Medical Center's main lobby, morning light across the marble floor.",
     focal: { x: 0.45, y: 0.45 },
     mobileFocal: { x: 0.4, y: 0.4 },
+    characterAnchor: { x: 0.62, baselineY: 0.99, heightFrac: 0.9 },
   },
   "riverbend-station": {
     src: `${RN}/station.jpg`,
     alt: "The Four West nurses' station, monitors lit, the corridor stretching away.",
     focal: { x: 0.42, y: 0.45 },
     mobileFocal: { x: 0.38, y: 0.42 },
+    characterAnchor: { x: 0.68, baselineY: 0.99, heightFrac: 0.9 },
   },
   "riverbend-patient-room": {
     src: `${RN}/patient-room.jpg`,
     alt: "A patient room on Four West, monitors beside the bed, the city through the window.",
     focal: { x: 0.6, y: 0.5 },
     mobileFocal: { x: 0.65, y: 0.45 },
+    // The open floor left of the bed -- never over the bed itself.
+    characterAnchor: { x: 0.24, baselineY: 0.99, heightFrac: 0.88 },
   },
   "riverbend-corridor": {
     src: `${RN}/corridor.jpg`,
     alt: "The Four West corridor, numbered patient doors and warm light down its length.",
     focal: { x: 0.5, y: 0.45 },
     mobileFocal: { x: 0.45, y: 0.42 },
+    characterAnchor: { x: 0.55, baselineY: 0.99, heightFrac: 0.9 },
   },
   "riverbend-staff-room": {
     src: `${RN}/staff-room.jpg`,
     alt: "The staff room at Riverbend, coffee shelves and the city beyond the glass.",
     focal: { x: 0.5, y: 0.45 },
     mobileFocal: { x: 0.45, y: 0.42 },
+    characterAnchor: { x: 0.64, baselineY: 0.99, heightFrac: 0.9 },
   },
   "riverbend-ward-night": {
     src: `${RN}/ward-night.jpg`,
     alt: "The ward at night, monitors glowing against the city lights.",
     focal: { x: 0.4, y: 0.45 },
     mobileFocal: { x: 0.35, y: 0.42 },
+    // The clear aisle right of the bed and cart.
+    characterAnchor: { x: 0.72, baselineY: 0.99, heightFrac: 0.88 },
   },
 };
 

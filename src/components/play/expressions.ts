@@ -15,6 +15,7 @@ import type { Tier } from "./types";
 // smaller, honest set.
 
 const E = "/images/play/ib/expressions";
+const RNE = "/images/play/rn/expressions";
 
 type ExpressionSet = Record<Tier, string>;
 
@@ -32,6 +33,29 @@ export const EXPRESSION_PORTRAITS: Partial<Record<string, ExpressionSet>> = {
     wrong: `${E}/jordan-uncertain.webp`,
     risky: `${E}/jordan-uncertain.webp`,
     none: `${E}/jordan-focused.webp`,
+  },
+  // The Registered Nurse cast, chroma-keyed from the RN_Game_Asset_Pack's
+  // green-screen masters (generated to docs/handoff/sprite-master-prompt.md).
+  Rosa: {
+    best: `${RNE}/rosa-proud.webp`,
+    acceptable: `${RNE}/rosa-welcoming.webp`,
+    wrong: `${RNE}/rosa-concerned.webp`,
+    risky: `${RNE}/rosa-concerned.webp`,
+    none: `${RNE}/rosa-welcoming.webp`,
+  },
+  Denise: {
+    best: `${RNE}/denise-composed.webp`,
+    acceptable: `${RNE}/denise-composed.webp`,
+    wrong: `${RNE}/denise-concerned.webp`,
+    risky: `${RNE}/denise-concerned.webp`,
+    none: `${RNE}/denise-assessing.webp`,
+  },
+  Tyler: {
+    best: `${RNE}/tyler-confident.webp`,
+    acceptable: `${RNE}/tyler-focused.webp`,
+    wrong: `${RNE}/tyler-uncertain.webp`,
+    risky: `${RNE}/tyler-uncertain.webp`,
+    none: `${RNE}/tyler-focused.webp`,
   },
 };
 
@@ -52,6 +76,10 @@ const DEFAULT_EXPRESSION: Partial<Record<string, string>> = {
   // all. Extend EXPRESSION_PORTRAITS for either once more variants arrive.
   Marcus: `${E}/marcus-assessing.webp`,
   Lamisa: `${E}/lamisa-composed.webp`,
+  Rosa: `${RNE}/rosa-welcoming.webp`,
+  Denise: `${RNE}/denise-assessing.webp`,
+  Tyler: `${RNE}/tyler-confident.webp`,
+  Yvonne: `${RNE}/yvonne-composed.webp`,
   // Level 2's Analyst onboarding carousel only -- reverted from D11's "hand
   // it to Christina" back to its own unnamed HR character, per direct
   // instruction. One expression, same as Marcus/Lamisa.
@@ -83,4 +111,15 @@ export const PORTRAIT_RATIO: Record<string, number> = {
   [`${E}/jordan-uncertain.webp`]: 0.5083,
   [`${E}/lamisa-composed.webp`]: 0.5128,
   [`${E}/marcus-assessing.webp`]: 0.4978,
+  // The RN pack's sprites all share the master prompt's 1024x2048 canvas.
+  [`${RNE}/rosa-welcoming.webp`]: 0.5,
+  [`${RNE}/rosa-proud.webp`]: 0.5,
+  [`${RNE}/rosa-concerned.webp`]: 0.5,
+  [`${RNE}/denise-composed.webp`]: 0.5,
+  [`${RNE}/denise-assessing.webp`]: 0.5,
+  [`${RNE}/denise-concerned.webp`]: 0.5,
+  [`${RNE}/tyler-confident.webp`]: 0.5,
+  [`${RNE}/tyler-focused.webp`]: 0.5,
+  [`${RNE}/tyler-uncertain.webp`]: 0.5,
+  [`${RNE}/yvonne-composed.webp`]: 0.5,
 };

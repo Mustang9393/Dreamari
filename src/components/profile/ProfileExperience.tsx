@@ -65,7 +65,10 @@ function careerById(id: string | null): ProfileCareer | null {
 
 
 const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase";
-const GLASS = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" } as const;
+// SOLID section surface (direct feedback): key containers stopped being
+// translucent -- page gradient -> solid card -> lighter nested rows is the
+// hierarchy, with glass kept for atmosphere rather than reading surfaces.
+const GLASS = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 
 // Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
 // navigates with (so the right career server-renders, no flash of someone
@@ -310,11 +313,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                     </>
                   )}
                 </dt>
-                <dd className="flex items-baseline gap-[4px]">
-                  <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
-                  {fact.note && <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
+                <dd className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[1px]">
+                  <span className="flex items-baseline gap-[4px]">
+                    <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
+                    {fact.note && <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
+                  </span>
+                  {fact.sub && <span className="text-[11.5px] leading-[14px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
                 </dd>
-                {fact.sub && <span className="text-[11.5px] leading-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
               </div>
             ))}
           </dl>
@@ -666,7 +671,7 @@ function Top3Tab({
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[16/9] w-full flex-none">
+            <div className="relative aspect-[4/3] w-full flex-none">
               {/* Focal point sits high (22% down), not center: these career
                  photos are tall portraits, and a 16:9 window centered on a
                  portrait frames the chest and beheads the person. */}

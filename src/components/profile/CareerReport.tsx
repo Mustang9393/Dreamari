@@ -663,7 +663,7 @@ function ShareTab() {
   };
 
   return (
-    <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
         <h3 id="share-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Share Your Report</h3>
         <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Choose who you want to share your career exploration progress with.</p>
@@ -725,7 +725,7 @@ function CounselorReviewTab() {
   const [reviewedOn, setReviewedOn] = useState<string | null>(null);
 
   return (
-    <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
         <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>For staff use only</span>
         <h3 id="counselor-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Counselor Review</h3>
