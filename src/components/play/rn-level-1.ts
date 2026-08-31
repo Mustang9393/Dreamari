@@ -163,6 +163,9 @@ export const RN_LEVEL_1: Level = {
       planLineIfFailed: "you started your shift without finding out what had happened overnight",
       progress: 0.1,
       speaker: "Narrator",
+      // Rosa is IN this scene ("Rosa meets you") -- the room must not be
+      // empty while the line says she is standing in it.
+      castMember: "Rosa",
       setup: "6:55 AM. Rosa meets you at the nurse station. The night nurse is still here.",
       question: "Day 1: What should you do first?",
       prompt: "Tap one.",
@@ -442,6 +445,9 @@ export const RN_LEVEL_1: Level = {
       speaker: "Narrator",
       tone: "conflict",
       resetScene: true,
+      // Tyler is IN this scene, claiming the catch -- his uncertain-tier
+      // face carries the conflict tone.
+      castMember: "Tyler",
       setup: "You spotted a rash on a patient yesterday and reported it. In the morning meeting, Tyler says he spotted it.",
       question: "What do you do?",
       prompt: "Tap one.",

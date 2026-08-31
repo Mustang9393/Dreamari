@@ -131,19 +131,23 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // (L1-15, Christina alone): her own slot, fully in frame.
     characterAnchor: { x: 0.5, baselineY: 0.99, heightFrac: 0.88 },
   },
+  // The Riverbend anchors run a touch taller than Cobalt's (0.94 vs 0.9):
+  // the RN chroma-keyed cutouts carry ~3-6% more transparent canvas above
+  // the figure than the IB set (alpha bbox fillH ~0.93 vs ~0.96), and this
+  // compensates so both casts render at the SAME visual height on screen.
   "riverbend-lobby": {
     src: `${RN}/lobby.jpg`,
     alt: "Riverbend Medical Center's main lobby, morning light across the marble floor.",
     focal: { x: 0.45, y: 0.45 },
     mobileFocal: { x: 0.4, y: 0.4 },
-    characterAnchor: { x: 0.62, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.62, baselineY: 0.99, heightFrac: 0.94 },
   },
   "riverbend-station": {
     src: `${RN}/station.jpg`,
     alt: "The Four West nurses' station, monitors lit, the corridor stretching away.",
     focal: { x: 0.42, y: 0.45 },
     mobileFocal: { x: 0.38, y: 0.42 },
-    characterAnchor: { x: 0.68, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.68, baselineY: 0.99, heightFrac: 0.94 },
   },
   "riverbend-patient-room": {
     src: `${RN}/patient-room.jpg`,
@@ -151,21 +155,21 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     focal: { x: 0.6, y: 0.5 },
     mobileFocal: { x: 0.65, y: 0.45 },
     // The open floor left of the bed -- never over the bed itself.
-    characterAnchor: { x: 0.24, baselineY: 0.99, heightFrac: 0.88 },
+    characterAnchor: { x: 0.24, baselineY: 0.99, heightFrac: 0.92 },
   },
   "riverbend-corridor": {
     src: `${RN}/corridor.jpg`,
     alt: "The Four West corridor, numbered patient doors and warm light down its length.",
     focal: { x: 0.5, y: 0.45 },
     mobileFocal: { x: 0.45, y: 0.42 },
-    characterAnchor: { x: 0.55, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.55, baselineY: 0.99, heightFrac: 0.94 },
   },
   "riverbend-staff-room": {
     src: `${RN}/staff-room.jpg`,
     alt: "The staff room at Riverbend, coffee shelves and the city beyond the glass.",
     focal: { x: 0.5, y: 0.45 },
     mobileFocal: { x: 0.45, y: 0.42 },
-    characterAnchor: { x: 0.64, baselineY: 0.99, heightFrac: 0.9 },
+    characterAnchor: { x: 0.64, baselineY: 0.99, heightFrac: 0.94 },
   },
   "riverbend-ward-night": {
     src: `${RN}/ward-night.jpg`,
@@ -173,7 +177,7 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     focal: { x: 0.4, y: 0.45 },
     mobileFocal: { x: 0.35, y: 0.42 },
     // The clear aisle right of the bed and cart.
-    characterAnchor: { x: 0.72, baselineY: 0.99, heightFrac: 0.88 },
+    characterAnchor: { x: 0.72, baselineY: 0.99, heightFrac: 0.92 },
   },
 };
 
