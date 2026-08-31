@@ -21,6 +21,7 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
   { label: "Play", href: "/play" },
+  { label: "Connect", href: "/connect" },
   { label: "My Profile", href: "/profile" },
 ];
 
