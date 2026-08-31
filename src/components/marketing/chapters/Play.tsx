@@ -161,36 +161,39 @@ function PlayDemo() {
           // flex-none content-sized and the art above absorbs whatever's left, so
           // every pixel trimmed here goes straight to the scene — part of the "image
           // should be immersive and prominent" pass, without dropping any content.
-          style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px) calc(var(--mu) * 8px)", gap: "calc(var(--mu) * 5px)", background: "var(--card)" }}
+          // One type scale, one reading order (per direct feedback: too many
+          // competing sizes/weights read as separate visual systems). Four
+          // styles only: H1 title, body scenario, a smaller sentence-case
+          // question heading (no all-caps -- called out as aggressive), and
+          // one answer style. Section rhythm is a single even gap so the eye
+          // walks scene -> context -> question -> choices.
+          style={{ padding: "calc(var(--mu) * 11px) calc(var(--mu) * 13px) calc(var(--mu) * 9px)", gap: "calc(var(--mu) * 9px)", background: "var(--card)" }}
         >
-          <div>
-            <p className="font-extrabold" style={{ fontSize: "clamp(17px, calc(var(--mu) * 14px), 23px)", lineHeight: 1.15, letterSpacing: "-0.015em", color: "#5b9bff" }}>
-              Day in the life of an investment banker
+          {/* The scenario is ONE block: the blue bar spans the title and the
+             scene copy together, so line, title and text read as a unit
+             instead of three stacked elements competing for attention. */}
+          <div
+            style={{
+              paddingLeft: "calc(var(--mu) * 11px)",
+              borderLeft: "3px solid color-mix(in srgb, #3b82f6 65%, transparent)",
+            }}
+          >
+            <p className="font-extrabold" style={{ fontSize: "clamp(16px, calc(var(--mu) * 13px), 20px)", lineHeight: 1.2, letterSpacing: "-0.012em", color: "#5b9bff" }}>
+              Day In The Life of An Investment Banker
             </p>
-            {/* Narrator line as a quote bar, not a full bordered bubble — the old
-               bubble was a third boxed element stacked between the label and the
-               three boxed answer rows, and the pile of borders read as clutter
-               (called out directly). A left accent bar says "someone is telling
-               you this" with one edge instead of four, and keeps actual boxes
-               reserved for the things you can press. Copy unchanged. */}
-            <div
-              style={{
-                marginTop: "calc(var(--mu) * 6px)",
-                paddingLeft: "calc(var(--mu) * 10px)",
-                borderLeft: "3px solid color-mix(in srgb, #3b82f6 65%, transparent)",
-              }}
-            >
-              <p style={{ fontSize: "clamp(14px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.45, fontWeight: 500, color: "var(--foreground)" }}>{SCENARIO.scene}</p>
-            </div>
-            <p className="uppercase" style={{ marginTop: "calc(var(--mu) * 9px)", fontSize: "clamp(13px, calc(var(--mu) * 10.5px), 15.5px)", letterSpacing: "0.06em", fontWeight: 800, color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
-              {SCENARIO.prompt}
+            <p style={{ marginTop: "calc(var(--mu) * 6px)", fontSize: "clamp(14px, calc(var(--mu) * 11px), 16px)", lineHeight: 1.5, fontWeight: 500, color: "color-mix(in srgb, var(--foreground) 94%, transparent)" }}>
+              {SCENARIO.scene}
             </p>
           </div>
+
+          <p style={{ fontSize: "clamp(14.5px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.3, fontWeight: 700, color: "var(--foreground)" }}>
+            {SCENARIO.prompt}
+          </p>
 
           {/* Choice rows — a leading arrow signals "tap to choose," the
              RPG-dialogue-choice shape, without a lettered badge per direct
              feedback. */}
-          <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 5px)" }}>
+          <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 6px)" }}>
             {SCENARIO.options.map((option, i) => {
               const isCorrect = i === CORRECT_INDEX;
               const isPicked = pickedIndex === i;
@@ -213,7 +216,7 @@ function PlayDemo() {
                     opacity: pickedIndex === null ? (isCorrect ? 1 : 0.5) : isPicked ? 1 : 0.5,
                   }}
                 >
-                  <span className="flex-1" style={{ fontSize: "clamp(13px, calc(var(--mu) * 10.5px), 15.5px)", fontWeight: 500, color: "#fff" }}>
+                  <span className="flex-1" style={{ fontSize: "clamp(14px, calc(var(--mu) * 11px), 16px)", fontWeight: 500, color: "#fff" }}>
                     {option.label}
                   </span>
                   <svg
