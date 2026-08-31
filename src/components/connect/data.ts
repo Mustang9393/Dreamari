@@ -135,6 +135,8 @@ export const PROS: Pro[] = [
   { id: "pro-tanaka", name: "Keiko Tanaka", role: "HR Manager", org: "Amazon", scope: "Hiring & early careers", verifiedBy: "Work email verified by Dreamari · Feb 2026" },
   { id: "pro-brooks", name: "Danielle Brooks", role: "Nurse Practitioner", org: "Mayo Clinic", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Apr 2026" },
   { id: "pro-fontaine", name: "Leo Fontaine", role: "Motion Designer", org: "Spotify", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Aug 2026" },
+  { id: "pro-haddad", name: "Omar Haddad", role: "Clinical Research Nurse", org: "Pfizer", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · May 2026" },
+  { id: "pro-vega", name: "Camille Vega", role: "Content Producer", org: "Netflix", scope: "Media & content careers", verifiedBy: "Work email verified by Dreamari · Jul 2026" },
 ];
 
 // The five communities, their names, order, counts, companies and topic
@@ -255,6 +257,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
       { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      {
+        kind: "answer",
+        proId: "pro-osei",
+        postedAgo: "3h ago",
+        body: "Hiring-manager view: I read the portfolio before the resume, every single time. One finished project with a clear README beats a long list of skills.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-zhang",
+        postedAgo: "2h ago",
+        body: "Security side of tech here — certifications can genuinely substitute for a degree. Security+ plus a home lab got two people onto my team.",
+      },
     ],
   },
   {
@@ -266,14 +280,34 @@ export const THREADS: Thread[] = [
     handle: "Priya",
     grade: "Sophomore",
     postedAgo: "6h ago",
-    state: "routed",
+    state: "answered",
     routedScope: "AI & data careers",
     expectedWindow: "within 1 day",
     views: 1120,
     location: "United Kingdom",
     helpful: 9,
     followers: 3,
-    responses: [],
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-chen",
+        primary: true,
+        postedAgo: "4h ago",
+        body: "Data science asks what happened and why; AI builds systems that act on it. They share the same math foundation, so you don't have to choose in high school — take statistics either way.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-osei",
+        postedAgo: "3h ago",
+        body: "Most of the AI engineers on my team started as data scientists. The path between the two is shorter than the job titles suggest.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-zhang",
+        postedAgo: "2h ago",
+        body: "Whichever you pick, learn Python properly. It's the shared language of both.",
+      },
+    ],
   },
   {
     id: "t-ib-hours",
@@ -307,6 +341,18 @@ export const THREADS: Thread[] = [
       { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 10, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
       { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 8 },
       { kind: "peer", handle: "Ava", grade: "Sophomore", body: "reading this from my 8am class thinking about 80-hour weeks", postedAgo: "20h ago", likes: 14, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
+      {
+        kind: "answer",
+        proId: "pro-gallagher",
+        postedAgo: "22h ago",
+        body: "Markets side is a different model — the hours are bounded by the trading day, so it's intense but it ends. Worth knowing both rhythms exist before you decide.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-grant",
+        postedAgo: "18h ago",
+        body: "Associate view: it genuinely improves as you get senior — you trade all-nighters for responsibility. Year two is easier than year one.",
+      },
     ],
   },
   {
@@ -334,6 +380,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 9 },
       { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
+      {
+        kind: "answer",
+        proId: "pro-brooks",
+        postedAgo: "2d ago",
+        body: "NP addition: ask to shadow in a clinic, not just a hospital — clinics say yes more often and you see much more of the patient conversation.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-haddad",
+        postedAgo: "1d ago",
+        body: "Research sites take students too — our unit runs a shadow day every semester. Ask about 'observer programs'; that's the magic phrase.",
+      },
     ],
   },
   // ——— board seeding: every community has real, short activity ———
@@ -362,6 +420,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 11, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
       { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 5 },
+      {
+        kind: "answer",
+        proId: "pro-whitfield",
+        postedAgo: "2h ago",
+        body: "Recruiter here: I spend under thirty seconds on a first pass. One page, clean font, results first — that's the whole game at your stage.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-tanaka",
+        postedAgo: "1h ago",
+        body: "We hire interns with zero work experience every year. The resume just has to show you finish things.",
+      },
     ],
   },
   {
@@ -374,12 +444,32 @@ export const THREADS: Thread[] = [
     postedAgo: "9h ago",
     views: 512,
     location: "United States",
-    state: "routed",
+    state: "answered",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
     helpful: 12,
     followers: 3,
-    responses: [],
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-whitfield",
+        primary: true,
+        postedAgo: "7h ago",
+        body: "Say your name, your year, and one real question about them — 'what does your first year actually look like?' works every time. We remember the askers, not the resumes.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-martinez",
+        postedAgo: "6h ago",
+        body: "Skip 'do you have internships' as the opener. Ask about the person first — the internship conversation happens on its own.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-tanaka",
+        postedAgo: "5h ago",
+        body: "And take the follow-up seriously: one short thank-you note the same week puts you ahead of most adults.",
+      },
+    ],
   },
   {
     id: "t-gpd-interview-nerves",
@@ -407,6 +497,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 7 },
       { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
+      {
+        kind: "answer",
+        proId: "pro-whitfield",
+        postedAgo: "16h ago",
+        body: "Recruiters expect nerves — they read as caring. What we actually notice is whether you recover, not whether you shake.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-tanaka",
+        postedAgo: "14h ago",
+        body: "Ask for the interview format in advance. Knowing what's coming removes half the fear before you walk in.",
+      },
     ],
   },
   {
@@ -419,12 +521,32 @@ export const THREADS: Thread[] = [
     postedAgo: "7h ago",
     views: 864,
     location: "United States",
-    state: "routed",
+    state: "answered",
     routedScope: "Finance & banking careers",
     expectedWindow: "within 2 days",
     helpful: 15,
     followers: 4,
-    responses: [],
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-okafor",
+        primary: true,
+        postedAgo: "5h ago",
+        body: "Stereotype. Accounting is the language every deal I work on is written in — the accountants in the room are often the ones who spot what everyone else missed.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-gallagher",
+        postedAgo: "4h ago",
+        body: "Quiet is not the same as boring. It's also one of the most recession-proof starts in all of finance.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-grant",
+        postedAgo: "3h ago",
+        body: "Half my deal team started in accounting. It's a launchpad, not a ceiling.",
+      },
+    ],
   },
   {
     id: "t-health-np",
@@ -451,6 +573,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 7 },
       { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 5 },
+      {
+        kind: "answer",
+        proId: "pro-brooks",
+        postedAgo: "14h ago",
+        body: "I'm the NP in question — Marcus has it exactly right. I worked bedside for six years first, and I still think that made me a better NP than the degree did.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-haddad",
+        postedAgo: "12h ago",
+        body: "There are also research nurses like me in the same buildings — same license, very different day. Worth comparing all the branches before you pick.",
+      },
     ],
   },
   {
@@ -479,6 +613,18 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 8, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
       { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 6 },
+      {
+        kind: "answer",
+        proId: "pro-fontaine",
+        postedAgo: "4h ago",
+        body: "Self-taught motion designer here — no art school. Online courses plus two years of daily practice reels did it.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-vega",
+        postedAgo: "3h ago",
+        body: "Producing side: I care that you can take feedback and hit a deadline. School teaches that — but so does running a school club's channel.",
+      },
     ],
   },
   {
@@ -491,12 +637,32 @@ export const THREADS: Thread[] = [
     postedAgo: "3h ago",
     views: 347,
     location: "United States",
-    state: "routed",
+    state: "answered",
     routedScope: "Design & creative careers",
     expectedWindow: "within 3 days",
     helpful: 8,
     followers: 2,
-    responses: [],
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-vega",
+        primary: true,
+        postedAgo: "2h ago",
+        body: "Brand deals, ad revenue, and commissions — roughly in that order for the working creators I hire. The consistent ones treat it like a job: posting schedule, invoices, contracts.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-cole",
+        postedAgo: "1h ago",
+        body: "Brands pay for audiences they can't reach themselves. Build a specific one, however small, and you're already interesting.",
+      },
+      {
+        kind: "answer",
+        proId: "pro-fontaine",
+        postedAgo: "1h ago",
+        body: "Also: the editors behind big creators get paid too. Being the person who makes someone else's content great is a real path in.",
+      },
+    ],
   },
 ];
 
@@ -554,6 +720,7 @@ export const INSIGHTS: Insight[] = [
       { proId: "pro-martinez", body: "You do — it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
       { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 7 },
       { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 5 },
+      { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
     ],
   },
   {
@@ -572,6 +739,7 @@ export const INSIGHTS: Insight[] = [
       { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
       { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds intense.", postedAgo: "1d ago", likes: 5 },
       { handle: "Amir", grade: "Junior", body: "the three-day week math is wild when each day is twelve hours", postedAgo: "1d ago", likes: 6 },
+      { handle: "Ethan", grade: "Junior", body: "me hearing 'three-day work week' right before the 'each day is twelve hours' part", postedAgo: "1d ago", likes: 14, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
     ],
   },
   {
@@ -908,6 +1076,12 @@ export const EVENT_THREADS: Thread[] = [
       { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 11 },
       { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 13, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
       { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 4 },
+      {
+        kind: "answer",
+        proId: "pro-martinez",
+        postedAgo: "1h ago",
+        body: "From our side of the stage: the questions in that room were better than most college career fairs I've worked. Keep that energy.",
+      },
     ],
   },
   {
@@ -919,14 +1093,22 @@ export const EVENT_THREADS: Thread[] = [
     handle: "Devon",
     grade: "Senior",
     postedAgo: "3h ago",
-    state: "routed",
+    state: "answered",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
     views: 942,
     location: "United States",
     helpful: 17,
     followers: 4,
-    responses: [],
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-martinez",
+        primary: true,
+        postedAgo: "2h ago",
+        body: "Shortest version: bankers price and close deals; consultants change how companies run. Transactions versus transformations — different rhythms, both client-service jobs.",
+      },
+    ],
   },
   {
     // Replaces a "how do I stay in touch with someone professionally" thread.

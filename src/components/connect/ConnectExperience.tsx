@@ -195,6 +195,8 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Keiko Tanaka": `${AV}/w63.jpg`,
   "Danielle Brooks": `${AV}/w41.jpg`,
   "Leo Fontaine": `${AV}/m77.jpg`,
+  "Omar Haddad": `${AV}/m68.jpg`,
+  "Camille Vega": `${AV}/w52.jpg`,
   // Students wear friendly illustrated avatars (micah, generated per
   // handle), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:
@@ -308,15 +310,12 @@ function CommunityCard({
   action,
   onOpen,
   featured,
-  wide,
 }: {
   community: Community;
   action: React.ReactNode;
   onOpen: () => void;
   /** First card wears the mock's "Most Popular" pill on its banner. */
   featured?: boolean;
-  /** The two top bento cards: roomier, and they carry the live ticker. */
-  wide?: boolean;
 }) {
   const shownCompanies = community.professionalsFrom.slice(0, 3);
   const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
@@ -335,54 +334,29 @@ function CommunityCard({
         style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${communityAccent(community)} 60%, transparent), 0 18px 50px -18px color-mix(in srgb, ${communityAccent(community)} 55%, transparent)` }}
       />
 
-      {/* The art is WOVEN into the card, not clipped into a strip (per the
-         reference). Two compositions:
-         WIDE (top bento row): the artwork owns the card's RIGHT half and
-         dissolves LEFTWARD through a blur band into the content column --
-         the reference's landscape cards exactly.
-         SQUARE (bottom row): the artwork owns the top and dissolves down. */}
-      {wide ? (
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[62%] lg:block">
-          <Image
-            src={community.photo}
-            alt=""
-            fill
-            sizes="620px"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, black 45%, transparent 99%)", WebkitMaskImage: "linear-gradient(to left, black 45%, transparent 99%)" }}
-          />
-          <Image
-            src={community.photo}
-            alt=""
-            fill
-            sizes="620px"
-            className="scale-[1.06] object-cover blur-[16px]"
-            style={{ objectPosition: "72% 45%", maskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)", WebkitMaskImage: "linear-gradient(to left, transparent 42%, black 66%, transparent 98%)" }}
-          />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to left, transparent 30%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 70%, transparent) 62%, color-mix(in srgb, var(--primary) 8%, var(--card)) 96%)" }} />
-        </div>
-      ) : null}
-      {(!wide || true) && (
-        <div aria-hidden className={`pointer-events-none absolute inset-0 ${wide ? "lg:hidden" : ""}`}>
-          <Image
-            src={community.photo}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 620px, 100vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 42%, transparent 94%)", WebkitMaskImage: "linear-gradient(to bottom, black 42%, transparent 94%)" }}
-          />
-          <Image
-            src={community.photo}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 620px, 100vw"
-            className="scale-[1.06] object-cover blur-[16px]"
-            style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 32%, black 58%, transparent 96%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 32%, black 58%, transparent 96%)" }}
-          />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 12%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 62%, transparent) 48%, color-mix(in srgb, var(--primary) 8%, var(--card)) 90%)" }} />
-        </div>
-      )}
+      {/* The art is WOVEN into the card, not clipped into a strip: it fills
+         the whole background, stays sharp up top, dissolves through a blur
+         band mid-card, and only fully yields to the surface near the
+         button. One composition, every card the same size. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <Image
+          src={community.photo}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 620px, 100vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+          style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)" }}
+        />
+        <Image
+          src={community.photo}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 620px, 100vw"
+          className="scale-[1.06] object-cover blur-[16px]"
+          style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 45%, black 70%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 45%, black 70%, transparent 100%)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 16%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 50%, transparent) 58%, color-mix(in srgb, var(--primary) 8%, var(--card)) 96%)" }} />
+      </div>
       {featured && (
         <span className="absolute top-[14px] right-[14px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
           <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
@@ -393,7 +367,7 @@ function CommunityCard({
         {/* Header block, the two-row anatomy: the icon spans BOTH rows on
            the left; the right column reads title on line one, the one-line
            stats on line two. Then real air before the chip sections. */}
-        <div className="flex items-center gap-[14px]">
+        <div className={`flex items-center gap-[14px] ${featured ? "pr-[110px]" : ""}`}>
           <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[13px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
             <WorldGlyph world={community.world} className="h-[22px] w-[22px]" />
           </span>
@@ -735,7 +709,7 @@ export function ConnectExperience() {
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
       <main
-        className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-[var(--space-5)] pb-[120px] md:px-8 md:pt-[var(--space-7)] ${view.kind === "home" ? "gap-[var(--space-5)]" : "gap-[var(--space-8)]"} ${
+        className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-[var(--space-5)] pb-[120px] md:px-8 md:pt-[var(--space-7)] ${view.kind === "home" ? "gap-[var(--space-4)]" : "gap-[var(--space-6)]"} ${
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
@@ -904,12 +878,10 @@ function HomeView({
       {/* "Find your community" masthead + Community/Events toggle, same on
          both tabs -- matches the reference doc's mockup exactly (title case,
          one-line sub, Dreamy in glasses at the header's right edge). */}
-      <div className="flex items-start justify-between gap-[var(--space-4)]">
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
-          <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
-        </div>
-        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={192} height={192} aria-hidden className="h-[88px] w-[88px] flex-none object-contain sm:h-[108px] sm:w-[108px]" />
+      <div className="relative pr-[100px] sm:pr-[120px]">
+        <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
+        <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
+        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={192} height={192} aria-hidden className="absolute -top-[10px] right-0 h-[88px] w-[88px] object-contain sm:h-[108px] sm:w-[108px]" />
       </div>
 
       <FilterRow
@@ -950,11 +922,13 @@ function HomeView({
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{searched.length} communities</span>}
           </div>
-          {/* The mock's bento rhythm: two wide cards up top, three below. */}
+          {/* Five equal boxes: three across the top, the last two centered
+             on the second row (direct feedback -- mixed sizes read as
+             confusing). */}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
-              <div key={c.id} className={index < 2 ? "lg:col-span-3" : "lg:col-span-2"}>
-                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} wide={index < 2} />
+              <div key={c.id} className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""}`}>
+                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
               </div>
             ))}
           </div>
@@ -1058,17 +1032,16 @@ function SuggestCommunityCard() {
   );
 }
 
-function CommunityRow({ community, joined, onOpen, onJoin, featured, wide }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean; wide?: boolean }) {
-  const action = joined ? (
-    <button type="button" onClick={onOpen} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-      Open Community
-    </button>
-  ) : (
-    <button type="button" onClick={onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+function CommunityRow({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean }) {
+  // One label everywhere (direct feedback): "Join Community". A joined
+  // community's button goes straight into the board; an unjoined one opens
+  // the join sheet.
+  const action = (
+    <button type="button" onClick={joined ? onOpen : onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
       Join Community
     </button>
   );
-  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} wide={wide} />;
+  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} />;
 }
 
 // ——— community board (handoff 8) ———
