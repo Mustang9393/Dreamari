@@ -162,7 +162,6 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
   const [trailerSim, setTrailerSim] = useState<Simulation | null>(null);
   const featured = candidates.find((c) => c.id === featuredId) ?? candidates[0];
   if (!featured) return null;
-  const rest = candidates.filter((c) => c.id !== featured.id);
 
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
@@ -181,8 +180,12 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
          visibly PEEKING at the screen edge instead of clipping exactly at
          the content column -- without the peek, nothing said there were
          more cards to the right (direct feedback). */}
+      {/* Expand IN PLACE: cards keep their positions and the clicked one
+         simply grows into the billboard while the old one shrinks (direct
+         feedback -- reordering the row on every click read as a shuffle,
+         not a selection). */}
       <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pb-1 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
-        {[featured, ...rest].map((c) => (
+        {candidates.map((c) => (
           <RowCard
             key={c.id}
             candidate={c}

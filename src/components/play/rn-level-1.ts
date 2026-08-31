@@ -234,7 +234,7 @@ export const RN_LEVEL_1: Level = {
       planLineIfFailed: "you could not follow a plain instruction from your own team",
       progress: 0.2,
       speaker: "Rosa",
-      setup: "Rosa asks for four things at once, in her own words.",
+      setup: '"I need four things from you, all at once."',
       question: "Match what she said to what you do.",
       prompt: "Tap a quote, then tap what you do.",
       pairs: [
@@ -256,7 +256,7 @@ export const RN_LEVEL_1: Level = {
       progress: 0.3,
       timer: 45,
       speaker: "Rosa",
-      setup: "Rosa checks whether you have the habits every nurse is expected to have.",
+      setup: '"Quick one. Every nurse needs these habits cold."',
       question: "Four quick questions on one shared timer.",
       prompt: "Four questions, one timer. Tap fast.",
       items: [
@@ -354,7 +354,7 @@ export const RN_LEVEL_1: Level = {
       planLineIfFailed: "you opened a patient record that was none of your business",
       progress: 0.6,
       speaker: "Rosa",
-      setup: "Rosa reminds you that a patient record is private, and that the system logs every person who opens one.",
+      setup: '"A patient record is private. The system logs every person who opens one."',
       question: "You may only open the record of a patient who is ___.",
       prompt: "Drag the right words into the space.",
       choices: [
@@ -406,7 +406,7 @@ export const RN_LEVEL_1: Level = {
       speaker: "Rosa",
       tone: "conflict",
       resetScene: true,
-      setup: "Rosa asks you to check tonight's handover note before Denise reads it. One line has three things wrong.",
+      setup: '"Check tonight\'s handover note before Denise reads it. One line has three things wrong."',
       question: "Tap the line with the mistakes.",
       prompt: "Tap the line with the mistakes.",
       choices: [
@@ -512,7 +512,7 @@ export const RN_LEVEL_1: Level = {
       variant: "chapter",
       id: "RN1-25",
       speaker: "Rosa",
-      setup: "Your first year is over. Before the floor decides whether you work on your own, Rosa pulls you aside.",
+      setup: '"Your first year is over. Before the floor decides whether you work on your own, come here a second."',
       title: '"You asked when you did not know, and you said it out loud when something changed."',
       body: '"I would take you on my shift."',
       cta: "Begin Final Review",

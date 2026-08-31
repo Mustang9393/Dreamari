@@ -222,7 +222,7 @@ export const IB_LEVEL_1: Level = {
       planLineIfFailed: "you could not follow a simple message from your own team",
       progress: 0.2,
       speaker: "Christina",
-      setup: "Christina sends four things at once, in her own words.",
+      setup: '"I\'m sending you four things, all at once."',
       question: "Match what she said to what you do.",
       prompt: "Tap a quote, then tap what you do.",
       pairs: [
@@ -245,7 +245,7 @@ export const IB_LEVEL_1: Level = {
       timer: 45,
       speaker: "Christina",
       castMember: "Christina",
-      setup: "Christina checks whether you know how Interns are expected to communicate.",
+      setup: '"Before client work, let me check how you communicate."',
       question: "Four quick questions on one shared timer.",
       prompt: "Four questions, one timer. Tap fast.",
       items: [
@@ -343,7 +343,7 @@ export const IB_LEVEL_1: Level = {
       planLineIfFailed: "you saved client files somewhere they should never have gone",
       progress: 0.6,
       speaker: "Christina",
-      setup: "Before sharing files, Christina reminds you: client materials must stay secure.",
+      setup: '"Before you share anything: client materials stay secure."',
       question: "Client files belong in the secure ___.",
       prompt: "Drag the right word into the space.",
       choices: [
@@ -393,7 +393,7 @@ export const IB_LEVEL_1: Level = {
       progress: 0.7,
       speaker: "Christina",
       tone: "conflict",
-      setup: "Christina asks you to check the Maison Laurent summary before Marcus sees it. One line has mistakes in it.",
+      setup: '"Check the Maison Laurent summary before Marcus sees it. One line has mistakes in it."',
       question: "Tap the line with the mistakes.",
       prompt: "Tap the line with the mistakes.",
       choices: [
@@ -499,7 +499,7 @@ export const IB_LEVEL_1: Level = {
       id: "L1-24",
       castMember: "Christina",
       speaker: "Christina",
-      setup: "Your internship is complete. Before the team decides whether to offer you a job after college, Christina pulls you aside.",
+      setup: '"Your internship is complete. Before the team decides on your offer, come here a second."',
       title: '"You stood out. You came in early, worked late, and made careful decisions under pressure."',
       body: '"I hope this works out. I\'d like to see you back here as an Analyst."',
       cta: "Begin Final Review",
