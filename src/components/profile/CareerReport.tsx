@@ -227,9 +227,9 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-9)] sm:py-[var(--space-10)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-7)] sm:py-[var(--space-9)]"
     >
-      <div className="mx-auto max-w-[68ch]">
+      <div className="mx-auto max-w-[920px]">
         {/* Masthead: one big line (the student's name), everything else as
            small labeled chips -- the old double stack of 42px lines competed
            with itself and with every section heading below it. */}
@@ -288,9 +288,9 @@ function ReportDocument({
 
         {/* 02 — Three Majors to Explore */}
         <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore" icon={BookOpen}>
-          <div className="grid gap-[10px] sm:grid-cols-3" data-keep-together>
+          <div className="grid grid-cols-3 gap-[8px] sm:gap-[10px]" data-keep-together>
             {report.majors.map((major) => (
-              <div key={major.name} className="flex items-center gap-[9px] rounded-[10px] border px-[14px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+              <div key={major.name} className="flex items-center gap-[8px] rounded-[10px] border px-[12px] py-[13px] sm:px-[14px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                 <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
@@ -602,8 +602,8 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
     }) as const;
 
   return (
-    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-7)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-10)] sm:py-[var(--space-8)]">
-      <div className="mx-auto max-w-[68ch]">
+    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-5)] pt-[var(--space-7)] pb-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-7)] sm:pt-[var(--space-8)] sm:pb-[var(--space-9)]">
+      <div className="mx-auto max-w-[920px]">
         <h3 id="reflection-title" className="flex items-center gap-[10px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           <PenLine className="h-[17px] w-[17px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />
           My Reflection
