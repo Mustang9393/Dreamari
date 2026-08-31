@@ -384,16 +384,12 @@ function CommunityCard({
         </div>
       )}
       {featured && (
-        <span className="absolute top-[12px] left-[12px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+        <span className="absolute top-[14px] right-[14px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
           <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
-      {/* Spacer: the stretch of art the content leaves fully visible --
-         only the square composition needs it (the wide card's art lives
-         beside the content, not above it). */}
-      <div aria-hidden className="h-[34px] w-full flex-none" />
 
-      <div className={`relative z-20 flex flex-1 flex-col gap-[var(--space-5)] px-[var(--space-4)] pt-[var(--space-3)] pb-[var(--space-4)] ${wide ? "lg:px-[var(--space-5)] lg:pb-[var(--space-5)]" : ""}`}>
+      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-5)] p-[var(--space-5)]">
         {/* Header block, the two-row anatomy: the icon spans BOTH rows on
            the left; the right column reads title on line one, the one-line
            stats on line two. Then real air before the chip sections. */}
