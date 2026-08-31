@@ -24,7 +24,9 @@ export type ProResponse = {
 };
 
 export type FollowUp = { kind: "followup"; body: string; postedAgo: string };
-export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string; likes?: number };
+/** Peers (and insight repliers) can attach a reaction GIF -- deliberate,
+ *  per the doc: the boards speak Gen Z, educational but fun. */
+export type PeerPerspective = { kind: "peer"; handle: string; grade: string; body: string; postedAgo: string; likes?: number; image?: string; imageAlt?: string };
 
 export type Thread = {
   id: string;
@@ -57,6 +59,8 @@ export type InsightReply = {
   body: string;
   postedAgo: string;
   likes: number;
+  image?: string;
+  imageAlt?: string;
 };
 
 export type Insight = {
@@ -243,6 +247,7 @@ export const THREADS: Thread[] = [
         body: "Tutorials are a fine start — just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
+      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/sob.gif", imageAlt: "Sobbing emoji reaction" },
     ],
   },
   {
@@ -491,6 +496,7 @@ export const INSIGHTS: Insight[] = [
       { proId: "pro-chen", body: "Good question — a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
       { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
       { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
+      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/skull.gif", imageAlt: "Skull emoji reaction" },
       { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 3 },
     ],
   },
@@ -535,7 +541,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "4d ago",
     helpful: 31,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13 },
+      { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/mindblown.gif", imageAlt: "Mind-blown emoji reaction" },
       { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
       { proId: "pro-reyes", body: "The opposite — the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
       { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
@@ -552,7 +558,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 27,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10 },
+      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/joy.gif", imageAlt: "Laughing emoji reaction" },
       { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
     ],
   },
@@ -636,7 +642,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 48,
     replies: [
-      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14 },
+      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/fire.gif", imageAlt: "Fire emoji reaction" },
       { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 6 },
     ],
   },

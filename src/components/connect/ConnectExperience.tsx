@@ -167,7 +167,12 @@ function StatusChip({ state }: { state: Thread["state"] }) {
   );
 }
 
-// Photo avatars everywhere (direct request), initials only as the fallback
+// Avatar photos are PARKED for the pitch (direct feedback: mixed cartoons
+// and photos read as random) -- every avatar renders as initials until
+// USE_PHOTO_AVATARS flips back on. The portrait set and mapping stay.
+const USE_PHOTO_AVATARS = false;
+
+// Photo avatars (behind the flag above), initials only as the fallback
 // for a name with no portrait. The pool is a committed set of demo portraits
 // (public/images/connect/avatars); each named person maps to ONE photo, and
 // no two people who share a screen share a face. Jordan (the signed-in
@@ -216,7 +221,7 @@ const AVATAR_PHOTO: Record<string, string> = {
 // A verified badge overlaps the corner exactly like the app's other verified
 // affordances — a small ShieldCheck on a solid chip, never color alone.
 function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  const photo = AVATAR_PHOTO[name];
+  const photo = USE_PHOTO_AVATARS ? AVATAR_PHOTO[name] : undefined;
   const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
@@ -1345,7 +1350,7 @@ function ThreadView({
           const pid = thread.id + "-p" + index;
           return (
             <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-              <CommentRow id={pid} name={r.handle} chip={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} />
+              <CommentRow id={pid} name={r.handle} chip={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
             </div>
           );
         })}
@@ -1396,7 +1401,7 @@ function ThreadView({
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, onLike }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
+function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   return (
     <div className="flex items-start gap-[12px]">
@@ -1408,6 +1413,12 @@ function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, o
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
         </div>
         <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{body}</p>
+        {/* Reaction GIFs between pros and students are deliberate (the doc
+           shows them; it's a pitch beat about speaking Gen Z) -- rendered
+           unoptimized so the animation actually plays. */}
+        {image && (
+          <Image src={image} alt={imageAlt ?? ""} width={512} height={512} unoptimized className="mt-[8px] h-[92px] w-[92px] rounded-[14px] object-contain" style={{ background: "var(--glass-surface-1)" }} />
+        )}
         <button type="button" onClick={() => onLike(id)} aria-pressed={liked} className="dm-link mt-[4px] flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[11.5px] leading-[15px] font-semibold" style={{ color: liked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
           <ThumbsUp className="h-3 w-3" aria-hidden /> {likes + (liked ? 1 : 0)}
         </button>
@@ -1532,6 +1543,8 @@ function InsightThreadView({
                   likes={reply.likes}
                   liked={!!helpfuls[rid]}
                   onLike={toggleHelpful}
+                  image={reply.image}
+                  imageAlt={reply.imageAlt}
                 />
               );
             })}
