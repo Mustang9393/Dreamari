@@ -517,7 +517,7 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // has come back yet, the quoted bold question as the card's heading, a chip
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
-function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const comments = thread.responses.length;
   const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
   return (
@@ -529,7 +529,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
         <span className="sr-only">Open question: {thread.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] border-2 border-transparent transition-colors duration-150 group-hover:border-[color:color-mix(in_srgb,var(--primary)_55%,transparent)]" />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       {/* A living row starts with a person: the asker's avatar and handle
@@ -586,7 +586,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
 // and their company chip, the insight's title line, then likes and comments
 // -- and the whole row OPENS: title and comment count both land on the
 // insight's own thread, where the conversation lives.
-function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const pro = proById(insight.proId);
   return (
     <Card className="dm-tap group relative cursor-pointer">
@@ -595,7 +595,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
         <span className="sr-only">Open insight: {insight.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] border-2 border-transparent transition-colors duration-150 group-hover:border-[color:color-mix(in_srgb,var(--primary)_55%,transparent)]" />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
@@ -1109,7 +1109,22 @@ function BoardView({
       {/* The doc's community banner: the community's own gradient, icon +
          name + "Qualified students can join", Feed/About pills, and the big
          Students / Professionals numbers at the right edge. */}
-      <section aria-label="Community overview" className="rounded-[var(--radius-xl)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]" style={{ background: gradientFor(community) }}>
+      <section aria-label="Community overview" className="relative overflow-hidden rounded-[var(--radius-xl)] border px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]" style={{ borderColor: `color-mix(in srgb, ${communityAccent(community)} 40%, var(--glass-border))`, background: gradientFor(community) }}>
+        {/* Same design language as the cards: the community's art occupies
+           the header, fading toward the content side so the name and
+           numbers stay fully legible. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <Image
+            src={community.photo}
+            alt=""
+            fill
+            sizes="880px"
+            className="object-cover"
+            style={{ objectPosition: "72% 42%", maskImage: "linear-gradient(to left, black 35%, transparent 92%)", WebkitMaskImage: "linear-gradient(to left, black 35%, transparent 92%)" }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(6,8,18,0.35), transparent 55%), linear-gradient(to top, rgba(6,8,18,0.45), transparent 60%)" }} />
+        </div>
+        <div className="relative">
         <div className="flex items-start justify-between gap-[var(--space-4)]">
           <div className="min-w-0 flex-1">
             <span aria-hidden className="flex size-9 items-center justify-center rounded-[10px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
@@ -1152,6 +1167,7 @@ function BoardView({
             </button>
           )}
         </div>
+        </div>
       </section>
 
       {about ? (
@@ -1172,7 +1188,7 @@ function BoardView({
            left rail (Student Questions / Professional Insights -- the doc
            cuts Industry Updates) and the active panel. The rail collapses
            to a pill row on phones. */
-        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
           <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-4)] md:w-[220px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
             {[
               { key: "questions", label: "Student Questions", Icon: MessagesSquare },
@@ -1186,7 +1202,7 @@ function BoardView({
                 className="dm-quiet flex min-h-[44px] flex-1 cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-3)] text-left text-[12.5px] leading-[16px] font-bold md:max-h-[52px] md:flex-none"
                 style={
                   filter === key
-                    ? { background: "color-mix(in srgb, var(--primary) 16%, var(--card))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)" }
+                    ? { background: `color-mix(in srgb, ${communityAccent(community)} 14%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 45%, var(--glass-border))`, color: "var(--foreground)" }
                     : { background: "transparent", borderColor: "transparent", color: "var(--muted-foreground)" }
                 }
               >
@@ -1203,7 +1219,7 @@ function BoardView({
                   <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Questions</h2>
                   <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
                 </div>
-                {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+                {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
                 {threads.length === 0 && (
                   <Card>
                     <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
@@ -1223,7 +1239,7 @@ function BoardView({
                   <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Professional Insights</h2>
                   <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
                 </div>
-                {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
+                {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
                 {insights.length === 0 && (
                   <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
                 )}
@@ -1332,7 +1348,7 @@ function EventView({
 
       <div className="flex flex-col gap-[var(--space-4)]">
         {(filter === "all" || filter === "questions") &&
-          threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+          threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={EVENT_ACCENT} {...cardProps(t.id)} />)}
         {filter === "insights" && (
           <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
         )}
@@ -1827,12 +1843,16 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-        <div className="flex items-center gap-[10px] px-[var(--space-5)] py-[14px]" style={{ background: gradientFor(community) }}>
-          <span aria-hidden className="flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
+        <div className="relative flex items-center gap-[10px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: gradientFor(community) }}>
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <Image src={community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: "72% 42%", maskImage: "linear-gradient(to left, black 30%, transparent 85%)", WebkitMaskImage: "linear-gradient(to left, black 30%, transparent 85%)" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.4), transparent)" }} />
+          </div>
+          <span aria-hidden className="relative flex size-8 flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.22)", color: "#FFFFFF" }}>
             <WorldGlyph world={community.world} className="h-[16px] w-[16px]" />
           </span>
-          <h2 className="min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Join {community.name}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}>
+          <h2 className="relative min-w-0 flex-1 text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Join {community.name}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet relative flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}>
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
