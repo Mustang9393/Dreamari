@@ -1816,7 +1816,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={`Reputation ${Math.round(reputation)}, ${band.name}. What this number decides`}
+        aria-label={`Reputation ${Math.round(reputation)}, ${band}. What this number decides`}
         onClick={() => {
           playSelect();
           setOpen(true);
