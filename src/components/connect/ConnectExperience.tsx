@@ -308,11 +308,11 @@ function gradientFor(community: Pick<Community, "world">): string {
 const CARD_INK = "#221e33";
 
 // The mask IS the topic (per direct feedback): each community's art is
-// clipped into an icon of its own subject -- a lightbulb of ideas, rising
-// bars, a chip, a medical cross, a flower. Paths live in a 128px box, the
+// clipped into an icon of its own subject -- a briefcase, rising bars, a
+// hexagon, a medical cross, a flower. Paths live in a 128px box, the
 // tile's exact size, unioned subpaths via clip-path: path().
 const SHAPE_CLIP: Record<string, string> = {
-  "teaching-education": 'M108 50 a44 44 0 1 1 -88 0 a44 44 0 1 1 88 0 Z M53 90 h22 a9 9 0 0 1 9 9 v8 a9 9 0 0 1 -9 9 h-22 a9 9 0 0 1 -9 -9 v-8 a9 9 0 0 1 9 -9 Z',
+  "teaching-education": 'M26 44 h76 a16 16 0 0 1 16 16 v42 a16 16 0 0 1 -16 16 h-76 a16 16 0 0 1 -16 -16 v-42 a16 16 0 0 1 16 -16 Z M54 16 h20 a10 10 0 0 1 10 10 v14 a10 10 0 0 1 -10 10 h-20 a10 10 0 0 1 -10 -10 v-14 a10 10 0 0 1 10 -10 Z',
   "business-money": 'M24 70 h10 a10 10 0 0 1 10 10 v38 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-38 a10 10 0 0 1 10 -10 Z M59 38 h10 a10 10 0 0 1 10 10 v70 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-70 a10 10 0 0 1 10 -10 Z M94 10 h10 a10 10 0 0 1 10 10 v98 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-98 a10 10 0 0 1 10 -10 Z',
   "tech-engineering": 'M64 4 L114 33 V95 L64 124 L14 95 V33 Z',
   "health-medicine": 'M61 6 h6 a16 16 0 0 1 16 16 v84 a16 16 0 0 1 -16 16 h-6 a16 16 0 0 1 -16 -16 v-84 a16 16 0 0 1 16 -16 Z M22 45 h84 a16 16 0 0 1 16 16 v6 a16 16 0 0 1 -16 16 h-84 a16 16 0 0 1 -16 -16 v-6 a16 16 0 0 1 16 -16 Z',
@@ -320,13 +320,39 @@ const SHAPE_CLIP: Record<string, string> = {
 };
 
 
-// Small per-shape hover gestures: the bars rise, the flower turns, the
-// chip tilts -- one playful degree, never a carnival.
-const SHAPE_HOVER: Record<string, string> = {
-  "business-money": "group-hover:-translate-y-[4px]",
-  "arts-media": "group-hover:rotate-[8deg]",
-  "tech-engineering": "group-hover:rotate-[4deg]",
+// Purpose-built art for the masks: tone-on-tone "accent glass" gradients
+// generated for each world, so the shapes read as luminous color at 128px
+// instead of dark photo crops.
+const SHAPE_ART: Record<string, string> = {
+  "teaching-education": "/images/connect/shapes/teaching-education.webp",
+  "business-money": "/images/connect/shapes/business-money.webp",
+  "tech-engineering": "/images/connect/shapes/tech-engineering.webp",
+  "health-medicine": "/images/connect/shapes/health-medicine.webp",
+  "arts-media": "/images/connect/shapes/arts-media.webp",
 };
+const SHAPE_KIND: Record<string, string> = {
+  "teaching-education": "briefcase",
+  "business-money": "bars",
+  "tech-engineering": "hex",
+  "health-medicine": "cross",
+  "arts-media": "flower",
+};
+
+// On hover each mask does the thing its shape depicts: the briefcase gets
+// picked up, the bars grow (the clip-path itself morphs taller), the hex
+// turns like a nut, the cross beats like a heart, the flower blooms.
+const BARS_GROWN =
+  "M24 44 h10 a10 10 0 0 1 10 10 v64 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-64 a10 10 0 0 1 10 -10 Z M59 20 h10 a10 10 0 0 1 10 10 v88 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-88 a10 10 0 0 1 10 -10 Z M94 4 h10 a10 10 0 0 1 10 10 v104 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-104 a10 10 0 0 1 10 -10 Z";
+const SHAPE_ANIM_CSS = `
+.dm-shape { transition: transform .55s cubic-bezier(.22,1,.36,1), clip-path .55s cubic-bezier(.22,1,.36,1); }
+.group:hover .dm-shape-briefcase { transform: translateY(-7px) rotate(-5deg); }
+.group:hover .dm-shape-bars { clip-path: path('${BARS_GROWN}') !important; }
+.group:hover .dm-shape-hex { transform: rotate(60deg); }
+.group:hover .dm-shape-cross { animation: dm-heartbeat 1.1s ease-in-out infinite; }
+.group:hover .dm-shape-flower { transform: rotate(30deg) scale(1.05); transition-duration: .85s; }
+@keyframes dm-heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(0.98); } 42% { transform: scale(1.08); } 56% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .dm-shape, .group:hover .dm-shape-cross { transition: none; animation: none; } }
+`;
 
 function CommunityCard({
   community,
@@ -353,7 +379,7 @@ function CommunityCard({
       <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }} />
 
       {/* dashed radials behind the shaped art */}
-      <svg aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[220px] w-[220px] -translate-y-1/2" viewBox="0 0 220 220" fill="none">
+      <svg aria-hidden className="pointer-events-none absolute top-[-6px] right-[-22px] h-[220px] w-[220px]" viewBox="0 0 220 220" fill="none">
         {[52, 78, 104].map((r) => (
           <circle key={r} cx="110" cy="110" r={r} stroke={`color-mix(in srgb, ${CARD_INK} 20%, transparent)`} strokeWidth="1.5" strokeDasharray="2 7" />
         ))}
@@ -369,39 +395,39 @@ function CommunityCard({
         </span>
       )}
 
-      <div className="pointer-events-none relative z-20 flex h-full w-full items-stretch gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-5)]">
-        {/* One hard left rail, folio anchored to the bottom so whitespace
-           never pools. Single family, three tiers only:
-           heading 20/extrabold -> subheading 13/semibold -> body 11/medium.
-           The title slot is a fixed 3-line box so every card's rows sit at
-           the same y regardless of how long the community name is. */}
-        <div className="flex min-w-0 flex-1 flex-col" style={{ fontFamily: "var(--font-display)" }}>
-          <h3 className="min-h-[75px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
+      <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
+        {/* Single family, three tiers only: heading 20/800 -> subheading
+           13/600 -> body 11/500 (CTA reuses 13 + 800 for prominence).
+           Title up top, shape on the right; the pros line sits directly on a
+           full-card-width rule with students left and the CTA far right, so
+           every row lands at the same y no matter how long the name is. */}
+        <div className="flex flex-1 items-center gap-[var(--space-4)]">
+          <h3 className="min-w-0 flex-1 self-start text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
             {community.name}
           </h3>
-          <p className="mt-[4px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
-            {community.activePros} verified pros
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
-          </p>
-          <div className="mt-auto flex items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 16%, transparent)` }}>
-            <span className="text-[11px] leading-[15px] font-medium tracking-[0.1em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${CARD_INK} 58%, transparent)` }}>
-              {community.students} students
-            </span>
-            <span className="flex items-center gap-[4px] text-[11px] leading-[15px] font-medium tracking-[0.1em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 55%, ${CARD_INK})` }}>
-              Join <ArrowRight className="h-[12px] w-[12px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden />
-            </span>
-          </div>
+
+          {/* the shaped mask holds generated accent-glass art -- no people.
+             mt clears the Most Popular chip so they never overlap. */}
+          <span
+            className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} relative mt-[20px] h-[128px] w-[128px] flex-none overflow-hidden`}
+            style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}
+          >
+            <Image src={SHAPE_ART[community.id] ?? community.photo} alt="" fill sizes="256px" className="object-cover" />
+          </span>
         </div>
 
-        {/* the shaped mask holds the community's own art -- no people.
-           Each shape gets its own small hover gesture. */}
-        <span
-          className={`relative h-[128px] w-[128px] flex-none self-center overflow-hidden transition-transform duration-500 ease-out group-hover:scale-[1.05] ${SHAPE_HOVER[community.id] ?? ""}`}
-          style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}
-        >
-          <Image src={community.photo} alt="" fill sizes="256px" className="object-cover" style={{ objectPosition: "70% 40%" }} />
-          <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)` }} />
-        </span>
+        <p className="mt-[10px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
+          {community.activePros} verified pros
+          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
+        </p>
+        <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
+          <span className="text-[11px] leading-[15px] font-medium tracking-[0.1em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${CARD_INK} 80%, transparent)` }}>
+            {community.students} students
+          </span>
+          <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, ${CARD_INK})` }}>
+            Join <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -901,6 +927,7 @@ function HomeView({
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
              centered beneath. */}
+          <style>{SHAPE_ANIM_CSS}</style>
           <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
               <div
