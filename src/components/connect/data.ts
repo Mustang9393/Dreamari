@@ -1,4 +1,4 @@
-// Connect — mock data for the frontend prototype, shaped by the implementation
+// Connect, mock data for the frontend prototype, shaped by the implementation
 // handoff (Dreamari_Connect_Claude_Implementation_Handoff.docx, v1.0) and the
 // Replit prototype's content evidence. Realistic where behavior needs it,
 // clearly bounded: no backend exists yet, so routing/SLA/entitlement are
@@ -6,9 +6,9 @@
 // server-side work and are documented as assumptions in ConnectExperience).
 //
 // Identity rules, per direct request: students post under a handle + class
-// year (Freshman/Sophomore/Junior/Senior) — Twitter-shaped, like the
+// year (Freshman/Sophomore/Junior/Senior), Twitter-shaped, like the
 // marketing site's own Connect chapter (src/components/marketing/chapters/
-// Connect.tsx) — never a full/last name. Professionals display full name +
+// Connect.tsx), never a full/last name. Professionals display full name +
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
@@ -140,7 +140,7 @@ export const PROS: Pro[] = [
 ];
 
 // The five communities, their names, order, counts, companies and topic
-// chips are the Aug 29 doc's own Community-tab mockup, verbatim — all five
+// chips are the Aug 29 doc's own Community-tab mockup, verbatim, all five
 // joined ("Your Communities · 5 joined"). Ids are stable (threads/insights
 // key on them), so the doc's renames land on the existing boards.
 export const COMMUNITIES: Community[] = [
@@ -245,17 +245,17 @@ export const THREADS: Thread[] = [
         proId: "pro-chen",
         primary: true,
         postedAgo: "14h ago",
-        body: "Short answer: no, but you need proof you can build. My team has engineers from bootcamps, community college transfers, and self-taught paths. What we actually screen for is (1) can you write working code, (2) can you explain your thinking, (3) have you finished something real — even a small project counts. A degree is one way to show that; a portfolio of 2-3 finished projects is another. Trade-off to know: some larger companies still filter first jobs by degree, so the non-degree path usually starts at smaller companies. Next step: pick one small project you'd actually use, finish it, and put it somewhere you can link to.",
+        body: "Short answer: no, but you need proof you can build. My team has engineers from bootcamps, community college transfers, and self-taught paths. What we actually screen for is (1) can you write working code, (2) can you explain your thinking, (3) have you finished something real, even a small project counts. A degree is one way to show that; a portfolio of 2-3 finished projects is another. Trade-off to know: some larger companies still filter first jobs by degree, so the non-degree path usually starts at smaller companies. Next step: pick one small project you'd actually use, finish it, and put it somewhere you can link to.",
         disclosure: "This reflects my experience hiring at one company, not an industry-wide rule.",
       },
-      { kind: "followup", body: "This helps a lot — does the project need to be original, or is following a tutorial okay to start?", postedAgo: "9h ago" },
+      { kind: "followup", body: "This helps a lot, does the project need to be original, or is following a tutorial okay to start?", postedAgo: "9h ago" },
       {
         kind: "answer",
         proId: "pro-chen",
         postedAgo: "6h ago",
-        body: "Tutorials are a fine start — just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
+        body: "Tutorials are a fine start, just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer — built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
       { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
       {
         kind: "answer",
@@ -267,7 +267,7 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-zhang",
         postedAgo: "2h ago",
-        body: "Security side of tech here — certifications can genuinely substitute for a degree. Security+ plus a home lab got two people onto my team.",
+        body: "Security side of tech here, certifications can genuinely substitute for a degree. Security+ plus a home lab got two people onto my team.",
       },
     ],
   },
@@ -293,7 +293,7 @@ export const THREADS: Thread[] = [
         proId: "pro-chen",
         primary: true,
         postedAgo: "4h ago",
-        body: "Data science asks what happened and why; AI builds systems that act on it. They share the same math foundation, so you don't have to choose in high school — take statistics either way.",
+        body: "Data science asks what happened and why; AI builds systems that act on it. They share the same math foundation, so you don't have to choose in high school, take statistics either way.",
       },
       {
         kind: "answer",
@@ -334,7 +334,7 @@ export const THREADS: Thread[] = [
         proId: "pro-okafor",
         primary: true,
         postedAgo: "1d ago",
-        body: "Honest answer: the first two years are genuinely intense — 70-80 hours is normal at most banks during busy periods, and deadlines don't care about your weekend. What people skip: it's cyclical, not constant; protected-Saturday policies exist at most large banks now; and the skills you build in those two years open doors that would otherwise take a decade. The real question is whether the work itself interests you — if it doesn't, the hours will break you; if it does, they're the price of a very fast start. Next step: try the Investment Banking simulation on Dreamari and see how the actual work feels before you commit to the idea of it.",
+        body: "Honest answer: the first two years are genuinely intense, 70-80 hours is normal at most banks during busy periods, and deadlines don't care about your weekend. What people skip: it's cyclical, not constant; protected-Saturday policies exist at most large banks now; and the skills you build in those two years open doors that would otherwise take a decade. The real question is whether the work itself interests you, if it doesn't, the hours will break you; if it does, they're the price of a very fast start. Next step: try the Investment Banking simulation on Dreamari and see how the actual work feels before you commit to the idea of it.",
         disclosure: "Based on my experience as an analyst at one large bank.",
       },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 7 },
@@ -345,13 +345,13 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-gallagher",
         postedAgo: "22h ago",
-        body: "Markets side is a different model — the hours are bounded by the trading day, so it's intense but it ends. Worth knowing both rhythms exist before you decide.",
+        body: "Markets side is a different model, the hours are bounded by the trading day, so it's intense but it ends. Worth knowing both rhythms exist before you decide.",
       },
       {
         kind: "answer",
         proId: "pro-grant",
         postedAgo: "18h ago",
-        body: "Associate view: it genuinely improves as you get senior — you trade all-nighters for responsibility. Year two is easier than year one.",
+        body: "Associate view: it genuinely improves as you get senior, you trade all-nighters for responsibility. Year two is easier than year one.",
       },
     ],
   },
@@ -376,7 +376,7 @@ export const THREADS: Thread[] = [
         proId: "pro-reyes",
         primary: true,
         postedAgo: "2d ago",
-        body: "Most hospitals require you to be 16+ and go through a volunteer office rather than asking a nurse directly. Search '[your city] hospital volunteer program' — that's the front door. Community clinics and long-term care facilities say yes more often than big hospitals. One practical example: our facility takes two high-school volunteers every semester through a school counselor referral, so ask your counselor first — it's the fastest route.",
+        body: "Most hospitals require you to be 16+ and go through a volunteer office rather than asking a nurse directly. Search '[your city] hospital volunteer program', that's the front door. Community clinics and long-term care facilities say yes more often than big hospitals. One practical example: our facility takes two high-school volunteers every semester through a school counselor referral, so ask your counselor first, it's the fastest route.",
       },
       { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 9 },
       { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
@@ -384,17 +384,17 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-brooks",
         postedAgo: "2d ago",
-        body: "NP addition: ask to shadow in a clinic, not just a hospital — clinics say yes more often and you see much more of the patient conversation.",
+        body: "NP addition: ask to shadow in a clinic, not just a hospital, clinics say yes more often and you see much more of the patient conversation.",
       },
       {
         kind: "answer",
         proId: "pro-haddad",
         postedAgo: "1d ago",
-        body: "Research sites take students too — our unit runs a shadow day every semester. Ask about 'observer programs'; that's the magic phrase.",
+        body: "Research sites take students too, our unit runs a shadow day every semester. Ask about 'observer programs'; that's the magic phrase.",
       },
     ],
   },
-  // ——— board seeding: every community has real, short activity ———
+  // , , ,  board seeding: every community has real, short activity , , , 
   {
     id: "t-gpd-resume",
     boardId: "teaching-education",
@@ -416,7 +416,7 @@ export const THREADS: Thread[] = [
         proId: "pro-martinez",
         primary: true,
         postedAgo: "2h ago",
-        body: "You have more than you think. School projects, clubs, sports, a job helping a family business — each one is a bullet if you say what you did and what changed. 'Organized a bake sale that raised $400' beats 'hard worker' every time.",
+        body: "You have more than you think. School projects, clubs, sports, a job helping a family business, each one is a bullet if you say what you did and what changed. 'Organized a bake sale that raised $400' beats 'hard worker' every time.",
       },
       { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 11, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
       { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 5 },
@@ -424,7 +424,7 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-whitfield",
         postedAgo: "2h ago",
-        body: "Recruiter here: I spend under thirty seconds on a first pass. One page, clean font, results first — that's the whole game at your stage.",
+        body: "Recruiter here: I spend under thirty seconds on a first pass. One page, clean font, results first, that's the whole game at your stage.",
       },
       {
         kind: "answer",
@@ -455,13 +455,13 @@ export const THREADS: Thread[] = [
         proId: "pro-whitfield",
         primary: true,
         postedAgo: "7h ago",
-        body: "Say your name, your year, and one real question about them — 'what does your first year actually look like?' works every time. We remember the askers, not the resumes.",
+        body: "Say your name, your year, and one real question about them, 'what does your first year actually look like?' works every time. We remember the askers, not the resumes.",
       },
       {
         kind: "answer",
         proId: "pro-martinez",
         postedAgo: "6h ago",
-        body: "Skip 'do you have internships' as the opener. Ask about the person first — the internship conversation happens on its own.",
+        body: "Skip 'do you have internships' as the opener. Ask about the person first, the internship conversation happens on its own.",
       },
       {
         kind: "answer",
@@ -492,8 +492,8 @@ export const THREADS: Thread[] = [
         proId: "pro-martinez",
         primary: true,
         postedAgo: "18h ago",
-        body: "Nerves usually mean you care, not that you're unprepared. Practice your first sixty seconds out loud until it's boring to you — the opening is where nerves live, and once it's automatic the rest is a conversation.",
-        disclosure: "Personal approach — different interviewers look for different things.",
+        body: "Nerves usually mean you care, not that you're unprepared. Practice your first sixty seconds out loud until it's boring to you, the opening is where nerves live, and once it's automatic the rest is a conversation.",
+        disclosure: "Personal approach, different interviewers look for different things.",
       },
       { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 7 },
       { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
@@ -501,7 +501,7 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-whitfield",
         postedAgo: "16h ago",
-        body: "Recruiters expect nerves — they read as caring. What we actually notice is whether you recover, not whether you shake.",
+        body: "Recruiters expect nerves, they read as caring. What we actually notice is whether you recover, not whether you shake.",
       },
       {
         kind: "answer",
@@ -532,7 +532,7 @@ export const THREADS: Thread[] = [
         proId: "pro-okafor",
         primary: true,
         postedAgo: "5h ago",
-        body: "Stereotype. Accounting is the language every deal I work on is written in — the accountants in the room are often the ones who spot what everyone else missed.",
+        body: "Stereotype. Accounting is the language every deal I work on is written in, the accountants in the room are often the ones who spot what everyone else missed.",
       },
       {
         kind: "answer",
@@ -569,7 +569,7 @@ export const THREADS: Thread[] = [
         proId: "pro-reyes",
         primary: true,
         postedAgo: "16h ago",
-        body: "A nurse practitioner is a registered nurse who went back for a graduate degree. NPs can diagnose and prescribe in most states; RNs carry out the care plan and are with the patient far more of the day. Same ladder, different rungs — most NPs I know worked as RNs first.",
+        body: "A nurse practitioner is a registered nurse who went back for a graduate degree. NPs can diagnose and prescribe in most states; RNs carry out the care plan and are with the patient far more of the day. Same ladder, different rungs, most NPs I know worked as RNs first.",
       },
       { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 7 },
       { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 5 },
@@ -577,13 +577,13 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-brooks",
         postedAgo: "14h ago",
-        body: "I'm the NP in question — Marcus has it exactly right. I worked bedside for six years first, and I still think that made me a better NP than the degree did.",
+        body: "I'm the NP in question, Marcus has it exactly right. I worked bedside for six years first, and I still think that made me a better NP than the degree did.",
       },
       {
         kind: "answer",
         proId: "pro-haddad",
         postedAgo: "12h ago",
-        body: "There are also research nurses like me in the same buildings — same license, very different day. Worth comparing all the branches before you pick.",
+        body: "There are also research nurses like me in the same buildings, same license, very different day. Worth comparing all the branches before you pick.",
       },
     ],
   },
@@ -608,8 +608,8 @@ export const THREADS: Thread[] = [
         proId: "pro-cole",
         primary: true,
         postedAgo: "3h ago",
-        body: "No — a portfolio beats a diploma in this field. Art school buys you time, critique and connections, which are real, but every hiring conversation I've been in starts and ends with the work. Ten finished pieces you're proud of is the actual requirement.",
-        disclosure: "My experience hiring at one company — agencies and studios vary.",
+        body: "No, a portfolio beats a diploma in this field. Art school buys you time, critique and connections, which are real, but every hiring conversation I've been in starts and ends with the work. Ten finished pieces you're proud of is the actual requirement.",
+        disclosure: "My experience hiring at one company, agencies and studios vary.",
       },
       { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 8, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
       { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 6 },
@@ -617,13 +617,13 @@ export const THREADS: Thread[] = [
         kind: "answer",
         proId: "pro-fontaine",
         postedAgo: "4h ago",
-        body: "Self-taught motion designer here — no art school. Online courses plus two years of daily practice reels did it.",
+        body: "Self-taught motion designer here, no art school. Online courses plus two years of daily practice reels did it.",
       },
       {
         kind: "answer",
         proId: "pro-vega",
         postedAgo: "3h ago",
-        body: "Producing side: I care that you can take feedback and hit a deadline. School teaches that — but so does running a school club's channel.",
+        body: "Producing side: I care that you can take feedback and hit a deadline. School teaches that, but so does running a school club's channel.",
       },
     ],
   },
@@ -648,7 +648,7 @@ export const THREADS: Thread[] = [
         proId: "pro-vega",
         primary: true,
         postedAgo: "2h ago",
-        body: "Brand deals, ad revenue, and commissions — roughly in that order for the working creators I hire. The consistent ones treat it like a job: posting schedule, invoices, contracts.",
+        body: "Brand deals, ad revenue, and commissions, roughly in that order for the working creators I hire. The consistent ones treat it like a job: posting schedule, invoices, contracts.",
       },
       {
         kind: "answer",
@@ -680,7 +680,7 @@ export const INSIGHTS: Insight[] = [
     replies: [
       { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 14 },
       { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 6 },
-      { proId: "pro-chen", body: "Good question — a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
+      { proId: "pro-chen", body: "Good question, a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
       { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
       { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
       { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
@@ -694,13 +694,13 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-okafor",
     title: "What I wish I knew before my first finance internship",
-    body: "Nobody expects you to know the technical work on day one — they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
+    body: "Nobody expects you to know the technical work on day one, they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
     postedAgo: "5d ago",
     helpful: 38,
     replies: [
       { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 12 },
       { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 5 },
-      { proId: "pro-okafor", body: "Plenty — I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 18 },
+      { proId: "pro-okafor", body: "Plenty, I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 18 },
       { handle: "Ethan", grade: "Junior", body: "writing everything down saved me in group projects too. it scales.", postedAgo: "2d ago", likes: 6 },
       { handle: "Maya", grade: "Junior", body: "me visualizing myself being the reliable one", postedAgo: "2d ago", likes: 8, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
     ],
@@ -711,13 +711,13 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-martinez",
     title: "The 30-second answer to 'tell me about yourself'",
-    body: "One line on who you are, one on what you've done that you're proud of, one on why you're here. Practice it out loud twice. Interviewers aren't grading your biography — they're checking whether you can organize a thought.",
+    body: "One line on who you are, one on what you've done that you're proud of, one on why you're here. Practice it out loud twice. Interviewers aren't grading your biography, they're checking whether you can organize a thought.",
     postedAgo: "2d ago",
     helpful: 44,
     replies: [
       { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 16 },
       { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 4 },
-      { proId: "pro-martinez", body: "You do — it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
+      { proId: "pro-martinez", body: "You do, it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
       { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 7 },
       { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 5 },
       { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
@@ -735,7 +735,7 @@ export const INSIGHTS: Insight[] = [
     replies: [
       { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
       { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
-      { proId: "pro-reyes", body: "The opposite — the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
+      { proId: "pro-reyes", body: "The opposite, the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
       { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
       { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds intense.", postedAgo: "1d ago", likes: 5 },
       { handle: "Amir", grade: "Junior", body: "the three-day week math is wild when each day is twelve hours", postedAgo: "1d ago", likes: 6 },
@@ -748,7 +748,7 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-cole",
     title: "What a brand actually pays a designer for",
-    body: "Not prettiness — decisions. Why this color, why this type, why this layout for this audience. The day you can defend your choices out loud is the day you stop being a student and start being a designer.",
+    body: "Not prettiness, decisions. Why this color, why this type, why this layout for this audience. The day you can defend your choices out loud is the day you stop being a student and start being a designer.",
     postedAgo: "1d ago",
     helpful: 27,
     replies: [
@@ -798,7 +798,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 33,
     replies: [
-      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first — that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 9 },
+      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 9 },
       { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 4 },
       { proId: "pro-gallagher", body: "Early. But honestly the wake-up matters less than the habit: same checklist, every morning, no exceptions.", postedAgo: "22h ago", likes: 11 },
       { handle: "Riley", grade: "Sophomore", body: "'the person who noticed first' being the whole job is lowkey every job", postedAgo: "20h ago", likes: 6 },
@@ -810,7 +810,7 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-grant",
     title: "Three things that surprised me in my first week at a bank",
-    body: "Nobody expected me to know finance — they expected me to be careful. Half the job is writing clearly. And the people who moved up fastest were the ones other people wanted on their team.",
+    body: "Nobody expected me to know finance, they expected me to be careful. Half the job is writing clearly. And the people who moved up fastest were the ones other people wanted on their team.",
     postedAgo: "1w ago",
     helpful: 27,
     replies: [
@@ -841,7 +841,7 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-tanaka",
     title: "What to say when you don't know the answer in an interview",
-    body: "Say 'I don't know, but here's how I'd find out' — and then actually walk through it. Interviewers aren't testing your memory, they're testing what you do at the edge of what you know.",
+    body: "Say 'I don't know, but here's how I'd find out', and then actually walk through it. Interviewers aren't testing your memory, they're testing what you do at the edge of what you know.",
     postedAgo: "5d ago",
     helpful: 48,
     replies: [
@@ -856,12 +856,12 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-brooks",
     title: "Day shift vs night shift, honestly",
-    body: "Days are busier and you learn faster; nights are calmer and you get more time with each patient. Most new nurses do some of both in year one. Neither is the easy option — they're different kinds of hard.",
+    body: "Days are busier and you learn faster; nights are calmer and you get more time with each patient. Most new nurses do some of both in year one. Neither is the easy option, they're different kinds of hard.",
     postedAgo: "2d ago",
     helpful: 24,
     replies: [
       { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 3 },
-      { proId: "pro-brooks", body: "Nights, at first — more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 9 },
+      { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 9 },
       { handle: "Lena", grade: "Junior", body: "'different kinds of hard' is such an honest answer", postedAgo: "16h ago", likes: 5 },
     ],
   },
@@ -885,7 +885,7 @@ export const INSIGHTS: Insight[] = [
     type: "insight",
     proId: "pro-fontaine",
     title: "Your sketchbook is already a portfolio",
-    body: "Students wait for permission to have 'real work'. The messy process pages — the versions you rejected and why — are often more impressive to me than the polished final. Show your thinking, not just your taste.",
+    body: "Students wait for permission to have 'real work'. The messy process pages, the versions you rejected and why, are often more impressive to me than the polished final. Show your thinking, not just your taste.",
     postedAgo: "3d ago",
     helpful: 22,
     replies: [
@@ -906,7 +906,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 31,
     replies: [
       { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 12 },
-      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here' — writing that down forever", postedAgo: "5d ago", likes: 10 },
+      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 10 },
       { handle: "Devon", grade: "Senior", body: "rooms where good ideas could die. respect for the honesty.", postedAgo: "5d ago", likes: 6 },
     ],
   },
@@ -919,7 +919,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     type: "opportunity",
     org: "Amazon",
     kind: "Internship",
-    title: "Amazon Future Engineer — High School Internship",
+    title: "Amazon Future Engineer, High School Internship",
     body: "Paid 8-week summer internship for high school students. Work alongside Amazon engineers on real products. No prior experience required.",
     eligibility: "High school students, 16+",
     location: "Seattle, WA",
@@ -934,7 +934,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     type: "opportunity",
     org: "Google",
     kind: "Fellowship",
-    title: "Google Tech Exchange — Student Developer Program",
+    title: "Google Tech Exchange, Student Developer Program",
     body: "Semester-long program covering data structures, algorithms, and systems design with Google engineers.",
     eligibility: "Sophomores & juniors",
     location: "Mountain View, CA",
@@ -960,7 +960,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   },
 ];
 
-// ——— Event board (post-event continuation) ———
+// , , ,  Event board (post-event continuation) , , , 
 
 export type EventBoard = {
   id: string;
@@ -979,9 +979,9 @@ export type EventBoard = {
   students?: number;
   pros?: number;
   postCount?: number;
-  entitled: boolean; // prototype: simulated AccessGrant — real entitlement is server-side (P0)
-  code?: string; // prototype: demo redemption token — real tokens are single-use/server-side (handoff 9.2)
-  // Upcoming events have neither yet — there's nothing to recap or share
+  entitled: boolean; // prototype: simulated AccessGrant, real entitlement is server-side (P0)
+  code?: string; // prototype: demo redemption token, real tokens are single-use/server-side (handoff 9.2)
+  // Upcoming events have neither yet, there's nothing to recap or share
   // until the event itself has happened.
   recap?: { proId: string; takeaways: string[]; postedAgo: string };
   resources?: { title: string; description: string; sourceLabel: string }[];
@@ -1001,11 +1001,11 @@ export const EVENTS: EventBoard[] = [
     postCount: 48,
     orgs: ["Ernst & Young", "Dreamari"],
     topics: ["Consulting", "Finance", "Networking"],
-    entitled: true, // already joined — demonstrates the straight-into-the-board state
+    entitled: true, // already joined, demonstrates the straight-into-the-board state
     recap: {
       proId: "pro-martinez",
       takeaways: [
-        "Your major does not determine your career path — several of us on the panel changed directions completely.",
+        "Your major does not determine your career path, several of us on the panel changed directions completely.",
         "Every person you spoke to is someone you can follow up with. Do it within 48 hours while the conversation is fresh.",
         "Curiosity is the skill that matters most early in your career. Keep asking the questions you didn't get to ask.",
       ],
@@ -1089,7 +1089,7 @@ export const EVENT_THREADS: Thread[] = [
     boardId: "event-ey",
     type: "question",
     title: "What's actually different between consulting and investment banking?",
-    context: "One of the speakers mentioned consulting today. I've been going back and forth between the two — they sound similar from the outside but I can tell they're not.",
+    context: "One of the speakers mentioned consulting today. I've been going back and forth between the two, they sound similar from the outside but I can tell they're not.",
     handle: "Devon",
     grade: "Senior",
     postedAgo: "3h ago",
@@ -1106,7 +1106,7 @@ export const EVENT_THREADS: Thread[] = [
         proId: "pro-martinez",
         primary: true,
         postedAgo: "2h ago",
-        body: "Shortest version: bankers price and close deals; consultants change how companies run. Transactions versus transformations — different rhythms, both client-service jobs.",
+        body: "Shortest version: bankers price and close deals; consultants change how companies run. Transactions versus transformations, different rhythms, both client-service jobs.",
       },
     ],
   },
@@ -1139,7 +1139,7 @@ export const EVENT_THREADS: Thread[] = [
         primary: true,
         postedAgo: "5h ago",
         body: "Pick one thing and act on it this month. If a panelist named a skill, find the free version of it and spend two hours there. If they named a class, check whether your school offers it next term. Then post what you found back here so the next person gets it too. Notes you act on once beat notes you reread five times.",
-        disclosure: "Personal approach — different professionals prefer different styles.",
+        disclosure: "Personal approach, different professionals prefer different styles.",
       },
       { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 6 },
     ],

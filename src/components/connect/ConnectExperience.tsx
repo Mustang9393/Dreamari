@@ -17,7 +17,6 @@ import {
   Star,
   ExternalLink,
   Flag,
-  GraduationCap,
   KeyRound,
   MapPin,
   Pin,
@@ -188,7 +187,7 @@ function InlineAsk({
       </div>
       <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          Posting as Jordan · Junior — pros see your grade, never your full name
+          Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
@@ -214,7 +213,7 @@ function LocalQuestionCard({ title }: { title: string }) {
       </div>
       <p className="mt-[8px] text-[15px] leading-[21px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>&ldquo;{title}&rdquo;</p>
       <p className="mt-[6px] flex items-center gap-[5px] text-[11.5px] leading-[16px] font-semibold" style={{ color: STATE_COLOR.awaiting }}>
-        <Clock className="h-3 w-3" aria-hidden /> Sent to verified pros — answers usually land within 48 hours
+        <Clock className="h-3 w-3" aria-hidden /> Sent to verified pros. Answers usually land within 48 hours.
       </p>
     </div>
   );
@@ -224,7 +223,7 @@ function LocalQuestionCard({ title }: { title: string }) {
 
 function StatusChip({ state }: { state: Thread["state"] }) {
   return (
-    <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state], fontFamily: "var(--font-body)" }}>
+    <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state] }}>
       {state === "awaiting" ? <Clock className="h-3 w-3" aria-hidden /> : state === "routed" ? <ArrowRight className="h-3 w-3" aria-hidden /> : <CheckCircle2 className="h-3 w-3" aria-hidden />}
       {STATE_LABEL[state]}
     </span>
@@ -324,8 +323,8 @@ function IdentityBadge({ handle, grade, postedAgo }: { handle: string; grade: st
     <div className="flex items-center gap-[10px]">
       <Avatar name={handle} size={34} />
       <div className="flex min-w-0 flex-col">
-        <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>{handle}</span>
-        <span className="text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{grade} · {postedAgo}</span>
+        <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{handle}</span>
+        <span className="text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)" }}>{grade} · {postedAgo}</span>
       </div>
     </div>
   );
@@ -339,8 +338,8 @@ function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: 
     <div className="flex items-center gap-[10px]">
       <Avatar name={pro.name} verified size={size} />
       <div className="flex min-w-0 flex-col">
-        <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>{pro.name}</span>
-        <span className="text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+        <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+        <span className="text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
           {pro.org} · {pro.role}
           {postedAgo ? ` · ${postedAgo}` : ""}
         </span>
@@ -366,6 +365,11 @@ function communityAccent(community: Pick<Community, "world">): string {
 // people-free artwork, not a portrait. Symmetric grid, every tile equal.
 // Signals kept to the earned three: name, verified-pro count, students.
 const CARD_INK = "#221e33";
+
+// Community feeds read in the platform's own UI face (what Instagram,
+// Facebook, and every OS-native feed does): sturdy at small sizes, high
+// x-height, no display-font airiness. Bricolage stays for identity type.
+const FEED_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
 // The mask IS the topic (per direct feedback): each community's art is
 // clipped into an icon of its own subject -- a briefcase, rising bars, a
@@ -536,7 +540,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
       type="button"
       onClick={onClick}
       className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
-      style={{ background: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-body)" }}
+      style={{ background: "var(--primary)", color: "#FFFFFF" }}
     >
       {children}
     </button>
@@ -549,7 +553,7 @@ function QuietCta({ children, onClick, className = "" }: { children: React.React
       type="button"
       onClick={onClick}
       className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
-      style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)", fontFamily: "var(--font-body)" }}
+      style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
     >
       {children}
     </button>
@@ -591,7 +595,8 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
       <div className="flex items-center justify-between gap-[var(--space-3)] pr-[22px]">
         <span className="flex min-w-0 items-center gap-[8px]">
           <Avatar name={thread.handle} size={26} />
-          <span className="truncate text-[12px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+          <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
           {comments === 0 && (
             <span className="inline-flex flex-none rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
               Unanswered
@@ -607,16 +612,6 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
           Answered by {proById(answeredBy.proId).name} · {proById(answeredBy.proId).org}
         </p>
       )}
-      <div className="mt-[10px] flex flex-wrap items-center gap-[7px]">
-        <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
-          <GraduationCap className="h-[12px] w-[12px]" aria-hidden /> {thread.grade}
-        </span>
-        {thread.location && (
-          <span className="inline-flex items-center gap-[5px] rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" }}>
-            <MapPin className="h-[12px] w-[12px]" aria-hidden /> {thread.location}
-          </span>
-        )}
-      </div>
       <div className="relative z-20 mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
@@ -625,7 +620,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
           <span className="flex items-center gap-[5px]"><Eye className="h-3.5 w-3.5" aria-hidden /> {thread.views.toLocaleString()}</span>
         )}
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments} comments
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
         </button>
         <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
@@ -659,14 +654,14 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{pro.org}</span>
           </div>
-          <h3 className="mt-[7px] text-[14.5px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>{insight.title}</h3>
+          <h3 className="mt-[7px] text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
           <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
               <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
             </button>
             <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length} comments
+              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{insight.replies.length} comments</span>
             </button>
             <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
               <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
@@ -698,8 +693,8 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
             className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
             style={
               active === option.key
-                ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-body)" }
-                : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }
+                ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }
+                : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }
             }
           >
             {option.Icon && <option.Icon className="h-[15px] w-[15px]" aria-hidden />}
@@ -764,7 +759,7 @@ export function ConnectExperience() {
   });
 
   return (
-    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
       <DesktopNavigation active="Connect" />
 
       {/* Mobile header (matches Home's pattern) */}
@@ -779,6 +774,7 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <style>{SHAPE_ANIM_CSS}</style>
       <main
+        style={{ fontFamily: FEED_FONT }}
         className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${view.kind === "home" ? "gap-[var(--space-4)]" : "gap-[var(--space-6)]"} ${
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
@@ -904,7 +900,7 @@ export function ConnectExperience() {
             setEventJoined((j) => ({ ...j, [id]: true }));
             setCodeOpenFor(null);
             setView({ kind: "event", id, filter: "all" });
-            say("Event board unlocked. It stays under Your events — no code needed next time.");
+            say("Event board unlocked. It stays under Your events. No code needed next time.");
           }}
         />
       )}
@@ -1197,38 +1193,20 @@ function BoardView({
            left rail (Student Questions / Professional Insights -- the doc
            cuts Industry Updates) and the active panel. The rail collapses
            to a pill row on phones. */
-        <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
-          <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-4)] md:w-[220px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
-            {[
-              { key: "questions", label: "Student Questions", short: "Questions", Icon: MessagesSquare },
-              { key: "insights", label: "Professional Insights", short: "Insights", Icon: ShieldCheck },
-            ].map(({ key, label, short, Icon }) => (
-              <button
-                key={key}
-                type="button"
-                aria-current={filter === key}
-                onClick={() => onFilter(key)}
-                className="dm-quiet flex min-h-[44px] flex-1 cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-3)] text-left text-[12.5px] leading-[16px] font-bold md:max-h-[52px] md:flex-none"
-                style={
-                  filter === key
-                    ? { background: `color-mix(in srgb, ${communityAccent(community)} 14%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 45%, var(--glass-border))`, color: "var(--foreground)" }
-                    : { background: "transparent", borderColor: "transparent", color: "var(--muted-foreground)" }
-                }
-              >
-                <Icon className="h-[15px] w-[15px] flex-none" aria-hidden />
-                <span className="whitespace-nowrap md:hidden">{short}</span>
-                <span className="hidden whitespace-nowrap md:inline">{label}</span>
-              </button>
-            ))}
-          </nav>
+        <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-xl)] border p-[var(--space-5)] md:p-[var(--space-6)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
+          <FilterRow
+            options={[
+              { key: "questions", label: "Student Questions", Icon: MessagesSquare },
+              { key: "insights", label: "Professional Insights", Icon: ShieldCheck },
+            ]}
+            active={filter}
+            onPick={onFilter}
+          />
 
-          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-5)] p-[var(--space-5)] md:p-[var(--space-6)]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-5)]">
             {filter === "questions" && (
               <>
-                <div>
-                  <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Questions</h2>
-                  <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
-                </div>
+                <p className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
                 <InlineAsk
                   joined={joined}
                   onRequireJoin={onJoin}
@@ -1239,7 +1217,7 @@ function BoardView({
                 {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
                 {threads.length === 0 && (
                   <Card>
-                    <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet — yours could be the first.</p>
+                    <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
                     <ul className="mt-[8px] flex flex-col gap-[6px]">
                       {STARTER_PROMPTS.map((p) => (
                         <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
@@ -1251,10 +1229,7 @@ function BoardView({
             )}
             {filter === "insights" && (
               <>
-                <div>
-                  <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Professional Insights</h2>
-                  <p className="mt-[2px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
-                </div>
+                <p className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
                 {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
                 {insights.length === 0 && (
                   <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
@@ -1505,7 +1480,7 @@ function ThreadView({
 
         {thread.responses.length === 0 && (
           <Card>
-            <p className="text-[13px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet — we&apos;ll notify you.</p>
+            <p className="text-[13px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet. We&apos;ll notify you.</p>
           </Card>
         )}
 
@@ -1776,7 +1751,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 24%, #f4f1ea)`, fontFamily: "var(--font-display)" }}>
           <ShapeBadge id={community.id} size={48} radials={false} />
           <h2 className="min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: CARD_INK }}>Join {community.name}</h2>
@@ -1849,14 +1824,14 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", fontFamily: "var(--font-body)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
             <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
             <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.location} · Hosted by {event.host}</p>
             <p className="mt-[10px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>
-              This private board is limited to verified attendees and event professionals. Joining adds it to Your events — you won&apos;t need the code again, and access can be managed by the host.
+              This private board is limited to verified attendees and event professionals. Joining adds it to Your events. You won&apos;t need the code again, and access can be managed by the host.
             </p>
             <div className="mt-[var(--space-5)] flex gap-[var(--space-3)]">
               <PrimaryCta onClick={onRedeemed} className="flex-1">Join event board</PrimaryCta>
@@ -1872,7 +1847,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
               </button>
             </div>
             <p className="mt-[6px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              Event codes come from a Dreamari event — on your badge, the closing slide, or the follow-up email. They unlock a private board for attendees.
+              Event codes come from a Dreamari event: on your badge, the closing slide, or the follow-up email. They unlock a private board for attendees.
             </p>
             <label className="mt-[var(--space-4)] block">
               <span className="sr-only">Event code</span>
