@@ -58,7 +58,14 @@ tokens above, in both modes).
   branch to origin/demo (Vercel preview
   dreamari-git-demo-chandump14-3961s-projects.vercel.app). NEVER merge or
   push to main until the user explicitly says "push to main".
-- Next: carry the winning card language into board/thread screens.
+- Carried into every Connect screen: board + event banners are pastel
+  identity cards (ShapeBadge = shape + concentric radials at any size),
+  events tab cards are pastel star cards (STAR_CLIP + event.webp glass
+  art), thread/insight breadcrumbs are board-accent pastel pills, JoinSheet
+  header is pastel with a mini shape. gradientFor/WorldGlyph retired.
+  EVENT_ACCENT hardcoded #f59e0b (--chart-3 resolves empty at :root).
+- Note: the browser pane's slow synthetic clicks lose against dm-tap's
+  press transform — verify navigation with element.click() in JS.
 
 ### 2026-09-01 (cont.) Connect pitch-readiness round (PUSHED, af1acc7)
 
