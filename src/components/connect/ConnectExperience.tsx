@@ -514,13 +514,13 @@ function CommunityCard({
           </span>
         </div>
 
-        <p className="mt-[10px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
-          {community.activePros} verified pros
+        <p className="mt-[10px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
+          <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros
           <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
         </p>
         <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
-          <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
-            {community.students} students
+          <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
+            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.posts}</strong> posts
           </span>
           <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, ${CARD_INK})` }}>
             Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
@@ -665,7 +665,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
           <div className="flex flex-wrap items-center gap-[6px]">
             <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
-            <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{pro.org}</span>
+            <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
           </div>
           <h3 className="mt-[7px] text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
@@ -1040,25 +1040,21 @@ function HomeView({
                     <ShapeBadge id="event" size={108} className="hidden sm:block" />
                   </div>
                   <div className="mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
-                    <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
+                    <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
                       {typeof event.students === "number" ? (
                         <>
-                          {event.students} students · {event.pros} pros
-                          <span className="hidden sm:inline"> · {event.postCount} posts</span>
+                          <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{event.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{event.pros}</strong> pros
+                          <span className="hidden sm:inline"> · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{event.postCount}</strong> posts</span>
                         </>
                       ) : (
-                        event.lifecycle
+                        "Opens after the event"
                       )}
                     </span>
                     {joined ? (
                       <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${CARD_INK})` }}>
                         Open Board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
                       </button>
-                    ) : upcoming ? (
-                      <span className="flex-none text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 60%, transparent)` }}>
-                        Opens after the event
-                      </span>
-                    ) : (
+                    ) : upcoming ? null : (
                       <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${CARD_INK})` }}>
                         <KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code
                       </button>
@@ -1084,7 +1080,6 @@ function SuggestCommunityCard() {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Can&apos;t find what you&apos;re looking for?</span>
-        <span className="mt-[2px] block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Request a community or suggest topics you&apos;d love to explore.</span>
       </span>
       <button
         type="button"
@@ -1149,10 +1144,6 @@ function BoardView({
         <div className="flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
             <h1 className="text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: CARD_INK }}>{community.name}</h1>
-            <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
-              {community.activePros} verified pros{" "}
-              <ShieldCheck className="inline-block h-[13px] w-[13px] align-[-2px]" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 70%, ${CARD_INK})` }} />
-            </p>
           </div>
           <ShapeBadge id={community.id} size={84} className="sm:hidden" />
           <ShapeBadge id={community.id} className="hidden sm:block" />
@@ -1174,8 +1165,10 @@ function BoardView({
           ))}
         </div>
         <div className="mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
-          <span className="text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
-            {community.students} students
+          <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
+            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros{" "}
+            <ShieldCheck className="inline-block h-[13px] w-[13px] align-[-2px]" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 70%, ${CARD_INK})` }} />
+            {" "}· <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.posts}</strong> posts
           </span>
           {joined ? (
             <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${CARD_INK})` }}>
@@ -1221,7 +1214,6 @@ function BoardView({
           <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-5)]">
             {filter === "questions" && (
               <>
-                <p className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask. Learn. Grow.</p>
                 <InlineAsk
                   joined={joined}
                   onRequireJoin={onJoin}
@@ -1244,7 +1236,6 @@ function BoardView({
             )}
             {filter === "insights" && (
               <>
-                <p className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read insights from professionals and join the conversation.</p>
                 {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
                 {insights.length === 0 && (
                   <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
