@@ -189,6 +189,12 @@ function InlineAsk({
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
+        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
+          <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
+        </button>
+        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+          Polish
+        </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
@@ -526,9 +532,16 @@ function CommunityCard({
 }
 
 
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className = "", accent }: { children: React.ReactNode; className?: string; accent?: string }) {
   return (
-    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`} style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+    <div
+      className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`}
+      style={
+        accent
+          ? { background: `color-mix(in srgb, ${accent} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 26%, var(--glass-border))` }
+          : { background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }
+      }
+    >
       {children}
     </div>
   );
@@ -578,7 +591,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
   const comments = thread.responses.length;
   const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
   return (
-    <Card className="dm-tap group relative cursor-pointer">
+    <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the thread (direct feedback: "make it
          obviously easily clickable") -- an overlay target under the
          like/save controls, a hover ring, and a chevron that says "this
@@ -637,7 +650,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const pro = proById(insight.proId);
   return (
-    <Card className="dm-tap group relative cursor-pointer">
+    <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the insight's thread -- overlay target under
          the like/save controls, hover ring, and an always-visible chevron. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
@@ -1585,7 +1598,12 @@ function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, o
         {image && (
           <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[14px] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
         )}
-        <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
+        <div className="flex flex-wrap items-center gap-[10px]">
+          <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
+          <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1593,6 +1611,12 @@ function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, o
 
 /** The reply box at the foot of a thread: type, post, and the comment
  *  appears immediately as the signed-in student ("Jordan · Junior"). */
+function focusReplyComposer() {
+  const box = document.getElementById("dm-reply-composer");
+  box?.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => box?.querySelector("textarea")?.focus(), 350);
+}
+
 function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   const [text, setText] = useState("");
   const submit = () => {
@@ -1601,7 +1625,7 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
     setText("");
   };
   return (
-    <div className="flex items-start gap-[12px] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+    <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
       <Avatar name="Jordan Rivera" size={32} />
       <div className="min-w-0 flex-1">
         <label className="block">
