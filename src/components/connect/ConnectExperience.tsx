@@ -393,6 +393,27 @@ const SHAPE_CLIP: Record<string, string> = {
 // Purpose-built art for the masks: tone-on-tone "accent glass" gradients
 // generated for each world, so the shapes read as luminous color at 128px
 // instead of dark photo crops.
+// High-key generated covers for the photo cards: bright accent art with a
+// per-world motif, built with a deepened bottom third so the scrim can stay
+// light and the type stays AA-legible.
+// The CEO's own reference photography (people-free), cropped for the cards.
+const PHOTO_COVER: Record<string, string> = {
+  "teaching-education": "/images/connect/covers/photo2-teaching-education.webp",
+  "business-money": "/images/connect/covers/photo2-business-money.webp",
+  "tech-engineering": "/images/connect/covers/photo2-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/photo2-health-medicine.webp",
+  "arts-media": "/images/connect/covers/photo2-arts-media.webp",
+};
+// Flat poster illustrations: subject upper-right, left + bottom kept calm
+// so the art never fights the title or the folio.
+const ILLUSTRATION_COVER: Record<string, string> = {
+  "teaching-education": "/images/connect/covers/art2-gpd.webp",
+  "business-money": "/images/connect/covers/art2-finance.webp",
+  "tech-engineering": "/images/connect/covers/art2-technology.webp",
+  "health-medicine": "/images/connect/covers/art2-healthcare.webp",
+  "arts-media": "/images/connect/covers/art2-creative.webp",
+};
+
 const SHAPE_ART: Record<string, string> = {
   "teaching-education": "/images/connect/shapes/teaching-education.webp",
   "business-money": "/images/connect/shapes/business-money.webp",
@@ -467,23 +488,24 @@ function CommunityCard({
   community: Community;
   onOpen: () => void;
   featured?: boolean;
-  /** "photos" = full-bleed cover art; "shapes" = the pinned pastel tiles. */
-  variant?: "photos" | "shapes";
+  /** "photos" = CEO reference photography; "illustrations" = flat poster
+   *  art; "shapes" = the pinned pastel tiles. */
+  variant?: "photos" | "illustrations" | "shapes";
 }) {
   const accent = communityAccent(community);
   const surface = `color-mix(in srgb, ${accent} 24%, #f4f1ea)`;
   const clip = SHAPE_CLIP[community.id];
 
-  if (variant === "photos") {
+  if (variant === "photos" || variant === "illustrations") {
     return (
       <div
         className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
         style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)` }}
       >
         {/* full-bleed cover, slow push-in on hover */}
-        <Image src={community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "60% 42%" }} />
+        <Image src={(variant === "photos" ? PHOTO_COVER[community.id] : ILLUSTRATION_COVER[community.id]) ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "60% 42%" }} />
         {/* progressive scrim keeps every tier legible without dimming the art */}
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(9,10,20,0.9) 0%, rgba(9,10,20,0.62) 34%, rgba(9,10,20,0.22) 62%, rgba(9,10,20,0.05) 100%)" }} />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.82) 0%, rgba(14,12,32,0.5) 36%, rgba(14,12,32,0.14) 64%, transparent 100%)" }} />
 
         <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
           <span className="sr-only">{`Open ${community.name}`}</span>
@@ -993,16 +1015,17 @@ function HomeView({
   const [query, setQuery] = useState("");
   // Lab pin: both card explorations stay one click apart. Default is the
   // photo cards; ?cards=shapes brings back the pastel shape tiles.
-  const [cardVariant, setCardVariant] = useState<"photos" | "shapes">("photos");
+  const [cardVariant, setCardVariant] = useState<"photos" | "illustrations" | "shapes">("photos");
   useEffect(() => {
     // read after mount: SSR always renders the default, so hydration matches
-    if (new URLSearchParams(window.location.search).get("cards") === "shapes") setCardVariant("shapes");
+    const v = new URLSearchParams(window.location.search).get("cards");
+    if (v === "shapes" || v === "illustrations") setCardVariant(v);
   }, []);
-  const pickVariant = (v: "photos" | "shapes") => {
+  const pickVariant = (v: "photos" | "illustrations" | "shapes") => {
     setCardVariant(v);
     const url = new URL(window.location.href);
-    if (v === "shapes") url.searchParams.set("cards", "shapes");
-    else url.searchParams.delete("cards");
+    if (v === "photos") url.searchParams.delete("cards");
+    else url.searchParams.set("cards", v);
     window.history.replaceState(null, "", url.toString());
   };
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
@@ -1054,7 +1077,7 @@ function HomeView({
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             <div className="flex items-center gap-[6px]" role="group" aria-label="Card style">
-              {(["photos", "shapes"] as const).map((v) => (
+              {(["photos", "illustrations", "shapes"] as const).map((v) => (
                 <button
                   key={v}
                   type="button"
@@ -1173,7 +1196,7 @@ function SuggestCommunityCard() {
     </button>
   );
 }
-function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: "photos" | "shapes" }) {
+function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: "photos" | "illustrations" | "shapes" }) {
   return <CommunityCard community={community} onOpen={onOpen} featured={featured} variant={variant} />;
 }
 
