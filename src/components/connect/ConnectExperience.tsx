@@ -462,14 +462,60 @@ function CommunityCard({
   community,
   onOpen,
   featured,
+  variant = "photos",
 }: {
   community: Community;
   onOpen: () => void;
   featured?: boolean;
+  /** "photos" = full-bleed cover art; "shapes" = the pinned pastel tiles. */
+  variant?: "photos" | "shapes";
 }) {
   const accent = communityAccent(community);
   const surface = `color-mix(in srgb, ${accent} 24%, #f4f1ea)`;
   const clip = SHAPE_CLIP[community.id];
+
+  if (variant === "photos") {
+    return (
+      <div
+        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
+        style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)` }}
+      >
+        {/* full-bleed cover, slow push-in on hover */}
+        <Image src={community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "60% 42%" }} />
+        {/* progressive scrim keeps every tier legible without dimming the art */}
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(9,10,20,0.9) 0%, rgba(9,10,20,0.62) 34%, rgba(9,10,20,0.22) 62%, rgba(9,10,20,0.05) 100%)" }} />
+
+        <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">{`Open ${community.name}`}</span>
+        </button>
+
+        {featured && (
+          <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
+            <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
+          </span>
+        )}
+
+        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF", textShadow: "0 1px 14px rgba(0,0,0,0.45)" }}>
+            {community.name}
+          </h3>
+          <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
+            <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> verified pros
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }} />
+          </p>
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
+            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.posts}</strong> posts
+            </span>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}>
+              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
@@ -945,6 +991,20 @@ function HomeView({
   onEnterCode: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  // Lab pin: both card explorations stay one click apart. Default is the
+  // photo cards; ?cards=shapes brings back the pastel shape tiles.
+  const [cardVariant, setCardVariant] = useState<"photos" | "shapes">("photos");
+  useEffect(() => {
+    // read after mount: SSR always renders the default, so hydration matches
+    if (new URLSearchParams(window.location.search).get("cards") === "shapes") setCardVariant("shapes");
+  }, []);
+  const pickVariant = (v: "photos" | "shapes") => {
+    setCardVariant(v);
+    const url = new URL(window.location.href);
+    if (v === "shapes") url.searchParams.set("cards", "shapes");
+    else url.searchParams.delete("cards");
+    window.history.replaceState(null, "", url.toString());
+  };
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
   const searchedEvents = EVENTS.filter((e) => !query || (e.name + " " + e.host + " " + e.location).toLowerCase().includes(query.toLowerCase()));
 
@@ -991,9 +1051,22 @@ function HomeView({
            grid. Search filters this same grid rather than a separate
            "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
-          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
-            {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{searched.length} communities</span>}
+            <div className="flex items-center gap-[6px]" role="group" aria-label="Card style">
+              {(["photos", "shapes"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={cardVariant === v}
+                  onClick={() => pickVariant(v)}
+                  className="dm-quiet min-h-[30px] cursor-pointer rounded-full border px-[12px] text-[11.5px] leading-[15px] font-bold capitalize"
+                  style={cardVariant === v ? { background: "var(--glass-surface-1)", borderColor: "var(--foreground)", color: "var(--foreground)" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
              centered beneath. */}
@@ -1003,7 +1076,7 @@ function HomeView({
                 key={c.id}
                 className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""} ${index === 4 && searched.length === 5 ? "sm:col-span-2 sm:mx-auto sm:w-[calc(50%-var(--space-5)/2)] lg:col-span-2 lg:mx-0 lg:w-auto" : ""}`}
               >
-                <CommunityRow community={c} onOpen={() => onOpenBoard(c.id)} featured={index === 0 && !query} />
+                <CommunityRow community={c} onOpen={() => onOpenBoard(c.id)} featured={index === 0 && !query} variant={cardVariant} />
               </div>
             ))}
           </div>
@@ -1100,8 +1173,8 @@ function SuggestCommunityCard() {
     </button>
   );
 }
-function CommunityRow({ community, onOpen, featured }: { community: Community; onOpen: () => void; featured?: boolean }) {
-  return <CommunityCard community={community} onOpen={onOpen} featured={featured} />;
+function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: "photos" | "shapes" }) {
+  return <CommunityCard community={community} onOpen={onOpen} featured={featured} variant={variant} />;
 }
 
 // ——— community board (handoff 8) ———
