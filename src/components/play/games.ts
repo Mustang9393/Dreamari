@@ -43,7 +43,7 @@ export const REGISTERED_NURSE: Simulation = {
   title: "Registered Nurse",
   world: "Health & Medicine",
   firm: "Riverbend Medical Center",
-  cover: "/images/play/rn/locations/station.jpg",
+  cover: "/images/play/rn/locations/station-hero.webp",
   // The trailer (Trailer tab): same seven-beat shape as every career --
   // the scale, the odds, the cost, the room, the consequence, the person
   // at the top, the ladder. Reuse only. The two statistic cards ship

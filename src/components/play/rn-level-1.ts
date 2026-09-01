@@ -31,7 +31,7 @@ export const RN_LEVEL_1: Level = {
   role: "New Grad RN",
   title: "The First Year",
   blurb: "Four West, Riverbend Medical Center. Learn the language, watch your patients, and say it out loud the moment something changes.",
-  cover: `${ART}/locations/station.jpg`,
+  cover: `${ART}/locations/station-hero.webp`,
   mood: "day",
   cast: {
     Rosa: `${ART}/face-rosa.jpg`,
