@@ -84,21 +84,40 @@ function SourceLink({ url, children }: { url: string; children: React.ReactNode 
 // instead of one continuous column of text. Nothing here collapses: the
 // export has to carry everything, and a dropdown is exactly how information
 // goes missing from a printed document.
+//
+// The card used to separate from the page (and its own tiles) by only a few
+// RGB values, so the whole report read as one flat surface no matter how
+// many boxes and borders were drawn on it -- widening that ramp (app.css)
+// is the real fix, but this card also picked up a soft shadow and a small
+// tinted icon badge so each section has an unmistakable anchor to land the
+// eye on while scrolling, the way a dashboard's module headers do.
 function ReportSection({ id, n, title, icon: Icon, action, children }: { id: string; n: number; title: string; icon?: typeof Check; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-[84px] overflow-hidden rounded-[14px] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
-      <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[8px] border-b px-[16px] py-[13px] sm:px-[20px]" style={{ borderColor: "var(--rule)" }}>
-        {Icon && <Icon className="h-[17px] w-[17px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className="scroll-mt-[84px] overflow-hidden rounded-[16px] border"
+      style={{ borderColor: "var(--rule)", background: "var(--paper-raised)", boxShadow: "0 16px 32px -24px rgba(0,0,0,0.65)" }}
+    >
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] border-b px-[18px] py-[15px] sm:px-[24px] sm:py-[17px]" style={{ borderColor: "var(--rule)" }}>
+        {Icon && (
+          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
+            <Icon className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
+          </span>
+        )}
         <span aria-hidden className="dm-report-num sr-only">{String(n).padStart(2, "0")}</span>
         {/* The one hierarchy, everywhere: section heading (18) > label (14)
            > body (13). Never let a value render larger than the heading
-           above it, whatever the value "deserves". */}
+           above it, whatever the value "deserves". Every other section-level
+           heading on this surface (Reflection, Share, Counselor Review,
+           Sources) matches this exact size -- one heading tier, not several
+           near-misses that compete with each other while scrolling. */}
         <h3 id={`${id}-title`} className="text-[18px] leading-[23px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           {title}
         </h3>
         {action && <span className="ml-auto">{action}</span>}
       </div>
-      <div className="px-[16px] py-[16px] sm:px-[20px] sm:py-[18px]">
+      <div className="px-[18px] py-[20px] sm:px-[24px] sm:py-[24px]">
         {children}
       </div>
     </section>
@@ -110,12 +129,12 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
 // labels first, values second, and never has to parse a sentence.
 function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
-    <div className={`rounded-[10px] border px-[14px] py-[12px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+    <div className={`rounded-[12px] border px-[16px] py-[14px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
       <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>
-        {Icon && <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />}
+        {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
         {label}
       </dt>
-      <dd className="mt-[6px] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{value}</dd>
+      <dd className="mt-[7px] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{value}</dd>
     </div>
   );
 }
@@ -227,39 +246,44 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-7)] sm:py-[var(--space-9)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-8)] sm:py-[var(--space-10)]"
     >
       <div className="mx-auto max-w-[920px]">
-        {/* Masthead: one big line (the student's name), everything else as
-           small labeled chips -- the old double stack of 42px lines competed
-           with itself and with every section heading below it. */}
+        {/* Masthead: mechanical hierarchy, not a hierarchy-by-importance --
+           "Dreamari Career Report" is the document's actual title (what
+           kind of document this is), so it is the heading, full stop.
+           Whose report it is comes after, as a subheading, however much
+           more "interesting" a name reads than a document type. It's plain
+           text now too, not a chip: a heading doesn't need a pill around it
+           to read as one, and the pill shape was fighting the same "how
+           much visual weight does this deserve" question from the other
+           side. */}
         <header data-print-keep className="flex flex-col items-start">
-          <p className="inline-flex items-center gap-[7px] rounded-full border px-[13px] py-[6px] text-[11px] leading-[14px] font-bold tracking-[0.11em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-            <BadgeCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--primary)" }} />
+          <h1 className="flex items-center gap-[10px] text-[26px] leading-[30px] font-extrabold tracking-[-0.015em] uppercase sm:text-[34px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>
+            <BadgeCheck className="h-[22px] w-[22px] flex-none sm:h-[27px] sm:w-[27px]" aria-hidden />
             Dreamari Career Report
-          </p>
-          <h2 className="mt-[14px] text-[30px] leading-[33px] font-extrabold tracking-[-0.022em] sm:text-[40px] sm:leading-[43px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
-          <p className="mt-[12px] flex flex-wrap items-center gap-[7px] text-[13px] leading-[17px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink-soft)" }}>
-            <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
+          </h1>
+          <h2 className="mt-[12px] text-[19px] leading-[24px] font-bold tracking-[-0.01em] sm:text-[21px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{student.name}</h2>
+          <p className="mt-[10px] flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[14px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink-soft)" }}>
+            <span>{`${ordinal(student.grade.replace(/\D/g, ""))} Grade`}</span>
+            <span aria-hidden style={{ color: "var(--ink-faint)" }}>·</span>
             {ACADEMIC_RECORD.verified && (
-              <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
-                {`${ACADEMIC_RECORD.gpa} GPA`}
-                <BadgeCheck className="ml-[5px] inline h-[14px] w-[14px] align-[-2.5px]" aria-hidden style={{ color: "var(--primary)" }} />
-                <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
-              </span>
+              <>
+                <span>
+                  {`${ACADEMIC_RECORD.gpa} GPA`}
+                  <BadgeCheck className="ml-[5px] inline h-[14px] w-[14px] align-[-2.5px]" aria-hidden style={{ color: "var(--primary)" }} />
+                  <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
+                </span>
+                <span aria-hidden style={{ color: "var(--ink-faint)" }}>·</span>
+              </>
             )}
-            <span className="rounded-[7px] border px-[10px] py-[4px]" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>{student.school}</span>
-          </p>
-          {/* suppressHydrationWarning: the generated date is the reader's
-             "today", so a server render across midnight must not error. */}
-          <p className="mt-[10px] text-[12.5px] leading-[17px] tracking-[-0.008em]" style={{ color: "var(--ink-faint)" }} suppressHydrationWarning>
-            Report generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            <span>{student.school}</span>
           </p>
         </header>
 
         {/* The sections stack as separate modules with real air between them,
            not one continuous ruled column. */}
-        <div className="mt-[26px] flex flex-col gap-[16px] sm:mt-[30px] sm:gap-[18px]">
+        <div className="mt-[32px] flex flex-col gap-[26px] sm:mt-[38px] sm:gap-[32px]">
 
         {/* 01 — At a Glance. The same facts as labeled tiles: what-you-do
            spans the row, employers and salary sit side by side under it. */}
@@ -279,7 +303,7 @@ function ReportDocument({
             </Link>
           }
         >
-          <dl className="grid gap-[10px] sm:grid-cols-2" data-keep-together>
+          <dl className="grid gap-[14px] sm:grid-cols-2" data-keep-together>
             <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
             <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
             <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
@@ -288,9 +312,9 @@ function ReportDocument({
 
         {/* 02 — Three Majors to Explore */}
         <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore" icon={BookOpen}>
-          <div className="grid grid-cols-3 gap-[8px] sm:gap-[10px]" data-keep-together>
+          <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3 sm:gap-[14px]" data-keep-together>
             {report.majors.map((major) => (
-              <div key={major.name} className="flex items-center gap-[8px] rounded-[10px] border px-[12px] py-[13px] sm:px-[14px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+              <div key={major.name} className="flex items-center gap-[9px] rounded-[12px] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                 <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
@@ -301,18 +325,18 @@ function ReportDocument({
         {/* 03 — Education. The common path gets the one accented tile on the
            page; the alternatives are even rows under a caps label. */}
         <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
-          <div className="flex flex-col gap-[14px]" data-keep-together>
-            <div className="rounded-[10px] border px-[14px] py-[12px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
+          <div className="flex flex-col gap-[20px]" data-keep-together>
+            <div className="rounded-[12px] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
               <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
-              <p className="mt-[6px] max-w-[50ch] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
+              <p className="mt-[7px] max-w-[50ch] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
                 {report.education.find((route) => route.common)?.name}
               </p>
             </div>
             <div>
               <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
-              <ul className="mt-[8px] grid list-none gap-[8px] p-0 sm:grid-cols-2">
+              <ul className="mt-[10px] grid list-none gap-[10px] p-0 sm:grid-cols-2">
                 {report.education.filter((route) => !route.common).map((route) => (
-                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[10px] border px-[14px] py-[11px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[12px] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
                     <span className="flex-none rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                   </li>
@@ -329,10 +353,10 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
             <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
-            <ul className="mt-[8px] flex list-none flex-wrap gap-[8px] p-0">
+            <ul className="mt-[12px] flex list-none flex-wrap gap-[10px] p-0">
               {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
                 <li key={course.label}>
-                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[13px] py-[7px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[16px] py-[9px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
                   </span>
                 </li>
@@ -358,20 +382,20 @@ function ReportDocument({
             </Link>
           }
         >
-          <div className="grid gap-[10px] sm:grid-cols-2">
+          <div className="grid gap-[14px] sm:grid-cols-2">
             {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
-                className="dm-tap flex flex-col rounded-[10px] border px-[14px] py-[12px]"
+                className="dm-tap flex flex-col rounded-[12px] border px-[18px] py-[16px]"
                 style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}
                 data-keep-together
               >
-                <span className="mb-[8px] inline-flex w-fit items-center rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
+                <span className="mb-[10px] inline-flex w-fit items-center rounded-full border px-[10px] py-[3px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
                   {college.status}
                 </span>
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                <span data-print-hide className="mt-[5px] inline-flex items-center gap-[4px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
+                <span data-print-hide className="mt-[7px] inline-flex items-center gap-[4px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
               </Link>
@@ -602,21 +626,28 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
     }) as const;
 
   return (
-    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-5)] pt-[var(--space-7)] pb-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-7)] sm:pt-[var(--space-8)] sm:pb-[var(--space-9)]">
+    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-5)] pt-[var(--space-6)] pb-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-8)] sm:pt-[var(--space-8)] sm:pb-[var(--space-10)]">
       <div className="mx-auto max-w-[920px]">
-        <h3 id="reflection-title" className="flex items-center gap-[10px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
-          <PenLine className="h-[17px] w-[17px] flex-none" style={{ color: "var(--primary)" }} aria-hidden />
+        <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
+          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
+            <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
+          </span>
           My Reflection
         </h3>
 
-        <div className="mt-[14px] flex flex-col gap-[22px] border-t pt-[18px]" style={{ borderColor: "var(--rule)" }}>
+        {/* Each question reads as its own loose group (generous gap between
+           question label and its chips, generous gap between chips
+           themselves) rather than one dense block of buttons -- this is the
+           part of the report that felt most like a form to fill out, so it
+           gets the most room to breathe. */}
+        <div className="mt-[20px] flex flex-col gap-[32px] border-t pt-[26px]" style={{ borderColor: "var(--rule)" }}>
           <fieldset>
-            <legend className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
+            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               After learning more about {careerTitle}, how interested are you?
             </legend>
-            <div className="mt-[10px] flex flex-wrap gap-[8px]">
+            <div className="mt-[14px] flex flex-wrap gap-[10px]">
               {INTEREST_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[13px] leading-[18px] font-bold" style={pill(interest === option)}>
+                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[14px] py-[7px] text-[13px] leading-[17px] font-bold" style={pill(interest === option)}>
                   {option}
                 </button>
               ))}
@@ -624,12 +655,12 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
           </fieldset>
 
           <fieldset>
-            <legend className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
+            <legend className="text-[16px] leading-[21px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               What influenced your decision most? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Select all that apply)</span>
             </legend>
-            <div className="mt-[10px] flex flex-wrap gap-[8px]">
+            <div className="mt-[14px] flex flex-wrap gap-[10px]">
               {INFLUENCE_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[13px] py-[7px] text-[13px] leading-[18px] font-bold" style={pill(influences.includes(option))}>
+                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[14px] py-[7px] text-[13px] leading-[17px] font-bold" style={pill(influences.includes(option))}>
                   {option}
                 </button>
               ))}
@@ -637,7 +668,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
           </fieldset>
 
           <label className="block">
-            <span className="text-[14px] leading-[19px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
+            <span className="text-[16px] leading-[21px] font-extrabold tracking-[-0.01em]" style={{ color: "var(--ink)" }}>
               What stood out to you? <span className="font-normal" style={{ color: "var(--ink-faint)" }}>(Optional)</span>
             </span>
             <textarea
@@ -645,7 +676,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
               onChange={(event) => setNotesEdited(event.target.value)}
               rows={4}
               placeholder="Jot down any thoughts, questions, or surprising facts here..."
-              className="mt-[10px] w-full resize-y rounded-[10px] border p-[14px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
+              className="mt-[14px] w-full resize-y rounded-[12px] border p-[16px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
               style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
             />
           </label>
@@ -691,7 +722,7 @@ function ShareTab() {
   return (
     <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
-        <h3 id="share-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Share Your Report</h3>
+        <h3 id="share-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Share Your Report</h3>
         <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Choose who you want to share your career exploration progress with.</p>
       </div>
 
@@ -728,10 +759,6 @@ function ShareTab() {
           </button>
         </div>
       </div>
-
-      <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-        Prototype: sharing is simulated locally and does not send anything yet.
-      </p>
     </section>
   );
 }
@@ -754,7 +781,7 @@ function CounselorReviewTab() {
     <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
         <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>For staff use only</span>
-        <h3 id="counselor-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Counselor Review</h3>
+        <h3 id="counselor-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Counselor Review</h3>
       </div>
 
       <fieldset>
@@ -808,10 +835,6 @@ function CounselorReviewTab() {
           <Trash2 className="h-3.5 w-3.5" aria-hidden /> Remove Pathway
         </button>
       </div>
-
-      <p className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-        Prototype: reviews are simulated locally and are not sent to the school yet.
-      </p>
     </section>
   );
 }

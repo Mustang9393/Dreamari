@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ThemeBoot } from "@/components/app/theme";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+// Replaces Montserrat app-wide: Inter is built specifically for UI legibility
+// at small sizes (tall x-height, open counters), has a genuinely wide static
+// weight range so nothing has to fall back to a thin 400 by default, and is
+// one of the most battle-tested body faces for exactly this pairing (a
+// characterful display face carrying personality, a neutral workhorse
+// carrying everything else).
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
@@ -31,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${favoritDisplay.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${favoritDisplay.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

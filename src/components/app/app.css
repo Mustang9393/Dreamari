@@ -246,15 +246,21 @@
 .dm-report {
   /* Dark is the app's default, so the reading surface follows it on screen:
      an ink-on-paper document rendered in the dark, not a white slab burning a
-     hole in the UI. Print always overrides back to black on white below. */
-  --paper: #14161c;
-  --paper-raised: #191c23;
-  --paper-sunken: #1e222a;
+     hole in the UI. Print always overrides back to black on white below.
+     The three paper steps used to sit only 5-7 RGB values apart -- "subtle
+     contrast" taken further than intended, since it meant a section card
+     barely separated from the page it sat on, and a tile barely separated
+     from the card around it. Widened so each step reads as a real surface
+     change at a glance (dashboard cards, not a watermark), while staying in
+     the same dark, desaturated family -- still restrained, just legible. */
+  --paper: #0d0f14;
+  --paper-raised: #1a1f29;
+  --paper-sunken: #242b38;
   --ink: #f4f5f8;
   --ink-soft: #b6bac6;
   --ink-faint: #8b90a0;
-  --rule: #2b303a;
-  --rule-strong: #3d4350;
+  --rule: #333c4d;
+  --rule-strong: #4a5468;
   background: var(--paper);
   color: var(--ink);
 }

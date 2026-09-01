@@ -118,9 +118,12 @@
      next/font/google — referenced here by literal family name instead of a next/font
      CSS variable. */
   --font-display: "Bricolage Grotesque", sans-serif; /* font-family.display */
-  --font-body: var(--font-montserrat), sans-serif; /* font-family.montserrat: Montserrat, still loaded via next/font in layout.tsx */
+  /* Montserrat replaced app-wide with Inter per direct feedback (thin
+     weights read weak, wanted something more legible for body) -- still
+     loaded via next/font in layout.tsx, just a different family now. */
+  --font-body: var(--font-inter), sans-serif;
   /* Mono retired per review: caption/eyebrow text uses the DS caption face
-     (Montserrat — var(--font-body)) in tracked all-caps, like the career
+     (var(--font-body)) in tracked all-caps, like the career
      cards' world labels. The utility below maps any straggler. */
   --font-mono: var(--font-body);
   --font-poster: "Viaoda Libre", serif; /* Browse Cards/Poster Title/Viaoda Libre */
