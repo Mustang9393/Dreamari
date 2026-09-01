@@ -301,11 +301,14 @@ function gradientFor(community: Pick<Community, "world">): string {
   return `linear-gradient(100deg, color-mix(in srgb, ${accent} 80%, #0a0d18), color-mix(in srgb, ${accent} 48%, #0a0d18))`;
 }
 
-// EXPLORATION (connect-redesign-lab): the card is a poster, not a form.
-// Full-bleed art, the community's name, ONE quiet stat line, an arrow.
-// Companies and topics moved into the board (About) -- a browsing student
-// decides from the picture and the name, not from four rows of chips.
-// Topics return as a whisper on hover (progressive disclosure).
+// EXPLORATION 2 (connect-redesign-lab): pastel notched bands, after the
+// user's references (Learning / Experts apps). Light card surfaces in the
+// community's own hue sitting on the dark page; ONE human anchor -- the
+// board's lead verified pro, ringed, over dashed radials; a compressed
+// proof line (mini avatar cluster + student count). No chips, no labels,
+// no button: the card is scannable in under a second and IS the button.
+const CARD_INK = "#221e33";
+
 function CommunityCard({
   community,
   joined,
@@ -320,64 +323,72 @@ function CommunityCard({
   featured?: boolean;
 }) {
   const accent = communityAccent(community);
+  // The board's own verified pros -- lead face + the mini cluster.
+  const boardPros = PROS.filter((p) => INSIGHTS.some((i) => i.boardId === community.id && i.proId === p.id));
+  const lead = boardPros[0];
+  const surface = `color-mix(in srgb, ${accent} 24%, #f4f1ea)`;
+  const ring = `color-mix(in srgb, ${accent} 55%, #ffffff)`;
   return (
     <div
-      className="dm-tap group relative flex h-[300px] flex-col justify-end overflow-hidden rounded-[22px] border"
-      style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}
+      className="dm-tap group relative overflow-hidden rounded-[26px]"
+      style={{ background: surface, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}
     >
-      <Image
-        src={community.photo}
-        alt=""
-        fill
-        sizes="(min-width: 1024px) 620px, 100vw"
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-        style={{ objectPosition: "70% 40%" }}
-      />
-      {/* One bottom-weighted scrim buys all the legibility the card needs. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,6,14,0.92) 0%, rgba(5,6,14,0.45) 42%, rgba(5,6,14,0.08) 68%, transparent 100%)" }} />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-30 rounded-[22px] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-        style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 60%, transparent), 0 18px 50px -18px color-mix(in srgb, ${accent} 55%, transparent)` }}
-      />
+      {/* pull-tab notch, like the reference's stacked sheets */}
+      <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[52px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }} />
+
+      {/* dashed radials behind the face */}
+      <svg aria-hidden className="pointer-events-none absolute top-1/2 right-[6px] h-[240px] w-[240px] -translate-y-1/2" viewBox="0 0 240 240" fill="none">
+        {[54, 82, 110].map((r) => (
+          <circle key={r} cx="120" cy="120" r={r} stroke={`color-mix(in srgb, ${CARD_INK} 22%, transparent)`} strokeWidth="1.6" strokeDasharray="2 7" />
+        ))}
+      </svg>
+
       <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">{joined ? `Open ${community.name}` : `Join ${community.name}`}</span>
       </button>
+
       {featured && (
-        <span className="absolute top-[14px] right-[14px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
-          <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
+        <span className="absolute top-[16px] right-[18px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-bold" style={{ background: `color-mix(in srgb, ${CARD_INK} 82%, transparent)`, color: "#FFFFFF" }}>
+          <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
 
-      <div className="pointer-events-none relative z-20 p-[var(--space-5)]">
-        <div className="flex items-center gap-[12px]">
-          <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-[11px]" style={{ background: accent, color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${accent} 80%, transparent)` }}>
-            <WorldGlyph world={community.world} className="h-[19px] w-[19px]" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="line-clamp-2 block text-[17px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-              {community.name}
-            </span>
-            <span className="mt-[2px] block text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
-              {community.students} students · {community.activePros} pros
-            </span>
-          </span>
-          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-full transition-colors duration-200" style={{ background: "rgba(255,255,255,0.14)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
-            <ArrowRight className="h-[16px] w-[16px] transition-transform duration-200 group-hover:translate-x-[2px]" />
-          </span>
-        </div>
-        {/* Topics whisper in on hover -- the card stays quiet until asked. */}
-        <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100">
-          <div className="overflow-hidden">
-            <div className="flex flex-wrap gap-[6px] pt-[12px]">
-              {community.topics.slice(0, 4).map((topic) => (
-                <span key={topic} className="rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.14)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
-                  {topic}
-                </span>
+      <div className="pointer-events-none relative z-20 flex items-center gap-[var(--space-5)] px-[var(--space-6)] py-[var(--space-6)]">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[22px] leading-[27px] font-extrabold text-balance sm:text-[24px] sm:leading-[29px]" style={{ fontFamily: "var(--font-display)", color: CARD_INK }}>
+            {community.name}
+          </h3>
+          {lead && (
+            <p className="mt-[7px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
+              {lead.name} + {community.activePros - 1} pros
+              <ShieldCheck className="h-[13.5px] w-[13.5px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
+            </p>
+          )}
+          <p className="mt-[14px] flex items-center gap-[8px]">
+            <span className="flex">
+              {boardPros.slice(0, 3).map((p, i) => (
+                <Image key={p.id} src={AVATAR_PHOTO[p.name] ?? "/images/avatar-jordan.jpg"} alt="" width={64} height={64} className={`h-[22px] w-[22px] rounded-full border-2 object-cover ${i > 0 ? "-ml-[7px]" : ""}`} style={{ borderColor: surface }} />
               ))}
-            </div>
-          </div>
+            </span>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 58%, transparent)` }}>
+              {community.students} students in this community
+            </span>
+          </p>
         </div>
+
+        {/* the human anchor: lead pro, ringed, over the radials */}
+        {lead && (
+          <span className="relative flex-none">
+            <span aria-hidden className="absolute inset-[-7px] rounded-full transition-transform duration-300 group-hover:scale-[1.06]" style={{ background: ring }} />
+            <Image
+              src={AVATAR_PHOTO[lead.name] ?? "/images/avatar-jordan.jpg"}
+              alt=""
+              width={128}
+              height={128}
+              className="relative h-[86px] w-[86px] rounded-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            />
+          </span>
+        )}
       </div>
     </div>
   );
@@ -875,14 +886,11 @@ function HomeView({
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             {!query && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{searched.length} communities</span>}
           </div>
-          {/* Five equal boxes: three across the top, the last two centered
-             on the second row (direct feedback -- mixed sizes read as
-             confusing). */}
-          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2 lg:grid-cols-6">
+          {/* EXPLORATION 2: a single stacked column of pastel bands (the
+             reference's sheet-stack rhythm), centered and calm. */}
+          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-[var(--space-4)]">
             {searched.map((c, index) => (
-              <div key={c.id} className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""}`}>
-                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
-              </div>
+              <CommunityRow key={c.id} community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
             ))}
           </div>
           {searched.length === 0 && (
