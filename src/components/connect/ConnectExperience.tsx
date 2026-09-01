@@ -1317,18 +1317,19 @@ function HomeView({
              centered beneath. */}
           <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
-              <div
-                key={c.id}
-                className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""} ${index === 4 && searched.length === 5 ? "sm:col-span-2 sm:mx-auto sm:w-[calc(50%-var(--space-5)/2)] lg:col-span-2 lg:mx-0 lg:w-auto" : ""}`}
-              >
+              <div key={c.id} className="lg:col-span-2">
                 <CommunityRow community={c} onOpen={() => onOpenBoard(c.id)} featured={index === 0 && !query} variant={cardVariant} />
               </div>
             ))}
+            {!query && (
+              <div className="lg:col-span-2">
+                <ComingSoonCard />
+              </div>
+            )}
           </div>
           {searched.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches “{query}” yet.</p>
           )}
-          <SuggestCommunityCard />
         </section>
       )}
 
@@ -1402,32 +1403,51 @@ function HomeView({
   );
 }
 
-/** The mock's closing row: an invitation, not a dead end. */
-function SuggestCommunityCard() {
+/** The sixth grid cell: a quiet promise. Same card anatomy as its five
+ *  neighbors -- title, sub in the dek slot, folio rule -- but ghosted, with
+ *  the suggest affordance living in the folio where a CTA belongs. */
+function ComingSoonCard() {
   const [sent, setSent] = useState(false);
   return (
-    <button
-      type="button"
-      onClick={() => setSent(true)}
-      disabled={sent}
-      className="dm-tap group mt-[var(--space-2)] flex min-h-[64px] w-full cursor-pointer flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[26px] border-2 border-dashed px-[var(--space-6)] py-[var(--space-4)] text-left disabled:cursor-default"
-      style={{ borderColor: "color-mix(in srgb, var(--foreground) 22%, transparent)", background: "transparent" }}
+    <div
+      className="relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px] border-2 border-dashed px-[var(--space-6)] py-[var(--space-5)]"
+      style={{ borderColor: "rgba(242,240,250,0.16)", background: "color-mix(in srgb, var(--primary) 5%, transparent)", fontFamily: "var(--font-display)" }}
     >
-      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        Can&apos;t find what you&apos;re looking for?
+      <span className="absolute top-[14px] right-[16px] inline-flex items-center rounded-full border border-dashed px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ borderColor: "rgba(242,240,250,0.3)", color: "rgba(242,240,250,0.6)" }}>
+        Coming Soon
       </span>
-      {sent ? (
-        <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: "var(--world-food-farming-nature)", fontFamily: "var(--font-display)" }}>
-          <CheckCircle2 className="h-[14px] w-[14px]" aria-hidden /> Request Sent
+      <h3 className="pr-[112px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "rgba(242,240,250,0.85)" }}>
+        More communities
+      </h3>
+      <p className="mt-auto pt-[44px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(242,240,250,0.55)" }}>
+        New rooms open as verified pros join.
+      </p>
+      <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(242,240,250,0.14)" }}>
+        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(242,240,250,0.55)" }}>
+          Want one sooner?
         </span>
-      ) : (
-        <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
-          Suggest a Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
-        </span>
-      )}
-    </button>
+        <button
+          type="button"
+          onClick={() => setSent(true)}
+          disabled={sent}
+          className="dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default"
+          style={{ color: sent ? "var(--world-food-farming-nature)" : "rgba(242,240,250,0.85)" }}
+        >
+          {sent ? (
+            <>
+              <CheckCircle2 className="h-[14px] w-[14px]" aria-hidden /> Request Sent
+            </>
+          ) : (
+            <>
+              Suggest a Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+            </>
+          )}
+        </button>
+      </div>
+    </div>
   );
 }
+
 function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: CardVariant }) {
   return <CommunityCard community={community} onOpen={onOpen} featured={featured} variant={variant} />;
 }
