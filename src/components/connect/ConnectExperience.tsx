@@ -354,14 +354,14 @@ const SHAPE_ANIM_CSS = `
 /** A community's (or event's) shape mask with the dashed radials drawn
  *  concentric to it. The clip-path lives in a fixed 128px box, so other
  *  sizes render the 128 box scaled inside a wrapper. */
-function ShapeBadge({ id, size = 128, radials = true }: { id: string; size?: number; radials?: boolean }) {
+function ShapeBadge({ id, size = 128, radials = true, className = "" }: { id: string; size?: number; radials?: boolean; className?: string }) {
   const event = id === "event";
   const clip = event ? STAR_CLIP : SHAPE_CLIP[id];
   const art = event ? "/images/connect/shapes/event.webp" : SHAPE_ART[id];
   const kind = event ? "star" : (SHAPE_KIND[id] ?? "blob");
   if (!clip || !art) return null;
   return (
-    <span className="pointer-events-none relative flex-none" style={{ height: size, width: size }}>
+    <span className={`pointer-events-none relative flex-none ${className}`} style={{ height: size, width: size }}>
       {radials && (
         <svg aria-hidden className="absolute top-1/2 left-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2" viewBox="0 0 220 220" fill="none">
           {[52, 78, 104].map((r) => (
@@ -958,15 +958,6 @@ function HomeView({
       )}
 
       {tab === "events" && (
-        <Card>
-          <p className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Keep the conversation going after the event.</p>
-          <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-            A private community for everyone who attended. Ask follow-up questions, hear more from professionals, and access resources shared after the event.
-          </p>
-        </Card>
-      )}
-
-      {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
           {/* The doc's event card, one for one: an orange gradient header
              (star chip, event name, date · location in white), then the
@@ -989,11 +980,19 @@ function HomeView({
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>{event.date} · {event.location}</p>
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
-                    <ShapeBadge id="event" size={108} />
+                    <ShapeBadge id="event" size={76} className="sm:hidden" />
+                    <ShapeBadge id="event" size={108} className="hidden sm:block" />
                   </div>
                   <div className="mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${CARD_INK} 80%, transparent)` }}>
-                      {typeof event.students === "number" ? `${event.students} students · ${event.pros} pros · ${event.postCount} posts` : event.lifecycle}
+                      {typeof event.students === "number" ? (
+                        <>
+                          {event.students} students · {event.pros} pros
+                          <span className="hidden sm:inline"> · {event.postCount} posts</span>
+                        </>
+                      ) : (
+                        event.lifecycle
+                      )}
                     </span>
                     {joined ? (
                       <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${CARD_INK})` }}>
@@ -1101,7 +1100,8 @@ function BoardView({
               {" "}· Qualified students can join
             </p>
           </div>
-          <ShapeBadge id={community.id} />
+          <ShapeBadge id={community.id} size={84} className="sm:hidden" />
+          <ShapeBadge id={community.id} className="hidden sm:block" />
         </div>
         <div className="mt-[4px] flex flex-wrap items-center gap-[8px]">
           {[
@@ -1156,9 +1156,9 @@ function BoardView({
         <div className="flex flex-col rounded-[var(--radius-xl)] border md:flex-row md:items-stretch" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
           <nav aria-label="Community boards" className="flex gap-[var(--space-2)] border-b p-[var(--space-4)] md:w-[220px] md:flex-none md:flex-col md:justify-start md:gap-[var(--space-2)] md:border-r md:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
             {[
-              { key: "questions", label: "Student Questions", Icon: MessagesSquare },
-              { key: "insights", label: "Professional Insights", Icon: ShieldCheck },
-            ].map(({ key, label, Icon }) => (
+              { key: "questions", label: "Student Questions", short: "Questions", Icon: MessagesSquare },
+              { key: "insights", label: "Professional Insights", short: "Insights", Icon: ShieldCheck },
+            ].map(({ key, label, short, Icon }) => (
               <button
                 key={key}
                 type="button"
@@ -1172,7 +1172,8 @@ function BoardView({
                 }
               >
                 <Icon className="h-[15px] w-[15px] flex-none" aria-hidden />
-                {label}
+                <span className="whitespace-nowrap md:hidden">{short}</span>
+                <span className="hidden whitespace-nowrap md:inline">{label}</span>
               </button>
             ))}
           </nav>
@@ -1265,7 +1266,8 @@ function EventView({
               <span>Hosted by {event.host}</span>
             </p>
           </div>
-          <ShapeBadge id="event" />
+          <ShapeBadge id="event" size={84} className="sm:hidden" />
+          <ShapeBadge id="event" className="hidden sm:block" />
         </div>
         <div className="mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${CARD_INK} 80%, transparent)` }}>
