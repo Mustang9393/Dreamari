@@ -307,11 +307,18 @@ function gradientFor(community: Pick<Community, "world">): string {
 // Signals kept to the earned three: name, verified-pro count, students.
 const CARD_INK = "#221e33";
 
-// Two organic shapes, alternated: a four-lobe clover (stacked radial
-// masks) and a soft blob (asymmetric border-radius).
-const CLOVER_MASK =
-  "radial-gradient(34% 34% at 28% 28%, #000 97%, transparent 100%), radial-gradient(34% 34% at 72% 28%, #000 97%, transparent 100%), radial-gradient(34% 34% at 28% 72%, #000 97%, transparent 100%), radial-gradient(34% 34% at 72% 72%, #000 97%, transparent 100%)";
-const BLOB_RADIUS = "58% 42% 63% 37% / 45% 55% 45% 55%";
+// The mask IS the topic (per direct feedback): each community's art is
+// clipped into an icon of its own subject -- a lightbulb of ideas, rising
+// bars, a chip, a medical cross, a flower. Paths live in a 128px box, the
+// tile's exact size, unioned subpaths via clip-path: path().
+const SHAPE_CLIP: Record<string, string> = {
+  "teaching-education": 'M108 50 a44 44 0 1 1 -88 0 a44 44 0 1 1 88 0 Z M53 90 h22 a9 9 0 0 1 9 9 v8 a9 9 0 0 1 -9 9 h-22 a9 9 0 0 1 -9 -9 v-8 a9 9 0 0 1 9 -9 Z',
+  "business-money": 'M24 70 h10 a10 10 0 0 1 10 10 v38 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-38 a10 10 0 0 1 10 -10 Z M59 38 h10 a10 10 0 0 1 10 10 v70 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-70 a10 10 0 0 1 10 -10 Z M94 10 h10 a10 10 0 0 1 10 10 v98 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-98 a10 10 0 0 1 10 -10 Z',
+  "tech-engineering": 'M64 4 L114 33 V95 L64 124 L14 95 V33 Z',
+  "health-medicine": 'M61 6 h6 a16 16 0 0 1 16 16 v84 a16 16 0 0 1 -16 16 h-6 a16 16 0 0 1 -16 -16 v-84 a16 16 0 0 1 16 -16 Z M22 45 h84 a16 16 0 0 1 16 16 v6 a16 16 0 0 1 -16 16 h-84 a16 16 0 0 1 -16 -16 v-6 a16 16 0 0 1 16 -16 Z',
+  "arts-media": 'M90 28 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M54 54 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M68 97 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M112 97 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M126 54 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M93 66 a29 29 0 1 1 -58 0 a29 29 0 1 1 58 0 Z',
+};
+
 
 function CommunityCard({
   community,
@@ -319,19 +326,16 @@ function CommunityCard({
   onOpen,
   onJoin,
   featured,
-  shapeIndex = 0,
 }: {
   community: Community;
   joined: boolean;
   onOpen: () => void;
   onJoin?: () => void;
   featured?: boolean;
-  /** Alternates the mask shape tile to tile; same size, equal weight. */
-  shapeIndex?: number;
 }) {
   const accent = communityAccent(community);
   const surface = `color-mix(in srgb, ${accent} 24%, #f4f1ea)`;
-  const clover = shapeIndex % 2 === 0;
+  const clip = SHAPE_CLIP[community.id];
   return (
     <div
       className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
@@ -374,11 +378,7 @@ function CommunityCard({
         {/* the shaped mask holds the community's own art -- no people */}
         <span
           className="relative h-[128px] w-[128px] flex-none overflow-hidden transition-transform duration-300 group-hover:scale-[1.05]"
-          style={
-            clover
-              ? { maskImage: CLOVER_MASK, WebkitMaskImage: CLOVER_MASK }
-              : { borderRadius: BLOB_RADIUS }
-          }
+          style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}
         >
           <Image src={community.photo} alt="" fill sizes="256px" className="object-cover" style={{ objectPosition: "70% 40%" }} />
           {/* a whisper of the hue so the art reads as part of the sheet */}
@@ -886,7 +886,7 @@ function HomeView({
           <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
               <div key={c.id} className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""}`}>
-                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} shapeIndex={index} />
+                <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
               </div>
             ))}
           </div>
@@ -990,8 +990,8 @@ function SuggestCommunityCard() {
   );
 }
 
-function CommunityRow({ community, joined, onOpen, onJoin, featured, shapeIndex }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean; shapeIndex?: number }) {
-  return <CommunityCard community={community} joined={joined} onOpen={onOpen} onJoin={onJoin} featured={featured} shapeIndex={shapeIndex} />;
+function CommunityRow({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean }) {
+  return <CommunityCard community={community} joined={joined} onOpen={onOpen} onJoin={onJoin} featured={featured} />;
 }
 
 // ——— community board (handoff 8) ———
