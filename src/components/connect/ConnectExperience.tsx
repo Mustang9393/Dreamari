@@ -396,6 +396,8 @@ const SHAPE_CLIP: Record<string, string> = {
 // High-key generated covers for the photo cards: bright accent art with a
 // per-world motif, built with a deepened bottom third so the scrim can stay
 // light and the type stays AA-legible.
+type CardVariant = "photos" | "fusion" | "people" | "shapes";
+
 /** The For You reel's progressive-blur recipe at card scale: stacked
  *  backdrop-filter layers at increasing blur, each feathered in by its own
  *  mask band, composited into a smooth sharp-to-frosted ramp. */
@@ -425,6 +427,9 @@ function CardProgressiveBlur() {
 
 const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)";
 
+// Pastel is dead: tiles sit on a dark accent-tinted ground with light ink.
+const TILE_INK = "#f2f0fa";
+
 // The CEO's own reference photography (people-free), cropped for the cards.
 const PHOTO_COVER: Record<string, string> = {
   "teaching-education": "/images/connect/covers/photo3-teaching-education.webp",
@@ -433,6 +438,15 @@ const PHOTO_COVER: Record<string, string> = {
   "health-medicine": "/images/connect/covers/photo3-health-medicine.webp",
   "arts-media": "/images/connect/covers/photo3-arts-media.webp",
 };
+// The community aspect: real people from the approved browse-card set.
+const PEOPLE_COVER: Record<string, string> = {
+  "teaching-education": "/images/connect/covers/people-teaching-education.webp",
+  "business-money": "/images/connect/covers/people-business-money.webp",
+  "tech-engineering": "/images/connect/covers/people-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/people-health-medicine.webp",
+  "arts-media": "/images/connect/covers/people-arts-media.webp",
+};
+
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
 // the towers, the monitors, the stethoscope, the studio desk) -- never an
 // empty stretch of room.
@@ -547,20 +561,19 @@ function CommunityCard({
   onOpen: () => void;
   featured?: boolean;
   /** "photos" = CEO reference photography; "shapes" = the pinned pastel tiles. */
-  variant?: "photos" | "shapes";
+  variant?: CardVariant;
 }) {
   const accent = communityAccent(community);
-  const surface = `color-mix(in srgb, ${accent} 24%, #f4f1ea)`;
   const clip = SHAPE_CLIP[community.id];
 
-  if (variant === "photos") {
+  if (variant === "photos" || variant === "people") {
     return (
       <div
         className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
         style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)` }}
       >
         {/* full-bleed cover, slow push-in on hover */}
-        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+        <Image src={(variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id]) ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
         {/* legibility = progressive blur first, then a much lighter tint:
            the frosted ramp does the work, so the photo stays bright */}
         <CardProgressiveBlur />
@@ -597,18 +610,64 @@ function CommunityCard({
     );
   }
 
+  if (variant === "fusion") {
+    // A and B merged: the topic shape blown up past the card frame, cropped
+    // by it, acting as the mask the photo lives inside.
+    return (
+      <div
+        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
+        style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
+      >
+        <span aria-hidden className="absolute top-1/2 right-[-26px] h-[128px] w-[128px]" style={clip ? { clipPath: `path('${clip}')`, transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%", transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" }}>
+          <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+          <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }} />
+        </span>
+        {/* folio guard: the mask can reach the card floor, the text cannot lose */}
+        <span aria-hidden className="absolute inset-x-0 bottom-0 h-[46%]" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.72) 0%, rgba(14,12,32,0.3) 55%, transparent 100%)" }} />
+
+        <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">{`Open ${community.name}`}</span>
+        </button>
+
+        {featured && (
+          <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
+            <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
+          </span>
+        )}
+
+        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]">
+          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF" }}>
+            {community.name}
+          </h3>
+          <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
+            <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> verified pros
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }} />
+          </p>
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
+            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.posts}</strong> posts
+            </span>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}>
+              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
-      style={{ background: surface, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}
+      style={{ background: `color-mix(in srgb, ${accent} 16%, #10132a)`, border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}
     >
       {/* pull-tab notch, from the reference's sheet stack */}
-      <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }} />
+      <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${TILE_INK} 18%, transparent)` }} />
 
       {/* dashed radials behind the shaped art */}
       <svg aria-hidden className="pointer-events-none absolute top-[-6px] right-[-22px] h-[220px] w-[220px]" viewBox="0 0 220 220" fill="none">
         {[52, 78, 104].map((r) => (
-          <circle key={r} cx="110" cy="110" r={r} stroke={`color-mix(in srgb, ${CARD_INK} 20%, transparent)`} strokeWidth="1.5" strokeDasharray="2 7" />
+          <circle key={r} cx="110" cy="110" r={r} stroke="rgba(242,240,250,0.22)" strokeWidth="1.5" strokeDasharray="2 7" />
         ))}
       </svg>
 
@@ -617,7 +676,7 @@ function CommunityCard({
       </button>
 
       {featured && (
-        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: `color-mix(in srgb, ${CARD_INK} 82%, transparent)`, color: "#FFFFFF" }}>
+        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
@@ -629,7 +688,7 @@ function CommunityCard({
            full-card-width rule with students left and the CTA far right, so
            every row lands at the same y no matter how long the name is. */}
         <div className="flex flex-1 items-center gap-[var(--space-4)]">
-          <h3 className="min-w-0 flex-1 self-start text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
+          <h3 className="min-w-0 flex-1 self-start text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: TILE_INK }}>
             {community.name}
           </h3>
 
@@ -643,15 +702,15 @@ function CommunityCard({
           </span>
         </div>
 
-        <p className="mt-[10px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
-          <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros
-          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
+        <p className="mt-[10px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${TILE_INK} 62%, transparent)` }}>
+          <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${TILE_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros
+          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${TILE_INK})` }} />
         </p>
-        <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }}>
-          <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
-            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.posts}</strong> posts
+        <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${TILE_INK} 18%, transparent)` }}>
+          <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${TILE_INK} 62%, transparent)` }}>
+            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${TILE_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${TILE_INK} 90%, transparent)` }}>{community.posts}</strong> posts
           </span>
-          <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, ${CARD_INK})` }}>
+          <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, ${TILE_INK})` }}>
             Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
           </span>
         </div>
@@ -873,12 +932,13 @@ export function ConnectExperience() {
   // A/B lane for the whole page: CEO photography vs the shape tiles.
   // Lives here (not in HomeView) so every screen inside Connect follows it,
   // and rides the URL as ?cards=shapes so either lane is linkable.
-  const [cardVariant, setCardVariant] = useState<"photos" | "shapes">("photos");
+  const [cardVariant, setCardVariant] = useState<CardVariant>("photos");
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setViewState(queryToView(window.location.search));
-    if (new URLSearchParams(window.location.search).get("cards") === "shapes") {
-      queueMicrotask(() => setCardVariant("shapes"));
+    const v = new URLSearchParams(window.location.search).get("cards");
+    if (v === "shapes" || v === "fusion" || v === "people") {
+      queueMicrotask(() => setCardVariant(v));
     }
   }, []);
   const setView = useCallback((next: View) => {
@@ -889,7 +949,7 @@ export function ConnectExperience() {
     window.history.replaceState(null, "", "/connect" + base + (shapes ? (base ? "&" : "?") + "cards=shapes" : ""));
     window.scrollTo(0, 0);
   }, []);
-  const pickVariant = useCallback((v: "photos" | "shapes") => {
+  const pickVariant = useCallback((v: CardVariant) => {
     setCardVariant(v);
     const url = new URL(window.location.href);
     if (v === "photos") url.searchParams.delete("cards");
@@ -1093,8 +1153,8 @@ function HomeView({
   onOpenBoard: (id: string) => void;
   onOpenEvent: (id: string) => void;
   onEnterCode: (id: string) => void;
-  cardVariant: "photos" | "shapes";
-  onPickVariant: (v: "photos" | "shapes") => void;
+  cardVariant: CardVariant;
+  onPickVariant: (v: CardVariant) => void;
 }) {
   const [query, setQuery] = useState("");
   const eventInk = "#f6f5fb";
@@ -1147,7 +1207,7 @@ function HomeView({
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
             <div className="flex items-center gap-[6px]" role="group" aria-label="Card style">
-              {(["photos", "shapes"] as const).map((v) => (
+              {(["photos", "fusion", "people", "shapes"] as const).map((v) => (
                 <button
                   key={v}
                   type="button"
@@ -1276,7 +1336,7 @@ function SuggestCommunityCard() {
     </button>
   );
 }
-function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: "photos" | "shapes" }) {
+function CommunityRow({ community, onOpen, featured, variant }: { community: Community; onOpen: () => void; featured?: boolean; variant?: CardVariant }) {
   return <CommunityCard community={community} onOpen={onOpen} featured={featured} variant={variant} />;
 }
 
@@ -1302,13 +1362,15 @@ function BoardView({
   onBack: () => void;
   onOpenThread: (id: string) => void;
   onOpenInsight: (id: string) => void;
-  variant: "photos" | "shapes";
+  variant: CardVariant;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const threads = THREADS.filter((t) => t.boardId === community.id);
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
   const about = filter === "about";
-  const bannerInk = variant === "photos" ? "#f6f5fb" : CARD_INK;
+  const imagery = variant !== "shapes";
+  const bannerCover = variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id];
+  const bannerInk = "#f6f5fb";
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
 
   return (
@@ -1323,11 +1385,11 @@ function BoardView({
       <section
         aria-label="Community overview"
         className="group relative overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
-        style={{ background: variant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${communityAccent(community)} 24%, #f4f1ea)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: variant === "photos" ? CARD_TEXT_SHADOW : undefined }}
+        style={{ background: imagery ? "#0e0c20" : `color-mix(in srgb, ${communityAccent(community)} 18%, #0e0c20)`, border: `1px solid color-mix(in srgb, ${communityAccent(community)} 40%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: imagery ? CARD_TEXT_SHADOW : undefined }}
       >
-        {variant === "photos" && (
+        {imagery && (
           <>
-            <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+            <Image src={bannerCover ?? community.photo} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
             <CardProgressiveBlur />
             <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
           </>
@@ -1337,7 +1399,7 @@ function BoardView({
           <div className="min-w-0 flex-1 self-start pt-[8px]">
             <h1 className="text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: bannerInk }}>{community.name}</h1>
           </div>
-          {variant !== "photos" && (
+          {!imagery && (
             <>
               <ShapeBadge id={community.id} size={84} className="sm:hidden" />
               <ShapeBadge id={community.id} className="hidden sm:block" />
@@ -1354,7 +1416,7 @@ function BoardView({
               type="button"
               onClick={pill.onPick}
               className="dm-quiet min-h-[34px] cursor-pointer rounded-full px-[16px] text-[13px] leading-[18px] font-semibold"
-              style={pill.active ? { background: bannerInk, color: variant === "photos" ? "#16132b" : "#f7f4ec" } : { background: `color-mix(in srgb, ${bannerInk} ${variant === "photos" ? "18" : "10"}%, transparent)`, color: bannerInk }}
+              style={pill.active ? { background: bannerInk, color: "#16132b" } : { background: `color-mix(in srgb, ${bannerInk} 18%, transparent)`, color: bannerInk }}
             >
               {pill.label}
             </button>
@@ -1973,7 +2035,7 @@ function InsightThreadView({
 // ——— Ask flow (handoff 11) ———
 
 
-function JoinSheet({ community, onClose, onJoin, variant }: { community: Community; onClose: () => void; onJoin: () => void; variant: "photos" | "shapes" }) {
+function JoinSheet({ community, onClose, onJoin, variant }: { community: Community; onClose: () => void; onJoin: () => void; variant: CardVariant }) {
   const [agreed, setAgreed] = useState(false);
   const perks = [
     { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
@@ -1984,17 +2046,17 @@ function JoinSheet({ community, onClose, onJoin, variant }: { community: Communi
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-        <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: variant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${communityAccent(community)} 24%, #f4f1ea)`, fontFamily: "var(--font-display)" }}>
-          {variant === "photos" ? (
+        <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: variant === "shapes" ? `color-mix(in srgb, ${communityAccent(community)} 18%, #0e0c20)` : "#0e0c20", fontFamily: "var(--font-display)" }}>
+          {variant !== "shapes" ? (
             <>
-              <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+              <Image src={(variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id]) ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
               <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.5)" }} />
             </>
           ) : (
             <ShapeBadge id={community.id} size={48} radials={false} />
           )}
-          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: variant === "photos" ? "#f6f5fb" : CARD_INK, textShadow: variant === "photos" ? CARD_TEXT_SHADOW : undefined }}>Join {community.name}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet relative z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: variant === "photos" ? "rgba(246,245,251,0.18)" : `color-mix(in srgb, ${CARD_INK} 12%, transparent)`, color: variant === "photos" ? "#f6f5fb" : CARD_INK }}>
+          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "#f6f5fb", textShadow: variant !== "shapes" ? CARD_TEXT_SHADOW : undefined }}>Join {community.name}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet relative z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "#f6f5fb" }}>
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
