@@ -712,7 +712,7 @@ export function ConnectExperience() {
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
       <main
-        className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-[var(--space-5)] pb-[120px] md:px-8 md:pt-[var(--space-7)] ${view.kind === "home" ? "gap-[var(--space-4)]" : "gap-[var(--space-6)]"} ${
+        className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${view.kind === "home" ? "gap-[var(--space-4)]" : "gap-[var(--space-6)]"} ${
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
