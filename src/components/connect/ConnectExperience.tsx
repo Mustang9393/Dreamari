@@ -496,16 +496,34 @@ function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: num
 function DoPartnerLockup({ host, size = "card" }: { host: string; size?: "card" | "banner" }) {
   const logo = partnerLogo(host, "white");
   if (!logo) return null;
-  const box = size === "banner" ? "h-[90px] w-[168px] sm:h-[110px] sm:w-[224px]" : "h-[84px] w-[152px] sm:h-[108px] sm:w-[200px]";
-  const doBadge = size === "banner" ? "h-[30px] px-[9px] text-[13px] sm:h-[36px] sm:px-[11px] sm:text-[15px]" : "h-[26px] px-[8px] text-[12px] sm:h-[32px] sm:px-[10px] sm:text-[14px]";
-  const logoImg = size === "banner" ? "max-h-[40px] max-w-[92px] sm:max-h-[56px] sm:max-w-[128px]" : "max-h-[36px] max-w-[80px] sm:max-h-[48px] sm:max-w-[108px]";
+  {/* No standalone "Dream Opportunity" logo asset exists in the repo (only
+     Dreamari's own product mark, a different brand) -- so DO is a live
+     wordmark rather than an image. No chip/border around it: it now sits
+     as plain text at a font-size tuned to match the partner mark's visual
+     weight, not boxed to an arbitrary height, since the partner PNGs fill
+     their canvas edge-to-edge while text glyphs never fill their em-box --
+     matching box heights (the old approach) left the boxed "DO" reading
+     smaller and lower than the corporate wordmark beside it. Constraining
+     the partner image by HEIGHT only (auto width, no max-width) keeps
+     every host's differing aspect ratio (JPMC ~4.9:1, ATT ~2.4:1, EY ~1:1)
+     at one consistent scale instead of whichever bound (height/width) hit
+     first winning per-logo. */}
+  const logoH = size === "banner" ? "h-[26px] sm:h-[36px]" : "h-[22px] sm:h-[30px]";
+  const doText = size === "banner" ? "text-[28px] sm:text-[38px]" : "text-[24px] sm:text-[32px]";
   return (
-    <span className={`relative flex flex-none items-center justify-center gap-[8px] sm:gap-[10px] ${box}`} style={{ fontFamily: "var(--font-display)" }}>
-      <span className={`flex flex-none items-center justify-center rounded-[8px] font-extrabold tracking-[0.02em] ${doBadge}`} style={{ background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.32)", color: "#FFFFFF" }}>
+    <span className="relative flex flex-none items-center gap-[7px] sm:gap-[9px]" style={{ fontFamily: "var(--font-display)" }}>
+      <span className={`flex-none leading-none font-extrabold tracking-[0.01em] ${doText}`} style={{ color: "#FFFFFF", textShadow: "0 1px 3px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.4)" }}>
         DO
       </span>
-      <span aria-hidden className="flex-none text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>×</span>
-      <Image src={logo.src} alt={`${host} logo`} width={logo.w} height={logo.h} className={`relative z-10 w-auto object-contain opacity-95 ${logoImg}`} />
+      <span aria-hidden className="flex-none text-[13px] leading-none font-semibold" style={{ color: "rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>×</span>
+      <Image
+        src={logo.src}
+        alt={`${host} logo`}
+        width={logo.w}
+        height={logo.h}
+        className={`relative w-auto flex-none object-contain opacity-95 ${logoH}`}
+        style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55)) drop-shadow(0 3px 12px rgba(0,0,0,0.4))" }}
+      />
     </span>
   );
 }
@@ -612,7 +630,15 @@ function ShapeBadge({ id, size = 128, radials = true, className = "" }: { id: st
         <span className={`dm-shape dm-shape-${kind} relative block h-full w-full overflow-hidden`} style={{ clipPath: `path('${clip}')`, filter: "drop-shadow(0 14px 24px rgba(9,10,20,0.5))" }}>
           <Image src={art} alt="" fill sizes="256px" className="object-cover" />
           <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.06) 36%, transparent 56%)" }} />
-          <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -14px 26px rgba(9,10,20,0.3), inset 0 2px 6px rgba(255,255,255,0.26)" }} />
+          {/* A stroke drawn as its own SVG path (even sharing this
+             element's class) desyncs from any gesture that morphs via
+             clip-path rather than transform -- the crop moves, the fixed
+             path data doesn't -- and stroking the raw union'd clip data
+             draws every internal seam between its primitives. An inset
+             box-shadow on this already-clipped, already-animated element
+             traces its live resolved silhouette instead, so it can never
+             drift out of sync and never shows a seam. */}
+          <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.55), inset 0 0 0 4px rgba(255,255,255,0.14), inset 0 -14px 26px rgba(9,10,20,0.3), inset 0 2px 6px rgba(255,255,255,0.26)" }} />
         </span>
       </span>
     </span>
@@ -841,14 +867,21 @@ function CommunityCard({
           </h3>
 
           {/* the shaped mask holds generated accent-glass art -- no people.
-             mt clears the Most Popular chip so they never overlap. */}
+             mt clears the Most Popular chip so they never overlap. The
+             rim is an inset box-shadow on this same clipped, animated
+             element rather than a separate stroke: a sibling SVG tracing
+             the raw clip data draws every internal union seam AND desyncs
+             from any gesture that morphs via clip-path (the crop moves,
+             the fixed path data doesn't) -- box-shadow instead traces
+             whatever this element's live resolved silhouette is, always
+             in sync, seam-free. */}
           <span
             className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} relative mt-[20px] h-[128px] w-[128px] flex-none overflow-hidden`}
             style={{ ...(clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }), filter: `drop-shadow(0 16px 26px color-mix(in srgb, ${accent} 45%, transparent))` }}
           >
             <Image src={SHAPE_ART[community.id] ?? community.photo} alt="" fill sizes="256px" className="object-cover" />
             <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.07) 36%, transparent 56%)" }} />
-            <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -14px 26px rgba(9,10,20,0.32), inset 0 2px 6px rgba(255,255,255,0.28)" }} />
+            <span aria-hidden className="absolute inset-0" style={{ boxShadow: `inset 0 0 0 1.5px rgba(255,255,255,0.6), inset 0 0 0 4px color-mix(in srgb, ${accent} 30%, transparent), inset 0 -14px 26px rgba(9,10,20,0.32), inset 0 2px 6px rgba(255,255,255,0.28)` }} />
           </span>
         </div>
 
@@ -1322,15 +1355,13 @@ function HomeView({
       {/* Title and the Community/Events toggle share one row on wider
          screens (same pattern as Explore's header: title left, controls
          right, one row instead of three stacked blocks) and wrap onto
-         their own line on phones where there isn't room. Dreamy sits in
-         the corner either way. */}
-      <div className="relative flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)] pr-[76px] sm:pr-[92px]">
+         their own line on phones where there isn't room. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
         <div className="min-w-0">
           <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
           <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
         </div>
         <TopTabs tab={tab} onTab={onTab} />
-        <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={192} height={192} aria-hidden className="absolute -top-[10px] right-0 h-[88px] w-[88px] object-contain sm:h-[108px] sm:w-[108px]" />
       </div>
 
       <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
