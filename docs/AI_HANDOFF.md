@@ -40,7 +40,18 @@ tokens above, in both modes).
 
 - Date: 2026-09-01
 
-### 2026-09-01 (later) connect-redesign-lab: card exploration branch (DEPLOYS TO demo BRANCH ONLY — NEVER main)
+### 2026-09-01 (night) connect-redesign-lab MERGED TO MAIN (user-authorized) — all four card lanes live
+
+- The user explicitly authorized pushing the entire lab to main ("push the
+  entire thing to the main branch, with all the options"). Main now carries
+  the four-lane Connect A/B/C/D: Photos / Fusion / People / Shapes,
+  URL-pinned via ?cards=. Direction gets finalized ON MAIN from here; losing
+  lanes will be removed once one wins. Production build + tokens:check
+  passed before the merge.
+- Per-push confirmation still applies: get the user's explicit go-ahead
+  before every future push to main.
+
+#### Original lab-era notes (historical)
 
 - Branch `connect-redesign-lab` (local) explores new Connect community cards.
   Explorations 1 (dark posters) → 2 (pastel bands) → 3/3b (topic-shape
