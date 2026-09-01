@@ -399,16 +399,18 @@ const SHAPE_CLIP: Record<string, string> = {
 /** The For You reel's progressive-blur recipe at card scale: stacked
  *  backdrop-filter layers at increasing blur, each feathered in by its own
  *  mask band, composited into a smooth sharp-to-frosted ramp. */
-const CARD_BLUR_STOPS = [2, 5, 9, 14];
+const CARD_BLUR_STOPS = [1, 2, 4, 8, 14];
 
 function CardProgressiveBlur() {
   const total = CARD_BLUR_STOPS.length;
   return (
-    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[64%] overflow-hidden">
+    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] overflow-hidden">
       {CARD_BLUR_STOPS.map((blur, index) => {
-        const bandStart = (index / total) * 100;
-        const feather = 100 / total + 8;
-        const mask = `linear-gradient(to bottom, transparent ${Math.max(0, bandStart - feather).toFixed(1)}%, black ${bandStart.toFixed(1)}%, black 100%)`;
+        /* every band -- including the first -- fades in from transparent, so
+           the ramp truly starts at 0px with no visible seam */
+        const fadeStart = (index / total) * 62;
+        const fadeEnd = fadeStart + 62 / total + 14;
+        const mask = `linear-gradient(to bottom, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
         return (
           <span
             key={blur}
@@ -425,11 +427,21 @@ const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)"
 
 // The CEO's own reference photography (people-free), cropped for the cards.
 const PHOTO_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/photo2-teaching-education.webp",
-  "business-money": "/images/connect/covers/photo2-business-money.webp",
-  "tech-engineering": "/images/connect/covers/photo2-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/photo2-health-medicine.webp",
-  "arts-media": "/images/connect/covers/photo2-arts-media.webp",
+  "teaching-education": "/images/connect/covers/photo3-teaching-education.webp",
+  "business-money": "/images/connect/covers/photo3-business-money.webp",
+  "tech-engineering": "/images/connect/covers/photo3-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/photo3-health-medicine.webp",
+  "arts-media": "/images/connect/covers/photo3-arts-media.webp",
+};
+// Focal point per scene so the card strip frames the SUBJECT (the laptop,
+// the towers, the monitors, the stethoscope, the studio desk) -- never an
+// empty stretch of room.
+const PHOTO_FOCUS: Record<string, string> = {
+  "teaching-education": "62% 62%",
+  "business-money": "72% 30%",
+  "tech-engineering": "68% 45%",
+  "health-medicine": "76% 55%",
+  "arts-media": "70% 45%",
 };
 
 const SHAPE_ART: Record<string, string> = {
@@ -520,7 +532,7 @@ function CommunityCard({
         style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)` }}
       >
         {/* full-bleed cover, slow push-in on hover */}
-        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "60% 42%" }} />
+        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
         {/* legibility = progressive blur first, then a much lighter tint:
            the frosted ramp does the work, so the photo stays bright */}
         <CardProgressiveBlur />
