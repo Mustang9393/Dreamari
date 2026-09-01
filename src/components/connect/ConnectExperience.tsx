@@ -1209,7 +1209,10 @@ function HomeView({
                       const logo = partnerLogo(event.host, cardVariant === "photos" ? "white" : "ink");
                       return logo ? (
                         <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
-                          <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
+                          {cardVariant !== "photos" && (
+                            <span aria-hidden className="absolute top-1/2 left-1/2 h-[128px] w-[128px]" style={{ clipPath: `path('${STAR_CLIP}')`, background: `color-mix(in srgb, ${pAccent} 60%, #f4f1ea)`, transform: "translate(-50%, -50%) rotate(-10deg) scale(0.85)", filter: "blur(1px)" }} />
+                          )}
+                          <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
                         </span>
                       ) : null;
                     })()}
@@ -1512,7 +1515,10 @@ function EventView({
             const logo = partnerLogo(event.host, variant === "photos" ? "white" : "ink");
             return logo ? (
               <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
-                <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
+                {variant !== "photos" && (
+                  <span aria-hidden className="absolute top-1/2 left-1/2 h-[128px] w-[128px]" style={{ clipPath: `path('${STAR_CLIP}')`, background: `color-mix(in srgb, ${pAccent} 60%, #f4f1ea)`, transform: "translate(-50%, -50%) rotate(-10deg) scale(0.9)", filter: "blur(1px)" }} />
+                )}
+                <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
               </span>
             ) : null;
           })()}
