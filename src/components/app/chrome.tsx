@@ -57,6 +57,7 @@ const QUICK_LINKS = [
   { label: "My Profile", href: "/profile" },
   { label: "Colleges", href: "/colleges" },
   { label: "Connect", href: "/connect" },
+  { label: "Sign Up", href: "/signup" },
 ] as const;
 
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
