@@ -301,130 +301,83 @@ function gradientFor(community: Pick<Community, "world">): string {
   return `linear-gradient(100deg, color-mix(in srgb, ${accent} 80%, #0a0d18), color-mix(in srgb, ${accent} 48%, #0a0d18))`;
 }
 
-// The doc's community card, one for one: a colored gradient header band
-// (icon chip + white name), then stats, "PROFESSIONALS FROM" companies with
-// a "+N more", topic chips, and the Open Community button. One type
-// hierarchy inside the card: header name > caps labels > chips/body.
+// EXPLORATION (connect-redesign-lab): the card is a poster, not a form.
+// Full-bleed art, the community's name, ONE quiet stat line, an arrow.
+// Companies and topics moved into the board (About) -- a browsing student
+// decides from the picture and the name, not from four rows of chips.
+// Topics return as a whisper on hover (progressive disclosure).
 function CommunityCard({
   community,
-  action,
+  joined,
   onOpen,
+  onJoin,
   featured,
 }: {
   community: Community;
-  action: React.ReactNode;
+  joined: boolean;
   onOpen: () => void;
-  /** First card wears the mock's "Most Popular" pill on its banner. */
+  onJoin?: () => void;
   featured?: boolean;
 }) {
-  const shownCompanies = community.professionalsFrom.slice(0, 3);
-  const moreCompanies = community.professionalsFrom.length - shownCompanies.length;
+  const accent = communityAccent(community);
   return (
-    <div className="dm-tap group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: `color-mix(in srgb, ${communityAccent(community)} 40%, var(--glass-border))`, background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
-      {/* Whole card, one target. The bottom action button sits above this
-         layer (z-20) so it's still its own reachable target. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
-        <span className="sr-only">Open {community.name}</span>
-      </button>
-      {/* Hover: the card glows in ITS OWN accent -- ring plus a soft cast,
-         so pointing at Finance feels gold and Healthcare feels teal. */}
+    <div
+      className="dm-tap group relative flex h-[300px] flex-col justify-end overflow-hidden rounded-[22px] border"
+      style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}
+    >
+      <Image
+        src={community.photo}
+        alt=""
+        fill
+        sizes="(min-width: 1024px) 620px, 100vw"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+        style={{ objectPosition: "70% 40%" }}
+      />
+      {/* One bottom-weighted scrim buys all the legibility the card needs. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,6,14,0.92) 0%, rgba(5,6,14,0.45) 42%, rgba(5,6,14,0.08) 68%, transparent 100%)" }} />
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-30 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-        style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${communityAccent(community)} 60%, transparent), 0 18px 50px -18px color-mix(in srgb, ${communityAccent(community)} 55%, transparent)` }}
+        className="pointer-events-none absolute inset-0 z-30 rounded-[22px] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 60%, transparent), 0 18px 50px -18px color-mix(in srgb, ${accent} 55%, transparent)` }}
       />
-
-      {/* The art is WOVEN into the card, not clipped into a strip: it fills
-         the whole background, stays sharp up top, dissolves through a blur
-         band mid-card, and only fully yields to the surface near the
-         button. One composition, every card the same size. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <Image
-          src={community.photo}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 620px, 100vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-          style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)" }}
-        />
-        <Image
-          src={community.photo}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 620px, 100vw"
-          className="scale-[1.06] object-cover blur-[16px]"
-          style={{ objectPosition: "70% 38%", maskImage: "linear-gradient(to bottom, transparent 45%, black 70%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, transparent 45%, black 70%, transparent 100%)" }}
-        />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 16%, color-mix(in srgb, color-mix(in srgb, var(--primary) 8%, var(--card)) 50%, transparent) 58%, color-mix(in srgb, var(--primary) 8%, var(--card)) 96%)" }} />
-      </div>
+      <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">{joined ? `Open ${community.name}` : `Join ${community.name}`}</span>
+      </button>
       {featured && (
         <span className="absolute top-[14px] right-[14px] z-20 inline-flex items-center gap-[6px] rounded-full px-[12px] py-[5px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(10,10,20,0.55)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
           <Star className="h-[12px] w-[12px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
 
-      <div className="relative z-20 flex flex-1 flex-col gap-[var(--space-5)] p-[var(--space-5)]">
-        {/* Header block, the two-row anatomy: the icon spans BOTH rows on
-           the left; the right column reads title on line one, the one-line
-           stats on line two. Then real air before the chip sections. */}
-        <div className={`flex items-center gap-[14px] ${featured ? "pr-[110px]" : ""}`}>
-          <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[13px]" style={{ background: communityAccent(community), color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${communityAccent(community)} 80%, transparent)` }}>
-            <WorldGlyph world={community.world} className="h-[22px] w-[22px]" />
+      <div className="pointer-events-none relative z-20 p-[var(--space-5)]">
+        <div className="flex items-center gap-[12px]">
+          <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-[11px]" style={{ background: accent, color: "#FFFFFF", boxShadow: `0 10px 26px -10px color-mix(in srgb, ${accent} 80%, transparent)` }}>
+            <WorldGlyph world={community.world} className="h-[19px] w-[19px]" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[16px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <span className="line-clamp-2 block text-[17px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
               {community.name}
             </span>
-            <span className="mt-[5px] flex flex-wrap items-center gap-x-[14px] gap-y-[4px]">
-              {[
-                { Icon: Users, value: community.students, label: "Students" },
-                { Icon: ShieldCheck, value: community.activePros, label: "Pros" },
-                { Icon: MessagesSquare, value: community.posts, label: "Posts" },
-              ].map(({ Icon, value, label }) => (
-                <span key={label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>
-                  <Icon className="h-[14px] w-[14px] flex-none" aria-hidden />
-                  <span><strong className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{value}</strong> {label}</span>
-                </span>
-              ))}
+            <span className="mt-[2px] block text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              {community.students} students · {community.activePros} pros
             </span>
           </span>
-        </div>
-
-        <div className="flex flex-col gap-[8px]">
-          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            Professionals from
+          <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-full transition-colors duration-200" style={{ background: "rgba(255,255,255,0.14)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+            <ArrowRight className="h-[16px] w-[16px] transition-transform duration-200 group-hover:translate-x-[2px]" />
           </span>
-          <div className="flex flex-wrap items-center gap-[7px]">
-            {shownCompanies.map((name) => (
-              <span key={name} className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)" }}>{name}</span>
-            ))}
-            {moreCompanies > 0 && <span className="text-[11.5px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>+{moreCompanies} more</span>}
+        </div>
+        {/* Topics whisper in on hover -- the card stays quiet until asked. */}
+        <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100">
+          <div className="overflow-hidden">
+            <div className="flex flex-wrap gap-[6px] pt-[12px]">
+              {community.topics.slice(0, 4).map((topic) => (
+                <span key={topic} className="rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.14)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+                  {topic}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="-mt-[6px] flex flex-col gap-[8px]">
-          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            Top topics
-          </span>
-          <div className="flex flex-wrap items-center gap-[7px]">
-            {community.topics.slice(0, 4).map((topic) => (
-              <span
-                key={topic}
-                className="rounded-[999px] px-[12px] py-[5px] text-[12px] leading-[16px] font-semibold"
-                style={{
-                  background: `color-mix(in srgb, ${communityAccent(community)} 16%, transparent)`,
-                  color: `color-mix(in srgb, ${communityAccent(community)} 42%, var(--foreground))`,
-                }}
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* mt-auto keeps buttons bottom-aligned across the grid row; the
-           padding guarantees the button never crowds the chips above it. */}
-        <div className="mt-auto pt-[var(--space-2)]">{action}</div>
       </div>
     </div>
   );
@@ -1033,15 +986,7 @@ function SuggestCommunityCard() {
 }
 
 function CommunityRow({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin?: () => void; featured?: boolean }) {
-  // One label everywhere (direct feedback): "Join Community". A joined
-  // community's button goes straight into the board; an unjoined one opens
-  // the join sheet.
-  const action = (
-    <button type="button" onClick={joined ? onOpen : onJoin} className="relative z-20 flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-      Join Community
-    </button>
-  );
-  return <CommunityCard community={community} action={action} onOpen={onOpen} featured={featured} />;
+  return <CommunityCard community={community} joined={joined} onOpen={onOpen} onJoin={onJoin} featured={featured} />;
 }
 
 // ——— community board (handoff 8) ———
