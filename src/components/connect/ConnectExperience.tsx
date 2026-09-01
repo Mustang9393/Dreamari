@@ -320,6 +320,14 @@ const SHAPE_CLIP: Record<string, string> = {
 };
 
 
+// Small per-shape hover gestures: the bars rise, the flower turns, the
+// chip tilts -- one playful degree, never a carnival.
+const SHAPE_HOVER: Record<string, string> = {
+  "business-money": "group-hover:-translate-y-[4px]",
+  "arts-media": "group-hover:rotate-[8deg]",
+  "tech-engineering": "group-hover:rotate-[4deg]",
+};
+
 function CommunityCard({
   community,
   joined,
@@ -356,32 +364,42 @@ function CommunityCard({
       </button>
 
       {featured && (
-        <span className="absolute top-[16px] left-[var(--space-5)] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-bold" style={{ background: `color-mix(in srgb, ${CARD_INK} 82%, transparent)`, color: "#FFFFFF" }}>
+        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: `color-mix(in srgb, ${CARD_INK} 82%, transparent)`, color: "#FFFFFF" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
 
-      <div className="pointer-events-none relative z-20 flex w-full items-center gap-[var(--space-4)] px-[var(--space-5)] py-[var(--space-6)]">
-        <div className="min-w-0 flex-1">
-          <h3 className="text-[20px] leading-[25px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: CARD_INK }}>
+      <div className="pointer-events-none relative z-20 flex h-full w-full items-stretch gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-5)]">
+        {/* One hard left rail, folio anchored to the bottom so whitespace
+           never pools. Single family, three tiers only:
+           heading 20/extrabold -> subheading 13/semibold -> body 11/medium.
+           The title slot is a fixed 3-line box so every card's rows sit at
+           the same y regardless of how long the community name is. */}
+        <div className="flex min-w-0 flex-1 flex-col" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className="min-h-[75px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
             {community.name}
           </h3>
-          <p className="mt-[7px] flex items-center gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
+          <p className="mt-[4px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
             {community.activePros} verified pros
             <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 70%, ${CARD_INK})` }} />
           </p>
-          <p className="mt-[2px] text-[12.5px] leading-[17px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 55%, transparent)` }}>
-            {community.students} students
-          </p>
+          <div className="mt-auto flex items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 16%, transparent)` }}>
+            <span className="text-[11px] leading-[15px] font-medium tracking-[0.1em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${CARD_INK} 58%, transparent)` }}>
+              {community.students} students
+            </span>
+            <span className="flex items-center gap-[4px] text-[11px] leading-[15px] font-medium tracking-[0.1em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 55%, ${CARD_INK})` }}>
+              Join <ArrowRight className="h-[12px] w-[12px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden />
+            </span>
+          </div>
         </div>
 
-        {/* the shaped mask holds the community's own art -- no people */}
+        {/* the shaped mask holds the community's own art -- no people.
+           Each shape gets its own small hover gesture. */}
         <span
-          className="relative h-[128px] w-[128px] flex-none overflow-hidden transition-transform duration-300 group-hover:scale-[1.05]"
+          className={`relative h-[128px] w-[128px] flex-none self-center overflow-hidden transition-transform duration-500 ease-out group-hover:scale-[1.05] ${SHAPE_HOVER[community.id] ?? ""}`}
           style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}
         >
           <Image src={community.photo} alt="" fill sizes="256px" className="object-cover" style={{ objectPosition: "70% 40%" }} />
-          {/* a whisper of the hue so the art reads as part of the sheet */}
           <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)` }} />
         </span>
       </div>
@@ -885,7 +903,10 @@ function HomeView({
              centered beneath. */}
           <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
-              <div key={c.id} className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""}`}>
+              <div
+                key={c.id}
+                className={`lg:col-span-2 ${index === 3 && searched.length === 5 ? "lg:col-start-2" : ""} ${index === 4 && searched.length === 5 ? "sm:col-span-2 sm:mx-auto sm:w-[calc(50%-var(--space-5)/2)] lg:col-span-2 lg:mx-0 lg:w-auto" : ""}`}
+              >
                 <CommunityRow community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoin(c.id)} featured={index === 0 && !query} />
               </div>
             ))}
