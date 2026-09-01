@@ -543,8 +543,10 @@ function ShapeBadge({ id, size = 128, radials = true, className = "" }: { id: st
         </svg>
       )}
       <span aria-hidden className="absolute top-0 left-0 h-[128px] w-[128px] origin-top-left" style={size !== 128 ? { transform: `scale(${size / 128})` } : undefined}>
-        <span className={`dm-shape dm-shape-${kind} relative block h-full w-full overflow-hidden`} style={{ clipPath: `path('${clip}')` }}>
+        <span className={`dm-shape dm-shape-${kind} relative block h-full w-full overflow-hidden`} style={{ clipPath: `path('${clip}')`, filter: "drop-shadow(0 14px 24px rgba(9,10,20,0.5))" }}>
           <Image src={art} alt="" fill sizes="256px" className="object-cover" />
+          <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.06) 36%, transparent 56%)" }} />
+          <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -14px 26px rgba(9,10,20,0.3), inset 0 2px 6px rgba(255,255,255,0.26)" }} />
         </span>
       </span>
     </span>
@@ -618,9 +620,16 @@ function CommunityCard({
         className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
       >
-        <span aria-hidden className="absolute top-1/2 right-[-26px] h-[128px] w-[128px]" style={clip ? { clipPath: `path('${clip}')`, transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%", transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" }}>
-          <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-          <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }} />
+        <span aria-hidden className="absolute top-1/2 right-[-26px] h-[128px] w-[128px]" style={{ transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" }}>
+          {/* accent echo: an offset ghost of the shape, for depth */}
+          <span className="absolute inset-0" style={{ clipPath: clip ? `path('${clip}')` : undefined, borderRadius: clip ? undefined : "58% 42% 63% 37% / 45% 55% 45% 55%", background: `color-mix(in srgb, ${accent} 50%, transparent)`, transform: "translate(5px, 6px)", filter: "blur(2px)", opacity: 0.55 }} />
+          {/* the mask itself carries the per-shape hover gesture; the photo
+             inside gets a slow Ken Burns */}
+          <span className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} absolute inset-0 overflow-hidden`} style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}>
+            <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1200px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.12]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 34%, transparent 55%)" }} />
+          </span>
         </span>
         {/* folio guard: the mask can reach the card floor, the text cannot lose */}
         <span aria-hidden className="absolute inset-x-0 bottom-0 h-[46%]" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.72) 0%, rgba(14,12,32,0.3) 55%, transparent 100%)" }} />
@@ -659,7 +668,7 @@ function CommunityCard({
   return (
     <div
       className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
-      style={{ background: `color-mix(in srgb, ${accent} 16%, #10132a)`, border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)" }}
+      style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, #141834) 0%, color-mix(in srgb, ${accent} 9%, #0d1024) 100%)`, border: `1px solid color-mix(in srgb, ${accent} 38%, transparent)`, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.09), 0 18px 44px -22px rgba(0,0,0,0.65)" }}
     >
       {/* pull-tab notch, from the reference's sheet stack */}
       <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${TILE_INK} 18%, transparent)` }} />
@@ -696,9 +705,11 @@ function CommunityCard({
              mt clears the Most Popular chip so they never overlap. */}
           <span
             className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} relative mt-[20px] h-[128px] w-[128px] flex-none overflow-hidden`}
-            style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}
+            style={{ ...(clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }), filter: `drop-shadow(0 16px 26px color-mix(in srgb, ${accent} 45%, transparent))` }}
           >
             <Image src={SHAPE_ART[community.id] ?? community.photo} alt="" fill sizes="256px" className="object-cover" />
+            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.07) 36%, transparent 56%)" }} />
+            <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -14px 26px rgba(9,10,20,0.32), inset 0 2px 6px rgba(255,255,255,0.28)" }} />
           </span>
         </div>
 
