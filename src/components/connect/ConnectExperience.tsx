@@ -441,10 +441,19 @@ const PHOTO_COVER: Record<string, string> = {
 // Internal demo; we work with these partners, so their logos are cleared.
 const DO_EVENT_COVER = "/images/connect/covers/do-event.webp";
 
-function partnerLogo(host: string): { src: string; w: number; h: number } | null {
-  if (/jpmorgan|chase/i.test(host)) return { src: "/images/connect/partners/jpmc-white.png", w: 958, h: 195 };
-  if (/at&t/i.test(host)) return { src: "/images/connect/partners/att-white.png", w: 960, h: 395 };
-  if (/ernst|ey/i.test(host)) return { src: "/images/connect/partners/ey-white.png", w: 959, h: 969 };
+// Each event wears its partner's brand accent (EY yellow, Chase blue,
+// AT&T blue) across surface, CTA, and filters.
+function partnerAccent(host: string): string {
+  if (/jpmorgan|chase/i.test(host)) return "#117aca";
+  if (/at&t/i.test(host)) return "#00a8e0";
+  if (/ernst|ey/i.test(host)) return "#ffe600";
+  return EVENT_ACCENT;
+}
+
+function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: number; h: number } | null {
+  if (/jpmorgan|chase/i.test(host)) return { src: `/images/connect/partners/jpmc-${tone}.png`, w: 958, h: 195 };
+  if (/at&t/i.test(host)) return { src: `/images/connect/partners/att-${tone}.png`, w: 960, h: 395 };
+  if (/ernst|ey/i.test(host)) return { src: `/images/connect/partners/ey-${tone}.png`, w: 959, h: 969 };
   return null;
 }
 
@@ -1174,12 +1183,13 @@ function HomeView({
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
+              const pAccent = partnerAccent(event.host);
               const joined = eventJoined[event.id];
               return (
                 <div
                   key={event.id}
                   className="group relative flex flex-col overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
-                  style={{ background: cardVariant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${EVENT_ACCENT} 24%, #f4f1ea)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: cardVariant === "photos" ? CARD_TEXT_SHADOW : undefined }}
+                  style={{ background: cardVariant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${pAccent} 24%, #f4f1ea)`, border: cardVariant === "photos" ? `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)` : undefined, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: cardVariant === "photos" ? CARD_TEXT_SHADOW : undefined }}
                 >
                   {cardVariant === "photos" && (
                     <>
@@ -1195,21 +1205,14 @@ function HomeView({
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
-                    {cardVariant === "photos" ? (
-                      (() => {
-                        const logo = partnerLogo(event.host);
-                        return logo ? (
-                          <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
-                            <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
-                          </span>
-                        ) : null;
-                      })()
-                    ) : (
-                      <>
-                        <ShapeBadge id="event" size={76} className="sm:hidden" />
-                        <ShapeBadge id="event" size={108} className="hidden sm:block" />
-                      </>
-                    )}
+                    {(() => {
+                      const logo = partnerLogo(event.host, cardVariant === "photos" ? "white" : "ink");
+                      return logo ? (
+                        <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
+                          <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 62%, transparent)` }}>
@@ -1223,11 +1226,11 @@ function HomeView({
                       )}
                     </span>
                     {joined ? (
-                      <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${eventInk})` }}>
+                      <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>
                         Open Board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
                       </button>
                     ) : upcoming ? null : (
-                      <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${eventInk})` }}>
+                      <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>
                         <KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code
                       </button>
                     )}
@@ -1475,6 +1478,7 @@ function EventView({
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
   const eventInk = variant === "photos" ? "#f6f5fb" : CARD_INK;
+  const pAccent = partnerAccent(event.host);
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -1484,7 +1488,7 @@ function EventView({
       <section
         aria-label="Event context"
         className="group relative overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
-        style={{ background: variant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${EVENT_ACCENT} 24%, #f4f1ea)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: variant === "photos" ? CARD_TEXT_SHADOW : undefined }}
+        style={{ background: variant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${pAccent} 24%, #f4f1ea)`, border: variant === "photos" ? `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)` : undefined, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: variant === "photos" ? CARD_TEXT_SHADOW : undefined }}
       >
         {variant === "photos" && (
           <>
@@ -1496,7 +1500,7 @@ function EventView({
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
-            <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${eventInk})` }}>{event.lifecycle}</p>
+            <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
               <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {event.date}</span>
@@ -1504,25 +1508,18 @@ function EventView({
               <span>Hosted by {event.host}</span>
             </p>
           </div>
-          {variant === "photos" ? (
-            (() => {
-              const logo = partnerLogo(event.host);
-              return logo ? (
-                <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
-                  <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
-                </span>
-              ) : null;
-            })()
-          ) : (
-            <>
-              <ShapeBadge id="event" size={84} className="sm:hidden" />
-              <ShapeBadge id="event" className="hidden sm:block" />
-            </>
-          )}
+          {(() => {
+            const logo = partnerLogo(event.host, variant === "photos" ? "white" : "ink");
+            return logo ? (
+              <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
+                <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
+              </span>
+            ) : null;
+          })()}
         </div>
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 70%, ${eventInk})` }} />
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 70%, ${eventInk})` }} />
             Attendees + event pros only
           </span>
         </div>
@@ -1530,7 +1527,7 @@ function EventView({
 
       <InlineAsk
         joined
-        accent={EVENT_ACCENT}
+        accent={pAccent}
         placeholder="Ask what you missed…"
         onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
       />
@@ -1582,7 +1579,7 @@ function EventView({
         ]}
         active={filter}
         onPick={onFilter}
-        accent={EVENT_ACCENT}
+        accent={pAccent}
       />
 
       <div className="flex flex-col gap-[var(--space-4)]">
