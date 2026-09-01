@@ -436,11 +436,16 @@ const PHOTO_COVER: Record<string, string> = {
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
 // the towers, the monitors, the stethoscope, the studio desk) -- never an
 // empty stretch of room.
-// Events wear the partner-relevant scene in the photo lane.
-function eventPhoto(host: string): string {
-  if (/jpmorgan|chase/i.test(host)) return PHOTO_COVER["business-money"];
-  if (/at&t/i.test(host)) return PHOTO_COVER["tech-engineering"];
-  return PHOTO_COVER["teaching-education"];
+// Events are Dream Opportunity branded in the photo lane -- one DO cover
+// for all events, with the partner's own logo as the identity mark.
+// Internal demo; we work with these partners, so their logos are cleared.
+const DO_EVENT_COVER = "/images/connect/covers/do-event.webp";
+
+function partnerLogo(host: string): { src: string; w: number; h: number } | null {
+  if (/jpmorgan|chase/i.test(host)) return { src: "/images/connect/partners/jpmc-white.png", w: 958, h: 195 };
+  if (/at&t/i.test(host)) return { src: "/images/connect/partners/att-white.png", w: 960, h: 395 };
+  if (/ernst|ey/i.test(host)) return { src: "/images/connect/partners/ey-white.png", w: 959, h: 969 };
+  return null;
 }
 
 const PHOTO_FOCUS: Record<string, string> = {
@@ -1178,7 +1183,7 @@ function HomeView({
                 >
                   {cardVariant === "photos" && (
                     <>
-                      <Image src={eventPhoto(event.host)} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
+                      <Image src={DO_EVENT_COVER} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
                       <CardProgressiveBlur />
                       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
                     </>
@@ -1186,11 +1191,20 @@ function HomeView({
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
                   <div className="relative z-10 flex flex-1 items-center gap-[var(--space-4)]">
                     <div className="min-w-0 flex-1 self-start">
-                      <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>{event.name}</h3>
+                      <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
-                    {cardVariant !== "photos" && (
+                    {cardVariant === "photos" ? (
+                      (() => {
+                        const logo = partnerLogo(event.host);
+                        return logo ? (
+                          <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
+                            <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
+                          </span>
+                        ) : null;
+                      })()
+                    ) : (
                       <>
                         <ShapeBadge id="event" size={76} className="sm:hidden" />
                         <ShapeBadge id="event" size={108} className="hidden sm:block" />
@@ -1316,7 +1330,7 @@ function BoardView({
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${bannerInk} 18%, transparent)` }} />
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
-            <h1 className="text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: CARD_INK }}>{community.name}</h1>
+            <h1 className="text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: bannerInk }}>{community.name}</h1>
           </div>
           {variant !== "photos" && (
             <>
@@ -1474,7 +1488,7 @@ function EventView({
       >
         {variant === "photos" && (
           <>
-            <Image src={eventPhoto(event.host)} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
+            <Image src={DO_EVENT_COVER} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
             <CardProgressiveBlur />
             <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
           </>
@@ -1483,14 +1497,23 @@ function EventView({
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${EVENT_ACCENT} 45%, ${eventInk})` }}>{event.lifecycle}</p>
-            <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: CARD_INK }}>{event.name}</h1>
+            <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
               <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {event.date}</span>
               <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {event.location}</span>
               <span>Hosted by {event.host}</span>
             </p>
           </div>
-          {variant !== "photos" && (
+          {variant === "photos" ? (
+            (() => {
+              const logo = partnerLogo(event.host);
+              return logo ? (
+                <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
+                  <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
+                </span>
+              ) : null;
+            })()
+          ) : (
             <>
               <ShapeBadge id="event" size={84} className="sm:hidden" />
               <ShapeBadge id="event" className="hidden sm:block" />
