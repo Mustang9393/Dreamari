@@ -679,7 +679,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
 
 type LucideIcon = React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 
-function FilterRow({ options, active, onPick }: { options: { key: string; label: string; Icon?: LucideIcon }[]; active: string; onPick: (key: string) => void }) {
+function FilterRow({ options, active, onPick, accent }: { options: { key: string; label: string; Icon?: LucideIcon }[]; active: string; onPick: (key: string) => void; accent?: string }) {
   return (
     <div className="relative -mx-1">
       <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Filter feed">
@@ -693,7 +693,9 @@ function FilterRow({ options, active, onPick }: { options: { key: string; label:
             className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
             style={
               active === option.key
-                ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }
+                ? accent
+                  ? { background: `color-mix(in srgb, ${accent} 20%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 60%, var(--glass-border))`, color: "var(--foreground)" }
+                  : { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }
                 : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }
             }
           >
@@ -1200,6 +1202,7 @@ function BoardView({
             ]}
             active={filter}
             onPick={onFilter}
+            accent={communityAccent(community)}
           />
 
           <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-5)]">
@@ -1354,6 +1357,7 @@ function EventView({
         ]}
         active={filter}
         onPick={onFilter}
+        accent={EVENT_ACCENT}
       />
 
       <div className="flex flex-col gap-[var(--space-4)]">
