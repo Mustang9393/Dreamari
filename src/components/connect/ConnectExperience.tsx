@@ -472,25 +472,30 @@ function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: num
 }
 
 
-/** The partner's mark, alone, composited directly over the visual center
- *  of the baked-in star art -- no "DO x" lockup. A live "DO" wordmark next
+/** The partner's mark, alone -- no "DO x" lockup. A live "DO" wordmark next
  *  to raster partner logos never quite settled: text and PNG ink don't
  *  share a real cap-height to match against (a wordmark like J.P.Morgan
  *  and a compact glyph like EY don't either, honestly), so every fix for
- *  one host's scale or baseline nudged another host out of line. One mark,
- *  well-placed, reads cleaner than two mismatched typographic systems
- *  forced into a row. Absolutely positioned at the star's measured centroid
- *  (~80%/53% of the cover art in both the card and banner treatments,
- *  found by sampling the brightest cluster in each do-event-*.webp against
- *  its rendered, object-fit:cover-cropped box) rather than living in the
- *  title's flex row. */
+ *  one host's scale or baseline nudged another host out of line. One
+ *  mark, well-placed, reads cleaner than two mismatched typographic
+ *  systems forced into a row. The cover art used to bake in a star for
+ *  the mark to center on; the star's gone (a decorative flourish that
+ *  read as one person's aesthetic pick, not the app's).
+ *
+ *  A real flex participant now, not an absolute overlay: overlaying it
+ *  meant reserving fixed horizontal room from the title on every card
+ *  width, which either squeezed the title into word-by-word wrapping on
+ *  a narrow card or, hidden below that width instead, vanished the mark
+ *  entirely. As a normal flex child next to the title, a wide card keeps
+ *  them side by side and a narrow one wraps the mark onto its own line
+ *  below the title -- never fighting it for the same horizontal space. */
 function PartnerMark({ host, size = "card" }: { host: string; size?: "card" | "banner" }) {
   const logo = partnerLogo(host, "white");
   if (!logo) return null;
-  const box = size === "banner" ? "h-[64px] w-[176px] sm:h-[84px] sm:w-[228px]" : "h-[56px] w-[152px] sm:h-[72px] sm:w-[196px]";
+  const box = size === "banner" ? "h-[54px] w-[156px] sm:h-[68px] sm:w-[196px]" : "h-[44px] w-[128px] sm:h-[56px] sm:w-[160px]";
   const offset = logo.centerOffset;
   return (
-    <span aria-hidden className={`pointer-events-none absolute top-[46%] left-[80%] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${box}`}>
+    <span aria-hidden className={`pointer-events-none relative flex-none ${box}`}>
       <Image
         src={logo.src}
         alt=""
@@ -1423,13 +1428,13 @@ function HomeView({
                   <CardProgressiveBlur />
                   <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
-                  <PartnerMark host={event.host} size="card" />
-                  <div className="relative z-10 flex flex-1 items-center gap-[var(--space-4)]">
-                    <div className="min-w-0 flex-1 self-start">
+                  <div className="relative z-10 flex flex-1 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[10px]">
+                    <div className="min-w-[180px] flex-1 self-start">
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
+                    <PartnerMark host={event.host} size="card" />
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 62%, transparent)` }}>
@@ -1821,9 +1826,8 @@ function EventView({
         <CardProgressiveBlur />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
-        <PartnerMark host={event.host} size="banner" />
-        <div className="relative z-10 flex items-center gap-[var(--space-5)]">
-          <div className="min-w-0 flex-1 self-start pt-[8px]">
+        <div className="relative z-10 flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[12px]">
+          <div className="min-w-[220px] flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
@@ -1832,6 +1836,7 @@ function EventView({
               <span>Hosted by {event.host}</span>
             </p>
           </div>
+          <PartnerMark host={event.host} size="banner" />
         </div>
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
