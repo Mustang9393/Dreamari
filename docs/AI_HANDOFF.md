@@ -40,6 +40,26 @@ tokens above, in both modes).
 
 - Date: 2026-09-01
 
+### 2026-09-01 (later) connect-redesign-lab: card exploration branch (DEPLOYS TO demo BRANCH ONLY — NEVER main)
+
+- Branch `connect-redesign-lab` (local) explores new Connect community cards.
+  Explorations 1 (dark posters) → 2 (pastel bands) → 3/3b (topic-shape
+  clip-path masks, approved) → 3c (uniform slot interiors) → 3d (current).
+- Current card language: pastel accent surface, Bricolage (--font-display)
+  only, exactly 3 type tiers (name 20/800, "N verified pros" 13/600, folio
+  11/500; CTA reuses 13+800). Title top-left, shape mask top-right, pros
+  line sitting on a full-card-width hairline, N STUDENTS left / JOIN → right.
+- Masks: briefcase (GPD — bulb retired per user), rising bars, hexagon,
+  cross, flower. Hover = what the shape is (bars morph taller via clip-path
+  interpolation, hex turns 60°, cross heartbeats, flower blooms, briefcase
+  lifts). Art = generated accent-glass gradients in
+  public/images/connect/shapes/ (PIL script in git history, 336095b).
+- DEPLOY RULE (user-set): this work deploys ONLY by force-pushing the lab
+  branch to origin/demo (Vercel preview
+  dreamari-git-demo-chandump14-3961s-projects.vercel.app). NEVER merge or
+  push to main until the user explicitly says "push to main".
+- Next: carry the winning card language into board/thread screens.
+
 ### 2026-09-01 (cont.) Connect pitch-readiness round (PUSHED, af1acc7)
 
 - Community grid: five EQUAL cards, three top + two centered below (the
