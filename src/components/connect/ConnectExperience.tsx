@@ -1137,7 +1137,6 @@ function BoardView({
             <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 74%, transparent)` }}>
               {community.activePros} verified pros{" "}
               <ShieldCheck className="inline-block h-[13px] w-[13px] align-[-2px]" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 70%, ${CARD_INK})` }} />
-              {" "}· Qualified students can join
             </p>
           </div>
           <ShapeBadge id={community.id} size={84} className="sm:hidden" />
