@@ -433,11 +433,11 @@ const TILE_INK = "#f2f0fa";
 // node 3632-877), used exactly with the file's own treatment: 12.5px
 // full-bleed blur, left-to-right dark scrim, accent tint, noise layer.
 const POSTER_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/poster2-teaching-education.webp",
-  "business-money": "/images/connect/covers/poster2-business-money.webp",
-  "tech-engineering": "/images/connect/covers/poster2-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/poster2-health-medicine.webp",
-  "arts-media": "/images/connect/covers/poster2-arts-media.webp",
+  "teaching-education": "/images/connect/covers/poster3-teaching-education.webp",
+  "business-money": "/images/connect/covers/poster3-business-money.webp",
+  "tech-engineering": "/images/connect/covers/poster3-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/poster3-health-medicine.webp",
+  "arts-media": "/images/connect/covers/poster3-arts-media.webp",
 };
 const POSTER_NOISE = "/images/connect/covers/poster-noise.png";
 const POSTER_BG = "#0c1023";
