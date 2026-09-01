@@ -1041,9 +1041,13 @@ export function ConnectExperience() {
           />
         )}
 
-        {view.kind === "board" && (
+        {view.kind === "board" &&
+          (() => {
+            const community = COMMUNITIES.find((c) => c.id === view.id);
+            if (!community) return null;
+            return (
           <BoardView
-            community={COMMUNITIES.find((c) => c.id === view.id)!}
+            community={community}
             filter={view.filter}
             variant={cardVariant}
             joined={!!joined[view.id]}
@@ -1054,7 +1058,8 @@ export function ConnectExperience() {
             onOpenInsight={(id) => setView({ kind: "insight", id })}
             cardProps={cardProps}
           />
-        )}
+            );
+          })()}
 
         {view.kind === "insight" &&
           (() => {
@@ -1113,12 +1118,15 @@ export function ConnectExperience() {
             );
           })()}
 
-        {view.kind === "thread" && (
+        {view.kind === "thread" &&
+          (() => {
+            const thread = ALL_THREADS.find((t) => t.id === view.id);
+            if (!thread) return null;
+            return (
           <ThreadView
-            thread={ALL_THREADS.find((t) => t.id === view.id)!}
+            thread={thread}
             onBack={() => {
-              const t = ALL_THREADS.find((x) => x.id === view.id)!;
-              setView(eventById(t.boardId) ? { kind: "event", id: t.boardId, filter: "all" } : { kind: "board", id: t.boardId, filter: "questions" });
+              setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "all" } : { kind: "board", id: thread.boardId, filter: "questions" });
             }}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onAddToPlan={() => say("Added to your Plan as a next action.")}
@@ -1128,7 +1136,8 @@ export function ConnectExperience() {
             helpfuls={helpfuls}
             toggleHelpful={toggleHelpful}
           />
-        )}
+            );
+          })()}
       </main>
 
       {joinFor && (
@@ -1298,8 +1307,8 @@ function HomeView({
                     {(() => {
                       const logo = partnerLogo(event.host, "white");
                       return logo ? (
-                        <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
-                          <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
+                        <span className="relative flex h-[84px] w-[104px] flex-none items-center justify-center sm:h-[108px] sm:w-[150px]">
+                          <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[48px] w-auto max-w-[96px] object-contain opacity-95 sm:max-h-[64px] sm:max-w-[140px]" />
                         </span>
                       ) : null;
                     })()}
@@ -1450,8 +1459,8 @@ function BoardView({
             </button>
           ))}
         </div>
-        <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${bannerInk} 18%, transparent)` }}>
-          <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${bannerInk} 62%, transparent)` }}>
+        <div className="relative z-10 mt-[var(--space-4)] flex w-full flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[4px] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${bannerInk} 18%, transparent)` }}>
+          <span className="min-w-0 text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${bannerInk} 62%, transparent)` }}>
             <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.activePros}</strong> verified pros{" "}
             <ShieldCheck className="inline-block h-[13px] w-[13px] align-[-2px]" aria-hidden style={{ color: `color-mix(in srgb, ${communityAccent(community)} 70%, ${bannerInk})` }} />
             {" "}· <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.posts}</strong> posts
@@ -1597,8 +1606,8 @@ function EventView({
           {(() => {
             const logo = partnerLogo(event.host, "white");
             return logo ? (
-              <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
-                <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
+              <span className="relative flex h-[90px] w-[112px] flex-none items-center justify-center sm:h-[110px] sm:w-[170px]">
+                <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[52px] w-auto max-w-[104px] object-contain opacity-95 sm:max-h-[72px] sm:max-w-[160px]" />
               </span>
             ) : null;
           })()}
@@ -1842,7 +1851,7 @@ function seededReactions(id: string): number[] {
     h ^= id.charCodeAt(i);
     h = Math.imul(h, 16777619) >>> 0;
   }
-  return EXTRA_REACTIONS.map((_, i) => (h >> (i * 5)) % 9);
+  return EXTRA_REACTIONS.map((_, i) => ((h >> (i * 5)) % 8) + 1);
 }
 
 /** The like button grown up: 👍 plus tap-to-react emoji, the same
