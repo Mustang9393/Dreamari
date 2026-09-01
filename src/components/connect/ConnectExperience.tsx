@@ -433,11 +433,11 @@ const TILE_INK = "#f2f0fa";
 // node 3632-877), used exactly with the file's own treatment: 12.5px
 // full-bleed blur, left-to-right dark scrim, accent tint, noise layer.
 const POSTER_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/poster-teaching-education.webp",
-  "business-money": "/images/connect/covers/poster-business-money.webp",
-  "tech-engineering": "/images/connect/covers/poster-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/poster-health-medicine.webp",
-  "arts-media": "/images/connect/covers/poster-arts-media.webp",
+  "teaching-education": "/images/connect/covers/poster2-teaching-education.webp",
+  "business-money": "/images/connect/covers/poster2-business-money.webp",
+  "tech-engineering": "/images/connect/covers/poster2-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/poster2-health-medicine.webp",
+  "arts-media": "/images/connect/covers/poster2-arts-media.webp",
 };
 const POSTER_NOISE = "/images/connect/covers/poster-noise.png";
 const POSTER_BG = "#0c1023";
@@ -638,16 +638,9 @@ function CommunityCard({
            progressive blur ramping toward the text side, then the file's
            scrim, accent tint, and noise layers */}
         <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-          <Image src={cover} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "50% 40%" }} />
-          {[2, 5, 9, 12.5].map((blur, index, arr) => {
-            const fadeStart = (index / arr.length) * 58;
-            const fadeEnd = fadeStart + 58 / arr.length + 16;
-            const mask = `linear-gradient(to left, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
-            return (
-              <span key={blur} className="absolute inset-0" style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }} />
-            );
-          })}
-          <span className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(12,16,35,0.95) 0%, rgba(12,16,35,0.65) 30%, rgba(12,16,35,0.1) 60%, rgba(12,16,35,0) 100%), linear-gradient(90deg, color-mix(in srgb, ${accent} 10%, transparent), color-mix(in srgb, ${accent} 10%, transparent))` }} />
+          <Image src={cover} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "50% 32%" }} />
+          <CardProgressiveBlur />
+          <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.45) 36%, rgba(12,16,35,0.1) 62%, rgba(12,16,35,0) 100%), linear-gradient(90deg, color-mix(in srgb, ${accent} 10%, transparent), color-mix(in srgb, ${accent} 10%, transparent))` }} />
           <Image src={POSTER_NOISE} alt="" fill sizes="640px" className="object-cover opacity-70" />
         </span>
         {/* accent handle pill on the top edge, from the design file */}
