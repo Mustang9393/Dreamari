@@ -613,26 +613,21 @@ function CommunityCard({
   }
 
   if (variant === "fusion") {
-    // A and B merged: the topic shape blown up past the card frame, cropped
-    // by it, acting as the mask the photo lives inside.
+    // The reference apps' recipe: a saturated color ground, the topic shape
+    // at portrait scale holding the photo (fully visible, never cropped),
+    // dashed radials behind it, and a progressive frost along the floor.
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
-        style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
+        className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
+        style={{ background: `linear-gradient(140deg, color-mix(in srgb, ${accent} 52%, #ffffff) 0%, color-mix(in srgb, ${accent} 32%, #efe9f7) 100%)`, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35), 0 18px 44px -22px rgba(0,0,0,0.65)" }}
       >
-        <span aria-hidden className="absolute top-1/2 right-[-26px] h-[128px] w-[128px]" style={{ transform: "translateY(-50%) scale(3.1)", transformOrigin: "58% 50%" }}>
-          {/* accent echo: an offset ghost of the shape, for depth */}
-          <span className="absolute inset-0" style={{ clipPath: clip ? `path('${clip}')` : undefined, borderRadius: clip ? undefined : "58% 42% 63% 37% / 45% 55% 45% 55%", background: `color-mix(in srgb, ${accent} 50%, transparent)`, transform: "translate(5px, 6px)", filter: "blur(2px)", opacity: 0.55 }} />
-          {/* the mask itself carries the per-shape hover gesture; the photo
-             inside gets a slow Ken Burns */}
-          <span className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} absolute inset-0 overflow-hidden`} style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}>
-            <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1200px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.12]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-            <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }} />
-            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 34%, transparent 55%)" }} />
-          </span>
-        </span>
-        {/* folio guard: the mask can reach the card floor, the text cannot lose */}
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-[46%]" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.72) 0%, rgba(14,12,32,0.3) 55%, transparent 100%)" }} />
+        <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }} />
+
+        <svg aria-hidden className="pointer-events-none absolute top-[-6px] right-[-22px] h-[220px] w-[220px]" viewBox="0 0 220 220" fill="none">
+          {[52, 78, 104].map((r) => (
+            <circle key={r} cx="110" cy="110" r={r} stroke={`color-mix(in srgb, ${CARD_INK} 22%, transparent)`} strokeWidth="1.5" strokeDasharray="2 7" />
+          ))}
+        </svg>
 
         <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
           <span className="sr-only">{`Open ${community.name}`}</span>
@@ -644,19 +639,32 @@ function CommunityCard({
           </span>
         )}
 
-        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]">
-          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF" }}>
-            {community.name}
-          </h3>
-          <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
-            <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> verified pros
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }} />
-          </p>
-          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
-            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
-              <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.posts}</strong> posts
+        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
+          <div className="flex flex-1 items-center gap-[var(--space-4)]">
+            <h3 className="min-w-0 flex-1 self-start text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
+              {community.name}
+            </h3>
+
+            {/* the photo lives inside the topic shape, portrait-style */}
+            <span
+              className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} relative mt-[20px] h-[128px] w-[128px] flex-none overflow-hidden`}
+              style={{ ...(clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }), filter: `drop-shadow(0 16px 26px color-mix(in srgb, ${accent} 55%, transparent))` }}
+            >
+              <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="512px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+              <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 12%, transparent)` }} />
+              <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.06) 36%, transparent 56%)" }} />
             </span>
-            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}>
+          </div>
+
+          <p className="mt-[4px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
+            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 40%, ${CARD_INK})` }} />
+          </p>
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 20%, transparent)` }}>
+            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
+              <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.posts}</strong> posts
+            </span>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 40%, ${CARD_INK})` }}>
               Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </span>
           </div>
