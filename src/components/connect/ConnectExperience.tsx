@@ -1264,14 +1264,7 @@ function HomeView({
         <Image src="/images/dreamy/v2/dreamy-glasses.png" alt="" width={192} height={192} aria-hidden className="absolute -top-[10px] right-0 h-[88px] w-[88px] object-contain sm:h-[108px] sm:w-[108px]" />
       </div>
 
-      <FilterRow
-        options={[
-          { key: "communities", label: "Community", Icon: Users },
-          { key: "events", label: "Events", Icon: Calendar },
-        ]}
-        active={tab}
-        onPick={(key) => onTab(key as "communities" | "events")}
-      />
+      <TopTabs tab={tab} onTab={onTab} />
 
       <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
@@ -1400,6 +1393,45 @@ function HomeView({
         </section>
       )}
     </>
+  );
+}
+
+/** The page-level Community/Events switcher: one glass segmented control
+ *  with a sliding thumb, instead of two disconnected chips. */
+function TopTabs({ tab, onTab }: { tab: "communities" | "events"; onTab: (tab: "communities" | "events") => void }) {
+  const isEvents = tab === "events";
+  return (
+    <div
+      role="tablist"
+      aria-label="Connect sections"
+      className="relative grid w-full max-w-[340px] grid-cols-2 rounded-full border p-[4px]"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)" }}
+    >
+      <span
+        aria-hidden
+        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(50%-4px)] rounded-full transition-transform duration-300 ease-out"
+        style={{ background: "var(--primary)", transform: isEvents ? "translateX(100%)" : "translateX(0)", boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+      />
+      {(
+        [
+          { key: "communities", label: "Community", Icon: Users },
+          { key: "events", label: "Events", Icon: Calendar },
+        ] as const
+      ).map(({ key, label, Icon }) => (
+        <button
+          key={key}
+          type="button"
+          role="tab"
+          aria-selected={tab === key}
+          onClick={() => onTab(key)}
+          className="dm-quiet relative z-10 flex min-h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-full text-[13px] leading-[18px] font-bold transition-colors duration-300"
+          style={{ color: tab === key ? "#FFFFFF" : "var(--muted-foreground)" }}
+        >
+          <Icon className="h-[15px] w-[15px]" aria-hidden />
+          {label}
+        </button>
+      ))}
+    </div>
   );
 }
 
