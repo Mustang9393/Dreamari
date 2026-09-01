@@ -396,6 +396,33 @@ const SHAPE_CLIP: Record<string, string> = {
 // High-key generated covers for the photo cards: bright accent art with a
 // per-world motif, built with a deepened bottom third so the scrim can stay
 // light and the type stays AA-legible.
+/** The For You reel's progressive-blur recipe at card scale: stacked
+ *  backdrop-filter layers at increasing blur, each feathered in by its own
+ *  mask band, composited into a smooth sharp-to-frosted ramp. */
+const CARD_BLUR_STOPS = [2, 5, 9, 14];
+
+function CardProgressiveBlur() {
+  const total = CARD_BLUR_STOPS.length;
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[64%] overflow-hidden">
+      {CARD_BLUR_STOPS.map((blur, index) => {
+        const bandStart = (index / total) * 100;
+        const feather = 100 / total + 8;
+        const mask = `linear-gradient(to bottom, transparent ${Math.max(0, bandStart - feather).toFixed(1)}%, black ${bandStart.toFixed(1)}%, black 100%)`;
+        return (
+          <span
+            key={blur}
+            className="absolute inset-0"
+            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
+const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)";
+
 // The CEO's own reference photography (people-free), cropped for the cards.
 const PHOTO_COVER: Record<string, string> = {
   "teaching-education": "/images/connect/covers/photo2-teaching-education.webp",
@@ -494,8 +521,10 @@ function CommunityCard({
       >
         {/* full-bleed cover, slow push-in on hover */}
         <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "60% 42%" }} />
-        {/* progressive scrim keeps every tier legible without dimming the art */}
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.82) 0%, rgba(14,12,32,0.5) 36%, rgba(14,12,32,0.14) 64%, transparent 100%)" }} />
+        {/* legibility = progressive blur first, then a much lighter tint:
+           the frosted ramp does the work, so the photo stays bright */}
+        <CardProgressiveBlur />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.52) 0%, rgba(14,12,32,0.28) 36%, rgba(14,12,32,0.08) 64%, transparent 100%)" }} />
 
         <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
           <span className="sr-only">{`Open ${community.name}`}</span>
@@ -507,8 +536,8 @@ function CommunityCard({
           </span>
         )}
 
-        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
-          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF", textShadow: "0 1px 14px rgba(0,0,0,0.45)" }}>
+        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}>
+          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF" }}>
             {community.name}
           </h3>
           <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
