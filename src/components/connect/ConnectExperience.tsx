@@ -379,12 +379,12 @@ const FEED_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helve
 
 // The mask IS the topic (per direct feedback): each community's art is
 // clipped into an icon of its own subject -- a briefcase, rising bars, a
-// hexagon, a medical cross, a flower. Paths live in a 128px box, the
+// microchip, a medical cross, a flower. Paths live in a 128px box, the
 // tile's exact size, unioned subpaths via clip-path: path().
 const SHAPE_CLIP: Record<string, string> = {
   "teaching-education": 'M26 44 h76 a16 16 0 0 1 16 16 v42 a16 16 0 0 1 -16 16 h-76 a16 16 0 0 1 -16 -16 v-42 a16 16 0 0 1 16 -16 Z M54 16 h20 a10 10 0 0 1 10 10 v14 a10 10 0 0 1 -10 10 h-20 a10 10 0 0 1 -10 -10 v-14 a10 10 0 0 1 10 -10 Z',
   "business-money": 'M24 70 h10 a10 10 0 0 1 10 10 v38 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-38 a10 10 0 0 1 10 -10 Z M59 38 h10 a10 10 0 0 1 10 10 v70 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-70 a10 10 0 0 1 10 -10 Z M94 10 h10 a10 10 0 0 1 10 10 v98 a10 10 0 0 1 -10 10 h-10 a10 10 0 0 1 -10 -10 v-98 a10 10 0 0 1 10 -10 Z',
-  "tech-engineering": 'M64 4 L114 33 V95 L64 124 L14 95 V33 Z',
+  "tech-engineering": 'M42 26 h44 a16 16 0 0 1 16 16 v44 a16 16 0 0 1 -16 16 h-44 a16 16 0 0 1 -16 -16 v-44 a16 16 0 0 1 16 -16 Z M40 8 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M40 98 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M12 36 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z M102 36 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z M63 8 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M63 98 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M12 59 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z M102 59 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z M86 8 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M86 98 h2 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 h-2 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 Z M12 82 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z M102 82 h14 a4 4 0 0 1 4 4 v2 a4 4 0 0 1 -4 4 h-14 a4 4 0 0 1 -4 -4 v-2 a4 4 0 0 1 4 -4 Z',
   "health-medicine": 'M61 6 h6 a16 16 0 0 1 16 16 v84 a16 16 0 0 1 -16 16 h-6 a16 16 0 0 1 -16 -16 v-84 a16 16 0 0 1 16 -16 Z M22 45 h84 a16 16 0 0 1 16 16 v6 a16 16 0 0 1 -16 16 h-84 a16 16 0 0 1 -16 -16 v-6 a16 16 0 0 1 16 -16 Z',
   "arts-media": 'M90 28 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M54 54 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M68 97 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M112 97 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M126 54 a26 26 0 1 1 -52 0 a26 26 0 1 1 52 0 Z M93 66 a29 29 0 1 1 -58 0 a29 29 0 1 1 58 0 Z',
 };
@@ -407,7 +407,7 @@ const STAR_CLIP =
 const SHAPE_KIND: Record<string, string> = {
   "teaching-education": "briefcase",
   "business-money": "bars",
-  "tech-engineering": "hex",
+  "tech-engineering": "chip",
   "health-medicine": "cross",
   "arts-media": "flower",
 };
@@ -422,6 +422,8 @@ const SHAPE_ANIM_CSS = `
 .group:hover .dm-shape-briefcase { transform: translateY(-7px) rotate(-5deg); }
 .group:hover .dm-shape-bars { clip-path: path('${BARS_GROWN}') !important; }
 .group:hover .dm-shape-hex { transform: rotate(60deg); }
+.group:hover .dm-shape-chip { animation: dm-power-on .8s ease-out forwards; }
+@keyframes dm-power-on { 0% { filter: brightness(1); } 25% { filter: brightness(1.45); } 45% { filter: brightness(1.08); } 65% { filter: brightness(1.5); } 100% { filter: brightness(1.3); } }
 .group:hover .dm-shape-cross { animation: dm-heartbeat 1.1s ease-in-out infinite; }
 .group:hover .dm-shape-flower { transform: rotate(30deg) scale(1.05); transition-duration: .85s; }
 .group:hover .dm-shape-star { transform: rotate(-12deg) scale(1.08); }
@@ -1074,26 +1076,28 @@ function HomeView({
 function SuggestCommunityCard() {
   const [sent, setSent] = useState(false);
   return (
-    <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:flex-row sm:items-center" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
-      <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-        <Sparkles className="h-[19px] w-[19px]" />
+    <button
+      type="button"
+      onClick={() => setSent(true)}
+      disabled={sent}
+      className="dm-tap group mt-[var(--space-2)] flex min-h-[64px] w-full cursor-pointer flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[26px] border-2 border-dashed px-[var(--space-6)] py-[var(--space-4)] text-left disabled:cursor-default"
+      style={{ borderColor: "color-mix(in srgb, var(--foreground) 22%, transparent)", background: "transparent" }}
+    >
+      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        Can&apos;t find what you&apos;re looking for?
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Can&apos;t find what you&apos;re looking for?</span>
-      </span>
-      <button
-        type="button"
-        onClick={() => setSent(true)}
-        disabled={sent}
-        className="dm-quiet flex min-h-[42px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[18px] text-[12.5px] leading-[17px] font-bold disabled:cursor-default"
-        style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
-      >
-        {sent ? <><CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> Request sent</> : <>Suggest a Community <ArrowRight className="h-4 w-4" aria-hidden /></>}
-      </button>
-    </div>
+      {sent ? (
+        <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: "var(--world-food-farming-nature)", fontFamily: "var(--font-display)" }}>
+          <CheckCircle2 className="h-[14px] w-[14px]" aria-hidden /> Request Sent
+        </span>
+      ) : (
+        <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+          Suggest a Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+        </span>
+      )}
+    </button>
   );
 }
-
 function CommunityRow({ community, onOpen, featured }: { community: Community; onOpen: () => void; featured?: boolean }) {
   return <CommunityCard community={community} onOpen={onOpen} featured={featured} />;
 }
