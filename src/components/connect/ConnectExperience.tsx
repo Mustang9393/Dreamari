@@ -441,6 +441,13 @@ const PHOTO_COVER: Record<string, string> = {
 // Internal demo; we work with these partners, so their logos are cleared.
 const DO_EVENT_COVER = "/images/connect/covers/do-event.webp";
 
+function eventCover(host: string): string {
+  if (/jpmorgan|chase/i.test(host)) return "/images/connect/covers/do-event-jpmc.webp";
+  if (/at&t/i.test(host)) return "/images/connect/covers/do-event-att.webp";
+  if (/ernst|ey/i.test(host)) return "/images/connect/covers/do-event-ey.webp";
+  return DO_EVENT_COVER;
+}
+
 // Each event wears its partner's brand accent (EY yellow, Chase blue,
 // AT&T blue) across surface, CTA, and filters.
 function partnerAccent(host: string): string {
@@ -990,7 +997,6 @@ export function ConnectExperience() {
                 <EventView
                   event={event}
                   filter={view.filter}
-                  variant={cardVariant}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
                   onBack={() => setView({ kind: "home", tab: "events" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
@@ -1091,7 +1097,7 @@ function HomeView({
   onPickVariant: (v: "photos" | "shapes") => void;
 }) {
   const [query, setQuery] = useState("");
-  const eventInk = cardVariant === "photos" ? "#f6f5fb" : CARD_INK;
+  const eventInk = "#f6f5fb";
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
   const searchedEvents = EVENTS.filter((e) => !query || (e.name + " " + e.host + " " + e.location).toLowerCase().includes(query.toLowerCase()));
 
@@ -1189,15 +1195,11 @@ function HomeView({
                 <div
                   key={event.id}
                   className="group relative flex flex-col overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
-                  style={{ background: cardVariant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${pAccent} 24%, #f4f1ea)`, border: cardVariant === "photos" ? `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)` : undefined, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: cardVariant === "photos" ? CARD_TEXT_SHADOW : undefined }}
+                  style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
-                  {cardVariant === "photos" && (
-                    <>
-                      <Image src={DO_EVENT_COVER} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
-                      <CardProgressiveBlur />
-                      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
-                    </>
-                  )}
+                  <Image src={eventCover(event.host)} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
+                  <CardProgressiveBlur />
+                  <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
                   <div className="relative z-10 flex flex-1 items-center gap-[var(--space-4)]">
                     <div className="min-w-0 flex-1 self-start">
@@ -1206,12 +1208,9 @@ function HomeView({
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
                     {(() => {
-                      const logo = partnerLogo(event.host, cardVariant === "photos" ? "white" : "ink");
+                      const logo = partnerLogo(event.host, "white");
                       return logo ? (
                         <span className="relative flex h-[108px] w-[150px] flex-none items-center justify-center">
-                          {cardVariant !== "photos" && (
-                            <span aria-hidden className="absolute top-1/2 left-1/2 h-[128px] w-[128px]" style={{ clipPath: `path('${STAR_CLIP}')`, background: `color-mix(in srgb, ${pAccent} 60%, #f4f1ea)`, transform: "translate(-50%, -50%) rotate(-10deg) scale(0.85)", filter: "blur(1px)" }} />
-                          )}
                           <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[64px] w-auto max-w-[140px] object-contain opacity-95" />
                         </span>
                       ) : null;
@@ -1465,13 +1464,11 @@ function EventView({
   takeawaySaved,
   onAddToPlan,
   cardProps,
-  variant,
 }: {
   event: EventBoard;
   filter: string;
   onFilter: (f: string) => void;
   onBack: () => void;
-  variant: "photos" | "shapes";
   onOpenThread: (id: string) => void;
   onSaveTakeaway: () => void;
   takeawaySaved: boolean;
@@ -1480,7 +1477,7 @@ function EventView({
 }) {
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
-  const eventInk = variant === "photos" ? "#f6f5fb" : CARD_INK;
+  const eventInk = "#f6f5fb";
   const pAccent = partnerAccent(event.host);
   return (
     <>
@@ -1491,15 +1488,11 @@ function EventView({
       <section
         aria-label="Event context"
         className="group relative overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
-        style={{ background: variant === "photos" ? "#0e0c20" : `color-mix(in srgb, ${pAccent} 24%, #f4f1ea)`, border: variant === "photos" ? `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)` : undefined, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: variant === "photos" ? CARD_TEXT_SHADOW : undefined }}
+        style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
-        {variant === "photos" && (
-          <>
-            <Image src={DO_EVENT_COVER} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
-            <CardProgressiveBlur />
-            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
-          </>
-        )}
+        <Image src={eventCover(event.host)} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
+        <CardProgressiveBlur />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
@@ -1512,12 +1505,9 @@ function EventView({
             </p>
           </div>
           {(() => {
-            const logo = partnerLogo(event.host, variant === "photos" ? "white" : "ink");
+            const logo = partnerLogo(event.host, "white");
             return logo ? (
               <span className="relative flex h-[110px] w-[170px] flex-none items-center justify-center">
-                {variant !== "photos" && (
-                  <span aria-hidden className="absolute top-1/2 left-1/2 h-[128px] w-[128px]" style={{ clipPath: `path('${STAR_CLIP}')`, background: `color-mix(in srgb, ${pAccent} 60%, #f4f1ea)`, transform: "translate(-50%, -50%) rotate(-10deg) scale(0.9)", filter: "blur(1px)" }} />
-                )}
                 <Image src={logo.src} alt={`${event.host} logo`} width={logo.w} height={logo.h} className="relative z-10 max-h-[72px] w-auto max-w-[160px] object-contain opacity-95" />
               </span>
             ) : null;
