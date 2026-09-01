@@ -3,10 +3,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim, cardTopScrim } from "./cardChrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
@@ -49,19 +51,24 @@ function PanelShell({ from, children }: { from: string; children: React.ReactNod
   );
 }
 
-function PanelPhoto({ photo, fadeRight = false }: { photo: string; fadeRight?: boolean }) {
+function PanelPhoto({ photo, fadeRight = false, focus = "50% 0%" }: { photo: string; fadeRight?: boolean; focus?: string }) {
   // Browse-card photo treatment for the hero panels: the full-bleed image
   // feathers into the panel via mask (left always; right on fadeRight
   // panels; soft top/bottom). The retired glow/symbol icon layers are gone.
-  const horizontal = fadeRight ? "linear-gradient(90deg, transparent 0%, #000 45%, #000 72%, transparent 100%)" : "linear-gradient(90deg, transparent 0%, #000 55%)";
-  const vertical = "linear-gradient(180deg, transparent 0%, #000 12%, #000 92%, transparent 100%)";
+  // Multi-stop ramps, not a 1-2 stop cutoff: a mask that jumps straight
+  // from transparent to opaque at one point reads as a visible seam where
+  // the fade "starts," even though the pixels either side are still soft.
+  const horizontal = fadeRight
+    ? "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.4) 28%, #000 48%, #000 68%, rgba(0,0,0,0.4) 86%, transparent 100%)"
+    : "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.35) 26%, rgba(0,0,0,0.8) 42%, #000 60%)";
+  const vertical = "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 9%, #000 20%, #000 84%, rgba(0,0,0,0.7) 92%, transparent 100%)";
   const mask = `${horizontal}, ${vertical}`;
   return (
     <div
       className="absolute right-0 bottom-0 h-[320px] w-[260px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[400px] lg:opacity-100"
       style={{ maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
     >
-      <img alt="" src={photo} className="absolute inset-0 h-full w-full object-cover object-top" />
+      <img alt="" src={photo} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: focus }} />
     </div>
   );
 }
@@ -147,7 +154,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
-      className="relative h-[430px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[360px] sm:rounded-[var(--radius-2xl)]"
+      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[320px] sm:rounded-[var(--radius-2xl)]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
         touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -160,25 +167,35 @@ function HeroBanner() {
         touchStart.current = null;
       }}
     >
-      {/* star dots are night decor — as var(--foreground) they turned into
-         ink specks on the light hero, so light mode drops them too */}
-      <div aria-hidden data-space-backdrop className="pointer-events-none absolute inset-0 z-[1]">
-        {SPACE_ACCENTS.map((dot, index) => (
-          <span key={index} className="absolute rounded-full" style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, background: "var(--foreground)" }} />
-        ))}
-      </div>
+      {/* star dots are Panel 1's night-sky decor. This overlay sits above
+         the sliding panel track (not inside it), so it stayed visible over
+         Panels 2/3 too once they were reached -- stray white flecks
+         floating over an office photo, unrelated to that panel's theme.
+         Only render them while Panel 1 is actually showing; light mode
+         drops them regardless, same as before. */}
+      {panel === 0 && (
+        <div aria-hidden data-space-backdrop className="pointer-events-none absolute inset-0 z-[1] motion-safe:animate-[fade-slide-up_0.4s_ease]">
+          {SPACE_ACCENTS.map((dot, index) => (
+            <span key={index} className="absolute rounded-full" style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, background: "var(--foreground)" }} />
+          ))}
+        </div>
+      )}
 
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
         {/* Panel 1 — Today's Drop */}
         <PanelShell from="var(--hero-accent-purple)">
+          {/* Stays on justify-between (unlike panels 2/3): Dreamy's flight
+             band crosses the panel's vertical middle here, so that gap is
+             his flight room, not dead space -- tightening it the same way
+             would run the streak/stats row straight through his trail. */}
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--chart-3)">TODAY&apos;S DROP</CaptionLabel>
               <p className="max-w-[420px] text-[26px] leading-[1.2] font-extrabold text-balance sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 Today&apos;s card is dropping in.
               </p>
-              <p className="max-w-[400px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                One question, 20 seconds. Solve it to catch today&apos;s career card and keep your streak.
+              <p className="max-w-[400px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                One question, 20 seconds. Keep your streak.
               </p>
             </div>
             <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
@@ -203,10 +220,14 @@ function HeroBanner() {
         </PanelShell>
 
         {/* Panel 2 — Continue Learning & Playing */}
-        {/* wash derived from the content's world (Business & Money) so the
-           whole panel obeys the system, not the old pink rotation */}
-        <PanelShell from="color-mix(in srgb, var(--world-business-money-office) 22%, var(--background))">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
+        {/* A gold wash (Business & Money's world color) fought the cool
+           purple-navy hero-mid it fades into -- swapped to the same cool
+           hero-accent family as the other two panels. The dossier art
+           itself stays: it's this specific game's own illustrated style,
+           not stock photography, so it's correct here even though it reads
+           differently from Panel 3's photo. */}
+        <PanelShell from="var(--hero-accent-pink)">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-start gap-[var(--space-5)] p-[var(--space-5)] pb-[30px] sm:gap-[var(--space-6)] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               {/* Same copy as the Continue Learning & Playing card below —
                  one activity, one set of words, hero-sized */}
@@ -214,11 +235,8 @@ function HeroBanner() {
               <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[30px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 Day in the Life: Investment Banker
               </p>
-              <p className="text-[15px] leading-[20px] italic" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+              <p className="text-[15px] leading-[20px] font-medium italic" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
                 The $30B Deal
-              </p>
-              <p className="max-w-[480px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Brief your team, pitch the client, and close the deal.
               </p>
             </div>
             <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
@@ -241,14 +259,14 @@ function HeroBanner() {
 
         {/* Panel 3 — Trending Now */}
         <PanelShell from="var(--hero-accent-teal)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
+          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-start gap-[var(--space-5)] p-[var(--space-5)] pb-[30px] sm:gap-[var(--space-6)] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <CaptionLabel color="var(--accent-subtle)">TRENDING NOW</CaptionLabel>
               <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 UX Researcher is on the rise.
               </p>
-              <p className="max-w-[480px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                One of the fastest-growing roles blending empathy, data, and design thinking. Explore how modern systems leverage research.
+              <p className="max-w-[480px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                One of the fastest-growing roles, blending empathy, data, and design.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-8)]">
@@ -340,12 +358,13 @@ type Activity = {
   stat: string;
   cta: string;
   photo?: string;
-  /** "glossary" renders a vocabulary visual instead of a photo (per
-      feedback: the glossary game must not wear career-sim imagery) */
-  art?: "glossary";
-  /** Where the card's own CTA actually goes. Omitted on Finance Essentials
-      and Deal Team Kickoff -- neither has a built page to send someone to
-      yet, so those two stay display-only rather than linking to a guess. */
+  /** object-position for the card photo -- the glossary thumbnail is a tall
+      portrait crop (real desk photography, not a mockup), so it needs its
+      own focus point rather than the landscape shots' default. */
+  photoFocus?: string;
+  /** Where the card's own CTA actually goes. Omitted on Deal Team Kickoff --
+      it has no built page to send someone to yet, so it stays display-only
+      rather than linking to a guess. */
   href?: string;
 };
 
@@ -371,7 +390,8 @@ const ACTIVITIES: Activity[] = [
     fill: 60,
     stat: "6 of 10 terms mastered",
     cta: "Continue Glossary Game",
-    art: "glossary",
+    photo: "/images/app/glossary-finance-thumb.png",
+    photoFocus: "50% 38%",
     href: "/play/glossary/investment-banking",
   },
   {
@@ -385,62 +405,45 @@ const ACTIVITIES: Activity[] = [
   },
 ];
 
+// Full-bleed photo + CardProgressiveBlur + soft scrim, matching Connect's
+// photo-card treatment: the old version was a solid-panel card with a photo
+// masked into just the right third via a 1-stop gradient, which read as a
+// visible seam. Content also moved off fixed pixel offsets onto a real flex
+// column, so it doesn't need re-tuning by hand every time copy changes.
 function ActivityCard({ activity }: { activity: Activity }) {
-  const className = `relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:w-[421px] ${activity.href ? "dm-tap block cursor-pointer" : ""}`;
-  const style = { borderColor: "var(--glass-border)", background: "linear-gradient(90deg, var(--card) 0%, var(--background) 62%, var(--background) 100%)" };
+  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
+  const style = { borderColor: "var(--glass-border)", background: "#0e0c20" };
+
   const content = (
     <>
-      {/* Badge chip removed, per direct feedback -- every element below
-         shifted up 30px (the chip's own height plus its gap to the title)
-         to close the gap it left rather than stranding a blank band at the
-         top of the card. */}
-      <p
-        className="absolute top-[17px] left-[15px] w-[164px] font-bold sm:left-[19px] sm:w-[226px]"
-        style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", fontSize: activity.title.length > 24 ? 15 : 19, lineHeight: activity.title.length > 24 ? "19px" : "24px" }}
-      >
-        {activity.title}
-      </p>
-      <p className="absolute top-[58px] left-[15px] w-[150px] text-[10.5px] leading-[14px] italic sm:left-[19px] sm:w-[215px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-        {activity.chapter ?? activity.sub}
-      </p>
-      <div className="absolute top-[93px] left-[15px] h-[5px] w-[160px] rounded-[999px] sm:top-[79px] sm:left-[19px] sm:w-[200px]" style={{ background: "var(--glass-surface-2)" }}>
-        <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
-      </div>
-      <p className="absolute top-[103px] left-[15px] text-[10px] leading-[14px] font-semibold sm:top-[89px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-        {activity.stat}
-      </p>
-      <p className="absolute top-[128px] left-[15px] text-[10px] leading-[14px] font-semibold whitespace-pre sm:top-[120px] sm:left-[19px]" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-        <span className="inline-flex items-center gap-[4px]">{activity.cta}<ArrowRight size={11} strokeWidth={3} aria-hidden /></span>
-      </p>
-      <div
-        aria-hidden
-        className="absolute top-0 right-0 h-full w-[132px] overflow-hidden sm:w-[181px]"
-        style={
-          activity.art === "glossary"
-            ? undefined
-            : { maskImage: "linear-gradient(90deg, transparent 0%, #000 38%)", WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 38%)" }
-        }
-      >
-        {activity.art === "glossary" ? (
-          /* vocabulary-learning visual — flashcards, not career-sim photos */
-          <div className="relative h-full w-full" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--background))" }}>
-            <div className="absolute top-[26px] right-[52px] w-[92px] rotate-[-7deg] rounded-[10px] border p-2 text-center" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-              <p className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>EQUITY</p>
-              <p className="text-[8px] leading-[10px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>ownership in a company</p>
-            </div>
-            <div className="absolute top-[84px] right-[22px] w-[92px] rotate-[5deg] rounded-[10px] border p-2 text-center" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--world-business-money-office) 60%, var(--glass-border))" }}>
-              <p className="text-[13px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>BOND</p>
-              <p className="text-[8px] leading-[10px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>a loan you can trade</p>
-            </div>
-            <div className="absolute right-[38px] bottom-[14px] flex gap-[5px]">
-              {[1, 1, 1, 1, 1, 1, 0, 0, 0, 0].map((done, i) => (
-                <span key={i} className="size-[6px] rounded-full" style={{ background: done ? "var(--world-business-money-office)" : "var(--glass-surface-2)" }} />
-              ))}
-            </div>
+      <Image src={activity.photo ?? ""} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: activity.photoFocus ?? "50% 20%" }} />
+      <CardProgressiveBlur />
+      <span aria-hidden className="absolute inset-0" style={{ background: cardBottomScrim() }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: cardTopScrim() }} />
+
+      <div className="relative z-10 flex h-full w-full flex-col justify-between px-[17px] py-[15px] sm:px-[19px] sm:py-[17px]" style={{ fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}>
+        <div>
+          <p className="font-bold" style={{ color: "#FFFFFF", fontSize: activity.title.length > 24 ? 15 : 19, lineHeight: activity.title.length > 24 ? "19px" : "24px" }}>
+            {activity.title}
+          </p>
+          {(activity.chapter ?? activity.sub) && (
+            <p className="mt-[3px] text-[11px] leading-[15px] font-medium italic" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.82)" }}>
+              {activity.chapter ?? activity.sub}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-[7px]">
+          <div className="h-[5px] w-full max-w-[200px] rounded-[999px]" style={{ background: "rgba(255,255,255,0.2)" }}>
+            <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
           </div>
-        ) : (
-          <img alt="" src={activity.photo} className="absolute inset-0 h-full w-full object-cover object-top" />
-        )}
+          <p className="flex items-center justify-between gap-[10px] text-[10.5px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+            <span className="min-w-0 truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{activity.stat}</span>
+            <span className="inline-flex flex-none items-center gap-[4px]" style={{ color: "#FFFFFF" }}>
+              {activity.cta}
+              <ArrowRight size={11} strokeWidth={3} aria-hidden />
+            </span>
+          </p>
+        </div>
       </div>
     </>
   );
@@ -512,7 +515,7 @@ export function HomeExperience() {
                 <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   Explore Recommended Careers
                 </h2>
-                <p className="text-[12px] leading-[16px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                <p className="text-[12px] leading-[16px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
                   Based on your interests
                 </p>
               </div>
@@ -557,9 +560,8 @@ export function HomeExperience() {
               <p className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 27 cards in, a pattern is forming.
               </p>
-              <p className="max-w-[520px] text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Your saves cluster in three worlds — careers that mix analysis with building things. Your plan
-                updates as you save, play, and crack daily drops.
+              <p className="max-w-[520px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                Your saves cluster in three worlds that mix analysis with building things.
               </p>
               <div className="flex flex-wrap gap-[var(--space-2)]">
                 {[
@@ -595,53 +597,6 @@ export function HomeExperience() {
               View My Plan
               <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
             </a>
-          </div>
-        </section>
-
-        {/* Glossary Challenge Banner */}
-        <section
-          aria-label="Today's glossary challenge"
-          className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border px-[var(--space-6)] py-[var(--space-6)] backdrop-blur-[10px] sm:flex-row sm:items-center sm:justify-between sm:px-[var(--space-8)] sm:py-[28px]"
-          style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}
-        >
-          <div className="flex min-w-0 flex-1 items-center gap-[var(--space-5)]">
-            <span className="flex h-12 flex-none items-center justify-center rounded-[var(--radius-lg)] px-[var(--space-4)]" style={{ background: "var(--world-business-money-office)" }}>
-              <BookOpen className="h-5 w-5" style={{ color: "var(--background)" }} />
-            </span>
-            <span className="flex min-w-0 flex-col gap-[var(--space-1)]">
-              <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--amber-400)" }}>
-                TODAY&apos;S GLOSSARY CHALLENGE
-              </span>
-              <span className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Finance &amp; Investing Terms
-              </span>
-            </span>
-          </div>
-          <div className="flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:gap-[28px]">
-            <div className="flex w-full flex-col gap-[var(--space-2)] sm:w-[160px]">
-              <span className="text-[10px] leading-[14px] font-semibold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                6 of 10 terms mastered
-              </span>
-              <span className="h-[5px] w-full rounded-[2.5px]" style={{ background: "var(--glass-surface-2)" }}>
-                <span className="block h-full w-[60%] rounded-[2.5px]" style={{ background: "var(--amber-400)" }} />
-              </span>
-            </div>
-            <div className="flex gap-[var(--space-3)]">
-              <button
-                type="button"
-                className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
-                style={{ fontFamily: "var(--font-body)", background: "var(--primary)", color: "var(--primary-foreground)" }}
-              >
-                START STUDY
-              </button>
-              <button
-                type="button"
-                className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[10px] leading-[14px] font-semibold"
-                style={{ fontFamily: "var(--font-body)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-              >
-                4 SETS
-              </button>
-            </div>
           </div>
         </section>
       </main>

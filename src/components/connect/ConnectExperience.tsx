@@ -26,6 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import {
   COMMUNITIES,
@@ -397,34 +398,8 @@ const SHAPE_CLIP: Record<string, string> = {
 // light and the type stays AA-legible.
 type CardVariant = "photos" | "fusion" | "people" | "shapes";
 
-/** The For You reel's progressive-blur recipe at card scale: stacked
- *  backdrop-filter layers at increasing blur, each feathered in by its own
- *  mask band, composited into a smooth sharp-to-frosted ramp. */
-const CARD_BLUR_STOPS = [1, 2, 4, 8, 14];
-
-function CardProgressiveBlur() {
-  const total = CARD_BLUR_STOPS.length;
-  return (
-    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] overflow-hidden">
-      {CARD_BLUR_STOPS.map((blur, index) => {
-        /* every band -- including the first -- fades in from transparent, so
-           the ramp truly starts at 0px with no visible seam */
-        const fadeStart = (index / total) * 62;
-        const fadeEnd = fadeStart + 62 / total + 14;
-        const mask = `linear-gradient(to bottom, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
-        return (
-          <span
-            key={blur}
-            className="absolute inset-0"
-            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
-          />
-        );
-      })}
-    </span>
-  );
-}
-
-const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)";
+// CardProgressiveBlur / CARD_TEXT_SHADOW now live in app/cardChrome.tsx,
+// shared with Home's activity cards.
 
 // Pastel is dead: tiles sit on a dark accent-tinted ground with light ink.
 const TILE_INK = "#f2f0fa";
@@ -449,11 +424,11 @@ const POSTER_BG = "#0c1023";
 
 // The CEO's own reference photography (people-free), cropped for the cards.
 const PHOTO_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/photo3-teaching-education.webp",
-  "business-money": "/images/connect/covers/photo3-business-money.webp",
-  "tech-engineering": "/images/connect/covers/photo3-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/photo3-health-medicine.webp",
-  "arts-media": "/images/connect/covers/photo3-arts-media.webp",
+  "teaching-education": "/images/connect/covers/photo4-teaching-education.webp",
+  "business-money": "/images/connect/covers/photo4-business-money.webp",
+  "tech-engineering": "/images/connect/covers/photo4-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/photo4-health-medicine.webp",
+  "arts-media": "/images/connect/covers/photo4-arts-media.webp",
 };
 
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
@@ -539,11 +514,11 @@ const PEOPLE_FOCUS: Record<string, string> = {
 };
 
 const PHOTO_FOCUS: Record<string, string> = {
-  "teaching-education": "62% 62%",
-  "business-money": "72% 30%",
-  "tech-engineering": "68% 45%",
-  "health-medicine": "76% 55%",
-  "arts-media": "70% 45%",
+  "teaching-education": "58% 42%",
+  "business-money": "68% 42%",
+  "tech-engineering": "50% 48%",
+  "health-medicine": "48% 38%",
+  "arts-media": "48% 45%",
 };
 
 const SHAPE_ART: Record<string, string> = {
@@ -1417,7 +1392,7 @@ function HomeView({
             ))}
             {!query && (
               <div className="lg:col-span-2">
-                <ComingSoonCard />
+                <ComingSoonCard variant={cardVariant} />
               </div>
             )}
           </div>
@@ -1532,8 +1507,60 @@ function TopTabs({ tab, onTab }: { tab: "communities" | "events"; onTab: (tab: "
 /** The sixth grid cell: a quiet promise. Same card anatomy as its five
  *  neighbors -- title, sub in the dek slot, folio rule -- but ghosted, with
  *  the suggest affordance living in the folio where a CTA belongs. */
-function ComingSoonCard() {
+function ComingSoonCard({ variant = "photos" }: { variant?: CardVariant }) {
   const [sent, setSent] = useState(false);
+  // Photos lane gets the same full-bleed-photo treatment as every other
+  // card there (the door-opening-to-light shot) instead of the flat dashed
+  // placeholder, which read out of place next to five photographic tiles.
+  // Other lanes keep the dashed/quiet look since they have no matching art.
+  if (variant === "photos") {
+    return (
+      <div
+        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
+        style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", background: "#0e0c20", fontFamily: "var(--font-display)" }}
+      >
+        <Image src="/images/connect/covers/photo4-event-door.webp" alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "68% 45%" }} />
+        <CardProgressiveBlur />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.62) 0%, rgba(14,12,32,0.34) 40%, rgba(14,12,32,0.1) 68%, transparent 100%)" }} />
+
+        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ background: "rgba(9,10,20,0.72)", color: "rgba(255,255,255,0.85)" }}>
+          Coming Soon
+        </span>
+
+        <div className="relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ textShadow: CARD_TEXT_SHADOW }}>
+          <h3 className="pr-[112px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>
+            More communities
+          </h3>
+          <p className="mt-auto pt-[44px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+            New rooms open as verified pros join.
+          </p>
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
+            <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              Want one sooner?
+            </span>
+            <button
+              type="button"
+              onClick={() => setSent(true)}
+              disabled={sent}
+              className="dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default"
+              style={{ color: sent ? "var(--world-food-farming-nature)" : "#FFFFFF" }}
+            >
+              {sent ? (
+                <>
+                  <CheckCircle2 className="h-[14px] w-[14px]" aria-hidden /> Request Sent
+                </>
+              ) : (
+                <>
+                  Suggest a Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px] border-2 border-dashed px-[var(--space-6)] py-[var(--space-5)]"
