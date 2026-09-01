@@ -480,49 +480,52 @@ function partnerAccent(host: string): string {
   return EVENT_ACCENT;
 }
 
-function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: number; h: number } | null {
+/** centerOffset compensates assets whose visible mark isn't centered in
+ *  its own canvas -- EY's file carries the brand's diagonal beam flourish
+ *  ABOVE the "EY" letters, so the wordmark itself sits well below the
+ *  canvas's geometric middle (measured by isolating the two ink clusters:
+ *  the letters run rows 488-968 of 969, centered at 75.1% down / 42.8%
+ *  across, vs. the canvas's own 50%/50%). Expressed as the translate (as
+ *  a fraction of the rendered box) needed to pull the LETTERS, not the
+ *  frame, onto center. JPMC and AT&T are single contiguous wordmarks with
+ *  no such split, so they need no correction. */
+function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: number; h: number; centerOffset?: { x: number; y: number } } | null {
   if (/jpmorgan|chase/i.test(host)) return { src: `/images/connect/partners/jpmc-${tone}.png`, w: 958, h: 195 };
   if (/at&t/i.test(host)) return { src: `/images/connect/partners/att-${tone}.png`, w: 960, h: 395 };
-  if (/ernst|ey/i.test(host)) return { src: `/images/connect/partners/ey-${tone}.png`, w: 959, h: 969 };
+  if (/ernst|ey/i.test(host)) return { src: `/images/connect/partners/ey-${tone}.png`, w: 959, h: 969, centerOffset: { x: 0.0725, y: -0.2513 } };
   return null;
 }
 
 
-/** Every event is a Dream Opportunity x Partner collab -- shown as a real
- *  lockup, not a solo partner mark: our own compact "DO" wordmark, a
- *  multiply glyph, then the partner's logo. Rendered as live text/CSS (the
- *  app's own display font) rather than a baked image, so it's crisp at
- *  any size and recolors with the rest of the card for free. */
-function DoPartnerLockup({ host, size = "card" }: { host: string; size?: "card" | "banner" }) {
+/** The partner's mark, alone, composited directly over the visual center
+ *  of the baked-in star art -- no "DO x" lockup. A live "DO" wordmark next
+ *  to raster partner logos never quite settled: text and PNG ink don't
+ *  share a real cap-height to match against (a wordmark like J.P.Morgan
+ *  and a compact glyph like EY don't either, honestly), so every fix for
+ *  one host's scale or baseline nudged another host out of line. One mark,
+ *  well-placed, reads cleaner than two mismatched typographic systems
+ *  forced into a row. Absolutely positioned at the star's measured centroid
+ *  (~80%/53% of the cover art in both the card and banner treatments,
+ *  found by sampling the brightest cluster in each do-event-*.webp against
+ *  its rendered, object-fit:cover-cropped box) rather than living in the
+ *  title's flex row. */
+function PartnerMark({ host, size = "card" }: { host: string; size?: "card" | "banner" }) {
   const logo = partnerLogo(host, "white");
   if (!logo) return null;
-  {/* No standalone "Dream Opportunity" logo asset exists in the repo (only
-     Dreamari's own product mark, a different brand) -- so DO is a live
-     wordmark rather than an image. No chip/border around it: it now sits
-     as plain text at a font-size tuned to match the partner mark's visual
-     weight, not boxed to an arbitrary height, since the partner PNGs fill
-     their canvas edge-to-edge while text glyphs never fill their em-box --
-     matching box heights (the old approach) left the boxed "DO" reading
-     smaller and lower than the corporate wordmark beside it. Constraining
-     the partner image by HEIGHT only (auto width, no max-width) keeps
-     every host's differing aspect ratio (JPMC ~4.9:1, ATT ~2.4:1, EY ~1:1)
-     at one consistent scale instead of whichever bound (height/width) hit
-     first winning per-logo. */}
-  const logoH = size === "banner" ? "h-[26px] sm:h-[36px]" : "h-[22px] sm:h-[30px]";
-  const doText = size === "banner" ? "text-[28px] sm:text-[38px]" : "text-[24px] sm:text-[32px]";
+  const box = size === "banner" ? "h-[64px] w-[176px] sm:h-[84px] sm:w-[228px]" : "h-[56px] w-[152px] sm:h-[72px] sm:w-[196px]";
+  const offset = logo.centerOffset;
   return (
-    <span className="relative flex flex-none items-center gap-[7px] sm:gap-[9px]" style={{ fontFamily: "var(--font-display)" }}>
-      <span className={`flex-none leading-none font-extrabold tracking-[0.01em] ${doText}`} style={{ color: "#FFFFFF", textShadow: "0 1px 3px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.4)" }}>
-        DO
-      </span>
-      <span aria-hidden className="flex-none text-[13px] leading-none font-semibold" style={{ color: "rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>×</span>
+    <span aria-hidden className={`pointer-events-none absolute top-[46%] left-[80%] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${box}`}>
       <Image
         src={logo.src}
-        alt={`${host} logo`}
+        alt=""
         width={logo.w}
         height={logo.h}
-        className={`relative w-auto flex-none object-contain opacity-95 ${logoH}`}
-        style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55)) drop-shadow(0 3px 12px rgba(0,0,0,0.4))" }}
+        className="relative h-full w-full object-contain opacity-95"
+        style={{
+          filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.55)) drop-shadow(0 6px 18px rgba(0,0,0,0.4))",
+          transform: offset ? `translate(${offset.x * 100}%, ${offset.y * 100}%)` : undefined,
+        }}
       />
     </span>
   );
@@ -1445,13 +1448,13 @@ function HomeView({
                   <CardProgressiveBlur />
                   <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
+                  <PartnerMark host={event.host} size="card" />
                   <div className="relative z-10 flex flex-1 items-center gap-[var(--space-4)]">
                     <div className="min-w-0 flex-1 self-start">
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
                       <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
                     </div>
-                    <DoPartnerLockup host={event.host} size="card" />
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 62%, transparent)` }}>
@@ -1791,6 +1794,7 @@ function EventView({
         <CardProgressiveBlur />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
+        <PartnerMark host={event.host} size="banner" />
         <div className="relative z-10 flex items-center gap-[var(--space-5)]">
           <div className="min-w-0 flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
@@ -1801,7 +1805,6 @@ function EventView({
               <span>Hosted by {event.host}</span>
             </p>
           </div>
-          <DoPartnerLockup host={event.host} size="banner" />
         </div>
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
