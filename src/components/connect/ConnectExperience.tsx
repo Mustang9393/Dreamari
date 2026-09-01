@@ -946,6 +946,7 @@ function HomeView({
 }) {
   const [query, setQuery] = useState("");
   const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
+  const searchedEvents = EVENTS.filter((e) => !query || (e.name + " " + e.host + " " + e.location).toLowerCase().includes(query.toLowerCase()));
 
   return (
     <>
@@ -967,14 +968,13 @@ function HomeView({
         onPick={(key) => onTab(key as "communities" | "events")}
       />
 
-      {tab === "communities" && (
-        <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-          <span className="sr-only">Search communities</span>
+          <span className="sr-only">{tab === "communities" ? "Search communities" : "Search events"}</span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search communities, topics, or companies"
+            placeholder={tab === "communities" ? "Search communities, topics, or companies" : "Search events, hosts, or cities"}
             className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
             style={{ color: "var(--foreground)" }}
           />
@@ -984,7 +984,6 @@ function HomeView({
             </button>
           )}
         </label>
-      )}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
@@ -1022,7 +1021,7 @@ function HomeView({
              stats row, the Partner line, and one action for this event's
              state. */}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
-            {EVENTS.map((event) => {
+            {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const joined = eventJoined[event.id];
               return (
@@ -1066,6 +1065,9 @@ function HomeView({
               );
             })}
           </div>
+          {searchedEvents.length === 0 && (
+            <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>No events match &ldquo;{query}&rdquo; yet.</p>
+          )}
         </section>
       )}
     </>
@@ -1187,17 +1189,24 @@ function BoardView({
       </section>
 
       {about ? (
-        <Card>
-          <h2 className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>About this community</h2>
-          <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
-          <p className="mt-[10px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</p>
-          <div className="mt-[6px] flex flex-wrap gap-[6px]">
-            {community.professionalsFrom.map((name) => (
-              <span key={name} className="rounded-[999px] border px-[9px] py-[2px] text-[11.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
-            ))}
+        <div className="rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 26%, var(--glass-border))` }}>
+          <h2 className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>About this community</h2>
+          <p className="mt-[8px] text-[14px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
+          <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
+            <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</p>
+            <div className="mt-[8px] flex flex-wrap gap-[6px]">
+              {community.professionalsFrom.map((name) => (
+                <span key={name} className="rounded-[999px] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${communityAccent(community)} 40%, var(--glass-border))`, color: "var(--foreground)", background: `color-mix(in srgb, ${communityAccent(community)} 12%, transparent)` }}>{name}</span>
+              ))}
+            </div>
           </div>
-          <p className="mt-[10px] text-[12px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{community.responseWindow}.</p>
-        </Card>
+          <div className="mt-[14px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
+            <p className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <ShieldCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: communityAccent(community) }} />
+              {community.responseWindow}.
+            </p>
+          </div>
+        </div>
       ) : (
         /* The Replit reference's board layout, verified at desktop width:
            the banner sits above ONE content card that contains both the
@@ -1428,7 +1437,7 @@ function ThreadView({
           <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-[11.5px] leading-[16px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px] border-b pb-[12px] text-[12px] leading-[16px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           {/* Who it went to is our plumbing, not their business. */}
           <StatusChip state={thread.state} />
           <span aria-hidden>·</span>
@@ -1518,7 +1527,7 @@ function ThreadView({
           <section className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} aria-label="Related answered questions">
             <SectionHead>Related answered questions</SectionHead>
             {related.map((t) => (
-              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet group flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: `color-mix(in srgb, ${boardAccent} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${boardAccent} 26%, var(--glass-border))` }}>
                 <span className="min-w-0 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.title}</span>
                 <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               </button>
