@@ -429,6 +429,19 @@ const CARD_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.7), 0 1px 10px rgba(0,0,0,0.4)"
 // Pastel is dead: tiles sit on a dark accent-tinted ground with light ink.
 const TILE_INK = "#f2f0fa";
 
+// The design-system poster images (Figma: Dreamari Design System v2.0,
+// node 3632-877), used exactly with the file's own treatment: 12.5px
+// full-bleed blur, left-to-right dark scrim, accent tint, noise layer.
+const POSTER_COVER: Record<string, string> = {
+  "teaching-education": "/images/connect/covers/poster-teaching-education.webp",
+  "business-money": "/images/connect/covers/poster-business-money.webp",
+  "tech-engineering": "/images/connect/covers/poster-tech-engineering.webp",
+  "health-medicine": "/images/connect/covers/poster-health-medicine.webp",
+  "arts-media": "/images/connect/covers/poster-arts-media.webp",
+};
+const POSTER_NOISE = "/images/connect/covers/poster-noise.png";
+const POSTER_BG = "#0c1023";
+
 // The CEO's own reference photography (people-free), cropped for the cards.
 const PHOTO_COVER: Record<string, string> = {
   "teaching-education": "/images/connect/covers/photo3-teaching-education.webp",
@@ -436,14 +449,6 @@ const PHOTO_COVER: Record<string, string> = {
   "tech-engineering": "/images/connect/covers/photo3-tech-engineering.webp",
   "health-medicine": "/images/connect/covers/photo3-health-medicine.webp",
   "arts-media": "/images/connect/covers/photo3-arts-media.webp",
-};
-// The community aspect: real people from the approved browse-card set.
-const PEOPLE_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/people-teaching-education.webp",
-  "business-money": "/images/connect/covers/people-business-money.webp",
-  "tech-engineering": "/images/connect/covers/people-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/people-health-medicine.webp",
-  "arts-media": "/images/connect/covers/people-arts-media.webp",
 };
 
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
@@ -519,8 +524,17 @@ const SHAPE_ANIM_CSS = `
 .group:hover .dm-shape-cross { animation: dm-heartbeat 1.1s ease-in-out infinite; }
 .group:hover .dm-shape-flower { transform: rotate(30deg) scale(1.05); transition-duration: .85s; }
 .group:hover .dm-shape-star { transform: rotate(-12deg) scale(1.08); }
+.dm-fusion-full { opacity: 1; transition: opacity .5s ease .15s; }
+.group:hover .dm-fusion-full { opacity: 0; transition-delay: 0s; }
+.dm-fusion-mask { opacity: 0; transform: translateY(-50%) scale(5.6); transition: transform .85s cubic-bezier(.3,.7,.3,1), opacity .3s ease; pointer-events: none; }
+.group:hover .dm-fusion-mask { opacity: 1; transform: translateY(-50%) scale(1.16); }
+.dm-fusion-radials { opacity: 0; transition: opacity .5s ease .3s; }
+.group:hover .dm-fusion-radials { opacity: 1; }
 @keyframes dm-heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(0.98); } 42% { transform: scale(1.08); } 56% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .dm-shape, .group:hover .dm-shape-cross { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .dm-shape, .group:hover .dm-shape-cross { transition: none; animation: none; }
+  .dm-fusion-full, .dm-fusion-mask, .dm-fusion-radials { transition: none; }
+}
 `;
 
 /** A community's (or event's) shape mask with the dashed radials drawn
@@ -567,16 +581,13 @@ function CommunityCard({
   const accent = communityAccent(community);
   const clip = SHAPE_CLIP[community.id];
 
-  if (variant === "photos" || variant === "people") {
+  if (variant === "photos") {
     return (
       <div
         className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
-        style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)` }}
+        style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, background: "#0e0c20" }}
       >
-        {/* full-bleed cover, slow push-in on hover */}
-        <Image src={(variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id]) ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
-        {/* legibility = progressive blur first, then a much lighter tint:
-           the frosted ramp does the work, so the photo stays bright */}
+        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
         <CardProgressiveBlur />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.52) 0%, rgba(14,12,32,0.28) 36%, rgba(14,12,32,0.08) 64%, transparent 100%)" }} />
 
@@ -611,30 +622,36 @@ function CommunityCard({
     );
   }
 
-  if (variant === "fusion") {
-    // The reference apps' recipe: a saturated color ground, the topic shape
-    // at portrait scale holding the photo (fully visible, never cropped),
-    // dashed radials behind it, and a progressive frost along the floor.
+  if (variant === "people") {
+    const cover = POSTER_COVER[community.id] ?? community.photo;
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
+        className="dm-tap group relative flex h-full min-h-[264px] flex-col overflow-hidden rounded-[26px]"
         style={{
-          background: `linear-gradient(140deg, color-mix(in srgb, ${accent} 55%, rgba(255,255,255,0.92)) 0%, color-mix(in srgb, ${accent} 34%, rgba(238,233,247,0.86)) 100%)`,
-          border: "1px solid rgba(255,255,255,0.4)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -18px 30px rgba(9,10,20,0.08), 0 18px 44px -22px rgba(0,0,0,0.65)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 100%), linear-gradient(${POSTER_BG}, ${POSTER_BG})`,
+          border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`,
+          boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)",
+          textShadow: CARD_TEXT_SHADOW,
         }}
       >
-        {/* glass sheen sweeping the card */}
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(115deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 30%, transparent 46%)" }} />
-        <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${CARD_INK} 18%, transparent)` }} />
-
-        <svg aria-hidden className="pointer-events-none absolute top-[-6px] right-[-22px] h-[220px] w-[220px]" viewBox="0 0 220 220" fill="none">
-          {[52, 78, 104].map((r) => (
-            <circle key={r} cx="110" cy="110" r={r} stroke={`color-mix(in srgb, ${CARD_INK} 22%, transparent)`} strokeWidth="1.5" strokeDasharray="2 7" />
-          ))}
-        </svg>
+        {/* the Figma poster backdrop: sharp image on the right, a
+           progressive blur ramping toward the text side, then the file's
+           scrim, accent tint, and noise layers */}
+        <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+          <Image src={cover} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "50% 40%" }} />
+          {[2, 5, 9, 12.5].map((blur, index, arr) => {
+            const fadeStart = (index / arr.length) * 58;
+            const fadeEnd = fadeStart + 58 / arr.length + 16;
+            const mask = `linear-gradient(to left, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
+            return (
+              <span key={blur} className="absolute inset-0" style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }} />
+            );
+          })}
+          <span className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(12,16,35,0.95) 0%, rgba(12,16,35,0.65) 30%, rgba(12,16,35,0.1) 60%, rgba(12,16,35,0) 100%), linear-gradient(90deg, color-mix(in srgb, ${accent} 10%, transparent), color-mix(in srgb, ${accent} 10%, transparent))` }} />
+          <Image src={POSTER_NOISE} alt="" fill sizes="640px" className="object-cover opacity-70" />
+        </span>
+        {/* accent handle pill on the top edge, from the design file */}
+        <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
 
         <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
           <span className="sr-only">{`Open ${community.name}`}</span>
@@ -647,36 +664,81 @@ function CommunityCard({
         )}
 
         <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
-          <div className="flex flex-1 items-center gap-[var(--space-4)]">
-            <h3 className="min-w-0 flex-1 self-start text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: CARD_INK }}>
-              {community.name}
-            </h3>
-
-            {/* the photo lives inside the topic shape, portrait-style,
-               maximized and rimmed in glass */}
-            <span className="relative mt-[14px] flex h-[152px] w-[152px] flex-none items-center justify-center">
-              <span aria-hidden className="absolute top-1/2 left-1/2 h-[128px] w-[128px]" style={{ transform: "translate(-50%, -50%) scale(1.19)" }}>
-                {/* glass rim: a slightly larger ghost of the shape */}
-                <span className="absolute inset-0" style={{ ...(clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }), transform: "scale(1.05)", background: "rgba(255,255,255,0.55)", filter: `drop-shadow(0 18px 28px color-mix(in srgb, ${accent} 60%, transparent))` }} />
-                <span className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} absolute inset-0 overflow-hidden`} style={clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" }}>
-                  <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="512px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-                  <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 12%, transparent)` }} />
-                  <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.07) 36%, transparent 56%)" }} />
-                  <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -12px 24px rgba(9,10,20,0.22), inset 0 2px 6px rgba(255,255,255,0.4)" }} />
-                </span>
-              </span>
+          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF" }}>
+            {community.name}
+          </h3>
+          <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
+            <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> verified pros
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }} />
+          </p>
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
+            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.posts}</strong> posts
+            </span>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }}>
+              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </span>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <p className="mt-[4px] flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
-            <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.activePros}</strong> verified pros
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 40%, ${CARD_INK})` }} />
+  if (variant === "fusion") {
+    // Rest: a full-bleed image card. Hover: the image collapses into the
+    // topic shape -- the full-bleed layer fades as a masked copy shrinks
+    // from card-filling scale into the shape's slot, spinning once.
+    const fusionClip = clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" };
+    return (
+      <div
+        className="dm-tap group relative flex h-full min-h-[240px] flex-col overflow-hidden rounded-[26px]"
+        style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 14%, ${POSTER_BG}) 0%, ${POSTER_BG} 100%)`, border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+      >
+        {/* rest state: the image, full bleed */}
+        <span aria-hidden className="dm-fusion-full absolute inset-0">
+          <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(12,16,35,0.82) 0%, rgba(12,16,35,0.4) 38%, rgba(12,16,35,0.06) 68%, transparent 100%), linear-gradient(to top, rgba(12,16,35,0.72) 0%, rgba(12,16,35,0.2) 42%, transparent 65%)" }} />
+        </span>
+
+        {/* hover state: radials + the same image engulfed by the shape */}
+        <svg aria-hidden className="dm-fusion-radials pointer-events-none absolute top-1/2 right-[-22px] h-[220px] w-[220px] -translate-y-1/2" viewBox="0 0 220 220" fill="none">
+          {[52, 78, 104].map((r) => (
+            <circle key={r} cx="110" cy="110" r={r} stroke="rgba(242,240,250,0.22)" strokeWidth="1.5" strokeDasharray="2 7" />
+          ))}
+        </svg>
+        <span aria-hidden className="dm-fusion-mask absolute top-1/2 right-[30px] h-[128px] w-[128px]">
+          <span className="absolute inset-0" style={{ ...fusionClip, transform: "scale(1.05)", background: "rgba(255,255,255,0.55)", filter: `drop-shadow(0 18px 28px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+          <span className={`dm-shape dm-shape-${SHAPE_KIND[community.id] ?? "blob"} absolute inset-0 overflow-hidden`} style={fusionClip}>
+            <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)` }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.06) 36%, transparent 56%)" }} />
+            <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -12px 24px rgba(9,10,20,0.22), inset 0 2px 6px rgba(255,255,255,0.4)" }} />
+          </span>
+        </span>
+
+        <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">{`Open ${community.name}`}</span>
+        </button>
+
+        {featured && (
+          <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
+            <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
+          </span>
+        )}
+
+        <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-6)] py-[var(--space-5)]" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[112px]" : ""}`} style={{ color: "#FFFFFF" }}>
+            {community.name}
+          </h3>
+          <p className="mt-auto flex items-center gap-[6px] pt-[44px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.72)" }}>
+            <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.activePros}</strong> verified pros
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }} />
           </p>
-          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${CARD_INK} 20%, transparent)` }}>
-            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${CARD_INK} 62%, transparent)` }}>
-              <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${CARD_INK} 90%, transparent)` }}>{community.posts}</strong> posts
+          <div className="mt-[8px] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.28)" }}>
+            <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
+              <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: "#FFFFFF" }}>{community.posts}</strong> posts
             </span>
-            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 40%, ${CARD_INK})` }}>
+            <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${accent} 55%, #FFFFFF)` }}>
               Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </span>
           </div>
@@ -1406,7 +1468,7 @@ function BoardView({
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
   const about = filter === "about";
   const imagery = variant !== "shapes";
-  const bannerCover = variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id];
+  const bannerCover = variant === "people" ? POSTER_COVER[community.id] : PHOTO_COVER[community.id];
   const bannerInk = "#f6f5fb";
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
 
@@ -2086,7 +2148,7 @@ function JoinSheet({ community, onClose, onJoin, variant }: { community: Communi
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: variant === "shapes" ? `color-mix(in srgb, ${communityAccent(community)} 18%, #0e0c20)` : "#0e0c20", fontFamily: "var(--font-display)" }}>
           {variant !== "shapes" ? (
             <>
-              <Image src={(variant === "people" ? PEOPLE_COVER[community.id] : PHOTO_COVER[community.id]) ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
+              <Image src={(variant === "people" ? POSTER_COVER[community.id] : PHOTO_COVER[community.id]) ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: variant === "people" ? "50% 30%" : (PHOTO_FOCUS[community.id] ?? "60% 42%") }} />
               <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.5)" }} />
             </>
           ) : (
