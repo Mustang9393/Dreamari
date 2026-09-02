@@ -1467,7 +1467,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
     <div
       className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
       style={{
-        background: screen === "powerPlayIntro" || screen === "powerPlay" ? "var(--background)" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--world-business-money-office) 16%, transparent), transparent 65%), var(--background)",
+        background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--world-business-money-office) 16%, transparent), transparent 65%), var(--background)",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
       }}

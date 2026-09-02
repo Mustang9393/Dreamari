@@ -110,6 +110,24 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   // The tab currently in view is skipped: the change is visible live there.
   const [pings, setPings] = useState<Partial<Record<TabId, boolean>>>({});
   const pingTimer = useRef<number | null>(null);
+  // Fade the tablist's right edge only while there's actually more to scroll
+  // to -- a static fade would misrepresent state once the last tab (Resume)
+  // is fully in view, reading as a cut-off pill rather than a genuine cue.
+  const tablistRef = useRef<HTMLDivElement | null>(null);
+  const [tabsOverflow, setTabsOverflow] = useState(false);
+  useEffect(() => {
+    const el = tablistRef.current;
+    if (!el) return;
+    const update = () => setTabsOverflow(el.scrollWidth - el.scrollLeft - el.clientWidth > 2);
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
   const tabRef = useRef<TabId>("overview");
   useEffect(() => {
     tabRef.current = tab;
@@ -344,6 +362,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
            takes its old slot in the main tablist instead -- promoted to
            the same standing as Overview/Report rather than tucked away. */}
         <div
+          ref={tablistRef}
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
@@ -360,7 +379,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             }
           }}
           className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] border p-[var(--space-1)] [scrollbar-width:none]"
-          style={GLASS}
+          style={
+            tabsOverflow
+              ? { ...GLASS, maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" }
+              : GLASS
+          }
         >
           {(
             [
@@ -380,7 +403,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[13px] py-[13px] text-center text-[15px] leading-[18px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)]"
+              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
@@ -609,7 +632,7 @@ function Top3Tab({
   if (top3.length === 0) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
-        <p className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
+        <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers here to compare them and choose your #1.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
       </section>
@@ -722,7 +745,7 @@ function Top3Tab({
                 <span className="flex min-w-0 flex-col gap-[1px]">
                   {/* World name carries the accent, never the career title. */}
                   <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <span className="text-balance text-[22px] leading-[26px] font-extrabold lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                  <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
                 {isFocus ? (
                   <span className="flex h-[27px] w-fit flex-none items-center gap-[4px] rounded-full px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
@@ -834,7 +857,7 @@ function OverviewTab({
   if (!focus) {
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
-        <p className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
+        <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
           <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
@@ -861,7 +884,7 @@ function OverviewTab({
             <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{top3Count} of 3 careers chosen</span>
+          <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
         <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
@@ -870,7 +893,7 @@ function OverviewTab({
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{progress.complete} of {progress.total} steps done</span>
+            <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{progress.complete} of {progress.total} steps done</span>
             <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
             </span>
@@ -882,7 +905,7 @@ function OverviewTab({
             <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{REPORT_SECTIONS.length} sections ready</span>
+          <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{REPORT_SECTIONS.length} sections ready</span>
         </button>
       </section>
 
@@ -890,7 +913,7 @@ function OverviewTab({
       <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <span className="flex min-w-0 flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
-          <h3 id="next-title" className="text-balance text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 id="next-title" className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
             {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
           </h3>
         </span>
@@ -969,7 +992,7 @@ function EvidenceSheet({
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="flex flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
-          <h3 id="evidence-intro" className="text-[21px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
+          <h3 id="evidence-intro" className="text-[18px] leading-[22px] font-extrabold sm:text-[21px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
           <span className="max-w-[54ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
             Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
           </span>
@@ -1302,7 +1325,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Paths into ${focus.title}`} /></h2>
+        <h2 key={focus.id} className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Paths into ${focus.title}`} /></h2>
         <button
           type="button"
           onClick={() => setRouteView(routeView === "cards" ? "compare" : "cards")}
@@ -1390,7 +1413,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
     <div className="flex flex-col gap-[var(--space-3)]">
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
         <div>
-          <h2 key={focus.id} className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
+          <h2 key={focus.id} className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
           <p className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
         <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
@@ -1808,7 +1831,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Saved Careers</h2>
+        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved Careers</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
           <button type="button" aria-label="Close Saved Careers" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -1862,7 +1885,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
+        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
         <button type="button" aria-label="Close settings" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <X className="h-4 w-4" />
         </button>
@@ -1889,7 +1912,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
 function ResumeView() {
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-8)]" style={GLASS}>
-      <h2 className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
+      <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
       <ol className="flex flex-col gap-[var(--space-3)]">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
           <li key={step} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={GLASS}>
