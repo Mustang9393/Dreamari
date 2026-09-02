@@ -24,7 +24,24 @@ type Ripple = {
   duration: number;
   maxRadius: number;
   amplitude: number;
+  // "band": the original behavior, anchored to the bottom edge, masked so it never blooms
+  // into the header. "point": launched from a specific screen point (Dreamy) instead --
+  // drawn as a full circle with no band mask, since it isn't trying to stay anchored to
+  // the aurora curtain, and Dreamy visibly sits well above where that mask would apply.
+  originKind: "band" | "point";
 };
+
+// Dreamy's own sprite in QuestionHeading carries this attribute -- looked up live at pulse
+// time rather than tracked via props/state, since it's just an occasional visual flourish,
+// not something the rest of the canvas needs to react to continuously.
+function getDreamyAnchor(): { x: number; y: number } | null {
+  if (typeof document === "undefined") return null;
+  const el = document.querySelector("[data-dreamy-anchor]");
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return null;
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
 
 type Blob = {
   hex: string;
@@ -58,10 +75,6 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   else if (h < 300) [r, g, b] = [x, 0, c];
   else [r, g, b] = [c, 0, x];
   return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
-}
-
-function gaussian(distance: number, width: number): number {
-  return Math.exp(-(distance * distance) / (2 * width * width));
 }
 
 // Light-mode base wash, matched exactly to the Figma reference (node 588:35961):
@@ -126,18 +139,12 @@ const ANCHORS: [number, number][] = [
   [0.5, 0.5],
 ];
 
-// Hex/honeycomb lattice, not a plain row-and-column grid: rows are packed at
-// sqrt(3)/2 of the column spacing and every other row is offset by half a
-// step, the standard hexagonal-packing layout.
-const SPACING = 22;
-const ROW_SPACING = SPACING * 0.866;
-const BASE_RADIUS = 0.7;
-const PEAK_RADIUS = 1.3;
 const BLOB_RADIUS_FACTOR = 0.42;
 
-// The hex-lattice dot-matrix no longer washes the whole viewport — it lives in a bottom
-// "curtain" band, like an aurora borealis sitting near the horizon, and brightens/pulses
-// upward in response to clicks rather than filling the screen uniformly.
+// The band is no longer a hex-lattice dot-matrix (removed per direct feedback -- the
+// nebula gradients behind this canvas are the texture now, this canvas layers accent
+// tint/blobs/ripples on top of them); BAND_FRACTION still shapes where the ripple glow's
+// top-fade mask sits, so band-origin pulses still read as rising from a "bottom curtain."
 const BAND_FRACTION = 0.42; // fraction of viewport height the band occupies, at its deepest
 const BAND_EDGE_FADE = 130; // px of soft fade above the band's (undulating) top edge
 
@@ -206,30 +213,38 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
     return onAuroraPulse(({ kind, x }) => {
       const isCta = kind === "cta";
       const now = performance.now();
-      // The aurora now lives at the bottom of the screen, so every pulse originates from
-      // the bottom edge and travels upward — a reaction from the glow itself, not a ripple
-      // planted wherever the click happened to land.
+      // The aurora usually reacts from the bottom edge -- a glow of its own, not a ripple
+      // planted wherever the click happened to land. But every CTA pulse doing exactly that
+      // read as mechanical, so about a third of the time (only when Dreamy is actually
+      // visible on screen) it launches from him instead, like he's the one reacting -- a
+      // little variety with a reason behind it, not randomness for its own sake.
       const bottomY = canvasRef.current?.clientHeight ?? window.innerHeight;
+      const dreamyAnchor = isCta && Math.random() < 0.35 ? getDreamyAnchor() : null;
+      const originKind: Ripple["originKind"] = dreamyAnchor ? "point" : "band";
+      const originX = dreamyAnchor ? dreamyAnchor.x : x;
+      const originY = dreamyAnchor ? dreamyAnchor.y : bottomY;
       ripplesRef.current.push({
         kind,
-        x,
-        y: bottomY,
+        x: originX,
+        y: originY,
         start: now,
         duration: isCta ? 1900 : 700,
         maxRadius: isCta ? Math.hypot(window.innerWidth, window.innerHeight) : 190,
         amplitude: isCta ? 22 : 9,
+        originKind,
       });
       if (isCta) {
         // A second, gentler wavefront just behind the first — reads as one bigger, richer
         // pulse rather than a repeat, without any of the ripples reversing direction.
         ripplesRef.current.push({
           kind,
-          x,
-          y: bottomY,
+          x: originX,
+          y: originY,
           start: now + 220,
           duration: 1900,
           maxRadius: Math.hypot(window.innerWidth, window.innerHeight),
           amplitude: 13,
+          originKind,
         });
       }
       if (ripplesRef.current.length > 10) ripplesRef.current.splice(0, ripplesRef.current.length - 10);
@@ -359,11 +374,16 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
       const [cr0, cg0, cb0] = current;
 
       if (isDark) {
-        const tintMix = 0.14 + transitionBoost * 0.24;
-        const bgR = 7 + (cr0 - 7) * tintMix;
-        const bgG = 9 + (cg0 - 9) * tintMix;
-        const bgB = 18 + (cb0 - 18) * tintMix;
-        ctx.fillStyle = `rgb(${bgR | 0}, ${bgG | 0}, ${bgB | 0})`;
+        // Transparent clear (not an opaque fillRect) so BackgroundSpace's own nebula
+        // gradients -- sitting behind this canvas -- show through, with the accent as a
+        // translucent wash layered on top instead of replacing them outright. Was an
+        // opaque flat navy, which fully hid BackgroundSpace regardless of z-index (an
+        // opaque paint blocks whatever's behind it independent of stacking order); the
+        // canvas read as flat/plain once that got fixed and the dot-matrix grid (which
+        // used to be the visual texture carrying the whole background) came out too.
+        ctx.clearRect(0, 0, width, height);
+        const tintAlpha = 0.16 + transitionBoost * 0.26;
+        ctx.fillStyle = `rgba(${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}, ${tintAlpha.toFixed(3)})`;
         ctx.fillRect(0, 0, width, height);
       } else {
         ctx.fillStyle = lightWashGradientRef.current ?? "#f3f4f8";
@@ -464,8 +484,8 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
           rippleCtx.clearRect(0, 0, width, height);
 
           const [cr, cg, cb] = current;
-          rippleCtx.save();
-          for (const ripple of ripples) {
+
+          function drawRippleGlow(ripple: Ripple) {
             const elapsed = now - ripple.start;
             const rawProgress = Math.min(1, elapsed / ripple.duration);
             const eased = easeOutCubic(rawProgress);
@@ -482,14 +502,14 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             const holdUntil = 0.55;
             const fadeMul = rawProgress < holdUntil ? 1 : Math.max(0, 1 - (rawProgress - holdUntil) / (1 - holdUntil));
             const glowAlpha = glowAlphaBase * fadeMul;
-            if (glowAlpha <= 0.003 || glowRadius <= 1) continue;
+            if (glowAlpha <= 0.003 || glowRadius <= 1) return;
 
-            const gradient = rippleCtx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
+            const gradient = rippleCtx!.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
             gradient.addColorStop(0, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${glowAlpha.toFixed(3)})`);
             gradient.addColorStop(0.7, `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${(glowAlpha * 0.35).toFixed(3)})`);
             gradient.addColorStop(1, isDark ? `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, 0)` : "rgba(255, 255, 255, 0)");
-            rippleCtx.fillStyle = gradient;
-            rippleCtx.fillRect(0, 0, width, height);
+            rippleCtx!.fillStyle = gradient;
+            rippleCtx!.fillRect(0, 0, width, height);
 
             // The fill alone is the same hue as everything else already on screen (the
             // ambient accent wash, the blobs) -- "brighter of the same color" reads as
@@ -501,34 +521,45 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             // ctx.arc() circle -- a geometrically perfect ring reads as synthetic against
             // everything else on this canvas, which is deliberately organic (the dot
             // band's own top edge uses the same two-sine-wave technique). CTA-only: the
-            // smaller select pulse stays a plain glow.
+            // smaller select pulse stays a plain glow. Band-origin ripples only trace their
+            // upper half (the lower half is off-canvas anyway, born at the bottom edge);
+            // point-origin ones (launched from Dreamy) trace the full circle.
             if (isCta && glowRadius > 4) {
               const ringAlpha = glowAlpha * (isDark ? 0.28 : 0.2);
               if (ringAlpha > 0.01) {
                 const seed = ripple.start * 0.001;
-                rippleCtx.beginPath();
-                const steps = 48;
+                const arcSpan = ripple.originKind === "point" ? Math.PI * 2 : Math.PI;
+                rippleCtx!.beginPath();
+                const steps = ripple.originKind === "point" ? 72 : 48;
                 for (let s = 0; s <= steps; s++) {
-                  const angle = Math.PI + (s / steps) * Math.PI;
+                  const angle = Math.PI + (s / steps) * arcSpan;
                   const wobble = Math.sin(angle * 5 + now * 0.0016 + seed) * glowRadius * 0.02 + Math.sin(angle * 2.3 - now * 0.001 + seed * 1.7) * glowRadius * 0.035;
                   const r = glowRadius + wobble;
                   const px = ripple.x + Math.cos(angle) * r;
                   const py = ripple.y + Math.sin(angle) * r;
-                  if (s === 0) rippleCtx.moveTo(px, py);
-                  else rippleCtx.lineTo(px, py);
+                  if (s === 0) rippleCtx!.moveTo(px, py);
+                  else rippleCtx!.lineTo(px, py);
                 }
-                rippleCtx.lineWidth = 2;
-                rippleCtx.strokeStyle = isDark ? `rgba(255, 255, 255, ${ringAlpha.toFixed(3)})` : `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${ringAlpha.toFixed(3)})`;
-                rippleCtx.stroke();
+                rippleCtx!.lineWidth = 2;
+                rippleCtx!.strokeStyle = isDark ? `rgba(255, 255, 255, ${ringAlpha.toFixed(3)})` : `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${ringAlpha.toFixed(3)})`;
+                rippleCtx!.stroke();
               }
             }
           }
+
+          const bandRipples = ripples.filter((r) => r.originKind !== "point");
+          const pointRipples = ripples.filter((r) => r.originKind === "point");
+
+          rippleCtx.save();
+          for (const ripple of bandRipples) drawRippleGlow(ripple);
           rippleCtx.restore();
 
-          // Keep the glow wash anchored to the aurora band rather than letting a big CTA
-          // pulse bloom all the way to the top frame (where FlowProgress sits) — fades it
-          // out gradually (fully gone by fadeTop, untouched by fadeBottom) instead of a
-          // hard cutoff, safely now that it only erases this isolated layer.
+          // Keep the band-origin glow anchored to the aurora band rather than letting a big
+          // CTA pulse bloom all the way to the top frame (where FlowProgress sits) — fades
+          // it out gradually (fully gone by fadeTop, untouched by fadeBottom) instead of a
+          // hard cutoff, safely now that it only erases this isolated layer. Point-origin
+          // (Dreamy) ripples are drawn AFTER this mask, unmasked -- they're meant to glow
+          // right where they're launched from, which is well above where this mask applies.
           const fadeBottom = Math.max(0, bandBaseTop - BAND_EDGE_FADE * 3);
           const fadeTop = Math.max(0, fadeBottom - BAND_EDGE_FADE * 3);
           if (fadeBottom > 0) {
@@ -542,6 +573,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             rippleCtx.restore();
           }
 
+          rippleCtx.save();
+          for (const ripple of pointRipples) drawRippleGlow(ripple);
+          rippleCtx.restore();
+
           ctx.save();
           ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
           ctx.drawImage(rippleLayer, 0, 0, width, height);
@@ -550,120 +585,6 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
       }
 
 
-      // Idle state stays subtle — brightness is mostly earned by an actual interaction (a
-      // ripple) or by sitting inside one of the accumulated color washes. Light mode still
-      // needs meaningfully higher floors than dark mode to read at all against white.
-      const baseAmbient = isDark ? 0.05 : 0.16;
-      const bandIntensity = isDark ? 0.1 : 0.16;
-      const washCoupling = isDark ? 0.9 : 0.5;
-      const maxAlpha = isDark ? 0.85 : 0.72;
-      const pointer = pointerRef.current;
-
-      // Deepen the dot color itself in light mode — same trick as the blobs above. A pale
-      // wash of a saturated color over white just looks gray; mixing some black in first
-      // keeps the hue readable at the alpha levels that behave well on a light background.
-      const dotR = isDark ? current[0] : current[0] * 0.72;
-      const dotG = isDark ? current[1] : current[1] * 0.72;
-      const dotB = isDark ? current[2] : current[2] * 0.72;
-
-      const cols = Math.ceil(width / SPACING) + 2;
-      const rows = Math.ceil(height / ROW_SPACING) + 1;
-
-      // Dot/hex grid is dark-mode only — in light mode it read as visible clutter over a
-      // white background rather than a subtle texture. The glow (blobs, ripples, band
-      // wash, all computed above this point) carries the light-mode look on its own.
-      if (isDark) for (let j = 0; j < rows; j++) {
-        const y = j * ROW_SPACING;
-        const v = y / (height || 1);
-        const rowOffset = j % 2 === 0 ? 0 : SPACING / 2;
-
-        for (let i = -1; i < cols; i++) {
-          const x = i * SPACING + rowOffset;
-          if (x < -SPACING || x > width + SPACING) continue;
-          const u = x / (width || 1);
-
-          // Organic, slowly drifting top edge for the aurora band — two low-frequency waves
-          // keyed to column index so it undulates like a curtain rather than a straight cutoff.
-          const edgeWave = Math.sin(i * 0.12 + t * 0.05) * 30 + Math.sin(i * 0.05 - t * 0.03) * 45;
-          const bandTop = bandBaseTop + edgeWave;
-          if (y < bandTop - BAND_EDGE_FADE) continue;
-          const bandFade = Math.min(1, Math.max(0, (y - (bandTop - BAND_EDGE_FADE)) / BAND_EDGE_FADE));
-
-          // Organic undulation: two overlapping wave directions keyed to lattice indices (not
-          // raw pixel coordinates), so the whole mesh flows like a loose sheet rather than
-          // each dot jittering independently or the grid staying perfectly rigid.
-          const wave1 = i * 0.35 + t * 0.35;
-          const wave2 = j * 0.32 - t * 0.28;
-          const idleAmp = isDark ? 3 : 3.4;
-          let dotOffsetX = Math.sin(wave1) * idleAmp * 0.6 + Math.sin(wave2 * 1.3) * idleAmp * 0.4;
-          let dotOffsetY = Math.cos(wave2) * idleAmp * 0.6 + Math.cos(wave1 * 1.2) * idleAmp * 0.4;
-
-          const a = Math.sin(u * 3.2 + t * 0.4 + v * 1.3);
-          const b = Math.sin(v * 2.4 - t * 0.3 + u * 0.6);
-          const n = Math.min(1, Math.max(0, (a * 0.6 + b * 0.4 + 1) / 2));
-
-          let alpha = baseAmbient + n * bandIntensity;
-
-          // Sample the color washes at this dot so it brightens wherever a glow sits
-          // underneath. Skipped on the finale step — the rainbow wash already dominates
-          // there, so coupling against the older per-step blobs too would just be extra
-          // per-dot math (11 blobs × every dot × every frame) for no visible difference.
-          if (!isFinale) {
-            for (const blob of blobs) {
-              const dx = x - blob.x * width;
-              const dy = y - blob.y * height;
-              alpha += gaussian(Math.hypot(dx, dy), blobRadius * 0.6) * washCoupling * 0.12;
-            }
-          }
-          for (const fb of finaleBlobs) {
-            const dx = x - fb.cx;
-            const dy = y - fb.cy;
-            alpha += gaussian(Math.hypot(dx, dy), blobRadius * 0.55) * washCoupling * 0.14;
-          }
-
-          for (const ripple of ripples) {
-            const elapsed = now - ripple.start;
-            const rawProgress = Math.min(1, elapsed / ripple.duration);
-            const eased = easeOutCubic(rawProgress);
-            const dx = x - ripple.x;
-            const dy = y - ripple.y;
-            const distance = Math.hypot(dx, dy) || 0.0001;
-            const ringCenter = eased * ripple.maxRadius;
-            const ringWidth = ripple.maxRadius * (ripple.kind === "cta" ? 0.16 : 0.22);
-            // Single bell-shaped lobe centered on the traveling front — always positive,
-            // so dots only ever get pushed outward, never snap back.
-            const proximity = gaussian(distance - ringCenter, ringWidth);
-            const fade = 1 - eased;
-
-            const displacement = ripple.amplitude * proximity * fade;
-            dotOffsetX += (dx / distance) * displacement;
-            dotOffsetY += (dy / distance) * displacement;
-
-            alpha += proximity * fade * (ripple.kind === "cta" ? 0.55 : 0.32);
-          }
-
-          if (pointer.active) {
-            const pd = Math.hypot(x - pointer.x, y - pointer.y);
-            alpha += gaussian(pd, 80) * (isDark ? 0.06 : 0.1);
-          }
-
-          alpha = Math.min(maxAlpha, alpha) * bandFade;
-          const radius = BASE_RADIUS + (PEAK_RADIUS - BASE_RADIUS) * n;
-
-          let fillR = dotR;
-          let fillG = dotG;
-          let fillB = dotB;
-          if (isFinale) {
-            const hue = ((u + v) * 180 + t * 25) % 360;
-            [fillR, fillG, fillB] = hslToRgb(hue, 0.7, isDark ? 0.62 : 0.42);
-          }
-
-          ctx.beginPath();
-          ctx.arc(x + dotOffsetX, y + dotOffsetY, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${fillR | 0}, ${fillG | 0}, ${fillB | 0}, ${alpha.toFixed(3)})`;
-          ctx.fill();
-        }
-      }
 
       // Subtle "cloud lit up by distant lightning" flash — a soft, localized brightening
       // patch at a random spot each time (not a uniform full-screen wash, which read as

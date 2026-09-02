@@ -211,7 +211,7 @@ export function QuestionHeading({
   return (
     <div className="mb-5 flex items-center gap-3 sm:mb-7 sm:gap-4">
       {sprite && (
-        <div className="relative h-[52px] w-[52px] flex-none sm:h-[72px] sm:w-[72px]">
+        <div data-dreamy-anchor className="relative h-[52px] w-[52px] flex-none sm:h-[72px] sm:w-[72px]">
           <img
             key={reacting ? REACTION_SPRITE : sprite}
             src={reacting ? REACTION_SPRITE : sprite}
