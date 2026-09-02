@@ -269,6 +269,92 @@ body {
    whole cycle with motion, which read as never stopping. Paired with a
    ~2.8s duration on the element (see GestureHint), that's roughly one
    second of visible movement followed by a real pause, not a tight loop. */
+/* Touch-down ripple at the dot's rest point: reads as "a finger lands here,"
+   then the dot travels. Same 2.6s cycle as gesture-hint-move; only the first
+   quarter is visible. */
+@keyframes gesture-hint-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  6% {
+    transform: scale(0.8);
+    opacity: 0.55;
+  }
+  28%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* "Show what the gesture does": while the swipe hint plays, the real card
+   nudges a little in the taught direction on the SAME timeline as the dot
+   (travel 9% -> 32%, settle by 46%, rest), and the matching Match/Pass stamp
+   fades partway in (guide-stamp-preview) -- a preview of the outcome, not
+   just an arrow. All CSS on one 2.6s cycle so nothing drifts out of phase. */
+@keyframes guide-nudge-right {
+  0%,
+  9% {
+    transform: translateX(0) rotate(0deg);
+  }
+  32% {
+    transform: translateX(26px) rotate(1.6deg);
+  }
+  46%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+@keyframes guide-nudge-left {
+  0%,
+  9% {
+    transform: translateX(0) rotate(0deg);
+  }
+  32% {
+    transform: translateX(-26px) rotate(-1.6deg);
+  }
+  46%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+@keyframes guide-nudge-up {
+  0%,
+  9% {
+    transform: translateY(0);
+  }
+  32% {
+    transform: translateY(-14px);
+  }
+  46%,
+  100% {
+    transform: translateY(0);
+  }
+}
+/* The Match/Pass stamp that the taught swipe WOULD reveal fades partway in, on
+   the same cycle as the card nudge. Scoped by the marker class MatchLab puts
+   on the top card while that direction is being taught. */
+@media (prefers-reduced-motion: no-preference) {
+  .guide-preview-right [data-stamp="right"],
+  .guide-preview-left [data-stamp="left"] {
+    animation: guide-stamp-preview 2.6s ease-in-out infinite;
+  }
+}
+@keyframes guide-stamp-preview {
+  0%,
+  9% {
+    opacity: 0;
+  }
+  32% {
+    opacity: 0.62;
+  }
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes gesture-hint-move {
   0% {
     transform: translate(0, 0) scale(0.6);

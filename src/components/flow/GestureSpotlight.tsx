@@ -107,7 +107,9 @@ export function GestureSpotlight({
           top: rect.top - pad,
           width: rect.width + pad * 2,
           height: rect.height + pad * 2,
-          boxShadow: "0 0 0 9999px rgba(3,5,14,0.74)",
+          // Lighter than the first version (0.74): the spotlighted element now
+          // moves and previews its outcome, and that has to read.
+          boxShadow: "0 0 0 9999px rgba(3,5,14,0.62)",
         }}
       />
       {/* Right where a real thumb or cursor would actually be: centered on

@@ -4,10 +4,10 @@ import type { CSSProperties } from "react";
 
 // A small animated "touch point" that teaches a swipe/drag direction by
 // showing it, not describing it -- for spots that used to (or still do)
-// explain a gesture in a sentence. One glowing dot travels the gesture's
-// path with a soft trailing echo, loops a few times, then either keeps
-// looping quietly (for a persistent, low-key affordance) or is left to the
-// caller to dismiss (for a first-visit teaching moment).
+// explain a gesture in a sentence. A ripple lands where a finger would, then
+// one glowing dot travels the gesture's path with a soft trailing echo, rests,
+// and repeats. Callers decide when it stops (GestureSpotlight ends it on the
+// real gesture).
 //
 // Deliberately not a licensed/stock hand-cursor asset (see the swipe-*.mp4
 // files evaluated for this work -- watermarked IconScout previews, not
@@ -18,6 +18,13 @@ import type { CSSProperties } from "react";
 // `distance`, so the whole excursion always fits inside the component's own
 // box -- an earlier version centered the dot and let it travel past the
 // edges, which spilled into neighboring text once used next to a label.
+//
+// Timing: one 2.6s cycle -- ripple 0-28%, travel 9-32%, fade by 42%, rest
+// until 100% (see globals.css). Anything that wants to move in step with the
+// dot (Match's card nudge and stamp preview) uses the same 2.6s. The class
+// strings below are written out in full on purpose: Tailwind only generates
+// classes it can see whole in source, so no template literals here.
+export const GESTURE_HINT_CYCLE_S = 2.6;
 
 export function GestureHint({
   direction,
@@ -46,10 +53,24 @@ export function GestureHint({
 
   return (
     <span aria-hidden className={`relative inline-block flex-none ${className}`} style={{ width: w, height: h }}>
+      {/* Touch-down ripple at the rest point. */}
+      <span
+        className="motion-safe:animate-[gesture-hint-ring_2.6s_ease-out_infinite]"
+        style={{
+          position: "absolute",
+          left: restLeft,
+          top: restTop,
+          width: size,
+          height: size,
+          borderRadius: "999px",
+          border: `2px solid ${color}`,
+          opacity: 0,
+        }}
+      />
       {/* Trailing echo: same path, offset start (smaller, delayed) so it
          reads as a soft comet tail instead of a second dot appearing. */}
       <span
-        className="motion-safe:animate-[gesture-hint-move_2.8s_ease-in-out_infinite]"
+        className="motion-safe:animate-[gesture-hint-move_2.6s_ease-in-out_infinite]"
         style={{
           ...style,
           position: "absolute",
@@ -65,7 +86,7 @@ export function GestureHint({
         }}
       />
       <span
-        className="motion-safe:animate-[gesture-hint-move_2.8s_ease-in-out_infinite]"
+        className="motion-safe:animate-[gesture-hint-move_2.6s_ease-in-out_infinite]"
         style={{
           ...style,
           position: "absolute",

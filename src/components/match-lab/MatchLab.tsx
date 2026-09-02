@@ -320,7 +320,7 @@ export function MatchLab() {
         const index = GUIDE_ORDER.indexOf(current);
         return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
       });
-    }, 3200);
+    }, 5200); // exactly two 2.6s hint cycles: one pass to notice, one to read
     return () => window.clearTimeout(timer);
   }, [guideGesture]);
   const dragXRef = useRef(0);
@@ -473,13 +473,29 @@ export function MatchLab() {
                   : isDragging
                     ? `translateX(${dragX}px) rotate(${dragX / 18}deg)`
                     : `translateY(${depth * 14}px) scale(${1 - depth * 0.05})`;
+                // While the gesture guide is teaching, the real top card nudges in
+                // the taught direction on the dot's own 2.6s cycle (guide-nudge-*,
+                // globals.css) -- a preview of the gesture, not just an arrow next
+                // to it. Off the moment the student touches the card.
+                const nudging = isTop && guideGesture !== null && !isDragging && !isExiting;
                 return (
                   <div
                     key={career.id}
                     ref={isTop ? cardRef : undefined}
                     // bottom-7 reserves the stack-peek band inside the deck
                     // area, so peeked cards never overlap the action buttons.
-                    className={`absolute inset-x-0 top-0 bottom-7 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"}`}
+                    // Full literal class strings per direction (not a template): Tailwind
+                    // only generates classes it can see whole in source. The plain
+                    // guide-preview-* marker is for globals.css's stamp rule, not Tailwind.
+                    className={`absolute inset-x-0 top-0 bottom-7 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
+                      !nudging
+                        ? ""
+                        : guideGesture === "right"
+                          ? "guide-preview-right motion-safe:animate-[guide-nudge-right_2.6s_ease-in-out_infinite]"
+                          : guideGesture === "left"
+                            ? "guide-preview-left motion-safe:animate-[guide-nudge-left_2.6s_ease-in-out_infinite]"
+                            : "motion-safe:animate-[guide-nudge-up_2.6s_ease-in-out_infinite]"
+                    }`}
                     style={{
                       background: "var(--color-night-card)",
                       borderColor: "var(--color-glass-border)",
@@ -771,6 +787,10 @@ function Stamp({ side, color, opacity, children }: { side: "left" | "right"; col
   return (
     <div
       aria-hidden
+      // data-stamp lets the gesture guide's CSS (globals.css, guide-preview-*) fade
+      // THIS stamp partway in while its swipe is being taught -- previewing what the
+      // gesture does, not just where it goes.
+      data-stamp={side}
       className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-lg border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
       style={{
         [side]: 24,
