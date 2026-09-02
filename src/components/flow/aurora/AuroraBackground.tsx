@@ -147,6 +147,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
   const themeRef = useRef(theme);
   const targetRgbRef = useRef(hexToRgb(accent));
   const currentRgbRef = useRef(hexToRgb(accent));
+  // Set for real on mount by the [accent] effect below (performance.now() can't be called
+  // during render); 0 just means "treat as already-settled" for the one frame before that
+  // effect runs.
+  const lastAccentChangeAtRef = useRef(0);
   const ripplesRef = useRef<Ripple[]>([]);
   const blobsRef = useRef<Blob[]>([]);
   const finaleRef = useRef(finale);
@@ -173,6 +177,10 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
 
   useEffect(() => {
     targetRgbRef.current = hexToRgb(accent);
+    // Marks the moment of a step change so the base wash can brighten toward the new
+    // accent right as it lands, then ease back down to its steady floor -- landing on a
+    // screen should read as a small wash of that step's color, not just a passive tint.
+    lastAccentChangeAtRef.current = performance.now();
   }, [accent]);
 
   useEffect(() => {
@@ -341,17 +349,34 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
       // fixed navy -- this is the one piece of the canvas painted first, full-bleed, every
       // frame, so it's the one change guaranteed to be visible regardless of where content
       // covers the rest of the screen. Light mode keeps the exact Figma wash untouched.
+      // Landing on a step brightens the wash toward its accent, then eases back down to a
+      // steady floor over ~2.2s -- a quadratic decay (bright, dies down a bit, settles
+      // somewhere still clearly visible) rather than either a flat tint or a flash that
+      // fades to nothing. Same curve drives both themes so the transition reads the same
+      // regardless of mode.
+      const sinceTransition = now - lastAccentChangeAtRef.current;
+      const transitionBoost = Math.pow(Math.max(0, 1 - sinceTransition / 2200), 2);
+      const [cr0, cg0, cb0] = current;
+
       if (isDark) {
-        const [cr0, cg0, cb0] = current;
-        const tintMix = 0.14;
+        const tintMix = 0.14 + transitionBoost * 0.24;
         const bgR = 7 + (cr0 - 7) * tintMix;
         const bgG = 9 + (cg0 - 9) * tintMix;
         const bgB = 18 + (cb0 - 18) * tintMix;
         ctx.fillStyle = `rgb(${bgR | 0}, ${bgG | 0}, ${bgB | 0})`;
+        ctx.fillRect(0, 0, width, height);
       } else {
         ctx.fillStyle = lightWashGradientRef.current ?? "#f3f4f8";
+        ctx.fillRect(0, 0, width, height);
+        // Light mode can't blend the accent into the base fill the same way (the wash is a
+        // pre-built gradient, not a flat color) -- an accent-tinted overlay on top gets the
+        // same "brightens in, settles to a visible floor" behavior. Needs a higher alpha
+        // than dark mode to read at all against a light wash (same reason every other
+        // light-mode value in this file runs higher than its dark-mode counterpart).
+        const tintAlpha = 0.05 + transitionBoost * 0.11;
+        ctx.fillStyle = `rgba(${cr0 | 0}, ${cg0 | 0}, ${cb0 | 0}, ${tintAlpha.toFixed(3)})`;
+        ctx.fillRect(0, 0, width, height);
       }
-      ctx.fillRect(0, 0, width, height);
 
 
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;

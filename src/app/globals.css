@@ -771,8 +771,16 @@ html.light {
   /* flow option tiles / panels: the black-alpha film reads muddy over the
      pastel aurora — frosted white is the light-theme glass */
   --color-glass-surface-1: rgb(255 255 255 / 0.62);
-  --color-world-business-money-office: color-mix(in srgb, #ffb81f 48%, black);
-  --color-world-building-construction: color-mix(in srgb, #ff9640 50%, black);
+  /* These two were color-mix(..., black) like the rest of this block, but mixing
+     black into a warm yellow/orange doesn't just darken it -- it drags the hue
+     toward brown because yellow's channels are so unequal (high R/G, near-zero
+     B) that a uniform black blend shifts their ratio, not just their lightness.
+     At the percentages here it read as literal mud (measured: #856010 / #804b20,
+     contrast 5.7:1 / 7.2:1 -- both already well past what's needed). Computed by
+     lowering HSL lightness instead, at full saturation, which is what these
+     actually needed: same hue, same saturation, just darker. */
+  --color-world-business-money-office: #996900; /* amber-500 h41 s100 l30, 4.8:1 vs white */
+  --color-world-building-construction: #ad4e00; /* orange-500 h27 s100 l34, 5.4:1 vs white */
   --color-world-arts-media-sport: color-mix(in srgb, #ff4585 68%, black);
   --color-world-food-farming-nature: color-mix(in srgb, #1fc76e 55%, black);
   --color-world-farming-animals-nature: color-mix(in srgb, #7c9a5e 62%, black);
