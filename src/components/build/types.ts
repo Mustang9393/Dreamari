@@ -168,6 +168,10 @@ export const STAGE_DREAMY: Record<Exclude<StageId, "milestone" | "complete">, { 
   workVibe: { line: "There is no right answer. Just choose what feels like you. ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },
   education: { line: "How much education or training feels right? ✨", sprite: "/images/dreamy/v2/dreamy-puzzle.png" },
   cost: { line: "Choose a range that feels realistic. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
-  location: { line: "Choose states that feel possible for your next step. ✨", sprite: "/images/dreamy/v2/dreamy-alert.png" },
-  profile: { line: "Last step. Let’s make your profile yours. ✨", sprite: "/images/dreamy/v2/dreamy-nervous.png" },
+  // alert (red exclamation marks) and nervous (sweat drop) both read as
+  // worried, not thoughtful -- wrong note for a flow that should feel
+  // encouraging start to finish. Swapped for expressions from the same
+  // pack that keep the tone positive.
+  location: { line: "Choose states that feel possible for your next step. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
+  profile: { line: "Last step. Let’s make your profile yours. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
 };
