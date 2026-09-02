@@ -627,6 +627,16 @@ body {
   }
 }
 
+/* Connect: any pressable that flips to aria-pressed="true" (save, helpful,
+   like, joined) gets the Build flow's confirm lift once, the moment it turns
+   on -- the rule starts matching on that flip, so the animation runs exactly
+   then. A state change you can see, without a new label to read. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-connect] [aria-pressed="true"] {
+    animation: confirm-lift 0.42s ease-out;
+  }
+}
+
 @keyframes confirm-lift {
   0% {
     transform: translateY(0) scale(1);

@@ -1,5 +1,7 @@
 "use client";
 
+import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -146,6 +148,7 @@ function InlineAsk({
   const [text, setText] = useState("");
   const submit = () => {
     if (!text.trim()) return;
+    dispatchAuroraPulse("cta");
     onPost(text.trim());
     setText("");
     setOpen(false);
@@ -211,7 +214,7 @@ function InlineAsk({
  *  immediately with its routing state, so posting feels alive. */
 function LocalQuestionCard({ title }: { title: string }) {
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
+    <div className="rounded-[var(--radius-xl)] border p-[var(--space-5)] motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
       <div className="flex flex-wrap items-center gap-[8px]">
         <Avatar name="Jordan Rivera" size={28} />
         <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Jordan</span>
@@ -914,14 +917,23 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
   );
 }
 
-function QuietCta({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+// `done`: the confirmed state of the SAME control -- filled with the success
+// tint plus a check, and aria-pressed so the data-connect lift rule fires once
+// as it flips. The label doesn't change; the state does, visibly.
+function QuietCta({ children, onClick, className = "", done = false }: { children: React.ReactNode; onClick?: () => void; className?: string; done?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={done || undefined}
       className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
-      style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
+      style={
+        done
+          ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }
+          : { borderColor: "var(--border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }
+      }
     >
+      {done && <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} />}
       {children}
     </button>
   );
@@ -929,7 +941,7 @@ function QuietCta({ children, onClick, className = "" }: { children: React.React
 
 function SectionHead({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+    <h2 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}
     </h2>
   );
@@ -1112,13 +1124,6 @@ export function ConnectExperience() {
     window.history.replaceState(null, "", "/connect" + base + (shapes ? (base ? "&" : "?") + "cards=shapes" : ""));
     window.scrollTo(0, 0);
   }, []);
-  const pickVariant = useCallback((v: CardVariant) => {
-    setCardVariant(v);
-    const url = new URL(window.location.href);
-    if (v === "photos") url.searchParams.delete("cards");
-    else url.searchParams.set("cards", "shapes");
-    window.history.replaceState(null, "", url.toString());
-  }, []);
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -1126,13 +1131,17 @@ export function ConnectExperience() {
   }, []);
 
   const toggleSave = (id: string, what = "insight") => {
+    dispatchAuroraPulse("select");
     setSaves((s) => {
       const next = { ...s, [id]: !s[id] };
       say(next[id] ? `Saved ${what}. Find it under Saved.` : "Removed from Saved.");
       return next;
     });
   };
-  const toggleHelpful = (id: string) => setHelpfuls((h) => ({ ...h, [id]: !h[id] }));
+  const toggleHelpful = (id: string) => {
+    dispatchAuroraPulse("select");
+    setHelpfuls((h) => ({ ...h, [id]: !h[id] }));
+  };
 
 
   const cardProps = (id: string) => ({
@@ -1143,7 +1152,7 @@ export function ConnectExperience() {
   });
 
   return (
-    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
+    <div data-connect className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
       <DesktopNavigation active="Connect" />
 
       {/* Mobile header (matches Home's pattern) */}
@@ -1152,7 +1161,17 @@ export function ConnectExperience() {
         <QuickLinksMenu />
       </header>
 
-      <div aria-live="polite" className="sr-only">{announce}</div>
+      {/* say()'s confirmations ("Saved insight. Find it under Saved.", "Added to
+          your Plan as a next action.") used to land ONLY in an sr-only region,
+          so sighted students got no confirmation at all. Same strings, now a
+          real toast above the nav; still aria-live for screen readers. */}
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+84px)] z-[95] flex justify-center px-5 md:bottom-8">
+        {announce && (
+          <span key={announce} className="flex items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[13.5px] leading-[18px] font-bold motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.8)" }}>
+            <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> {announce}
+          </span>
+        )}
+      </div>
 
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
@@ -1172,7 +1191,7 @@ export function ConnectExperience() {
             onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
             onEnterCode={(id) => setCodeOpenFor(id)}
             cardVariant={cardVariant}
-            onPickVariant={pickVariant}
+            joinedCount={Object.values(joined).filter(Boolean).length}
           />
         )}
 
@@ -1281,6 +1300,7 @@ export function ConnectExperience() {
           variant={cardVariant}
           onClose={() => setJoinFor(null)}
           onJoin={() => {
+            dispatchAuroraPulse("cta");
             const id = joinFor;
             setJoined((j) => ({ ...j, [id]: true }));
             setJoinFor(null);
@@ -1293,6 +1313,7 @@ export function ConnectExperience() {
           event={eventById(codeOpenFor)!}
           onClose={() => setCodeOpenFor(null)}
           onRedeemed={() => {
+            dispatchAuroraPulse("cta");
             const id = codeOpenFor;
             setEventJoined((j) => ({ ...j, [id]: true }));
             setCodeOpenFor(null);
@@ -1317,7 +1338,7 @@ function HomeView({
   onOpenEvent,
   onEnterCode,
   cardVariant,
-  onPickVariant,
+  joinedCount,
 }: {
   tab: "communities" | "events";
   onTab: (tab: "communities" | "events") => void;
@@ -1326,7 +1347,7 @@ function HomeView({
   onOpenEvent: (id: string) => void;
   onEnterCode: (id: string) => void;
   cardVariant: CardVariant;
-  onPickVariant: (v: CardVariant) => void;
+  joinedCount: number;
 }) {
   const [query, setQuery] = useState("");
   const eventInk = "#f6f5fb";
@@ -1341,7 +1362,7 @@ function HomeView({
          their own line on phones where there isn't room. */}
       <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
         <div className="min-w-0">
-          <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Connect</h1>
+          <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find your community</h1>
           <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
         </div>
         <TopTabs tab={tab} onTab={onTab} />
@@ -1372,20 +1393,12 @@ function HomeView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
             <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
-            <div className="flex items-center gap-[6px]" role="group" aria-label="Card style">
-              {(["photos", "fusion", "people", "shapes"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={cardVariant === v}
-                  onClick={() => onPickVariant(v)}
-                  className="dm-quiet min-h-[30px] cursor-pointer rounded-full border px-[12px] text-[11.5px] leading-[15px] font-bold capitalize"
-                  style={cardVariant === v ? { background: "var(--glass-surface-1)", borderColor: "var(--foreground)", color: "var(--foreground)" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
+            {/* The card-style A/B switcher that sat here was a lab control in a
+               student's face; the lane still rides ?cards= in the URL. This
+               slot is the doc's joined count. */}
+            {!query && (
+              <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{joinedCount} joined</span>
+            )}
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
              centered beneath. */}
@@ -1413,6 +1426,12 @@ function HomeView({
              (star chip, event name, date · location in white), then the
              stats row, the Partner line, and one action for this event's
              state. */}
+          {!query && (
+            <Card>
+              <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Keep the conversation going after the event.</h2>
+              <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>A private community for everyone who attended. Ask follow-up questions, hear more from professionals, and access resources shared after the event.</p>
+            </Card>
+          )}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
@@ -1432,7 +1451,7 @@ function HomeView({
                     <div className="min-w-[180px] flex-1 self-start">
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
-                      <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Hosted by {event.host}</p>
+                      <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Partner: {event.host}</p>
                     </div>
                     <PartnerMark host={event.host} size="card" />
                   </div>
@@ -1449,7 +1468,7 @@ function HomeView({
                     </span>
                     {joined ? (
                       <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>
-                        Open Board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
+                        Open Event Board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
                       </button>
                     ) : upcoming ? null : (
                       <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>
@@ -1545,9 +1564,9 @@ function ComingSoonCard({ variant = "photos" }: { variant?: CardVariant }) {
             </span>
             <button
               type="button"
-              onClick={() => setSent(true)}
+              onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
               disabled={sent}
-              className="dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default"
+              className={`dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default ${sent ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
               style={{ color: sent ? "var(--world-food-farming-nature)" : "#FFFFFF" }}
             >
               {sent ? (
@@ -1586,9 +1605,9 @@ function ComingSoonCard({ variant = "photos" }: { variant?: CardVariant }) {
         </span>
         <button
           type="button"
-          onClick={() => setSent(true)}
+          onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
           disabled={sent}
-          className="dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default"
+          className={`dm-quiet group/cta flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase disabled:cursor-default ${sent ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
           style={{ color: sent ? "var(--world-food-farming-nature)" : "rgba(242,240,250,0.85)" }}
         >
           {sent ? (
@@ -1809,6 +1828,7 @@ function EventView({
 }) {
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
+  const [planAdded, setPlanAdded] = useState(false);
   const eventInk = "#f6f5fb";
   const pAccent = partnerAccent(event.host);
   return (
@@ -1868,8 +1888,8 @@ function EventView({
             ))}
           </ol>
           <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
-            <QuietCta onClick={onSaveTakeaway}><Bookmark className="h-4 w-4" aria-hidden /> {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-            <QuietCta onClick={onAddToPlan}><ArrowRight className="h-4 w-4" aria-hidden /> Add to my Plan</QuietCta>
+            <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
+            <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ArrowRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
           </div>
         </Card>
       )}
