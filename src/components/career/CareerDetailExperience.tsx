@@ -98,7 +98,9 @@ function Figure({ children, accent }: { children: React.ReactNode; accent: strin
 function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      {/* the title row is ruled off edge to edge (direct feedback): the line
+         runs through the panel's padding to touch both borders */}
+      <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
         <h2 className={BIG} style={DISPLAY}>{title}</h2>
         {action}
       </div>
@@ -117,12 +119,13 @@ function Folded({ id, title, open, onToggle, children }: { id: string; title: st
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         onClick={onToggle}
-        className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:px-[var(--space-6)]"
+        className={`dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] p-[var(--space-5)] text-left sm:px-[var(--space-6)] ${open ? "rounded-t-[inherit] border-b" : "rounded-[inherit]"}`}
+        style={{ borderColor: "rgba(255,255,255,0.12)" }}
       >
         <h2 className={`${BIG} min-w-0`} style={DISPLAY}>{title}</h2>
         <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
       </button>
-      <div id={`${id}-panel`} hidden={!open} className="px-[var(--space-5)] pb-[var(--space-6)] sm:px-[var(--space-6)]">
+      <div id={`${id}-panel`} hidden={!open} className="px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-6)] sm:px-[var(--space-6)]">
         {children}
       </div>
     </section>
