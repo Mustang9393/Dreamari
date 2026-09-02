@@ -68,7 +68,13 @@ const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase
 // SOLID section surface (direct feedback): key containers stopped being
 // translucent -- page gradient -> solid card -> lighter nested rows is the
 // hierarchy, with glass kept for atmosphere rather than reading surfaces.
-const GLASS = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
+// Semi-transparent (not the opaque var(--card)) so the page's colorful
+// backdrop gradient bleeds through, same as every other bright page's cards
+// (Home/Explore/Connect/Signup/Report all use glass-surface-3 for this, never
+// flat --card) -- an opaque fill here was blocking that gradient under every
+// stacked card, which is why the page read as flat/dark despite sharing the
+// exact same background gradient string as Home.
+const GLASS = { background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" } as const;
 
 // Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
 // navigates with (so the right career server-renders, no flash of someone
