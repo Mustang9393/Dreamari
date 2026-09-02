@@ -499,26 +499,36 @@ const PHOTO_FOCUS: Record<string, string> = {
 // tall, so wordmarks and square marks take the room their shape needs. A
 // company with no exact current mark gets a text-only chip (Blackstone; and
 // Goldman Sachs, whose only mark is a filled square that masks to a blank tile).
-const COMPANY_MARKS: Record<string, { file: string; w: number }> = {
-  "JPMorgan Chase": { file: "jpmorgan-chase", w: 58 },
-  Amazon: { file: "amazon", w: 40 },
-  EY: { file: "ey", w: 16 },
-  Google: { file: "google", w: 36 },
-  Deloitte: { file: "deloitte", w: 52 },
-  "Morgan Stanley": { file: "morgan-stanley", w: 96 },
-  Microsoft: { file: "microsoft", w: 56 },
-  Meta: { file: "meta", w: 56 },
-  Apple: { file: "apple", w: 10 },
-  "CVS Health": { file: "cvs-health", w: 52 },
-  "Johnson & Johnson": { file: "johnson-johnson", w: 60 },
-  Pfizer: { file: "pfizer", w: 40 },
-  "Mayo Clinic": { file: "mayo-clinic", w: 44 },
-  Disney: { file: "disney", w: 30 },
-  Nike: { file: "nike", w: 22 },
-  Spotify: { file: "spotify", w: 12 },
-  Netflix: { file: "netflix", w: 36 },
-  Adobe: { file: "adobe", w: 12 },
+const COMPANY_MARKS: Record<string, { file: string; aspect: number }> = {
+  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.67 },
+  Amazon: { file: "amazon", aspect: 3.31 },
+  EY: { file: "ey", aspect: 0.99 },
+  Google: { file: "google", aspect: 2.96 },
+  Deloitte: { file: "deloitte", aspect: 5.25 },
+  "Morgan Stanley": { file: "morgan-stanley", aspect: 4.0 },
+  Microsoft: { file: "microsoft", aspect: 1.0 },
+  Meta: { file: "meta", aspect: 4.96 },
+  Apple: { file: "apple", aspect: 0.81 },
+  "CVS Health": { file: "cvs-health", aspect: 8.2 },
+  "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
+  Pfizer: { file: "pfizer", aspect: 2.44 },
+  "Mayo Clinic": { file: "mayo-clinic", aspect: 0.91 },
+  Disney: { file: "disney", aspect: 2.38 },
+  Nike: { file: "nike", aspect: 2.81 },
+  Spotify: { file: "spotify", aspect: 1.0 },
+  Netflix: { file: "netflix", aspect: 3.7 },
+  Adobe: { file: "adobe", aspect: 3.8 },
 };
+
+// One visual size for every mark (direct feedback: none too big, none too
+// small): each mark fills a box scaled from its own aspect ratio (measured
+// from the SVG), so square marks and long wordmarks carry the same visual
+// weight: height 16 for compact marks, width capped at 60 for the longest
+// wordmarks, height never under 10.
+function markBox(aspect: number): { width: number; height: number } {
+  const height = Math.max(10, Math.min(16, 60 / aspect));
+  return { width: Math.round(height * aspect), height: Math.round(height) };
+}
 
 function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
   const mark = COMPANY_MARKS[name];
@@ -541,9 +551,9 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
         <>
           <span
             aria-hidden
-            className="block h-[14px] flex-none"
+            className="block flex-none"
             style={{
-              width: Math.round(mark.w * 1.17),
+              ...markBox(mark.aspect),
               background: ink,
               maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
               WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
