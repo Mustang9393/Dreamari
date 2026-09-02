@@ -47,6 +47,10 @@ const FIGURE = "text-[18px] leading-[24px] font-bold tabular-nums";
 const LABEL = "text-[16px] leading-[22px] font-semibold";
 const SMALL = "text-[15px] leading-[22px]";
 const TINY = "text-[14px] leading-[20px]";
+// The frosted panel every info box on this page sits in (direct feedback:
+// more contrast, frostier): a stronger glass fill, a real backdrop blur and a
+// brighter hairline than the page's default glass-surface-1.
+const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
@@ -148,7 +152,7 @@ function DotList({ items, accent, leading }: { items: string[]; accent: string; 
 function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
   const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
   return (
-    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+    <li className="border-t first:border-t-0" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
       <button
         type="button"
         onClick={hasDetail ? onToggle : undefined}
@@ -202,7 +206,7 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
       {rows.map((row) => {
         const isFigure = /\d/.test(row.pay);
         return (
-          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={PANEL}>
             <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
             {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
           </li>
@@ -379,13 +383,13 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
-          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}
                 data-fact-cell
                 className={`flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
-                style={{ borderColor: "var(--glass-border)" }}
+                style={{ borderColor: "rgba(255,255,255,0.12)" }}
               >
                 <span className={LABEL}>{fact.label}</span>
                 <Figure accent={accent}>{fact.value}</Figure>
@@ -415,7 +419,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.ladder.length > 0 && (
           <Section title="Career ladder">
-            <ol className="flex flex-col">
+            <ol className="flex flex-col rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={PANEL}>
               {vm.ladder.map((rung) => (
                 <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
               ))}
