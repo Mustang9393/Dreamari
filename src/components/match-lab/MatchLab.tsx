@@ -39,6 +39,14 @@ const SWIPE_COMMIT_PX = 100;
 // the hint should go back to first-visit-only.
 const DEMO_ALWAYS_SHOW_GUIDE = true;
 
+const GUIDE_ORDER = ["up", "right", "left"] as const;
+type GestureKind = (typeof GUIDE_ORDER)[number];
+const GUIDE_LABEL: Record<GestureKind, string> = {
+  up: "Scroll up for details",
+  right: "Swipe right to save",
+  left: "Swipe left to pass",
+};
+
 type HistoryEntry =
   | { type: "pass"; career: Career; prevDeckIndex: number }
   | { type: "like"; career: Career; prevDeckIndex: number }
@@ -64,64 +72,43 @@ export function MatchLab() {
   const grabScroller = useRef<HTMLElement | null>(null);
   const grabScrollTop = useRef(0);
   const [exiting, setExiting] = useState<{ id: string; dir: 1 | -1 } | null>(null);
-  // Progressive, on-card gesture teaching -- one direction at a time,
-  // spotlighting the real card instead of a modal listing all three at
-  // once (which read as confusing per direct feedback: "all 3 gestures at
-  // once explained is confusing"). Cycles through the three directions on
-  // an idle timer purely for visibility -- that timer must NEVER be what
-  // dismisses the hint, or a student who steps away/isn't looking loses it
-  // permanently after ~8s without ever having seen it (exactly what
-  // happened: it was marking itself "seen" on a blind timeout regardless
-  // of whether anyone actually looked). Only a genuine action ends it and
-  // persists "seen": GestureSpotlight's own full-screen overlay intercepts
-  // the first tap itself (it has to, to sit on top of the card), so that
-  // tap IS the dismiss -- the real gesture then lands on the actual card
-  // right after. like()/pass()/the scroll claim also call dismissGuideRef
-  // directly, for the rare case a gesture reaches the card without the
-  // overlay's own tap firing first.
-  const [guideStep, setGuideStep] = useState<0 | 1 | 2 | null>(null);
-  const guideSeenKey = "dreamari:hint-seen:match-swipe";
+  // On-card gesture teaching, spotlighting the real card instead of a modal
+  // listing all three gestures at once. Per direct feedback, deliberately
+  // minimal: it shows on the FIRST card only, teaches scroll-up first (the
+  // least discoverable of the three -- Like/Pass already have explicit
+  // buttons and drag stamps), and disappears for good the moment the
+  // student performs any real gesture. It never plays per-card and never
+  // comes back after a gesture is done. `demonstrated` is persisted so a
+  // returning student who already did it isn't retaught (DEMO flag aside).
+  const guideProgressKey = "dreamari:hint-progress:match-swipe";
+  const [demonstrated, setDemonstrated] = useState<Set<GestureKind>>(() => {
+    if (DEMO_ALWAYS_SHOW_GUIDE || typeof window === "undefined") return new Set();
+    try {
+      const raw = window.localStorage.getItem(guideProgressKey);
+      return raw ? new Set(JSON.parse(raw) as GestureKind[]) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+  const [guideGesture, setGuideGesture] = useState<GestureKind | null>(null);
+  // Kept fresh via effect, not assigned during render -- refs can't be
+  // written while rendering (matches dragLive's own pattern below).
+  const markDemonstratedRef = useRef<(kind: GestureKind) => void>(() => {});
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (DEMO_ALWAYS_SHOW_GUIDE) {
-        setGuideStep(0);
-        return;
-      }
-      try {
-        if (!window.localStorage.getItem(guideSeenKey)) setGuideStep(0);
-      } catch {
-        // Storage blocked -- skip the hint rather than nag every mount.
-      }
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, []);
-  // Kept fresh via effect (matching dragLive's own pattern just below),
-  // not assigned during render -- refs can't be written while rendering.
-  const cycleGuideRef = useRef<() => void>(() => {});
-  const dismissGuideRef = useRef<() => void>(() => {});
-  useEffect(() => {
-    cycleGuideRef.current = () => {
-      setGuideStep((step) => (step === null ? null : (((step + 1) % 3) as 0 | 1 | 2)));
-    };
-    dismissGuideRef.current = () => {
-      setGuideStep((step) => {
-        if (step === null) return null;
-        if (!DEMO_ALWAYS_SHOW_GUIDE) {
-          try {
-            window.localStorage.setItem(guideSeenKey, "1");
-          } catch {
-            // Nothing to persist to; the hint just won't reappear this mount.
-          }
+    markDemonstratedRef.current = (kind) => {
+      setGuideGesture(null);
+      setDemonstrated((current) => {
+        if (current.has(kind)) return current;
+        const next = new Set(current).add(kind);
+        try {
+          window.localStorage.setItem(guideProgressKey, JSON.stringify([...next]));
+        } catch {
+          // Nothing to persist to; progress just won't carry to next visit.
         }
-        return null;
+        return next;
       });
     };
   });
-  useEffect(() => {
-    if (guideStep === null) return;
-    const timer = window.setTimeout(() => cycleGuideRef.current(), 2400);
-    return () => window.clearTimeout(timer);
-  }, [guideStep]);
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [swapFor, setSwapFor] = useState<Career | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
@@ -158,7 +145,7 @@ export function MatchLab() {
 
   function pass() {
     if (!top || exiting) return;
-    dismissGuideRef.current();
+    markDemonstratedRef.current("left");
     setHistory((h) => [...h, { type: "pass", career: top, prevDeckIndex: deckIndex }]);
     setExiting({ id: top.id, dir: -1 });
     setTimeout(advance, 380);
@@ -166,7 +153,7 @@ export function MatchLab() {
 
   function like(e?: React.MouseEvent) {
     if (!top || exiting) return;
-    dismissGuideRef.current();
+    markDemonstratedRef.current("right");
     if (liked.length >= MAX_SLOTS) {
       // Slots full: the card stays put and the swap sheet asks who leaves.
       setSwapFor(top);
@@ -301,6 +288,31 @@ export function MatchLab() {
   }
 
   const topId = top?.id;
+  // First card only (deckIndex 0), and only while nothing has been
+  // demonstrated yet -- the moment any real gesture lands, this stops and
+  // never restarts for the rest of the visit. Opens on scroll-up.
+  useEffect(() => {
+    if (!topId || deckIndex !== 0 || demonstrated.size > 0) return;
+    const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
+    return () => window.clearTimeout(timer);
+  }, [topId, deckIndex, demonstrated]);
+  // While it's up, walk scroll-up -> swipe right -> swipe left with a
+  // comfortable dwell on each (one GestureHint pass plus its built-in rest),
+  // and keep walking until a real gesture ends it. Only the direction/label
+  // change on the ONE persistent overlay, so the dark scrim never drops and
+  // re-raises between gestures -- that mount/unmount flicker was the
+  // complaint with the earlier per-gesture instances.
+  useEffect(() => {
+    if (guideGesture === null) return;
+    const timer = window.setTimeout(() => {
+      setGuideGesture((current) => {
+        if (current === null) return null;
+        const index = GUIDE_ORDER.indexOf(current);
+        return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
+      });
+    }, 3200);
+    return () => window.clearTimeout(timer);
+  }, [guideGesture]);
   const dragXRef = useRef(0);
   // keep the native listeners' handle fresh without re-binding them
   useEffect(() => {
@@ -325,7 +337,7 @@ export function MatchLab() {
         if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) claimed = "h";
         else if (Math.abs(dy) > 12) {
           claimed = "v"; // browser scrolls; we stand down
-          dismissGuideRef.current();
+          markDemonstratedRef.current("up");
         } else return;
       }
       if (claimed === "h") {
@@ -501,31 +513,17 @@ export function MatchLab() {
       {/* ---- fly-to-slot ghost ---- */}
       {ghost && <FlyGhost {...ghost} />}
 
-      {/* ---- first-visit gesture guide: one direction at a time, spotlighting
-         the real card, instead of a modal listing all three gestures at
-         once. See GestureSpotlight for the dim-everything-but-the-target
-         treatment and GestureHint for the animated direction itself. ---- */}
-      <GestureSpotlight
-        active={guideStep === 0}
-        targetRef={cardRef}
-        direction="right"
-        label="Swipe right to save"
-        onDismiss={() => dismissGuideRef.current()}
-      />
-      <GestureSpotlight
-        active={guideStep === 1}
-        targetRef={cardRef}
-        direction="left"
-        label="Swipe left to pass"
-        onDismiss={() => dismissGuideRef.current()}
-      />
-      <GestureSpotlight
-        active={guideStep === 2}
-        targetRef={cardRef}
-        direction="up"
-        label="Scroll up for details"
-        onDismiss={() => dismissGuideRef.current()}
-      />
+      {/* ---- gesture guide: teaches whichever direction the student hasn't
+         demonstrated yet, spotlighting the real card, instead of a modal
+         listing all three gestures at once. ONE instance for the whole
+         sequence -- swapping direction/label on it as guideGesture changes,
+         rather than mounting/unmounting a different instance per gesture,
+         is what keeps the dark scrim from flickering off and back on
+         between steps. See GestureSpotlight for the dim-the-rest-of-the-
+         screen treatment and GestureHint for the animated direction. ---- */}
+      {guideGesture && (
+        <GestureSpotlight active targetRef={cardRef} direction={guideGesture} label={GUIDE_LABEL[guideGesture]} remeasureKey={`${topId}:${guideGesture}`} />
+      )}
 
       {/* ---- decision sheet at 3 matches ---- */}
       {decisionOpen && (

@@ -49,7 +49,7 @@ export function GestureHint({
       {/* Trailing echo: same path, offset start (smaller, delayed) so it
          reads as a soft comet tail instead of a second dot appearing. */}
       <span
-        className="motion-safe:animate-[gesture-hint-move_1.3s_ease-in-out_infinite]"
+        className="motion-safe:animate-[gesture-hint-move_2.8s_ease-in-out_infinite]"
         style={{
           ...style,
           position: "absolute",
@@ -65,7 +65,7 @@ export function GestureHint({
         }}
       />
       <span
-        className="motion-safe:animate-[gesture-hint-move_1.3s_ease-in-out_infinite]"
+        className="motion-safe:animate-[gesture-hint-move_2.8s_ease-in-out_infinite]"
         style={{
           ...style,
           position: "absolute",

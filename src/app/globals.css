@@ -264,19 +264,25 @@ body {
    same element) is a separate absolutely-positioned copy so it can lag
    behind on its own animation-delay, reading as motion rather than a
    dot just teleporting. */
+/* The travel itself lives in the first ~40% of the cycle; the rest is a
+   held, invisible rest before it repeats -- an earlier version filled the
+   whole cycle with motion, which read as never stopping. Paired with a
+   ~2.8s duration on the element (see GestureHint), that's roughly one
+   second of visible movement followed by a real pause, not a tight loop. */
 @keyframes gesture-hint-move {
   0% {
     transform: translate(0, 0) scale(0.6);
     opacity: 0;
   }
-  16% {
+  9% {
     transform: translate(0, 0) scale(1);
     opacity: 1;
   }
-  72% {
+  32% {
     transform: translate(var(--hint-dx, 0), var(--hint-dy, 0)) scale(1);
     opacity: 1;
   }
+  42%,
   100% {
     transform: translate(var(--hint-dx, 0), var(--hint-dy, 0)) scale(0.7);
     opacity: 0;

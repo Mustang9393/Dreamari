@@ -873,7 +873,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
           </motion.button>
         ))}
       </div>
-      <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag into the blank" onDismiss={dismissHint} hintSize={22} hintDistance={28} />
+      <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag into the blank" hintSize={22} hintDistance={28} />
     </div>
   );
 }
@@ -1612,7 +1612,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
       >
         Submit rank
       </button>
-      <GestureSpotlight active={hintOn && !locked} targetRef={firstRowRef} direction="up" label="Press & drag to reorder" onDismiss={dismissHint} hintSize={22} hintDistance={28} />
+      <GestureSpotlight active={hintOn && !locked} targetRef={firstRowRef} direction="up" label="Press & drag to reorder" hintSize={22} hintDistance={28} />
     </div>
   );
 }

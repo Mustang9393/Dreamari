@@ -43,19 +43,24 @@ export function GestureSpotlight({
   targetRef,
   direction,
   label,
-  onDismiss,
   hintSize = 34,
   hintDistance = 56,
+  remeasureKey,
 }: {
   active: boolean;
   targetRef: RefObject<HTMLElement | null>;
   direction: "left" | "right" | "up";
   label: string;
-  onDismiss: () => void;
   /** Size/travel of the animated dot. Defaults suit a full card; pass
       smaller values for a compact target like a list row or a pill. */
   hintSize?: number;
   hintDistance?: number;
+  /** Forces a fresh getBoundingClientRect() when the SAME target ref now
+      points at a different real element (e.g. a new card became "top") --
+      the ref object itself never changes identity, so without this the
+      measurement effect would never re-run and the cutout would stay
+      locked to wherever the first element used to be. */
+  remeasureKey?: string | number;
 }) {
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -76,20 +81,21 @@ export function GestureSpotlight({
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [active, targetRef]);
+  }, [active, targetRef, remeasureKey]);
 
   if (!active || !rect) return null;
 
   const pad = 10;
 
   return (
-    <div
-      className="fixed inset-0 z-[200] cursor-pointer motion-safe:animate-[fade-slide-up_0.28s_ease]"
-      onPointerDown={onDismiss}
-      role="button"
-      tabIndex={-1}
-      aria-label="Dismiss gesture hint"
-    >
+    // pointer-events: none on the whole thing -- purely visual. An earlier
+    // version put onPointerDown on this full-screen div to dismiss on tap,
+    // which meant it silently ATE the very gesture it was teaching: a real
+    // swipe or scroll starting anywhere on screen (including right over the
+    // spotlighted card) hit this overlay first and never reached the real
+    // element underneath. Dismissal is entirely the caller's job -- flip
+    // `active` to false from real gesture handlers.
+    <div className="pointer-events-none fixed inset-0 z-[200] motion-safe:animate-[fade-slide-up_0.28s_ease]" aria-hidden>
       {/* One rounded box-shadow spread, not a full-screen scrim + a
          separate hole -- cheaper, and the cutout tracks any border-radius
          for free. */}
