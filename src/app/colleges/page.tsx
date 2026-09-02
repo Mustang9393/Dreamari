@@ -79,7 +79,7 @@ export default async function CollegesPage({ searchParams }: { searchParams: Pro
             ))}
           </div>
 
-          <Link href="/profile" className="rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--border)" }}>
+          <Link href="/profile" className="dm-quiet rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[14px] font-semibold" style={{ borderColor: "var(--border)" }}>
             Back to My Profile
           </Link>
         </main>

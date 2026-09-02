@@ -8,7 +8,7 @@ import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Hea
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
-import { WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "./data";
@@ -326,7 +326,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
-              <h1 className="w-full text-[36px] leading-[40px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(48px,3.6vw,60px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
+              {/* The career's own poster face (the browse card's approved per-world
+                 font), not the display face: the title should look like the card
+                 the student tapped to get here. */}
+              <h1 className="w-full text-[36px] leading-[40px] uppercase sm:text-[clamp(48px,3.6vw,60px)] sm:leading-[1]" style={{ ...posterTitleFont(career.world), textWrap: "balance" }}>
                 {career.title}
               </h1>
               {vm.summary && <p className={`${MEDIUM} max-w-[34ch]`}>{vm.summary}</p>}
