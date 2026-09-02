@@ -80,8 +80,9 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   }
 
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
@@ -244,6 +245,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
 
       <Citation>MIT CAPD Job Search + BLS OEWS</Citation>
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!selected} />
     </div>
   );

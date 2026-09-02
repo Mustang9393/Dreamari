@@ -25,8 +25,9 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
   }
 
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
       <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
 
@@ -140,6 +141,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
       </div>
 
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!touched} />
     </div>
   );

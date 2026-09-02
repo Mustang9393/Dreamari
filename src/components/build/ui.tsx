@@ -332,15 +332,20 @@ export function StepFooter({
   return (
     // Sticky to the step column's scroll container: on phones where a stage
     // scrolls, Next/Previous stay on screen instead of hiding below the fold.
-    // mt-auto (not a fixed mt-3): the step wrapper is now a full-height flex
-    // column, so this pushes the footer flush to its true bottom whenever
-    // the question content is shorter than the viewport -- previously the
-    // whole block (question + footer together) was centered as one unit one
-    // level up, which left a gap between the footer and the real screen
-    // edge (and the ::before scrim behind it) on any short step or tall
-    // screen. mt-auto + sticky both apply cleanly: auto margin sets the
-    // resting position, sticky keeps it pinned during scroll on tall steps.
-    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-auto flex w-full items-center justify-between gap-3 pt-2 pb-1">
+    // No mt-auto here (there was one; removed): a flex item's auto margin
+    // consumes ALL free space on that line, which per spec suppresses
+    // justify-content for the WHOLE flex line, not just this item -- so
+    // while it did pin the footer to the bottom, it silently broke the
+    // question content's own centering above it (confirmed live: on a short
+    // step, "flex-1 flex-col justify-center" was measuring as fully
+    // correct via getComputedStyle, yet the content still rendered pinned
+    // to the top -- because the parent's justify-content had no effect at
+    // all once this auto margin existed anywhere on that line). Fixed
+    // structurally instead: each step now wraps its own centered content in
+    // a dedicated flex-1 block, with this footer as a plain sibling after
+    // it and CardHud as a plain sibling before it -- no auto margins
+    // anywhere, so justify-content on the middle block actually applies.
+    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
           Previous

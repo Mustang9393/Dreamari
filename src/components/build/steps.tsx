@@ -60,8 +60,9 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
 
 export function InterestsStep({ state, patch, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
@@ -104,6 +105,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
         />
         <Citation>Harvard FAS Mignone + O*NET Interest Profiler</Citation>
       </GlassCard>
+      </div>
       <StepFooter onNext={onNext} nextDisabled={state.interests.length === 0} />
     </div>
   );
@@ -111,8 +113,9 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
 
 export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
@@ -125,6 +128,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
           onPick={react}
         />
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.subjects.length === 0} />
     </div>
   );
@@ -193,8 +197,9 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
 
 export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
@@ -222,6 +227,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
         </div>
         <Citation>MIT CAPD Self Assessment + O*NET Work Styles</Citation>
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.energy || !state.teamStyle} />
     </div>
   );
@@ -230,8 +236,9 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
 export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   const confirming = useConfirmGlow(!!state.education);
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
         <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
         {/* one horizontal line, per feedback — a different rhythm from the
@@ -266,6 +273,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
           })}
         </div>
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.education} />
     </div>
   );
@@ -326,8 +334,9 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
 export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
   const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
+      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
@@ -382,6 +391,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
           />
         </div>
       </GlassCard>
+      </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
