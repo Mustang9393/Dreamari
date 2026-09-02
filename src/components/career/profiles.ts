@@ -106,6 +106,10 @@ export const CAREER_PROFILES: Record<string, CareerProfile> = {
   },
 };
 
+import { GENERATED_PROFILES } from "./profiles.generated";
+
 export function careerProfile(slug: string): CareerProfile | undefined {
-  return CAREER_PROFILES[slug];
+  // Hand-transcribed production data wins; the generated blueprint fills
+  // every other catalog career.
+  return CAREER_PROFILES[slug] ?? GENERATED_PROFILES[slug];
 }

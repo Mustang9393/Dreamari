@@ -487,7 +487,7 @@ export function MatchLab() {
               aria-label="Rank and edit your picks"
               onClick={() => setManageOpen(true)}
               disabled={liked.length === 0}
-              className="flex h-9 w-9 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-35"
+              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border disabled:opacity-35"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-muted-foreground)" }}
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -638,7 +638,7 @@ export function MatchLab() {
                   key={c.id}
                   type="button"
                   onClick={() => commitSwap(i)}
-                  className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 text-left transition-all hover:-translate-y-px"
+                  className="dm-tap flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 text-left"
                   style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -859,7 +859,7 @@ function ActionButton({ label, color, size, onClick, disabled, children }: { lab
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center justify-center rounded-full border backdrop-blur transition-all duration-200 hover:scale-110 disabled:opacity-35 disabled:hover:scale-100"
+      className="dm-tap flex items-center justify-center rounded-full border backdrop-blur disabled:opacity-35 disabled:hover:scale-100"
       style={{
         width: size,
         height: size,

@@ -309,11 +309,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            imagine it, and the actions all sit inside the card, on the frosted
            lower half. */}
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
-          <div className="absolute inset-0" aria-hidden>
-            <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 20%" }} />
-            <Image src={career.photo} alt="" fill sizes="1040px" className="hidden object-cover md:block" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "72% 30%" }} />
-            <CardProgressiveBlur size="72%" />
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.74) 36%, rgba(12,16,35,0.3) 64%, transparent 100%), ${cardTopScrim()}` }} />
+          {/* Faces stay in frame (direct feedback): the poster photos carry the
+             subject in their upper part, so the crop anchors near the top. On
+             phones the photo runs behind the whole card; from md up it sits on
+             the right half at its natural framing and fades into the card's
+             dark base toward the text, so nothing is cropped to fit a wide
+             band. */}
+          <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
+            <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
+            <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
+              <Image src={career.photo} alt="" fill sizes="520px" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.6) 30%, transparent 70%)" }} />
+            </span>
+            <CardProgressiveBlur size="60%" />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.7) 34%, rgba(12,16,35,0.22) 62%, transparent 100%), ${cardTopScrim()}` }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
@@ -371,11 +380,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 style={{ borderColor: "var(--glass-border)" }}
               >
                 <span className={LABEL}>{fact.label}</span>
-                {/pay/i.test(fact.label) && /\d/.test(fact.value) ? (
-                  <Figure accent={accent}>{fact.value}</Figure>
-                ) : (
-                  <span className={`${SMALL} font-medium`} style={{ ...DISPLAY, color: "var(--muted-foreground)" }}>{fact.value}</span>
-                )}
+                <Figure accent={accent}>{fact.value}</Figure>
               </div>
             ))}
           </section>

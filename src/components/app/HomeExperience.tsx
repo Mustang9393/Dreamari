@@ -318,7 +318,7 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
+              className="dm-quiet h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
               style={{ width: panel === index ? 24 : 7, background: panel === index ? "var(--foreground)" : "var(--muted-foreground)" }}
             />
           ))}

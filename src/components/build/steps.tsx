@@ -162,7 +162,7 @@ function VibeButtonRow({
                 dispatchAuroraPulse("select", e);
                 onChange(option);
               }}
-              className={`relative rounded-[var(--radius-md)] border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+              className={`dm-tap relative rounded-[var(--radius-md)] border px-2 py-2 text-[13px] font-semibold transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
               style={{
                 background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
                 borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
@@ -261,7 +261,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                   react();
                   patch({ education: option.title });
                 }}
-                className={`relative h-full rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+                className={`dm-tap relative h-full rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
                   borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,

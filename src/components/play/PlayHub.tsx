@@ -296,7 +296,7 @@ function RowCard({
   // <Link> overlay, so a pressable side card gets its own absolute overlay
   // button instead (same idiom as the whole-card links across the app).
   return (
-    <article className={className} style={style}>
+    <article className={`dm-tap ${className}`} style={style}>
       {content}
       {!large && candidate.kind === "sim" && onSelect && (
         <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
