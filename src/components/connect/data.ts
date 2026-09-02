@@ -1016,6 +1016,41 @@ export const EVENTS: EventBoard[] = [
       { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
     ],
   },
+  // The two spring partnership boards the Replit prototype carried, which
+  // the CEO of JA Singapore singled out (Slack, Sep 2): a nonprofit plus a
+  // corporate partner, with the Replit's own figures. Morgan Stanley is
+  // already joined; the Junior Achievement board unlocks with its code.
+  {
+    id: "event-do-morgan-stanley-nyc",
+    name: "Dream Opportunity Morgan Stanley NYC",
+    host: "Morgan Stanley",
+    date: "March 12, 2026",
+    location: "Morgan Stanley, New York City",
+    lifecycle: "Active follow-up",
+    closesOn: "September 30, 2026",
+    students: 312,
+    pros: 87,
+    postCount: 203,
+    orgs: ["Dream Opportunity", "Morgan Stanley", "Dreamari"],
+    topics: ["Finance", "Investing", "Networking"],
+    entitled: true,
+  },
+  {
+    id: "event-ja-goldman-sachs-nyc",
+    name: "Junior Achievement Goldman Sachs NYC",
+    host: "Junior Achievement",
+    date: "April 16, 2026",
+    location: "Goldman Sachs, New York City",
+    lifecycle: "Active follow-up",
+    closesOn: "October 15, 2026",
+    students: 236,
+    pros: 52,
+    postCount: 98,
+    orgs: ["Junior Achievement", "Goldman Sachs", "Dreamari"],
+    topics: ["Finance", "Banking", "Networking"],
+    entitled: false,
+    code: "JA-GS-2026",
+  },
   // The three ACTUAL fall events (from Slack, Sep 1): Brooklyn/JPMorgan
   // Chase Oct 23, Dallas/AT&T Oct 29, New Jersey/EY Nov 4. All upcoming --
   // their boards open after each event happens, same lifecycle rule as

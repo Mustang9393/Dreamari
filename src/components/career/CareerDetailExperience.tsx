@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
@@ -333,74 +334,71 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <ArrowLeft className="h-4 w-4" aria-hidden /> Explore
         </button>
 
-        {/* Header card, in the production page's look: the title on a panel in
-           the career's world color inside a dark card, the actions below.
-           Added: the career's own poster photo fills the card's right side on
-           desktop, so the page opens on a person doing the job. */}
+        {/* Header card, in the production page's look: the title on a panel
+           in the career's world color, the poster photo on the card's right,
+           the actions in a strip below. The panel does not stop at a seam:
+           the photo runs the full card behind it, a progressive blur frosts
+           the photo toward the text, and the accent fades over that frosted
+           half, so solid color under the title dissolves into the picture.
+           Below md the same thing happens top to bottom: photo up top, color
+           rising from below the text. */}
         <section className="relative overflow-hidden rounded-[var(--radius-2xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-          <div className="grid md:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="relative h-[210px] w-full md:hidden" aria-hidden>
-              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "top" }} />
-            </div>
-            <div className="flex flex-col">
-              <div
-                className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-6)] sm:p-[var(--space-8)]"
-                style={{ background: `linear-gradient(135deg, ${accent}, color-mix(in srgb, ${accent} 78%, #000))`, color: "#fff" }}
-              >
-                <h1 className="w-full text-[40px] leading-[44px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(56px,4.2vw,72px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
-                  {career.title}
-                </h1>
-                {vm.summary && <p className={`${MEDIUM} max-w-[34ch] pt-[var(--space-2)]`}>{vm.summary}</p>}
-                {vm.scenario && <p className={`${SMALL} max-w-[52ch]`} style={{ color: "rgba(255,255,255,0.86)" }}>{vm.scenario}</p>}
-              </div>
-              <div className="flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-5)] sm:px-[var(--space-8)]">
-                {hasSimulation && (
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/play/${career.slug}`)}
-                    className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full px-[var(--space-5)] text-[15px] font-bold"
-                    style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-                  >
-                    <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
-                  </button>
-                )}
-                {hasGlossaryGame && (
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                    className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[var(--space-5)] text-[15px] font-bold"
-                    style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                  >
-                    <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
-                  </button>
-                )}
-                <div className="ml-auto flex items-center gap-[var(--space-2)]">
-                  <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
-                  <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
-                    <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
-                  </IconButton>
-                  <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
-                    <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
-                  </IconButton>
-                  <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
-                    <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
-                  </IconButton>
-                </div>
-              </div>
-            </div>
-            <div className="relative hidden min-h-[320px] md:order-last md:block" aria-hidden>
-              <Image
-                src={career.photo}
-                alt=""
-                fill
-                sizes="300px"
-                className="object-cover"
-                style={{
-                  objectPosition: HERO_FOCUS[career.slug] ?? "top",
-                  maskImage: "linear-gradient(90deg, transparent 0%, black 22%)",
-                  WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 22%)",
-                }}
+          <div className="relative min-h-[360px] md:min-h-[340px]" style={{ color: "#fff" }}>
+            <div className="absolute inset-0" aria-hidden>
+              {/* phones: subject up top; desktop: subject at the right */}
+              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 18%" }} />
+              <Image src={career.photo} alt="" fill sizes="1040px" className="hidden object-cover md:block" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "78% 28%" }} />
+              <span className="md:hidden"><CardProgressiveBlur direction="up" size="64%" /></span>
+              <span className="hidden md:block"><CardProgressiveBlur direction="left" size="70%" /></span>
+              <span
+                className="absolute inset-0 md:hidden"
+                style={{ background: `linear-gradient(to top, ${accent} 0%, ${accent} 38%, color-mix(in srgb, ${accent} 86%, transparent) 52%, color-mix(in srgb, ${accent} 40%, transparent) 68%, transparent 88%)` }}
               />
+              <span
+                className="absolute inset-0 hidden md:block"
+                style={{ background: `linear-gradient(90deg, ${accent} 0%, ${accent} 36%, color-mix(in srgb, ${accent} 88%, transparent) 50%, color-mix(in srgb, ${accent} 42%, transparent) 66%, transparent 88%)` }}
+              />
+            </div>
+            <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-6)] pt-[176px] sm:p-[var(--space-8)] sm:pt-[176px] md:max-w-[60%] md:pt-[var(--space-8)]">
+              <h1 className="w-full text-[40px] leading-[44px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(56px,4.2vw,72px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
+                {career.title}
+              </h1>
+              {vm.summary && <p className={`${MEDIUM} max-w-[34ch] pt-[var(--space-2)]`}>{vm.summary}</p>}
+              {vm.scenario && <p className={`${SMALL} max-w-[52ch]`} style={{ color: "rgba(255,255,255,0.9)" }}>{vm.scenario}</p>}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-5)] sm:px-[var(--space-8)]">
+            {hasSimulation && (
+              <button
+                type="button"
+                onClick={() => router.push(`/play/${career.slug}`)}
+                className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full px-[var(--space-5)] text-[15px] font-bold"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+              >
+                <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
+              </button>
+            )}
+            {hasGlossaryGame && (
+              <button
+                type="button"
+                onClick={() => router.push(`/play/glossary/${career.slug}`)}
+                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[var(--space-5)] text-[15px] font-bold"
+                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              >
+                <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-[var(--space-2)]">
+              <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
+              <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
+                <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
+              </IconButton>
+              <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
+                <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
+              </IconButton>
+              <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
+                <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
+              </IconButton>
             </div>
           </div>
         </section>
