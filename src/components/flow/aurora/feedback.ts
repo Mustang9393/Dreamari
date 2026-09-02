@@ -26,6 +26,64 @@ export function getAudioContext(): AudioContext | null {
   }
 }
 
+// Runs `play` only once the context is actually running. Scheduling oscillators
+// against a SUSPENDED context's clock (after iOS backgrounds the tab, a phone call,
+// or Safari's own idle suspension) can drop them outright rather than queue them --
+// so if it isn't running yet, wait for resume() to settle first.
+export function whenRunning(ctx: AudioContext, play: (ctx: AudioContext) => void) {
+  if (ctx.state === "running") {
+    play(ctx);
+    return;
+  }
+  ctx
+    .resume()
+    .then(() => play(ctx))
+    .catch(() => {
+      // Autoplay policy refused (no gesture yet) -- nothing to play into.
+    });
+}
+
+// A 40ms silent 8kHz 16-bit mono WAV (684 bytes), generated programmatically
+// (Node Buffer, exact RIFF/fmt/data sizes) rather than hand-written, and
+// inlined so there's no asset to fetch or license. The data chunk is all
+// zeros, which is why the tail of the base64 is a run of "A"s.
+const SILENT_WAV =
+  "data:audio/wav;base64,UklGRqQCAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YYACAAA" +
+  "A".repeat(853);
+
+let primed = false;
+
+// Web Audio on iOS Safari is muted whenever the phone's hardware ringer switch is
+// on -- unlike an <audio>/<video> element, which iOS treats as "media" and plays
+// regardless. The one thing that flips WebKit's audio session for the page over to
+// that media category is a real HTMLMediaElement playing at least once. So, on the
+// first trusted gesture, this plays a one-shot silent clip (one-shot, not looping,
+// so it never holds the session and pauses whatever music the student had on) and
+// creates/resumes the shared AudioContext inside that same gesture, which is also
+// the only moment autoplay policy lets a context start. Desktop is unaffected --
+// the context was already being created in-gesture -- this is for the "works on my
+// laptop, silent on my phone" report. Call once from a long-lived component.
+export function primeAudioOnFirstGesture(): () => void {
+  if (typeof window === "undefined" || primed) return () => {};
+  const unlock = () => {
+    if (primed) return;
+    primed = true;
+    getAudioContext();
+    try {
+      const el = new Audio(SILENT_WAV);
+      el.volume = 0.01;
+      void el.play().catch(() => {});
+    } catch {
+      // No HTMLMediaElement support -- Web Audio alone will have to do.
+    }
+    remove();
+  };
+  const events: (keyof WindowEventMap)[] = ["pointerdown", "touchend", "keydown"];
+  const remove = () => events.forEach((name) => window.removeEventListener(name, unlock, true));
+  events.forEach((name) => window.addEventListener(name, unlock, { capture: true, passive: true }));
+  return remove;
+}
+
 export function tone(ctx: AudioContext, freq: number, startTime: number, duration: number, peakGain: number, type: OscillatorType = "sine") {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -82,10 +140,10 @@ export function playFeedback(kind: AuroraPulseKind) {
   const ctx = getAudioContext();
 
   if (kind === "cta") {
-    if (ctx) playCtaSound(ctx);
+    if (ctx) whenRunning(ctx, playCtaSound);
     vibrate(18);
   } else {
-    if (ctx) playSelectSound(ctx);
+    if (ctx) whenRunning(ctx, playSelectSound);
     vibrate(8);
   }
 }

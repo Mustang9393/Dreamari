@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { HomeButton } from "@/components/flow/HomeButton";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
@@ -57,6 +58,10 @@ export function BuildFlowExperience() {
     const timer = setTimeout(() => router.push("/match-lab"), MATCH_LOADING_MS);
     return () => clearTimeout(timer);
   }, [phase, router]);
+
+  // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
+  // ringer switch until an <audio> element has played; see feedback.ts).
+  useEffect(() => primeAudioOnFirstGesture(), []);
 
   function patch(update: Partial<BuildState>) {
     setState((current) => ({ ...current, ...update }));

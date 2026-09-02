@@ -1,4 +1,4 @@
-import { bellTone, getAudioContext } from "@/components/flow/aurora/feedback";
+import { bellTone, getAudioContext, whenRunning } from "@/components/flow/aurora/feedback";
 
 // Progress "level-up" chime — a warm three-note rising arpeggio. Played when the
 // progress bar grows; distinct from the select tick and CTA ding so filling the bar
@@ -13,8 +13,13 @@ import { bellTone, getAudioContext } from "@/components/flow/aurora/feedback";
 export function playMilestoneChime() {
   const ctx = getAudioContext();
   if (!ctx) return;
-  const now = ctx.currentTime;
-  bellTone(ctx, 523.25, now, 0.24, 0.15);
-  bellTone(ctx, 659.25, now + 0.09, 0.24, 0.15);
-  bellTone(ctx, 783.99, now + 0.18, 0.32, 0.17);
+  // This fires from a setTimeout in an effect, not a gesture -- if the context
+  // was suspended in between (backgrounded tab, iOS idle), schedule only once
+  // it's actually running again rather than against a stopped clock.
+  whenRunning(ctx, (running) => {
+    const now = running.currentTime;
+    bellTone(running, 523.25, now, 0.24, 0.15);
+    bellTone(running, 659.25, now + 0.09, 0.24, 0.15);
+    bellTone(running, 783.99, now + 0.18, 0.32, 0.17);
+  });
 }

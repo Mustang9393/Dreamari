@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { HomeButton } from "@/components/flow/HomeButton";
@@ -80,6 +81,9 @@ export function MatchLab() {
   // student performs any real gesture. It never plays per-card and never
   // comes back after a gesture is done. `demonstrated` is persisted so a
   // returning student who already did it isn't retaught (DEMO flag aside).
+  // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
+  // ringer switch until an <audio> element has played; see feedback.ts).
+  useEffect(() => primeAudioOnFirstGesture(), []);
   const guideProgressKey = "dreamari:hint-progress:match-swipe";
   const [demonstrated, setDemonstrated] = useState<Set<GestureKind>>(() => {
     if (DEMO_ALWAYS_SHOW_GUIDE || typeof window === "undefined") return new Set();
