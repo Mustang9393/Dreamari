@@ -229,7 +229,6 @@ function viewModel(career: ResolvedCareer) {
     whatTheyDo,
     facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER),
     payByState: p?.payByState,
-    typicalPay: p?.facts.find((f) => f.label === "Typical pay")?.value ?? null,
     knowAbout: p?.knowAbout ?? [],
     goodAt: p?.goodAt ?? [],
     software: career.software ?? [],
@@ -242,7 +241,6 @@ function viewModel(career: ResolvedCareer) {
 export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
-  const [payTab, setPayTab] = useState<"best" | "country">("best");
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
   const [saved, setSaved] = useState(false);
@@ -387,45 +385,21 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         )}
 
         {vm.payByState && (
-          <Section
-            title={vm.payByState.title ?? "Pay by state"}
-            action={
-              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                {([["best", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="tab"
-                    aria-selected={payTab === id}
-                    onClick={() => setPayTab(id)}
-                    className="dm-quiet min-h-[32px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[13px] leading-[16px] font-semibold"
-                    style={{ background: payTab === id ? "var(--foreground)" : "transparent", color: payTab === id ? "var(--background)" : "var(--foreground)" }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            }
-          >
-            {payTab === "best" ? (
-              <div className="flex flex-col gap-[var(--space-5)]">
-                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
-                  <div className="flex flex-col gap-[var(--space-3)]">
-                    <h3 className={MEDIUM}>Your states</h3>
-                    <PayRows rows={vm.payByState.yourStates} accent={accent} />
-                  </div>
-                )}
+          <Section title={vm.payByState.title ?? "Pay by state"}>
+            {/* No "Whole country" tab: it only repeated the Typical pay figure
+               already in the facts strip (direct feedback). */}
+            <div className="flex flex-col gap-[var(--space-5)]">
+              {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
                 <div className="flex flex-col gap-[var(--space-3)]">
-                  {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM}>Best states</h3>}
-                  <PayRows rows={vm.payByState.best} accent={accent} />
+                  <h3 className={MEDIUM}>Your states</h3>
+                  <PayRows rows={vm.payByState.yourStates} accent={accent} />
                 </div>
+              )}
+              <div className="flex flex-col gap-[var(--space-3)]">
+                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM}>Best states</h3>}
+                <PayRows rows={vm.payByState.best} accent={accent} />
               </div>
-            ) : (
-              <div className="flex items-baseline gap-[var(--space-4)]">
-                <span className={LABEL}>Typical pay</span>
-                <Figure accent={accent}>{vm.typicalPay}</Figure>
-              </div>
-            )}
+            </div>
           </Section>
         )}
 
