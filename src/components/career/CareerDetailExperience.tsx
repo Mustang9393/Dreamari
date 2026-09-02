@@ -22,10 +22,9 @@ import { careerSlug } from "./slug";
 // What the reader sees first, and only that:
 //   the header card (title, one line on what it is, one line to imagine it),
 //   four quick facts, pay by state as bars, and the career ladder as three
-//   compact rows (title + pay, with a bar showing the pay climb). Everything
-//   below the ladder is folded: each section shows its heading and a one-line
-//   preview of its own first items, and opens on tap. Nothing is hidden, but
-//   nothing is thrown at the reader at once either.
+//   compact rows (title + pay). Everything below the ladder is folded behind
+//   its heading and opens on tap. Nothing is hidden, but nothing is thrown at
+//   the reader at once either.
 //
 // Type scale, five steps, strictly descending down the page and inside every
 // block (a value never outsizes the heading above it; labels never masquerade
@@ -100,11 +99,9 @@ function Section({ title, action, children }: { title: string; action?: React.Re
   );
 }
 
-// Folded section: the heading is the control. Collapsed, it shows one muted
-// line previewing its own first items (the section's real words, truncated),
-// so a reader can skim the whole page from headings and previews alone and
-// open only what they want.
-function Folded({ id, title, preview, open, onToggle, children }: { id: string; title: string; preview: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+// Folded section: the heading is the control. Collapsed, it is the heading
+// alone (direct feedback: no caption under it); open, the content.
+function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <section className="flex w-full flex-col border-t" style={{ borderColor: "var(--glass-border)" }}>
       <button
@@ -114,10 +111,7 @@ function Folded({ id, title, preview, open, onToggle, children }: { id: string; 
         onClick={onToggle}
         className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-md)] px-[8px] py-[var(--space-5)] text-left"
       >
-        <span className="flex min-w-0 flex-col gap-[6px]">
-          <h2 className={BIG} style={DISPLAY}>{title}</h2>
-          {!open && <span className={`${SMALL} truncate`} style={{ color: "var(--muted-foreground)" }}>{preview}</span>}
-        </span>
+        <h2 className={`${BIG} min-w-0`} style={DISPLAY}>{title}</h2>
         <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
       </button>
       <div id={`${id}-panel`} hidden={!open} className="pb-[var(--space-6)]">
@@ -244,8 +238,6 @@ function viewModel(career: ResolvedCareer) {
     sources: p?.sources,
   };
 }
-
-const preview = (items: string[]) => items.join(" · ");
 
 export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
@@ -449,25 +441,25 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Folded from here down. */}
         {vm.whatTheyDo && (
-          <Folded id="what-they-do" title="What they actually do" preview={vm.whatTheyDo} open={openSections.has("what-they-do")} onToggle={() => toggleSection("what-they-do")}>
+          <Folded id="what-they-do" title="What they actually do" open={openSections.has("what-they-do")} onToggle={() => toggleSection("what-they-do")}>
             <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>
           </Folded>
         )}
 
         {vm.knowAbout.length > 0 && (
-          <Folded id="know-about" title="What you need to know about" preview={preview(vm.knowAbout)} open={openSections.has("know-about")} onToggle={() => toggleSection("know-about")}>
+          <Folded id="know-about" title="What you need to know about" open={openSections.has("know-about")} onToggle={() => toggleSection("know-about")}>
             <DotList items={vm.knowAbout} accent={accent} />
           </Folded>
         )}
 
         {vm.goodAt.length > 0 && (
-          <Folded id="good-at" title="What you would need to be good at" preview={preview(vm.goodAt)} open={openSections.has("good-at")} onToggle={() => toggleSection("good-at")}>
+          <Folded id="good-at" title="What you would need to be good at" open={openSections.has("good-at")} onToggle={() => toggleSection("good-at")}>
             <DotList items={vm.goodAt} accent={accent} />
           </Folded>
         )}
 
         {vm.software.length > 0 && (
-          <Folded id="software" title="Software you would use" preview={preview(vm.software)} open={openSections.has("software")} onToggle={() => toggleSection("software")}>
+          <Folded id="software" title="Software you would use" open={openSections.has("software")} onToggle={() => toggleSection("software")}>
             <DotList items={vm.software} accent={accent} />
           </Folded>
         )}
@@ -476,7 +468,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <Folded
             id="education"
             title="Education"
-            preview={preview([...vm.education.studies.map((s) => s.name), ...vm.education.where.map((w) => `${w.count} ${w.credential}`)])}
             open={openSections.has("education")}
             onToggle={() => toggleSection("education")}
           >
