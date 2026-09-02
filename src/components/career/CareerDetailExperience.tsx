@@ -158,7 +158,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
         type="button"
         onClick={hasDetail ? onToggle : undefined}
         aria-expanded={hasDetail ? open : undefined}
-        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} -mx-[8px] grid w-[calc(100%+16px)] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-[var(--radius-md)] px-[8px] py-[var(--space-4)] text-left`}
+        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} grid w-full grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-none px-[var(--space-4)] py-[var(--space-4)] text-left`}
       >
         <span
           className={`${FIGURE} text-center`}
@@ -173,7 +173,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
         </span>
       </button>
       {hasDetail && open && (
-        <div className="flex flex-col gap-[var(--space-3)] pb-[var(--space-5)] pl-[48px]">
+        <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pb-[var(--space-5)] pl-[64px]">
           {rung.description && <p className="max-w-[62ch] text-[16px] leading-[24px]">{rung.description}</p>}
           {(rung.whatYouDo.length > 0 || rung.toGetHere.length > 0) && (
             <dl className="flex flex-col gap-[var(--space-2)]">
@@ -420,7 +420,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.ladder.length > 0 && (
           <Section title="Career ladder">
-            <ol className="flex flex-col rounded-[var(--radius-sm)] border px-[var(--space-4)]" style={INNER}>
+            <ol className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border" style={INNER}>
               {vm.ladder.map((rung) => (
                 <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
               ))}
