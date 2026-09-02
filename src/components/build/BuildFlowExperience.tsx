@@ -31,10 +31,17 @@ const MATCH_ACCENT = "#2f6bf2";
 type Phase = "build" | "loading";
 
 // Figma "Background Space" (dev handoff Step 4): nebula ellipses positioned
-// proportionally, colored by pipeline tokens. Sits UNDER the aurora canvas.
+// proportionally, colored by pipeline tokens. Sits UNDER the aurora canvas --
+// except it didn't: this div had no explicit z-index (auto), and the canvas
+// carries -z-10, so per CSS stacking rules an explicit negative z-index sits
+// BELOW an auto one regardless of DOM/paint order. These static nebulas have
+// been painting on TOP of the entire animated canvas the whole time, washing
+// out the trailing step-glow blobs and the CTA pulse -- both were rendering
+// correctly (verified via direct canvas pixel readback), just underneath this
+// layer. -z-20 actually puts it behind, matching the comment above.
 function BackgroundSpace() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-20 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
       {/* Radial-gradient nebulas, NOT filter:blur() — giant blur() layers blow
          iOS Safari's GPU memory and crash the tab ("a problem repeatedly
          occurred"), which is exactly what happened in prod. Gradients give the

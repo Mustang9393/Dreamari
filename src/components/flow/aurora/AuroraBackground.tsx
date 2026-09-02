@@ -141,40 +141,6 @@ const BLOB_RADIUS_FACTOR = 0.42;
 const BAND_FRACTION = 0.42; // fraction of viewport height the band occupies, at its deepest
 const BAND_EDGE_FADE = 130; // px of soft fade above the band's (undulating) top edge
 
-// Slowly twinkling starfield spanning the full canvas, independent of the bottom band and
-// of click reactions — a constant, gentle "night sky" backdrop.
-const STAR_COUNT = 70;
-
-type Star = {
-  x: number; // 0..1 fraction of canvas
-  y: number; // 0..1
-  radius: number;
-  phase: number;
-  speed: number;
-  baseAlpha: number;
-};
-
-function makeStars(count: number): Star[] {
-  const stars: Star[] = [];
-  for (let i = 0; i < count; i++) {
-    // Deterministic pseudo-random spread (no Math.random dependency on remount timing
-    // mattering) — simple hash off the index is enough for a static star field.
-    const h1 = Math.sin(i * 12.9898) * 43758.5453;
-    const h2 = Math.sin(i * 78.233) * 12543.231;
-    const h3 = Math.sin(i * 37.719) * 91231.876;
-    const frac = (n: number) => n - Math.floor(n);
-    stars.push({
-      x: frac(h1),
-      y: frac(h2),
-      radius: 0.6 + frac(h3) * 1.3,
-      phase: frac(h1 * h2) * Math.PI * 2,
-      speed: 0.25 + frac(h2 * h3) * 0.35,
-      baseAlpha: 0.35 + frac(h3 * h1) * 0.5,
-    });
-  }
-  return stars;
-}
-
 export function AuroraBackground({ accent, visitedAccents, finale = false, lightning = false }: AuroraBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
@@ -186,7 +152,6 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
   const finaleRef = useRef(finale);
   const lightningRef = useRef(lightning);
   const pointerRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
-  const starsRef = useRef<Star[]>(makeStars(STAR_COUNT));
   // Each accumulated step-glow blob is baked once (at max brightness) into its own small
   // offscreen canvas — position never changes, only brightness (the twinkle) does — so every
   // frame just needs a cheap drawImage + globalAlpha per blob instead of re-running a
@@ -242,7 +207,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
         x,
         y: bottomY,
         start: now,
-        duration: isCta ? 1700 : 700,
+        duration: isCta ? 1900 : 700,
         maxRadius: isCta ? Math.hypot(window.innerWidth, window.innerHeight) : 190,
         amplitude: isCta ? 22 : 9,
       });
@@ -254,7 +219,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
           x,
           y: bottomY,
           start: now + 220,
-          duration: 1700,
+          duration: 1900,
           maxRadius: Math.hypot(window.innerWidth, window.innerHeight),
           amplitude: 13,
         });
@@ -370,27 +335,24 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
       // Mirrors --color-aurora-canvas-dark/light in globals.css — kept as literals here
       // rather than a getComputedStyle() read since this runs every animation frame;
       // update both places together if this ever changes.
-      ctx.fillStyle = isDark ? "#070912" : lightWashGradientRef.current ?? "#f3f4f8";
+      //
+      // Dark mode's base fill blends toward the current accent (the same already-smooth
+      // 0.04/frame lerp everything else on this canvas reads from) instead of staying a
+      // fixed navy -- this is the one piece of the canvas painted first, full-bleed, every
+      // frame, so it's the one change guaranteed to be visible regardless of where content
+      // covers the rest of the screen. Light mode keeps the exact Figma wash untouched.
+      if (isDark) {
+        const [cr0, cg0, cb0] = current;
+        const tintMix = 0.14;
+        const bgR = 7 + (cr0 - 7) * tintMix;
+        const bgG = 9 + (cg0 - 9) * tintMix;
+        const bgB = 18 + (cb0 - 18) * tintMix;
+        ctx.fillStyle = `rgb(${bgR | 0}, ${bgG | 0}, ${bgB | 0})`;
+      } else {
+        ctx.fillStyle = lightWashGradientRef.current ?? "#f3f4f8";
+      }
       ctx.fillRect(0, 0, width, height);
 
-      // Constant, slow-twinkling starfield across the whole canvas — independent of clicks
-      // and of the bottom aurora band, just a gentle night-sky backdrop. Dimmed to near-
-      // nothing in light mode, since visible stars don't make sense against a daytime wash.
-      const starAlphaScale = isDark ? 1 : 0.3;
-      if (starAlphaScale > 0.02) {
-        ctx.save();
-        for (const star of starsRef.current) {
-          const twinkle = 0.5 + 0.5 * Math.sin(t * star.speed + star.phase);
-          const alpha = star.baseAlpha * (0.25 + twinkle * 0.75) * starAlphaScale;
-          const sx = star.x * width;
-          const sy = star.y * height;
-          ctx.beginPath();
-          ctx.arc(sx, sy, star.radius, 0, Math.PI * 2);
-          ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${alpha.toFixed(3)})` : `rgba(170, 182, 205, ${alpha.toFixed(3)})`;
-          ctx.fill();
-        }
-        ctx.restore();
-      }
 
       const blobRadius = Math.max(width, height) * BLOB_RADIUS_FACTOR;
       const blobs = blobsRef.current;
@@ -484,7 +446,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             const eased = easeOutCubic(rawProgress);
             const isCta = ripple.kind === "cta";
             const glowRadius = eased * ripple.maxRadius * (isCta ? 1.0 : 0.85);
-            const glowAlphaBase = isCta ? (isDark ? 0.34 : 0.26) : isDark ? 0.13 : 0.1;
+            const glowAlphaBase = isCta ? (isDark ? 0.22 : 0.16) : isDark ? 0.13 : 0.1;
             // A wavefront reads as "traveling" only if it's still bright once it's big
             // enough to see -- fading from the very first frame (old: alphaBase*(1-eased))
             // meant it was brightest as a single pixel at the click origin and nearly gone
@@ -503,6 +465,38 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             gradient.addColorStop(1, isDark ? `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, 0)` : "rgba(255, 255, 255, 0)");
             rippleCtx.fillStyle = gradient;
             rippleCtx.fillRect(0, 0, width, height);
+
+            // The fill alone is the same hue as everything else already on screen (the
+            // ambient accent wash, the blobs) -- "brighter of the same color" reads as
+            // almost nothing against a backdrop that's already that color. A faint
+            // near-white edge traced at the wavefront reads as an actual moving front
+            // regardless of what accent is active. Traced as a wobbly path (two sine
+            // terms perturbing the radius per angle, seeded off the ripple's own start
+            // time so consecutive pulses don't wobble in lockstep) rather than a perfect
+            // ctx.arc() circle -- a geometrically perfect ring reads as synthetic against
+            // everything else on this canvas, which is deliberately organic (the dot
+            // band's own top edge uses the same two-sine-wave technique). CTA-only: the
+            // smaller select pulse stays a plain glow.
+            if (isCta && glowRadius > 4) {
+              const ringAlpha = glowAlpha * (isDark ? 0.28 : 0.2);
+              if (ringAlpha > 0.01) {
+                const seed = ripple.start * 0.001;
+                rippleCtx.beginPath();
+                const steps = 48;
+                for (let s = 0; s <= steps; s++) {
+                  const angle = Math.PI + (s / steps) * Math.PI;
+                  const wobble = Math.sin(angle * 5 + now * 0.0016 + seed) * glowRadius * 0.02 + Math.sin(angle * 2.3 - now * 0.001 + seed * 1.7) * glowRadius * 0.035;
+                  const r = glowRadius + wobble;
+                  const px = ripple.x + Math.cos(angle) * r;
+                  const py = ripple.y + Math.sin(angle) * r;
+                  if (s === 0) rippleCtx.moveTo(px, py);
+                  else rippleCtx.lineTo(px, py);
+                }
+                rippleCtx.lineWidth = 2;
+                rippleCtx.strokeStyle = isDark ? `rgba(255, 255, 255, ${ringAlpha.toFixed(3)})` : `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${ringAlpha.toFixed(3)})`;
+                rippleCtx.stroke();
+              }
+            }
           }
           rippleCtx.restore();
 
@@ -529,6 +523,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
           ctx.restore();
         }
       }
+
 
       // Idle state stays subtle — brightness is mostly earned by an actual interaction (a
       // ripple) or by sitting inside one of the accumulated color washes. Light mode still

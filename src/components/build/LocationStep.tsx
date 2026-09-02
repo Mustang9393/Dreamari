@@ -117,8 +117,12 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
           // per-step trailing glow (see BuildFlowExperience.tsx), that
           // backdrop shifts hue as the student progresses. A solid map
           // surface keeps state edges reading the same regardless of what's
-          // happening behind the card.
-          style={{ background: "color-mix(in srgb, var(--color-night-card) 96%, var(--color-glass-surface-raised))", borderColor: GLASS_PANEL_BORDER }}
+          // happening behind the card. Lightened well past night-card itself
+          // (was 96% night-card, near-black) -- now that the aurora canvas is
+          // correctly layered (its own z-index fix), the page behind this
+          // card is visibly darker/moodier than before, and a near-black map
+          // on a near-black page read as one indistinct mass with no edge.
+          style={{ background: "color-mix(in srgb, var(--color-night-card) 78%, var(--color-night-foreground) 22%)", borderColor: GLASS_PANEL_BORDER }}
         >
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">United States</span>
