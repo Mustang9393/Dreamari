@@ -414,7 +414,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             >
               {item.label}
               {pings[item.id] && (
-                <span className="filters-reveal absolute -top-[7px] right-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--accent-subtle)", color: "var(--primary-foreground)" }}>Updated</span>
+                <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                  <span
+                    className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[profile-tab-ping-shimmer_2.4s_ease-in-out_1]"
+                    style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.85) 45%, transparent 90%)" }}
+                  />
+                </span>
               )}
             </button>
           ))}

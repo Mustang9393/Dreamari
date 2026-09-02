@@ -256,17 +256,30 @@ body {
   initial-value: #1f5ff0;
 }
 
-/* ── Match Experience: swipe-gesture tutorial hint ── */
-@keyframes swipe-hint-drift {
-  0%,
+/* ── Gesture hint: an animated "touch point" teaching a swipe/drag
+   direction in place of a text instruction. One keyframe, parameterized by
+   --hint-dx/--hint-dy (set inline per direction) rather than one keyframe
+   per direction. The dot itself scales/fades in, travels the gesture's
+   path, then fades/scales out; the trail (a blurred, delayed echo of the
+   same element) is a separate absolutely-positioned copy so it can lag
+   behind on its own animation-delay, reading as motion rather than a
+   dot just teleporting. */
+@keyframes gesture-hint-move {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  16% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  72% {
+    transform: translate(var(--hint-dx, 0), var(--hint-dy, 0)) scale(1);
+    opacity: 1;
+  }
   100% {
-    transform: translateX(0);
-  }
-  30% {
-    transform: translateX(-34px) rotate(-6deg);
-  }
-  70% {
-    transform: translateX(34px) rotate(6deg);
+    transform: translate(var(--hint-dx, 0), var(--hint-dy, 0)) scale(0.7);
+    opacity: 0;
   }
 }
 
@@ -479,6 +492,49 @@ body {
    the screen just cutting away. Two pieces: confirm-lift on the option itself (a small
    scale/rise, settling back before the transition), confirm-shimmer-sweep on a masked
    overlay band that crosses it once. */
+/* Profile tab "content changed" cue: three quiet passes of a light sweep
+   across the tab pill, in place of an "Updated" text badge. Baked as three
+   distinct passes in one timeline (not animation-iteration-count: 3) so
+   each pass can have its own gap/peak -- reads as organic drift rather
+   than a metronome. Matches the 2.6s window ProfileExperience clears
+   `pings` on, so it finishes right as the cue itself disappears. */
+@keyframes profile-tab-ping-shimmer {
+  0% {
+    transform: translateX(-120%) skewX(-14deg);
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.5;
+  }
+  14% {
+    transform: translateX(120%) skewX(-14deg);
+    opacity: 0;
+  }
+  40% {
+    transform: translateX(-120%) skewX(-14deg);
+    opacity: 0;
+  }
+  46% {
+    opacity: 0.42;
+  }
+  54% {
+    transform: translateX(120%) skewX(-14deg);
+    opacity: 0;
+  }
+  78% {
+    transform: translateX(-120%) skewX(-14deg);
+    opacity: 0;
+  }
+  84% {
+    opacity: 0.36;
+  }
+  92%,
+  100% {
+    transform: translateX(120%) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
 @keyframes confirm-lift {
   0% {
     transform: translateY(0) scale(1);
