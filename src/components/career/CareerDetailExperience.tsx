@@ -50,7 +50,6 @@ const TINY = "text-[14px] leading-[20px]";
 // The frosted panel every info box on this page sits in (direct feedback:
 // more contrast, frostier): a stronger glass fill, a real backdrop blur and a
 // brighter hairline than the page's default glass-surface-1.
-const INNER = { background: "var(--glass-surface-1)", borderColor: "rgba(255,255,255,0.12)" } as const;
 const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
@@ -158,7 +157,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
         type="button"
         onClick={hasDetail ? onToggle : undefined}
         aria-expanded={hasDetail ? open : undefined}
-        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} grid w-full grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-none px-[var(--space-4)] py-[var(--space-4)] text-left`}
+        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} -mx-[8px] grid w-[calc(100%+16px)] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-4)] text-left`}
       >
         <span
           className={`${FIGURE} text-center`}
@@ -173,7 +172,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
         </span>
       </button>
       {hasDetail && open && (
-        <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] pb-[var(--space-5)] pl-[64px]">
+        <div className="flex flex-col gap-[var(--space-3)] pb-[var(--space-5)] pl-[48px]">
           {rung.description && <p className="max-w-[62ch] text-[16px] leading-[24px]">{rung.description}</p>}
           {(rung.whatYouDo.length > 0 || rung.toGetHere.length > 0) && (
             <dl className="flex flex-col gap-[var(--space-2)]">
@@ -203,11 +202,11 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
 
 function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
   return (
-    <ul className="grid gap-[8px] sm:grid-cols-3">
+    <ul className="flex flex-col">
       {rows.map((row) => {
         const isFigure = /\d/.test(row.pay);
         return (
-          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={INNER}>
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
             <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
             {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
           </li>
@@ -420,7 +419,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.ladder.length > 0 && (
           <Section title="Career ladder">
-            <ol className="flex flex-col overflow-hidden rounded-[var(--radius-sm)] border" style={INNER}>
+            <ol className="flex flex-col">
               {vm.ladder.map((rung) => (
                 <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
               ))}
