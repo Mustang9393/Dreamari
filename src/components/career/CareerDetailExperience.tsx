@@ -77,7 +77,11 @@ function Figure({ children, accent }: { children: React.ReactNode; accent: strin
   return (
     <span
       className={`${SMALL} font-bold tabular-nums`}
-      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, #ffffff 0%, color-mix(in srgb, ${accent} 55%, #ffffff) 50%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      // Two colored stops, no white start: a white-to-accent ramp stretched
+      // across the element made short figures read white and long ones read
+      // colored (direct feedback). Now every figure carries the same amount
+      // of color whatever its length.
+      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
     >
       {children}
     </span>
