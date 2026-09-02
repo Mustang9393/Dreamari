@@ -316,7 +316,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                 type="button"
                 aria-label="Saved Careers"
                 onClick={() => setTab("locker")}
-                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-bold"
+                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                 style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
                 <Archive className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved Careers</span>
@@ -327,7 +327,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   aria-label="Settings menu"
                   aria-expanded={settingsMenuOpen}
                   onClick={() => setSettingsMenuOpen((open) => !open)}
-                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-bold"
+                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ background: tab === "settings" || settingsMenuOpen ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" || settingsMenuOpen ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
                   <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
@@ -854,11 +854,11 @@ function Top3Tab({
                   <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
                 {isFocus ? (
-                  <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-full px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                  <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
                     <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-full border px-[12px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
                 )}
               </div>
 
@@ -1069,9 +1069,9 @@ function EvidenceSheet({
           <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
-      <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
+      <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
         {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-full px-[14px] text-[14px] font-bold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {label}
           </button>
         ))}
@@ -1540,7 +1540,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                       className="min-w-0 flex-1 bg-transparent text-[15px] font-bold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
                       style={{ color: "var(--foreground)" }}
                     />
-                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[4px] text-[15px] font-bold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
+                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-md)] border px-[12px] py-[4px] text-[15px] font-semibold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
                       Add
                     </button>
                   </form>
@@ -1996,7 +1996,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
               type="button"
               aria-pressed={sections[section.key]}
               onClick={() => toggle(section.key)}
-              className="cursor-pointer rounded-full border px-[12px] py-[4px] text-[15px] font-bold"
+              className="cursor-pointer rounded-[var(--radius-md)] border px-[12px] py-[4px] text-[15px] font-semibold"
               style={{
                 background: sections[section.key] ? "color-mix(in srgb, var(--primary) 24%, transparent)" : "transparent",
                 borderColor: sections[section.key] ? "var(--primary)" : "var(--glass-border)",

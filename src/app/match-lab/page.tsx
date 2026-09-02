@@ -1,4 +1,6 @@
 import { MatchLab } from "@/components/match-lab/MatchLab";
+import "@/components/marketing/tokens.css";
+import "@/components/app/app.css";
 
 // v3 PROTOTYPE ONLY — the match-flow lab. This route exists so the match
 // experience can be iterated in isolation instead of walking all eight build

@@ -274,7 +274,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
           playSelect();
           onNext();
         }}
-        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         {beat.cta}
@@ -483,7 +483,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
             </p>
           )}
           {!solved && (
-            <button type="button" onClick={submitTyped} className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-full px-[18px] py-[13px] text-[16px] font-extrabold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            <button type="button" onClick={submitTyped} className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               Check
             </button>
           )}
@@ -572,7 +572,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
           <button
             type="button"
             onClick={() => { playSelect(); onNext(); }}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             {beat.cta}
@@ -647,7 +647,7 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
         <button
           type="button"
           onClick={() => { playSelect(); onNext(); }}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {beat.cta}
@@ -748,7 +748,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
         <button
           type="button"
           onClick={() => { playSelect(); onNext(); }}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {beat.cta}
@@ -859,7 +859,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
               const pointer = event as PointerEvent;
               dropTile(choice, pointer.clientX, pointer.clientY);
             }}
-            className="relative cursor-grab touch-none rounded-full border px-[18px] py-[15px] text-[16px] font-bold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
+            className="relative cursor-grab touch-none rounded-[var(--radius-md)] border px-[18px] py-[15px] text-[15px] font-semibold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
             style={{
               animationDelay: `${index * 55}ms`,
               background:
@@ -1390,7 +1390,7 @@ export function SliderBody({ beat, onResolve }: { beat: SliderBeat; onResolve: R
           tierSound(step.tier);
           onResolve(step.tier, step.why);
         }}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:opacity-50"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:opacity-50"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit
@@ -1466,7 +1466,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
       <button
         type="button"
         onClick={() => submit(marked)}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit findings
@@ -1616,7 +1616,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
           else if (close) onResolve("acceptable", beat.whenClose ?? beat.whenWrong);
           else onResolve("wrong", beat.whenWrong);
         }}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:opacity-50"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:opacity-50"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit rank
@@ -1704,7 +1704,7 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
         type="button"
         disabled={!full}
         onClick={() => submit(chosen)}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit

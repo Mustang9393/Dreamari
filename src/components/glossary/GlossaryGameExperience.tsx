@@ -11,13 +11,10 @@ import {
   Check,
   CircleDollarSign,
   Flame,
-  Home,
   Paintbrush,
   Sparkles,
   UserRound,
   Trophy,
-  Moon,
-  Sun,
   Volume2,
   VolumeX,
   X,
@@ -25,6 +22,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { QuickLinksMenu } from "@/components/app/chrome";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
@@ -175,36 +173,17 @@ function MuteToggle() {
   );
 }
 
-// Same global light/dark switch already on every other app screen
-// (app/chrome.tsx's QuickLinksMenu) -- this game's TopBar has no chrome menu
-// to carry it, so it gets its own button here, same hook, same persistence.
-function ThemeToggle() {
-  const { theme, toggle } = useGlobalTheme();
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      {theme === "dark" ? <Sun className="h-[17px] w-[17px]" aria-hidden /> : <Moon className="h-[17px] w-[17px]" aria-hidden />}
-    </button>
-  );
-}
-
-function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
+function TopBar({ onBack }: { onBack: () => void }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
+      {/* Mute stays (it is this game's own control); everything else is the
+         app's one hamburger, same as every screen. */}
       <div className="flex items-center gap-[var(--space-2)]">
-        <ThemeToggle />
         <MuteToggle />
-        <button type="button" onClick={onHome} aria-label="Exit to career page" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-          <Home className="h-4 w-4" aria-hidden />
-        </button>
+        <QuickLinksMenu />
       </div>
     </header>
   );
@@ -681,7 +660,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
               type="button"
               disabled={checked !== null}
               onClick={() => setValue(word)}
-              className="dm-tap rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               style={{ borderColor: value === word ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)", background: value === word ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "transparent" }}
             >
               {word}
@@ -917,7 +896,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
                 key={item.text}
                 type="button"
                 onClick={() => setPicked(item.text)}
-                className="dm-tap rounded-full border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
+                className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
                 {item.text}
@@ -1494,7 +1473,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         fontFamily: "var(--font-body)",
       }}
     >
-      <TopBar onBack={() => router.back()} onHome={exitToCareer} />
+      <TopBar onBack={() => router.back()} />
 
       {screen === "question" && (
         <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">

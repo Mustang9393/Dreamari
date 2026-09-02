@@ -645,7 +645,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
             </legend>
             <div className="mt-[14px] flex flex-wrap gap-[10px]">
               {INTEREST_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-full border px-[14px] py-[7px] text-[13px] leading-[17px] font-bold" style={pill(interest === option)}>
+                <button key={option} type="button" aria-pressed={interest === option} onClick={() => setInterestEdited(interest === option ? null : option)} className="dm-tap cursor-pointer rounded-[var(--radius-md)] border px-[14px] py-[7px] text-[13px] leading-[17px] font-semibold" style={pill(interest === option)}>
                   {option}
                 </button>
               ))}
@@ -658,7 +658,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
             </legend>
             <div className="mt-[14px] flex flex-wrap gap-[10px]">
               {INFLUENCE_OPTIONS.map((option) => (
-                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-full border px-[14px] py-[7px] text-[13px] leading-[17px] font-bold" style={pill(influences.includes(option))}>
+                <button key={option} type="button" aria-pressed={influences.includes(option)} onClick={() => toggleInfluence(option)} className="dm-tap cursor-pointer rounded-[var(--radius-md)] border px-[14px] py-[7px] text-[13px] leading-[17px] font-semibold" style={pill(influences.includes(option))}>
                   {option}
                 </button>
               ))}

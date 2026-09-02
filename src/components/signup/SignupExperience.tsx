@@ -338,7 +338,7 @@ export function SignupExperience() {
           <button
             type="button"
             onClick={goBack}
-            className="dm-quiet flex items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[13px] font-semibold"
+            className="dm-quiet flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-[13px] font-semibold"
             style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back
@@ -500,7 +500,7 @@ export function SignupExperience() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="dm-quiet absolute top-1/2 right-[10px] flex h-[34px] -translate-y-1/2 items-center gap-[5px] rounded-full px-[10px] text-[12px] font-semibold"
+                          className="dm-quiet absolute top-1/2 right-[10px] flex h-[34px] -translate-y-1/2 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12px] font-semibold"
                           style={{ fontFamily: "var(--font-body)", color: "var(--primary)" }}
                         >
                           {showPassword ? <EyeOff className="h-[15px] w-[15px]" aria-hidden /> : <Eye className="h-[15px] w-[15px]" aria-hidden />}

@@ -270,14 +270,14 @@ export function StepFooter({
     <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
-          Previous
+          Back
         </Button>
       ) : (
         // Same box as the real button, just not drawn: keeps the footer's height
         // identical on the first step (it measured 2px shorter with a bare span).
         <span className="invisible" aria-hidden>
           <Button variant="secondary" type="button" tabIndex={-1}>
-            Previous
+            Back
           </Button>
         </span>
       )}

@@ -160,7 +160,7 @@ function InlineAsk({
       <button
         type="button"
         onClick={() => (joined ? setOpen(true) : onRequireJoin?.())}
-        className="dm-tap flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-full border px-[var(--space-4)] text-left"
+        className="dm-tap flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left"
         style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
       >
         <Avatar name="Jordan Rivera" size={30} />
@@ -194,17 +194,17 @@ function InlineAsk({
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
-        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
+        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
           <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
         </button>
-        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Polish
         </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
-        <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
         </button>
-        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-full px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
           Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
         </button>
       </div>
@@ -551,7 +551,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
             <button
               type="button"
               onClick={onOpen}
-              className="dm-solid flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-full px-[16px] text-[13.5px] leading-[18px] font-bold"
+              className="dm-solid flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[14px] leading-[18px] font-semibold"
               style={{ background: `linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 50%, ${accent}))`, color: "#FFFFFF" }}
             >
               Open Community <ArrowRight className="h-[15px] w-[15px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.5} />
@@ -560,7 +560,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
             <button
               type="button"
               onClick={onJoin}
-              className="dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-full border px-[16px] text-[13.5px] leading-[18px] font-bold"
+              className="dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[16px] text-[14px] leading-[18px] font-semibold"
               style={{ borderColor: "rgba(255,255,255,0.45)", color: "#FFFFFF", background: "rgba(12,16,35,0.35)" }}
             >
               Join Community
@@ -1190,7 +1190,7 @@ function TopTabs({ tab, onTab }: { tab: "communities" | "events"; onTab: (tab: "
           role="tab"
           aria-selected={tab === key}
           onClick={() => onTab(key)}
-          className="dm-quiet relative z-10 flex min-h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-full text-[13px] leading-[18px] font-bold transition-colors duration-300"
+          className="dm-quiet relative z-10 flex min-h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[13px] leading-[18px] font-bold transition-colors duration-300"
           style={{ color: tab === key ? "#FFFFFF" : "var(--muted-foreground)" }}
         >
           <Icon className="h-[15px] w-[15px]" aria-hidden />
@@ -1229,7 +1229,7 @@ function ComingSoonCard() {
             type="button"
             onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
             disabled={sent}
-            className={`dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-full border px-[16px] text-[13.5px] leading-[18px] font-bold disabled:cursor-default ${sent ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+            className={`dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[16px] text-[14px] leading-[18px] font-semibold disabled:cursor-default ${sent ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
             style={{ borderColor: sent ? "color-mix(in srgb, var(--world-food-farming-nature) 70%, transparent)" : "rgba(255,255,255,0.45)", color: sent ? "var(--world-food-farming-nature)" : "#FFFFFF", background: "rgba(12,16,35,0.35)" }}
           >
             {sent ? (
@@ -1309,7 +1309,7 @@ function BoardView({
               key={pill.key}
               type="button"
               onClick={pill.onPick}
-              className="dm-quiet min-h-[34px] cursor-pointer rounded-full px-[16px] text-[13px] leading-[18px] font-semibold"
+              className="dm-quiet min-h-[34px] cursor-pointer rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
               style={pill.active ? { background: bannerInk, color: "#16132b" } : { background: `color-mix(in srgb, ${bannerInk} 18%, transparent)`, color: bannerInk }}
             >
               {pill.label}
@@ -1582,7 +1582,7 @@ function ThreadView({
       <button
         type="button"
         onClick={onBack}
-        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-full px-[16px] text-[13px] leading-[18px] font-semibold"
+        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
         style={{ background: `color-mix(in srgb, ${boardAccent} 24%, #f4f1ea)`, color: CARD_INK, fontFamily: "var(--font-display)" }}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
@@ -1718,7 +1718,7 @@ function seededReactions(id: string): number[] {
 function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
   const [mine, setMine] = useState<Record<string, boolean>>({});
   const seeds = seededReactions(id);
-  const chip = "dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[11.5px] leading-[15px] font-semibold transition-transform duration-150 active:scale-90";
+  const chip = "dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[11.5px] leading-[15px] font-semibold transition-transform duration-150 active:scale-90";
   const offStyle = { borderColor: "var(--glass-border)", color: "var(--muted-foreground)", background: "transparent" };
   const onStyle = { borderColor: "color-mix(in srgb, var(--accent-subtle) 55%, transparent)", background: "color-mix(in srgb, var(--accent-subtle) 14%, transparent)", color: "var(--accent-subtle)" };
   return (
@@ -1805,7 +1805,7 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
         </label>
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior</span>
-          <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-full px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
@@ -1851,7 +1851,7 @@ function InsightThreadView({
       <button
         type="button"
         onClick={onBack}
-        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-full px-[16px] text-[13px] leading-[18px] font-semibold"
+        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
         style={{ background: `color-mix(in srgb, ${boardAccent} 24%, #f4f1ea)`, color: CARD_INK, fontFamily: "var(--font-display)" }}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}

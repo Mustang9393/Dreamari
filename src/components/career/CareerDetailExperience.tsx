@@ -349,7 +349,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/play/${career.slug}`)}
-                className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full px-[var(--space-5)] text-[15px] font-bold"
+                className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
                 style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
               >
                 <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
@@ -359,7 +359,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[var(--space-5)] text-[15px] font-bold"
+                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
                 style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
               >
                 <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
@@ -401,7 +401,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <Section
             title="Pay by state"
             action={
-              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 {([["best", "Best states"], ["country", "Whole country"]] as const).map(([id, label]) => (
                   <button
                     key={id}
@@ -409,7 +409,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                     role="tab"
                     aria-selected={payTab === id}
                     onClick={() => setPayTab(id)}
-                    className="dm-quiet min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
+                    className="dm-quiet min-h-[32px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[13px] leading-[16px] font-semibold"
                     style={{ background: payTab === id ? "var(--foreground)" : "transparent", color: payTab === id ? "var(--background)" : "var(--foreground)" }}
                   >
                     {label}

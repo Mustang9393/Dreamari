@@ -216,7 +216,7 @@
   transition: filter 140ms ease, transform 140ms ease;
 }
 .dm-solid:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.05);
   transform: translateY(-1px);
 }
 .dm-solid:active {

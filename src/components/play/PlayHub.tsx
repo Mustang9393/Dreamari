@@ -366,7 +366,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
         {first.expressCut && first.expressCut.length > 0 && (
           <Link
             href={`/play/${sim.id}?mode=express`}
-            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
             style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Zap className="h-[13px] w-[13px]" aria-hidden />
@@ -380,7 +380,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
           <button
             type="button"
             onClick={onTrailer}
-            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
             style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Film className="h-[13px] w-[13px]" aria-hidden />

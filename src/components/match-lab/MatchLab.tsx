@@ -3,16 +3,15 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { GESTURE_HINT_CYCLE_S } from "@/components/flow/GestureHint";
 import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
-import { HomeButton } from "@/components/flow/HomeButton";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { picksParam, writePicks } from "@/lib/picks";
@@ -419,8 +418,7 @@ export function MatchLab() {
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
       <BackgroundSpace />
       <AuroraBackground accent={top?.color?.startsWith("var") ? "#2f6bf2" : "#2f6bf2"} visitedAccents={[]} finale={liked.length >= MAX_SLOTS} lightning={false} />
-      <HomeButton />
-      <ThemeToggle />
+      <FlowChrome />
 
       <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-5 sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
@@ -452,7 +450,7 @@ export function MatchLab() {
                   onKeyDown={(e) => {
                     if ((e.key === "Enter" || e.key === " ") && liked.length > 0) setManageOpen(true);
                   }}
-                  className={`relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-visible rounded-full border px-2.5 text-[11.5px] font-semibold transition-all duration-300 ${c ? "cursor-pointer" : ""}`}
+                  className={`relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-visible rounded-[var(--radius-md)] border px-2.5 text-[11.5px] font-semibold transition-all duration-300 ${c ? "cursor-pointer" : ""}`}
                   style={
                     c
                       ? {
@@ -491,6 +489,14 @@ export function MatchLab() {
               <Pencil className="h-3.5 w-3.5" />
             </button>
           </div>
+
+          {/* Three saved and cards still left: the way forward is always on
+             screen (direct feedback), not only in the once-only sheet. */}
+          {!deckDone && liked.length === MAX_SLOTS && (
+            <Button variant="primary" size="compact" onClick={() => toReport()} type="button" className="mb-3 w-full">
+              Continue with your 3 <ArrowRight className="h-4 w-4" aria-hidden />
+            </Button>
+          )}
 
           {/* ---- deck ---- */}
           <div className="relative min-h-0 w-full flex-1">
@@ -599,12 +605,12 @@ export function MatchLab() {
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>Top 3 Matches Found!</h2>
             <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-              Lock these in and view your personalized Career Report, or keep swiping — new likes will ask to swap in.
+              Lock these in and choose where to start, or keep swiping. New likes will ask to swap in.
             </p>
             <MiniRanking liked={liked} />
             <div className="flex w-full flex-col gap-2.5">
               <Button variant="primary" size="large" onClick={() => toReport()} type="button">
-                Save These 3 & View Career Report
+                Save these 3 & continue
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
@@ -653,9 +659,9 @@ export function MatchLab() {
         <Sheet onClose={() => setManageOpen(false)}>
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Rank your picks</h2>
-            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">#1 is your top choice — it leads your Career Report.</p>
+            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">#1 is your top choice. It leads your Career Report.</p>
             <div className="flex w-full flex-col gap-2">
-              {liked.length === 0 && <p className="py-4 text-[13px] text-[var(--color-night-muted-foreground)]">Nothing saved yet — swipe right on a career you like.</p>}
+              {liked.length === 0 && <p className="py-4 text-[13px] text-[var(--color-night-muted-foreground)]">Nothing saved yet. Swipe right on a career you like.</p>}
               {liked.map((c, i) => (
                 <div
                   key={c.id}
@@ -681,7 +687,7 @@ export function MatchLab() {
             <div className="flex w-full flex-col gap-2.5">
               {liked.length > 0 && (
                 <Button variant="primary" onClick={() => toReport()} type="button">
-                  {liked.length === MAX_SLOTS ? "Lock In & View Career Report" : `Continue with ${liked.length}`}
+                  {liked.length === MAX_SLOTS ? "Lock in & continue" : `Continue with ${liked.length}`}
                 </Button>
               )}
               <Button variant="secondary" onClick={() => setManageOpen(false)} type="button">
@@ -969,7 +975,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       </h2>
       <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
-          ? "Lock them in to build your personalized Career Report."
+          ? "Lock them in and choose where to start."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
             : "Knowing what's NOT for you is real progress. Wander through Explore — hundreds of paths, no pressure — and come back when one sparks."}
@@ -978,7 +984,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">
         {likedCount > 0 ? (
           <Button variant="primary" size="large" onClick={onReport} type="button">
-            {likedCount === MAX_SLOTS ? "View Career Report" : `Continue with ${likedCount}`}
+            {likedCount === MAX_SLOTS ? "Continue with your 3" : `Continue with ${likedCount}`}
           </Button>
         ) : (
           <Button variant="primary" size="large" onClick={onExplore} type="button">

@@ -1270,7 +1270,7 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
         <button
           type="button"
           onClick={onNext}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           See the decision
@@ -1822,7 +1822,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
           playSelect();
           setOpen(true);
         }}
-        className="dm-quiet cursor-pointer rounded-full"
+        className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
       >
         <ScoreGauge reputation={reputation} band={band} delta={delta} />
       </button>
@@ -2137,7 +2137,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
                   type="button"
                   onClick={() => setOpenSkill((current) => (current === skill ? null : skill))}
                   aria-expanded={openSkill === skill}
-                  className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold"
+                  className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[10px] py-[4px] text-[11.5px] font-semibold"
                   style={{
                     borderColor: openSkill === skill ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
                     color: openSkill === skill ? "var(--foreground)" : "var(--muted-foreground)",
@@ -2159,7 +2159,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
           type="button"
           onClick={onNext}
           autoFocus
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {cta}
@@ -2221,7 +2221,7 @@ function EndingCard({
         {ending.advances && next ? (
           <Link
             href={`/play/${simulation.id}?level=${next.n}`}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Start Level {next.n} · {next.role}
@@ -2242,7 +2242,7 @@ function EndingCard({
             <button
               type="button"
               onClick={onRepair}
-              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
               style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               <Wrench className="h-[16px] w-[16px]" aria-hidden />
@@ -2254,7 +2254,7 @@ function EndingCard({
             <button
               type="button"
               onClick={onReplay}
-              className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-full border px-[18px] py-[12px] text-[15px] font-bold"
+              className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
               style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
             >
               <RotateCcw className="h-[15px] w-[15px]" aria-hidden />
@@ -2265,7 +2265,7 @@ function EndingCard({
           <button
             type="button"
             onClick={onReplay}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             <RotateCcw className="h-[16px] w-[16px]" aria-hidden />
@@ -2279,7 +2279,7 @@ function EndingCard({
         )}
         <Link
           href="/play"
-          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-full border px-[18px] py-[12px] text-[15px] font-bold"
+          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
           style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
         >
           <X className="h-[15px] w-[15px]" aria-hidden />

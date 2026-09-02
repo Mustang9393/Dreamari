@@ -132,7 +132,7 @@ export function PerformancePlanFlow({
                 playSweep();
                 onPassed();
               }}
-              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
               style={{ background: "#a855f7", color: "#0a0614" }}
             >
               {plan.passedCta}
@@ -149,14 +149,14 @@ export function PerformancePlanFlow({
               <button
                 type="button"
                 onClick={onTerminated}
-                className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+                className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
                 style={{ background: "#e5484d", color: "#1a0508" }}
               >
                 {plan.terminatedRestartCta}
               </button>
               <Link
                 href="/play"
-                className="flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full border px-[18px] py-[13px] text-[16px] font-extrabold"
+                className="flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] border px-[18px] py-[13px] text-[15px] font-semibold"
                 style={{ borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
               >
                 {plan.terminatedLeaveCta}
@@ -190,7 +190,7 @@ function WarningCard({ setup, question, cta, onBegin }: { setup: string; questio
       <button
         type="button"
         onClick={onBegin}
-        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
         style={{ background: "#f97316", color: "#1a0508" }}
       >
         {cta}
@@ -269,7 +269,7 @@ function StepCard({
             <button
               type="button"
               onClick={onContinue}
-              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
               style={{ background: "#e5484d", color: "#1a0508" }}
             >
               Continue
