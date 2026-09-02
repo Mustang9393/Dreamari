@@ -239,7 +239,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
+        <QuestionHeading sprite={sprite} title="How many years of education are you open to after high school?" />
         {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
            direct feedback: a scrolling row of answer options reads as broken,
            not as a deliberate rhythm change). Fits as many of the 5 cards as

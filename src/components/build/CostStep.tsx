@@ -8,7 +8,7 @@ import type { StepProps } from "./steps";
 // <input type=range> drives everything (keyboard + screen-reader + touch for free);
 // the visuals are custom-painted around it: a gradient fill that grows with the
 // value, tick dots that light as the thumb passes them, a glowing thumb, and
-// clickable stop labels that jump the slider. Discrete 6 stops per the reference.
+// clickable stop labels that jump the slider. Discrete stops, one per COST_STOPS entry (7 as of 2026-09-03).
 
 const AMBER = "var(--color-world-business-money-office)";
 
@@ -29,7 +29,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
+      <QuestionHeading sprite={sprite} title="How much would you consider spending on your education after high school?" />
 
       <div
         className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
@@ -78,7 +78,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
             max={COST_STOPS.length - 1}
             step={1}
             value={value}
-            aria-label="What total school or training cost feels realistic?"
+            aria-label="How much would you consider spending on your education after high school?"
             aria-valuetext={COST_STOPS[value]}
             onChange={(e) => setIndex(Number(e.target.value))}
             className="absolute inset-0 w-full cursor-pointer opacity-0"

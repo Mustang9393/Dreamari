@@ -80,11 +80,12 @@ export const EDUCATION_OPTIONS: { title: string }[] = [
 
 // Slider stop labels, in track order. Index -1 = untouched ("Select a range").
 export const COST_STOPS = [
-  "As little as possible",
+  "As low as possible",
   "$25,000 or less",
   "$50,000 or less",
   "$100,000 or less",
   "Over $100,000 for the right path",
+  "Cost is not a major factor for me",
   "I’m not sure yet",
 ];
 
