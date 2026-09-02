@@ -5,8 +5,27 @@ import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
+import { CONFIRM_GLOW_MS, dispatchConfirmPulse, useConfirmGlow } from "./confirmPulse";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+
+export { useConfirmGlow };
+
+// The shimmer half of confirm-glow: a masked light band that sweeps once across
+// whatever it's placed inside (needs position:relative + overflow-hidden on the
+// parent, or this handles the clipping itself via rounded-[inherit]). Pair with
+// motion-safe:animate-[confirm-lift_...] on the element itself for the "lift" half.
+export function ConfirmShimmer({ active }: { active: boolean }) {
+  if (!active) return null;
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      <span
+        className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[confirm-shimmer-sweep_0.42s_ease-out_forwards]"
+        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.6) 45%, transparent 90%)" }}
+      />
+    </span>
+  );
+}
 
 // Shared primitives for the build flow, variant-aware (see variant.tsx): the same
 // step implementations render the "glass" treatment (Figma card structure, glass
@@ -56,23 +75,60 @@ export const GLASS_PANEL_CLASS = "backdrop-blur-md";
 // The in-flow progress bar. It names the CHAPTER, not the step: "BUILD" sits over
 // the bar on every question so the flow reads as one leg of Build → Match → Play,
 // never as "Step x of 8" (counters make it feel long). The old "Phase 1..4" labels
-// meant nothing to a student and are retired. When the percent GROWS, the bar
-// animates its fill, fires a spark fan off the leading edge (Duolingo-style);
-// module-level memory of the last percent survives step remounts so going Previous
-// never re-celebrates.
+// meant nothing to a student and are retired. When the percent GROWS, a comet with a
+// trailing streak rides the leading edge from the old percent to the new one
+// (Duolingo's combo-streak spark, adapted -- we don't have a combo mechanic, so it
+// fires on every advance instead of a streak); module-level memory of the last
+// percent survives step remounts so going Previous never re-celebrates.
 let lastCelebratedPercent = 0;
 
+function CometSpark({ from, to }: { from: number; to: number }) {
+  // Two-phase mount: render at the OLD position with no transition, then on the next
+  // frame move to the new one WITH a transition -- the standard way to animate "from A
+  // to B" with plain CSS when both ends are dynamic (a single style update wouldn't
+  // have anything to transition from).
+  const [pos, setPos] = useState(from);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setPos(to));
+    return () => cancelAnimationFrame(raf);
+  }, [to]);
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute top-1/2 h-3 w-3 motion-safe:animate-[comet-bounce_0.7s_ease-out_forwards]"
+      style={{ left: `${pos}%`, transition: "left 0.7s cubic-bezier(0.22, 1, 0.36, 1)" }}
+    >
+      <span
+        aria-hidden
+        className="absolute top-1/2 right-1/2 h-[3px] w-7 -translate-y-1/2 rounded-full"
+        style={{ background: "linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-world-business-money-office) 80%, white))", filter: "blur(1.5px)" }}
+      />
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: "radial-gradient(circle, white 0%, var(--color-world-business-money-office) 55%, transparent 75%)",
+          boxShadow: "0 0 9px 2px color-mix(in srgb, var(--color-world-business-money-office) 75%, transparent)",
+        }}
+      />
+    </div>
+  );
+}
+
 export function PhaseProgress({ percent, almostDone }: { percent: number; almostDone?: boolean }) {
-  const [sparkNonce, setSparkNonce] = useState(0);
+  const [comet, setComet] = useState<{ from: number; to: number; nonce: number } | null>(null);
   const mounted = useRef(false);
 
   useEffect(() => {
     if (mounted.current) return;
     mounted.current = true;
     if (percent > lastCelebratedPercent) {
+      const from = lastCelebratedPercent;
       lastCelebratedPercent = percent;
-      // Sparks pop as the 700ms fill animation crests — no sound per step.
-      const timer = setTimeout(() => setSparkNonce((n) => n + 1), 620);
+      // Deferred a tick rather than calling setState synchronously in the effect body
+      // (React flags that as a cascading-render risk) -- imperceptible delay, the comet
+      // still rides alongside the bar's own 700ms fill.
+      const timer = setTimeout(() => setComet((c) => ({ from, to: percent, nonce: (c?.nonce ?? 0) + 1 })), 0);
       return () => clearTimeout(timer);
     }
   }, [percent]);
@@ -106,26 +162,8 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
             }}
           />
         </div>
-        {/* Spark fan wrapping the bar's leading edge on growth. */}
-        {sparkNonce > 0 && (
-          <div key={sparkNonce} aria-hidden className="pointer-events-none absolute top-1/2 -translate-y-1/2" style={{ left: `${percent}%` }}>
-            {Array.from({ length: 8 }, (_, i) => {
-              const angle = (i / 8) * Math.PI * 2;
-              return (
-                <span
-                  key={i}
-                  className="absolute h-1 w-1 rounded-full motion-safe:animate-[dreamy-burst_0.6s_ease-out_forwards]"
-                  style={{
-                    background: i % 2 ? "var(--color-accent-purple)" : "var(--color-world-business-money-office)",
-                    ["--bx"]: `${Math.round(Math.cos(angle) * 22)}px`,
-                    ["--by"]: `${Math.round(Math.sin(angle) * 22)}px`,
-                    animationDelay: `${(i % 3) * 0.04}s`,
-                  } as React.CSSProperties}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* Comet riding the bar's leading edge on growth. */}
+        {comet && <CometSpark key={comet.nonce} from={comet.from} to={comet.to} />}
       </div>
     </div>
   );
@@ -263,6 +301,7 @@ export function StepFooter({
   nextDisabled?: boolean;
   nextLabel?: React.ReactNode;
 }) {
+  const [holding, setHolding] = useState(false);
   return (
     // Sticky to the step column's scroll container: on phones where a stage
     // scrolls, Next/Previous stay on screen instead of hiding below the fold.
@@ -286,7 +325,17 @@ export function StepFooter({
         variant="primary"
         onClick={(e) => {
           dispatchAuroraPulse("cta", e);
-          onNext();
+          // Give the selected answer its shimmer-and-lift moment before the step actually
+          // changes, instead of the screen cutting away the instant it's chosen. holding
+          // (not nextDisabled, which would visually greys the button mid-confirm) blocks a
+          // second click from queuing a second delayed advance.
+          if (holding) return;
+          setHolding(true);
+          dispatchConfirmPulse();
+          window.setTimeout(() => {
+            setHolding(false);
+            onNext();
+          }, CONFIRM_GLOW_MS);
         }}
         disabled={nextDisabled}
         type="button"
@@ -340,6 +389,9 @@ export function ChipGrid({
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const atMax = selected.length >= max;
+  // One shared glow window for the whole grid (not per-chip -- hooks can't live inside
+  // .map()) applied to whichever options are currently selected when it fires.
+  const confirming = useConfirmGlow(selected.length > 0);
 
   function toggle(option: string, e: React.MouseEvent) {
     if (selected.includes(option)) {
@@ -361,6 +413,7 @@ export function ChipGrid({
         const isSelected = selected.includes(option);
         const isLocked = atMax && !isSelected;
         const accent = accents?.[option] ?? "var(--color-brand-400)";
+        const glowing = isSelected && confirming;
         return (
           <button
             key={option}
@@ -371,18 +424,20 @@ export function ChipGrid({
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
+            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
               isLocked ? "cursor-not-allowed opacity-40" : "hover:-translate-y-px"
-            }`}
+            } ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-raised))` : "var(--color-glass-surface-raised)",
               borderColor: isSelected ? accent : GLASS_PANEL_BORDER,
               color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
+              boxShadow: glowing ? `0 0 0 1px ${accent}, 0 4px 18px -2px color-mix(in srgb, ${accent} 65%, transparent)` : undefined,
               ...(expandedBy === "tap" && index >= PREVIEW
                 ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
                 : cascade(index)),
             }}
           >
+            <ConfirmShimmer active={glowing} />
             {icons?.[option] ? (
               <span aria-hidden className="flex-none" style={{ color: isSelected ? accent : "var(--color-night-muted-foreground)" }}>
                 {icons[option]}

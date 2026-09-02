@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
@@ -142,12 +142,14 @@ function VibeButtonRow({
   value: string | null;
   onChange: (next: string) => void;
 }) {
+  const confirming = useConfirmGlow(value !== null);
   return (
     <div className={`rounded-2xl border px-4 py-3.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
       <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">{label}</p>
       <div className="mt-2.5 grid grid-cols-3 gap-2">
         {options.map((option) => {
           const isSelected = value === option;
+          const glowing = isSelected && confirming;
           return (
             <button
               key={option}
@@ -157,13 +159,15 @@ function VibeButtonRow({
                 dispatchAuroraPulse("select", e);
                 onChange(option);
               }}
-              className="rounded-xl border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px"
+              className={`relative rounded-xl border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
               style={{
                 background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
                 borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
                 color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
+                boxShadow: glowing ? "0 0 0 1px var(--color-brand-400), 0 4px 18px -2px color-mix(in srgb, var(--color-brand-400) 65%, transparent)" : undefined,
               }}
             >
+              <ConfirmShimmer active={glowing} />
               {option}
             </button>
           );
@@ -224,6 +228,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
 }
 
 export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
+  const confirming = useConfirmGlow(!!state.education);
   return (
     <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
@@ -234,6 +239,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
         <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:auto-rows-fr sm:grid-cols-5 sm:overflow-visible sm:pb-0">
           {EDUCATION_OPTIONS.map((option, optionIndex) => {
             const isSelected = state.education === option.title;
+            const glowing = isSelected && confirming;
             return (
               <button
                 key={option.title}
@@ -244,13 +250,15 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                   react();
                   patch({ education: option.title });
                 }}
-                className="h-full min-w-[168px] flex-none rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px sm:min-w-0"
+                className={`relative h-full min-w-[168px] flex-none rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px sm:min-w-0 ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
                   borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
+                  boxShadow: glowing ? "0 0 0 1px var(--color-brand-400), 0 4px 18px -2px color-mix(in srgb, var(--color-brand-400) 65%, transparent)" : undefined,
                   ...cascade(optionIndex),
                 }}
               >
+                <ConfirmShimmer active={glowing} />
                 {(() => { const Icon = EDUCATION_ICONS[optionIndex]; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
                 <span className="block text-[14px] font-bold text-[var(--color-night-foreground)]">{option.title}</span>
               </button>

@@ -474,6 +474,58 @@ body {
   }
 }
 
+/* Confirm-glow: the selected answer(s) lift and shimmer for a beat right as Next is
+   pressed, before the step actually advances -- a moment of "yes, that one" instead of
+   the screen just cutting away. Two pieces: confirm-lift on the option itself (a small
+   scale/rise, settling back before the transition), confirm-shimmer-sweep on a masked
+   overlay band that crosses it once. */
+@keyframes confirm-lift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  38% {
+    transform: translateY(-3px) scale(1.035);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes confirm-shimmer-sweep {
+  from {
+    transform: translateX(-140%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+/* Progress bar comet: a little vertical swoop layered on top of the `left` CSS
+   transition that carries it horizontally -- baking the -50% centering into every
+   step since it shares the transform property with the bounce itself. */
+@keyframes comet-bounce {
+  0% {
+    transform: translateY(-50%);
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(calc(-50% - 8px));
+    opacity: 1;
+  }
+  62% {
+    transform: translateY(calc(-50% + 3px));
+    opacity: 1;
+  }
+  100% {
+    /* Fades out at rest -- the element itself is never explicitly unmounted after
+       firing (a fresh `key` on the next celebration replaces it, but nothing clears
+       it in between), so without this it would sit as a permanent glowing dot at the
+       bar's tip instead of disappearing once its swoop is done. */
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+}
+
 /* Build-flow phone fades: masked blur instead of painted gradient slabs — the
    flat-color gradient bands read as hard-edged cutouts over the nebula
    background. A mask fades the WHOLE element (tint included) so there is no

@@ -1,7 +1,7 @@
 "use client";
 
 import { COST_STOPS } from "./types";
-import { CardHud, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import type { StepProps } from "./steps";
 
 // Education Cost — the "enhance interactive elements like sliders" showcase. A real
@@ -17,6 +17,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
   const touched = index >= 0;
   const value = touched ? index : 0;
   const fraction = value / (COST_STOPS.length - 1);
+  const glowing = useConfirmGlow(touched);
 
   function setIndex(next: number) {
     if (next !== state.costIndex) react();
@@ -83,12 +84,16 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-[left] duration-200"
+            className={`pointer-events-none absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-[left] duration-200 ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
             style={{
               left: `${fraction * 100}%`,
               background: touched ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 70%, transparent)",
               borderColor: touched ? AMBER : "var(--color-glass-stroke)",
-              boxShadow: touched ? `0 0 0 6px color-mix(in srgb, ${AMBER} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)` : "0 4px 12px rgba(0,0,0,0.4)",
+              boxShadow: glowing
+                ? `0 0 0 9px color-mix(in srgb, ${AMBER} 38%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+                : touched
+                  ? `0 0 0 6px color-mix(in srgb, ${AMBER} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+                  : "0 4px 12px rgba(0,0,0,0.4)",
             }}
           />
         </div>
