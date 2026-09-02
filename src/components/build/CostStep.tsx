@@ -104,13 +104,15 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
            selected words (edges clamp inward to stay inside the card). */}
         <div className="relative h-[38px]">
           {(
+            // two-line breaks of COST_STOPS, in the same order (one entry per stop)
             [
-              ["As little as", "possible"],
+              ["As low as", "possible"],
               ["$25,000", "or less"],
               ["$50,000", "or less"],
               ["$100,000", "or less"],
               ["Over $100,000", "for the right path"],
-              ["I’m not sure yet", ""],
+              ["Cost is not a", "major factor for me"],
+              ["I’m not", "sure yet"],
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;
@@ -122,7 +124,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
                 key={COST_STOPS[i]}
                 type="button"
                 onClick={() => setIndex(i)}
-                className={`absolute top-0 max-w-[92px] text-[11px] leading-tight font-semibold transition-colors sm:text-[11.5px] ${
+                className={`absolute top-0 max-w-[76px] text-[10.5px] leading-tight font-semibold transition-colors sm:max-w-[96px] sm:text-[11.5px] ${
                   isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
                 }`}
                 style={{
