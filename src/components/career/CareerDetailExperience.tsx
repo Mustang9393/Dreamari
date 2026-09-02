@@ -229,7 +229,7 @@ function factKey(label: string): keyof FactDetails | null {
 
 // Small popover under a fact's label: pay bands, or what "openings" counts.
 // Closes on a tap anywhere else or Escape.
-function FactPopover({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function FactPopover({ children, onClose, align = "left" }: { children: React.ReactNode; onClose: () => void; align?: "left" | "right" }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -242,7 +242,7 @@ function FactPopover({ children, onClose }: { children: React.ReactNode; onClose
       <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-[40] cursor-default" />
       <div
         role="dialog"
-        className="absolute top-[calc(100%-8px)] left-[var(--space-4)] z-[50] w-[min(300px,calc(100vw-40px))] rounded-[var(--radius-md)] border p-[var(--space-4)] sm:left-[var(--space-5)]"
+        className={`absolute top-[calc(100%-8px)] z-[50] w-[min(300px,calc(100vw-40px))] rounded-[var(--radius-md)] border p-[var(--space-4)] ${align === "right" ? "right-[var(--space-4)] sm:right-[var(--space-5)]" : "left-[var(--space-4)] sm:left-[var(--space-5)]"}`}
         style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)" }}
       >
         {children}
@@ -487,7 +487,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
-          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={PANEL}>
+          <section aria-label="Quick facts" className={`grid grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}
@@ -512,7 +512,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </span>
                 <Figure accent={accent}>{fact.value}</Figure>
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
-                  <FactPopover onClose={() => setOpenFact(null)}>
+                  <FactPopover onClose={() => setOpenFact(null)} align={i % 2 === 1 ? "right" : "left"}>
                     <dl className="flex flex-col gap-[6px]">
                       {[["Starting out", vm.details.pay.starting], ["Typical", vm.details.pay.typical], ["Top earners", vm.details.pay.top]].map(([k, v]) => (
                         <div key={k} className="flex items-baseline justify-between gap-[var(--space-4)]">
@@ -525,7 +525,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   </FactPopover>
                 )}
                 {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
-                  <FactPopover onClose={() => setOpenFact(null)}>
+                  <FactPopover onClose={() => setOpenFact(null)} align={i % 2 === 1 ? "right" : "left"}>
                     <p className={TINY}>{vm.details.openings.note}</p>
                   </FactPopover>
                 )}
