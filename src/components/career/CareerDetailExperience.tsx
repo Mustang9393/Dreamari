@@ -9,6 +9,7 @@ import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Hea
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
+import { PayMap } from "./PayMap";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
@@ -368,6 +369,7 @@ function viewModel(career: ResolvedCareer) {
     education: p?.education,
     sources: p?.sources,
     details: p?.factDetails,
+    typicalPay: p?.facts.find((f) => f.label === "Typical pay")?.value ?? career.medianSalary,
   };
 }
 
@@ -376,6 +378,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const career = resolveCareer(slug);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
+  // Pay by state: the list of your states and the best states, or the whole
+  // country as a shaded map. A view switch over the same data.
+  const [payView, setPayView] = useState<"states" | "country">("states");
   // the (i) that opened the popover, kept in state (not a ref) so render can read it
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
@@ -562,21 +567,48 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         )}
 
         {vm.payByState && (
-          <Section title={vm.payByState.title ?? "Pay by state"}>
-            {/* No "Whole country" tab: it only repeated the Typical pay figure
-               already in the facts strip (direct feedback). */}
-            <div className="flex flex-col gap-[var(--space-6)]">
-              {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
-                <div className="flex flex-col gap-[var(--space-2)]">
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
-                  <PayRows rows={vm.payByState.yourStates} accent={accent} />
-                </div>
-              )}
-              <div className="flex flex-col gap-[var(--space-2)]">
-                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
-                <PayRows rows={vm.payByState.best} accent={accent} />
+          <Section
+            title={vm.payByState.title ?? "Pay by state"}
+            action={
+              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "rgba(255,255,255,0.16)", background: "var(--glass-surface-1)" }}>
+                {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={payView === id}
+                    onClick={() => setPayView(id)}
+                    className="dm-quiet min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
+                    style={{ background: payView === id ? "var(--foreground)" : "transparent", color: payView === id ? "var(--background)" : "var(--foreground)" }}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-            </div>
+            }
+          >
+            {payView === "states" ? (
+              <div className="flex flex-col gap-[var(--space-6)]">
+                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
+                  <div className="flex flex-col gap-[var(--space-2)]">
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
+                    <PayRows rows={vm.payByState.yourStates} accent={accent} />
+                  </div>
+                )}
+                <div className="flex flex-col gap-[var(--space-2)]">
+                  {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
+                  <PayRows rows={vm.payByState.best} accent={accent} />
+                </div>
+              </div>
+            ) : (
+              <PayMap
+                typical={vm.typicalPay}
+                rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
+                yourState={vm.payByState.yourStates?.[0]?.state}
+                accent={accent}
+                seed={career.slug}
+              />
+            )}
           </Section>
         )}
 
