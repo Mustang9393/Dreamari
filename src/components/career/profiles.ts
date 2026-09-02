@@ -6,7 +6,12 @@
 // paraphrase or re-order data here; layout decisions live in the component.
 
 export type PayByState = {
-  best: { state: string; pay: string; value: number }[];
+  /** Production titles this block "Pay by state" when the figures are pay,
+   *  and "Where the jobs are" when they are job-concentration labels. */
+  title?: string;
+  /** The student's own state(s); pay is "—" in production when unknown. */
+  yourStates?: { state: string; pay: string }[];
+  best: { state: string; pay: string }[];
 };
 
 export type ProfileRung = {
@@ -40,7 +45,7 @@ export type CareerProfile = {
   sources: string;
 };
 
-const K = (state: string, pay: string) => ({ state, pay, value: Number(pay.replace(/[^0-9]/g, "")) });
+const K = (state: string, pay: string) => ({ state, pay });
 
 export const CAREER_PROFILES: Record<string, CareerProfile> = {
   carpenter: {
@@ -57,7 +62,9 @@ export const CAREER_PROFILES: Record<string, CareerProfile> = {
       { label: "Jobs open each year", value: "74,100" },
     ],
     payByState: {
-      best: [K("Vermont", "$62K"), K("South Dakota", "$48K"), K("Idaho", "$52K")],
+      title: "Pay by state",
+      yourStates: [K("South Dakota", "$48K")],
+      best: [K("Vermont", "$62K"), K("Idaho", "$52K"), K("Utah", "$52K")],
     },
     knowAbout: ["Building things", "Math", "Running a team or a business", "Designing how things look and work", "How things get engineered and built"],
     goodAt: ["Accurate measuring and math", "A 3-4 year apprenticeship", "Reading blueprints", "Power tool safety", "Physical strength and stamina"],

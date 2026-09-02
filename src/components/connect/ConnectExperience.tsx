@@ -539,7 +539,7 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
   // for screen readers and as the fallback when no exact mark exists.
   return (
     <span
-      className="group relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
+      className="group/chip relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
       title={name}
       tabIndex={mark ? 0 : undefined}
       style={{
@@ -571,7 +571,7 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
           {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
           <span
             aria-hidden
-            className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/chip:opacity-100 group-focus-visible/chip:opacity-100"
             style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
           >
             {name}
@@ -617,6 +617,11 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
       </span>
       <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
 
+      {/* the whole card is the tap target (direct feedback) */}
+      <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">{joined ? `Open ${community.name}` : `Join ${community.name}`}</span>
+      </button>
+
       {featured && (
         <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
@@ -625,9 +630,8 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
 
       {/* Information in the Replit's order: name and category up top; four
          stat tiles; the companies row; one action at the right. */}
-      <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
+      <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         <h3 className={`text-[20px] leading-[25px] font-extrabold text-balance ${featured ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name}</h3>
-        <p className="mt-[3px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{community.world}</p>
 
         <div className="mt-auto grid grid-cols-4 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
           <StatTile icon={GraduationCap} value={community.students} label="Students" accent={accent} />
@@ -637,11 +641,11 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         <div className="mt-[10px] flex min-w-0 items-center gap-[8px]">
           <span className="flex-none text-[13px] leading-[18px] font-semibold" style={{ color: "#FFFFFF" }}>Professionals from</span>
-          <div className="-mt-[32px] flex min-w-0 flex-1 gap-[6px] overflow-x-auto pt-[32px] [scrollbar-width:none]">
+          <div className="pointer-events-auto -mt-[32px] flex min-w-0 flex-1 gap-[6px] overflow-x-auto pt-[32px] [scrollbar-width:none]">
             {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} />)}
           </div>
         </div>
-        <div className="mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
+        <div className="pointer-events-auto mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           {/* Ghost, all caps, accent-tinted, arrow on Open: the card's original
              action (direct feedback: the blue gradient fill read badly on the
              photo). */}

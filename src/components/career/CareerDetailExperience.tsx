@@ -70,6 +70,21 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
   );
 }
 
+// ---- Key figure: production's gradient numeral, in the world accent -------
+// Used sparingly (direct feedback): typical pay, pay by state, ladder pay.
+// Same size tier as the body value it replaces, so it never outsizes the
+// label above it; the gradient carries the emphasis, not the size.
+function Figure({ children, accent }: { children: React.ReactNode; accent: string }) {
+  return (
+    <span
+      className={`${SMALL} font-bold tabular-nums`}
+      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, #ffffff 0%, color-mix(in srgb, ${accent} 55%, #ffffff) 50%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+    >
+      {children}
+    </span>
+  );
+}
+
 // ---- Section shells -------------------------------------------------------
 
 // Always-open section: heading row (with an optional control) over content.
@@ -132,8 +147,7 @@ function DotList({ items, accent, leading }: { items: string[]; accent: string; 
 // Three compact rows first: number, title, pay, and a bar under the title
 // showing how far up the pay climb this rung sits. The paragraph and the
 // "What you do" / "To get here" lines open per rung on tap.
-function Rung({ rung, accent, max, open, onToggle }: { rung: ProfileRung; accent: string; max: number; open: boolean; onToggle: () => void }) {
-  const value = Number(rung.pay.replace(/[^0-9]/g, "")) || 0;
+function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
   const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
   return (
     <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -149,16 +163,9 @@ function Rung({ rung, accent, max, open, onToggle }: { rung: ProfileRung; accent
         >
           {rung.number}
         </span>
-        <span className="flex min-w-0 flex-col gap-[8px]">
-          <span className={`${MEDIUM} truncate`}>{rung.jobTitle}</span>
-          {value > 0 && (
-            <span aria-hidden className="h-[4px] w-full max-w-[280px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-1)" }}>
-              <span className="block h-full rounded-full" style={{ width: `${Math.max(8, Math.round((value / max) * 100))}%`, background: accent }} />
-            </span>
-          )}
-        </span>
+        <span className={`${MEDIUM} min-w-0 truncate`}>{rung.jobTitle}</span>
         <span className="flex items-center gap-[var(--space-3)]">
-          <span className={FIGURE} style={{ ...DISPLAY, color: accent }}>{rung.pay}</span>
+          {rung.pay && <Figure accent={accent}>{rung.pay}</Figure>}
           {hasDetail && <ChevronDown className="h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />}
         </span>
       </button>
@@ -187,21 +194,22 @@ function Rung({ rung, accent, max, open, onToggle }: { rung: ProfileRung; accent
   );
 }
 
-// ---- Pay by state: figures as bars, so the comparison is one glance. -------
+// ---- Pay by state: production's tiles, no chart (direct feedback: fewer
+// graphs). State on the left, the figure on the right; a label like "more
+// than usual" stays plain text, a pay figure gets the accent gradient. ----
 
-function PayBars({ rows, accent }: { rows: { state: string; pay: string; value: number }[]; accent: string }) {
-  const max = Math.max(...rows.map((r) => r.value), 1);
+function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
   return (
-    <ul className="flex flex-col gap-[var(--space-4)]">
-      {rows.map((row) => (
-        <li key={row.state} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] gap-y-[6px] sm:grid-cols-[150px_minmax(0,1fr)_72px]">
-          <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
-          <span className={`${SMALL} text-right font-bold tabular-nums sm:order-3`} style={DISPLAY}>{row.pay}</span>
-          <span className="col-span-2 h-[8px] w-full overflow-hidden rounded-full sm:col-span-1 sm:order-2" style={{ background: "var(--glass-surface-1)" }}>
-            <span className="block h-full rounded-full" style={{ width: `${Math.round((row.value / max) * 100)}%`, background: accent }} />
-          </span>
-        </li>
-      ))}
+    <ul className="grid gap-[8px] sm:grid-cols-3">
+      {rows.map((row) => {
+        const isFigure = /\d/.test(row.pay);
+        return (
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+            <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
+            {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -273,7 +281,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
   const vm = viewModel(career);
-  const ladderMax = Math.max(...vm.ladder.map((r) => Number(r.pay.replace(/[^0-9]/g, "")) || 0), 1);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 45%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 60%), var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -364,7 +371,11 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 style={{ borderColor: "var(--glass-border)" }}
               >
                 <span className={LABEL}>{fact.label}</span>
-                <span className={`${SMALL} font-medium`} style={{ ...DISPLAY, color: "var(--muted-foreground)" }}>{fact.value}</span>
+                {/pay/i.test(fact.label) && /\d/.test(fact.value) ? (
+                  <Figure accent={accent}>{fact.value}</Figure>
+                ) : (
+                  <span className={`${SMALL} font-medium`} style={{ ...DISPLAY, color: "var(--muted-foreground)" }}>{fact.value}</span>
+                )}
               </div>
             ))}
           </section>
@@ -372,10 +383,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.payByState && (
           <Section
-            title="Pay by state"
+            title={vm.payByState.title ?? "Pay by state"}
             action={
               <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                {([["best", "Best states"], ["country", "Whole country"]] as const).map(([id, label]) => (
+                {([["best", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
                   <button
                     key={id}
                     type="button"
@@ -392,11 +403,22 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             }
           >
             {payTab === "best" ? (
-              <PayBars rows={vm.payByState.best} accent={accent} />
+              <div className="flex flex-col gap-[var(--space-5)]">
+                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
+                  <div className="flex flex-col gap-[var(--space-3)]">
+                    <h3 className={MEDIUM}>Your states</h3>
+                    <PayRows rows={vm.payByState.yourStates} accent={accent} />
+                  </div>
+                )}
+                <div className="flex flex-col gap-[var(--space-3)]">
+                  {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM}>Best states</h3>}
+                  <PayRows rows={vm.payByState.best} accent={accent} />
+                </div>
+              </div>
             ) : (
               <div className="flex items-baseline gap-[var(--space-4)]">
                 <span className={LABEL}>Typical pay</span>
-                <span className={`${SMALL} font-bold tabular-nums`} style={DISPLAY}>{vm.typicalPay}</span>
+                <Figure accent={accent}>{vm.typicalPay}</Figure>
               </div>
             )}
           </Section>
@@ -406,7 +428,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <Section title="Career ladder">
             <ol className="flex flex-col">
               {vm.ladder.map((rung) => (
-                <Rung key={rung.number} rung={rung} accent={accent} max={ladderMax} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
+                <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
               ))}
             </ol>
           </Section>
