@@ -50,6 +50,7 @@ const TINY = "text-[14px] leading-[20px]";
 // The frosted panel every info box on this page sits in (direct feedback:
 // more contrast, frostier): a stronger glass fill, a real backdrop blur and a
 // brighter hairline than the page's default glass-surface-1.
+const INNER = { background: "var(--glass-surface-1)", borderColor: "rgba(255,255,255,0.12)" } as const;
 const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
@@ -97,7 +98,7 @@ function Figure({ children, accent }: { children: React.ReactNode; accent: strin
 // Always-open section: heading row (with an optional control) over content.
 function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="flex w-full flex-col gap-[var(--space-5)] border-t pt-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
+    <section className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <h2 className={BIG} style={DISPLAY}>{title}</h2>
         {action}
@@ -111,18 +112,18 @@ function Section({ title, action, children }: { title: string; action?: React.Re
 // alone (direct feedback: no caption under it); open, the content.
 function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <section className="flex w-full flex-col border-t" style={{ borderColor: "var(--glass-border)" }}>
+    <section className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
       <button
         type="button"
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         onClick={onToggle}
-        className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-md)] px-[8px] py-[var(--space-5)] text-left"
+        className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:px-[var(--space-6)]"
       >
         <h2 className={`${BIG} min-w-0`} style={DISPLAY}>{title}</h2>
         <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
       </button>
-      <div id={`${id}-panel`} hidden={!open} className="pb-[var(--space-6)]">
+      <div id={`${id}-panel`} hidden={!open} className="px-[var(--space-5)] pb-[var(--space-6)] sm:px-[var(--space-6)]">
         {children}
       </div>
     </section>
@@ -206,7 +207,7 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
       {rows.map((row) => {
         const isFigure = /\d/.test(row.pay);
         return (
-          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={PANEL}>
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] border px-[14px] py-[10px]" style={INNER}>
             <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
             {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
           </li>
@@ -419,7 +420,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.ladder.length > 0 && (
           <Section title="Career ladder">
-            <ol className="flex flex-col rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={PANEL}>
+            <ol className="flex flex-col rounded-[var(--radius-sm)] border px-[var(--space-4)]" style={INNER}>
               {vm.ladder.map((rung) => (
                 <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
               ))}
