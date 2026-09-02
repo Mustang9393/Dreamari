@@ -527,7 +527,7 @@ const COMPANY_MARKS: Record<string, { file: string; aspect: number }> = {
 // box IS the letters: wordmarks render 11px tall and as wide as their own
 // letters need; compact symbol marks (aspect under 1.3) render 14px tall.
 function markBox(aspect: number): { width: number; height: number } {
-  const height = aspect < 1.3 ? 14 : 11;
+  const height = aspect < 1.3 ? 14 : aspect > 6 ? 13 : 11;
   return { width: Math.round(height * aspect), height };
 }
 
@@ -640,7 +640,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
           <StatTile icon={Building2} value={community.professionalsFrom.length} label="Companies" accent={accent} />
         </div>
         <div className="mt-[10px] flex min-w-0 items-center gap-[8px]">
-          <span className="flex-none text-[13px] leading-[18px] font-semibold" style={{ color: "#FFFFFF" }}>Professionals from</span>
+          <span className="flex-none text-[13px] leading-[18px] font-semibold" style={{ color: "#FFFFFF" }}>Pros from</span>
           <div className="pointer-events-auto -mt-[32px] flex min-w-0 flex-1 gap-[6px] overflow-x-auto pt-[32px] [scrollbar-width:none]">
             {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} />)}
           </div>
@@ -1449,7 +1449,7 @@ function BoardView({
             </div>
           </div>
           <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-            <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</p>
+            <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Pros from</p>
             <div className="mt-[8px] flex flex-wrap gap-[6px]">
               {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} tone="surface" />)}
             </div>
