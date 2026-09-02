@@ -210,16 +210,18 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
   }, [visitedAccents]);
 
   useEffect(() => {
-    return onAuroraPulse(({ kind, x }) => {
+    return onAuroraPulse(({ kind, x, forceDreamyOrigin }) => {
       const isCta = kind === "cta";
       const now = performance.now();
       // The aurora usually reacts from the bottom edge -- a glow of its own, not a ripple
       // planted wherever the click happened to land. But every CTA pulse doing exactly that
       // read as mechanical, so about a third of the time (only when Dreamy is actually
       // visible on screen) it launches from him instead, like he's the one reacting -- a
-      // little variety with a reason behind it, not randomness for its own sake.
+      // little variety with a reason behind it, not randomness for its own sake. Some
+      // moments (the milestone screen, where Dreamy IS the screen) skip the coin flip and
+      // always use him via forceDreamyOrigin.
       const bottomY = canvasRef.current?.clientHeight ?? window.innerHeight;
-      const dreamyAnchor = isCta && Math.random() < 0.35 ? getDreamyAnchor() : null;
+      const dreamyAnchor = isCta && (forceDreamyOrigin || Math.random() < 0.35) ? getDreamyAnchor() : null;
       const originKind: Ripple["originKind"] = dreamyAnchor ? "point" : "band";
       const originX = dreamyAnchor ? dreamyAnchor.x : x;
       const originY = dreamyAnchor ? dreamyAnchor.y : bottomY;
@@ -513,19 +515,19 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
 
             // The fill alone is the same hue as everything else already on screen (the
             // ambient accent wash, the blobs) -- "brighter of the same color" reads as
-            // almost nothing against a backdrop that's already that color. A faint
+            // almost nothing against a backdrop that's already that color. A crisp,
             // near-white edge traced at the wavefront reads as an actual moving front
-            // regardless of what accent is active. Traced as a wobbly path (two sine
-            // terms perturbing the radius per angle, seeded off the ripple's own start
-            // time so consecutive pulses don't wobble in lockstep) rather than a perfect
-            // ctx.arc() circle -- a geometrically perfect ring reads as synthetic against
-            // everything else on this canvas, which is deliberately organic (the dot
-            // band's own top edge uses the same two-sine-wave technique). CTA-only: the
-            // smaller select pulse stays a plain glow. Band-origin ripples only trace their
-            // upper half (the lower half is off-canvas anyway, born at the bottom edge);
-            // point-origin ones (launched from Dreamy) trace the full circle.
+            // regardless of what accent is active -- hard and bright rather than a soft
+            // blurred stroke, per direct feedback preferring more character/contrast here.
+            // Traced as a barely-wobbly path (two sine terms perturbing the radius per
+            // angle, seeded off the ripple's own start time so consecutive pulses don't
+            // wobble in lockstep) rather than a perfectly geometric ctx.arc() circle -- a
+            // touch of organic irregularity, not a soft one. CTA-only: the smaller select
+            // pulse stays a plain glow. Band-origin ripples only trace their upper half
+            // (the lower half is off-canvas anyway, born at the bottom edge); point-origin
+            // ones (launched from Dreamy) trace the full circle.
             if (isCta && glowRadius > 4) {
-              const ringAlpha = glowAlpha * (isDark ? 0.28 : 0.2);
+              const ringAlpha = glowAlpha * (isDark ? 0.62 : 0.48);
               if (ringAlpha > 0.01) {
                 const seed = ripple.start * 0.001;
                 const arcSpan = ripple.originKind === "point" ? Math.PI * 2 : Math.PI;
@@ -533,14 +535,14 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
                 const steps = ripple.originKind === "point" ? 72 : 48;
                 for (let s = 0; s <= steps; s++) {
                   const angle = Math.PI + (s / steps) * arcSpan;
-                  const wobble = Math.sin(angle * 5 + now * 0.0016 + seed) * glowRadius * 0.02 + Math.sin(angle * 2.3 - now * 0.001 + seed * 1.7) * glowRadius * 0.035;
+                  const wobble = Math.sin(angle * 5 + now * 0.0016 + seed) * glowRadius * 0.008 + Math.sin(angle * 2.3 - now * 0.001 + seed * 1.7) * glowRadius * 0.014;
                   const r = glowRadius + wobble;
                   const px = ripple.x + Math.cos(angle) * r;
                   const py = ripple.y + Math.sin(angle) * r;
                   if (s === 0) rippleCtx!.moveTo(px, py);
                   else rippleCtx!.lineTo(px, py);
                 }
-                rippleCtx!.lineWidth = 2;
+                rippleCtx!.lineWidth = 2.5;
                 rippleCtx!.strokeStyle = isDark ? `rgba(255, 255, 255, ${ringAlpha.toFixed(3)})` : `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${ringAlpha.toFixed(3)})`;
                 rippleCtx!.stroke();
               }

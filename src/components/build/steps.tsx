@@ -399,7 +399,7 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
       <CardHud percent={percent} />
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
-        <div className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
+        <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
@@ -407,7 +407,9 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
         <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">The good part is coming.</p>
       </GlassCard>
       <div className="mt-5 flex justify-center">
-        <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e); onNext(); }} type="button">
+        {/* Dreamy IS this screen -- the pulse always launches from him here rather than
+           leaving it to the usual one-in-three coin flip. */}
+        <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e, { forceDreamyOrigin: true }); onNext(); }} type="button">
           <span className="inline-flex items-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
         </Button>
       </div>
