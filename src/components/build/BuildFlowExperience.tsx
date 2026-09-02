@@ -136,7 +136,16 @@ export function BuildFlowExperience() {
           {/* Same 860px column for BOTH variants — per direct feedback the framed
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">
-            <div className="flow-scroll-fade flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
+            {/* flex-1: fills the column's full height instead of shrinking to
+               its content. Without this, a step shorter than the viewport
+               got centered as a block (question + footer together) one
+               level up, leaving real empty space -- and the sticky footer's
+               own ::before scrim -- floating short of the true screen
+               bottom. Each step's own wrapper now centers its question
+               content and pins its footer to this container's bottom via
+               mt-auto (see StepFooter), so the footer always reaches the
+               real edge regardless of content height or viewport size. */}
+            <div className="flow-scroll-fade flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
               {phase === "build" && <StepTransition key={stageId}>{content}</StepTransition>}
               {phase === "loading" && (
                 <StepTransition key="match-loading">

@@ -1,7 +1,7 @@
 "use client";
 
 import { COST_STOPS } from "./types";
-import { CardHud, GlassCard, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 
 // Education Cost — the "enhance interactive elements like sliders" showcase. A real
@@ -24,14 +24,14 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
   }
 
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
       <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
 
       <div
-        className="rounded-2xl border px-4 py-5 sm:px-6"
-        style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+        className={`rounded-2xl border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
+        style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {/* One readout, no eyebrow and no placeholder: the question above already
            asks for a range, so saying "select a range" twice more was pure noise.

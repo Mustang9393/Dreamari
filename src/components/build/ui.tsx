@@ -40,6 +40,19 @@ export function GlassCard({ children, className = "" }: { children: React.ReactN
   return <div className={`w-full px-1 ${className}`}>{children}</div>;
 }
 
+// Frosted-box treatment for the flow's single/low-count panels (summary
+// cards, the slider track, the map/list toggle, dropdowns) -- NOT for
+// repeated grids like ChipGrid's options or Education's row: a dozen
+// stacked backdrop-blur layers is a WebKit compositing bomb on phones (see
+// the no-blur note on ChipGrid below), but 1-3 panels per screen cost
+// nothing. Mixing in --color-night-card raises the surface's opacity so
+// each box reads as a solid frosted panel instead of a barely-there wash;
+// both source tokens flip per theme already, so this stays correct (and
+// WCAG AA, spot-checked) in light mode too.
+export const GLASS_PANEL_BG = "color-mix(in srgb, var(--color-night-card) 32%, var(--color-glass-surface-raised))";
+export const GLASS_PANEL_BORDER = "color-mix(in srgb, var(--color-glass-border-raised) 100%, var(--color-night-foreground) 16%)";
+export const GLASS_PANEL_CLASS = "backdrop-blur-md";
+
 // The in-flow progress bar. It names the CHAPTER, not the step: "BUILD" sits over
 // the bar on every question so the flow reads as one leg of Build → Match → Play,
 // never as "Step x of 8" (counters make it feel long). The old "Phase 1..4" labels
@@ -185,7 +198,15 @@ export function StepFooter({
   return (
     // Sticky to the step column's scroll container: on phones where a stage
     // scrolls, Next/Previous stay on screen instead of hiding below the fold.
-    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
+    // mt-auto (not a fixed mt-3): the step wrapper is now a full-height flex
+    // column, so this pushes the footer flush to its true bottom whenever
+    // the question content is shorter than the viewport -- previously the
+    // whole block (question + footer together) was centered as one unit one
+    // level up, which left a gap between the footer and the real screen
+    // edge (and the ::before scrim behind it) on any short step or tall
+    // screen. mt-auto + sticky both apply cleanly: auto margin sets the
+    // resting position, sticky keeps it pinned during scroll on tall steps.
+    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-auto flex w-full items-center justify-between gap-3 pt-2 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
           Previous
@@ -287,7 +308,7 @@ export function ChipGrid({
             }`}
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-raised))` : "var(--color-glass-surface-raised)",
-              borderColor: isSelected ? accent : "var(--color-glass-border-raised)",
+              borderColor: isSelected ? accent : GLASS_PANEL_BORDER,
               color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
               ...(expandedBy === "tap" && index >= PREVIEW
                 ? { animation: `option-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both`, animationDelay: `${(index - PREVIEW) * 0.05}s` }
@@ -321,10 +342,10 @@ export function ChipGrid({
             setExpandedBy("tap");
             dispatchAuroraPulse("select", e);
           }}
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
+          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
           style={{
-            background: "var(--color-glass-surface-2)",
-            borderColor: "var(--color-glass-border-raised)",
+            background: GLASS_PANEL_BG,
+            borderColor: GLASS_PANEL_BORDER,
             color: "var(--color-night-muted-foreground)",
           }}
         >
@@ -341,10 +362,10 @@ export function ChipGrid({
             setExpandedBy(null);
             gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors"
+          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
           style={{
-            background: "var(--color-glass-surface-2)",
-            borderColor: "var(--color-glass-border-raised)",
+            background: GLASS_PANEL_BG,
+            borderColor: GLASS_PANEL_BORDER,
             color: "var(--color-night-muted-foreground)",
           }}
         >

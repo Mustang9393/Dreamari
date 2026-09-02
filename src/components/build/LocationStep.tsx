@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import usaMapModule from "@svg-maps/usa";
-import { CardHud, Citation, GlassCard, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 
 // Location — a REAL USA map (actual state shapes via @svg-maps/usa path data, not
@@ -80,15 +80,15 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   }
 
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} almostDone={almostDone} />
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
       {/* Map | List segmented toggle. */}
       <div
-        className="mb-4 grid grid-cols-2 gap-1 rounded-xl border p-1"
-        style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+        className={`mb-4 grid grid-cols-2 gap-1 rounded-xl border p-1 ${GLASS_PANEL_CLASS}`}
+        style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {(["map", "list"] as const).map((tab) => (
           <button
@@ -110,7 +110,15 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
       {view === "map" ? (
         <div
           className="rounded-2xl border p-2.5 sm:p-3"
-          style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+          // Solid, not the shared frosted-panel mix: this box holds ~51 small
+          // state shapes that need to read as distinct regions, not text on
+          // a background. A see-through card would let the ambient scene
+          // bleed in behind it -- and since the flow's aurora now carries a
+          // per-step trailing glow (see BuildFlowExperience.tsx), that
+          // backdrop shifts hue as the student progresses. A solid map
+          // surface keeps state edges reading the same regardless of what's
+          // happening behind the card.
+          style={{ background: "color-mix(in srgb, var(--color-night-card) 96%, var(--color-glass-surface-raised))", borderColor: GLASS_PANEL_BORDER }}
         >
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">United States</span>
@@ -157,6 +165,29 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
                 </path>
               );
             })}
+            {/* Invisible hit-buffer per state, layered on top: the same path
+               with a constant ON-SCREEN stroke width (non-scaling-stroke
+               ignores the SVG's own zoom, so this stays ~16px regardless of
+               card width). Sliver states in the Northeast render well under
+               any reasonable touch-target size at the visible path's own
+               geometry alone (Rhode Island is ~7x9 CSS px on a typical phone
+               card) -- this widens what's clickable without changing what's
+               painted. Not a11y-exposed; the visible path above is the one
+               real control per state (role/aria/keyboard). */}
+            {USA.locations.map((location) => {
+              const name = displayName(location.name);
+              return (
+                <path
+                  key={`hit-${location.id}`}
+                  aria-hidden="true"
+                  d={location.path}
+                  transform={REPOSITION[location.name] ? `translate(${REPOSITION[location.name].tx} ${REPOSITION[location.name].ty}) scale(${REPOSITION[location.name].s})` : undefined}
+                  onClick={() => pickState(name)}
+                  className="cursor-pointer"
+                  style={{ fill: "transparent", stroke: "transparent", strokeWidth: 16, vectorEffect: "non-scaling-stroke" }}
+                />
+              );
+            })}
             {USA.locations.map((location) => {
               const code = STATE_CODES[location.name];
               const rawPos = code ? labelPos[code] : undefined;
@@ -192,10 +223,10 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
           aria-label="Choose a state"
           value={selected}
           onChange={(e) => pickState(e.target.value)}
-          className="w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)]"
+          className={`w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
           style={{
-            background: "var(--color-glass-surface-raised)",
-            borderColor: "var(--color-glass-border-raised)",
+            background: GLASS_PANEL_BG,
+            borderColor: GLASS_PANEL_BORDER,
           }}
         >
           <option value="">Choose a state</option>

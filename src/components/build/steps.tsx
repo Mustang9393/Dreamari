@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, GlassCard, InkText, QuestionHeading, StepFooter } from "./ui";
+import { CardHud, ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, QuestionHeading, StepFooter } from "./ui";
 import { LocalBurst } from "./DreamyGuide";
 import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
@@ -60,7 +60,7 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
 
 export function InterestsStep({ state, patch, onNext, react, percent, sprite }: StepProps) {
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="What sounds interesting?" subtitle="Choose up to 2" />
@@ -68,7 +68,7 @@ export function InterestsStep({ state, patch, onNext, react, percent, sprite }: 
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
            flex-wrap lets two long names break onto a second line cleanly. */}
-        <div className="mb-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
+        <div className={`mb-3 rounded-xl border px-3.5 py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
@@ -111,7 +111,7 @@ export function InterestsStep({ state, patch, onNext, react, percent, sprite }: 
 
 export function SubjectsStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
@@ -143,7 +143,7 @@ function VibeButtonRow({
   onChange: (next: string) => void;
 }) {
   return (
-    <div className="rounded-2xl border px-4 py-3.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
+    <div className={`rounded-2xl border px-4 py-3.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
       <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">{label}</p>
       <div className="mt-2.5 grid grid-cols-3 gap-2">
         {options.map((option) => {
@@ -160,7 +160,7 @@ function VibeButtonRow({
               className="rounded-xl border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px"
               style={{
                 background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
-                borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
+                borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
                 color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
               }}
             >
@@ -189,7 +189,7 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
 
 export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Where do you work best?" subtitle="Pick one from each row." />
@@ -202,8 +202,8 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, spr
             <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
           </div>
           <div
-            className="flex flex-col justify-center gap-4 rounded-xl border px-4 py-4"
-            style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+            className={`flex flex-col justify-center gap-4 rounded-xl border px-4 py-4 ${GLASS_PANEL_CLASS}`}
+            style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
           >
             <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
             <div>
@@ -225,7 +225,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, spr
 
 export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
@@ -247,15 +247,12 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                 className="h-full min-w-[168px] flex-none rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px sm:min-w-0"
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
-                  borderColor: isSelected ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
+                  borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
                   ...cascade(optionIndex),
                 }}
               >
                 {(() => { const Icon = EDUCATION_ICONS[optionIndex]; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
                 <span className="block text-[14px] font-bold text-[var(--color-night-foreground)]">{option.title}</span>
-                {option.subtitle && (
-                  <span className="mt-0.5 block text-[12px] font-medium" style={{ color: "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)" }}>{option.subtitle}</span>
-                )}
               </button>
             );
           })}
@@ -281,10 +278,10 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
           value={value}
           aria-label={label}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full cursor-pointer appearance-none rounded-xl border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)]"
+          className={`w-full cursor-pointer appearance-none rounded-xl border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
           style={{
-            background: "var(--color-glass-surface-raised)",
-            borderColor: value ? "var(--color-brand-400)" : "var(--color-glass-border-raised)",
+            background: GLASS_PANEL_BG,
+            borderColor: value ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
             color: value ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
           }}
         >
@@ -321,7 +318,7 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
 export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
   const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
   return (
-    <div className="w-full">
+    <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} almostDone={almostDone} />
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />

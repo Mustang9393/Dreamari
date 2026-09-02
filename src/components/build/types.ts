@@ -70,12 +70,12 @@ export const SUBJECTS = [
 export const ENERGY_OPTIONS = ["Fast pace", "Balanced", "Calm"];
 export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
-export const EDUCATION_OPTIONS: { title: string; subtitle: string }[] = [
-  { title: "Work after HS", subtitle: "" },
-  { title: "1–2 years", subtitle: "Certificate or 2-year college" },
-  { title: "4 years", subtitle: "Bachelor’s degree" },
-  { title: "5 years+", subtitle: "Advanced degree" },
-  { title: "Not sure yet", subtitle: "Show me options" },
+export const EDUCATION_OPTIONS: { title: string }[] = [
+  { title: "Work after HS" },
+  { title: "1–2 years" },
+  { title: "4 years" },
+  { title: "5 years+" },
+  { title: "Not sure yet" },
 ];
 
 // Slider stop labels, in track order. Index -1 = untouched ("Select a range").
