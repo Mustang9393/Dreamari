@@ -13,6 +13,7 @@ import {
   ChevronRight,
   CornerDownRight,
   Clock,
+  Eye,
   MessagesSquare,
   Star,
   ExternalLink,
@@ -29,7 +30,7 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { Avatar, Card, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, STATE_COLOR, STATE_LABEL } from "./primitives";
+import { Avatar, Card, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, STATE_COLOR, STATE_LABEL, formatCount } from "./primitives";
 import { PeopleToFollow, ProDashboardView, ProProfileView, type Follows } from "./ProProfile";
 import {
   COMMUNITIES,
@@ -764,6 +765,9 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
           <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
         </button>
+        {typeof thread.views === "number" && (
+          <span className="hidden items-center gap-[5px] whitespace-nowrap tabular-nums sm:flex"><Eye className="h-3.5 w-3.5" aria-hidden /> {formatCount(thread.views, "compact")} Views</span>
+        )}
         <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
           <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
         </button>
@@ -778,6 +782,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 // insight's own thread, where the conversation lives.
 function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const pro = proById(insight.proId);
+  const nav = useContext(ConnectNav);
   return (
     <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the insight's thread -- overlay target under
@@ -792,7 +797,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
         <Avatar name={pro.name} verified size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
-            <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
             <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
           </div>
@@ -805,6 +810,10 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
             <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
               <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{insight.replies.length} comments</span>
             </button>
+            {/* Connect 2.0: the learning signal pros are shown ("8.4K Views"), so a
+               student sees that answers are actually read. Derived where the
+               seed carries no view count, same rule as the profile. */}
+            <span className="hidden items-center gap-[5px] whitespace-nowrap tabular-nums sm:flex"><Eye className="h-3.5 w-3.5" aria-hidden /> {formatCount(insight.views ?? insight.helpful * 23 + 140, "compact")} Views</span>
             <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
               <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
             </button>
@@ -1966,12 +1975,18 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
  *  seeded count; the toggle adds the student's own on top. */
 function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
+  const nav = useContext(ConnectNav);
+  const proId = chipTone === "pro" ? PROS.find((p) => p.name === name)?.id : undefined;
   return (
     <div className="flex items-start gap-[12px]">
       <Avatar name={name} verified={chipTone === "pro"} size={32} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-[6px]">
-          <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+          {proId ? (
+            <button type="button" onClick={() => nav?.openPro(proId)} className="dm-link cursor-pointer text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</button>
+          ) : (
+            <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+          )}
           <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
           {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>

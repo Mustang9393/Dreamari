@@ -153,7 +153,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 8 }: { follows: Foll
                   <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
                 </span>
               </div>
-              <span className="relative z-[1] w-fit rounded-full border px-[9px] py-[2px] text-[11px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
+              <span className="relative z-[1] w-fit rounded-full border px-[9px] py-[2px] text-[12px] leading-[16px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
                 {pro.field}
               </span>
               <div className="relative z-[1] mt-auto flex items-center justify-between gap-[var(--space-3)]">
@@ -204,23 +204,15 @@ export function ProProfileView({
           <Avatar name={pro.name} verified size={72} />
           <div className="min-w-0 flex-1">
             <h1 className="text-[26px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
-            <p className="mt-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.role} · {pro.org}</p>
-            <div className="mt-[8px] flex flex-wrap items-center gap-[8px]">
-              <span className="rounded-full border px-[10px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
-                {pro.field}
-              </span>
-              <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {pro.verifiedBy}
-              </span>
-            </div>
           </div>
           <div className="flex-none">
             <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
           </div>
         </div>
 
-        {/* The doc's three profile numbers, in its words and its format. */}
-        <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+        {/* Top-down, strictly: name (26) > the doc's three numbers (22) > role
+           and story (15) > field and verification (12). */}
+        <dl className="grid grid-cols-3 gap-[var(--space-3)]">
           {[
             { value: pro.studentsReached + (following ? 1 : 0), label: "Students Reached" },
             { value: pro.followers + (following ? 1 : 0), label: "Followers" },
@@ -233,7 +225,18 @@ export function ProProfileView({
           ))}
         </dl>
 
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.story}</p>
+        <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+          <p className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.role} · {pro.org}</p>
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.story}</p>
+          <div className="flex flex-wrap items-center gap-[8px] pt-[2px]">
+            <span className="rounded-full border px-[10px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>
+              {pro.field}
+            </span>
+            <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {pro.verifiedBy}
+            </span>
+          </div>
+        </div>
       </section>
 
       {/* Ask Me Anything is the primary engagement mechanism (doc). Same
@@ -266,10 +269,10 @@ export function ProProfileView({
                   <span className="sr-only">Open question: {thread.title}</span>
                 </button>
                 <div className="relative z-[1] flex flex-col gap-[8px]">
+                  <h3 className="text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
                   <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                     <MessagesSquare className="h-3 w-3" aria-hidden /> {communityName(thread.boardId)}
                   </span>
-                  <h3 className="text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
                   <SignalRow {...s} accent={accent} />
                 </div>
               </Card>
@@ -289,11 +292,11 @@ export function ProProfileView({
                   <span className="sr-only">Open insight: {insight.title}</span>
                 </button>
                 <div className="relative z-[1] flex flex-col gap-[8px]">
+                  <h3 className="text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h3>
+                  <p className="line-clamp-2 text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
                   <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                     <MessagesSquare className="h-3 w-3" aria-hidden /> {communityName(insight.boardId)} · {insight.postedAgo}
                   </span>
-                  <h3 className="text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h3>
-                  <p className="line-clamp-2 text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
                   <SignalRow {...s} accent={accent} />
                 </div>
               </Card>
@@ -344,11 +347,10 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
       {/* Ask Me Anything routing: a direct student question is a far stronger
          reason to respond than a blank page. Answer · Skip, never an
          obligation. */}
+      <section aria-labelledby="route-title" className="flex flex-col gap-[var(--space-3)]">
+      <SectionHead id="route-title">Ask Me Anything</SectionHead>
       <Card accent={accent}>
         <div className="flex flex-col gap-[var(--space-3)]">
-          <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>
-            <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> Ask Me Anything
-          </span>
           <h2 className="text-[19px] leading-[25px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Three students asked questions about investment banking this week. Answer one?
           </h2>
@@ -364,6 +366,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
           )}
         </div>
       </Card>
+      </section>
 
       {/* Private Impact Dashboard: the doc's example numbers. Private,
          motivational, never a public badge. */}
@@ -382,7 +385,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             </div>
           ))}
         </div>
-        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+        <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
           Your answers reached 18% more students this month. Staying active helps us recommend your expertise to more students.
         </p>
       </section>
