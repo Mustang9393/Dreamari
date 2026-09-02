@@ -484,8 +484,17 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             const eased = easeOutCubic(rawProgress);
             const isCta = ripple.kind === "cta";
             const glowRadius = eased * ripple.maxRadius * (isCta ? 1.0 : 0.85);
-            const glowAlphaBase = isCta ? (isDark ? 0.24 : 0.18) : isDark ? 0.13 : 0.1;
-            const glowAlpha = glowAlphaBase * (1 - eased);
+            const glowAlphaBase = isCta ? (isDark ? 0.34 : 0.26) : isDark ? 0.13 : 0.1;
+            // A wavefront reads as "traveling" only if it's still bright once it's big
+            // enough to see -- fading from the very first frame (old: alphaBase*(1-eased))
+            // meant it was brightest as a single pixel at the click origin and nearly gone
+            // by the time it had grown large enough to register, which is why this pulse
+            // was firing correctly but landing as functionally invisible. Hold near-full
+            // brightness through most of the animation and only fade over the tail, so the
+            // glow is still visible while it's actually crossing the screen.
+            const holdUntil = 0.55;
+            const fadeMul = rawProgress < holdUntil ? 1 : Math.max(0, 1 - (rawProgress - holdUntil) / (1 - holdUntil));
+            const glowAlpha = glowAlphaBase * fadeMul;
             if (glowAlpha <= 0.003 || glowRadius <= 1) continue;
 
             const gradient = rippleCtx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, glowRadius);
