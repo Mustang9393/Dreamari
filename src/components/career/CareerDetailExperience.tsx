@@ -210,7 +210,7 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
         const isFigure = /\d/.test(row.pay);
         return (
           <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-            <span className={`${SMALL} min-w-0 truncate`}>{row.state}</span>
+            <span className={`${SMALL} min-w-0 truncate`} style={{ color: "rgba(255,255,255,0.86)" }}>{row.state}</span>
             {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
           </li>
         );
@@ -408,12 +408,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             <div className="flex flex-col gap-[var(--space-6)]">
               {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
                 <div className="flex flex-col gap-[var(--space-2)]">
-                  <h3 className={MEDIUM} style={DISPLAY}>Your states</h3>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
                   <PayRows rows={vm.payByState.yourStates} accent={accent} />
                 </div>
               )}
               <div className="flex flex-col gap-[var(--space-2)]">
-                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM} style={DISPLAY}>Best states</h3>}
+                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
                 <PayRows rows={vm.payByState.best} accent={accent} />
               </div>
             </div>
@@ -464,7 +464,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           >
             <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
               <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={DISPLAY}>What people study for it</h3>
+                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
                 <ul className="flex flex-col gap-[var(--space-2)]">
                   {vm.education.studies.map((s) => (
                     <li key={s.name}>
@@ -483,7 +483,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </ul>
               </div>
               <div className="flex flex-col gap-[var(--space-3)]">
-                <h3 className={MEDIUM} style={DISPLAY}>Where you would study it</h3>
+                <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
                 <ul className="flex flex-col">
                   {vm.education.where.map((w, i) => (
                     <li key={w.credential} className={`flex items-baseline gap-[var(--space-4)] py-[var(--space-2)] ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
