@@ -49,45 +49,6 @@ const LABEL = "text-[16px] leading-[22px] font-semibold";
 const SMALL = "text-[15px] leading-[22px]";
 const TINY = "text-[14px] leading-[20px]";
 
-// Real, current brand marks, committed under public/images/logos (sourced
-// from Wikimedia Commons, 2026-09-02) and shown on a small white tile so
-// every brand's own colors read on the dark page. A tool with no exact,
-// current mark gets the list's plain marker instead of a stand-in glyph.
-const LOGOS: Record<string, string> = {
-  Excel: "excel",
-  "Microsoft Excel": "excel",
-  "Microsoft Word": "word",
-  PowerPoint: "powerpoint",
-  "Microsoft Windows": "windows",
-  "Intuit QuickBooks": "quickbooks",
-  Figma: "figma",
-  Slack: "slack",
-  Jira: "jira",
-  "Git / GitHub": "github",
-  Docker: "docker",
-  "VS Code": "vscode",
-  SAP: "sap",
-  Zoom: "zoom",
-  Notion: "notion",
-  Asana: "asana",
-  "Adobe Acrobat": "acrobat",
-  "R / RStudio": "rstudio",
-  Sketch: "sketch",
-  "Bloomberg Terminal": "bloomberg",
-  "Epic (EHR)": "epic",
-};
-
-function SoftwareLogo({ name }: { name: string }) {
-  const file = LOGOS[name];
-  if (!file) return null;
-  return (
-    <span className="flex h-7 min-w-7 flex-none items-center justify-center rounded-[6px] bg-white px-[5px]">
-      {/* eslint-disable-next-line @next/next/no-img-element -- local SVG brand mark, no optimization wanted */}
-      <img src={`/images/logos/${file}.svg`} alt="" className="h-[18px] w-auto max-w-[72px] object-contain" />
-    </span>
-  );
-}
-
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
 const HERO_FOCUS: Record<string, string> = {
@@ -350,13 +311,29 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <Image src={career.photo} alt="" fill sizes="1040px" className="hidden object-cover md:block" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "78% 28%" }} />
               <span className="md:hidden"><CardProgressiveBlur direction="up" size="64%" /></span>
               <span className="hidden md:block"><CardProgressiveBlur direction="left" size="70%" /></span>
+              {/* A full-strength solid panel of the world accent read as
+                 garish for some worlds and the fade to the photo was a hard
+                 edge, not a blend. Same idea (accent panel dissolving into
+                 the photo) with two changes: the panel itself is the accent
+                 mixed into a near-black (not the raw hue at full strength,
+                 which is what read as "stupid" -- a text scrim should
+                 recede, not shout), and twice the gradient stops so the
+                 falloff reads as continuous rather than banded. #05070f
+                 matches this app's existing night-surface color (used
+                 wherever a dark card sits over imagery); not tokenized here
+                 since it has to stay dark regardless of site theme, same as
+                 the hardcoded #fff text color right above it. */}
               <span
                 className="absolute inset-0 md:hidden"
-                style={{ background: `linear-gradient(to top, ${accent} 0%, ${accent} 38%, color-mix(in srgb, ${accent} 86%, transparent) 52%, color-mix(in srgb, ${accent} 40%, transparent) 68%, transparent 88%)` }}
+                style={{
+                  background: `linear-gradient(to top, color-mix(in srgb, ${accent} 45%, #05070f) 0%, color-mix(in srgb, ${accent} 45%, #05070f) 28%, color-mix(in srgb, ${accent} 32%, transparent) 44%, color-mix(in srgb, ${accent} 20%, transparent) 58%, color-mix(in srgb, ${accent} 10%, transparent) 74%, color-mix(in srgb, ${accent} 3%, transparent) 88%, transparent 97%)`,
+                }}
               />
               <span
                 className="absolute inset-0 hidden md:block"
-                style={{ background: `linear-gradient(90deg, ${accent} 0%, ${accent} 36%, color-mix(in srgb, ${accent} 88%, transparent) 50%, color-mix(in srgb, ${accent} 42%, transparent) 66%, transparent 88%)` }}
+                style={{
+                  background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 45%, #05070f) 0%, color-mix(in srgb, ${accent} 45%, #05070f) 26%, color-mix(in srgb, ${accent} 32%, transparent) 42%, color-mix(in srgb, ${accent} 20%, transparent) 56%, color-mix(in srgb, ${accent} 10%, transparent) 72%, color-mix(in srgb, ${accent} 3%, transparent) 86%, transparent 97%)`,
+                }}
               />
             </div>
             <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-6)] pt-[176px] sm:p-[var(--space-8)] sm:pt-[176px] md:max-w-[60%] md:pt-[var(--space-8)]">
@@ -483,13 +460,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.software.length > 0 && (
           <Folded id="software" title="Software you would use" preview={preview(vm.software)} open={openSections.has("software")} onToggle={() => toggleSection("software")}>
-            <DotList
-              items={vm.software}
-              accent={accent}
-              leading={(name) =>
-                LOGOS[name] ? <SoftwareLogo name={name} /> : <span aria-hidden className="mx-[11px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-              }
-            />
+            <DotList items={vm.software} accent={accent} />
           </Folded>
         )}
 

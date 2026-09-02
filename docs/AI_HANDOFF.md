@@ -40,6 +40,44 @@ tokens above, in both modes).
 
 - Date: 2026-09-02
 
+### 2026-09-02 (later still) Career Detail: drop inconsistent software logos, organic hero scrim
+
+- Reference material this round: a 40s screen recording of dreamonna.com's
+  own `/explore/emt` page (extracted to frames via ffmpeg -- the file name
+  had a U+202F narrow-no-break-space before "PM" that broke naive path
+  matching, worth remembering next time a Desktop screen-recording path
+  "doesn't exist") plus an earlier screenshot of dreamonna.com's Actor page.
+  Confirmed both are the reference production site, not this prototype.
+- **"All things should have relevant logos or nothing should... logos need
+  to be transparent PNGs not white bounding boxes."** The reference has ZERO
+  brand logos anywhere on the whole page (software, employers, colleges are
+  all plain text/pills) -- confirmed by walking every section of the EMT
+  recording. This prototype's "Software you would use" list special-cased
+  ~20 known tools with a real SVG logo on a `bg-white` tile and fell back to
+  a plain dot for anything else, which is exactly the "some things have
+  logos, some don't, and they sit in a white box" complaint. Fixed by going
+  with "nothing" (matches the reference, and is the only option that can't
+  drift back into partial coverage as more careers/tools get added): dropped
+  the `leading` prop so software renders through the same plain `DotList` as
+  every other section. Removed the now-dead `LOGOS` map, `SoftwareLogo`
+  component, and all 20 orphaned SVGs under `public/images/logos/`.
+- **"The headers are stupid with these colors... make the transition smooth
+  and organic... progressive blue text scrim if required."** The hero panel
+  behind the title used the career's world accent at FULL saturation as a
+  solid block (0-38%), then two hard color-mix steps to transparent by 88%.
+  Some world colors read as garish at that strength, and the falloff was
+  visibly banded, not a blend. Changed both the mobile and desktop gradients
+  to mix each accent into `#05070f` (this app's existing night-surface tone,
+  hardcoded rather than tokenized since the panel has to stay dark
+  regardless of site theme, same as the hardcoded `#fff` text color right
+  next to it) instead of using the raw hue, and doubled the gradient stops
+  for a continuous falloff instead of banding. No exact reference existed
+  for a photo-based header (the EMT reference has no photo at all), so this
+  is the "be artistic" half of the ask -- live-verified on Carpenter (warm
+  brown/amber world) and Investment Banking (gold): both now read as a
+  tasteful dark vignette dissolving into the photo, not a colored block.
+- `npx tsc --noEmit`, `eslint`, `npm run tokens:check` all clean.
+
 ### 2026-09-02 (later) Match Lab: cap the deck card's height on wide desktop viewports
 
 - Direct report with a screenshot from a MacBook Pro: the swipe card was
