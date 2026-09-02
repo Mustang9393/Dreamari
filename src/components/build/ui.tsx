@@ -8,6 +8,7 @@ import { cascade } from "./variant";
 import { CONFIRM_GLOW_MS, dispatchConfirmPulse, useConfirmGlow } from "./confirmPulse";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { ProgressSpark } from "./ProgressSpark";
 
 export { useConfirmGlow };
 
@@ -82,56 +83,80 @@ export const GLASS_PANEL_CLASS = "backdrop-blur-md";
 // percent survives step remounts so going Previous never re-celebrates.
 let lastCelebratedPercent = 0;
 
-function CometSpark({ from, to }: { from: number; to: number }) {
-  // Two-phase mount: render at the OLD position with no transition, then on the next
-  // frame move to the new one WITH a transition -- the standard way to animate "from A
-  // to B" with plain CSS when both ends are dynamic (a single style update wouldn't
-  // have anything to transition from).
-  const [pos, setPos] = useState(from);
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setPos(to));
-    return () => cancelAnimationFrame(raf);
-  }, [to]);
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute top-1/2 h-3 w-3 motion-safe:animate-[comet-bounce_0.7s_ease-out_forwards]"
-      style={{ left: `${pos}%`, transition: "left 0.7s cubic-bezier(0.22, 1, 0.36, 1)" }}
-    >
-      <span
-        aria-hidden
-        className="absolute top-1/2 right-1/2 h-[3px] w-7 -translate-y-1/2 rounded-full"
-        style={{ background: "linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-world-business-money-office) 80%, white))", filter: "blur(1.5px)" }}
-      />
-      <span
-        aria-hidden
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: "radial-gradient(circle, white 0%, var(--color-world-business-money-office) 55%, transparent 75%)",
-          boxShadow: "0 0 9px 2px color-mix(in srgb, var(--color-world-business-money-office) 75%, transparent)",
-        }}
-      />
-    </div>
-  );
-}
-
 export function PhaseProgress({ percent, almostDone }: { percent: number; almostDone?: boolean }) {
   const [comet, setComet] = useState<{ from: number; to: number; nonce: number } | null>(null);
-  const mounted = useRef(false);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const fillRef = useRef<HTMLDivElement | null>(null);
+  // Each step remounts this component fresh (it lives inside the step's own JSX tree,
+  // which StepTransition keys by stageId), so a plain `width: ${percent}%` never had a
+  // prior value to transition FROM -- the CSS `transition-[width]` was declared but
+  // never actually had anything to animate, since the new instance painted straight at
+  // its target width on frame one. displayPercent starts at the module-level "last
+  // shown" value (correct across the remount) and only moves to the real percent a
+  // frame later, same two-phase trick as the spark's position.
+  const [displayPercent, setDisplayPercent] = useState(lastCelebratedPercent);
 
   useEffect(() => {
-    if (mounted.current) return;
-    mounted.current = true;
-    if (percent > lastCelebratedPercent) {
-      const from = lastCelebratedPercent;
+    // No `mounted` ref guard: that pattern (synchronously mutating the module-level
+    // lastCelebratedPercent, then using a ref to block a second run) is NOT safe under
+    // React's dev-mode StrictMode, which deliberately runs every effect twice
+    // (mount -> cleanup -> mount) to catch exactly this kind of non-idempotent effect.
+    // The first invoke mutated lastCelebratedPercent and scheduled a timer; cleanup
+    // cancelled the timer but couldn't undo the mutation; the second invoke then saw
+    // the guard already tripped and did nothing -- so the real update silently never
+    // landed. (This is why the bar was rendering the PREVIOUS step's fill width. Traced
+    // via direct DOM sampling: styleWidth stuck at a stale value while the % label,
+    // which reads the prop directly rather than this state, was already correct.)
+    // Fix: read lastCelebratedPercent fresh on every invoke, and only mutate it inside
+    // the timer callback -- so if the timer gets cancelled, nothing happened, and a
+    // second invoke starts from the same clean state as the first.
+    const from = lastCelebratedPercent;
+    const growing = percent > from;
+    const timer = setTimeout(() => {
       lastCelebratedPercent = percent;
-      // Deferred a tick rather than calling setState synchronously in the effect body
-      // (React flags that as a cascading-render risk) -- imperceptible delay, the comet
-      // still rides alongside the bar's own 700ms fill.
-      const timer = setTimeout(() => setComet((c) => ({ from, to: percent, nonce: (c?.nonce ?? 0) + 1 })), 0);
-      return () => clearTimeout(timer);
-    }
+      setDisplayPercent(percent);
+      if (growing) setComet((c) => ({ from, to: percent, nonce: (c?.nonce ?? 0) + 1 }));
+    }, 0);
+    return () => clearTimeout(timer);
   }, [percent]);
+
+  useEffect(() => {
+    // A rare, unprompted flicker in place (from === to, so ProgressSpark draws its
+    // small idle-width floor rather than sweeping any distance) so the bar doesn't
+    // read as dead between real advances -- spaced well apart, not a loop a student
+    // would consciously notice recurring. jitterPath's own randomness already gives
+    // each firing (idle or growth) its own shape.
+    let timer: ReturnType<typeof setTimeout>;
+    function scheduleIdle() {
+      const delay = 14000 + Math.random() * 16000;
+      timer = setTimeout(() => {
+        setComet((c) => ({ from: percent, to: percent, nonce: (c?.nonce ?? 0) + 1 }));
+        scheduleIdle();
+      }, delay);
+    }
+    scheduleIdle();
+    return () => clearTimeout(timer);
+  }, [percent]);
+
+  useEffect(() => {
+    // The bar's fill pulses brighter in step with the spark (same nonce/timing),
+    // instead of the spark being a decoration floating over an otherwise-static bar --
+    // driven via the Web Animations API rather than a CSS class toggle, since the
+    // element never remounts (a toggled class needs a real off-state to re-trigger,
+    // and this needs to restart cleanly on every nonce, growth or idle alike) and
+    // without `fill: "forwards"` it reverts cleanly to the underlying inline
+    // boxShadow/background once done, so nothing needs to be manually reset.
+    if (!comet || !fillRef.current) return;
+    const anim = fillRef.current.animate(
+      [
+        { filter: "brightness(1) saturate(1)", offset: 0 },
+        { filter: "brightness(1.5) saturate(1.35)", offset: 0.4 },
+        { filter: "brightness(1) saturate(1)", offset: 1 },
+      ],
+      { duration: 700, easing: "ease-out" },
+    );
+    return () => anim.cancel();
+  }, [comet]);
 
   return (
     <div>
@@ -151,19 +176,20 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
           {percent}% Complete
         </span>
       </div>
-      <div className="relative mt-2">
+      <div ref={trackRef} className="relative mt-2">
         <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--color-glass-surface-2)" }}>
           <div
+            ref={fillRef}
             className="h-full rounded-full transition-[width] duration-700 ease-out"
             style={{
-              width: `${percent}%`,
+              width: `${displayPercent}%`,
               background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple), var(--color-world-arts-media-sport))",
               boxShadow: "0 0 10px 0 color-mix(in srgb, var(--color-accent-purple) 55%, transparent)",
             }}
           />
         </div>
-        {/* Comet riding the bar's leading edge on growth. */}
-        {comet && <CometSpark key={comet.nonce} from={comet.from} to={comet.to} />}
+        {/* Hand-drawn-style scribble sweeping the newly-filled span on growth. */}
+        {comet && <ProgressSpark key={comet.nonce} trackRef={trackRef} fromPercent={comet.from} toPercent={comet.to} />}
       </div>
     </div>
   );

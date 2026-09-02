@@ -500,32 +500,6 @@ body {
   }
 }
 
-/* Progress bar comet: a little vertical swoop layered on top of the `left` CSS
-   transition that carries it horizontally -- baking the -50% centering into every
-   step since it shares the transform property with the bounce itself. */
-@keyframes comet-bounce {
-  0% {
-    transform: translateY(-50%);
-    opacity: 1;
-  }
-  30% {
-    transform: translateY(calc(-50% - 8px));
-    opacity: 1;
-  }
-  62% {
-    transform: translateY(calc(-50% + 3px));
-    opacity: 1;
-  }
-  100% {
-    /* Fades out at rest -- the element itself is never explicitly unmounted after
-       firing (a fresh `key` on the next celebration replaces it, but nothing clears
-       it in between), so without this it would sit as a permanent glowing dot at the
-       bar's tip instead of disappearing once its swoop is done. */
-    transform: translateY(-50%);
-    opacity: 0;
-  }
-}
-
 /* Build-flow phone fades: masked blur instead of painted gradient slabs — the
    flat-color gradient bands read as hard-edged cutouts over the nebula
    background. A mask fades the WHOLE element (tint included) so there is no
