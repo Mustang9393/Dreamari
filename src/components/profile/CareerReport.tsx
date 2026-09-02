@@ -339,7 +339,7 @@ function ReportDocument({
                 {report.education.filter((route) => !route.common).map((route) => (
                   <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
-                    <span className="flex-none rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
+                    <span className="flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                   </li>
                 ))}
               </ul>
@@ -389,7 +389,7 @@ function ReportDocument({
                 style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}
                 data-keep-together
               >
-                <span className="mb-[10px] inline-flex w-fit items-center rounded-full border px-[10px] py-[3px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
+                <span className="mb-[10px] inline-flex w-fit items-center rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
                   {college.status}
                 </span>
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
@@ -730,7 +730,7 @@ function ShareTab() {
             key={target.id}
             type="button"
             onClick={() => setShared((current) => ({ ...current, [target.id]: true }))}
-            className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
+            className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
             style={{ background: "var(--glass-surface-1)", borderColor: shared[target.id] ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 45%, var(--glass-border))" : "var(--glass-border)" }}
           >
             <span className="flex min-w-0 flex-col gap-[2px]">

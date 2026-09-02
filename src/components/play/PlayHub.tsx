@@ -463,7 +463,7 @@ function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string;
         </span>
       )}
       <span
-        className="absolute top-[10px] left-[10px] rounded-full px-[9px] py-[3px] text-[10px] font-extrabold tracking-[0.1em] uppercase"
+        className="absolute top-[10px] left-[10px] rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[10px] font-extrabold tracking-[0.1em] uppercase"
         style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
       >
         Glossary Game

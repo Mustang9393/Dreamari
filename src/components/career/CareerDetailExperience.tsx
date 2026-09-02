@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
-import { CardProgressiveBlur } from "@/components/app/cardChrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
@@ -63,7 +63,7 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
       aria-pressed={active}
       onClick={onClick}
       className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ background: "var(--glass-surface-1)", borderColor: active ? "var(--accent-subtle)" : "var(--glass-border)", color: active ? "var(--accent-subtle)" : "var(--foreground)" }}
+      style={{ background: "rgba(12,16,35,0.45)", borderColor: active ? "var(--accent-subtle)" : "rgba(255,255,255,0.3)", color: active ? "var(--accent-subtle)" : "#fff" }}
     >
       {children}
     </button>
@@ -295,87 +295,60 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <ArrowLeft className="h-4 w-4" aria-hidden /> Explore
         </button>
 
-        {/* Header card, in the production page's look: the title on a panel
-           in the career's world color, the poster photo on the card's right,
-           the actions in a strip below. The panel does not stop at a seam:
-           the photo runs the full card behind it, a progressive blur frosts
-           the photo toward the text, and the accent fades over that frosted
-           half, so solid color under the title dissolves into the picture.
-           Below md the same thing happens top to bottom: photo up top, color
-           rising from below the text. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-          <div className="relative min-h-[360px] md:min-h-[340px]" style={{ color: "#fff" }}>
-            <div className="absolute inset-0" aria-hidden>
-              {/* phones: subject up top; desktop: subject at the right */}
-              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 18%" }} />
-              <Image src={career.photo} alt="" fill sizes="1040px" className="hidden object-cover md:block" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "78% 28%" }} />
-              <span className="md:hidden"><CardProgressiveBlur direction="up" size="64%" /></span>
-              <span className="hidden md:block"><CardProgressiveBlur direction="left" size="70%" /></span>
-              {/* A full-strength solid panel of the world accent read as
-                 garish for some worlds and the fade to the photo was a hard
-                 edge, not a blend. Same idea (accent panel dissolving into
-                 the photo) with two changes: the panel itself is the accent
-                 mixed into a near-black (not the raw hue at full strength,
-                 which is what read as "stupid" -- a text scrim should
-                 recede, not shout), and twice the gradient stops so the
-                 falloff reads as continuous rather than banded. #05070f
-                 matches this app's existing night-surface color (used
-                 wherever a dark card sits over imagery); not tokenized here
-                 since it has to stay dark regardless of site theme, same as
-                 the hardcoded #fff text color right above it. */}
-              <span
-                className="absolute inset-0 md:hidden"
-                style={{
-                  background: `linear-gradient(to top, color-mix(in srgb, ${accent} 45%, #05070f) 0%, color-mix(in srgb, ${accent} 45%, #05070f) 28%, color-mix(in srgb, ${accent} 32%, transparent) 44%, color-mix(in srgb, ${accent} 20%, transparent) 58%, color-mix(in srgb, ${accent} 10%, transparent) 74%, color-mix(in srgb, ${accent} 3%, transparent) 88%, transparent 97%)`,
-                }}
-              />
-              <span
-                className="absolute inset-0 hidden md:block"
-                style={{
-                  background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 45%, #05070f) 0%, color-mix(in srgb, ${accent} 45%, #05070f) 26%, color-mix(in srgb, ${accent} 32%, transparent) 42%, color-mix(in srgb, ${accent} 20%, transparent) 56%, color-mix(in srgb, ${accent} 10%, transparent) 72%, color-mix(in srgb, ${accent} 3%, transparent) 86%, transparent 97%)`,
-                }}
-              />
-            </div>
-            <div className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-6)] pt-[176px] sm:p-[var(--space-8)] sm:pt-[176px] md:max-w-[60%] md:pt-[var(--space-8)]">
-              <h1 className="w-full text-[40px] leading-[44px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(56px,4.2vw,72px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
+        {/* Header card: the poster photo, full bleed, with the same legibility
+           stack as the For You reel and the Connect cards (progressive blur up
+           from the bottom, a soft vignette, a light top scrim) and nothing
+           else: no color wash. Title, one line on what it is, one line to
+           imagine it, and the actions all sit inside the card, on the frosted
+           lower half. */}
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+          <div className="absolute inset-0" aria-hidden>
+            <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 20%" }} />
+            <Image src={career.photo} alt="" fill sizes="1040px" className="hidden object-cover md:block" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "72% 30%" }} />
+            <CardProgressiveBlur size="72%" />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.74) 36%, rgba(12,16,35,0.3) 64%, transparent 100%), ${cardTopScrim()}` }} />
+          </div>
+          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
+            <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
+              <h1 className="w-full text-[36px] leading-[40px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(48px,3.6vw,60px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
                 {career.title}
               </h1>
-              {vm.summary && <p className={`${MEDIUM} max-w-[34ch] pt-[var(--space-2)]`}>{vm.summary}</p>}
+              {vm.summary && <p className={`${MEDIUM} max-w-[34ch]`}>{vm.summary}</p>}
               {vm.scenario && <p className={`${SMALL} max-w-[52ch]`} style={{ color: "rgba(255,255,255,0.9)" }}>{vm.scenario}</p>}
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-5)] sm:px-[var(--space-8)]">
-            {hasSimulation && (
-              <button
-                type="button"
-                onClick={() => router.push(`/play/${career.slug}`)}
-                className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
-                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-              >
-                <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
-              </button>
-            )}
-            {hasGlossaryGame && (
-              <button
-                type="button"
-                onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
-              </button>
-            )}
-            <div className="ml-auto flex items-center gap-[var(--space-2)]">
-              <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
-              <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
-                <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
-              </IconButton>
-              <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
-                <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
-              </IconButton>
-              <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
-                <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
-              </IconButton>
+            <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+              {hasSimulation && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/play/${career.slug}`)}
+                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
+                  style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+                >
+                  <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
+                </button>
+              )}
+              {hasGlossaryGame && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/play/glossary/${career.slug}`)}
+                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
+                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.4)", color: "#fff" }}
+                >
+                  <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
+                </button>
+              )}
+              <div className="ml-auto flex items-center gap-[var(--space-2)]">
+                <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
+                <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
+                  <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
+                </IconButton>
+                <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
+                  <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
+                </IconButton>
+                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
+                  <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
+                </IconButton>
+              </div>
             </div>
           </div>
         </section>

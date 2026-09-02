@@ -109,7 +109,7 @@ export function GestureSpotlight({
         }}
       >
         <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
-        <span className="rounded-full px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+        <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
           {label}
         </span>
       </div>

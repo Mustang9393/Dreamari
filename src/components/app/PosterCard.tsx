@@ -39,7 +39,7 @@ export function PosterCard({ career, className = "", onClick }: { career: Catalo
         /* dark glass chip (approved) + large gradient figure — legible on
            any photo at a glance */
         <span
-          className="absolute top-2 right-2 z-[1] rounded-full border px-[12px] py-[4px] backdrop-blur-[10px]"
+          className="absolute top-2 right-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
           style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
         >
           <span

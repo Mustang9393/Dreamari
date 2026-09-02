@@ -50,7 +50,7 @@ export default async function CollegesPage({ searchParams }: { searchParams: Pro
         </div>
 
         <main className="relative z-10 mx-auto flex w-full max-w-[860px] flex-col items-center gap-[var(--space-6)] px-5 pt-[48px] pb-[140px] text-center md:pt-[96px]">
-          <span className="rounded-full border px-[14px] py-[5px] text-[10px] font-bold tracking-[0.6px] uppercase" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>In the works</span>
+          <span className="rounded-[var(--radius-sm)] border px-[14px] py-[5px] text-[10px] font-bold tracking-[0.6px] uppercase" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>In the works</span>
           <h1 className="text-[34px] leading-[38px] font-extrabold uppercase sm:text-[44px] sm:leading-[48px]" style={{ fontFamily: "var(--font-display)" }}>College Lookup</h1>
           <p className="max-w-[420px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Real schools and programs, matched to your route and budget.</p>
 
@@ -74,7 +74,7 @@ export default async function CollegesPage({ searchParams }: { searchParams: Pro
                 <span className="flex items-center gap-[4px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                   <MapPin className="h-3 w-3" /> {school.meta}
                 </span>
-                <span className="rounded-full px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>{school.tag}</span>
+                <span className="rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[10px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>{school.tag}</span>
               </div>
             ))}
           </div>

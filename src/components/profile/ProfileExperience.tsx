@@ -599,7 +599,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               {top3.map((id, index) => {
                 const career = careerById(id)!;
                 return (
-                  <button key={id} type="button" onClick={() => confirmSwap(id)} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
+                  <button key={id} type="button" onClick={() => confirmSwap(id)} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
                     <span className="text-[14px] font-bold">{index + 1} · {career.title}</span>
                     <span className="text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>Replace</span>
                   </button>
@@ -800,7 +800,7 @@ function Top3Tab({
                  faces at different heights across the row. */}
               <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
               <span
-                className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-full px-[9px] text-[13px] font-extrabold"
+                className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-[var(--radius-sm)] px-[9px] text-[13px] font-extrabold"
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", fontFamily: "var(--font-display)", color: "var(--foreground)" }}
               >
                 #{index + 1}
@@ -1269,7 +1269,7 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
                   <Sparkles className="h-2.5 w-2.5" aria-hidden /> Pick
                 </span>
               )}
-              {selected && <span className="rounded-full px-[8px] py-[2px] text-[12px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+              {selected && <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[12px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           </span>
           <span className="flex w-full items-center gap-[var(--space-2)]">
@@ -1506,7 +1506,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                         </button>
                         <span className={`min-w-0 flex-1 text-[15px] leading-[17px] font-bold ${complete ? "line-through" : ""}`}>{task.label}</span>
                         {task.custom && (
-                          <span className="flex-none rounded-full px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
+                          <span className="flex-none rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
                         )}
                         <span className="flex-none text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
                         {!complete && !task.custom && (
@@ -1603,7 +1603,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
             <Sparkles className="h-3 w-3" /> Recommended
           </span>
         )}
-        {selected && <span className="rounded-full px-[10px] py-[3px] text-[12px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
+        {selected && <span className="rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[12px] font-bold tracking-[0.6px] whitespace-nowrap uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Your path</span>}
       </div>
 
       {/* Editorial masthead: kicker, headline, deck, meta */}
@@ -1842,8 +1842,8 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
           {routes.map((route) => (
             <span key={route.id} className="border-b p-[var(--space-3)] text-[15px] font-extrabold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-display)", color: route.id === selectedId ? "var(--accent-subtle)" : "var(--foreground)" }}>
               {route.short}
-              {route.recommended && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>Recommended</span>}
-              {route.id === selectedId && <span className="ml-[6px] rounded-full px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
+              {route.recommended && <span className="ml-[6px] rounded-[var(--radius-sm)] px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>Recommended</span>}
+              {route.id === selectedId && <span className="ml-[6px] rounded-[var(--radius-sm)] px-[7px] py-[1px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Yours</span>}
             </span>
           ))}
           {rows.map((row, rowIndex) => (
@@ -1852,7 +1852,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
               {routes.map((route) => (
                 <span key={route.id} className={`flex flex-col items-start gap-[3px] p-[var(--space-3)] ${rowIndex < rows.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)", background: route.id === selectedId ? "color-mix(in srgb, var(--primary) 7%, transparent)" : "transparent" }}>
                   <span className="text-[15px] leading-[16px] font-bold">{row.value(route)}</span>
-                  {row.tag(route) && <span className="rounded-full px-[8px] py-[2px] text-[12px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{row.tag(route)}</span>}
+                  {row.tag(route) && <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[12px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>{row.tag(route)}</span>}
                 </span>
               ))}
             </Fragment>
@@ -1936,10 +1936,10 @@ function SettingsView({ onClose }: { onClose: () => void }) {
         {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
           <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="text-[15px] font-bold">{item}</span>
-            <span className="rounded-full px-[8px] py-[2px] text-[12px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
+            <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[12px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
           </div>
         ))}
-        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
+        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
           Sign out
         </button>
       </div>

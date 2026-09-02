@@ -254,7 +254,7 @@ function StepCard({
                 key={which}
                 type="button"
                 onClick={() => onPick(which)}
-                className="dm-quiet flex w-full cursor-pointer items-center rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-left text-[15px] font-bold"
+                className="dm-quiet flex w-full cursor-pointer items-center rounded-[var(--radius-md)] border px-[16px] py-[13px] text-left text-[15px] font-bold"
                 style={{ borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
               >
                 {labels[which]}

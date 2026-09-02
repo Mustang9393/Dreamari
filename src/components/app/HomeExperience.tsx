@@ -80,9 +80,9 @@ function HeroCta({ children, display = false, fullOnMobile = false, onClick }: {
       type="button"
       onClick={onClick}
       className={`dm-solid cursor-pointer px-[var(--space-6)] py-[var(--space-4)] active:scale-[0.97] ${
-        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
+        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto" : "rounded-[var(--radius-md)]"
       }`}
-      style={{ background: "var(--foreground)", color: "var(--background)" }}
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
     >
       <span
         className={display ? "text-[16px] leading-[22px] font-semibold" : "text-[13px] leading-[18px] font-semibold"}
@@ -550,7 +550,7 @@ export function HomeExperience() {
           <div className="relative flex h-full flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-8)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <span
-                className="w-fit rounded-[99px] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
+                className="w-fit rounded-[var(--radius-sm)] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
                 /* white on primary measures 4.8:1; the ghost tint failed at 2.56 */
                 style={{ fontFamily: "var(--font-body)", background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }}
               >
@@ -570,7 +570,7 @@ export function HomeExperience() {
                 ].map(({ tag, count, color }) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-[var(--space-2)] rounded-[999px] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
+                    className="inline-flex items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
                     style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                   >
                     <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />

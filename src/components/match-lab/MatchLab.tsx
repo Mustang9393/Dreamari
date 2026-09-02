@@ -430,7 +430,7 @@ export function MatchLab() {
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
             <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
             <span
-              className="flex flex-none items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
+              className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
             >
               <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${"#33c78c"}` }} />
@@ -732,13 +732,13 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
           <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 94vw, 440px" className="object-cover" draggable={false} priority={isTop} />
           <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4">
             <span
-              className="max-w-[60%] truncate rounded-full border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
+              className="max-w-[60%] truncate rounded-[var(--radius-sm)] border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
               style={{ background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)", borderColor: "var(--color-glass-border)" }}
             >
               {career.employers}
             </span>
             <span
-              className="flex-none rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
+              className="flex-none rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
               style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)" }}
             >
               {career.salary}

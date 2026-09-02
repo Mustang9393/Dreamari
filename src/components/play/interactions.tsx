@@ -175,7 +175,7 @@ function OptionButton({
       // A right pick previously just recolored; a wrong one shook and the revealed
       // answer popped, so getting it right was the least-marked outcome. It now
       // gets the Build flow's confirm moment: a lift plus one light sweep.
-      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-lg)] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
+      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
         bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
       } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""} ${
         mark === "right" ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""
@@ -347,7 +347,7 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
               {rung.label}
             </span>
             {rung.lit && rung.label.startsWith("You") && (
-              <span className="rounded-full px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
+              <span className="rounded-[var(--radius-sm)] px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
                 You
               </span>
             )}
@@ -441,7 +441,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
                 if (option.correct) solve();
                 else miss(index);
               }}
-              className={`flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border px-[18px] py-[15px] text-left text-[16px] font-semibold transition-[border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+              className={`flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[18px] py-[15px] text-left text-[16px] font-semibold transition-[border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
               style={{
                 animationDelay: `${index * 55}ms`,
                 background: solved && option.correct ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
@@ -613,7 +613,7 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
                 playSelect();
                 setOpen((current) => new Set(current).add(index));
               }}
-              className="flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-lg)] border px-[16px] py-[14px] text-left text-[15px] font-semibold transition-[border-color,background] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[16px]"
+              className="flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-md)] border px-[16px] py-[14px] text-left text-[15px] font-semibold transition-[border-color,background] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[16px]"
               style={{
                 animationDelay: `${index * 55}ms`,
                 background: revealed ? `color-mix(in srgb, ${tint} 12%, var(--glass-surface-1))` : "var(--glass-surface-1)",
@@ -697,7 +697,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
           initial={{ rotateY: -70, opacity: 0 }}
           animate={{ rotateY: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex w-full cursor-pointer flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border px-[20px] py-[26px] text-center disabled:cursor-default sm:py-[34px]"
+          className="flex w-full cursor-pointer flex-col items-center gap-[10px] rounded-[var(--radius-md)] border px-[20px] py-[26px] text-center disabled:cursor-default sm:py-[34px]"
           style={{
             transformOrigin: "left center",
             // The glossary flipbook's binder page: ruled paper over a faint
@@ -1788,7 +1788,7 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
               type="button"
               onClick={() => put(side)}
               disabled={flash !== null}
-              className={`flex-1 cursor-pointer rounded-[var(--radius-lg)] border-2 px-[12px] py-[14px] text-[14.5px] font-extrabold transition-[border-color,background] duration-150 disabled:cursor-default ${
+              className={`flex-1 cursor-pointer rounded-[var(--radius-md)] border-2 px-[12px] py-[14px] text-[14.5px] font-extrabold transition-[border-color,background] duration-150 disabled:cursor-default ${
                 lit && !ok ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
               }`}
               style={{

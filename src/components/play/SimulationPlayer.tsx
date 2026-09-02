@@ -644,7 +644,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {repair && repair.length > 0 && phase === "beat" && (
         <div className="absolute inset-x-0 top-[74px] z-30 flex justify-center px-3">
           <span
-            className="flex items-center gap-[9px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
+            className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--primary)", color: "var(--foreground)" }}
           >
             <Wrench className="h-[14px] w-[14px]" aria-hidden />
@@ -657,7 +657,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {resumed && phase === "beat" && (
         <div className="pointer-events-none absolute inset-x-0 top-[74px] z-30 flex justify-center px-3 animate-[play-notice_11s_ease-out_both]">
           <span
-            className="pointer-events-auto flex items-center gap-[10px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
+            className="pointer-events-auto flex items-center gap-[10px] rounded-[var(--radius-sm)] border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
             Picked up where you left off
@@ -1408,7 +1408,7 @@ function ScoreGauge({ reputation, band, delta, demo = false }: { reputation: num
               {reputation}
             </span>
           </span>
-          <span className="rounded-full px-[14px] py-[4px] text-[13px] font-extrabold tracking-[0.3em] uppercase backdrop-blur-[10px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", color, textShadow: `0 0 18px ${color}` }}>
+          <span className="rounded-[var(--radius-sm)] px-[14px] py-[4px] text-[13px] font-extrabold tracking-[0.3em] uppercase backdrop-blur-[10px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", color, textShadow: `0 0 18px ${color}` }}>
             Reputation
           </span>
         </motion.span>
@@ -1671,7 +1671,7 @@ function DialogueBox({
          in the scene said rather than as narration about them. */}
       {speaker && !portrait && ambient && (
         <span
-          className="absolute -top-[13px] left-[14px] z-10 rounded-full px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
+          className="absolute -top-[13px] left-[14px] z-10 rounded-[var(--radius-sm)] px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}
         >
           {speaker}
@@ -2229,7 +2229,7 @@ function EndingCard({
           </Link>
         ) : ending.advances ? (
           <span
-            className="flex w-full items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"
+            className="flex w-full items-center justify-center gap-[8px] rounded-[var(--radius-sm)] px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             aria-disabled
           >

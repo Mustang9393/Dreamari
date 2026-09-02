@@ -165,7 +165,7 @@ function InlineAsk({
       >
         <Avatar name="Jordan Rivera" size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{placeholder}</span>
-        <span className="flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
+        <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
           Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
         </span>
       </button>
@@ -492,6 +492,56 @@ const PHOTO_FOCUS: Record<string, string> = {
 // category, four stat tiles, then one action at the right. Ours puts the
 // CEO's photography in the band, with the poster card's legibility stack
 // (progressive blur, vignette, top scrim, grain) so the title always reads.
+// Real company marks for the "Professionals from" chips (Wikimedia Commons,
+// 2026-09-03, committed under public/images/logos/companies). A company with
+// no exact current mark gets a text-only chip; no stand-in glyphs.
+const COMPANY_LOGOS: Record<string, string> = {
+  "JPMorgan Chase": "jpmorgan-chase",
+  Amazon: "amazon",
+  EY: "ey",
+  Google: "google",
+  Deloitte: "deloitte",
+  "Goldman Sachs": "goldman-sachs",
+  "Morgan Stanley": "morgan-stanley",
+  Microsoft: "microsoft",
+  Meta: "meta",
+  Apple: "apple",
+  "CVS Health": "cvs-health",
+  "Johnson & Johnson": "johnson-johnson",
+  Pfizer: "pfizer",
+  "Mayo Clinic": "mayo-clinic",
+  Disney: "disney",
+  Nike: "nike",
+  Spotify: "spotify",
+  Netflix: "netflix",
+  Adobe: "adobe",
+};
+
+function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
+  const file = COMPANY_LOGOS[name];
+  const onPhoto = tone === "photo";
+  return (
+    <span
+      className="inline-flex h-[26px] flex-none items-center gap-[6px] rounded-[var(--radius-sm)] border pr-[9px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
+      style={{
+        paddingLeft: file ? 4 : 9,
+        background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
+        borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
+        color: onPhoto ? "#FFFFFF" : "var(--foreground)",
+        textShadow: "none",
+      }}
+    >
+      {file && (
+        <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-white px-[3px]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- local SVG brand mark */}
+          <img src={`/images/logos/companies/${file}.svg`} alt="" className="h-[11px] w-auto max-w-[44px] object-contain" />
+        </span>
+      )}
+      {name}
+    </span>
+  );
+}
+
 function StatTile({ icon: Icon, value, label, accent }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: number | string; label: string; accent: string }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[4px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
@@ -526,7 +576,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
       <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
 
       {featured && (
-        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
+        <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
         </span>
       )}
@@ -543,9 +593,12 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
           <StatTile icon={MessagesSquare} value={community.posts} label="Posts" accent={accent} />
           <StatTile icon={Building2} value={community.professionalsFrom.length} label="Companies" accent={accent} />
         </div>
-        <p className="mt-[10px] min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
-          <span style={{ color: "#FFFFFF" }}>Professionals from</span> {community.professionalsFrom.join(", ")}
-        </p>
+        <div className="mt-[10px] flex min-w-0 items-center gap-[8px]">
+          <span className="flex-none text-[13px] leading-[18px] font-semibold" style={{ color: "#FFFFFF" }}>Professionals from</span>
+          <div className="flex min-w-0 flex-1 gap-[6px] overflow-x-auto [scrollbar-width:none]">
+            {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} />)}
+          </div>
+        </div>
         <div className="mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           {joined ? (
             <button
@@ -592,7 +645,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
+      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF" }}
     >
       {children}
@@ -609,7 +662,7 @@ function QuietCta({ children, onClick, className = "", done = false }: { childre
       type="button"
       onClick={onClick}
       aria-pressed={done || undefined}
-      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
+      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
       style={
         done
           ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }
@@ -660,7 +713,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
           <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
           <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
           {comments === 0 && (
-            <span className="inline-flex flex-none rounded-full border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
+            <span className="inline-flex flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
               Unanswered
             </span>
           )}
@@ -710,7 +763,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
             <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
-            <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
+            <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
@@ -749,7 +802,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
             role="tab"
             aria-selected={active === option.key}
             onClick={() => onPick(option.key)}
-            className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[999px] border px-[var(--space-4)] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
+            className="dm-quiet flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap"
             style={
               active === option.key
                 ? accent
@@ -840,7 +893,7 @@ export function ConnectExperience() {
           real toast above the nav; still aria-live for screen readers. */}
       <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+84px)] z-[95] flex justify-center px-5 md:bottom-8">
         {announce && (
-          <span key={announce} className="flex items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[13.5px] leading-[18px] font-bold motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.8)" }}>
+          <span key={announce} className="flex items-center gap-[8px] rounded-[var(--radius-sm)] border px-[16px] py-[10px] text-[13.5px] leading-[18px] font-bold motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.8)" }}>
             <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> {announce}
           </span>
         )}
@@ -1217,7 +1270,7 @@ function ComingSoonCard() {
         <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}` }} />
         <span className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
       </span>
-      <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center rounded-full px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ background: "rgba(9,10,20,0.72)", color: "rgba(255,255,255,0.85)" }}>
+      <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ background: "rgba(9,10,20,0.72)", color: "rgba(255,255,255,0.85)" }}>
         Coming Soon
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
@@ -1342,16 +1395,14 @@ function BoardView({
             <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Topics</p>
             <div className="mt-[8px] flex flex-wrap gap-[6px]">
               {community.topics.map((name) => (
-                <span key={name} className="rounded-[999px] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+                <span key={name} className="rounded-[var(--radius-sm)] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
               ))}
             </div>
           </div>
           <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
             <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Professionals from</p>
             <div className="mt-[8px] flex flex-wrap gap-[6px]">
-              {community.professionalsFrom.map((name) => (
-                <span key={name} className="rounded-[999px] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${communityAccent(community)} 40%, var(--glass-border))`, color: "var(--foreground)", background: `color-mix(in srgb, ${communityAccent(community)} 12%, transparent)` }}>{name}</span>
-              ))}
+              {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} tone="surface" />)}
             </div>
           </div>
           <div className="mt-[14px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
@@ -1611,7 +1662,7 @@ function ThreadView({
                 <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
                   <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
                   {r.primary && (
-                    <span className="flex-none rounded-[999px] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
+                    <span className="flex-none rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
                       Primary answer
                     </span>
                   )}
@@ -1751,7 +1802,7 @@ function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, li
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-[6px]">
           <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
-          <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
+          <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
           {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
         </div>
