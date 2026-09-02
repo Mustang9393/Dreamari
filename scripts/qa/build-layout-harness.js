@@ -49,7 +49,7 @@
   byText("Fast pace")?.click(); await wait(120); byText("Solo")?.click(); await wait(300);
   measure("workVibe"); if (!(await next())) return JSON.stringify({ stuck: "workVibe", rows });
   measure("milestone"); if (!(await next())) return JSON.stringify({ stuck: "milestone", rows });
-  btns().find((b) => /Work after HS/.test(b.textContent))?.click(); await wait(600);
+  btns().find((b) => /Work after high school/.test(b.textContent))?.click(); await wait(600);
   measure("education"); if (!(await next())) return JSON.stringify({ stuck: "education", rows });
   btns().find((b) => /\$50,000/.test(b.textContent))?.click(); await wait(300);
   measure("cost"); if (!(await next())) return JSON.stringify({ stuck: "cost", rows });

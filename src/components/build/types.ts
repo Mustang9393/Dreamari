@@ -71,7 +71,7 @@ export const ENERGY_OPTIONS = ["Fast pace", "Balanced", "Calm"];
 export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
 export const EDUCATION_OPTIONS: { title: string }[] = [
-  { title: "Work after HS" },
+  { title: "Work after high school" },
   { title: "1–2 years" },
   { title: "4 years" },
   { title: "5 years+" },

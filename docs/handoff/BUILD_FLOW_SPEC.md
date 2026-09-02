@@ -58,7 +58,7 @@ are NOT part of the product flow (per direct instruction); "Previous" is real.
 - Header: "Education & Training" / "Choose one" (graduation-cap icon)
 - Question: "How many years of education are you open to after high school?"
 - Option cards (title / subtitle):
-  - "Start work after HS" / "HS or short training"
+  - "Start work after high school" / "High school or short training"
   - "1–2 more years" / "Certificate or 2-year college"
   - "4 more years" / "4-year college"
   - "4+ more years" / "Advanced degree paths"
