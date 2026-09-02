@@ -649,7 +649,7 @@ function CommunityCard({
   if (variant === "photos") {
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
+        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
         style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, background: "#0e0c20" }}
       >
         <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
@@ -691,7 +691,7 @@ function CommunityCard({
     const cover = POSTER_COVER[community.id] ?? community.photo;
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[264px] flex-col overflow-hidden rounded-[26px]"
+        className="dm-tap group relative flex h-full min-h-[264px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
         style={{
           backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 100%), linear-gradient(${POSTER_BG}, ${POSTER_BG})`,
           border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`,
@@ -753,7 +753,7 @@ function CommunityCard({
     const fusionClip = clip ? { clipPath: `path('${clip}')` } : { borderRadius: "58% 42% 63% 37% / 45% 55% 45% 55%" };
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[240px] flex-col overflow-hidden rounded-[26px]"
+        className="dm-tap group relative flex h-full min-h-[240px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
         style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 14%, ${POSTER_BG}) 0%, ${POSTER_BG} 100%)`, border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         {/* rest state: the image, full bleed */}
@@ -818,7 +818,7 @@ function CommunityCard({
 
   return (
     <div
-      className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[26px]"
+      className="dm-tap group relative flex h-full min-h-[212px] items-center overflow-hidden rounded-[var(--radius-2xl)]"
       style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, #141834) 0%, color-mix(in srgb, ${accent} 9%, #0d1024) 100%)`, border: `1px solid color-mix(in srgb, ${accent} 38%, transparent)`, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.09), 0 18px 44px -22px rgba(0,0,0,0.65)" }}
     >
       {/* pull-tab notch, from the reference's sheet stack */}
@@ -957,7 +957,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
   const comments = thread.responses.length;
   const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer transition-transform duration-200 hover:-translate-y-[2px]">
+    <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the thread (direct feedback: "make it
          obviously easily clickable") -- an overlay target under the
          like/save controls, a hover ring, and a chevron that says "this
@@ -1013,7 +1013,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const pro = proById(insight.proId);
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer transition-transform duration-200 hover:-translate-y-[2px]">
+    <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the insight's thread -- overlay target under
          the like/save controls, hover ring, and an always-visible chevron. */}
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
@@ -1058,7 +1058,7 @@ type LucideIcon = React.ComponentType<{ className?: string; "aria-hidden"?: bool
 function FilterRow({ options, active, onPick, accent }: { options: { key: string; label: string; Icon?: LucideIcon }[]; active: string; onPick: (key: string) => void; accent?: string }) {
   return (
     <div className="relative -mx-1">
-      <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Filter feed">
+      <div className="flex gap-[var(--space-2)] overflow-x-auto px-1 pt-1 pb-3 [scrollbar-width:none]" role="tablist" aria-label="Filter feed">
         {options.map((option) => (
           <button
             key={option.key}
@@ -1120,9 +1120,17 @@ export function ConnectExperience() {
     setViewState(next);
     const base = viewToQuery(next);
     // the URL is the variant's source of truth, so navigation preserves it
-    const shapes = new URLSearchParams(window.location.search).get("cards") === "shapes";
-    window.history.replaceState(null, "", "/connect" + base + (shapes ? (base ? "&" : "?") + "cards=shapes" : ""));
+    const lane = new URLSearchParams(window.location.search).get("cards");
+    window.history.replaceState(null, "", "/connect" + base + (lane ? (base ? "&" : "?") + "cards=" + lane : ""));
     window.scrollTo(0, 0);
+  }, []);
+
+  const pickVariant = useCallback((v: CardVariant) => {
+    setCardVariant(v);
+    const url = new URL(window.location.href);
+    if (v === "photos") url.searchParams.delete("cards");
+    else url.searchParams.set("cards", v);
+    window.history.replaceState(null, "", url.toString());
   }, []);
 
   const say = useCallback((message: string) => {
@@ -1191,6 +1199,7 @@ export function ConnectExperience() {
             onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
             onEnterCode={(id) => setCodeOpenFor(id)}
             cardVariant={cardVariant}
+            onPickVariant={pickVariant}
             joinedCount={Object.values(joined).filter(Boolean).length}
           />
         )}
@@ -1338,6 +1347,7 @@ function HomeView({
   onOpenEvent,
   onEnterCode,
   cardVariant,
+  onPickVariant,
   joinedCount,
 }: {
   tab: "communities" | "events";
@@ -1347,6 +1357,7 @@ function HomeView({
   onOpenEvent: (id: string) => void;
   onEnterCode: (id: string) => void;
   cardVariant: CardVariant;
+  onPickVariant: (v: CardVariant) => void;
   joinedCount: number;
 }) {
   const [query, setQuery] = useState("");
@@ -1384,6 +1395,27 @@ function HomeView({
             </button>
           )}
         </label>
+
+      {tab === "communities" && (
+        /* Card-style lanes under test (photos / fusion / people / shapes). Kept
+           for the team's side-by-side evaluation, on its own quiet row rather
+           than in the section heading's slot, which the doc gives to the
+           joined count. The lane rides the URL as ?cards= so each is linkable. */
+        <div className="flex items-center justify-end gap-[6px]" role="group" aria-label="Card style">
+          {(["photos", "fusion", "people", "shapes"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={cardVariant === v}
+              onClick={() => onPickVariant(v)}
+              className="dm-quiet min-h-[30px] cursor-pointer rounded-full border px-[12px] text-[11.5px] leading-[15px] font-bold capitalize"
+              style={cardVariant === v ? { background: "var(--glass-surface-1)", borderColor: "var(--foreground)", color: "var(--foreground)" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      )}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
@@ -1440,7 +1472,7 @@ function HomeView({
               return (
                 <div
                   key={event.id}
-                  className="group relative flex flex-col overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
+                  className="group relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
                   style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
                   <Image src={eventCover(event.host)} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
@@ -1540,7 +1572,7 @@ function ComingSoonCard({ variant = "photos" }: { variant?: CardVariant }) {
   if (variant === "photos") {
     return (
       <div
-        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px]"
+        className="dm-tap group relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
         style={{ boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", background: "#0e0c20", fontFamily: "var(--font-display)" }}
       >
         <Image src="/images/connect/covers/photo4-event-door.webp" alt="" fill sizes="640px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: "68% 45%" }} />
@@ -1587,7 +1619,7 @@ function ComingSoonCard({ variant = "photos" }: { variant?: CardVariant }) {
 
   return (
     <div
-      className="relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[26px] border-2 border-dashed px-[var(--space-6)] py-[var(--space-5)]"
+      className="relative flex h-full min-h-[212px] flex-col overflow-hidden rounded-[var(--radius-2xl)] border-2 border-dashed px-[var(--space-6)] py-[var(--space-5)]"
       style={{ borderColor: "rgba(242,240,250,0.16)", background: "color-mix(in srgb, var(--primary) 5%, transparent)", fontFamily: "var(--font-display)" }}
     >
       <span className="absolute top-[14px] right-[16px] inline-flex items-center rounded-full border border-dashed px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ borderColor: "rgba(242,240,250,0.3)", color: "rgba(242,240,250,0.6)" }}>
@@ -1673,7 +1705,7 @@ function BoardView({
          at the right, a full-width folio rule underneath. */}
       <section
         aria-label="Community overview"
-        className="group relative overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
+        className="group relative overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: imagery ? "#0e0c20" : `color-mix(in srgb, ${communityAccent(community)} 18%, #0e0c20)`, border: `1px solid color-mix(in srgb, ${communityAccent(community)} 40%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: imagery ? CARD_TEXT_SHADOW : undefined }}
       >
         {imagery && (
@@ -1839,7 +1871,7 @@ function EventView({
 
       <section
         aria-label="Event context"
-        className="group relative overflow-hidden rounded-[26px] px-[var(--space-6)] py-[var(--space-5)]"
+        className="group relative overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         <Image src={eventCover(event.host)} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
@@ -2039,7 +2071,7 @@ function ThreadView({
           const pid = thread.id + "-p" + index;
           return (
             <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-              <CommentRow id={pid} name={r.handle} chip={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
+              <CommentRow id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
             </div>
           );
         })}
@@ -2052,7 +2084,7 @@ function ThreadView({
 
         {posted.map((reply) => (
           <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-            <CommentRow id={reply.id} name="Jordan" chip="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
+            <CommentRow id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
           </div>
         ))}
         <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
@@ -2130,7 +2162,7 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
+function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   return (
     <div className="flex items-start gap-[12px]">
@@ -2139,6 +2171,7 @@ function CommentRow({ id, name, chip, chipTone, body, postedAgo, likes, liked, o
         <div className="flex flex-wrap items-center gap-[6px]">
           <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
           <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
+          {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
         </div>
         <p className="mt-[5px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{body}</p>
@@ -2281,7 +2314,8 @@ function InsightThreadView({
                   key={rid}
                   id={rid}
                   name={isPro ? proById(reply.proId!).name : reply.handle!}
-                  chip={isPro ? "Professional" : reply.grade!}
+                  chip={isPro ? "Professional" : "Student"}
+                  meta={isPro ? undefined : reply.grade}
                   chipTone={isPro ? "pro" : "student"}
                   body={reply.body}
                   postedAgo={reply.postedAgo}
