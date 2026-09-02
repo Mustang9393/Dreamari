@@ -185,9 +185,18 @@ export function MatchLab() {
     }
   }
 
+  // The slot strip's existing pop (dreamy-pop + LocalBurst, keyed by slotPops)
+  // was only fired by flyToSlot. Every other way a slot changes -- reorder,
+  // remove, undo -- happened in total silence, so the same pop now marks them.
+  function popSlots(...slots: number[]) {
+    setSlotPops((p) => p.map((n, i) => (slots.includes(i) ? n + 1 : n)));
+  }
+
   function commitSwap(slot: number) {
     if (!swapFor || !top) return;
     const replaced = liked[slot];
+    // A swap IS a like (a new career enters the Top 3): same ding as a like.
+    dispatchAuroraPulse("cta");
     setHistory((h) => [...h, { type: "swap", career: swapFor, replaced, slot, prevDeckIndex: deckIndex }]);
     setLiked((l) => l.map((c, i) => (i === slot ? swapFor : c)));
     flyToSlot(swapFor, slot);
@@ -200,6 +209,11 @@ export function MatchLab() {
     if (exiting) return;
     const entry = history[history.length - 1];
     if (!entry) return;
+    // Undo reads as a deliberate step back: the soft tick, and the slot that
+    // just changed pops so the eye is drawn to what came back.
+    dispatchAuroraPulse("select");
+    if (entry.type === "like") popSlots(liked.findIndex((c) => c.id === entry.career.id));
+    if (entry.type === "swap") popSlots(entry.slot);
     setHistory((h) => h.slice(0, -1));
     if (entry.type === "like") setLiked((l) => l.filter((c) => c.id !== entry.career.id));
     if (entry.type === "swap") setLiked((l) => l.map((c, i) => (i === entry.slot ? entry.replaced : c)));
@@ -210,6 +224,7 @@ export function MatchLab() {
   function restartDeck() {
     // Already-liked careers don't come back around; the fresh round is only
     // what's still undecided.
+    dispatchAuroraPulse("select");
     setRoundDeck(DECK.filter((c) => !liked.some((l) => l.id === c.id)));
     setDeckIndex(0);
     setHistory([]);
@@ -227,16 +242,22 @@ export function MatchLab() {
   }
 
   function reorder(slot: number, dir: -1 | 1) {
+    const j = slot + dir;
+    if (j < 0 || j >= liked.length) return;
+    // Both slots that trade places pop, plus the tick -- the manage sheet sits
+    // over the slot strip, so the pops are what make the swap visible behind it.
+    dispatchAuroraPulse("select");
+    popSlots(slot, j);
     setLiked((l) => {
       const next = [...l];
-      const j = slot + dir;
-      if (j < 0 || j >= next.length) return l;
       [next[slot], next[j]] = [next[j], next[slot]];
       return next;
     });
   }
 
   function removeLiked(slot: number) {
+    dispatchAuroraPulse("select");
+    popSlots(slot);
     setLiked((l) => l.filter((_, i) => i !== slot));
     // Their spot opens again — the once-only decision sheet stays consumed,
     // but they can re-fill and lock in from the slots or the end panel.
