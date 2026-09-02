@@ -5322,3 +5322,19 @@ Direct feedback: "things are still moving around... keep the progress bar HUD st
 
 - 2026-09-02 (later): Top 3 cards on My Profile: the world-accent glow blob (right/bottom -40px, blur 38px) bled past the card border because the card is overflow-visible (the kebab menu must escape it). Moved the blob into its own `absolute inset-0 overflow-hidden rounded-[inherit]` layer so it clips to the card radius. Sweep found no other card-bound blobs (remaining hits are speech-bubble tails and page-level ambient blobs behind marketing sections, intentional). Verified at 1280x900: wrapper radius 24px matches card, blob still overhangs wrapper by 40px on both axes but is clipped.
 - 2026-09-02 (later): Career Report readability: the report slab's dark palette lifted from near-black (#0d0f14) to slate (#1e2431, raised #29303f, sunken #343c4c, rules a step lighter) so it sits on the navy background as a card; slab and Reflection slab now use uniform padding (space-5, sm: space-6) with the inner 920px column removed so content fills to that padding; section number tiles are 18/23 to match the section title (h 34). Verified at 1280x900: bg rgb(30,36,49), padding 24 on all four sides, numeral font-size equals h3 font-size.
+
+## 2026-09-02 (evening): Career Detail rebuilt for skimming (`/career/[slug]`)
+
+Reference: production page export "Carpenter · Dreamari.pdf" (dreamonna.com/explore/carpenter). Production is login-gated, so EMT copy could not be fetched; Carpenter's copy and figures are transcribed verbatim into `src/components/career/profiles.ts` (`CareerProfile`), and `resolveCareer` attaches `profile` when one exists (title/world/photo fall back to it too, so Carpenter renders without a catalog entry).
+
+`CareerDetailExperience.tsx` is a fresh layout, one shape for every career:
+- Header card in the production look (title on a world-accent panel inside a dark card, CTA row below) plus the poster photo: top band below md, right column from md.
+- First screen only: header, four quick facts (one strip, dividers), Pay by state as bars (Best states / Whole country tabs), Career ladder as collapsed rows (number in the accent, title, pay, a bar for the pay climb). Everything else is folded with a one-line preview of its own first items: know about, good at, software, education, and the fallback "What they actually do".
+- Type scale, strictly descending everywhere: title 40 → 56..72 Bricolage; section 22 → 26 Bricolage; sub-heading/rung title/pay 18; label-over-value 16 semibold (facts, states, dt); body 15; dd 14. Values never outsize the label above them (direct feedback on "Typical degree").
+- Software logos are real current brand marks committed under `public/images/logos/*.svg` (Wikimedia Commons), shown on a white tile at 18px tall; tools without an exact mark get the plain list marker (e.g. "Microsoft Office software"). Simple Icons glyphs removed.
+- Careers without a profile: facts from report/reel/catalog, ladder from CAREER_EXTRAS (oneLiner as description, skills as "What you do"); placeholder "Coming soon" values are dropped rather than rendered; empty sections are omitted (Roofer shows header + Careers like this one only).
+- Only `--space-1..6, 8, 10, 12, 13, 14` exist in tokens.css; `--space-7` does not (it silently zeroed padding in the first pass). Do not use it.
+
+Assumptions to confirm with the user: "Whole country" tab shows the Typical pay figure (the reference did not show that tab's content); "Sign in to save this career." and "Play the ladder game" were not carried (logged-in prototype, no ladder game route); the world tag was removed from the header panel because it sat above the larger summary line.
+
+Verified at 1280x900 and 375x812: h1 56/Bricolage, h2 26/Bricolage, fact label 16 over value 15, rung title = pay = 18, no horizontal overflow, all four Carpenter logos load. Not pushed.

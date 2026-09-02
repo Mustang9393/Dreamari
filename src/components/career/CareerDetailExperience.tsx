@@ -4,104 +4,91 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Bookmark, BookOpen, ChevronDown, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
+import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { PosterCard } from "@/components/app/PosterCard";
-import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
-import { resolveCareer, similarCareers, type LadderRung } from "./data";
+import { resolveCareer, similarCareers, type ResolvedCareer } from "./data";
+import type { ProfileRung } from "./profiles";
 import { careerSlug } from "./slug";
 
-// Career Detail — built from the Figma "Career Detail" screens (node
-// 2591:3993), with the hierarchy/density refinements from direct feedback
-// on top: Median Salary (not Starting Salary) + Degree Required + Common
-// Majors as the three stat cards (Getting In dropped entirely), "Play Game"
-// not "Try Game", the You-really-need/Also-helps skill chips removed, and no
-// separate Education & Path section since degree + majors already sit in
-// the stat row. Similar Careers uses the app's own PosterCard (Mika's browse
-// card), not a one-off image.
+// Career Detail, rebuilt 2026-09-02 around the production page's information
+// (dreamonna.com/explore/<slug>; copy and data transcribed in profiles.ts and
+// never rewritten here) for readers who skim: US high schoolers.
 //
-// Type scale, held to exactly these five steps everywhere on this page
-// (weight carries emphasis before a new size does, per direct feedback):
-//   Career title   -> 36px Viaoda Libre (serif), the one place the poster
-//                     display face is used for body chrome, not just cards.
-//   Section heading -> 22px Montserrat Bold  ("Career Ladder", "Similar Careers", ...)
-//   Key value       -> 16px Bricolage SemiBold (stat values, ladder job titles)
-//   Body            -> 13px Montserrat (description, tab copy, one-liners)
-//   Label/metadata  -> 10-11px Montserrat SemiBold, uppercase, muted
+// What the reader sees first, and only that:
+//   the header card (title, one line on what it is, one line to imagine it),
+//   four quick facts, pay by state as bars, and the career ladder as three
+//   compact rows (title + pay, with a bar showing the pay climb). Everything
+//   below the ladder is folded: each section shows its heading and a one-line
+//   preview of its own first items, and opens on tap. Nothing is hidden, but
+//   nothing is thrown at the reader at once either.
+//
+// Type scale, five steps, strictly descending down the page and inside every
+// block (a value never outsizes the heading above it; labels never masquerade
+// as headings; sections open with their heading, not an eyebrow):
+//   Large    career title       Bricolage 800, 40/44 -> clamp(56..72) from sm
+//   Big      section heading    Bricolage 700, 22/26 -> 26/30 from sm
+//   Medium   sub-heading, rung title/pay  18/24 semibold (figures in Bricolage)
+//   Label    the name over a value        16/22 semibold  (facts, states, dt)
+//   Small    body, values                 15/22
+//   Tiny     dd under a Small dt          14/20
+//   (Chrome such as tab labels stays at 13px and is not part of the scale.)
+//
+// Spacing uses the marketing token scale (tokens.css defines 1-6, 8, 10, 12,
+// 13, 14 -- there is no --space-7, which is what silently zeroed the first
+// pass of this layout) or explicit px where a step in between is needed.
+const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+const BIG = "text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]";
+const MEDIUM = "text-[18px] leading-[24px] font-semibold";
+const FIGURE = "text-[18px] leading-[24px] font-bold tabular-nums";
+const LABEL = "text-[16px] leading-[22px] font-semibold";
+const SMALL = "text-[15px] leading-[22px]";
+const TINY = "text-[14px] leading-[20px]";
 
-// Same proportional-scaling convention as SimulationPlayer's dialogue box:
-// clamp()'s middle term is pure vw, so it's linear with viewport width; each
-// floor matches the old flat value exactly at 1440px (the 13" MacBook Air
-// reference width) and grows past that point, capped so it doesn't run away
-// on an ultrawide monitor. Below 1440px (including all of mobile) nothing
-// changes -- these are plain unprefixed sizes, not sm:-gated, since this
-// page's text doesn't need a separate phone-vs-tablet step, only a
-// desktop-vs-desktop one.
-const HEADING = "text-[clamp(22px,1.5278vw,32px)] leading-[clamp(28px,1.9444vw,41px)] font-bold";
-const KEY_VALUE = "text-[clamp(16px,1.1111vw,23px)] leading-[clamp(22px,1.5278vw,32px)] font-semibold";
-const BODY = "text-[clamp(13px,0.9028vw,19px)] leading-[clamp(18px,1.25vw,26px)]";
-const LABEL = "text-[clamp(10px,0.6944vw,15px)] leading-[clamp(14px,0.9722vw,20px)] font-semibold tracking-[0.4px] uppercase";
-
-// Simple Icons (cdn.simpleicons.org) covers the well-known consumer/dev tools
-// with a confident, exact slug; specialty industry software (Bloomberg
-// Terminal, Epic, LIMS, ForeFlight, etc.) has no reliable brand mark there,
-// so those names render as plain text — no icon is safer than a wrong one.
-// Per direct instruction, the same rule applies to anything that's close but
-// not exact: AutoCAD and MATLAB were dropped because Simple Icons only has
-// the parent company's mark (Autodesk / MathWorks), not the product's own
-// logo, and "Adobe Creative Suite" was dropped because the only Adobe icon
-// available is Creative Cloud's current logo, a different (later) product
-// under that name. The swatch is a fixed dark chip behind a white glyph
-// (same idea as PosterCard's salary badge) so it reads the same regardless
-// of theme, since Simple Icons serves one flat color per request rather than
-// following currentColor.
-const SOFTWARE_LOGO_SLUGS: Record<string, string> = {
-  Excel: "microsoftexcel",
-  PowerPoint: "microsoftpowerpoint",
-  "Microsoft Excel": "microsoftexcel",
-  "Microsoft Word": "microsoftword",
+// Real, current brand marks, committed under public/images/logos (sourced
+// from Wikimedia Commons, 2026-09-02) and shown on a small white tile so
+// every brand's own colors read on the dark page. A tool with no exact,
+// current mark gets the list's plain marker instead of a stand-in glyph.
+const LOGOS: Record<string, string> = {
+  Excel: "excel",
+  "Microsoft Excel": "excel",
+  "Microsoft Word": "word",
+  PowerPoint: "powerpoint",
+  "Microsoft Windows": "windows",
+  "Intuit QuickBooks": "quickbooks",
   Figma: "figma",
   Slack: "slack",
   Jira: "jira",
   "Git / GitHub": "github",
   Docker: "docker",
-  "VS Code": "visualstudiocode",
+  "VS Code": "vscode",
   SAP: "sap",
   Zoom: "zoom",
   Notion: "notion",
   Asana: "asana",
-  "Adobe Acrobat": "adobeacrobatreader",
+  "Adobe Acrobat": "acrobat",
   "R / RStudio": "rstudio",
   Sketch: "sketch",
-  Miro: "miro",
+  "Bloomberg Terminal": "bloomberg",
+  "Epic (EHR)": "epic",
 };
 
 function SoftwareLogo({ name }: { name: string }) {
-  const slug = SOFTWARE_LOGO_SLUGS[name];
-  if (!slug) return null;
+  const file = LOGOS[name];
+  if (!file) return null;
   return (
-    <span className="flex size-5 flex-none items-center justify-center rounded-full" style={{ background: "rgba(5,8,20,0.85)" }}>
-      <img
-        src={`https://cdn.simpleicons.org/${slug}/ffffff`}
-        alt=""
-        className="size-3"
-        onError={(e) => {
-          e.currentTarget.parentElement?.style.setProperty("display", "none");
-        }}
-      />
+    <span className="flex h-7 min-w-7 flex-none items-center justify-center rounded-[6px] bg-white px-[5px]">
+      {/* eslint-disable-next-line @next/next/no-img-element -- local SVG brand mark, no optimization wanted */}
+      <img src={`/images/logos/${file}.svg`} alt="" className="h-[18px] w-auto max-w-[72px] object-contain" />
     </span>
   );
 }
 
-// Most of these source photos are conventional headshots with the subject
-// in the upper half, so a top-anchored crop is the right default -- but not
-// all of them (the asset-manager photo seats him low against a tall bank of
-// monitors, so top-anchoring showed mostly ceiling/screens with his face cut
-// off at the very bottom edge). Rather than pick one global position that's
-// wrong for photos like that, this is a small per-career override, same idea
-// as Play's own characterAnchor overrides in locations.ts.
+// Per-career photo focal point for the header panel (most posters carry the
+// subject in the upper half; the exceptions are listed here).
 const HERO_FOCUS: Record<string, string> = {
   "asset-management": "center 68%",
 };
@@ -113,7 +100,7 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
-      className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border transition-transform duration-150 hover:-translate-y-px active:scale-95"
+      className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border"
       style={{ background: "var(--glass-surface-1)", borderColor: active ? "var(--accent-subtle)" : "var(--glass-border)", color: active ? "var(--accent-subtle)" : "var(--foreground)" }}
     >
       {children}
@@ -121,55 +108,192 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
   );
 }
 
-function LadderRow({ rung }: { rung: LadderRung }) {
-  const [open, setOpen] = useState(false);
+// ---- Section shells -------------------------------------------------------
+
+// Always-open section: heading row (with an optional control) over content.
+function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={() => setOpen((v) => !v)}
-      aria-expanded={open}
-      className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-5)] text-left"
-      style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
-    >
-      {/* Title and salary/chevron stack on a narrow phone (the salary's own
-         24px display figure plus the chevron were flex-none siblings eating
-         enough width to crush a two/three-word title into a ragged 3-line
-         column) and share one row from sm: up, where there's room. */}
-      <div className="flex w-full flex-col gap-[var(--space-3)] sm:flex-row sm:items-center">
-        <div className="flex min-w-0 flex-1 items-center gap-[var(--space-4)]">
-          <span className="flex size-9 flex-none items-center justify-center rounded-full border-[1.5px] text-[14px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
-            {rung.number}
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col gap-[2px] text-left">
-            <span className={KEY_VALUE}>{rung.jobTitle}</span>
-            {open && <span className={BODY} style={{ color: "var(--muted-foreground)" }}>{rung.oneLiner}</span>}
-          </span>
-        </div>
-        <div className="flex flex-none items-center justify-end gap-[var(--space-3)]">
-          <span className="flex-none text-[clamp(24px,1.6667vw,35px)] leading-[clamp(30px,2.0833vw,43px)] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{rung.salary}</span>
-          <ChevronDown className="h-5 w-5 flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
-        </div>
+    <section className="flex w-full flex-col gap-[var(--space-5)] border-t pt-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <h2 className={BIG} style={DISPLAY}>{title}</h2>
+        {action}
       </div>
-      {open && rung.skills.length > 0 && (
-        <div className="flex w-full flex-wrap gap-[var(--space-2)] pl-[52px]">
-          {rung.skills.map((skill) => (
-            <span key={skill} className={LABEL} style={{ color: "var(--muted-foreground)", background: "var(--glass-surface-1)", borderRadius: "var(--radius-sm)", padding: "4px 10px" }}>
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
-    </button>
+      {children}
+    </section>
   );
 }
+
+// Folded section: the heading is the control. Collapsed, it shows one muted
+// line previewing its own first items (the section's real words, truncated),
+// so a reader can skim the whole page from headings and previews alone and
+// open only what they want.
+function Folded({ id, title, preview, open, onToggle, children }: { id: string; title: string; preview: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <section className="flex w-full flex-col border-t" style={{ borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
+        onClick={onToggle}
+        className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-md)] px-[8px] py-[var(--space-5)] text-left"
+      >
+        <span className="flex min-w-0 flex-col gap-[6px]">
+          <h2 className={BIG} style={DISPLAY}>{title}</h2>
+          {!open && <span className={`${SMALL} truncate`} style={{ color: "var(--muted-foreground)" }}>{preview}</span>}
+        </span>
+        <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
+      </button>
+      <div id={`${id}-panel`} hidden={!open} className="pb-[var(--space-6)]">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+// One marker, one line per item. The marker is the world accent so the list
+// reads as this career's without a second color system.
+function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
+  return (
+    <ul className="flex flex-col gap-[var(--space-3)]">
+      {items.map((item) => (
+        <li key={item} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
+          {leading ? leading(item) : <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />}
+          <span className="min-w-0">{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ---- Career ladder --------------------------------------------------------
+
+// Three compact rows first: number, title, pay, and a bar under the title
+// showing how far up the pay climb this rung sits. The paragraph and the
+// "What you do" / "To get here" lines open per rung on tap.
+function Rung({ rung, accent, max, open, onToggle }: { rung: ProfileRung; accent: string; max: number; open: boolean; onToggle: () => void }) {
+  const value = Number(rung.pay.replace(/[^0-9]/g, "")) || 0;
+  const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
+  return (
+    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        onClick={hasDetail ? onToggle : undefined}
+        aria-expanded={hasDetail ? open : undefined}
+        className={`${hasDetail ? "dm-quiet cursor-pointer" : ""} -mx-[8px] grid w-[calc(100%+16px)] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] rounded-[var(--radius-md)] px-[8px] py-[var(--space-4)] text-left`}
+      >
+        <span
+          className={`${FIGURE} text-center`}
+          style={{ ...DISPLAY, backgroundImage: `linear-gradient(180deg, ${accent}, color-mix(in srgb, ${accent} 60%, #000))`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+        >
+          {rung.number}
+        </span>
+        <span className="flex min-w-0 flex-col gap-[8px]">
+          <span className={`${MEDIUM} truncate`}>{rung.jobTitle}</span>
+          {value > 0 && (
+            <span aria-hidden className="h-[4px] w-full max-w-[280px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-1)" }}>
+              <span className="block h-full rounded-full" style={{ width: `${Math.max(8, Math.round((value / max) * 100))}%`, background: accent }} />
+            </span>
+          )}
+        </span>
+        <span className="flex items-center gap-[var(--space-3)]">
+          <span className={FIGURE} style={{ ...DISPLAY, color: accent }}>{rung.pay}</span>
+          {hasDetail && <ChevronDown className="h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />}
+        </span>
+      </button>
+      {hasDetail && open && (
+        <div className="flex flex-col gap-[var(--space-3)] pb-[var(--space-5)] pl-[48px]">
+          {rung.description && <p className="max-w-[62ch] text-[16px] leading-[24px]">{rung.description}</p>}
+          {(rung.whatYouDo.length > 0 || rung.toGetHere.length > 0) && (
+            <dl className="flex flex-col gap-[var(--space-2)]">
+              {rung.whatYouDo.length > 0 && (
+                <div className="flex flex-col gap-[2px] sm:flex-row sm:gap-[var(--space-4)]">
+                  <dt className={`${SMALL} font-semibold sm:w-[112px] sm:flex-none`}>What you do</dt>
+                  <dd className={`${TINY} min-w-0 sm:pt-[1px]`} style={{ color: "var(--muted-foreground)" }}>{rung.whatYouDo.join(" · ")}</dd>
+                </div>
+              )}
+              {rung.toGetHere.length > 0 && (
+                <div className="flex flex-col gap-[2px] sm:flex-row sm:gap-[var(--space-4)]">
+                  <dt className={`${SMALL} font-semibold sm:w-[112px] sm:flex-none`}>To get here</dt>
+                  <dd className={`${TINY} min-w-0 sm:pt-[1px]`} style={{ color: "var(--muted-foreground)" }}>{rung.toGetHere.join(" · ")}</dd>
+                </div>
+              )}
+            </dl>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+// ---- Pay by state: figures as bars, so the comparison is one glance. -------
+
+function PayBars({ rows, accent }: { rows: { state: string; pay: string; value: number }[]; accent: string }) {
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  return (
+    <ul className="flex flex-col gap-[var(--space-4)]">
+      {rows.map((row) => (
+        <li key={row.state} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-4)] gap-y-[6px] sm:grid-cols-[150px_minmax(0,1fr)_72px]">
+          <span className={`${LABEL} min-w-0 truncate`}>{row.state}</span>
+          <span className={`${SMALL} text-right font-bold tabular-nums sm:order-3`} style={DISPLAY}>{row.pay}</span>
+          <span className="col-span-2 h-[8px] w-full overflow-hidden rounded-full sm:col-span-1 sm:order-2" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="block h-full rounded-full" style={{ width: `${Math.round((row.value / max) * 100)}%`, background: accent }} />
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Every career gets the same page shape. Careers without a full profile map
+// what the app already knows into it; sections with nothing to say are
+// skipped, never rendered empty or as a placeholder.
+const PLACEHOLDER = "Coming soon";
+function viewModel(career: ResolvedCareer) {
+  const p = career.profile;
+  const facts = p?.facts ?? [
+    { label: "Median salary", value: career.medianSalary },
+    { label: "Degree required", value: career.degreeRequired },
+    { label: "Common majors", value: career.commonMajors },
+  ];
+  const ladder: ProfileRung[] =
+    p?.ladder ??
+    (career.ladder ?? []).map((r) => ({ number: r.number, jobTitle: r.jobTitle, pay: r.salary, description: r.oneLiner, whatYouDo: r.skills, toGetHere: [] }));
+  const whatTheyDo = !p && career.whatTheyActuallyDo && career.whatTheyActuallyDo !== PLACEHOLDER ? career.whatTheyActuallyDo : null;
+  return {
+    summary: p?.summary ?? career.description,
+    scenario: p?.scenario ?? career.realLifeExample,
+    whatTheyDo,
+    facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER),
+    payByState: p?.payByState,
+    typicalPay: p?.facts.find((f) => f.label === "Typical pay")?.value ?? null,
+    knowAbout: p?.knowAbout ?? [],
+    goodAt: p?.goodAt ?? [],
+    software: career.software ?? [],
+    ladder,
+    education: p?.education,
+    sources: p?.sources,
+  };
+}
+
+const preview = (items: string[]) => items.join(" · ");
 
 export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
-  const [tab, setTab] = useState<"do" | "example">("do");
+  const [payTab, setPayTab] = useState<"best" | "country">("best");
+  const [openRung, setOpenRung] = useState<string | null>(null);
+  const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
+
+  const toggleSection = (id: string) =>
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   if (!career) {
     return (
@@ -186,6 +310,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const similar = similarCareers(career);
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
+  const vm = viewModel(career);
+  const ladderMax = Math.max(...vm.ladder.map((r) => Number(r.pay.replace(/[^0-9]/g, "")) || 0), 1);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 45%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 60%), var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -197,203 +323,240 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         <QuickLinksMenu />
       </header>
 
-      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] pb-[120px] md:pt-[var(--space-4)]">
-        {/* Hero */}
-        <section className="relative flex min-h-[300px] w-full flex-col overflow-hidden md:min-h-[260px] md:flex-row md:items-center md:gap-[var(--space-18)] md:rounded-[var(--radius-lg)]">
-          {/* Mobile: full-bleed background photo behind the full-width text,
-             with the Browse-card var(--poster-scrim) treatment for legibility
-             (photo peeking through up top, fading to a solid surface below).
-             Desktop: NOT full-bleed -- a contained photo panel on the right
-             side only (object-position tunable per career via HERO_FOCUS
-             below) so the actual subject stays in frame instead of getting
-             sliced away by one fixed crop. Only that panel's own left edge
-             fades into the page background, right where the text column
-             ends -- the rest of the photo reads at full brightness, not
-             washed out by a scrim over the whole hero. */}
-          <div className="absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 md:hidden">
-              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover object-top" />
-              <div className="absolute inset-0" style={{ backgroundImage: "var(--poster-scrim)" }} />
+      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Explore
+        </button>
+
+        {/* Header card, in the production page's look: the title on a panel in
+           the career's world color inside a dark card, the actions below.
+           Added: the career's own poster photo fills the card's right side on
+           desktop, so the page opens on a person doing the job. */}
+        <section className="relative overflow-hidden rounded-[var(--radius-2xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+          <div className="grid md:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="relative h-[210px] w-full md:hidden" aria-hidden>
+              <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "top" }} />
             </div>
-            {/* object-cover, top-anchored by default: contain avoided
-               cropping heads but left a hard-edged letterboxed rectangle
-               where the photo's own pixels stopped short of the panel.
-               Cover fills the panel edge to edge, and the panel's aspect
-               ratio is kept close enough to a portrait photo's own that
-               top-anchoring shows head-and-shoulders for most of these
-               photos -- HERO_FOCUS above overrides the small minority
-               composed differently. Shortened from a taller version per
-               direct feedback ("too far down, make it ~50% shorter") --
-               width came down with it, same aspect ratio, so the crop itself
-               doesn't get more aggressive, just smaller.
-               A background-color overlay on just the left edge (the earlier
-               approach here) only ever faded the seam facing the text --
-               the photo's other three edges stayed a flat rectangular cut
-               against the page, which read as a pasted-in "jpeg with a hard
-               border" once pointed out. mask-image dissolves the photo's own
-               pixels into transparency on every side at once (an off-center
-               ellipse, pulled toward the subject on the right, so the left
-               side -- closest to the text -- fades earliest and most, while
-               the subject stays fully opaque) -- there's no separate color
-               layer to keep in sync with the page's own background, since
-               this reveals whatever's actually behind it. */}
-            <div className="absolute inset-y-0 right-0 hidden w-[24%] overflow-hidden md:block">
+            <div className="flex flex-col">
+              <div
+                className="relative flex flex-col gap-[var(--space-3)] p-[var(--space-6)] sm:p-[var(--space-8)]"
+                style={{ background: `linear-gradient(135deg, ${accent}, color-mix(in srgb, ${accent} 78%, #000))`, color: "#fff" }}
+              >
+                <h1 className="w-full text-[40px] leading-[44px] font-extrabold tracking-[-0.02em] uppercase sm:text-[clamp(56px,4.2vw,72px)] sm:leading-[0.95]" style={{ ...DISPLAY, textWrap: "balance" }}>
+                  {career.title}
+                </h1>
+                {vm.summary && <p className={`${MEDIUM} max-w-[34ch] pt-[var(--space-2)]`}>{vm.summary}</p>}
+                {vm.scenario && <p className={`${SMALL} max-w-[52ch]`} style={{ color: "rgba(255,255,255,0.86)" }}>{vm.scenario}</p>}
+              </div>
+              <div className="flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-5)] sm:px-[var(--space-8)]">
+                {hasSimulation && (
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/play/${career.slug}`)}
+                    className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full px-[var(--space-5)] text-[15px] font-bold"
+                    style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+                  >
+                    <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
+                  </button>
+                )}
+                {hasGlossaryGame && (
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/play/glossary/${career.slug}`)}
+                    className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[var(--space-5)] text-[15px] font-bold"
+                    style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                  >
+                    <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
+                  </button>
+                )}
+                <div className="ml-auto flex items-center gap-[var(--space-2)]">
+                  <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
+                  <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
+                    <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
+                  </IconButton>
+                  <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
+                    <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
+                  </IconButton>
+                  <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
+                    <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
+                  </IconButton>
+                </div>
+              </div>
+            </div>
+            <div className="relative hidden min-h-[320px] md:order-last md:block" aria-hidden>
               <Image
                 src={career.photo}
                 alt=""
                 fill
-                sizes="24vw"
+                sizes="300px"
                 className="object-cover"
                 style={{
                   objectPosition: HERO_FOCUS[career.slug] ?? "top",
-                  maskImage: "radial-gradient(85% 105% at 74% 50%, black 30%, transparent 100%)",
-                  WebkitMaskImage: "radial-gradient(85% 105% at 74% 50%, black 30%, transparent 100%)",
+                  maskImage: "linear-gradient(90deg, transparent 0%, black 22%)",
+                  WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 22%)",
                 }}
               />
             </div>
           </div>
-          <div className="relative z-[1] flex w-full flex-col items-start gap-[var(--space-3)] px-5 py-[var(--space-8)] md:max-w-[650px] md:px-8">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label="Back"
-              className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-            </button>
-            <span className={LABEL} style={{ color: accent }}>{career.world}</span>
-            <h1 className="w-full text-[30px] leading-[36px] uppercase sm:text-[clamp(36px,2.5vw,52px)] sm:leading-[clamp(42px,2.9167vw,60px)]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>
-              {career.title}
-            </h1>
-            {career.description && <p className={BODY} style={{ color: "var(--muted-foreground)" }}>{career.description}</p>}
-            <div className="flex w-full flex-wrap items-center gap-[var(--space-3)]">
-              {hasSimulation && (
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/${career.slug}`)}
-                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-                  style={{ background: "var(--foreground)", color: "var(--background)", fontFamily: "var(--font-display)" }}
-                >
-                  Play Game <Gamepad2 className="h-4 w-4" aria-hidden />
-                </button>
-              )}
-              {hasGlossaryGame ? (
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
-                  style={{ borderColor: accent, color: "var(--foreground)" }}
-                >
-                  Glossary Game <BookOpen className="h-4 w-4" aria-hidden />
-                </button>
-              ) : (
-                <span
-                  className="flex min-h-[44px] items-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
-                  style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-                  aria-disabled
-                >
-                  Glossary Game <span className={LABEL}>· Coming soon</span>
-                </span>
-              )}
-              <div className="flex items-center gap-[var(--space-2)]">
-                <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
-                <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
-                  <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
-                </IconButton>
-                <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
-                  <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
-                </IconButton>
-                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
-                  <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
-                </IconButton>
-              </div>
-            </div>
-          </div>
         </section>
 
-        <div className="flex w-full flex-col gap-[var(--space-6)] px-5 md:px-8">
-          {/* Three quick facts only */}
-          <div className="grid w-full grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-            {[
-              { label: "Median Salary", value: career.medianSalary },
-              { label: "Degree Required", value: career.degreeRequired },
-              { label: "Common Majors", value: career.commonMajors },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-[8px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-                <span className={KEY_VALUE}>{stat.label}</span>
-                <span className={BODY} style={{ color: "var(--muted-foreground)" }}>{stat.value}</span>
+        {/* Quick facts: one strip, internal dividers, label over figure. */}
+        {vm.facts.length > 0 && (
+          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-xl)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+            {vm.facts.map((fact, i) => (
+              <div
+                key={fact.label}
+                data-fact-cell
+                className={`flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                style={{ borderColor: "var(--glass-border)" }}
+              >
+                <span className={LABEL}>{fact.label}</span>
+                <span className={`${SMALL} font-medium`} style={{ ...DISPLAY, color: "var(--muted-foreground)" }}>{fact.value}</span>
               </div>
             ))}
-          </div>
+          </section>
+        )}
 
-          {/* What They Actually Do | Real-life Example */}
-          <div className="flex w-full flex-col gap-[var(--space-5)]">
-            {/* Full-width rows on mobile, side by side from sm: up -- at the
-               Subheading size these labels are too wide to sit side by side
-               on a narrow phone without either wrapping mid-phrase or
-               shrinking the type scale just for this one spot; stacking
-               instead keeps the size and gives each label its own full row
-               to sit on one line. */}
-            <div className="flex flex-col items-stretch gap-[var(--space-3)] sm:flex-row sm:items-start sm:gap-[var(--space-4)]">
-              <button type="button" onClick={() => setTab("do")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                <span className={`${KEY_VALUE} whitespace-nowrap`} style={{ color: tab === "do" ? "var(--foreground)" : "var(--muted-foreground)" }}>What They Actually Do</span>
-                <span className="h-[2px] w-full" style={{ background: tab === "do" ? "var(--accent)" : "transparent" }} />
-              </button>
-              {career.realLifeExample && (
-                <button type="button" onClick={() => setTab("example")} className="flex cursor-pointer flex-col items-start gap-[var(--space-1)]">
-                  <span className={`${KEY_VALUE} whitespace-nowrap`} style={{ color: tab === "example" ? "var(--foreground)" : "var(--muted-foreground)" }}>Real-life Example</span>
-                  <span className="h-[2px] w-full" style={{ background: tab === "example" ? "var(--accent)" : "transparent" }} />
-                </button>
-              )}
-            </div>
-            <p className={`${BODY} w-full`}>
-              {tab === "do" ? career.whatTheyActuallyDo : career.realLifeExample}
-            </p>
-          </div>
-
-          {/* Career Ladder */}
-          {career.ladder && career.ladder.length > 0 && (
-            <section className="flex w-full flex-col gap-[var(--space-4)]">
-              <h2 className={HEADING} style={{ fontFamily: "var(--font-body)" }}>Career Ladder</h2>
-              <div className="flex w-full flex-col gap-[var(--space-4)]">
-                {career.ladder.map((rung) => <LadderRow key={rung.number} rung={rung} />)}
-              </div>
-            </section>
-          )}
-
-          {/* 5 Common Softwares Needed — placeholder pending the real per-career
-             list; flagged to the user, not final content. */}
-          {career.software && career.software.length > 0 && (
-            <section className="flex w-full flex-col gap-[var(--space-4)]">
-              <h2 className={HEADING} style={{ fontFamily: "var(--font-body)" }}>{career.software.length} Common Softwares Needed</h2>
-              <div className="flex flex-wrap gap-[var(--space-3)]">
-                {career.software.map((name) => (
-                  <span
-                    key={name}
-                    className={`${KEY_VALUE} flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]`}
-                    style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
+        {vm.payByState && (
+          <Section
+            title="Pay by state"
+            action={
+              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                {([["best", "Best states"], ["country", "Whole country"]] as const).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={payTab === id}
+                    onClick={() => setPayTab(id)}
+                    className="dm-quiet min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
+                    style={{ background: payTab === id ? "var(--foreground)" : "transparent", color: payTab === id ? "var(--background)" : "var(--foreground)" }}
                   >
-                    <SoftwareLogo name={name} />
-                    {name}
-                  </span>
+                    {label}
+                  </button>
                 ))}
               </div>
-            </section>
-          )}
+            }
+          >
+            {payTab === "best" ? (
+              <PayBars rows={vm.payByState.best} accent={accent} />
+            ) : (
+              <div className="flex items-baseline gap-[var(--space-4)]">
+                <span className={LABEL}>Typical pay</span>
+                <span className={`${SMALL} font-bold tabular-nums`} style={DISPLAY}>{vm.typicalPay}</span>
+              </div>
+            )}
+          </Section>
+        )}
 
-          {/* Similar Careers — the real PosterCard grid */}
-          {similar.length > 0 && (
-            <section className="flex w-full flex-col gap-[var(--space-4)]">
-              <h2 className={HEADING} style={{ fontFamily: "var(--font-body)", color: accent }}>Similar Careers</h2>
-              <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>
-                {similar.map((c) => (
-                  <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
-                ))}
+        {vm.ladder.length > 0 && (
+          <Section title="Career ladder">
+            <ol className="flex flex-col">
+              {vm.ladder.map((rung) => (
+                <Rung key={rung.number} rung={rung} accent={accent} max={ladderMax} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
+              ))}
+            </ol>
+          </Section>
+        )}
+
+        {/* Folded from here down. */}
+        {vm.whatTheyDo && (
+          <Folded id="what-they-do" title="What they actually do" preview={vm.whatTheyDo} open={openSections.has("what-they-do")} onToggle={() => toggleSection("what-they-do")}>
+            <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>
+          </Folded>
+        )}
+
+        {vm.knowAbout.length > 0 && (
+          <Folded id="know-about" title="What you need to know about" preview={preview(vm.knowAbout)} open={openSections.has("know-about")} onToggle={() => toggleSection("know-about")}>
+            <DotList items={vm.knowAbout} accent={accent} />
+          </Folded>
+        )}
+
+        {vm.goodAt.length > 0 && (
+          <Folded id="good-at" title="What you would need to be good at" preview={preview(vm.goodAt)} open={openSections.has("good-at")} onToggle={() => toggleSection("good-at")}>
+            <DotList items={vm.goodAt} accent={accent} />
+          </Folded>
+        )}
+
+        {vm.software.length > 0 && (
+          <Folded id="software" title="Software you would use" preview={preview(vm.software)} open={openSections.has("software")} onToggle={() => toggleSection("software")}>
+            <DotList
+              items={vm.software}
+              accent={accent}
+              leading={(name) =>
+                LOGOS[name] ? <SoftwareLogo name={name} /> : <span aria-hidden className="mx-[11px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
+              }
+            />
+          </Folded>
+        )}
+
+        {vm.education && (
+          <Folded
+            id="education"
+            title="Education"
+            preview={preview([...vm.education.studies.map((s) => s.name), ...vm.education.where.map((w) => `${w.count} ${w.credential}`)])}
+            open={openSections.has("education")}
+            onToggle={() => toggleSection("education")}
+          >
+            <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
+              <div className="flex flex-col gap-[var(--space-3)]">
+                <h3 className={MEDIUM}>What people study for it</h3>
+                <ul className="flex flex-col gap-[var(--space-2)]">
+                  {vm.education.studies.map((s) => (
+                    <li key={s.name}>
+                      {s.href ? (
+                        <a href={s.href} target="_blank" rel="noreferrer" className={`dm-link ${SMALL} inline-flex items-center gap-[6px]`} style={{ color: "var(--accent-subtle)" }}>
+                          {s.name} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                        </a>
+                      ) : (
+                        <span className={`${SMALL} inline-flex items-center gap-[var(--space-3)]`}>
+                          <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
+                          {s.name}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </section>
-          )}
-        </div>
+              <div className="flex flex-col gap-[var(--space-3)]">
+                <h3 className={MEDIUM}>Where you would study it</h3>
+                <ul className="flex flex-col">
+                  {vm.education.where.map((w, i) => (
+                    <li key={w.credential} className={`flex items-baseline gap-[var(--space-4)] py-[var(--space-2)] ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                      <span className={`${SMALL} w-[48px] flex-none font-bold tabular-nums`} style={DISPLAY}>{w.count}</span>
+                      {w.href ? (
+                        <a href={w.href} target="_blank" rel="noreferrer" className={`dm-link ${SMALL} inline-flex items-center gap-[6px]`} style={{ color: "var(--accent-subtle)" }}>
+                          {w.credential} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                        </a>
+                      ) : (
+                        <span className={SMALL}>{w.credential}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Folded>
+        )}
+
+        {similar.length > 0 && (
+          <Section title="Careers like this one">
+            <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>
+              {similar.map((c) => (
+                <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {vm.sources && (
+          <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{vm.sources}</p>
+        )}
       </main>
 
       <MobileNav active="Explore" />
