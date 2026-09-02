@@ -140,19 +140,87 @@ export function CardHud({ percent, almostDone }: { percent: number; almostDone?:
   );
 }
 
-export function QuestionHeading({ title, subtitle, sprite }: { title: string; subtitle?: string; sprite?: string }) {
+// Local burst particle vectors (deterministic, no randomness at render — SSR-safe
+// and consistent): 10 particles fanning up/outward from Dreamy's head.
+const BURST_PARTICLES = Array.from({ length: 10 }, (_, i) => {
+  const angle = (-95 + i * 21) * (Math.PI / 180);
+  const distance = 46 + (i % 3) * 16;
+  return {
+    bx: `${Math.round(Math.cos(angle) * distance)}px`,
+    by: `${Math.round(Math.sin(angle) * distance)}px`,
+    br: `${i % 2 === 0 ? 200 : -160}deg`,
+    delay: `${(i % 4) * 0.03}s`,
+    color: ["var(--color-brand-400)", "var(--color-accent-purple)", "var(--color-world-arts-media-sport)", "var(--color-world-business-money-office)"][i % 4],
+  };
+});
+
+export function LocalBurst({ nonce }: { nonce: number }) {
+  if (nonce === 0) return null;
+  return (
+    <div key={nonce} aria-hidden className="pointer-events-none absolute inset-0">
+      {BURST_PARTICLES.map((particle, i) => (
+        <span
+          key={i}
+          className="absolute top-1/3 left-1/2 h-1.5 w-1.5 rounded-[2px] motion-safe:animate-[dreamy-burst_0.7s_ease-out_forwards]"
+          style={{
+            background: particle.color,
+            ["--bx" as string]: particle.bx,
+            ["--by" as string]: particle.by,
+            ["--br" as string]: particle.br,
+            animationDelay: particle.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+const REACTION_MS = 950;
+const REACTION_SPRITE = "/images/dreamy/v2/dreamy-heart.png";
+
+export function QuestionHeading({
+  title,
+  subtitle,
+  sprite,
+  reactionNonce,
+}: {
+  title: string;
+  subtitle?: string;
+  sprite?: string;
+  // Omit entirely on steps where a celebratory reaction is the wrong tone
+  // (cost, location, education-level, profile) -- those are the flow's
+  // stakes-bearing questions, not identity picks. Only threaded through on
+  // Interests/Subjects/Work Vibe, per direct instruction: relevant screens
+  // only, not every screen or interaction.
+  reactionNonce?: number;
+}) {
   // Left-aligned per the frameless Figma frame (3214-7363) — big, anchored to
   // the same grid as the options below. Dreamy sits beside the question,
   // ASKING it (the old speech-bubble row is retired to free vertical space).
+  const [reacting, setReacting] = useState(false);
+  const lastNonce = useRef(reactionNonce ?? 0);
+
+  useEffect(() => {
+    if (reactionNonce === undefined || reactionNonce === lastNonce.current) return;
+    lastNonce.current = reactionNonce;
+    setReacting(true);
+    const timer = setTimeout(() => setReacting(false), REACTION_MS);
+    return () => clearTimeout(timer);
+  }, [reactionNonce]);
+
   return (
     <div className="mb-5 flex items-center gap-3 sm:mb-7 sm:gap-4">
       {sprite && (
-        <img
-          src={sprite}
-          alt=""
-          aria-hidden
-          className="h-[52px] w-[52px] flex-none object-contain motion-safe:animate-[dreamy-celebrate_3.2s_ease-in-out_infinite] sm:h-[72px] sm:w-[72px]"
-        />
+        <div className="relative h-[52px] w-[52px] flex-none sm:h-[72px] sm:w-[72px]">
+          <img
+            key={reacting ? REACTION_SPRITE : sprite}
+            src={reacting ? REACTION_SPRITE : sprite}
+            alt=""
+            aria-hidden
+            className="h-full w-full object-contain motion-safe:animate-[dreamy-celebrate_3.2s_ease-in-out_infinite]"
+          />
+          {reactionNonce !== undefined && <LocalBurst nonce={reactionNonce} />}
+        </div>
       )}
       <div>
       <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>

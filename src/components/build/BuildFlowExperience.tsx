@@ -52,13 +52,21 @@ export function BuildFlowExperience() {
   const [stageIndex, setStageIndex] = useState(0);
   const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
   const [phase, setPhase] = useState<Phase>("build");
+  // Dreamy's heart-burst reaction, restored -- but only rendered on the
+  // identity steps (Interests/Subjects/Work Vibe) that pass reactionNonce
+  // into their own QuestionHeading call. Every step still calls react() on
+  // selection, but on the stakes-bearing steps (cost, location, education,
+  // profile) nothing listens for it, so nothing shows -- a celebratory
+  // heart-burst is the wrong tone for "what total school cost feels
+  // realistic," not just an unfinished wire-up.
+  const [reactionNonce, setReactionNonce] = useState(0);
 
   const stage = STAGES[stageIndex];
   const stageId: StageId = stage.id;
 
   const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
   const back = () => setStageIndex((current) => Math.max(current - 1, 0));
-  const react = () => {}; // Dreamy reactions retired with the bubble row
+  const react = () => setReactionNonce((n) => n + 1);
   const seeMatches = () => setPhase("loading");
 
   useEffect(() => {
@@ -96,7 +104,7 @@ export function BuildFlowExperience() {
   }, [phase, stageIndex]);
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
-  const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite };
+  const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite };
 
   let content: ReactNode = null;
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;

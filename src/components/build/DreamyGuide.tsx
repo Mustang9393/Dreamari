@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { bricolage } from "./fonts";
-import { InkText } from "./ui";
+import { InkText, LocalBurst } from "./ui";
+
+// Re-exported for existing external consumers (MatchLab, the Glossary game)
+// that import LocalBurst from this module -- it now lives in ui.tsx
+// alongside QuestionHeading's own reaction burst, but the public import
+// path stays stable so nothing else needs to change.
+export { LocalBurst };
 
 // The flow's interactive Dreamy — gamified, Duolingo-style: he PERCHES on the
 // question block's top edge (the parent overlaps him onto the card, deliberately
@@ -20,41 +26,6 @@ type DreamyGuideProps = {
 };
 
 const REACTION_MS = 950;
-
-// Local burst particle vectors (deterministic, no randomness at render — SSR-safe
-// and consistent): 10 particles fanning up/outward from Dreamy's head.
-const BURST_PARTICLES = Array.from({ length: 10 }, (_, i) => {
-  const angle = (-95 + i * 21) * (Math.PI / 180);
-  const distance = 46 + (i % 3) * 16;
-  return {
-    bx: `${Math.round(Math.cos(angle) * distance)}px`,
-    by: `${Math.round(Math.sin(angle) * distance)}px`,
-    br: `${i % 2 === 0 ? 200 : -160}deg`,
-    delay: `${(i % 4) * 0.03}s`,
-    color: ["var(--color-brand-400)", "var(--color-accent-purple)", "var(--color-world-arts-media-sport)", "var(--color-world-business-money-office)"][i % 4],
-  };
-});
-
-export function LocalBurst({ nonce }: { nonce: number }) {
-  if (nonce === 0) return null;
-  return (
-    <div key={nonce} aria-hidden className="pointer-events-none absolute inset-0">
-      {BURST_PARTICLES.map((particle, i) => (
-        <span
-          key={i}
-          className="absolute top-1/3 left-1/2 h-1.5 w-1.5 rounded-[2px] motion-safe:animate-[dreamy-burst_0.7s_ease-out_forwards]"
-          style={{
-            background: particle.color,
-            ["--bx" as string]: particle.bx,
-            ["--by" as string]: particle.by,
-            ["--br" as string]: particle.br,
-            animationDelay: particle.delay,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.png" }: DreamyGuideProps) {
   const tiltRef = useRef<HTMLDivElement | null>(null);

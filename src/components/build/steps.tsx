@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, QuestionHeading, StepFooter } from "./ui";
-import { LocalBurst } from "./DreamyGuide";
+import { CardHud, ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter } from "./ui";
 import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
@@ -33,6 +32,7 @@ export type StepProps = {
   onBack?: () => void;
   onNext: () => void;
   react: () => void;
+  reactionNonce: number;
   percent: number;
   almostDone?: boolean;
   sprite?: string;
@@ -58,12 +58,12 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
   INTEREST_WORLDS.map((world) => [world.label, `var(--color-world-${world.slug})`]),
 );
 
-export function InterestsStep({ state, patch, onNext, react, percent, sprite }: StepProps) {
+export function InterestsStep({ state, patch, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="What sounds interesting?" subtitle="Choose up to 2" />
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
@@ -109,12 +109,12 @@ export function InterestsStep({ state, patch, onNext, react, percent, sprite }: 
   );
 }
 
-export function SubjectsStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
+export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
           options={SUBJECTS}
           selected={state.subjects}
@@ -187,12 +187,12 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
   );
 }
 
-export function WorkVibeStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
+export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col justify-center">
       <CardHud percent={percent} />
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="Where do you work best?" subtitle="Pick one from each row." />
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
            RIGHT as vibrant statements — a different rhythm from the grid
            steps. On phones the summary tucks below the rows. */}
