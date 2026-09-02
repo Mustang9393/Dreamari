@@ -520,7 +520,7 @@ export function MatchLab() {
                     // Full literal class strings per direction (not a template): Tailwind
                     // only generates classes it can see whole in source. The plain
                     // guide-preview-* marker is for globals.css's stamp rule, not Tailwind.
-                    className={`absolute inset-x-0 top-0 bottom-7 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
+                    className={`absolute inset-x-0 top-0 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
                       !nudging
                         ? ""
                         : guideGesture === "right"
@@ -538,6 +538,15 @@ export function MatchLab() {
                       transform,
                       opacity: isExiting ? 0 : 1 - depth * 0.26,
                       transition: isDragging ? "none" : "transform 0.38s cubic-bezier(0.22,1,0.36,1), opacity 0.38s",
+                      // The deck area is `flex-1`, so on a tall desktop viewport
+                      // (a MacBook Pro screen, not a phone) this card stretched
+                      // edge-to-edge to fill it -- a 440px-wide card that tall
+                      // reads as broken, not just big. `min()` keeps the old
+                      // "fill available height minus the 28px stack-peek band"
+                      // behavior on phone-sized viewports (where that's under
+                      // the cap anyway) while capping it to a real phone-card
+                      // proportion everywhere else.
+                      height: "min(calc(100% - 28px), 680px)",
                     }}
                     onPointerDown={isTop ? onPointerDown : undefined}
                     onPointerMove={isTop ? onPointerMove : undefined}

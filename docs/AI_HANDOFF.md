@@ -40,6 +40,20 @@ tokens above, in both modes).
 
 - Date: 2026-09-02
 
+### 2026-09-02 (later) Match Lab: cap the deck card's height on wide desktop viewports
+
+- Direct report with a screenshot from a MacBook Pro: the swipe card was
+  stretching edge-to-edge, nearly the full viewport height, on a wide desktop
+  screen. Root cause: the card div is `absolute inset-x-0 top-0 bottom-7`
+  inside a `flex-1` deck area, so its height was always "100% of whatever
+  vertical space the page happens to have" -- fine on a phone viewport, wrong
+  on a tall desktop one, at a fixed 440px card width.
+  `src/components/match-lab/MatchLab.tsx`: replaced `bottom-7` with an inline
+  `height: "min(calc(100% - 28px), 680px)"` -- unchanged on phone-sized
+  viewports (already under the cap), capped everywhere else. Live-verified at
+  1512x982: card now reads as a real card, not a stretched banner.
+- `npx tsc --noEmit` and `eslint` clean. Not yet committed.
+
 ### 2026-09-02 Profile dashboard cleanup; Match Lab gesture-guide fixes (COMMITTED, not yet pushed)
 
 - **Profile page** (`ProfileExperience.tsx`, `data.ts`, `report-data.ts`), all per direct, itemized feedback:
