@@ -62,7 +62,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
@@ -115,7 +115,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
@@ -199,7 +199,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
@@ -238,12 +238,17 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
-        {/* one horizontal line, per feedback — a different rhythm from the
-           grids; phones swipe the same line */}
-        <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:auto-rows-fr sm:grid-cols-5 sm:overflow-visible sm:pb-0">
+        {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
+           direct feedback: a scrolling row of answer options reads as broken,
+           not as a deliberate rhythm change). Fits as many of the 5 cards as
+           the width allows in one row and wraps the rest -- on a typical phone
+           that's 2 per row, tablet usually 3-4, desktop all 5 in one row --
+           instead of a fixed breakpoint guess that can still overflow or cut
+           cards off at in-between widths (tablet split-view, foldables, etc). */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2">
           {EDUCATION_OPTIONS.map((option, optionIndex) => {
             const isSelected = state.education === option.title;
             const glowing = isSelected && confirming;
@@ -257,7 +262,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                   react();
                   patch({ education: option.title });
                 }}
-                className={`relative h-full min-w-[168px] flex-none rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px sm:min-w-0 ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+                className={`relative h-full rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
                   borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
@@ -336,7 +341,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">

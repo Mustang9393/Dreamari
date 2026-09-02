@@ -35,7 +35,9 @@ function mix(a: [number, number, number], b: [number, number, number], t: number
   return `rgb(${r}, ${g}, ${bl})`;
 }
 
-function barGradientColorAt(fraction: number): string {
+// Exported so PhaseProgress can drive the bar's OWN pulse off the exact same color the
+// spark uses -- congruent, not just "the bar's normal gradient, brighter."
+export function barGradientColorAt(fraction: number): string {
   const fallback: [string, string, string] = ["#4767f3", "#8b5cf6", "#ff4585"];
   const names = ["--color-brand-500", "--color-accent-purple", "--color-world-arts-media-sport"];
   const cs = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;

@@ -8,7 +8,7 @@ import { cascade } from "./variant";
 import { CONFIRM_GLOW_MS, dispatchConfirmPulse, useConfirmGlow } from "./confirmPulse";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { ProgressSpark } from "./ProgressSpark";
+import { barGradientColorAt, ProgressSpark } from "./ProgressSpark";
 
 export { useConfirmGlow };
 
@@ -140,19 +140,32 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
   }, [percent]);
 
   useEffect(() => {
-    // The bar's fill pulses brighter in step with the spark (same nonce/timing),
-    // instead of the spark being a decoration floating over an otherwise-static bar --
-    // driven via the Web Animations API rather than a CSS class toggle, since the
+    // The bar's fill pulses -- brightness AND an actual colored glow, in the spark's
+    // own matched color, not just "brighter of whatever the bar's static gradient
+    // already is" -- in step with the spark (same nonce/timing, same source color),
+    // for every firing alike (a real advance or one of the occasional idle loops), so
+    // the bar never just sits there while something else lights up next to it.
+    // Driven via the Web Animations API rather than a CSS class toggle, since the
     // element never remounts (a toggled class needs a real off-state to re-trigger,
-    // and this needs to restart cleanly on every nonce, growth or idle alike) and
-    // without `fill: "forwards"` it reverts cleanly to the underlying inline
-    // boxShadow/background once done, so nothing needs to be manually reset.
+    // and this needs to restart cleanly on every nonce) and without `fill: "forwards"`
+    // it reverts cleanly to the underlying inline boxShadow/background once done, so
+    // nothing needs to be manually reset.
     if (!comet || !fillRef.current) return;
+    const glowColor = barGradientColorAt(comet.to / 100);
+    const restingShadow = "0 0 10px 0 color-mix(in srgb, var(--color-accent-purple) 55%, transparent)";
+    const glowShadow = (spread: number, blur: number) => `0 0 ${blur}px ${spread}px ${glowColor}`;
+    // An irregular multi-peak flicker (real electricity doesn't ramp smoothly up and
+    // down once) rather than one clean pulse -- matches the spark's own erratic
+    // timing instead of reading as a separate, calmer animation next to it.
     const anim = fillRef.current.animate(
       [
-        { filter: "brightness(1) saturate(1)", offset: 0 },
-        { filter: "brightness(1.5) saturate(1.35)", offset: 0.4 },
-        { filter: "brightness(1) saturate(1)", offset: 1 },
+        { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 0 },
+        { filter: "brightness(1.65) saturate(1.4)", boxShadow: glowShadow(4, 24), offset: 0.12 },
+        { filter: "brightness(1.1) saturate(1.1)", boxShadow: glowShadow(1, 12), offset: 0.24 },
+        { filter: "brightness(1.55) saturate(1.35)", boxShadow: glowShadow(3, 20), offset: 0.4 },
+        { filter: "brightness(1.05) saturate(1.05)", boxShadow: glowShadow(1, 10), offset: 0.55 },
+        { filter: "brightness(1.4) saturate(1.25)", boxShadow: glowShadow(2, 16), offset: 0.7 },
+        { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 1 },
       ],
       { duration: 700, easing: "ease-out" },
     );

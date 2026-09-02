@@ -82,7 +82,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col justify-[safe_center]">
+      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
