@@ -33,6 +33,12 @@ import { DECK, MAX_SLOTS, type Career } from "./data";
 
 const SWIPE_COMMIT_PX = 100;
 
+// TEMP for the demo, per direct request: show the gesture guide every
+// reload, not gated by "seen once ever". Flip back to false (the mount
+// effect below falls back to checking guideSeenKey) once this settles and
+// the hint should go back to first-visit-only.
+const DEMO_ALWAYS_SHOW_GUIDE = true;
+
 type HistoryEntry =
   | { type: "pass"; career: Career; prevDeckIndex: number }
   | { type: "like"; career: Career; prevDeckIndex: number }
@@ -61,13 +67,26 @@ export function MatchLab() {
   // Progressive, on-card gesture teaching -- one direction at a time,
   // spotlighting the real card instead of a modal listing all three at
   // once (which read as confusing per direct feedback: "all 3 gestures at
-  // once explained is confusing"). Auto-advances on a timer, but also the
-  // instant the matching real gesture happens, so a student who already
-  // gets it isn't stuck waiting out a clock. First-visit only.
+  // once explained is confusing"). Cycles through the three directions on
+  // an idle timer purely for visibility -- that timer must NEVER be what
+  // dismisses the hint, or a student who steps away/isn't looking loses it
+  // permanently after ~8s without ever having seen it (exactly what
+  // happened: it was marking itself "seen" on a blind timeout regardless
+  // of whether anyone actually looked). Only a genuine action ends it and
+  // persists "seen": GestureSpotlight's own full-screen overlay intercepts
+  // the first tap itself (it has to, to sit on top of the card), so that
+  // tap IS the dismiss -- the real gesture then lands on the actual card
+  // right after. like()/pass()/the scroll claim also call dismissGuideRef
+  // directly, for the rare case a gesture reaches the card without the
+  // overlay's own tap firing first.
   const [guideStep, setGuideStep] = useState<0 | 1 | 2 | null>(null);
   const guideSeenKey = "dreamari:hint-seen:match-swipe";
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      if (DEMO_ALWAYS_SHOW_GUIDE) {
+        setGuideStep(0);
+        return;
+      }
       try {
         if (!window.localStorage.getItem(guideSeenKey)) setGuideStep(0);
       } catch {
@@ -78,26 +97,29 @@ export function MatchLab() {
   }, []);
   // Kept fresh via effect (matching dragLive's own pattern just below),
   // not assigned during render -- refs can't be written while rendering.
-  const advanceGuideRef = useRef<() => void>(() => {});
+  const cycleGuideRef = useRef<() => void>(() => {});
+  const dismissGuideRef = useRef<() => void>(() => {});
   useEffect(() => {
-    advanceGuideRef.current = () => {
+    cycleGuideRef.current = () => {
+      setGuideStep((step) => (step === null ? null : (((step + 1) % 3) as 0 | 1 | 2)));
+    };
+    dismissGuideRef.current = () => {
       setGuideStep((step) => {
         if (step === null) return null;
-        if (step >= 2) {
+        if (!DEMO_ALWAYS_SHOW_GUIDE) {
           try {
             window.localStorage.setItem(guideSeenKey, "1");
           } catch {
             // Nothing to persist to; the hint just won't reappear this mount.
           }
-          return null;
         }
-        return (step + 1) as 0 | 1 | 2;
+        return null;
       });
     };
   });
   useEffect(() => {
     if (guideStep === null) return;
-    const timer = window.setTimeout(() => advanceGuideRef.current(), 2400);
+    const timer = window.setTimeout(() => cycleGuideRef.current(), 2400);
     return () => window.clearTimeout(timer);
   }, [guideStep]);
   const [decisionOpen, setDecisionOpen] = useState(false);
@@ -136,7 +158,7 @@ export function MatchLab() {
 
   function pass() {
     if (!top || exiting) return;
-    advanceGuideRef.current();
+    dismissGuideRef.current();
     setHistory((h) => [...h, { type: "pass", career: top, prevDeckIndex: deckIndex }]);
     setExiting({ id: top.id, dir: -1 });
     setTimeout(advance, 380);
@@ -144,7 +166,7 @@ export function MatchLab() {
 
   function like(e?: React.MouseEvent) {
     if (!top || exiting) return;
-    advanceGuideRef.current();
+    dismissGuideRef.current();
     if (liked.length >= MAX_SLOTS) {
       // Slots full: the card stays put and the swap sheet asks who leaves.
       setSwapFor(top);
@@ -303,7 +325,7 @@ export function MatchLab() {
         if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) claimed = "h";
         else if (Math.abs(dy) > 12) {
           claimed = "v"; // browser scrolls; we stand down
-          advanceGuideRef.current();
+          dismissGuideRef.current();
         } else return;
       }
       if (claimed === "h") {
@@ -488,21 +510,21 @@ export function MatchLab() {
         targetRef={cardRef}
         direction="right"
         label="Swipe right to save"
-        onDismiss={() => advanceGuideRef.current()}
+        onDismiss={() => dismissGuideRef.current()}
       />
       <GestureSpotlight
         active={guideStep === 1}
         targetRef={cardRef}
         direction="left"
         label="Swipe left to pass"
-        onDismiss={() => advanceGuideRef.current()}
+        onDismiss={() => dismissGuideRef.current()}
       />
       <GestureSpotlight
         active={guideStep === 2}
         targetRef={cardRef}
         direction="up"
         label="Scroll up for details"
-        onDismiss={() => advanceGuideRef.current()}
+        onDismiss={() => dismissGuideRef.current()}
       />
 
       {/* ---- decision sheet at 3 matches ---- */}
