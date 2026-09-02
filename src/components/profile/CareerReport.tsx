@@ -680,7 +680,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
           </label>
 
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[22px] text-[14px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
+            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[22px] text-[14px] font-semibold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
               Save Reflection
             </button>
             <span aria-live="polite" className="flex items-center gap-[5px] text-[13px] font-bold" style={{ color: saved ? "var(--ink-soft)" : "var(--ink-faint)" }}>
@@ -752,7 +752,7 @@ function ShareTab() {
         <span className="text-[12px] font-bold tracking-[0.8px] uppercase" style={{ color: "var(--muted-foreground)" }}>Or copy link</span>
         <div className="flex items-stretch gap-[var(--space-2)]">
           <input readOnly value={link} onFocus={(event) => event.target.select()} aria-label="Report link" className="min-w-0 flex-1 rounded-[var(--radius-md)] border bg-transparent px-[var(--space-3)] text-[13.5px] font-bold outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }} />
-          <button type="button" onClick={copy} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+          <button type="button" onClick={copy} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy"}
           </button>
         </div>
@@ -821,7 +821,7 @@ function CounselorReviewTab() {
         <button
           type="button"
           onClick={() => setReviewedOn(new Date().toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }))}
-          className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold"
+          className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           Save Review
@@ -845,7 +845,7 @@ function DownloadTab({ student, career, report }: { student: { name: string; gra
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-        <button type="button" onClick={() => window.print()} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <button type="button" onClick={() => window.print()} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
         </button>
         <p className="min-w-[220px] flex-1 text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>

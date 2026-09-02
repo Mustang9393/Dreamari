@@ -208,7 +208,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
       <button
         type="button"
         onClick={onNext}
-        className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Next <ArrowRight className="h-4 w-4" aria-hidden />
@@ -240,7 +240,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
         <button
           type="button"
           onClick={onStart}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Start Learning Finance <ArrowRight className="h-4 w-4" aria-hidden />
@@ -290,7 +290,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Lesson {lesson.lessonNumber} <ArrowRight className="h-4 w-4" aria-hidden />
@@ -501,7 +501,7 @@ function UnlockScreen({
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
         transition={{ duration: 0.12 }}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Unlock {term.term} <TermIcon icon={term.icon} className="h-4 w-4" />
@@ -543,7 +543,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
       <button
         type="button"
         onClick={onStartPractice}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Practice <ArrowRight className="h-4 w-4" aria-hidden />
@@ -692,7 +692,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
           type="button"
           disabled={!value.trim()}
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           Check Answer
@@ -949,7 +949,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
         <button
           type="button"
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
         >
           Check My Sorting
@@ -1014,7 +1014,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
           type="button"
           disabled={!allFilled}
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
         >
           Check My Math
@@ -1134,7 +1134,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
         <button
           type="button"
           onClick={onNext}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
         >
           {isLast ? "See Results" : "Next Question"} <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1169,7 +1169,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
         <button
           type="button"
           onClick={onDismiss}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[15px] font-semibold"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           Keep Going <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1197,7 +1197,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1288,7 +1288,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         type="button"
         disabled={!allFilled}
         onClick={allCorrect ? onComplete : check}
-        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
         style={{ background: allCorrect ? CORRECT_COLOR : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
       >
         {allCorrect ? (
@@ -1382,7 +1382,7 @@ function CompleteScreen({
       <button
         type="button"
         onClick={onContinue}
-        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Continue <ArrowRight className="h-4 w-4" aria-hidden />

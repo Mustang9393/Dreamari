@@ -493,51 +493,73 @@ const PHOTO_FOCUS: Record<string, string> = {
 // CEO's photography in the band, with the poster card's legibility stack
 // (progressive blur, vignette, top scrim, grain) so the title always reads.
 // Real company marks for the "Professionals from" chips (Wikimedia Commons,
-// 2026-09-03, committed under public/images/logos/companies). A company with
-// no exact current mark gets a text-only chip; no stand-in glyphs.
-const COMPANY_LOGOS: Record<string, string> = {
-  "JPMorgan Chase": "jpmorgan-chase",
-  Amazon: "amazon",
-  EY: "ey",
-  Google: "google",
-  Deloitte: "deloitte",
-  "Goldman Sachs": "goldman-sachs",
-  "Morgan Stanley": "morgan-stanley",
-  Microsoft: "microsoft",
-  Meta: "meta",
-  Apple: "apple",
-  "CVS Health": "cvs-health",
-  "Johnson & Johnson": "johnson-johnson",
-  Pfizer: "pfizer",
-  "Mayo Clinic": "mayo-clinic",
-  Disney: "disney",
-  Nike: "nike",
-  Spotify: "spotify",
-  Netflix: "netflix",
-  Adobe: "adobe",
+// 2026-09-03, committed under public/images/logos/companies), drawn as a
+// white silhouette through a CSS mask (direct feedback: no white tiles; the
+// logo in white on the chip). `w` is each mark's rendered width at 12px
+// tall, so wordmarks and square marks take the room their shape needs. A
+// company with no exact current mark gets a text-only chip (Blackstone; and
+// Goldman Sachs, whose only mark is a filled square that masks to a blank tile).
+const COMPANY_MARKS: Record<string, { file: string; w: number }> = {
+  "JPMorgan Chase": { file: "jpmorgan-chase", w: 58 },
+  Amazon: { file: "amazon", w: 40 },
+  EY: { file: "ey", w: 16 },
+  Google: { file: "google", w: 36 },
+  Deloitte: { file: "deloitte", w: 52 },
+  "Morgan Stanley": { file: "morgan-stanley", w: 96 },
+  Microsoft: { file: "microsoft", w: 56 },
+  Meta: { file: "meta", w: 56 },
+  Apple: { file: "apple", w: 10 },
+  "CVS Health": { file: "cvs-health", w: 52 },
+  "Johnson & Johnson": { file: "johnson-johnson", w: 60 },
+  Pfizer: { file: "pfizer", w: 40 },
+  "Mayo Clinic": { file: "mayo-clinic", w: 44 },
+  Disney: { file: "disney", w: 30 },
+  Nike: { file: "nike", w: 22 },
+  Spotify: { file: "spotify", w: 12 },
+  Netflix: { file: "netflix", w: 36 },
+  Adobe: { file: "adobe", w: 12 },
 };
 
 function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
-  const file = COMPANY_LOGOS[name];
+  const mark = COMPANY_MARKS[name];
   const onPhoto = tone === "photo";
+  const ink = onPhoto ? "#FFFFFF" : "var(--foreground)";
+  // Logo only when we have the real mark (direct feedback); the name stays
+  // for screen readers and as the fallback when no exact mark exists.
   return (
     <span
-      className="inline-flex h-[26px] flex-none items-center gap-[6px] rounded-[var(--radius-sm)] border pr-[9px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
+      className="inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
+      title={name}
       style={{
-        paddingLeft: file ? 4 : 9,
         background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
         borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
-        color: onPhoto ? "#FFFFFF" : "var(--foreground)",
+        color: ink,
         textShadow: "none",
       }}
     >
-      {file && (
-        <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-white px-[3px]">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local SVG brand mark */}
-          <img src={`/images/logos/companies/${file}.svg`} alt="" className="h-[11px] w-auto max-w-[44px] object-contain" />
-        </span>
+      {mark ? (
+        <>
+          <span
+            aria-hidden
+            className="block h-[14px] flex-none"
+            style={{
+              width: Math.round(mark.w * 1.17),
+              background: ink,
+              maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+          <span className="sr-only">{name}</span>
+        </>
+      ) : (
+        name
       )}
-      {name}
     </span>
   );
 }
@@ -645,7 +667,7 @@ function PrimaryCta({ children, onClick, className = "" }: { children: React.Rea
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
+      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF" }}
     >
       {children}
@@ -2025,7 +2047,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
             type="button"
             onClick={onJoin}
             disabled={!agreed}
-            className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13.5px] font-bold disabled:cursor-default disabled:opacity-50"
+            className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13.5px] font-semibold disabled:cursor-default disabled:opacity-50"
             style={{ background: "var(--primary)", color: "#FFFFFF" }}
           >
             Agree &amp; Join

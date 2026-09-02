@@ -575,7 +575,7 @@ function PrimaryButton({ children, onClick, accent, loading }: { children: React
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="dm-solid flex h-[52px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] text-[16px] font-bold text-white disabled:cursor-default disabled:opacity-70"
+      className="dm-solid flex h-[52px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] text-[16px] font-semibold text-white disabled:cursor-default disabled:opacity-70"
       style={{ fontFamily: "var(--font-display)", background: `linear-gradient(120deg, ${accent}, color-mix(in srgb, ${accent} 65%, white))`, boxShadow: `0 16px 32px -16px color-mix(in srgb, ${accent} 65%, transparent)` }}
     >
       {loading ? "One sec…" : children}
