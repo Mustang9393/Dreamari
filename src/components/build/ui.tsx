@@ -123,12 +123,13 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
   useEffect(() => {
     // A rare, unprompted flicker in place (from === to, so ProgressSpark draws its
     // small idle-width floor rather than sweeping any distance) so the bar doesn't
-    // read as dead between real advances -- spaced well apart, not a loop a student
-    // would consciously notice recurring. jitterPath's own randomness already gives
-    // each firing (idle or growth) its own shape.
+    // read as dead between real advances -- spaced apart enough not to read as a
+    // loop, but per direct feedback the original 14-30s gap felt sluggish; tightened
+    // without going so quick it turns distracting. jitterPath's own randomness
+    // already gives each firing (idle or growth) its own shape.
     let timer: ReturnType<typeof setTimeout>;
     function scheduleIdle() {
-      const delay = 14000 + Math.random() * 16000;
+      const delay = 7000 + Math.random() * 8000;
       timer = setTimeout(() => {
         setComet((c) => ({ from: percent, to: percent, nonce: (c?.nonce ?? 0) + 1 }));
         scheduleIdle();
