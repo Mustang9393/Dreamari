@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { HomeButton } from "@/components/flow/HomeButton";
-import { MatchBackdrop } from "@/components/flow/match/MatchBackdrop";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
@@ -29,30 +29,6 @@ const MATCH_ACCENT = "#2f6bf2";
 // After the loading beat, Build hands off to the real match flow at
 // /match-lab (the old in-page MatchExperience is deleted).
 type Phase = "build" | "loading";
-
-// Figma "Background Space" (dev handoff Step 4): nebula ellipses positioned
-// proportionally, colored by pipeline tokens. Sits UNDER the aurora canvas --
-// except it didn't: this div had no explicit z-index (auto), and the canvas
-// carries -z-10, so per CSS stacking rules an explicit negative z-index sits
-// BELOW an auto one regardless of DOM/paint order. These static nebulas have
-// been painting on TOP of the entire animated canvas the whole time, washing
-// out the trailing step-glow blobs and the CTA pulse -- both were rendering
-// correctly (verified via direct canvas pixel readback), just underneath this
-// layer. -z-20 actually puts it behind, matching the comment above.
-function BackgroundSpace() {
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-20 overflow-hidden" style={{ background: "var(--color-night-background)" }}>
-      {/* Radial-gradient nebulas, NOT filter:blur() — giant blur() layers blow
-         iOS Safari's GPU memory and crash the tab ("a problem repeatedly
-         occurred"), which is exactly what happened in prod. Gradients give the
-         same soft wash for free. px floors keep phones from going flat black. */}
-      <div className="absolute" style={{ width: "max(90vw, 900px)", aspectRatio: "1", left: "50%", top: "-30vh", transform: "translateX(-40%)", background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 34%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) 14%, transparent) 40%, transparent 68%)" }} />
-      <div className="absolute" style={{ width: "max(100vw, 980px)", aspectRatio: "1", left: "min(-30vw, -220px)", top: "40vh", background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 24%, transparent) 0%, transparent 66%)" }} />
-      <div className="absolute" style={{ width: "max(75vw, 700px)", aspectRatio: "1", left: "4vw", top: "18vh", background: "radial-gradient(circle, color-mix(in srgb, var(--color-decorative-pink-glow) 14%, transparent) 0%, transparent 64%)" }} />
-      <div className="absolute" style={{ width: "max(95vw, 820px)", height: "max(45vh, 380px)", left: "0", top: "-4vh", background: "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.07) 0%, transparent 62%)" }} />
-    </div>
-  );
-}
 
 export function BuildFlowExperience() {
   const router = useRouter();
@@ -134,7 +110,6 @@ export function BuildFlowExperience() {
            Screen-wide confetti is still reserved for the Match celebration —
            the flow's own celebrations are Dreamy-local bursts. */}
         <AuroraBackground accent={accent} visitedAccents={visitedAccents} finale={isComplete} lightning={false} />
-        {phase !== "build" && <MatchBackdrop />}
         <HomeButton />
         <ThemeToggle />
 

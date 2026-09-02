@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { HomeButton } from "@/components/flow/HomeButton";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
@@ -293,7 +294,7 @@ export function MatchLab() {
       {/* The world poster faces (Viaoda, Science Gothic, Lora, Fraunces,
          Nunito, Heebo) — React hoists this into <head>. */}
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
-      <div className="fixed inset-0" style={{ background: "var(--color-night-background)" }} />
+      <BackgroundSpace />
       <AuroraBackground accent={top?.color?.startsWith("var") ? "#2f6bf2" : "#2f6bf2"} visitedAccents={[]} finale={liked.length >= MAX_SLOTS} lightning={false} />
       <HomeButton />
       <ThemeToggle />
