@@ -150,6 +150,9 @@ export function MatchLab() {
   function pass() {
     if (!top || exiting) return;
     markDemonstratedRef.current("left");
+    // A pass had no feedback at all -- the soft select tick (not the CTA ding,
+    // which is reserved for a like) marks it as a deliberate, registered choice.
+    dispatchAuroraPulse("select");
     setHistory((h) => [...h, { type: "pass", career: top, prevDeckIndex: deckIndex }]);
     setExiting({ id: top.id, dir: -1 });
     setTimeout(advance, 380);
@@ -163,7 +166,10 @@ export function MatchLab() {
       setSwapFor(top);
       return;
     }
-    if (e) dispatchAuroraPulse("cta", e);
+    // No `if (e)` guard: a SWIPE reaches here with no event (commitDrag), and
+    // was getting neither the pulse nor the ding a button-like got. With no
+    // origin the pulse launches from screen center, where the card is.
+    dispatchAuroraPulse("cta", e);
     const slot = liked.length;
     setHistory((h) => [...h, { type: "like", career: top, prevDeckIndex: deckIndex }]);
     setLiked((l) => [...l, top]);
@@ -889,11 +895,20 @@ function FlyGhost({ career, from, to }: { career: Career; from: DOMRect; to: DOM
 }
 
 function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore }: { likedCount: number; liked: Career[]; onRestart: () => void; onReport: () => void; onManage: () => void; onExplore: () => void }) {
+  const complete = likedCount === MAX_SLOTS;
+  // "Your Top 3 is set!" is the flow's finish line and arrived with no sound and
+  // no motion -- the same chime + burst the 3rd save itself gets, so the ending
+  // reads as the payoff rather than a static card. Partial/empty endings stay
+  // quiet on purpose; those aren't celebrations.
+  useEffect(() => {
+    if (complete) playMilestoneChime();
+  }, [complete]);
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center backdrop-blur-xl"
+      className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
       style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
     >
+      {complete && <LocalBurst nonce={1} />}
       <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>
         {likedCount === MAX_SLOTS ? "Your Top 3 is set!" : likedCount > 0 ? `You've seen the stack — ${likedCount} saved` : "Nothing clicked — and that's okay"}
       </h2>

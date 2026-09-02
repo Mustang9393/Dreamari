@@ -129,10 +129,14 @@ export function ProgressSpark({
   trackRef,
   fromPercent,
   toPercent,
+  color: colorOverride,
 }: {
   trackRef: RefObject<HTMLDivElement | null>;
   fromPercent: number;
   toPercent: number;
+  /** The bar's own color at the celebrated point. Non-Build bars (SparkBar) pass
+      theirs; left out, this falls back to Build's three-stop gradient. */
+  color?: string;
 }) {
   const height = 26;
   // Measuring the track's real pixel width -- and generating the jittered squiggle
@@ -155,7 +159,7 @@ export function ProgressSpark({
 
   if (!ready) return null;
   const { leftPx, widthPx: w, paths } = ready;
-  const color = barGradientColorAt(toPercent / 100);
+  const color = colorOverride ?? barGradientColorAt(toPercent / 100);
 
   return (
     <svg

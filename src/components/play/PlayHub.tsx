@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SparkBar } from "@/components/flow/SparkBar";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { BookOpen, Film, Lock, Play, Zap } from "lucide-react";
@@ -326,8 +327,8 @@ function FeaturedMeta({ sim }: { sim: Simulation }) {
         {resumable ? `Level ${first.n} · ${first.role} · ${pct}% done` : `Level ${first.n} · ${first.role}`}
       </span>
       {resumable && (
-        <span aria-hidden className="block h-[5px] w-full max-w-[300px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--poster-title) 25%, transparent)" }}>
-          <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: "var(--primary)" }} />
+        <span aria-hidden className="block w-full max-w-[300px]">
+          <SparkBar percent={pct} height={5} track="color-mix(in srgb, var(--poster-title) 25%, transparent)" fill="var(--primary)" glow="var(--primary)" />
         </span>
       )}
     </span>

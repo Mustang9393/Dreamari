@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BookOpen, Check, Eye, EyeOff, GraduationCap, Heart, PartyPopper } from "lucide-react";
+import { playMilestoneChime } from "@/components/build/sound";
 import { Wordmark } from "@/components/app/chrome";
 import { InkText } from "@/components/build/ui";
 
@@ -239,6 +240,21 @@ export function SignupExperience() {
   const dotIndex = Math.min(sequence.indexOf(step), dotTotal - 1);
 
   const bump = useCallback(() => setReactionNonce((n) => n + 1), []);
+
+  // "You're in!" arrived silently with a static party-popper. The same 3-note
+  // milestone chime the Build flow uses at its landmarks, plus Dreamy's own
+  // burst (bump), so signing up lands as the celebration it is. Skipped for the
+  // under-age "check that inbox" hand-off, which isn't a finish line yet.
+  useEffect(() => {
+    if (step !== "success" || (isStudent && underAge)) return;
+    // Deferred a tick: bump() sets state, and a synchronous setState inside an
+    // effect body is what react-hooks/set-state-in-effect flags.
+    const timer = window.setTimeout(() => {
+      playMilestoneChime();
+      bump();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [step, isStudent, underAge, bump]);
 
   const dreamySprite = useMemo(() => {
     if (step === "role") return "/images/dreamy/v2/dreamy-curious.png";

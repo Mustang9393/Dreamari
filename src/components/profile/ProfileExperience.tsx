@@ -5,6 +5,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { SparkBar } from "@/components/flow/SparkBar";
+import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -232,6 +234,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   }
 
   function toggleTask(careerId: string, taskId: string) {
+    // Checking a step off was a silent color change. The shared select tick (the
+    // pulse event has no aurora canvas here, so only the sound lands) plus the
+    // two progress bars above sparking as they grow (SparkBar) make it register.
+    dispatchAuroraPulse("select");
     setDone((current) => {
       const list = current[careerId] ?? [];
       return { ...current, [careerId]: list.includes(taskId) ? list.filter((id) => id !== taskId) : [...list, taskId] };
@@ -905,9 +911,7 @@ function OverviewTab({
           </span>
           <span className="flex flex-col gap-[6px]">
             <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps done</span>
-            <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-              <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
-            </span>
+            <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
           </span>
         </button>
 
@@ -1435,9 +1439,15 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
         <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
           <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
-          <span className="relative h-[6px] w-full max-w-[420px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--accent-subtle) 22%, transparent)" }}>
-            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(Math.round((doneCount / Math.max(allTasks.length, 1)) * 100), 2)}%`, background: "var(--accent-subtle)" }} />
-          </span>
+          <SparkBar
+            className="w-full max-w-[420px]"
+            percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)}
+            min={2}
+            height={6}
+            track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)"
+            fill="var(--accent-subtle)"
+            glow="var(--accent-subtle)"
+          />
         </span>
       </section>
       <div className="flex flex-col gap-[var(--space-3)]">

@@ -52,27 +52,39 @@ const SILENT_WAV =
   "A".repeat(853);
 
 let primed = false;
+let silentEl: HTMLAudioElement | null = null;
 
 // Web Audio on iOS Safari is muted whenever the phone's hardware ringer switch is
 // on -- unlike an <audio>/<video> element, which iOS treats as "media" and plays
-// regardless. The one thing that flips WebKit's audio session for the page over to
-// that media category is a real HTMLMediaElement playing at least once. So, on the
-// first trusted gesture, this plays a one-shot silent clip (one-shot, not looping,
-// so it never holds the session and pauses whatever music the student had on) and
-// creates/resumes the shared AudioContext inside that same gesture, which is also
-// the only moment autoplay policy lets a context start. Desktop is unaffected --
-// the context was already being created in-gesture -- this is for the "works on my
-// laptop, silent on my phone" report. Call once from a long-lived component.
+// regardless. WebKit only classes the page's audio session as media WHILE a real
+// HTMLMediaElement is actively playing: a one-shot clip (the first version of this)
+// flipped it for its 40ms and then it reverted, which is why the phone stayed
+// silent. So, on the first trusted gesture, this starts a near-silent LOOPING clip
+// (the same approach the well-known unmute-ios-audio shims use) and creates/resumes
+// the shared AudioContext inside that same gesture -- also the only moment autoplay
+// policy lets a context start. The loop pauses whenever the tab is hidden, so it
+// never holds the audio session in the background. Known cost, accepted: while the
+// page is in front, iOS may pause the student's own music, as any playing media
+// would. Desktop is unaffected. Call once from a long-lived component.
 export function primeAudioOnFirstGesture(): () => void {
   if (typeof window === "undefined" || primed) return () => {};
+  const onVisibility = () => {
+    if (!silentEl) return;
+    if (document.hidden) silentEl.pause();
+    else void silentEl.play().catch(() => {});
+  };
   const unlock = () => {
     if (primed) return;
     primed = true;
     getAudioContext();
     try {
       const el = new Audio(SILENT_WAV);
+      el.loop = true;
       el.volume = 0.01;
+      el.setAttribute("playsinline", "");
+      silentEl = el;
       void el.play().catch(() => {});
+      document.addEventListener("visibilitychange", onVisibility);
     } catch {
       // No HTMLMediaElement support -- Web Audio alone will have to do.
     }

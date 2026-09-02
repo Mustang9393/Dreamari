@@ -8,7 +8,8 @@ import { cascade } from "./variant";
 import { CONFIRM_GLOW_MS, dispatchConfirmPulse, useConfirmGlow } from "./confirmPulse";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { barGradientColorAt, ProgressSpark } from "./ProgressSpark";
+import { barGradientColorAt } from "./ProgressSpark";
+import { SparkBar } from "@/components/flow/SparkBar";
 
 export { useConfirmGlow };
 
@@ -16,17 +17,11 @@ export { useConfirmGlow };
 // whatever it's placed inside (needs position:relative + overflow-hidden on the
 // parent, or this handles the clipping itself via rounded-[inherit]). Pair with
 // motion-safe:animate-[confirm-lift_...] on the element itself for the "lift" half.
-export function ConfirmShimmer({ active }: { active: boolean }) {
-  if (!active) return null;
-  return (
-    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <span
-        className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[confirm-shimmer-sweep_0.42s_ease-out_forwards]"
-        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.6) 45%, transparent 90%)" }}
-      />
-    </span>
-  );
-}
+// ConfirmShimmer moved to the shared flow/ folder so Play and Glossary can use the
+// same moment without importing this Build-specific module; re-exported here so
+// the build steps' existing imports keep working.
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+export { ConfirmShimmer };
 
 // Shared primitives for the build flow, variant-aware (see variant.tsx): the same
 // step implementations render the "glass" treatment (Figma card structure, glass
@@ -81,97 +76,12 @@ export const GLASS_PANEL_CLASS = "backdrop-blur-md";
 // (Duolingo's combo-streak spark, adapted -- we don't have a combo mechanic, so it
 // fires on every advance instead of a streak); module-level memory of the last
 // percent survives step remounts so going Previous never re-celebrates.
-let lastCelebratedPercent = 0;
-
+// The bar itself (fill transition, growth spark, matched flicker, idle loop, and the
+// cross-remount percent memory this step tree needs) now lives in the shared
+// SparkBar -- the same component every other progress bar in the app uses -- so this
+// is just Build's label row over it. memoryKey keeps the "from" percent across the
+// per-step remounts (going Previous never re-celebrates); idle is on only here.
 export function PhaseProgress({ percent, almostDone }: { percent: number; almostDone?: boolean }) {
-  const [comet, setComet] = useState<{ from: number; to: number; nonce: number } | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const fillRef = useRef<HTMLDivElement | null>(null);
-  // Each step remounts this component fresh (it lives inside the step's own JSX tree,
-  // which StepTransition keys by stageId), so a plain `width: ${percent}%` never had a
-  // prior value to transition FROM -- the CSS `transition-[width]` was declared but
-  // never actually had anything to animate, since the new instance painted straight at
-  // its target width on frame one. displayPercent starts at the module-level "last
-  // shown" value (correct across the remount) and only moves to the real percent a
-  // frame later, same two-phase trick as the spark's position.
-  const [displayPercent, setDisplayPercent] = useState(lastCelebratedPercent);
-
-  useEffect(() => {
-    // No `mounted` ref guard: that pattern (synchronously mutating the module-level
-    // lastCelebratedPercent, then using a ref to block a second run) is NOT safe under
-    // React's dev-mode StrictMode, which deliberately runs every effect twice
-    // (mount -> cleanup -> mount) to catch exactly this kind of non-idempotent effect.
-    // The first invoke mutated lastCelebratedPercent and scheduled a timer; cleanup
-    // cancelled the timer but couldn't undo the mutation; the second invoke then saw
-    // the guard already tripped and did nothing -- so the real update silently never
-    // landed. (This is why the bar was rendering the PREVIOUS step's fill width. Traced
-    // via direct DOM sampling: styleWidth stuck at a stale value while the % label,
-    // which reads the prop directly rather than this state, was already correct.)
-    // Fix: read lastCelebratedPercent fresh on every invoke, and only mutate it inside
-    // the timer callback -- so if the timer gets cancelled, nothing happened, and a
-    // second invoke starts from the same clean state as the first.
-    const from = lastCelebratedPercent;
-    const growing = percent > from;
-    const timer = setTimeout(() => {
-      lastCelebratedPercent = percent;
-      setDisplayPercent(percent);
-      if (growing) setComet((c) => ({ from, to: percent, nonce: (c?.nonce ?? 0) + 1 }));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [percent]);
-
-  useEffect(() => {
-    // A rare, unprompted flicker in place (from === to, so ProgressSpark draws its
-    // small idle-width floor rather than sweeping any distance) so the bar doesn't
-    // read as dead between real advances -- spaced apart enough not to read as a
-    // loop, but per direct feedback the original 14-30s gap felt sluggish; tightened
-    // without going so quick it turns distracting. jitterPath's own randomness
-    // already gives each firing (idle or growth) its own shape.
-    let timer: ReturnType<typeof setTimeout>;
-    function scheduleIdle() {
-      const delay = 7000 + Math.random() * 8000;
-      timer = setTimeout(() => {
-        setComet((c) => ({ from: percent, to: percent, nonce: (c?.nonce ?? 0) + 1 }));
-        scheduleIdle();
-      }, delay);
-    }
-    scheduleIdle();
-    return () => clearTimeout(timer);
-  }, [percent]);
-
-  useEffect(() => {
-    // The bar's fill pulses -- brightness AND an actual colored glow, in the spark's
-    // own matched color, not just "brighter of whatever the bar's static gradient
-    // already is" -- in step with the spark (same nonce/timing, same source color),
-    // for every firing alike (a real advance or one of the occasional idle loops), so
-    // the bar never just sits there while something else lights up next to it.
-    // Driven via the Web Animations API rather than a CSS class toggle, since the
-    // element never remounts (a toggled class needs a real off-state to re-trigger,
-    // and this needs to restart cleanly on every nonce) and without `fill: "forwards"`
-    // it reverts cleanly to the underlying inline boxShadow/background once done, so
-    // nothing needs to be manually reset.
-    if (!comet || !fillRef.current) return;
-    const glowColor = barGradientColorAt(comet.to / 100);
-    const restingShadow = "0 0 10px 0 color-mix(in srgb, var(--color-accent-purple) 55%, transparent)";
-    const glowShadow = (spread: number, blur: number) => `0 0 ${blur}px ${spread}px ${glowColor}`;
-    // An irregular multi-peak flicker (real electricity doesn't ramp smoothly up and
-    // down once) rather than one clean pulse -- matches the spark's own erratic
-    // timing instead of reading as a separate, calmer animation next to it.
-    const anim = fillRef.current.animate(
-      [
-        { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 0 },
-        { filter: "brightness(1.65) saturate(1.4)", boxShadow: glowShadow(4, 24), offset: 0.12 },
-        { filter: "brightness(1.1) saturate(1.1)", boxShadow: glowShadow(1, 12), offset: 0.24 },
-        { filter: "brightness(1.55) saturate(1.35)", boxShadow: glowShadow(3, 20), offset: 0.4 },
-        { filter: "brightness(1.05) saturate(1.05)", boxShadow: glowShadow(1, 10), offset: 0.55 },
-        { filter: "brightness(1.4) saturate(1.25)", boxShadow: glowShadow(2, 16), offset: 0.7 },
-        { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 1 },
-      ],
-      { duration: 700, easing: "ease-out" },
-    );
-    return () => anim.cancel();
-  }, [comet]);
-
   return (
     <div>
       <div className="flex items-center gap-2.5">
@@ -190,21 +100,16 @@ export function PhaseProgress({ percent, almostDone }: { percent: number; almost
           {percent}% Complete
         </span>
       </div>
-      <div ref={trackRef} className="relative mt-2">
-        <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--color-glass-surface-2)" }}>
-          <div
-            ref={fillRef}
-            className="h-full rounded-full transition-[width] duration-700 ease-out"
-            style={{
-              width: `${displayPercent}%`,
-              background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple), var(--color-world-arts-media-sport))",
-              boxShadow: "0 0 10px 0 color-mix(in srgb, var(--color-accent-purple) 55%, transparent)",
-            }}
-          />
-        </div>
-        {/* Hand-drawn-style scribble sweeping the newly-filled span on growth. */}
-        {comet && <ProgressSpark key={comet.nonce} trackRef={trackRef} fromPercent={comet.from} toPercent={comet.to} />}
-      </div>
+      <SparkBar
+        className="mt-2"
+        percent={percent}
+        height={4}
+        fill="linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple), var(--color-world-arts-media-sport))"
+        glow="var(--color-accent-purple)"
+        glowAt={barGradientColorAt}
+        idle
+        memoryKey="build-phase"
+      />
     </div>
   );
 }

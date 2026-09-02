@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
+import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -433,9 +434,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
           )}
         </div>
         <div className="flex flex-col gap-[7px]">
-          <div className="h-[5px] w-full max-w-[200px] rounded-[999px]" style={{ background: "rgba(255,255,255,0.2)" }}>
-            <div className="h-full rounded-[999px]" style={{ width: `${activity.fill}%`, background: activity.badgeColor, boxShadow: `0 0 8px color-mix(in srgb, ${activity.badgeColor} 45%, transparent)` }} />
-          </div>
+          <SparkBar className="w-full max-w-[200px]" percent={activity.fill} height={5} track="rgba(255,255,255,0.2)" fill={activity.badgeColor} glow={activity.badgeColor} />
           <p className="flex items-center justify-between gap-[10px] text-[10.5px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
             <span className="min-w-0 truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{activity.stat}</span>
             <span className="inline-flex flex-none items-center gap-[4px]" style={{ color: "#FFFFFF" }}>

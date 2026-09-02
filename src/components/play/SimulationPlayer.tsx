@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SparkBar } from "@/components/flow/SparkBar";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
@@ -1943,12 +1944,17 @@ function Hud({
         {level.express ? <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} /> : <ScoreGauge reputation={reputation} band={band} delta={delta} demo={spotlightScore} />}
       </div>
       <div className="flex items-center gap-[7px]">
-        <span className="relative h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--color-glass-border-raised)" }}>
-          <span
-            className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
-            style={{ width: `${reputation}%`, background: `linear-gradient(90deg, ${accent}, ${BAND_COLOR[band]})` }}
-          />
-        </span>
+        {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
+           reputation gaining ground is the run's core reward, and a bare width
+           change gave it nothing. Glow matches the leading-edge band color. */}
+        <SparkBar
+          className="flex-1"
+          percent={reputation}
+          height={6}
+          track="var(--color-glass-border-raised)"
+          fill={`linear-gradient(90deg, ${accent}, ${BAND_COLOR[band]})`}
+          glow={BAND_COLOR[band]}
+        />
         <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${SCORED_BEATS} decisions made`}>
           {/* Every third dot is a checkpoint: the run is saved at each beat, and
              marking them makes that visible instead of hoping the player trusts

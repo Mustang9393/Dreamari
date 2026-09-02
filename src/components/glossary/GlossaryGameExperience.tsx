@@ -45,6 +45,7 @@ import {
   subscribeGlossaryProgress,
 } from "./progress";
 import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
+import { SparkBar } from "@/components/flow/SparkBar";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
@@ -288,13 +289,11 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
           <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>
             ${lesson.companyValue.toLocaleString()}
           </span>
-          <div className="h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            {/* Floored so the bar never opens on a literal empty track --
-               a future lesson's own companyValue/nextCompanyValue numbers
-               could otherwise round to 0%, which reads as "no progress
-               possible here" rather than "the start of a journey." */}
-            <div className="h-full rounded-full" style={{ width: `${Math.max(4, Math.min(100, pct))}%`, background: "var(--world-business-money-office)" }} />
-          </div>
+          {/* Floored (min) so the bar never opens on a literal empty track --
+             a future lesson's own companyValue/nextCompanyValue numbers
+             could otherwise round to 0%, which reads as "no progress
+             possible here" rather than "the start of a journey." */}
+          <SparkBar percent={pct} min={4} height={6} track="var(--glass-surface-2)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" />
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             Next: ${lesson.nextCompanyValue.toLocaleString()} · {lesson.nextMilestone}
           </span>
@@ -515,7 +514,10 @@ function UnlockScreen({
       <motion.button
         type="button"
         onClick={() => {
-          playSelect();
+          // Unlocking a term is the game's core reward moment, and it had the
+          // same soft tick as any tap. The "correct" chime is the area's own
+          // reward sound, so it now reads as one.
+          playCorrect();
           onUnlock();
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
@@ -531,8 +533,15 @@ function UnlockScreen({
 
 function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
   const { theme } = useGlobalTheme();
+  // "All N terms unlocked!" with a trophy is a milestone that arrived with no
+  // sound and no motion. Same level-up sweep + burst the lesson's own finish
+  // line uses, so the two landmarks read as one family.
+  useEffect(() => {
+    playSweep();
+  }, []);
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
+    <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 py-[var(--space-5)] text-center">
+      <LocalBurst nonce={1} />
       <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t) => (
           <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
@@ -1157,13 +1166,20 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
 }
 
 function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
+  // A streak award with a party Dreamy and "On fire!" had no sound or motion
+  // beyond the modal appearing. The correct-answer chime it just earned, plus a
+  // burst, so it lands as the bonus it is.
+  useEffect(() => {
+    playCorrect();
+  }, []);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5" onClick={onDismiss}>
       <div
-        className="flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-xl)] p-[var(--space-8)] text-center"
+        className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-xl)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}
         onClick={(e) => e.stopPropagation()}
       >
+        <LocalBurst nonce={1} />
         <DreamyFace pose="party" size={100} />
         <p className="flex items-center gap-[8px] text-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--amber-400)" }}>
           <Flame className="h-7 w-7" fill="currentColor" aria-hidden /> {streak} in a row!
@@ -1342,6 +1358,12 @@ function CompleteScreen({
 }) {
   const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
   const { theme } = useGlobalTheme();
+  // The lesson's finish line had a burst and a party Dreamy but no sound at all.
+  // playSweep is this area's own "level-up" sound (Power Play solved uses it), so
+  // completing the whole lesson gets at least that.
+  useEffect(() => {
+    playSweep();
+  }, []);
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
       <LocalBurst nonce={1} />
@@ -1482,9 +1504,8 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
               {currentNumber}/{Math.max(mainLoopLength, queue.length)} · {percent}%
             </span>
           </div>
-          <div className="h-[6px] w-full rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(4, percent)}%`, background: "var(--world-business-money-office)" }} />
-          </div>
+          {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
+          <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" />
           {/* Mastery reads as filled skill dots, one per term (Duolingo's own
              mastery visualization), not just a fraction in text -- seeing
              which specific term is still open is more useful than a count. */}

@@ -6,7 +6,8 @@ import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripV
 
 import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
-import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
+import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import type {
   BucketBeat,
   CardBeat,
@@ -171,9 +172,14 @@ function OptionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group flex w-full cursor-pointer items-center gap-[14px] rounded-[16px] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
+      // A right pick previously just recolored; a wrong one shook and the revealed
+      // answer popped, so getting it right was the least-marked outcome. It now
+      // gets the Build flow's confirm moment: a lift plus one light sweep.
+      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[16px] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
         bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
-      } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
+      } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""} ${
+        mark === "right" ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""
+      }`}
       style={{
         animationDelay: `${index * 55}ms`,
         background: mark ? `color-mix(in srgb, ${paint} 18%, var(--glass-surface-1))` : "var(--glass-surface-1)",
@@ -182,6 +188,7 @@ function OptionButton({
         opacity: dimmed && !mark ? 0.4 : 1,
       }}
     >
+      <ConfirmShimmer active={mark === "right"} />
       <span
         aria-hidden
         className="flex h-[29px] w-[29px] flex-none items-center justify-center rounded-full border text-[13px] font-extrabold"
@@ -665,7 +672,9 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   const last = at >= beat.cards.length - 1;
   const turn = () => {
     if (finished && last) return;
-    playSelect();
+    // The card physically turns; the sound bank already had a flip for it that
+    // nothing was calling. A generic tick undersold the motion.
+    playFlip();
     if (last) {
       playCorrect();
       setFinished(true);
