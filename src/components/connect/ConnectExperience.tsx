@@ -499,35 +499,36 @@ const PHOTO_FOCUS: Record<string, string> = {
 // tall, so wordmarks and square marks take the room their shape needs. A
 // company with no exact current mark gets a text-only chip (Blackstone; and
 // Goldman Sachs, whose only mark is a filled square that masks to a blank tile).
+// Microsoft uses the 2012 wordmark, not the four-square symbol, for the same reason.
 const COMPANY_MARKS: Record<string, { file: string; aspect: number }> = {
-  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.67 },
+  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93 },
   Amazon: { file: "amazon", aspect: 3.31 },
   EY: { file: "ey", aspect: 0.99 },
-  Google: { file: "google", aspect: 2.96 },
-  Deloitte: { file: "deloitte", aspect: 5.25 },
-  "Morgan Stanley": { file: "morgan-stanley", aspect: 4.0 },
-  Microsoft: { file: "microsoft", aspect: 1.0 },
+  Google: { file: "google", aspect: 3.04 },
+  Deloitte: { file: "deloitte", aspect: 5.31 },
+  "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
+  Microsoft: { file: "microsoft", aspect: 4.69 },
   Meta: { file: "meta", aspect: 4.96 },
   Apple: { file: "apple", aspect: 0.81 },
   "CVS Health": { file: "cvs-health", aspect: 8.2 },
   "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
   Pfizer: { file: "pfizer", aspect: 2.44 },
-  "Mayo Clinic": { file: "mayo-clinic", aspect: 0.91 },
-  Disney: { file: "disney", aspect: 2.38 },
-  Nike: { file: "nike", aspect: 2.81 },
+  "Mayo Clinic": { file: "mayo-clinic", aspect: 0.92 },
+  Disney: { file: "disney", aspect: 2.41 },
+  Nike: { file: "nike", aspect: 2.82 },
   Spotify: { file: "spotify", aspect: 1.0 },
   Netflix: { file: "netflix", aspect: 3.7 },
   Adobe: { file: "adobe", aspect: 3.8 },
 };
 
-// One visual size for every mark (direct feedback: none too big, none too
-// small): each mark fills a box scaled from its own aspect ratio (measured
-// from the SVG), so square marks and long wordmarks carry the same visual
-// weight: height 16 for compact marks, width capped at 60 for the longest
-// wordmarks, height never under 10.
+// Equal visual weight (direct feedback: letters the same height, chips the
+// same height, nothing too big or small). Every SVG is trimmed to its ink
+// bounds (viewBox rewritten from a rendered alpha scan, 2026-09-03), so the
+// box IS the letters: wordmarks render 11px tall and as wide as their own
+// letters need; compact symbol marks (aspect under 1.3) render 14px tall.
 function markBox(aspect: number): { width: number; height: number } {
-  const height = Math.max(10, Math.min(16, 60 / aspect));
-  return { width: Math.round(height * aspect), height: Math.round(height) };
+  const height = aspect < 1.3 ? 14 : 11;
+  return { width: Math.round(height * aspect), height };
 }
 
 function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
