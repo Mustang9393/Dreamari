@@ -255,14 +255,18 @@
      from the card around it. Widened so each step reads as a real surface
      change at a glance (dashboard cards, not a watermark), while staying in
      the same dark, desaturated family -- still restrained, just legible. */
-  --paper: #0d0f14;
-  --paper-raised: #1a1f29;
-  --paper-sunken: #242b38;
+  /* Lifted off near-black (direct feedback: the page slab read as a black
+     hole against the app's blue-navy space). A mid slate-grey now, so the
+     document sits ON the background as a card rather than punching through
+     it; raised and sunken steps keep the same spacing above it. */
+  --paper: #1e2431;
+  --paper-raised: #29303f;
+  --paper-sunken: #343c4c;
   --ink: #f4f5f8;
-  --ink-soft: #b6bac6;
-  --ink-faint: #8b90a0;
-  --rule: #333c4d;
-  --rule-strong: #4a5468;
+  --ink-soft: #bcc0cb;
+  --ink-faint: #949aa9;
+  --rule: #414b5f;
+  --rule-strong: #596479;
   background: var(--paper);
   color: var(--ink);
 }

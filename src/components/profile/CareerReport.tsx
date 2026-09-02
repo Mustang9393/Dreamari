@@ -104,7 +104,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
            the header -- one shape, one weight, every section. The icon prop
            stays accepted so call sites don't change; it just isn't drawn. */}
         {void Icon}
-        <span aria-hidden className="dm-report-num flex h-[30px] min-w-[30px] flex-none items-center justify-center rounded-[9px] px-[6px] text-[13px] leading-none font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
+        <span aria-hidden className="dm-report-num flex h-[34px] min-w-[34px] flex-none items-center justify-center rounded-[9px] px-[8px] text-[18px] leading-[23px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
           {String(n).padStart(2, "0")}
         </span>
         {/* The one hierarchy, everywhere: section heading (18) > label (14)
@@ -118,7 +118,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
         </h3>
         {action && <span className="ml-auto">{action}</span>}
       </div>
-      <div className="px-[18px] py-[20px] sm:px-[24px] sm:py-[24px]">
+      <div className="p-[18px] sm:p-[24px]">
         {children}
       </div>
     </section>
@@ -247,9 +247,9 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-5)] py-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-8)] sm:py-[var(--space-10)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]"
     >
-      <div className="mx-auto max-w-[920px]">
+      <div className="w-full">
         {/* Masthead: mechanical hierarchy, not a hierarchy-by-importance --
            "Dreamari Career Report" is the document's actual title (what
            kind of document this is), so it is the heading, full stop.
@@ -624,8 +624,8 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
     }) as const;
 
   return (
-    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] px-[var(--space-5)] pt-[var(--space-6)] pb-[var(--space-8)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:px-[var(--space-8)] sm:pt-[var(--space-8)] sm:pb-[var(--space-10)]">
-      <div className="mx-auto max-w-[920px]">
+    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]">
+      <div className="w-full">
         <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
             <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
