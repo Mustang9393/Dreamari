@@ -18,7 +18,6 @@ import {
   ChevronDown,
   ChevronRight,
   Compass,
-  Eye,
   Flame,
   Gamepad2,
   GraduationCap,
@@ -43,10 +42,8 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import {
   ACADEMIC_RECORD,
-  COURSE_SUGGESTIONS,
   EVIDENCE,
   EVIDENCE_KIND_LABEL,
-  UPCOMING,
   reportV2,
   type EvidenceItem,
 } from "./report-data";
@@ -86,6 +83,7 @@ const DEMO_TOP3 = ["investment-banking", "airline-pilot"];
 
 export function ProfileExperience({ initialPicks = [], initialFocus = null }: { initialPicks?: string[]; initialFocus?: string | null } = {}) {
   const [tab, setTab] = useState<TabId>("overview");
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");
   // Storage is an external store, so it is READ, never copied into state by an
@@ -295,8 +293,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
         {/* ---- Identity: an editorial masthead. Name and school read as a
              byline; the numeric facts sit in their own strip so they line up
-             at every width instead of forming a ragged grid on phones. ---- */}
-        <section className="flex flex-col gap-[var(--space-3)]">
+             at every width instead of forming a ragged grid on phones. Its
+             own card, separate from the tabs/dashboard surface below. ---- */}
+        <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
           <div className="flex items-center gap-[var(--space-3)]">
             <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
               <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
@@ -313,18 +312,41 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              {([["locker", "Saved Careers", Archive], ["settings", "Settings", Settings]] as const).map(([id, label, Icon]) => (
+              <button
+                type="button"
+                aria-label="Saved Careers"
+                onClick={() => setTab("locker")}
+                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-bold"
+                style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+              >
+                <Archive className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved Careers</span>
+              </button>
+              <span className="relative">
                 <button
-                  key={id}
                   type="button"
-                  aria-label={label}
-                  onClick={() => setTab(id)}
+                  aria-label="Settings menu"
+                  aria-expanded={settingsMenuOpen}
+                  onClick={() => setSettingsMenuOpen((open) => !open)}
                   className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-bold"
-                  style={{ background: tab === id ? "var(--glass-surface-3)" : "transparent", color: tab === id ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+                  style={{ background: tab === "settings" || settingsMenuOpen ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" || settingsMenuOpen ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
-                  <Icon className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{label}</span>
+                  <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
                 </button>
-              ))}
+                {settingsMenuOpen && (
+                  <>
+                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
+                    <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
+                      <button
+                        type="button"
+                        onClick={() => { setSettingsMenuOpen(false); setTab("settings"); }}
+                        className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                      >
+                        <Settings className="h-4 w-4 flex-none" aria-hidden /> Profile and privacy
+                      </button>
+                    </div>
+                  </>
+                )}
+              </span>
             </span>
           </div>
           <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-3)] sm:flex sm:gap-x-[44px]" style={{ borderColor: "var(--glass-border)" }}>
@@ -362,7 +384,78 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "locker" || tab === "settings") ? null : (
+        {(tab === "locker" || tab === "settings") ? null : tab === "overview" ? (
+          // Overview is the dashboard: tabs, the three doorways, and "Do
+          // this next" all read as ONE surface, not a stack of separate
+          // floating cards -- the tablist sits inside the same card instead
+          // of its own pill above it.
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
+            <div
+              ref={tablistRef}
+              role="tablist"
+              aria-label="Career sections"
+              onKeyDown={(event) => {
+                const order: TabId[] = ["overview", "top3", "plan", "report", "resume"];
+                const index = order.indexOf(tab);
+                if (index === -1) return;
+                let next: TabId | null = null;
+                if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
+                if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
+                if (next) {
+                  event.preventDefault();
+                  setTab(next);
+                  document.getElementById(`profile-tab-${next}`)?.focus();
+                }
+              }}
+              className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] p-[var(--space-1)] [scrollbar-width:none]"
+              style={{
+                background: "var(--glass-surface-2)",
+                ...(tabsOverflow ? { maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" } : {}),
+              }}
+            >
+              {(
+                [
+                  { id: "overview", label: "Overview" },
+                  { id: "top3", label: "Top Three" },
+                  { id: "plan", label: "Plan" },
+                  { id: "report", label: "Report" },
+                  { id: "resume", label: "Resume" },
+                ] as const
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  id={`profile-tab-${item.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === item.id}
+                  aria-controls={`profile-panel-${item.id}`}
+                  tabIndex={tab === item.id ? 0 : -1}
+                  onClick={() => setTab(item.id)}
+                  className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
+                  style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
+                >
+                  {item.label}
+                  {pings[item.id] && (
+                    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                      <span
+                        className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[profile-tab-ping-shimmer_2.4s_ease-in-out_1]"
+                        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.85) 45%, transparent 90%)" }}
+                      />
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
+              <OverviewTab
+                focus={focus} nextTask={nextTask} planProgress={planProgress} top3Count={top3.length}
+                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                onGoLocker={() => setTab("locker")}
+              />
+            </div>
+          </div>
+        ) : (
         <>
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
@@ -432,16 +525,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         </div>
         </>
         )}
-
-        {tab === "overview" && (
-          <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
-            <OverviewTab
-              focus={focus} nextTask={nextTask} planProgress={planProgress} top3Count={top3.length}
-              onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")} onOpenEvidence={() => setEvidenceOpen(true)}
-              onGoLocker={() => setTab("locker")} onGoSettings={() => setTab("settings")}
-            />
-          </div>
-        )}
         {tab === "top3" && (
           <div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3">
             <Top3Tab
@@ -466,7 +549,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         {tab === "plan" && (
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
             <MyPlanTab
-              focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
+              focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
               doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
               removeCustomTask={removeCustomTask} onGoRoutes={() => setTab("routes")}
             />
@@ -675,7 +758,7 @@ function Top3Tab({
          three read as three different Career Worlds -- accent as glow and
          tint per the design language, never a solid color block. Copy is
          unchanged from the stacked version. */}
-      <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const report = reportV2(id);
@@ -699,7 +782,7 @@ function Top3Tab({
         return (
           <div
             key={id}
-            className="relative flex flex-col rounded-[var(--radius-2xl)] border"
+            className="relative flex h-full flex-col rounded-[var(--radius-2xl)] border"
             style={{
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
@@ -771,11 +854,11 @@ function Top3Tab({
                   <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
                 {isFocus ? (
-                  <span className="flex h-[27px] w-fit flex-none items-center gap-[4px] rounded-full px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                  <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-full px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
                     <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet min-h-[36px] w-fit flex-none cursor-pointer rounded-full border px-[12px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-full border px-[12px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
                 )}
               </div>
 
@@ -864,7 +947,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 
 function OverviewTab({
   focus, nextTask, planProgress, top3Count,
-  onGoTop3, onGoPlan, onGoReport, onOpenEvidence, onGoLocker, onGoSettings,
+  onGoTop3, onGoPlan, onGoReport, onGoLocker,
 }: {
   focus: ProfileCareer | null;
   nextTask: (career: ProfileCareer) => PlanTask | null;
@@ -873,9 +956,7 @@ function OverviewTab({
   onGoTop3: () => void;
   onGoPlan: () => void;
   onGoReport: () => void;
-  onOpenEvidence: () => void;
   onGoLocker: () => void;
-  onGoSettings: () => void;
 }) {
   if (!focus) {
     return (
@@ -945,40 +1026,6 @@ function OverviewTab({
         ) : (
           <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
         )}
-      </section>
-
-      {/* Coming up — the same reminders My Plan shows, surfaced here too so a
-          date on the calendar never depends on opening the plan tab first. */}
-      <section aria-labelledby="coming-up-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
-        <span id="coming-up-title" className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Coming up</span>
-        <ul className="flex list-none flex-col p-0">
-          {UPCOMING.map((item) => (
-            <li key={item.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="flex min-w-0 flex-col gap-[1px]">
-                <span className="text-[15px] font-bold">{item.label}</span>
-                <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{item.note}</span>
-              </span>
-              <span className="flex-none text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>{item.when}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Secondary: activity and controls, kept out of the identity block */}
-      <section aria-labelledby="activity-title" className="flex flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
-        <h3 id="activity-title" className="sr-only">Activity and profile controls</h3>
-        <span className="flex flex-wrap items-center gap-[var(--space-5)]">
-          <span className="flex items-center gap-[7px]">
-            <Flame className="h-4 w-4" style={{ color: "var(--chart-3)" }} aria-hidden />
-            <span className="text-[15px] font-bold">{STUDENT.streakDays} day streak</span>
-          </span>
-          <button type="button" onClick={onOpenEvidence} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            <Eye className="h-4 w-4" aria-hidden /> {EVIDENCE.length} inputs behind your report
-          </button>
-        </span>
-        <button type="button" onClick={onGoSettings} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-          <Settings className="h-4 w-4" aria-hidden /> Profile and privacy
-        </button>
       </section>
     </div>
   );
@@ -1150,11 +1197,10 @@ function RoutesTab({
 // ---- My Plan: what to do about it, plus what is coming up ----
 
 function MyPlanTab({
-  focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
+  focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
   addCustomTask, removeCustomTask, onGoRoutes,
 }: {
   focus: ProfileCareer | null;
-  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
   horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
   doneSet: (careerId: string) => Set<string>;
@@ -1165,47 +1211,14 @@ function MyPlanTab({
   onGoRoutes: () => void;
 }) {
   if (!focus) return null;
-  const courses = COURSE_SUGGESTIONS[focus.id] ?? [];
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <PlanTab
-        focus={focus} chosenRoute={chosenRoute} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
+        focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
         doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
         removeCustomTask={removeCustomTask} onGoPath={onGoRoutes}
       />
-
-      <section aria-labelledby="ahead-title" className="grid gap-[var(--space-4)] md:grid-cols-2">
-        <h3 id="ahead-title" className="sr-only">What is coming up</h3>
-        {courses.length > 0 && (
-          <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
-            <ul className="flex list-none flex-col p-0">
-              {courses.map((course) => (
-                <li key={course.label} className="flex flex-col gap-[1px] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="text-[15px] font-bold">{course.label}</span>
-                  <span className="text-[14px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}>{course.why}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Coming up</span>
-          <ul className="flex list-none flex-col p-0">
-            {UPCOMING.map((item) => (
-              <li key={item.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="flex min-w-0 flex-col gap-[1px]">
-                  <span className="text-[15px] font-bold">{item.label}</span>
-                  <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{item.note}</span>
-                </span>
-                <span className="flex-none text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>{item.when}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
     </div>
   );
 }
@@ -1396,9 +1409,8 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   );
 }
 
-function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, onGoPath }: {
+function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, onGoPath }: {
   focus: ProfileCareer | null;
-  chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
   horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
   doneSet: (careerId: string) => Set<string>;
@@ -1435,7 +1447,6 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
       <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
         <div>
           <h2 key={focus.id} className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
-          <p className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Next steps, clear and small · built for the {chosenRoute(focus).short} route</p>
         </div>
         <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
       </div>

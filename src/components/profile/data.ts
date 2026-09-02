@@ -134,7 +134,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     ],
     plan: [
       h("ib-3", "Next 3 Months", "Foundation", [
-        t("ib-3-1", "Complete the finance glossary game", 10, "Play", "/match-lab"),
+        t("ib-3-1", "Complete the Investment Banking career simulation", 20, "Play", "/play/investment-banking"),
         t("ib-3-2", "Explore 5 finance careers", 10, "Explore", "/explore?tab=browse"),
         t("ib-3-3", "Continue playing the Investment Banking Simulation", 15, "Play", "/match-lab"),
         t("ib-3-4", "Start your resume draft", 15, "Build", "#resume"),

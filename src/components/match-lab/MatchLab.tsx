@@ -3,11 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { GESTURE_HINT_CYCLE_S } from "@/components/flow/GestureHint";
 import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { HomeButton } from "@/components/flow/HomeButton";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
@@ -319,29 +320,40 @@ export function MatchLab() {
   }
 
   const topId = top?.id;
+  // How many gesture steps the guide has advanced through this run -- caps
+  // the walk at two full loops (up/right/left, up/right/left) instead of
+  // cycling forever, per direct feedback. Reset whenever a fresh run starts.
+  const guideStepRef = useRef(0);
   // First card only (deckIndex 0), and only while nothing has been
   // demonstrated yet -- the moment any real gesture lands, this stops and
   // never restarts for the rest of the visit. Opens on scroll-up.
   useEffect(() => {
     if (!topId || deckIndex !== 0 || demonstrated.size > 0) return;
+    guideStepRef.current = 0;
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated]);
-  // While it's up, walk scroll-up -> swipe right -> swipe left with a
-  // comfortable dwell on each (one GestureHint pass plus its built-in rest),
-  // and keep walking until a real gesture ends it. Only the direction/label
-  // change on the ONE persistent overlay, so the dark scrim never drops and
-  // re-raises between gestures -- that mount/unmount flicker was the
-  // complaint with the earlier per-gesture instances.
+  // While it's up, walk scroll-up -> swipe right -> swipe left, one
+  // GestureHint cycle's dwell on each, for two full loops -- then stop on
+  // its own. A real gesture ends it early at any point (markDemonstratedRef
+  // above). Only the direction/label change on the ONE persistent overlay,
+  // so the dark scrim never drops and re-raises between gestures -- that
+  // mount/unmount flicker was the complaint with the earlier per-gesture
+  // instances.
   useEffect(() => {
     if (guideGesture === null) return;
     const timer = window.setTimeout(() => {
+      guideStepRef.current += 1;
+      if (guideStepRef.current >= GUIDE_ORDER.length * 2) {
+        setGuideGesture(null);
+        return;
+      }
       setGuideGesture((current) => {
         if (current === null) return null;
         const index = GUIDE_ORDER.indexOf(current);
         return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
       });
-    }, 5200); // exactly two 2.6s hint cycles: one pass to notice, one to read
+    }, GESTURE_HINT_CYCLE_S * 1000);
     return () => window.clearTimeout(timer);
   }, [guideGesture]);
   const dragXRef = useRef(0);
@@ -727,13 +739,6 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
             <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
               {career.world}
             </p>
-            <span
-              className="mt-1 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold normal-case backdrop-blur-md motion-safe:animate-bounce"
-              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
-            >
-              <ChevronsUp className="h-3.5 w-3.5" style={{ color: career.color }} />
-              Scroll for the breakdown
-            </span>
           </div>
         </div>
 
