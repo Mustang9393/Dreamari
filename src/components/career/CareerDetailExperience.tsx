@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Plus, ThumbsDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -12,7 +12,7 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "./data";
-import type { ProfileRung } from "./profiles";
+import type { FactDetails, ProfileRung } from "./profiles";
 import { careerSlug } from "./slug";
 
 // Career Detail, rebuilt 2026-09-02 around the production page's information
@@ -219,6 +219,105 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
   );
 }
 
+// Which quick fact carries which detail behind its (i).
+function factKey(label: string): keyof FactDetails | null {
+  if (/degree/i.test(label)) return "degree";
+  if (/pay/i.test(label)) return "pay";
+  if (/open/i.test(label)) return "openings";
+  return null;
+}
+
+// Small popover under a fact's label: pay bands, or what "openings" counts.
+// Closes on a tap anywhere else or Escape.
+function FactPopover({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <>
+      <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-[40] cursor-default" />
+      <div
+        role="dialog"
+        className="absolute top-[calc(100%-8px)] left-[var(--space-4)] z-[50] w-[min(300px,calc(100vw-40px))] rounded-[var(--radius-md)] border p-[var(--space-4)] sm:left-[var(--space-5)]"
+        style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)" }}
+      >
+        {children}
+      </div>
+    </>
+  );
+}
+
+// The degree sheet: the three door questions, the note, the "not the only
+// route" line, and how people in the job actually finished, as bars.
+function DegreeSheet({ career, detail, accent, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; accent: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const top = Math.max(...detail.distribution.map((d) => d.pct));
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
+      <div
+        className="relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
+        style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
+      >
+        <div className="flex items-start justify-between gap-[var(--space-4)]">
+          <div className="flex flex-col gap-[2px]">
+            <h2 id="degree-sheet-title" className={BIG} style={DISPLAY}>What you need to get in</h2>
+            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{career}</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.16)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+
+        <dl className="flex flex-col gap-[8px]">
+          {[["The door asks for", detail.doorAsksFor], ["Experience first?", detail.experienceFirst], ["Training after hiring", detail.trainingAfterHiring]].map(([k, v]) => (
+            <div key={k} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-[var(--space-4)]">
+              <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+              <dd className={`${SMALL} font-semibold`}>{v}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>
+        <p className={SMALL}>
+          <strong className="font-semibold">Even so, {detail.noBachelorPct} of people doing this job do not have a bachelor&apos;s degree.</strong>{" "}
+          <span style={{ color: "var(--muted-foreground)" }}>The usual route is not the only one.</span>
+        </p>
+        {detail.extra && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.extra}</p>}
+
+        <div className="flex flex-col gap-[var(--space-3)]">
+          <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people in this job finished</h3>
+          <p className={TINY} style={{ color: "var(--muted-foreground)" }}>According to the U.S. Bureau of Labor Statistics.</p>
+          <ul className="flex flex-col gap-[8px]">
+            {detail.distribution.map((row) => {
+              const lead = row.pct === top;
+              return (
+                <li key={row.label} className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_56px] items-center gap-[var(--space-3)]">
+                  <span className={`${TINY} truncate ${lead ? "font-semibold" : ""}`} style={{ color: lead ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.label}</span>
+                  <span className="h-[8px] w-full overflow-hidden rounded-full" style={{ background: "var(--glass-surface-1)" }}>
+                    <span className="block h-full rounded-full" style={{ width: `${Math.max(2, row.pct)}%`, background: lead ? accent : "color-mix(in srgb, var(--foreground) 35%, transparent)" }} />
+                  </span>
+                  <span className={`${TINY} text-right tabular-nums ${lead ? "font-semibold" : ""}`} style={{ color: lead ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.pct}%</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Every career gets the same page shape. Careers without a full profile map
 // what the app already knows into it; sections with nothing to say are
 // skipped, never rendered empty or as a placeholder.
@@ -246,6 +345,7 @@ function viewModel(career: ResolvedCareer) {
     ladder,
     education: p?.education,
     sources: p?.sources,
+    details: p?.factDetails,
   };
 }
 
@@ -253,6 +353,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
   const [openRung, setOpenRung] = useState<string | null>(null);
+  const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -391,11 +492,43 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <div
                 key={fact.label}
                 data-fact-cell
-                className={`flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
+                className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
                 style={{ borderColor: "rgba(255,255,255,0.12)" }}
               >
-                <span className={LABEL}>{fact.label}</span>
+                <span className="flex items-center gap-[6px]">
+                  <span className={LABEL}>{fact.label}</span>
+                  {factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
+                    <button
+                      type="button"
+                      aria-label={`About ${fact.label.toLowerCase()}`}
+                      aria-expanded={openFact === factKey(fact.label)}
+                      onClick={() => setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)))}
+                      className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full"
+                      style={{ color: "var(--muted-foreground)" }}
+                    >
+                      <Info className="h-[15px] w-[15px]" aria-hidden />
+                    </button>
+                  )}
+                </span>
                 <Figure accent={accent}>{fact.value}</Figure>
+                {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
+                  <FactPopover onClose={() => setOpenFact(null)}>
+                    <dl className="flex flex-col gap-[6px]">
+                      {[["Starting out", vm.details.pay.starting], ["Typical", vm.details.pay.typical], ["Top earners", vm.details.pay.top]].map(([k, v]) => (
+                        <div key={k} className="flex items-baseline justify-between gap-[var(--space-4)]">
+                          <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+                          <dd><Figure accent={accent}>{v}</Figure></dd>
+                        </div>
+                      ))}
+                    </dl>
+                    {vm.details.pay.note && <p className={`${TINY} mt-[10px]`} style={{ color: "var(--muted-foreground)" }}>{vm.details.pay.note}</p>}
+                  </FactPopover>
+                )}
+                {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
+                  <FactPopover onClose={() => setOpenFact(null)}>
+                    <p className={TINY}>{vm.details.openings.note}</p>
+                  </FactPopover>
+                )}
               </div>
             ))}
           </section>
@@ -511,6 +644,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               ))}
             </div>
           </Section>
+        )}
+
+        {openFact === "degree" && vm.details?.degree && (
+          <DegreeSheet career={career.title} detail={vm.details.degree} accent={accent} onClose={() => setOpenFact(null)} />
         )}
 
         {vm.sources && (

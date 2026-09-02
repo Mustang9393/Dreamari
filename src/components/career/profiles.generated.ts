@@ -155,7 +155,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$96,780",
+        "typical": "$156,100",
+        "top": "$262,250",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +45,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "accountant": {
     "slug": "accountant",
@@ -303,7 +351,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$49,530",
+        "typical": "$79,880",
+        "top": "$134,200",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +78,500 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "private-equity": {
     "slug": "private-equity",
@@ -447,7 +543,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$96,100",
+        "typical": "$155,000",
+        "top": "$260,400",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +18,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "investment-banking": {
     "slug": "investment-banking",
@@ -590,7 +734,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$63,180",
+        "typical": "$101,910",
+        "top": "$171,210",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +22,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "data-scientist": {
     "slug": "data-scientist",
@@ -738,7 +930,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$66,970",
+        "typical": "$108,020",
+        "top": "$181,470",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +12,500 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "software-engineer": {
     "slug": "software-engineer",
@@ -885,7 +1125,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$82,010",
+        "typical": "$132,270",
+        "top": "$222,210",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +84,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "ui-ux-designer": {
     "slug": "ui-ux-designer",
@@ -1028,7 +1316,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$61,090",
+        "typical": "$98,540",
+        "top": "$165,550",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +10,200 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "video-game-designer": {
     "slug": "video-game-designer",
@@ -1172,7 +1508,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$60,760",
+        "typical": "$98,000",
+        "top": "$164,640",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,700 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "cyber-security": {
     "slug": "cyber-security",
@@ -1320,7 +1704,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$74,620",
+        "typical": "$120,360",
+        "top": "$202,200",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +10,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "food-scientist": {
     "slug": "food-scientist",
@@ -1467,7 +1899,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$47,370",
+        "typical": "$76,400",
+        "top": "$128,350",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,900 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "farm-and-ranch-manager": {
     "slug": "farm-and-ranch-manager",
@@ -1611,7 +2091,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$51,940",
+        "typical": "$83,770",
+        "top": "$140,730",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +53,200 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "agricultural-technician": {
     "slug": "agricultural-technician",
@@ -1755,7 +2283,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Associate's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A two-year degree is the usual door in.",
+        "noBachelorPct": "75%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 3.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 14.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 22.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 36.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 20.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 1.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$28,450",
+        "typical": "$45,880",
+        "top": "$77,080",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,500 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "electrician": {
     "slug": "electrician",
@@ -1900,7 +2476,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$38,190",
+        "typical": "$61,590",
+        "top": "$103,470",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +48,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "roofer": {
     "slug": "roofer",
@@ -2037,7 +2661,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "No formal education required",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "You can start without a degree and learn the work on the job.",
+        "noBachelorPct": "89%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 18.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 40.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 22.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 9.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 9.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 1.5
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$31,020",
+        "typical": "$50,030",
+        "top": "$84,050",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +7,300 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "truck-driver": {
     "slug": "truck-driver",
@@ -2171,7 +2843,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$33,680",
+        "typical": "$54,320",
+        "top": "$91,260",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +144,700 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "registered-nurse": {
     "slug": "registered-nurse",
@@ -2316,7 +3036,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$53,360",
+        "typical": "$86,070",
+        "top": "$144,600",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +115,900 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "school-counselor": {
     "slug": "school-counselor",
@@ -2458,7 +3226,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Master's degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A graduate degree is the usual door in, and licensing often follows it.",
+        "noBachelorPct": "10.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Finished high school",
+            "pct": 2.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 30.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 50.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 9.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$38,260",
+        "typical": "$61,710",
+        "top": "$103,670",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +16,000 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "air-traffic-controller": {
     "slug": "air-traffic-controller",
@@ -2598,7 +3414,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Associate's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A two-year degree is the usual door in.",
+        "noBachelorPct": "75%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 3.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 14.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 22.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 36.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 20.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 1.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$85,180",
+        "typical": "$137,380",
+        "top": "$230,800",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,300 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "sports-medicine-doctor": {
     "slug": "sports-medicine-doctor",
@@ -2742,7 +3606,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$146,320",
+        "typical": "$236,000",
+        "top": "$396,480",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +700 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "animator": {
     "slug": "animator",
@@ -2885,7 +3797,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$61,420",
+        "typical": "$99,060",
+        "top": "$166,420",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +4,000 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "hr-manager": {
     "slug": "hr-manager",
@@ -3028,7 +3988,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$84,540",
+        "typical": "$136,350",
+        "top": "$229,070",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +9,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "game-designer": {
     "slug": "game-designer",
@@ -3172,7 +4180,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$60,760",
+        "typical": "$98,000",
+        "top": "$164,640",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,700 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "quant": {
     "slug": "quant",
@@ -3317,7 +4373,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Master's degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A graduate degree is the usual door in, and licensing often follows it.",
+        "noBachelorPct": "10.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Finished high school",
+            "pct": 2.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 30.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 50.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 9.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$73,160",
+        "typical": "$118,000",
+        "top": "$198,240",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +3,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "management-analyst": {
     "slug": "management-analyst",
@@ -3459,7 +4563,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$61,630",
+        "typical": "$99,410",
+        "top": "$167,010",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +57,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "administrative-assistant": {
     "slug": "administrative-assistant",
@@ -3598,7 +4750,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$28,530",
+        "typical": "$46,010",
+        "top": "$77,300",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +189,600 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "emergency-medicine-doctor": {
     "slug": "emergency-medicine-doctor",
@@ -3742,7 +4942,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$148,300",
+        "typical": "$239,200",
+        "top": "$401,860",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "nurse-anesthetist": {
     "slug": "nurse-anesthetist",
@@ -3884,7 +5132,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Master's degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A graduate degree is the usual door in, and licensing often follows it.",
+        "noBachelorPct": "10.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Finished high school",
+            "pct": 2.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 30.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 50.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 9.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$131,840",
+        "typical": "$212,650",
+        "top": "$357,250",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,900 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "lawyer": {
     "slug": "lawyer",
@@ -4027,7 +5323,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$90,370",
+        "typical": "$145,760",
+        "top": "$244,880",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +21,400 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "airline-pilot": {
     "slug": "airline-pilot",
@@ -4168,7 +5512,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$135,870",
+        "typical": "$219,140",
+        "top": "$368,160",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +11,100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "therapist": {
     "slug": "therapist",
@@ -4311,7 +5703,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Master's degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A graduate degree is the usual door in, and licensing often follows it.",
+        "noBachelorPct": "10.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Finished high school",
+            "pct": 2.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 4.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 30.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 50.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 9.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$36,280",
+        "typical": "$58,510",
+        "top": "$98,300",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +29,300 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "database-architect": {
     "slug": "database-architect",
@@ -4453,7 +5893,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$83,510",
+        "typical": "$134,700",
+        "top": "$226,300",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +4,700 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "sound-engineering-technician": {
     "slug": "sound-engineering-technician",
@@ -4596,7 +6084,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Postsecondary certificate",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "A short certificate program gets you in; most of the learning happens on the job.",
+        "noBachelorPct": "80%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 24.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 26.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 16.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 3.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 1.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$36,850",
+        "typical": "$59,430",
+        "top": "$99,840",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,300 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "drone-pilot": {
     "slug": "drone-pilot",
@@ -4736,7 +6272,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$70,110",
+        "typical": "$113,080",
+        "top": "$189,970",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +3,000 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "jewelry-designer": {
     "slug": "jewelry-designer",
@@ -4879,7 +6463,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "A high school diploma opens the door; the rest is learned at work or in a short program.",
+        "noBachelorPct": "85%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 12.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 38.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$29,420",
+        "typical": "$47,450",
+        "top": "$79,720",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,000 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "pediatric-surgeon": {
     "slug": "pediatric-surgeon",
@@ -5023,7 +6655,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$346,580",
+        "typical": "$559,000",
+        "top": "$939,120",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +100 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "purchasing-manager": {
     "slug": "purchasing-manager",
@@ -5165,7 +6845,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$91,760",
+        "typical": "$148,000",
+        "top": "$248,640",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +3,800 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "cardiologist": {
     "slug": "cardiologist",
@@ -5309,7 +7037,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$307,520",
+        "typical": "$496,000",
+        "top": "$833,280",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +500 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "public-relations-manager": {
     "slug": "public-relations-manager",
@@ -5451,7 +7227,55 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Bachelor's degree",
+        "experienceFirst": "Usually an internship or entry role first",
+        "trainingAfterHiring": "On-the-job training",
+        "note": "Most people arrive with a four-year degree, but the mix below shows it is not the only way in.",
+        "noBachelorPct": "25%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 1.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 6.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 55.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 17.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 3.0
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$90,520",
+        "typical": "$146,000",
+        "top": "$245,280",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +4,200 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   },
   "veterinarian": {
     "slug": "veterinarian",
@@ -5595,6 +7419,54 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         }
       ]
     },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Doctoral or professional degree",
+        "experienceFirst": "Yes. Supervised training comes first",
+        "trainingAfterHiring": "Residency or fellowship",
+        "note": "This path runs through a doctoral or professional degree and years of supervised training.",
+        "noBachelorPct": "2.5%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 0.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 0.5
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 1.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 77.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$80,600",
+        "typical": "$130,000",
+        "top": "$218,400",
+        "note": "Half of the people in this job earn more than the typical figure and half earn less."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,600 by 2034. It is growing about as fast as most jobs."
+      }
+    }
   }
 };

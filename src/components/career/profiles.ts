@@ -23,6 +23,22 @@ export type ProfileRung = {
   toGetHere: string[];
 };
 
+/** Behind the (i) on three quick facts. Degree opens a sheet with the
+ *  education mix; pay and openings open a small popover. */
+export type FactDetails = {
+  degree?: {
+    doorAsksFor: string;
+    experienceFirst: string;
+    trainingAfterHiring: string;
+    note: string;
+    noBachelorPct: string;
+    extra?: string;
+    distribution: { label: string; pct: number }[];
+  };
+  pay?: { starting: string; typical: string; top: string; note?: string };
+  openings?: { note: string };
+};
+
 export type CareerProfile = {
   slug: string;
   title: string;
@@ -43,6 +59,7 @@ export type CareerProfile = {
     where: { count: string; credential: string; href?: string }[];
   };
   sources: string;
+  factDetails?: FactDetails;
 };
 
 const K = (state: string, pay: string) => ({ state, pay });
@@ -103,6 +120,29 @@ export const CAREER_PROFILES: Record<string, CareerProfile> = {
       ],
     },
     sources: "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    // Transcribed from the production (i) tooltips and sheet (screenshots,
+    // 2026-09-03); em dashes replaced with periods and commas, wording kept.
+    factDetails: {
+      degree: {
+        doorAsksFor: "High school diploma or equivalent",
+        experienceFirst: "No. You can start without it",
+        trainingAfterHiring: "Apprenticeship",
+        note: "This is a trade you learn on an apprenticeship: paid work with training, not a degree first.",
+        noBachelorPct: "92%",
+        extra: "100% got in with two years of study or less.",
+        distribution: [
+          { label: "Did not finish high school", pct: 25.6 },
+          { label: "Finished high school", pct: 42.6 },
+          { label: "Some college, no degree", pct: 17.8 },
+          { label: "Associate's degree", pct: 5.9 },
+          { label: "Bachelor's degree", pct: 6.6 },
+          { label: "Master's degree", pct: 1.1 },
+          { label: "Doctorate or professional degree", pct: 0.3 },
+        ],
+      },
+      pay: { starting: "$40,410", typical: "$60,580", top: "$99,910", note: "27% work for themselves, so this describes the ones with a boss." },
+      openings: { note: "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +43,100 by 2034. It is growing about as fast as most jobs." },
+    },
   },
 };
 
