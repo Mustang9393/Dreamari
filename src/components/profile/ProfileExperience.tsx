@@ -751,7 +751,13 @@ function Top3Tab({
               </div>
             </div>
 
-            <span aria-hidden className="pointer-events-none absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
+            {/* The accent glow lives in its own clipped layer: the card itself
+               stays overflow-visible (the kebab menu must escape it), so the
+               blob is clipped here to the card's radius instead of bleeding
+               past the border. */}
+            <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+              <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
+            </span>
 
             <div className="relative flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
               {/* Every block below reserves its height at lg (the 3-up
