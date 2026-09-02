@@ -172,10 +172,10 @@ export function PerformancePlanFlow({
 function WarningCard({ setup, question, cta, onBegin }: { setup: string; question: string; cta: string; onBegin: () => void }) {
   return (
     <div
-      className="flex w-full flex-col items-center gap-[var(--space-4)] rounded-[22px] border-2 px-[22px] py-[26px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="flex w-full flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border-2 px-[22px] py-[26px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{ background: "linear-gradient(160deg, rgba(234,88,12,0.22), rgba(127,29,29,0.55))", borderColor: "#f97316" }}
     >
-      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[18px]" style={{ background: "#f97316", color: "#fff" }}>
+      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: "#f97316", color: "#fff" }}>
         <ShieldAlert className="h-[28px] w-[28px]" aria-hidden />
       </span>
       <h2 className="text-[22px] leading-[1.2] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>
@@ -241,7 +241,7 @@ function StepCard({
         ))}
       </div>
       <div
-        className="flex w-full flex-col gap-[var(--space-3)] rounded-[20px] border-2 px-[18px] py-[20px] backdrop-blur-[22px]"
+        className="flex w-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[20px] backdrop-blur-[22px]"
         style={{ background: "rgba(10,3,6,0.72)", borderColor: "#e5484d" }}
       >
         <p className="m-0 text-[18px] leading-[1.3] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>
@@ -254,7 +254,7 @@ function StepCard({
                 key={which}
                 type="button"
                 onClick={() => onPick(which)}
-                className="dm-quiet flex w-full cursor-pointer items-center rounded-[14px] border px-[16px] py-[13px] text-left text-[15px] font-bold"
+                className="dm-quiet flex w-full cursor-pointer items-center rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-left text-[15px] font-bold"
                 style={{ borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
               >
                 {labels[which]}
@@ -280,7 +280,7 @@ function StepCard({
       </div>
       {showSystemLine && (
         <p
-          className="rounded-[16px] border px-[16px] py-[13px] text-[13.5px] leading-relaxed font-semibold"
+          className="rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-[13.5px] leading-relaxed font-semibold"
           style={{ background: "rgba(10,3,6,0.5)", borderColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.85)" }}
         >
           {systemLine}
@@ -305,14 +305,14 @@ function OutcomeCard({
 }) {
   return (
     <div
-      className="flex w-full flex-col items-center gap-[var(--space-3)] rounded-[22px] border-2 px-[22px] py-[26px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="flex w-full flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[22px] py-[26px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{
         background: tone === "passed" ? "rgba(88,28,135,0.4)" : "rgba(40,8,12,0.6)",
         borderColor: tone === "passed" ? "#a855f7" : "#e5484d",
       }}
     >
       <span
-        className="flex h-[58px] w-[58px] items-center justify-center rounded-[18px]"
+        className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]"
         style={{ background: tone === "passed" ? "#facc15" : "#6b7280", color: tone === "passed" ? "#1a0614" : "#0a0a0a" }}
       >
         {icon}

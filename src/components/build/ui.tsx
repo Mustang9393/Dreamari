@@ -384,7 +384,7 @@ export function ChipGrid({
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
+            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
               isLocked ? "cursor-not-allowed opacity-40" : "hover:-translate-y-px"
             } ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
             style={{
@@ -425,7 +425,7 @@ export function ChipGrid({
             setExpandedBy("tap");
             dispatchAuroraPulse("select", e);
           }}
-          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
+          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-md)] border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,
@@ -445,7 +445,7 @@ export function ChipGrid({
             setExpandedBy(null);
             gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
-          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
+          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-md)] border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,

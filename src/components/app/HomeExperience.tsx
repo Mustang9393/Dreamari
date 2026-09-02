@@ -155,7 +155,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
-      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[320px] sm:rounded-[var(--radius-2xl)]"
+      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[320px] sm:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
         touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -412,7 +412,7 @@ const ACTIVITIES: Activity[] = [
 // visible seam. Content also moved off fixed pixel offsets onto a real flex
 // column, so it doesn't need re-tuning by hand every time copy changes.
 function ActivityCard({ activity }: { activity: Activity }) {
-  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
+  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
   const style = { borderColor: "var(--glass-border)", background: "#0e0c20" };
 
   const content = (
@@ -541,7 +541,7 @@ export function HomeExperience() {
            counts, so the claim is checkable, and the CTA goes somewhere. */}
         <section
           aria-label="Your signal"
-          className="relative w-full overflow-hidden rounded-[var(--radius-2xl)] border p-[27px] sm:min-h-[216px]"
+          className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border p-[27px] sm:min-h-[216px]"
           style={{ borderColor: "var(--glass-border)" }}
         >
           {/* screen-blend purple is night-tuned; light mode swaps it via the

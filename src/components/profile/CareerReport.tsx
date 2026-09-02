@@ -96,7 +96,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-[84px] overflow-hidden rounded-[16px] border"
+      className="scroll-mt-[84px] overflow-hidden rounded-[var(--radius-sm)] border"
       style={{ borderColor: "var(--rule)", background: "var(--paper-raised)", boxShadow: "0 16px 32px -24px rgba(0,0,0,0.65)" }}
     >
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] border-b px-[18px] py-[15px] sm:px-[24px] sm:py-[17px]" style={{ borderColor: "var(--rule)" }}>
@@ -104,7 +104,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
            the header -- one shape, one weight, every section. The icon prop
            stays accepted so call sites don't change; it just isn't drawn. */}
         {void Icon}
-        <span aria-hidden className="dm-report-num flex h-[34px] min-w-[34px] flex-none items-center justify-center rounded-[9px] px-[8px] text-[18px] leading-[23px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
+        <span aria-hidden className="dm-report-num flex h-[34px] min-w-[34px] flex-none items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[18px] leading-[23px] font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
           {String(n).padStart(2, "0")}
         </span>
         {/* The one hierarchy, everywhere: section heading (18) > label (14)
@@ -130,7 +130,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
 // labels first, values second, and never has to parse a sentence.
 function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
-    <div className={`rounded-[12px] border px-[16px] py-[14px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+    <div className={`rounded-[var(--radius-sm)] border px-[16px] py-[14px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
       <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>
         {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
         {label}
@@ -247,7 +247,7 @@ function ReportDocument({
   return (
     <article
       data-doc="full"
-      className="dm-report overflow-hidden rounded-[var(--radius-2xl)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]"
+      className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]"
     >
       <div className="w-full">
         {/* Masthead: mechanical hierarchy, not a hierarchy-by-importance --
@@ -315,7 +315,7 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore" icon={BookOpen}>
           <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3 sm:gap-[14px]" data-keep-together>
             {report.majors.map((major) => (
-              <div key={major.name} className="flex items-center gap-[9px] rounded-[12px] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+              <div key={major.name} className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                 <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{major.name}</h4>
               </div>
@@ -327,7 +327,7 @@ function ReportDocument({
            page; the alternatives are even rows under a caps label. */}
         <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
           <div className="flex flex-col gap-[20px]" data-keep-together>
-            <div className="rounded-[12px] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
+            <div className="rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
               <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
               <p className="mt-[7px] max-w-[50ch] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
                 {report.education.find((route) => route.common)?.name}
@@ -337,7 +337,7 @@ function ReportDocument({
               <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
               <ul className="mt-[10px] grid list-none gap-[10px] p-0 sm:grid-cols-2">
                 {report.education.filter((route) => !route.common).map((route) => (
-                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[12px] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
                     <span className="flex-none rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
                   </li>
@@ -385,7 +385,7 @@ function ReportDocument({
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
-                className="dm-tap flex flex-col rounded-[12px] border px-[18px] py-[16px]"
+                className="dm-tap flex flex-col rounded-[var(--radius-sm)] border px-[18px] py-[16px]"
                 style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}
                 data-keep-together
               >
@@ -403,7 +403,7 @@ function ReportDocument({
 
         {/* Sources: the same module shape as the sections, so the page ends
            contained rather than trailing off into loose text */}
-        <footer className="rounded-[14px] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
+        <footer className="rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--rule)", background: "var(--paper-raised)" }}>
           {/* Collapsed on screen to keep the page short. The print stylesheet
               reveals [hidden], so an export still carries every source. */}
           <button
@@ -485,7 +485,7 @@ export function CareerReportView(props: ReportViewProps) {
 
   if (!report) {
     return (
-      <div className="rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <div className="rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         <p className="text-[15px] font-bold">No report yet for {career.title}</p>
         <p className="mt-[6px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or save it from Explore and the report will build itself.</p>
       </div>
@@ -511,7 +511,7 @@ export function CareerReportView(props: ReportViewProps) {
               document.getElementById(`report-tab-${next}`)?.focus();
             }
           }}
-          className="flex max-w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] border p-[var(--space-1)] [scrollbar-width:none]"
+          className="flex max-w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] border p-[var(--space-1)] [scrollbar-width:none]"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
         >
           {REPORT_TABS.map((item) => (
@@ -524,7 +524,7 @@ export function CareerReportView(props: ReportViewProps) {
               aria-controls={`report-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[14px] text-[13.5px] leading-[17px] font-bold whitespace-nowrap"
+              className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[13.5px] leading-[17px] font-bold whitespace-nowrap"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
@@ -624,10 +624,10 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
     }) as const;
 
   return (
-    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-2xl)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]">
+    <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]">
       <div className="w-full">
         <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
-          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
+          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
             <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
           </span>
           My Reflection
@@ -674,13 +674,13 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
               onChange={(event) => setNotesEdited(event.target.value)}
               rows={4}
               placeholder="Jot down any thoughts, questions, or surprising facts here..."
-              className="mt-[14px] w-full resize-y rounded-[12px] border p-[16px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
+              className="mt-[14px] w-full resize-y rounded-[var(--radius-sm)] border p-[16px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--ink-faint)]"
               style={{ borderColor: "var(--rule-strong)", background: "var(--paper-raised)", color: "var(--ink)" }}
             />
           </label>
 
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[10px] px-[22px] text-[14px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
+            <button type="button" onClick={save} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[22px] text-[14px] font-bold" style={{ background: "var(--ink)", color: "var(--paper)" }}>
               Save Reflection
             </button>
             <span aria-live="polite" className="flex items-center gap-[5px] text-[13px] font-bold" style={{ color: saved ? "var(--ink-soft)" : "var(--ink-faint)" }}>
@@ -718,7 +718,7 @@ function ShareTab() {
   };
 
   return (
-    <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <section aria-labelledby="share-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
         <h3 id="share-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Share Your Report</h3>
         <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Choose who you want to share your career exploration progress with.</p>
@@ -730,7 +730,7 @@ function ShareTab() {
             key={target.id}
             type="button"
             onClick={() => setShared((current) => ({ ...current, [target.id]: true }))}
-            className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
+            className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
             style={{ background: "var(--glass-surface-1)", borderColor: shared[target.id] ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 45%, var(--glass-border))" : "var(--glass-border)" }}
           >
             <span className="flex min-w-0 flex-col gap-[2px]">
@@ -776,7 +776,7 @@ function CounselorReviewTab() {
   const [reviewedOn, setReviewedOn] = useState<string | null>(null);
 
   return (
-    <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+    <section aria-labelledby="counselor-title" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex flex-col gap-[3px]">
         <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>For staff use only</span>
         <h3 id="counselor-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Counselor Review</h3>
@@ -791,7 +791,7 @@ function CounselorReviewTab() {
               type="button"
               aria-pressed={status === option.id}
               onClick={() => { setStatus(option.id); setReviewedOn(null); }}
-              className="dm-tap flex cursor-pointer flex-col gap-[6px] rounded-[var(--radius-xl)] border p-[var(--space-4)] text-left"
+              className="dm-tap flex cursor-pointer flex-col gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
               style={{
                 borderColor: status === option.id ? "var(--primary)" : "var(--glass-border)",
                 background: status === option.id ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)",

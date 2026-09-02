@@ -530,7 +530,7 @@ export function MatchLab() {
                     // Full literal class strings per direction (not a template): Tailwind
                     // only generates classes it can see whole in source. The plain
                     // guide-preview-* marker is for globals.css's stamp rule, not Tailwind.
-                    className={`absolute inset-x-0 top-0 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
+                    className={`absolute inset-x-0 top-0 overflow-hidden rounded-[var(--radius-lg)] border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
                       !nudging
                         ? ""
                         : guideGesture === "right"
@@ -638,7 +638,7 @@ export function MatchLab() {
                   key={c.id}
                   type="button"
                   onClick={() => commitSwap(i)}
-                  className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all hover:-translate-y-px"
+                  className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 text-left transition-all hover:-translate-y-px"
                   style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -669,7 +669,7 @@ export function MatchLab() {
               {liked.map((c, i) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-2.5 rounded-xl border px-3 py-2.5"
+                  className="flex items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2.5"
                   style={{ background: `color-mix(in srgb, ${c.color} 10%, var(--color-glass-surface-raised))`, borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className={`${bricolage.className} w-7 flex-none text-[16px] font-extrabold`} style={{ color: c.color }}>
@@ -837,7 +837,7 @@ function Stamp({ side, color, opacity, children }: { side: "left" | "right"; col
       // THIS stamp partway in while its swipe is being taught -- previewing what the
       // gesture does, not just where it goes.
       data-stamp={side}
-      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-lg border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
+      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-[var(--radius-md)] border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
       style={{
         [side]: 24,
         color,
@@ -895,7 +895,7 @@ function MiniRanking({ liked }: { liked: Career[] }) {
   return (
     <div className="flex w-full flex-col gap-2">
       {liked.map((c, i) => (
-        <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
+        <div key={c.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
           <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold" style={{ color: c.color }}>
             #{i + 1} <span className="truncate text-[var(--color-night-foreground)]">{c.title}</span>
           </span>
@@ -923,7 +923,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
       aria-modal="true"
     >
       <div
-        className="w-full max-w-[440px] rounded-3xl border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="w-full max-w-[440px] rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}
@@ -943,7 +943,7 @@ function FlyGhost({ career, from, to }: { career: Career; from: DOMRect; to: DOM
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed z-[90] overflow-hidden rounded-2xl border"
+      className="pointer-events-none fixed z-[90] overflow-hidden rounded-[var(--radius-lg)] border"
       style={{
         left: r.left,
         top: r.top,
@@ -971,7 +971,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
   }, [complete]);
   return (
     <div
-      className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
+      className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border p-6 text-center backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
       style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
     >
       {complete && <LocalBurst nonce={1} />}

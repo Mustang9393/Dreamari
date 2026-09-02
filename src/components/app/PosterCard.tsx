@@ -31,10 +31,10 @@ export function PosterCard({ career, className = "", onClick }: { career: Catalo
     <button
       type="button"
       onClick={onClick}
-      className={`dm-tap relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] border text-center uppercase ${className}`}
+      className={`dm-tap relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
-      <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
+      <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-lg)] object-cover" draggable={false} />
       {career.salary && (
         /* dark glass chip (approved) + large gradient figure — legible on
            any photo at a glance */
@@ -111,9 +111,9 @@ export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCar
       <button
         type="button"
         onClick={onClick}
-        className="dm-tap absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-xl)] text-center uppercase"
+        className="dm-tap absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase"
       >
-        <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-xl)] object-cover" draggable={false} />
+        <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-lg)] object-cover" draggable={false} />
         <span
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
           style={{ backgroundImage: "var(--poster-scrim)" }}

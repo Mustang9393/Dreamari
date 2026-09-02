@@ -32,7 +32,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
       <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
 
       <div
-        className={`rounded-2xl border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
+        className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
         style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {/* One readout, no eyebrow and no placeholder: the question above already

@@ -295,7 +295,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
              byline; the numeric facts sit in their own strip so they line up
              at every width instead of forming a ragged grid on phones. Its
              own card, separate from the tabs/dashboard surface below. ---- */}
-        <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
+        <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS}>
           <div className="flex items-center gap-[var(--space-3)]">
             <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
               <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
@@ -389,7 +389,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
           // this next" all read as ONE surface, not a stack of separate
           // floating cards -- the tablist sits inside the same card instead
           // of its own pill above it.
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
             <div
               ref={tablistRef}
               role="tablist"
@@ -407,7 +407,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   document.getElementById(`profile-tab-${next}`)?.focus();
                 }
               }}
-              className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] p-[var(--space-1)] [scrollbar-width:none]"
+              className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] p-[var(--space-1)] [scrollbar-width:none]"
               style={{
                 background: "var(--glass-surface-2)",
                 ...(tabsOverflow ? { maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" } : {}),
@@ -431,7 +431,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   aria-controls={`profile-panel-${item.id}`}
                   tabIndex={tab === item.id ? 0 : -1}
                   onClick={() => setTab(item.id)}
-                  className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
+                  className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
                   style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
                 >
                   {item.label}
@@ -483,7 +483,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               document.getElementById(`profile-tab-${next}`)?.focus();
             }
           }}
-          className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-xl)] border p-[var(--space-1)] [scrollbar-width:none]"
+          className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] border p-[var(--space-1)] [scrollbar-width:none]"
           style={
             tabsOverflow
               ? { ...GLASS, maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" }
@@ -508,7 +508,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md-alt)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
+              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
               style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {item.label}
@@ -592,7 +592,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
         <div className="no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
-          <div className="filters-reveal w-full max-w-[440px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="filters-reveal w-full max-w-[440px] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to your Saved Careers.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
@@ -616,7 +616,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
       {/* ---- Remove confirm: destructive actions always confirm ---- */}
       {confirmRemove && (
         <div className="no-print fixed inset-0 z-[66] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
-          <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to your Saved Careers. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
@@ -630,7 +630,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
       {/* ---- Add-from-Locker sheet: pick right here, no tab switch ---- */}
       {addOpen && (
         <div className="fixed inset-0 z-[65] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setAddOpen(false); }}>
-          <div className="filters-reveal w-full max-w-[420px] rounded-t-[var(--radius-2xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="filters-reveal w-full max-w-[420px] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div>
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
@@ -645,7 +645,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                 <Link href="/match-lab" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Nothing saved yet · swipe careers</Link>
               )}
               {locker.map((career) => (
-                <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-2)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-2)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                   <span className="relative h-[52px] w-[38px] flex-none overflow-hidden rounded-[8px]">
                     <Image src={career.photo} alt="" fill sizes="38px" className="object-cover" />
                   </span>
@@ -731,7 +731,7 @@ function Top3Tab({
 
   if (top3.length === 0) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers here to compare them and choose your #1.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
@@ -782,7 +782,7 @@ function Top3Tab({
         return (
           <div
             key={id}
-            className="relative flex h-full flex-col rounded-[var(--radius-2xl)] border"
+            className="relative flex h-full flex-col rounded-[var(--radius-lg)] border"
             style={{
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
@@ -887,7 +887,7 @@ function Top3Tab({
         <button
           type="button"
           onClick={onAdd}
-          className="dm-tap flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-2xl)] border-2 border-dashed"
+          className="dm-tap flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed"
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -899,7 +899,7 @@ function Top3Tab({
       </div>
 
       {!focusId && (
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
           <span className="text-[14px] font-bold">Choose your #1 career to build your plan around it.</span>
           <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Choose my #1</button>
         </div>
@@ -919,7 +919,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
   return (
     <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
-      <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:my-auto sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
@@ -960,7 +960,7 @@ function OverviewTab({
 }) {
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
@@ -983,7 +983,7 @@ function OverviewTab({
       <section aria-labelledby="bento-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         <h3 id="bento-title" className="sr-only">Your top three, plan and report at a glance</h3>
 
-        <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -991,7 +991,7 @@ function OverviewTab({
           <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
-        <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Plan</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -1002,7 +1002,7 @@ function OverviewTab({
           </span>
         </button>
 
-        <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -1012,7 +1012,7 @@ function OverviewTab({
       </section>
 
       {/* The one thing to do next — a single action, nothing else in the box */}
-      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
         <span className="flex min-w-0 flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
           <h3 id="next-title" className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
@@ -1078,7 +1078,7 @@ function EvidenceSheet({
       </div>
 
       {Object.entries(grouped).map(([kind, list]) => (
-        <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={GLASS}>
           <h3 id={`ev-${kind}`} className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>
             {EVIDENCE_KIND_LABEL[kind as EvidenceItem["kind"]]}
           </h3>
@@ -1107,13 +1107,13 @@ function EvidenceSheet({
       ))}
 
       {items.length === 0 && (
-        <section className="rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
+        <section className="rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={GLASS}>
           <p className="text-[15px] font-bold">Nothing logged for this career yet</p>
           <p className="mx-auto mt-[6px] max-w-[40ch] text-[15px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or finish a glossary level and it shows up here.</p>
         </section>
       )}
 
-      <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+      <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={GLASS}>
         <span className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>What does not count</span>
         <p className="text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
           Scrolling, tapping around and watching without finishing. Dreamari keeps some internal signals to order your feed, and none of them appear in your report or get shared with anyone.
@@ -1173,7 +1173,7 @@ function RoutesTab({
       <PathTab focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice} onGoPlan={onGoPlan} />
 
       {report && (
-        <section aria-labelledby="majors-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
+        <section aria-labelledby="majors-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={GLASS}>
           <h3 id="majors-title" className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
           <ul className="flex list-none flex-col p-0">
             {report.majors.map((major) => (
@@ -1247,14 +1247,14 @@ function RouteRow({ route, selected, onOpen, onSelect }: {
     // content rather than wrapping it, so "Make this my path" stays a real
     // sibling button instead of an invalid nested one.
     <div
-      className="dm-tap group relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
+      className="dm-tap group relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Open details for ${route.short}`}
-        className="absolute inset-0 z-0 cursor-pointer rounded-[var(--radius-2xl)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-subtle)]"
+        className="absolute inset-0 z-0 cursor-pointer rounded-[var(--radius-lg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-subtle)]"
       />
 
       <div className="pointer-events-none relative z-[1] flex flex-col gap-[var(--space-4)]">
@@ -1323,7 +1323,7 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
     <Portal>
     <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
-      <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <button type="button" onClick={onClose} className="dm-quiet absolute top-[10px] right-[10px] z-10 flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
           <X className="h-5 w-5" aria-hidden />
         </button>
@@ -1347,7 +1347,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={GLASS}>
         <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its routes</p>
         <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
       </section>
@@ -1425,7 +1425,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
 
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-8)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={GLASS}>
         <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its plan</p>
         <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
       </section>
@@ -1452,7 +1452,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
       </div>
 
       {/* Your roadmap: overall progress across every step */}
-      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-4)]" style={GLASS}>
+      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={GLASS}>
         <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
           <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
           <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
@@ -1475,7 +1475,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
           // only CHECKING OFF waits for the earlier steps.
           const isOpen = openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id;
           return (
-            <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
+            <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
               <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[inherit] p-[var(--space-4)] text-left">
                 <span className="flex min-w-0 items-center gap-[var(--space-3)]">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
@@ -1593,7 +1593,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
   const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
-      className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] p-[var(--space-5)] md:grid md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane'] ${inModal ? "w-full border-0" : "w-[86vw] max-w-[340px] flex-none snap-center border-2 md:w-[86%] md:max-w-[880px]"}`}
+      className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] p-[var(--space-5)] md:grid md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane'] ${inModal ? "w-full border-0" : "w-[86vw] max-w-[340px] flex-none snap-center border-2 md:w-[86%] md:max-w-[880px]"}`}
       style={{ background: inModal ? "transparent" : selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       {/* Status chips */}
@@ -1836,7 +1836,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
   ];
   return (
     <div className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>
-      <div className="min-w-[640px] overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS }}>
+      <div className="min-w-[640px] overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...GLASS }}>
         <div className="grid" style={{ gridTemplateColumns: `130px repeat(${routes.length}, minmax(150px, 1fr))` }}>
           <span className="border-b p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }} />
           {routes.map((route) => (
@@ -1878,14 +1878,14 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
         </span>
       </div>
       {locker.length === 0 ? (
-        <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-2xl)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
           <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>
           <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
           {locker.map((career) => (
-            <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ borderColor: "var(--glass-border)" }}>
+            <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <Image src={career.photo} alt="" fill sizes="220px" className="object-cover" />
                 <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
@@ -1949,7 +1949,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
 
 function ResumeView() {
   return (
-    <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-8)]" style={GLASS}>
+    <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-8)]" style={GLASS}>
       <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
       <ol className="flex flex-col gap-[var(--space-3)]">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (

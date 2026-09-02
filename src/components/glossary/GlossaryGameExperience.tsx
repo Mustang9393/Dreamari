@@ -197,7 +197,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
       <DreamyFace pose="idea" size={64} />
-      <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <h1 className="text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           Meet {lesson.exampleCompany}
         </h1>
@@ -263,7 +263,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
         Learn the Language of Finance
       </h1>
 
-      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))" }}>
           <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>
             ${lesson.companyValue.toLocaleString()}
@@ -310,7 +310,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 function SketchFace({ term, icon, style }: { term: string; icon: string; style?: React.CSSProperties }) {
   return (
     <span
-      className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden]"
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 4%, var(--card))",
@@ -440,7 +440,7 @@ function UnlockScreen({
 
               {/* BACK: the written page, ring-bound edge and all. */}
               <span
-                className="absolute inset-0 flex overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+                className="absolute inset-0 flex overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden]"
                 style={{
                   background: "var(--card)",
                   borderColor: "var(--glass-border)",
@@ -531,7 +531,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
           </span>
         ))}
       </div>
-      <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <Trophy className="h-8 w-8" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
         <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           All {lesson.terms.length} terms unlocked!
@@ -1114,7 +1114,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
       <div
-        className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)]"
+        className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
       >
         <div className="flex items-start gap-[var(--space-3)]">
@@ -1154,7 +1154,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5" onClick={onDismiss}>
       <div
-        className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-xl)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1245,7 +1245,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
           ))}
       </div>
 
-      <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <LocalBurst nonce={burstNonce} />
         {parts.map((part, i) => {
           const gapMatch = part.match(/^\{(\d+)\}$/);
@@ -1351,7 +1351,7 @@ function CompleteScreen({
         Lesson Complete!
       </h2>
 
-      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
+      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
         <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--world-business-money-office)" }}>
           <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
         </span>

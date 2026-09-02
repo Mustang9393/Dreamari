@@ -380,3 +380,14 @@ html.light .dm-report {
 
 /* The running footer is a print artifact only. */
 .dm-print-footer { display: none; }
+
+/* Every interactive element gets the same keyboard focus ring and pointer,
+   whether or not it opted into a dm-* utility (engineering review: states
+   were inconsistent control to control). */
+:where(button, [role="button"], [role="tab"], [role="radio"], a[href], input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent-subtle);
+  outline-offset: 2px;
+}
+:where(button, [role="button"], [role="tab"], [role="radio"]):not(:disabled) {
+  cursor: pointer;
+}

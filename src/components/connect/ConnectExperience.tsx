@@ -172,7 +172,7 @@ function InlineAsk({
     );
   }
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
+    <div className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
       <div className="flex items-start gap-[12px]">
         <Avatar name="Jordan Rivera" size={30} />
         <label className="min-w-0 flex-1">
@@ -216,7 +216,7 @@ function InlineAsk({
  *  immediately with its routing state, so posting feels alive. */
 function LocalQuestionCard({ title }: { title: string }) {
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-5)] motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
+    <div className="rounded-[var(--radius-lg)] border p-[var(--space-5)] motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }}>
       <div className="flex flex-wrap items-center gap-[8px]">
         <Avatar name="Jordan Rivera" size={28} />
         <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Jordan</span>
@@ -494,7 +494,7 @@ const PHOTO_FOCUS: Record<string, string> = {
 // (progressive blur, vignette, top scrim, grain) so the title always reads.
 function StatTile({ icon: Icon, value, label, accent }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: number | string; label: string; accent: string }) {
   return (
-    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-lg)] px-[4px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[4px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       <Icon className="h-[14px] w-[14px]" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 60%, #FFFFFF)` }} />
       <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
       <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
@@ -506,7 +506,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
   const accent = communityAccent(community);
   return (
     <div
-      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
+      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
       {/* Our full-bleed photo, but dimmed and frosted so type wins: the photo
@@ -575,7 +575,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
 function Card({ children, className = "", accent }: { children: React.ReactNode; className?: string; accent?: string }) {
   return (
     <div
-      className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`}
+      className={`rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`}
       style={
         accent
           ? { background: `color-mix(in srgb, ${accent} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 26%, var(--glass-border))` }
@@ -645,10 +645,10 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
          obviously easily clickable") -- an overlay target under the
          like/save controls, a hover ring, and a chevron that says "this
          goes somewhere" before you ever hover. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open question: {thread.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       {/* A living row starts with a person: the asker's avatar and handle
@@ -699,10 +699,10 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
     <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the insight's thread -- overlay target under
          the like/save controls, hover ring, and an always-visible chevron. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-xl)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open insight: {insight.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
@@ -1113,7 +1113,7 @@ function HomeView({
               return (
                 <div
                   key={event.id}
-                  className="group relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
+                  className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
                   style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
                   <Image src={eventCover(event.host)} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
@@ -1208,7 +1208,7 @@ function ComingSoonCard() {
   const [sent, setSent] = useState(false);
   return (
     <div
-      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-2xl)]"
+      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW, fontFamily: "var(--font-display)" }}
     >
       <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
@@ -1287,7 +1287,7 @@ function BoardView({
          at the right, a full-width folio rule underneath. */}
       <section
         aria-label="Community overview"
-        className="group relative overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
+        className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${communityAccent(community)} 40%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         <Image src={bannerCover ?? community.photo} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
@@ -1335,7 +1335,7 @@ function BoardView({
       </section>
 
       {about ? (
-        <div className="rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 26%, var(--glass-border))` }}>
+        <div className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 26%, var(--glass-border))` }}>
           <h2 className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>About this community</h2>
           <p className="mt-[8px] text-[14px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
           <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
@@ -1367,7 +1367,7 @@ function BoardView({
            left rail (Student Questions / Professional Insights -- the doc
            cuts Industry Updates) and the active panel. The rail collapses
            to a pill row on phones. */
-        <div className="flex flex-col gap-[var(--space-6)] rounded-[var(--radius-xl)] border p-[var(--space-5)] md:p-[var(--space-7)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
+        <div className="flex flex-col gap-[var(--space-6)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:p-[var(--space-7)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
           <FilterRow
             options={[
               { key: "questions", label: "Student Questions", Icon: MessagesSquare },
@@ -1452,7 +1452,7 @@ function EventView({
 
       <section
         aria-label="Event context"
-        className="group relative overflow-hidden rounded-[var(--radius-2xl)] px-[var(--space-6)] py-[var(--space-5)]"
+        className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         <Image src={eventCover(event.host)} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
@@ -1512,7 +1512,7 @@ function EventView({
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Event resources">
           <SectionHead>Resources from the event</SectionHead>
           {event.resources.map((r) => (
-            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
               <div className="min-w-0">
                 <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
                 <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
@@ -1607,7 +1607,7 @@ function ThreadView({
           if (r.kind === "answer") {
             const rid = thread.id + "-a" + index;
             return (
-              <div key={rid} className="rounded-[var(--radius-xl)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
+              <div key={rid} className="rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
                 <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
                   <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
                   {r.primary && (
@@ -1760,7 +1760,7 @@ function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, li
            shows them; it's a pitch beat about speaking Gen Z) -- rendered
            unoptimized so the animation actually plays. */}
         {image && (
-          <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[14px] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
+          <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[var(--radius-lg)] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
         )}
         <div className="flex flex-wrap items-center gap-[10px]">
           <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
@@ -1789,7 +1789,7 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
     setText("");
   };
   return (
-    <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+    <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
       <Avatar name="Jordan Rivera" size={32} />
       <div className="min-w-0 flex-1">
         <label className="block">
@@ -1858,7 +1858,7 @@ function InsightThreadView({
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">
-        <div className="rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+        <div className="rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
           <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
@@ -1943,7 +1943,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-2xl)] border sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
           <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
@@ -1974,7 +1974,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
             type="button"
             onClick={onJoin}
             disabled={!agreed}
-            className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[10px] text-[13.5px] font-bold disabled:cursor-default disabled:opacity-50"
+            className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13.5px] font-bold disabled:cursor-default disabled:opacity-50"
             style={{ background: "var(--primary)", color: "#FFFFFF" }}
           >
             Agree &amp; Join
@@ -2017,7 +2017,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-2xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-2xl)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="relative z-[1] w-full max-w-[480px] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>

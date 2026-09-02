@@ -303,7 +303,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            half, so solid color under the title dissolves into the picture.
            Below md the same thing happens top to bottom: photo up top, color
            rising from below the text. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-2xl)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
           <div className="relative min-h-[360px] md:min-h-[340px]" style={{ color: "#fff" }}>
             <div className="absolute inset-0" aria-hidden>
               {/* phones: subject up top; desktop: subject at the right */}
@@ -382,7 +382,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
-          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-xl)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <section aria-label="Quick facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}

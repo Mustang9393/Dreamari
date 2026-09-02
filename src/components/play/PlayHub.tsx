@@ -235,7 +235,7 @@ function RowCard({
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
   // The featured card's copy reads left-aligned (a billboard); every side
   // card centers its copy, matching Browse's own PosterCard convention.
-  const className = `dm-tap group relative flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
+  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
   const style = {
     borderColor: "var(--color-glass-border-raised)",
     background: "var(--glass-surface-1)",
@@ -415,7 +415,7 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
   return (
     <li className="flex-none">
       <span
-        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[16px] border p-[10px] ${SHELF_HEIGHT}`}
+        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[10px] ${SHELF_HEIGHT}`}
         style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
       >
         {cover ? (
@@ -452,7 +452,7 @@ function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string;
   return (
     <Link
       href={`/play/glossary/${game.careerSlug}`}
-      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[16px] border ${SHELF_HEIGHT}`}
+      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
     >
       {game.cover ? (

@@ -34,7 +34,7 @@ import "./app.css";
 function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
   return (
     <div
-      className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-xl)] border p-[var(--space-1)]"
+      className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
     >
       {(
@@ -48,7 +48,7 @@ function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (
           type="button"
           aria-pressed={tab === item.key}
           onClick={() => onTab(item.key)}
-          className="dm-quiet cursor-pointer rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
           style={{
             fontFamily: "var(--font-body)",
             background: tab === item.key ? "var(--primary)" : "transparent",
@@ -249,7 +249,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const router = useRouter();
   return (
     <article
-      className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-xl)]"
+      className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "var(--background)" }}
     >
       {/* Env photo: taller-than-card wrapper for parallax (JS translateY),
@@ -470,7 +470,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
 
   return (
     <article
-      className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-xl)]"
+      className="relative flex h-full w-full flex-col justify-end overflow-hidden border md:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
       <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
@@ -490,7 +490,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
            of a playing video looks muddy in a way it doesn't over a still
            photo, and the title needs to stay sharp and legible over motion. */}
         <span
-          className="inline-block rounded-[var(--radius-2xl)] border px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold"
+          className="inline-block rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)] text-[16px] leading-[22px] font-semibold"
           style={{ background: "var(--scrim-heavy)", borderColor: "var(--glass-border)", color: "#ffffff", fontFamily: "var(--font-display)" }}
         >
           {item.title}
@@ -616,7 +616,7 @@ function ForYouFace() {
         /* night scene: the reel is always photo-on-dark; its ui keeps dark
            tokens in light mode (see tokens.css) */
         data-night-scene
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-xl)]"
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => (
           <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
@@ -736,7 +736,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
               {/* Search grows from icon to input; the toggle folds away while
                  it is open. */}
               <div
-                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{
                   width: searchOpen ? "min(480px, 44vw)" : 40,
                   background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
@@ -782,7 +782,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
         {/* Mobile search input (the desktop header is hidden below md) */}
         {tab === "browse" && searchOpen && (
           <div
-            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-xl)] border px-[var(--space-4)] backdrop-blur-[10px] md:hidden"
+            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px] md:hidden"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
           >
             <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />

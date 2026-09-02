@@ -40,7 +40,7 @@ export function MatchCard({ card }: MatchCardProps) {
             body-box height ratio (~1.6:1) instead of the body box just shrink-wrapping
             its own content — that's what was making it read as a small label rather
             than a real, generously-sized box. */}
-        <div className="flex w-full flex-[1.6] flex-col items-center justify-center rounded-xl" style={{ gap: "var(--match-card-inner-gap)" }}>
+        <div className="flex w-full flex-[1.6] flex-col items-center justify-center rounded-[var(--radius-md)]" style={{ gap: "var(--match-card-inner-gap)" }}>
           <span className="text-[length:var(--font-size-match-card-emoji)] leading-none">{card.emoji}</span>
           <p className="text-center text-[length:var(--font-size-match-card-title)] leading-[1.1] font-extrabold tracking-[-0.02em] text-white">
             {card.label}

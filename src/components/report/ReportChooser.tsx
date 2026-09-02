@@ -110,7 +110,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
                         setPicked(career.id);
                       }
                     }}
-                    className={`relative flex-none snap-center rounded-[var(--radius-xl)] outline-none transition-[transform,opacity,box-shadow] duration-300 ease-out focus-visible:ring-2 focus-visible:ring-[var(--accent-subtle)] ${revealed ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"} ${selected ? "scale-[1.03]" : "opacity-[0.78] hover:opacity-100"}`}
+                    className={`relative flex-none snap-center rounded-[var(--radius-lg)] outline-none transition-[transform,opacity,box-shadow] duration-300 ease-out focus-visible:ring-2 focus-visible:ring-[var(--accent-subtle)] ${revealed ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"} ${selected ? "scale-[1.03]" : "opacity-[0.78] hover:opacity-100"}`}
                     style={{
                       transitionDelay: revealed ? "0ms" : `${index * 90}ms`,
                       boxShadow: selected ? `0 0 0 2px ${ring}, 0 24px 48px -24px color-mix(in srgb, ${ring} 70%, transparent)` : "0 18px 40px -28px rgba(0,0,0,0.7)",
