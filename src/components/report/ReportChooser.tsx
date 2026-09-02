@@ -236,7 +236,7 @@ function ReportStage({
               }}
             >
               <section
-                className={`flex h-full flex-col overflow-hidden rounded-[22px] border ${active ? "backdrop-blur-[20px]" : ""}`}
+                className={`flex h-full flex-col overflow-hidden rounded-[var(--radius-2xl)] border ${active ? "backdrop-blur-[20px]" : ""}`}
                 style={{
                   // Opaque enough that the report behind it does not read
                   // through the glass -- a peeking card should sit BEHIND the
@@ -299,7 +299,7 @@ function ReportStage({
                 <button
                   type="button"
                   onClick={() => onCentre(career.id)}
-                  className="absolute inset-0 cursor-pointer rounded-[22px]"
+                  className="absolute inset-0 cursor-pointer rounded-[var(--radius-2xl)]"
                   style={{ background: "color-mix(in srgb, var(--background) 30%, transparent)" }}
                 >
                   <span className="sr-only">Show the {career.title} report</span>
@@ -356,7 +356,7 @@ function StageArrow({ side, disabled, onClick }: { side: "left" | "right"; disab
 
 function EmptyState({ onGoMatch }: { onGoMatch: () => void }) {
   return (
-    <div className="rounded-[22px] border px-[var(--space-5)] py-[var(--space-8)] text-center" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <div className="rounded-[var(--radius-2xl)] border px-[var(--space-5)] py-[var(--space-8)] text-center" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
       <p className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
         Nothing saved yet
       </p>

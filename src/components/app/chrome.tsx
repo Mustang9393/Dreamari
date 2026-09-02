@@ -185,7 +185,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
             15,980 XP
           </span>
         </span>
-        <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-full">
+        <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
         </Link>

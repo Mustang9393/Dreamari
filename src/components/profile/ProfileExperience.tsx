@@ -648,7 +648,7 @@ function Top3Tab({
 
   if (top3.length === 0) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] text-center" style={GLASS}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers here to compare them and choose your #1.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
@@ -699,7 +699,7 @@ function Top3Tab({
         return (
           <div
             key={id}
-            className="relative flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border"
+            className="relative flex flex-col rounded-[var(--radius-2xl)] border"
             style={{
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
@@ -711,7 +711,7 @@ function Top3Tab({
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[4/3] w-full flex-none">
+            <div className="relative aspect-[4/3] w-full flex-none overflow-hidden rounded-t-[inherit]">
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
@@ -769,7 +769,7 @@ function Top3Tab({
                     <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet h-[27px] w-fit flex-none cursor-pointer rounded-full border px-[10px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet min-h-[36px] w-fit flex-none cursor-pointer rounded-full border px-[12px] text-[12px] font-bold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
                 )}
               </div>
 
@@ -873,11 +873,11 @@ function OverviewTab({
 }) {
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-10)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-6)] text-center" style={GLASS}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
-          <Link href="/match-lab" className="flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
+          <Link href="/match-lab" className="dm-solid flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Start swiping</Link>
           <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Open Saved Careers</button>
         </div>
       </section>
@@ -1353,7 +1353,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
       </div>
 
       {routeView === "cards" ? (
-        <div className="-mx-5 flex snap-x snap-mandatory items-stretch gap-[var(--space-3)] overflow-x-auto scroll-px-5 px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:overflow-visible sm:px-0 sm:pb-0 sm:[grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]" style={{ touchAction: "pan-x pan-y" }}>
+        <div className="-mx-5 flex snap-x snap-mandatory items-stretch gap-[var(--space-3)] overflow-x-auto scroll-px-5 px-5 pt-1 pb-3 [scrollbar-width:none] sm:mx-0 sm:grid sm:overflow-visible sm:px-0 sm:pb-0 sm:[grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]" style={{ touchAction: "pan-x pan-y" }}>
           {focus.routes.map((routeOption) => (
             <RouteRow
               key={routeOption.id}
@@ -1459,7 +1459,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
           const isOpen = openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id;
           return (
             <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-2xl)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
-              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left">
+              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[inherit] p-[var(--space-4)] text-left">
                 <span className="flex min-w-0 items-center gap-[var(--space-3)]">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
                   <span className="flex min-w-0 flex-col">
@@ -1498,7 +1498,7 @@ function PlanTab({ focus, chosenRoute, horizonProgress, horizonUnlocked, doneSet
                           </Link>
                         )}
                         {task.custom && (
-                          <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded p-[2px]" style={{ color: "var(--muted-foreground)" }}>
+                          <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[4px]" style={{ color: "var(--muted-foreground)" }}>
                             <X className="h-3.5 w-3.5" />
                           </button>
                         )}
@@ -1619,7 +1619,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
               type="button"
               aria-pressed={pane === item.id}
               onClick={() => setPane(item.id)}
-              className="dm-quiet -mb-[1px] cursor-pointer border-b-2 pb-[8px] text-[12px] font-bold tracking-[1px] uppercase"
+              className="dm-quiet -mb-[1px] cursor-pointer rounded-t-[var(--radius-sm)] border-b-2 px-[var(--space-2)] pb-[8px] text-[12px] font-bold tracking-[1px] uppercase"
               style={{ borderColor: pane === item.id && !(hint === "run" && pane === "stats") ? "var(--primary)" : "transparent", color: pane === item.id ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {item.label}
@@ -1855,7 +1855,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved Careers</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{locker.length} saved</span>
-          <button type="button" aria-label="Close Saved Careers" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          <button type="button" aria-label="Close Saved Careers" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
         </span>
@@ -1886,7 +1886,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   onClick={() => addToTop3(career.id)}
                   aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
                   title={top3Count >= 3 ? "Swap into Top 3" : "Add to Top 3"}
-                  className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
                   style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
                 >
                   {top3Count >= 3 ? <ArrowLeftRight className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -1907,7 +1907,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
-        <button type="button" aria-label="Close settings" onClick={onClose} className="flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+        <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -1922,7 +1922,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
             <span className="rounded-full px-[8px] py-[2px] text-[12px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
           </div>
         ))}
-        <button type="button" className="cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
+        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
           Sign out
         </button>
       </div>
@@ -1943,7 +1943,7 @@ function ResumeView() {
         ))}
       </ol>
       <div className="flex items-center gap-[var(--space-3)]">
-        <button type="button" className="w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <button type="button" className="dm-quiet w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Continue
         </button>
       </div>

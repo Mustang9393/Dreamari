@@ -86,7 +86,7 @@ export function PlayHub() {
             {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
                than the hero row above -- the billboard dominates, the
                shelves below it stay uniform and quiet, Netflix-style. */}
-            <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pb-1">
+            <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pt-1 pb-3">
               {glossaryPlayable.map((game) => (
                 <li key={game.careerSlug} className="flex-none">
                   <GlossaryGameCard game={game} />
@@ -188,7 +188,7 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pb-1 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
+      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -262,7 +262,7 @@ function RowCard({
       <Image src={cover} alt="" fill sizes={large ? "(min-width: 1024px) 764px, 90vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
       {candidate.kind === "soon" && !large && (
         <span className="absolute top-[8px] left-[8px] z-[1] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
-          <Lock className="h-[10px] w-[10px]" aria-hidden /> Soon
+          <Lock className="h-[10px] w-[10px]" aria-hidden /> Coming soon
         </span>
       )}
       {/* Same scrim + title + world-label (in the world's own accent color)
@@ -299,7 +299,7 @@ function RowCard({
     <article className={className} style={style}>
       {content}
       {!large && candidate.kind === "sim" && onSelect && (
-        <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer">
+        <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
           <span className="sr-only">Feature {candidate.sim.title}</span>
         </button>
       )}
@@ -349,7 +349,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   return (
     <>
-      <Link href={`/play/${sim.id}`} className="absolute inset-0 z-10 cursor-pointer">
+      <Link href={`/play/${sim.id}`} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
         <span className="sr-only">{resumable ? `Continue ${sim.title} · Level ${first.n}` : `Play ${sim.title} · Level ${first.n}`}</span>
       </Link>
       <span
@@ -402,7 +402,7 @@ function SoonSection({ label, children }: { label: string; children: React.React
       <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
         {label}
       </h2>
-      <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pb-1">{children}</ul>
+      <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pt-1 pb-3">{children}</ul>
     </section>
   );
 }

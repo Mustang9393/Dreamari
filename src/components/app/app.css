@@ -160,53 +160,55 @@
 .dm-tap {
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
 }
+/* Shadow kept tight (extends ~4px) so a card lifting inside a padded scroll
+   rail isn't sliced off at the rail's edge; the old 12/28px shadow was cut on
+   every overflow-x-auto shelf in the app. */
 .dm-tap:hover {
   border-color: color-mix(in srgb, var(--accent-subtle) 50%, var(--glass-border)) !important;
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px -20px rgb(0 0 0 / 0.85);
+  box-shadow: 0 6px 16px -12px rgb(0 0 0 / 0.85);
 }
 .dm-tap:active {
   transform: translateY(0);
   box-shadow: none;
 }
 
-/* Quiet controls: icon buttons and rail chips that sit on transparent. */
+/* Quiet controls: icon buttons, chips, tabs, text actions on transparent.
+   The hover state must follow the control's OWN shape and stay INSIDE its
+   box: the previous version forced a 999px pill on anything without a
+   rounded-* utility (a rectangular accordion header hover-painted as a pill)
+   and added a 6px spread halo that spilled past tab tracks, nav pills and
+   card edges and got clipped by every overflow-hidden parent. Now: the
+   element's radius (a soft 8px fallback for bare text controls -- utilities
+   still win, this is the components layer), a wash, and a 1px INSET ring. */
 .dm-quiet {
   transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
-/* Default SHAPE for quiet controls, in the components layer so any explicit
-   rounded-* utility on the element still wins (utilities come later in the
-   cascade): without this, an unpadded text control (a bare "Back" label)
-   hover-painted a sharp-cornered rectangle flush against its own glyphs. */
 @layer components {
   .dm-quiet {
-    border-radius: 999px;
+    border-radius: var(--radius-sm, 8px);
   }
 }
 .dm-quiet:hover {
   background: var(--glass-surface-2) !important;
   color: var(--foreground) !important;
-  /* Breathing room around the wash without touching layout: the halo reads
-     as padding, and it follows the control's own border-radius, so the
-     hover state is never a hard-edged box hugging the text. */
-  box-shadow: 0 0 0 6px var(--glass-surface-2);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent);
 }
 .dm-quiet:active {
-  box-shadow: 0 0 0 4px var(--glass-surface-2);
+  background: color-mix(in srgb, var(--foreground) 12%, transparent) !important;
 }
 
-/* Text links and inline actions: lift + shadow instead of an underline,
-   same affordance language as .dm-tap's cards. */
+/* Text links and inline actions: bare text can't cast a shadow onto anything
+   and a 1px lift is invisible, so the affordance is the one text has always
+   had -- an underline -- plus the accent. */
 .dm-link {
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: color 140ms ease, text-decoration-color 140ms ease;
+  text-decoration: underline transparent;
+  text-underline-offset: 3px;
 }
 .dm-link:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px -20px rgb(0 0 0 / 0.85);
-}
-.dm-link:active {
-  transform: translateY(0);
-  box-shadow: none;
+  color: var(--accent-subtle) !important;
+  text-decoration-color: currentColor;
 }
 
 /* Solid buttons keep their fill and lift instead. */

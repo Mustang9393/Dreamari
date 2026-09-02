@@ -353,15 +353,12 @@ function ReportDocument({
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
             <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
-            <ul className="mt-[12px] flex list-none flex-wrap gap-[10px] p-0">
-              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
-                <li key={course.label}>
-                  <span title={course.why || undefined} className="inline-flex items-baseline rounded-full border px-[16px] py-[9px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-                    <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {/* One line, per the Aug 29 doc ("Statistics - Economics"): the
+               classes read as a single statement under the subhead, not two
+               chips competing with it. Body-sized, below the 14px subhead. */}
+            <p className="mt-[8px] text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
+              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => course.label).join(" · ")}
+            </p>
           </div>
         </ReportSection>
 
