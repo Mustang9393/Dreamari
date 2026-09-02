@@ -107,6 +107,9 @@ export function BuildFlowExperience() {
 
   return (
     <ThemeProvider>
+      {/* marketing-v2: the semantic tokens ui/Button and FlowChrome read;
+         display:contents adds no box. */}
+      <div className="marketing-v2 themeable contents">
         <BackgroundSpace />
         {/* The current accent tracks the progress bar's gradient at the
            current percent (unchanged); visitedAccents now carries a short
@@ -148,6 +151,7 @@ export function BuildFlowExperience() {
             </div>
           </div>
         </section>
+      </div>
     </ThemeProvider>
   );
 }

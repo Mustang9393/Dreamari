@@ -413,6 +413,10 @@ export function MatchLab() {
 
   return (
     <ThemeProvider>
+      {/* marketing-v2: the app's semantic tokens (--primary, --radius-md, the
+         glass surfaces) that ui/Button and FlowChrome read. display:contents,
+         so it adds no box to the h-dvh layout below. */}
+      <div className="marketing-v2 themeable contents">
       {/* The world poster faces (Viaoda, Science Gothic, Lora, Fraunces,
          Nunito, Heebo) — React hoists this into <head>. */}
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
@@ -697,6 +701,7 @@ export function MatchLab() {
           </div>
         </Sheet>
       )}
+      </div>
     </ThemeProvider>
   );
 }
