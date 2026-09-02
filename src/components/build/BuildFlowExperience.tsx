@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -74,6 +74,27 @@ export function BuildFlowExperience() {
   const accent = phase === "build" ? STAGE_ACCENTS[stageId] : MATCH_ACCENT;
   const isComplete = stageId === "complete" && phase === "build";
 
+  // A trailing glow of the last few steps, not every step ever visited.
+  // AuroraBackground has always supported accumulating one persistent blob
+  // per visited step, but this flow has fed it an empty array since the
+  // rebuild -- a deliberate simplification at the time, not a bug (the code
+  // and its own comments call it out as intentional). Un-capped accumulation
+  // is the likely reason it read as "too busy" back then: by the final step
+  // every one of the 8 questions' colors would still be glowing at once,
+  // stacking toward a wash of noise right as the flow should feel like it's
+  // arriving somewhere, not getting louder. Windowing it to a short trail
+  // keeps the "the space you're in keeps shifting" cue in the beginning and
+  // middle of the flow, but lets it settle back down toward the end instead
+  // of building indefinitely -- newer territory for this component, not a
+  // straight revert to how it worked before.
+  const TRAIL_LENGTH = 3;
+  const visitedAccents = useMemo(() => {
+    if (phase !== "build") return [];
+    return STAGES.slice(0, stageIndex)
+      .map((s) => STAGE_ACCENTS[s.id])
+      .slice(-TRAIL_LENGTH);
+  }, [phase, stageIndex]);
+
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
   const stepProps: StepProps = { state, patch, onNext: next, react, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite };
 
@@ -92,12 +113,12 @@ export function BuildFlowExperience() {
   return (
     <ThemeProvider>
         <BackgroundSpace />
-        {/* No accumulated per-step blobs (visitedAccents empty, per direct
-           feedback); the single accent tracks the progress bar's gradient at the
-           current percent, and input pulses supply the reactivity. Screen-wide
-           confetti is reserved for the Match celebration — the flow's own
-           celebrations are Dreamy-local bursts. */}
-        <AuroraBackground accent={accent} visitedAccents={[]} finale={isComplete} lightning={false} />
+        {/* The current accent tracks the progress bar's gradient at the
+           current percent (unchanged); visitedAccents now carries a short
+           trailing window (see TRAIL_LENGTH above) instead of staying empty.
+           Screen-wide confetti is still reserved for the Match celebration —
+           the flow's own celebrations are Dreamy-local bursts. */}
+        <AuroraBackground accent={accent} visitedAccents={visitedAccents} finale={isComplete} lightning={false} />
         {phase !== "build" && <MatchBackdrop />}
         <HomeButton />
         <ThemeToggle />
