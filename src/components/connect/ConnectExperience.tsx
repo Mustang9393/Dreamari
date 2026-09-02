@@ -571,7 +571,7 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
           {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
           <span
             aria-hidden
-            className="pointer-events-none absolute -top-[30px] left-1/2 -translate-x-1/2 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
             style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
           >
             {name}
