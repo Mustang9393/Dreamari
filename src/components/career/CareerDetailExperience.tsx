@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -227,27 +228,46 @@ function factKey(label: string): keyof FactDetails | null {
   return null;
 }
 
-// Small popover under a fact's label: pay bands, or what "openings" counts.
-// Closes on a tap anywhere else or Escape.
-function FactPopover({ children, onClose, align = "left" }: { children: React.ReactNode; onClose: () => void; align?: "left" | "right" }) {
+// Small popover next to a fact's (i): pay bands, or what "openings" counts.
+// Rendered through a portal at the body and positioned from the icon's own
+// rect, so no panel, blur layer or overflow can clip it; clamped to the
+// viewport with a 16px margin. Closes on a tap anywhere else or Escape.
+function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
   useEffect(() => {
+    const place = () => {
+      if (!anchor) return;
+      const r = anchor.getBoundingClientRect();
+      const width = Math.min(320, window.innerWidth - 32);
+      const left = Math.min(Math.max(16, r.left - 12), window.innerWidth - width - 16);
+      setPos({ top: r.bottom + 8, left, width });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  return (
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [anchor, onClose]);
+  if (!pos || typeof document === "undefined") return null;
+  return createPortal(
     <>
-      <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-[40] cursor-default" />
+      <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-[80] cursor-default" />
       <div
         role="dialog"
-        className={`absolute top-[calc(100%-8px)] z-[50] w-[min(300px,calc(100vw-40px))] rounded-[var(--radius-md)] border p-[var(--space-4)] ${align === "right" ? "right-[var(--space-4)] sm:right-[var(--space-5)]" : "left-[var(--space-4)] sm:left-[var(--space-5)]"}`}
-        style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)" }}
+        className="marketing-v2 themeable fixed z-[81] rounded-[var(--radius-md)] border p-[var(--space-4)]"
+        style={{ top: pos.top, left: pos.left, width: pos.width, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
       >
         {children}
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
 
@@ -262,8 +282,9 @@ function DegreeSheet({ career, detail, accent, onClose }: { career: string; deta
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   const top = Math.max(...detail.distribution.map((d) => d.pct));
-  return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title">
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
       <div
         className="relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
@@ -314,7 +335,8 @@ function DegreeSheet({ career, detail, accent, onClose }: { career: string; deta
           </ul>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -354,6 +376,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const career = resolveCareer(slug);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
+  // the (i) that opened the popover, kept in state (not a ref) so render can read it
+  const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -502,7 +526,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                       type="button"
                       aria-label={`About ${fact.label.toLowerCase()}`}
                       aria-expanded={openFact === factKey(fact.label)}
-                      onClick={() => setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)))}
+                      onClick={(e) => {
+                        setFactAnchor(e.currentTarget);
+                        setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
+                      }}
                       className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full"
                       style={{ color: "var(--muted-foreground)" }}
                     >
@@ -512,7 +539,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </span>
                 <Figure accent={accent}>{fact.value}</Figure>
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
-                  <FactPopover onClose={() => setOpenFact(null)} align={i % 2 === 1 ? "right" : "left"}>
+                  <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
                     <dl className="flex flex-col gap-[6px]">
                       {[["Starting out", vm.details.pay.starting], ["Typical", vm.details.pay.typical], ["Top earners", vm.details.pay.top]].map(([k, v]) => (
                         <div key={k} className="flex items-baseline justify-between gap-[var(--space-4)]">
@@ -525,7 +552,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   </FactPopover>
                 )}
                 {openFact === "openings" && factKey(fact.label) === "openings" && vm.details?.openings && (
-                  <FactPopover onClose={() => setOpenFact(null)} align={i % 2 === 1 ? "right" : "left"}>
+                  <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
                     <p className={TINY}>{vm.details.openings.note}</p>
                   </FactPopover>
                 )}
