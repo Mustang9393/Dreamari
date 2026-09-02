@@ -539,8 +539,9 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
   // for screen readers and as the fallback when no exact mark exists.
   return (
     <span
-      className="inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap"
+      className="group relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
       title={name}
+      tabIndex={mark ? 0 : undefined}
       style={{
         background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
         borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
@@ -567,6 +568,14 @@ function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | 
             }}
           />
           <span className="sr-only">{name}</span>
+          {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-[30px] left-1/2 -translate-x-1/2 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+            style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
+          >
+            {name}
+          </span>
         </>
       ) : (
         name
@@ -628,28 +637,31 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         <div className="mt-[10px] flex min-w-0 items-center gap-[8px]">
           <span className="flex-none text-[13px] leading-[18px] font-semibold" style={{ color: "#FFFFFF" }}>Professionals from</span>
-          <div className="flex min-w-0 flex-1 gap-[6px] overflow-x-auto [scrollbar-width:none]">
+          <div className="-mt-[32px] flex min-w-0 flex-1 gap-[6px] overflow-x-auto pt-[32px] [scrollbar-width:none]">
             {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} />)}
           </div>
         </div>
         <div className="mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
+          {/* Ghost, all caps, accent-tinted, arrow on Open: the card's original
+             action (direct feedback: the blue gradient fill read badly on the
+             photo). */}
           {joined ? (
             <button
               type="button"
               onClick={onOpen}
-              className="dm-solid flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[14px] leading-[18px] font-semibold"
-              style={{ background: `linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 50%, ${accent}))`, color: "#FFFFFF" }}
+              className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
+              style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}
             >
-              Open Community <ArrowRight className="h-[15px] w-[15px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden strokeWidth={2.5} />
+              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </button>
           ) : (
             <button
               type="button"
               onClick={onJoin}
-              className="dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[16px] text-[14px] leading-[18px] font-semibold"
-              style={{ borderColor: "rgba(255,255,255,0.45)", color: "#FFFFFF", background: "rgba(12,16,35,0.35)" }}
+              className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
+              style={{ color: "#FFFFFF" }}
             >
-              Join Community
+              Join Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </button>
           )}
         </div>
