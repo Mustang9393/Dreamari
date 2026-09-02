@@ -71,7 +71,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
     <div
       className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
       style={{
-        background: `radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, ${accent} 26%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 60%), var(--background)`,
+        background: `radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)`,
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
         transition: "background 600ms ease",
