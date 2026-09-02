@@ -72,6 +72,10 @@ export type Insight = {
   body: string;
   postedAgo: string;
   helpful: number;
+  /** Connect 2.0 per-post learning signals ("8.4K Views · 642 Likes · 187
+   *  Saves"). Optional: derived from `helpful` where the seed doesn't say. */
+  views?: number;
+  saves?: number;
   /** The comment thread under the insight -- the card's count derives
    *  from this list, so the number is never out of step with the page. */
   replies: InsightReply[];
@@ -101,6 +105,18 @@ export type Pro = {
   org: string;
   scope: string; // approved answer scope
   verifiedBy: string; // "what was verified and by whom"
+  // Connect 2.0 profile (DREAMARI CONNECT 2.pdf): field, short story, and the
+  // three public numbers the doc names. `world` is the app's world taxonomy,
+  // for relevance-first ranking against the student's own Top 3.
+  world: string;
+  field: string;
+  story: string;
+  followers: number;
+  studentsReached: number;
+  totalLikes: number;
+  questionsAnswered: number;
+  /** Private activity signal: days since they last answered or posted. */
+  activeDaysAgo: number;
 };
 
 export type Community = {
@@ -122,21 +138,21 @@ export type Community = {
 };
 
 export const PROS: Pro[] = [
-  { id: "pro-chen", name: "David Chen", role: "Software Engineer", org: "Amazon", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Feb 2026" },
-  { id: "pro-martinez", name: "Elena Martinez", role: "Brand Strategist", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026" },
-  { id: "pro-okafor", name: "Amara Okafor", role: "Investment Banking Analyst", org: "JPMorgan Chase", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · May 2026" },
-  { id: "pro-reyes", name: "Marcus Reyes", role: "Registered Nurse", org: "CVS Health", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Mar 2026" },
-  { id: "pro-cole", name: "Jasmine Cole", role: "Art Director", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jun 2026" },
-  { id: "pro-osei", name: "Nadia Osei", role: "Engineering Manager", org: "Google", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Apr 2026" },
-  { id: "pro-zhang", name: "Wei Zhang", role: "Cybersecurity Engineer", org: "Microsoft", scope: "Security engineering careers", verifiedBy: "Work email verified by Dreamari · Jul 2026" },
-  { id: "pro-gallagher", name: "Tom Gallagher", role: "Markets Analyst", org: "Morgan Stanley", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Mar 2026" },
-  { id: "pro-grant", name: "Sofia Grant", role: "Investment Banking Associate", org: "Goldman Sachs", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Jan 2026" },
-  { id: "pro-whitfield", name: "Andre Whitfield", role: "Recruiter", org: "Deloitte", scope: "Hiring & early careers", verifiedBy: "Verified through Deloitte partner program · May 2026" },
-  { id: "pro-tanaka", name: "Keiko Tanaka", role: "HR Manager", org: "Amazon", scope: "Hiring & early careers", verifiedBy: "Work email verified by Dreamari · Feb 2026" },
-  { id: "pro-brooks", name: "Danielle Brooks", role: "Nurse Practitioner", org: "Mayo Clinic", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Apr 2026" },
-  { id: "pro-fontaine", name: "Leo Fontaine", role: "Motion Designer", org: "Spotify", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Aug 2026" },
-  { id: "pro-haddad", name: "Omar Haddad", role: "Clinical Research Nurse", org: "Pfizer", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · May 2026" },
-  { id: "pro-vega", name: "Camille Vega", role: "Content Producer", org: "Netflix", scope: "Media & content careers", verifiedBy: "Work email verified by Dreamari · Jul 2026" },
+  { id: "pro-chen", name: "David Chen", role: "Software Engineer", org: "Amazon", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Tech & Engineering", field: "Software Engineering", story: "I taught myself to code in a library after school because we didn't have a computer at home. Nine years later I ship features millions of people use, and the thing I still lean on most is asking better questions.", followers: 1286, studentsReached: 9418, totalLikes: 4921, questionsAnswered: 63, activeDaysAgo: 1 },
+  { id: "pro-martinez", name: "Elena Martinez", role: "Brand Strategist", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026", world: "Business & Money", field: "Consulting", story: "I switched from marketing to strategy consulting at 27 with no MBA. The pitch that got me in was a two-page teardown of a brand I loved, not a résumé.", followers: 742, studentsReached: 5104, totalLikes: 2380, questionsAnswered: 41, activeDaysAgo: 3 },
+  { id: "pro-okafor", name: "Amara Okafor", role: "Investment Banking Analyst", org: "JPMorgan Chase", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · May 2026", world: "Business & Money", field: "Investment Banking", story: "First in my family to work in finance. I got here from a state school by cold-emailing 140 analysts; 11 wrote back and two of them changed my life. I try to be one of those two for someone every week.", followers: 1934, studentsReached: 12660, totalLikes: 6812, questionsAnswered: 87, activeDaysAgo: 0 },
+  { id: "pro-reyes", name: "Marcus Reyes", role: "Registered Nurse", org: "CVS Health", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Mar 2026", world: "Health & Medicine", field: "Nursing", story: "I was a lifeguard who liked the first-aid part more than the pool. Nursing school at a community college, then an ER, now a MinuteClinic. Every day is a hundred small decisions that matter.", followers: 968, studentsReached: 7215, totalLikes: 3540, questionsAnswered: 58, activeDaysAgo: 2 },
+  { id: "pro-cole", name: "Jasmine Cole", role: "Art Director", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jun 2026", world: "Arts, Media & Sport", field: "Design", story: "My portfolio at 17 was Instagram edits for my friends' sneaker resale accounts. That instinct for what makes people stop scrolling is the same one I use on campaigns now.", followers: 2210, studentsReached: 14380, totalLikes: 8104, questionsAnswered: 52, activeDaysAgo: 1 },
+  { id: "pro-osei", name: "Nadia Osei", role: "Engineering Manager", org: "Google", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Apr 2026", world: "Tech & Engineering", field: "Engineering Management", story: "I spent six years as an engineer before managing anyone. The job became less about the code I write and more about the people who can write it because I cleared the way.", followers: 1522, studentsReached: 8830, totalLikes: 4260, questionsAnswered: 39, activeDaysAgo: 5 },
+  { id: "pro-zhang", name: "Wei Zhang", role: "Cybersecurity Engineer", org: "Microsoft", scope: "Security engineering careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Tech & Engineering", field: "Cybersecurity", story: "Capture-the-flag competitions in high school taught me more than any class. Security is a career for people who like to understand how things break so they can keep them whole.", followers: 1107, studentsReached: 6940, totalLikes: 3312, questionsAnswered: 46, activeDaysAgo: 4 },
+  { id: "pro-gallagher", name: "Tom Gallagher", role: "Markets Analyst", org: "Morgan Stanley", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Mar 2026", world: "Business & Money", field: "Markets", story: "I read the business section at breakfast as a kid because my dad did. Twenty years on I still start the day the same way; now people pay for what I think about it.", followers: 655, studentsReached: 4120, totalLikes: 1980, questionsAnswered: 33, activeDaysAgo: 9 },
+  { id: "pro-grant", name: "Sofia Grant", role: "Investment Banking Associate", org: "Goldman Sachs", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Jan 2026", world: "Business & Money", field: "Investment Banking", story: "Nobody at my high school had heard of investment banking. A single alumni panel changed my trajectory, so I answer every question here the way I wish someone had answered mine.", followers: 1410, studentsReached: 9975, totalLikes: 5230, questionsAnswered: 71, activeDaysAgo: 2 },
+  { id: "pro-whitfield", name: "Andre Whitfield", role: "Recruiter", org: "Deloitte", scope: "Hiring & early careers", verifiedBy: "Verified through Deloitte partner program · May 2026", world: "Teaching & Education", field: "Recruiting", story: "I have read more than ten thousand résumés. Most of what students worry about, I never notice; most of what I notice, nobody tells them. Ask me.", followers: 3020, studentsReached: 21540, totalLikes: 9870, questionsAnswered: 118, activeDaysAgo: 0 },
+  { id: "pro-tanaka", name: "Keiko Tanaka", role: "HR Manager", org: "Amazon", scope: "Hiring & early careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Teaching & Education", field: "Human Resources", story: "I hire for teams of 400 people. The interview is not a test of who you are; it is a conversation about whether we can do good work together. I can teach you how to have that conversation.", followers: 1188, studentsReached: 8410, totalLikes: 3925, questionsAnswered: 64, activeDaysAgo: 6 },
+  { id: "pro-brooks", name: "Danielle Brooks", role: "Nurse Practitioner", org: "Mayo Clinic", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Apr 2026", world: "Health & Medicine", field: "Nursing", story: "RN at 22, NP at 30, still learning at 41. Healthcare has a ladder most students never see; I like showing them the rungs.", followers: 1340, studentsReached: 9120, totalLikes: 4488, questionsAnswered: 55, activeDaysAgo: 3 },
+  { id: "pro-fontaine", name: "Leo Fontaine", role: "Motion Designer", org: "Spotify", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Aug 2026", world: "Arts, Media & Sport", field: "Motion Design", story: "I made lyric videos for local bands for free for three years. One of them got a label deal, kept me on, and that reel is what Spotify saw.", followers: 1876, studentsReached: 11230, totalLikes: 7360, questionsAnswered: 29, activeDaysAgo: 12 },
+  { id: "pro-haddad", name: "Omar Haddad", role: "Clinical Research Nurse", org: "Pfizer", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · May 2026", world: "Health & Medicine", field: "Clinical Research", story: "I wanted medicine but not the operating room. Research nursing let me stay close to patients and closer to the science; the trial I coordinate now might change how we treat asthma.", followers: 612, studentsReached: 3980, totalLikes: 1745, questionsAnswered: 24, activeDaysAgo: 7 },
+  { id: "pro-vega", name: "Camille Vega", role: "Content Producer", org: "Netflix", scope: "Media & content careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Arts, Media & Sport", field: "Media Production", story: "I produced my school's morning announcements and took it far too seriously. That seriousness about small things is the entire job.", followers: 2490, studentsReached: 15870, totalLikes: 9012, questionsAnswered: 44, activeDaysAgo: 1 },
 ];
 
 // The five communities, their names, order, counts, companies and topic
