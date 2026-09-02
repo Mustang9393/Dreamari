@@ -98,12 +98,12 @@ export function BuildFlowExperience() {
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;
   else if (stageId === "subjects") content = <SubjectsStep {...stepProps} onBack={back} />;
   else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
-  else if (stageId === "milestone") content = <MilestoneScreen onNext={next} percent={stage.percent} />;
+  else if (stageId === "milestone") content = <MilestoneScreen onNext={next} onBack={back} percent={stage.percent} />;
   else if (stageId === "education") content = <EducationStep {...stepProps} onBack={back} />;
   else if (stageId === "cost") content = <CostStep {...stepProps} onBack={back} />;
   else if (stageId === "location") content = <LocationStep {...stepProps} onBack={back} />;
   else if (stageId === "profile") content = <ProfileStep {...stepProps} onBack={back} />;
-  else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} />;
+  else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} onBack={back} />;
 
 
   return (

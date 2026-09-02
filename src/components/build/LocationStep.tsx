@@ -82,7 +82,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
@@ -132,7 +132,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             </span>
           </div>
 
-          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[52vh] w-[calc(100%+8px)]">
+          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[44dvh] w-[calc(100%+8px)]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
               const isSelected = selected === name;

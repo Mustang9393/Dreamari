@@ -100,12 +100,13 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
       style={{ borderColor: "var(--rule)", background: "var(--paper-raised)", boxShadow: "0 16px 32px -24px rgba(0,0,0,0.65)" }}
     >
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] border-b px-[18px] py-[15px] sm:px-[24px] sm:py-[17px]" style={{ borderColor: "var(--rule)" }}>
-        {Icon && (
-          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
-            <Icon className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
-          </span>
-        )}
-        <span aria-hidden className="dm-report-num sr-only">{String(n).padStart(2, "0")}</span>
+        {/* Per direct feedback: the section's number, not a pictogram, leads
+           the header -- one shape, one weight, every section. The icon prop
+           stays accepted so call sites don't change; it just isn't drawn. */}
+        {void Icon}
+        <span aria-hidden className="dm-report-num flex h-[30px] min-w-[30px] flex-none items-center justify-center rounded-[9px] px-[6px] text-[13px] leading-none font-extrabold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)", fontFamily: "var(--font-display)" }}>
+          {String(n).padStart(2, "0")}
+        </span>
         {/* The one hierarchy, everywhere: section heading (18) > label (14)
            > body (13). Never let a value render larger than the heading
            above it, whatever the value "deserves". Every other section-level

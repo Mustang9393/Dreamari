@@ -240,11 +240,15 @@ export function StepFooter({
   onNext,
   nextDisabled,
   nextLabel = "Next Step",
+  pulseFromDreamy = false,
 }: {
   onBack?: () => void;
   onNext: () => void;
   nextDisabled?: boolean;
   nextLabel?: React.ReactNode;
+  /** Milestone/completion screens: the CTA pulse launches from Dreamy, who IS
+      that screen, instead of the usual one-in-three coin flip. */
+  pulseFromDreamy?: boolean;
 }) {
   const [holding, setHolding] = useState(false);
   return (
@@ -269,12 +273,18 @@ export function StepFooter({
           Previous
         </Button>
       ) : (
-        <span />
+        // Same box as the real button, just not drawn: keeps the footer's height
+        // identical on the first step (it measured 2px shorter with a bare span).
+        <span className="invisible" aria-hidden>
+          <Button variant="secondary" type="button" tabIndex={-1}>
+            Previous
+          </Button>
+        </span>
       )}
       <Button
         variant="primary"
         onClick={(e) => {
-          dispatchAuroraPulse("cta", e);
+          dispatchAuroraPulse("cta", e, pulseFromDreamy ? { forceDreamyOrigin: true } : undefined);
           // Give the selected answer its shimmer-and-lift moment before the step actually
           // changes, instead of the screen cutting away the instant it's chosen. holding
           // (not nextDisabled, which would visually greys the button mid-confirm) blocks a
