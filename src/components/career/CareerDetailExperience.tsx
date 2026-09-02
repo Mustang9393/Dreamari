@@ -333,9 +333,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 {career.title}
               </h1>
               {vm.summary && <p className={`${MEDIUM} max-w-[34ch]`}>{vm.summary}</p>}
-              {vm.scenario && <p className={`${SMALL} max-w-[52ch]`} style={{ color: "rgba(255,255,255,0.9)" }}>{vm.scenario}</p>}
-            </div>
-            <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+              {/* Actions sit under the summary, left-aligned with the text
+                 (direct feedback), not floated to the far corner. */}
+              <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
               {hasSimulation && (
                 <button
                   type="button"
@@ -356,7 +356,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
                 </button>
               )}
-              <div className="ml-auto flex items-center gap-[var(--space-2)]">
+              <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
                 <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
                   <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
@@ -368,9 +368,14 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
               </div>
+              </div>
             </div>
           </div>
         </section>
+
+        {/* The "imagine" line lives on the page, not in the header (direct
+           feedback): one plain paragraph before the facts. */}
+        {vm.scenario && <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>{vm.scenario}</p>}
 
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
