@@ -7,6 +7,7 @@ import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pe
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { HomeButton } from "@/components/flow/HomeButton";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
@@ -57,7 +58,48 @@ export function MatchLab() {
   const grabScroller = useRef<HTMLElement | null>(null);
   const grabScrollTop = useRef(0);
   const [exiting, setExiting] = useState<{ id: string; dir: 1 | -1 } | null>(null);
-  const [guideOpen, setGuideOpen] = useState(true);
+  // Progressive, on-card gesture teaching -- one direction at a time,
+  // spotlighting the real card instead of a modal listing all three at
+  // once (which read as confusing per direct feedback: "all 3 gestures at
+  // once explained is confusing"). Auto-advances on a timer, but also the
+  // instant the matching real gesture happens, so a student who already
+  // gets it isn't stuck waiting out a clock. First-visit only.
+  const [guideStep, setGuideStep] = useState<0 | 1 | 2 | null>(null);
+  const guideSeenKey = "dreamari:hint-seen:match-swipe";
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        if (!window.localStorage.getItem(guideSeenKey)) setGuideStep(0);
+      } catch {
+        // Storage blocked -- skip the hint rather than nag every mount.
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, []);
+  // Kept fresh via effect (matching dragLive's own pattern just below),
+  // not assigned during render -- refs can't be written while rendering.
+  const advanceGuideRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    advanceGuideRef.current = () => {
+      setGuideStep((step) => {
+        if (step === null) return null;
+        if (step >= 2) {
+          try {
+            window.localStorage.setItem(guideSeenKey, "1");
+          } catch {
+            // Nothing to persist to; the hint just won't reappear this mount.
+          }
+          return null;
+        }
+        return (step + 1) as 0 | 1 | 2;
+      });
+    };
+  });
+  useEffect(() => {
+    if (guideStep === null) return;
+    const timer = window.setTimeout(() => advanceGuideRef.current(), 2400);
+    return () => window.clearTimeout(timer);
+  }, [guideStep]);
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [swapFor, setSwapFor] = useState<Career | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
@@ -94,6 +136,7 @@ export function MatchLab() {
 
   function pass() {
     if (!top || exiting) return;
+    advanceGuideRef.current();
     setHistory((h) => [...h, { type: "pass", career: top, prevDeckIndex: deckIndex }]);
     setExiting({ id: top.id, dir: -1 });
     setTimeout(advance, 380);
@@ -101,6 +144,7 @@ export function MatchLab() {
 
   function like(e?: React.MouseEvent) {
     if (!top || exiting) return;
+    advanceGuideRef.current();
     if (liked.length >= MAX_SLOTS) {
       // Slots full: the card stays put and the swap sheet asks who leaves.
       setSwapFor(top);
@@ -257,8 +301,10 @@ export function MatchLab() {
       const dy = e.touches[0].clientY - sy;
       if (!claimed) {
         if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) claimed = "h";
-        else if (Math.abs(dy) > 12) claimed = "v"; // browser scrolls; we stand down
-        else return;
+        else if (Math.abs(dy) > 12) {
+          claimed = "v"; // browser scrolls; we stand down
+          advanceGuideRef.current();
+        } else return;
       }
       if (claimed === "h") {
         if (e.cancelable) e.preventDefault();
@@ -433,33 +479,31 @@ export function MatchLab() {
       {/* ---- fly-to-slot ghost ---- */}
       {ghost && <FlyGhost {...ghost} />}
 
-      {/* ---- first-visit gesture guide ---- */}
-      {guideOpen && (
-        <Sheet onClose={() => setGuideOpen(false)}>
-          <div className="flex flex-col items-center gap-5 text-center">
-            <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>How this works</h2>
-            {/* TEMP build marker for device debugging — tells us the phone is
-               running the current code, not a stale pre-restart tab. */}
-            <span className="rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-wide text-[var(--color-night-muted-foreground)] uppercase" style={{ borderColor: "var(--color-glass-border)" }}>
-              lab build 3
-            </span>
-            <div className="flex w-full flex-col gap-3">
-              <GuideRow icon={<ChevronsUp className="h-5 w-5 motion-safe:animate-bounce" />} color="var(--color-brand-400)">
-                <b>Swipe up on a card</b> to flip through daily work, skills, work style, pathway & tradeoffs.
-              </GuideRow>
-              <GuideRow icon={<ThumbsUp className="h-5 w-5" />} color={SUCCESS}>
-                <b>Swipe right</b> or tap the thumbs-up to save a career to your Top 3.
-              </GuideRow>
-              <GuideRow icon={<X className="h-5 w-5" />} color={PASS_COLOR}>
-                <b>Swipe left</b> or tap the X to pass. You can always undo.
-              </GuideRow>
-            </div>
-            <Button variant="primary" size="large" onClick={() => setGuideOpen(false)} type="button">
-              Start Swiping
-            </Button>
-          </div>
-        </Sheet>
-      )}
+      {/* ---- first-visit gesture guide: one direction at a time, spotlighting
+         the real card, instead of a modal listing all three gestures at
+         once. See GestureSpotlight for the dim-everything-but-the-target
+         treatment and GestureHint for the animated direction itself. ---- */}
+      <GestureSpotlight
+        active={guideStep === 0}
+        targetRef={cardRef}
+        direction="right"
+        label="Swipe right to save"
+        onDismiss={() => advanceGuideRef.current()}
+      />
+      <GestureSpotlight
+        active={guideStep === 1}
+        targetRef={cardRef}
+        direction="left"
+        label="Swipe left to pass"
+        onDismiss={() => advanceGuideRef.current()}
+      />
+      <GestureSpotlight
+        active={guideStep === 2}
+        targetRef={cardRef}
+        direction="up"
+        label="Scroll up for details"
+        onDismiss={() => advanceGuideRef.current()}
+      />
 
       {/* ---- decision sheet at 3 matches ---- */}
       {decisionOpen && (
@@ -748,17 +792,9 @@ function IconGhostButton({ label, onClick, disabled, children }: { label: string
   );
 }
 
-function GuideRow({ icon, color, children }: { icon: React.ReactNode; color: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border" style={{ color, borderColor: `color-mix(in srgb, ${color} 35%, transparent)`, background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
-        {icon}
-      </span>
-      <p className="text-[13px] leading-snug font-medium text-[var(--color-night-foreground)]">{children}</p>
-    </div>
-  );
-}
-
+// Leads with the actual motion (GestureHint animates the swipe direction)
+// instead of a static icon + a full sentence -- the direction is shown, so
+// the caption only needs to say what it DOES, not how to do it.
 function MiniRanking({ liked }: { liked: Career[] }) {
   return (
     <div className="flex w-full flex-col gap-2">

@@ -892,19 +892,19 @@ function OverviewTab({
 
         <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My Top Three</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{top3Count} of 3 careers chosen</span>
+          <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
         <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>My Plan</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Plan</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{progress.complete} of {progress.total} steps done</span>
+            <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps done</span>
             <span className="relative h-[6px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
               <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(progress.pct, 2)}%`, background: "var(--accent-subtle)" }} />
             </span>
@@ -913,10 +913,10 @@ function OverviewTab({
 
         <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-2xl)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Career Report</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{REPORT_SECTIONS.length} sections ready</span>
+          <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections ready</span>
         </button>
       </section>
 
@@ -940,7 +940,7 @@ function OverviewTab({
       {/* Coming up — the same reminders My Plan shows, surfaced here too so a
           date on the calendar never depends on opening the plan tab first. */}
       <section aria-labelledby="coming-up-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-5)]" style={GLASS}>
-        <span id="coming-up-title" className="text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>Coming up</span>
+        <span id="coming-up-title" className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Coming up</span>
         <ul className="flex list-none flex-col p-0">
           {UPCOMING.map((item) => (
             <li key={item.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -1022,7 +1022,7 @@ function EvidenceSheet({
 
       {Object.entries(grouped).map(([kind, list]) => (
         <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <h3 id={`ev-${kind}`} className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>
+          <h3 id={`ev-${kind}`} className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>
             {EVIDENCE_KIND_LABEL[kind as EvidenceItem["kind"]]}
           </h3>
           <ul className="flex list-none flex-col p-0">
@@ -1057,7 +1057,7 @@ function EvidenceSheet({
       )}
 
       <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>What does not count</span>
+        <span className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>What does not count</span>
         <p className="text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
           Scrolling, tapping around and watching without finishing. Dreamari keeps some internal signals to order your feed, and none of them appear in your report or get shared with anyone.
         </p>
@@ -1117,7 +1117,7 @@ function RoutesTab({
 
       {report && (
         <section aria-labelledby="majors-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <h3 id="majors-title" className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
+          <h3 id="majors-title" className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Majors that fit these routes</h3>
           <ul className="flex list-none flex-col p-0">
             {report.majors.map((major) => (
               <li key={major.name} className="flex items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -1169,7 +1169,7 @@ function MyPlanTab({
         <h3 id="ahead-title" className="sr-only">What is coming up</h3>
         {courses.length > 0 && (
           <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-            <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
+            <span className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Courses and experiences to consider</span>
             <ul className="flex list-none flex-col p-0">
               {courses.map((course) => (
                 <li key={course.label} className="flex flex-col gap-[1px] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -1181,7 +1181,7 @@ function MyPlanTab({
           </div>
         )}
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-2xl)] border p-[var(--space-6)]" style={GLASS}>
-          <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Coming up</span>
+          <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Coming up</span>
           <ul className="flex list-none flex-col p-0">
             {UPCOMING.map((item) => (
               <li key={item.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>

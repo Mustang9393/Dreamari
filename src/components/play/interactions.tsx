@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
 
+import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playSelect, playSweep, playWrong } from "./sound";
 import type {
@@ -799,6 +800,11 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
   const chosen = beat.choices.find((choice) => choice.id === locked);
   const [before, after] = beat.question.split("___");
   const slotRef = useRef<HTMLSpanElement>(null);
+  const firstTileRef = useRef<HTMLButtonElement>(null);
+  // The tiles are drag-only -- tapping does nothing -- with no visual cue
+  // beyond a cursor-grab style that's invisible on touch. First encounter
+  // only (see useFirstUseHint), and dismissed the moment a drag starts.
+  const [hintOn, dismissHint] = useFirstUseHint("blank-drag");
   const dropTile = (choice: ChoiceBeat["choices"][number], x: number, y: number) => {
     if (locked !== null) return;
     const rect = slotRef.current?.getBoundingClientRect();
@@ -832,12 +838,14 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
         {choices.map((choice, index) => (
           <motion.button
             key={choice.id}
+            ref={index === 0 ? firstTileRef : undefined}
             type="button"
             disabled={locked !== null}
             drag={locked === null}
             dragSnapToOrigin
             dragMomentum={false}
             whileDrag={{ scale: 1.08, zIndex: 30 }}
+            onDragStart={dismissHint}
             onDragEnd={(event) => {
               const pointer = event as PointerEvent;
               dropTile(choice, pointer.clientX, pointer.clientY);
@@ -865,6 +873,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
           </motion.button>
         ))}
       </div>
+      <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag into the blank" onDismiss={dismissHint} hintSize={22} hintDistance={28} />
     </div>
   );
 }
@@ -1480,6 +1489,10 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
   // mid-drag would move rows by re-layout, which no transition can animate.
   const [drag, setDrag] = useState<{ index: number; dy: number; height: number; from: number } | null>(null);
   const target = drag ? Math.max(0, Math.min(rows.length - 1, drag.index + Math.round(drag.dy / drag.height))) : -1;
+  const firstRowRef = useRef<HTMLLIElement>(null);
+  // GripVertical is a weak affordance on its own -- press-and-drag to
+  // reorder isn't obvious from a static icon. First encounter only.
+  const [hintOn, dismissHint] = useFirstUseHint("rank-drag");
 
   function reorder(list: string[], from: number, to: number): string[] {
     const next = [...list];
@@ -1506,6 +1519,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 
   function onPointerDown(event: React.PointerEvent<HTMLLIElement>, index: number) {
     if (locked || event.button !== 0) return;
+    dismissHint();
     const height = event.currentTarget.getBoundingClientRect().height + 6; // + the list gap
     event.currentTarget.setPointerCapture(event.pointerId);
     setDrag({ index, dy: 0, height, from: event.clientY });
@@ -1540,6 +1554,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
           return (
             <li
               key={row}
+              ref={index === 0 ? firstRowRef : undefined}
               onPointerDown={(event) => onPointerDown(event, index)}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
@@ -1597,6 +1612,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
       >
         Submit rank
       </button>
+      <GestureSpotlight active={hintOn && !locked} targetRef={firstRowRef} direction="up" label="Press & drag to reorder" onDismiss={dismissHint} hintSize={22} hintDistance={28} />
     </div>
   );
 }

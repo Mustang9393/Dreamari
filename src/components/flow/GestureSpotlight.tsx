@@ -1,0 +1,124 @@
+"use client";
+
+import { useEffect, useState, type RefObject } from "react";
+import { GestureHint } from "./GestureHint";
+
+// Persists per-device, not per-session -- a drag-to-reorder or drag-to-blank
+// mechanic is genuinely non-obvious the first time, but re-showing it on
+// every visit would be the "entire modal with written instructions" problem
+// this is meant to replace, just moved to every mount instead of the first.
+export function useFirstUseHint(key: string): [boolean, () => void] {
+  const storageKey = `dreamari:hint-seen:${key}`;
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        if (!window.localStorage.getItem(storageKey)) setShow(true);
+      } catch {
+        // Storage blocked (private mode, etc.) -- fall back to not nagging
+        // rather than showing the hint every single mount.
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [storageKey]);
+  const dismiss = () => {
+    setShow(false);
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch {
+      // Nothing to persist to; the hint just won't reappear this mount.
+    }
+  };
+  return [show, dismiss];
+}
+
+// Dims everything on screen EXCEPT a cutout around one real element, with the
+// gesture's motion animated right where it needs to happen -- precise
+// spotlighting instead of a generic centered modal, for the handful of
+// interactions (drag-to-blank, drag-to-reorder) that have zero affordance
+// today. A single reusable primitive so each call site stays a few lines,
+// not a bespoke overlay each time.
+export function GestureSpotlight({
+  active,
+  targetRef,
+  direction,
+  label,
+  onDismiss,
+  hintSize = 34,
+  hintDistance = 56,
+}: {
+  active: boolean;
+  targetRef: RefObject<HTMLElement | null>;
+  direction: "left" | "right" | "up";
+  label: string;
+  onDismiss: () => void;
+  /** Size/travel of the animated dot. Defaults suit a full card; pass
+      smaller values for a compact target like a list row or a pill. */
+  hintSize?: number;
+  hintDistance?: number;
+}) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!active) {
+      const timer = window.setTimeout(() => setRect(null), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const measure = () => {
+      const el = targetRef.current;
+      if (el) setRect(el.getBoundingClientRect());
+    };
+    const timer = window.setTimeout(measure, 0);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [active, targetRef]);
+
+  if (!active || !rect) return null;
+
+  const pad = 10;
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] cursor-pointer motion-safe:animate-[fade-slide-up_0.28s_ease]"
+      onPointerDown={onDismiss}
+      role="button"
+      tabIndex={-1}
+      aria-label="Dismiss gesture hint"
+    >
+      {/* One rounded box-shadow spread, not a full-screen scrim + a
+         separate hole -- cheaper, and the cutout tracks any border-radius
+         for free. */}
+      <div
+        aria-hidden
+        className="absolute rounded-[16px]"
+        style={{
+          left: rect.left - pad,
+          top: rect.top - pad,
+          width: rect.width + pad * 2,
+          height: rect.height + pad * 2,
+          boxShadow: "0 0 0 9999px rgba(3,5,14,0.74)",
+        }}
+      />
+      {/* Right where a real thumb or cursor would actually be: centered on
+         the target itself, not floating off it in empty space above/below. */}
+      <div
+        className="absolute flex flex-col items-center gap-3"
+        style={{
+          left: rect.left + rect.width / 2,
+          top: rect.top + rect.height / 2,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
+        <span className="rounded-full px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
