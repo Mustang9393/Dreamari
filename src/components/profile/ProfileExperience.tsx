@@ -79,10 +79,11 @@ const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 const RULE = "rgba(255,255,255,0.12)";
 
-// Covers a student can pick for their header: six abstract light fields in
-// the manner of desktop screensavers (no subject, nothing to crop), or their
-// own upload. Persisted per browser.
-const COVERS = ["aurora", "dusk", "ocean", "ember", "forest", "nebula"].map((n) => `/images/profile/covers/${n}.svg`);
+// Covers a student can pick for their header: six rendered materials (fluted
+// glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
+// warm-lit register (scratchpad/covers.js renders them), or their own upload.
+// No subject, nothing to crop. Persisted per browser.
+const COVERS = ["fluted-amber", "fluted-ember", "fluted-dusk", "molten", "ripple", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
 /** the sentinel that means "use my #1 career's poster as the cover" */
 const COVER_CAREER = "career";
