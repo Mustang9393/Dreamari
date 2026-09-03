@@ -37,7 +37,6 @@ import {
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
-import { Segmented } from "@/components/connect/viz";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -339,7 +338,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 36%, rgba(12,16,35,0.08) 66%, transparent 100%)" }} />
           </div>
           <div className="relative flex min-h-[224px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-5)] pt-[88px] sm:min-h-[264px] sm:p-[var(--space-6)]">
-            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex items-center gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
+            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
+              {/* A/B for the demo: the cover is your #1 career's poster, or a background */}
+              <div role="tablist" aria-label="Cover version" className="flex gap-[2px] rounded-[var(--radius-sm)] p-[2px]" style={{ background: "rgba(255,255,255,0.08)" }}>
+                {[{ key: "career", label: "Career", letter: "A" }, { key: "picked", label: "Background", letter: "B" }].map((o) => {
+                  const on = o.key === "career" ? coverIsCareer : !coverIsCareer;
+                  return (
+                    <button key={o.key} type="button" role="tab" aria-selected={on} onClick={() => { if (o.key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(COVERS[0]); }} className="dm-quiet flex min-h-[30px] cursor-pointer items-center rounded-[6px] px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "rgba(255,255,255,0.8)" }}>
+                      {o.letter}<span className="hidden sm:inline"> · {o.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
               <span className="relative">
                 <button
                   type="button"
@@ -364,16 +374,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                           <X className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
-                      <Segmented<"career" | "picked">
-                        ariaLabel="Cover style"
-                        grow
-                        value={coverIsCareer ? "career" : "picked"}
-                        onChange={(key) => { if (key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(COVERS[0]); }}
-                        options={[{ key: "career", label: focus ? `Your #1: ${focus.title}` : "Your #1 career" }, { key: "picked", label: "Backgrounds" }]}
-                      />
-                      {coverIsCareer && focus && (
-                        <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Changes with your Top 3.</p>
-                      )}
                       <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
                           <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
