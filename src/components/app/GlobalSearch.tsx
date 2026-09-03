@@ -112,7 +112,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   if (typeof document === "undefined") return null;
   const visible = GROUPS.filter((g) => scope === "all" || g.key === scope);
   return createPortal(
-    <div className="fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label="Search Dreamari" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label="Search Dreamari" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the page stays visible behind, dimmed and softened */}
       <button type="button" aria-label="Close search" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[720px] flex-col px-5 pt-[var(--space-4)] pb-[var(--space-6)] md:pt-[72px]">

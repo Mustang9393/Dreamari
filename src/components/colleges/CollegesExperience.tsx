@@ -230,6 +230,8 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
 }
 
 // ---- the tray: every filter as short checkbox lists, over the results ----
+// Portals mount on <body>, outside `.marketing-v2`, so the root carries the
+// token classes itself (with a transparent background, or it paints black).
 
 function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
@@ -260,7 +262,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the results stay visible behind: dimmed and softened, never black */}
       <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)" }} />
       <div className="relative z-[1] flex max-h-[86dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
@@ -334,7 +336,7 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
   ];
   const head = { background: "color-mix(in srgb, var(--primary) 12%, var(--background))" } as const;
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="college-compare-title" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="college-compare-title" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }} />
       <div className="relative mx-auto mt-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: RULE }}>
