@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, collegeBySlug, compact, money } from "./data";
+import { ADMISSION_WORD, collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 
 // One college. The career page's anatomy: a header that dissolves into the
@@ -91,28 +91,20 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </p>
         )}
 
-        {/* four facts, one strip */}
-        <section aria-label="Quick facts" className="grid grid-cols-2 rounded-[var(--radius-lg)] border sm:grid-cols-4" style={PANEL}>
-          {[
-            { label: "Really pay", value: c.netPrice === null ? "n/a" : money(c.netPrice), note: "a year, after grants" },
-            { label: "Get in", value: c.admitRate === null ? "Everyone" : `${c.admitRate}%`, note: c.admitRate === null ? "who applies" : "of applicants" },
-            { label: "Finish", value: pct(c.finish), note: "within 6 years" },
-            { label: "Students", value: compact(c.undergrads), note: "undergraduates" },
-          ].map((f, i) => (
-            <div key={f.label} className={`flex flex-col gap-[4px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0 sm:border-l" : ""}`} style={{ borderColor: RULE }}>
-              <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{f.label}</span>
-              <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${ACCENT} 55%, #ffffff) 0%, ${SOFT} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{f.value}</span>
-              <span className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{f.note}</span>
-            </div>
-          ))}
+        {/* at a glance: five rows, body-sized figures. Headings stay
+           headings; no number is ever set larger than the text above it. */}
+        <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+          <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
+          <div className="pt-[var(--space-2)]">
+            <Row label="What students really pay" note="a year, after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+            <Row label="Getting in" note={c.admitRate === null ? "open admission, no test scores" : c.applied ? `${c.applied.toLocaleString("en-US")} applied` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate}% are admitted`} />
+            <Row label="Finish their degree" note="within 6 years, everyone who started" value={pct(c.finish)} />
+            <Row label="Come back for year 2" value={pct(c.retention)} />
+            <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} last />
+          </div>
         </section>
 
-        {!d ? (
-          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-            <h2 className={BIG} style={DISPLAY}>That is what we have so far</h2>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>We only have the headline numbers for this college. Its own website has the rest.</p>
-          </section>
-        ) : (
+        {d && (
           <>
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
@@ -149,7 +141,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <p className={SMALL}>Everyone who applies is admitted. There is no competition to get in and no test scores to worry about. You still need to meet the requirements for the course you pick.</p>
               ) : (
                 <div className="flex flex-col gap-[var(--space-5)]">
-                  <p className={SMALL}><strong className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ ...DISPLAY, color: SOFT }}>{c.admitRate}%</strong> of applicants are admitted{c.applied ? ` · ${c.applied.toLocaleString("en-US")} applied` : ""}.</p>
+                  <p className={SMALL}><strong className="font-bold">{c.admitRate}% of applicants are admitted</strong>{c.applied ? `, from ${c.applied.toLocaleString("en-US")} who applied` : ""}.</p>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What they require</h3>
@@ -232,21 +224,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             </Folded>
 
             <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
-              <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-4">
-                {[
-                  { label: "Typical pay", value: d.pay6 ? money(d.pay6) : "n/a", note: "6 years after starting" },
-                  { label: "Owe when they finish", value: d.debt ? money(d.debt) : "n/a", note: "federal loans" },
-                  { label: "Loan payment", value: d.monthly ? `${money(d.monthly)}` : "n/a", note: "a month" },
-                  { label: "Paying it back", value: pct(c.repay), note: "of those who borrowed" },
-                ].map((f) => (
-                  <div key={f.label} className="flex flex-col gap-[3px]">
-                    <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{f.label}</span>
-                    <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ ...DISPLAY, color: SOFT }}>{f.value}</span>
-                    <span className="text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{f.note}</span>
-                  </div>
-                ))}
+              <div>
+                <Row label="Typical pay" note="6 years after starting, finished or not" value={d.pay6 ? money(d.pay6) : "Not published"} />
+                <Row label="Owe when they finish" note="federal loans" value={d.debt ? money(d.debt) : "Not published"} />
+                <Row label="Loan payment" note="a month" value={d.monthly ? `${money(d.monthly)}` : "Not published"} />
+                <Row label="Paying it back" note="of those who borrowed" value={pct(c.repay)} last />
               </div>
-              <p className={`${SMALL} mt-[var(--space-4)]`} style={{ color: "var(--muted-foreground)" }}>Pay covers everyone who enrolled and now works, finished or not, in every subject. Debt is what graduates owed on federal loans.</p>
+              <p className={`${SMALL} mt-[var(--space-3)]`} style={{ color: "var(--muted-foreground)" }}>Pay covers everyone who enrolled and now works, finished or not, in every subject. Debt is what graduates owed on federal loans.</p>
             </Folded>
           </>
         )}
@@ -276,6 +260,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Really pay.</strong> The average a family paid for a year after grants, from the federal IPEDS survey. Published for full-time, first-time students who got federal aid. Use the college&apos;s own calculator for your number.</p>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Finish.</strong> Counts every student who started, part-time and transfers included, so it is the harder, honest test.</p>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Pay and debt.</strong> From the federal College Scorecard. They describe everyone who went here, in every subject, not one programme.</p>
+            {d?.sample && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Prototype note.</strong> The headline figures for this college are from the government data. The detail sections are sample figures in the same shape, until the live data is wired in.</p>}
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Collected for 2024-25. Government data arrives about 18 months late, so check anything time-sensitive with the college.</p>
           </div>
         </Folded>

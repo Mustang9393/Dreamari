@@ -83,6 +83,8 @@ export type CollegeDetail = {
   debt: number | null;
   monthly?: number;
   worth?: string;
+  /** true when the detail was generated for the prototype from the card figures */
+  sample?: boolean;
 };
 
 const nj = { state: "NJ", stateName: "New Jersey", accreditor: "Middle States Commission on Higher Education" } as const;
@@ -399,6 +401,65 @@ export const COLLEGES: College[] = [
   { slug: "paul-mitchell-the-school-rapid-city", name: "Paul Mitchell the School Rapid City", city: "Rapid City", ...sd, level: "Certificates", control: "For profit", setting: "City", size: "Small", undergrads: 120, netPrice: 19694, finish: 88, retention: 80, repay: 58, gradsPerYear: 54, admission: "open", admitRate: null, flags: ["forProfit"], accreditor: "National Accrediting Commission of Career Arts and Sciences", photo: false, mark: false },
   { slug: "sisseton-wahpeton-college", name: "Sisseton Wahpeton College", city: "Sisseton", ...sd, level: "Bachelor's degrees", control: "Public", setting: "Countryside", size: "Small", undergrads: 200, netPrice: 2977, finish: 17, retention: null, repay: null, gradsPerYear: 52, admission: "open", admitRate: null, flags: ["tribal", "fewFinish"], photo: false, mark: true },
 ];
+
+
+// ---- Generated detail for card-level colleges (prototype) --------------
+// The reference publishes the same sections for every college. Where we only
+// transcribed the card figures, the detail below is derived from them with
+// the patterns the real pages show (bands rise with income, two-year and
+// trade colleges have no housing, tribal colleges are almost entirely Native
+// students). Marked `sample: true`; the page says so in its sources.
+function seeded(slug: string) { let h = 2166136261; for (let i = 0; i < slug.length; i++) { h ^= slug.charCodeAt(i); h = Math.imul(h, 16777619); } return () => { h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0; return (h % 1000) / 1000; }; }
+const r5 = (n: number) => Math.round(n / 5) * 5;
+const PROGS: Record<Level, Programme[]> = {
+  "Certificates": [{ name: "Cosmetology", grads: 40, share: 46, pay: "$22,100" }, { name: "Esthetician and Skin Care", grads: 18, share: 21, pay: "$21,900" }, { name: "Nail Technician", grads: 15, share: 17, pay: "$21,900" }, { name: "Barbering", grads: 9, share: 10, pay: "not published" }, { name: "Massage Therapy", grads: 5, share: 6, pay: "not published" }],
+  "Associate degrees": [{ name: "Registered Nursing", grads: 62, share: 12, pay: "$54,400" }, { name: "Business", grads: 48, share: 9, pay: "$33,200" }, { name: "Electrician", grads: 31, share: 6, pay: "$41,700" }, { name: "Welding Technology", grads: 29, share: 6, pay: "$40,300" }, { name: "Automotive Technology", grads: 26, share: 5, pay: "$39,800" }, { name: "Computer Programming", grads: 22, share: 4, pay: "$44,100" }, { name: "Diesel Technology", grads: 21, share: 4, pay: "$46,900" }, { name: "Medical Assistant", grads: 19, share: 4, pay: "$34,600" }],
+  "Bachelor's degrees": [{ name: "Business Administration", grads: 58, share: 11, pay: "$41,300" }, { name: "Registered Nursing", grads: 44, share: 8, pay: "$58,900" }, { name: "Elementary Education", grads: 36, share: 7, pay: "$37,600" }, { name: "Psychology", grads: 31, share: 6, pay: "$28,900" }, { name: "Biology", grads: 27, share: 5, pay: "$27,400" }, { name: "Exercise Science", grads: 22, share: 4, pay: "not published" }, { name: "Criminal Justice", grads: 19, share: 4, pay: "$35,200" }, { name: "Computer Science", grads: 17, share: 3, pay: "$56,800" }],
+};
+export function synthDetail(c: College): CollegeDetail {
+  const rnd = seeded(c.slug);
+  const net = c.netPrice ?? 14000;
+  const bands = [0.72, 0.78, 0.9, 1.06, 1.12].map((k, i) => ({ label: ["Under $30,000", "$30,000 to $48,000", "$48,000 to $75,000", "$75,000 to $110,000", "Over $110,000"][i], pay: Math.round((net * k) / 10) * 10 }));
+  const four = c.level === "Bachelor's degrees";
+  const two = c.level === "Associate degrees";
+  const pub = c.control === "Public";
+  const tuition = c.level === "Certificates" ? null : Math.round((pub ? (four ? 7800 : 4100) : (four ? 26000 : 14000)) * (0.9 + rnd() * 0.25) / 10) * 10;
+  const housing = four && c.undergrads > 400;
+  const tribal = c.flags?.includes("tribal");
+  const scale = c.gradsPerYear / 520;
+  const programmes = PROGS[c.level].map((p) => ({ ...p, grads: Math.max(2, Math.round(p.grads * scale)) }));
+  const levels = c.level === "Certificates" ? [{ label: "Certificates", n: programmes.length }] : two ? [{ label: "Certificates", n: 12 + Math.round(rnd() * 20) }, { label: "Associate", n: 18 + Math.round(rnd() * 30) }] : [{ label: "Certificates", n: 4 + Math.round(rnd() * 10) }, { label: "Associate", n: Math.round(rnd() * 6) }, { label: "Bachelor's", n: 30 + Math.round(rnd() * 40) }, { label: "Master's", n: 6 + Math.round(rnd() * 20) }];
+  const women = r5(52 + rnd() * 14);
+  const makeup = tribal
+    ? [{ label: "American Indian or Alaska Native", n: Math.round(c.undergrads * 0.94), pct: 94 }, { label: "White", n: Math.round(c.undergrads * 0.04), pct: 4 }, { label: "Two or more races", n: Math.round(c.undergrads * 0.02), pct: 2 }]
+    : [{ pct: 78 + Math.round(rnd() * 8), label: "White" }, { pct: 5, label: "Hispanic or Latino" }, { pct: 4, label: "Two or more races" }, { pct: 3, label: "Black or African American" }, { pct: 3, label: "American Indian or Alaska Native" }, { pct: 2, label: "Asian" }].map((m) => ({ ...m, n: Math.round((c.undergrads * m.pct) / 100) }));
+  const partShare = two ? 0.48 : c.level === "Certificates" ? 0.05 : 0.22;
+  const pay6 = c.level === "Certificates" ? 27000 + Math.round(rnd() * 4000) : two ? 39000 + Math.round(rnd() * 7000) : 44000 + Math.round(rnd() * 9000);
+  const debt = c.repay === null ? null : c.level === "Certificates" ? 7000 + Math.round(rnd() * 3000) : two ? 11000 + Math.round(rnd() * 4000) : 19000 + Math.round(rnd() * 6000);
+  return {
+    sample: true,
+    address: `${c.city}, ${c.stateName}`,
+    tuitionInState: tuition, tuitionOutState: tuition === null ? null : pub && four ? Math.round(tuition * 1.45 / 10) * 10 : tuition, fees: tuition === null ? null : Math.round((900 + rnd() * 1800) / 10) * 10,
+    housing, housingCost: housing ? Math.round((4200 + rnd() * 2200) / 10) * 10 : undefined, foodCost: housing ? Math.round((4000 + rnd() * 1800) / 10) * 10 : undefined,
+    bands,
+    scholarshipShare: pub ? 40 + Math.round(rnd() * 45) : 85 + Math.round(rnd() * 15), scholarshipAvg: pub ? 1800 + Math.round(rnd() * 2400) : 9000 + Math.round(rnd() * 12000), pell: tribal ? 76 : two ? 38 + Math.round(rnd() * 15) : 22 + Math.round(rnd() * 16),
+    require: c.admission === "open" ? [] : ["High school grades", "Your school record", "An English test"],
+    consider: c.admission === "open" ? [] : ["Class rank", "Recommendations", "SAT or ACT scores", "A personal essay"],
+    scores: c.admission === "open" ? undefined : { sat: "1010 to 1210", act: "18 to 24", sentSat: 3, sentAct: 55 + Math.round(rnd() * 25) },
+    finish4: four ? Math.max(0, (c.finish ?? 40) - 12) : undefined,
+    ratio: `${12 + Math.round(rnd() * 8)} to 1`,
+    programmeCount: levels.reduce((a, l) => a + l.n, 0),
+    levels, programmes,
+    gradStudents: four && c.undergrads > 1000 ? Math.round(c.undergrads * (0.08 + rnd() * 0.12)) : undefined,
+    fullTime: Math.round(c.undergrads * (1 - partShare)), partTime: Math.round(c.undergrads * partShare),
+    women, men: 100 - women, makeup,
+    ways: c.level === "Certificates" ? [] : two ? ["Evening or weekend classes"] : ["Study abroad", "Undergraduate research", "Teacher training", ...(rnd() > 0.5 ? ["ROTC (Army)"] : [])],
+    helps: ["Careers advice", "Help finding work while you study", "Help finding a job when you finish", ...(rnd() > 0.5 ? ["Childcare on campus"] : [])],
+    sport: four && c.undergrads > 800 ? { league: c.undergrads > 2500 ? "NCAA Division II" : "NAIA", students: Math.round(c.undergrads * (0.12 + rnd() * 0.1)), teams: ["Football", "Basketball", "Track and Field", "Soccer", "Volleyball", "Baseball", "Softball", "Golf", "Wrestling"].slice(0, 6 + Math.round(rnd() * 3)) } : two && c.undergrads > 1000 ? { league: "NJCAA", students: Math.round(c.undergrads * 0.06), teams: ["Basketball", "Volleyball", "Baseball", "Softball", "Rodeo"] } : undefined,
+    pay6, debt, monthly: debt ? Math.round(debt * 0.0106) : undefined,
+  };
+}
+for (const c of COLLEGES) if (!c.detail) c.detail = synthDetail(c);
 
 export function collegeBySlug(slug: string): College | undefined {
   return COLLEGES.find((c) => c.slug === slug);

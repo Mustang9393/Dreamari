@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
-import { Bookmark, GraduationCap, Landmark } from "lucide-react";
-import { PANEL, SMALL } from "@/components/career/CareerDetailExperience";
+import { ArrowRight, Bookmark, GraduationCap, Landmark, Undo2, Wallet } from "lucide-react";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, money, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
@@ -76,49 +77,72 @@ export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle:
   );
 }
 
-/** The result card: a picture, a name, three words, three facts. */
-export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
+/** The result card in the community card's shape (the CEO's approved card):
+ *  the campus photo full-bleed, dimmed and frosted so type wins; name and
+ *  place at the top; three stat tiles; the three words; one ghost action.
+ *  Figures sit at body size: nothing on the card outranks its title. */
+const GRAIN = "/images/connect/covers/grain.png";
+function StatTile({ icon: Icon, value, label }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: string; label: string }) {
   return (
-    <article className="dm-tap relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, borderColor: compared ? "color-mix(in srgb, var(--primary) 60%, transparent)" : PANEL.borderColor }}>
-      <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      <div className="relative">
-        <CollegePicture c={c} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" className="aspect-[16/9] w-full" />
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[56%]" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85), transparent)" }} />
-        <span className="absolute top-[10px] right-[10px] z-10"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-[2px] p-[var(--space-4)] pb-[10px]" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
-          <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{c.name}</h3>
-          <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{c.city}, {c.stateName}</p>
-        </div>
-      </div>
-      <div className="relative z-[1] flex flex-1 flex-col gap-[var(--space-3)] p-[var(--space-4)] pt-[12px]">
-        <ul className="flex flex-wrap gap-[6px]" aria-label="About this college">
-          {tags(c).map((t) => (
-            <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "var(--foreground)" }}>{t}</li>
-          ))}
-          {c.admission === "open" && <li className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>Everyone gets in</li>}
-        </ul>
-        <dl className="grid grid-cols-3 gap-[var(--space-2)] border-t pt-[10px]" style={{ borderColor: RULE }}>
-          <Fact label="Really pay" value={c.netPrice === null ? "n/a" : money(c.netPrice)} note="a year" />
-          <Fact label="Finish" value={pct(c.finish)} note="in 6 years" />
-          <Fact label="Come back" value={pct(c.retention)} note="for year 2" />
-        </dl>
-        {onCompare && (
-          <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-[2] mt-auto flex min-h-[32px] w-fit cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[12.5px] leading-[16px] font-bold" style={{ borderColor: compared ? ACCENT : "rgba(255,255,255,0.18)", color: compared ? SOFT : "var(--muted-foreground)", background: compared ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent" }}>
-            <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "In compare" : "Compare"}
-          </button>
-        )}
-      </div>
-    </article>
+    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+      <Icon className="h-[14px] w-[14px]" aria-hidden style={{ color: `color-mix(in srgb, ${ACCENT} 60%, #FFFFFF)` }} />
+      <span className="text-[15px] leading-[20px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
+      <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
+    </div>
   );
 }
 
-function Fact({ label, value, note }: { label: string; value: string; note: string }) {
+export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
+  const img = collegeImage(c);
+  const mark = collegeMark(c);
   return (
-    <div className="flex min-w-0 flex-col gap-[1px]">
-      <dt className="truncate text-[11px] leading-[14px] font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</dt>
-      <dd className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</dd>
-      <dd className="truncate text-[11px] leading-[14px]" style={{ color: "var(--muted-foreground)" }}>{note}</dd>
-    </div>
+    <article
+      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+    >
+      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+        {img ? (
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" style={{ filter: "brightness(0.78) saturate(0.92)" }} />
+        ) : (
+          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }}>
+            {mark && <Image src={mark} alt="" fill sizes="160px" className="object-contain p-[22%] opacity-40" />}
+          </span>
+        )}
+        <CardProgressiveBlur size="74%" />
+        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${ACCENT} 12%, transparent), transparent 60%)` }} />
+        <span className="absolute inset-0" style={{ backgroundImage: `url(${GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
+      </span>
+      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: ACCENT }} />
+
+      {/* the whole card opens the college */}
+      <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
+      <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+
+      <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
+        <h3 className="pr-[48px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
+        <p className="mt-[3px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
+
+        <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
+          <StatTile icon={Wallet} value={c.netPrice === null ? "n/a" : money(c.netPrice)} label="Really pay a year" />
+          <StatTile icon={GraduationCap} value={pct(c.finish)} label="Finish" />
+          <StatTile icon={Undo2} value={pct(c.retention)} label="Come back" />
+        </div>
+        <ul className="mt-[10px] flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
+          {tags(c).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.1)", color: "#fff" }}>{t}</li>)}
+          {c.admission === "open" && <li className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(12,16,35,0.6))", color: "#fff" }}>Everyone gets in</li>}
+        </ul>
+        <div className="pointer-events-auto mt-[10px] flex items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
+          {onCompare ? (
+            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: compared ? "#fff" : "rgba(255,255,255,0.72)", background: compared ? `color-mix(in srgb, ${ACCENT} 45%, transparent)` : "transparent" }}>
+              <Landmark className="h-[14px] w-[14px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
+            </button>
+          ) : <span />}
+          <Link href={`/colleges/${c.slug}`} className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${ACCENT} 45%, #FFFFFF)` }}>
+            Open <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }
 
