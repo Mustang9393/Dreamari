@@ -77,3 +77,4 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Profile cover A/B now crossfades (both images stay loaded), no more half-swapped picture.
 - The app background is the landing page's colour field on every screen.
 - Volunteer and staff metric tiles are grouped tighter: icon, figure with its change on one line, label under, in a ruled grid.
+- Background dialled back to the earlier app field: purple only in the top-right corner, blue elsewhere, no pink or purple through the middle. Still fixed to the screen, so it never changes within a tab.
