@@ -80,9 +80,9 @@ function HeroCta({ children, display = false, fullOnMobile = false, onClick }: {
       type="button"
       onClick={onClick}
       className={`dm-solid cursor-pointer px-[var(--space-6)] py-[var(--space-4)] active:scale-[0.97] ${
-        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto sm:rounded-[var(--radius-lg)]" : "rounded-[var(--radius-lg)]"
+        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto" : "rounded-[var(--radius-md)]"
       }`}
-      style={{ background: "var(--foreground)", color: "var(--background)" }}
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
     >
       <span
         className={display ? "text-[16px] leading-[22px] font-semibold" : "text-[13px] leading-[18px] font-semibold"}
@@ -155,7 +155,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
-      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-xl)] border sm:h-[320px] sm:rounded-[var(--radius-2xl)]"
+      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[320px] sm:rounded-[var(--radius-lg)]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
         touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -318,7 +318,7 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
+              className="dm-quiet h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
               style={{ width: panel === index ? 24 : 7, background: panel === index ? "var(--foreground)" : "var(--muted-foreground)" }}
             />
           ))}
@@ -412,7 +412,7 @@ const ACTIVITIES: Activity[] = [
 // visible seam. Content also moved off fixed pixel offsets onto a real flex
 // column, so it doesn't need re-tuning by hand every time copy changes.
 function ActivityCard({ activity }: { activity: Activity }) {
-  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-xl)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
+  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
   const style = { borderColor: "var(--glass-border)", background: "#0e0c20" };
 
   const content = (
@@ -541,7 +541,7 @@ export function HomeExperience() {
            counts, so the claim is checkable, and the CTA goes somewhere. */}
         <section
           aria-label="Your signal"
-          className="relative w-full overflow-hidden rounded-[var(--radius-2xl)] border p-[27px] sm:min-h-[216px]"
+          className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border p-[27px] sm:min-h-[216px]"
           style={{ borderColor: "var(--glass-border)" }}
         >
           {/* screen-blend purple is night-tuned; light mode swaps it via the
@@ -550,7 +550,7 @@ export function HomeExperience() {
           <div className="relative flex h-full flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-8)]">
             <div className="flex flex-col gap-[var(--space-3)]">
               <span
-                className="w-fit rounded-[99px] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
+                className="w-fit rounded-[var(--radius-sm)] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
                 /* white on primary measures 4.8:1; the ghost tint failed at 2.56 */
                 style={{ fontFamily: "var(--font-body)", background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }}
               >
@@ -570,7 +570,7 @@ export function HomeExperience() {
                 ].map(({ tag, count, color }) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-[var(--space-2)] rounded-[999px] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
+                    className="inline-flex items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
                     style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                   >
                     <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />

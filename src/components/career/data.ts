@@ -1,5 +1,6 @@
 import { ALL_CATALOG_CAREERS, FOR_YOU_REEL, type CatalogCareer, type ReelCareer } from "@/components/app/catalog";
 import { reportV2 } from "@/components/profile/report-data";
+import { careerProfile, type CareerProfile } from "./profiles";
 import { careerSlug } from "./slug";
 
 // Career Detail page data — resolved by merging whatever the app already
@@ -179,6 +180,9 @@ export type ResolvedCareer = {
   realLifeExample: string | null;
   ladder?: LadderRung[];
   software?: string[];
+  // Present for careers with a full production-shaped profile (profiles.ts);
+  // the detail page renders the richer sections from it.
+  profile?: CareerProfile;
 };
 
 const COMING_SOON = "Coming soon";
@@ -196,10 +200,11 @@ export function resolveCareer(slug: string): ResolvedCareer | null {
   const reel = findReel(slug);
   const report = reportV2(slug);
   const extra = CAREER_EXTRAS[slug];
+  const profile = careerProfile(slug);
 
-  const title = catalog?.title ?? reel?.title;
-  const world = catalog?.world ?? reel?.world;
-  const photo = catalog?.photo ?? reel?.photo;
+  const title = profile?.title ?? catalog?.title ?? reel?.title;
+  const world = profile?.world ?? catalog?.world ?? reel?.world;
+  const photo = profile?.photo ?? catalog?.photo ?? reel?.photo;
   if (!title || !world || !photo) return null;
 
   return {
@@ -207,14 +212,15 @@ export function resolveCareer(slug: string): ResolvedCareer | null {
     title,
     world,
     photo,
-    description: report?.glance.simple ?? reel?.description ?? "",
+    profile,
+    description: profile?.summary ?? report?.glance.simple ?? reel?.description ?? "",
     medianSalary: report?.salary.median ?? catalog?.salary ?? reel?.salary ?? COMING_SOON,
     degreeRequired: report?.education.find((e) => e.common)?.name ?? COMING_SOON,
     commonMajors: report?.majors.length ? report.majors.map((m) => m.name).join(", ") : (reel?.major ?? COMING_SOON),
     whatTheyActuallyDo: report?.glance.whatYouDo ?? reel?.description ?? COMING_SOON,
     realLifeExample: report?.glance.example ?? null,
     ladder: extra?.ladder,
-    software: extra?.software,
+    software: profile?.software ?? extra?.software,
   };
 }
 

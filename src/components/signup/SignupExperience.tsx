@@ -151,7 +151,7 @@ function SignupDreamy({ sprite, line, reactionNonce = 0, accent }: { sprite: str
       </div>
       <div key={line} className="relative w-fit max-w-[260px] min-w-0 sm:max-w-[300px]">
         <div aria-hidden className="absolute top-1/2 -left-[6px] h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] backdrop-blur-md" style={{ background: "var(--glass-surface-3)", borderLeft: "1px solid var(--glass-border)", borderBottom: "1px solid var(--glass-border)" }} />
-        <p className="relative rounded-2xl px-4 py-3 text-[14px] leading-snug font-semibold backdrop-blur-md sm:text-[15px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", background: "var(--glass-surface-3)", border: "1px solid var(--glass-border)", boxShadow: `0 12px 32px -18px color-mix(in srgb, ${accent} 45%, transparent)` }}>
+        <p className="relative rounded-[var(--radius-lg)] px-4 py-3 text-[14px] leading-snug font-semibold backdrop-blur-md sm:text-[15px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", background: "var(--glass-surface-3)", border: "1px solid var(--glass-border)", boxShadow: `0 12px 32px -18px color-mix(in srgb, ${accent} 45%, transparent)` }}>
           <InkText text={line} delay={0.1} />
         </p>
       </div>
@@ -338,7 +338,7 @@ export function SignupExperience() {
           <button
             type="button"
             onClick={goBack}
-            className="dm-quiet flex items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[13px] font-semibold"
+            className="dm-quiet flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-[13px] font-semibold"
             style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back
@@ -378,7 +378,7 @@ export function SignupExperience() {
 
           <div
             key={step}
-            className="motion-safe:animate-[fade-slide-up_0.32s_cubic-bezier(0.16,1,0.3,1)] flex w-full flex-col gap-[var(--space-5)] rounded-[28px] border p-[var(--space-8)] backdrop-blur-[16px]"
+            className="motion-safe:animate-[fade-slide-up_0.32s_cubic-bezier(0.16,1,0.3,1)] flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-8)] backdrop-blur-[16px]"
             style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -28px rgba(0,0,0,0.6)" }}
           >
             {step === "role" && (
@@ -392,10 +392,10 @@ export function SignupExperience() {
                       key={r.id}
                       type="button"
                       onClick={() => pickRole(r.id)}
-                      className="dm-tap flex w-full cursor-pointer items-center gap-[14px] rounded-[20px] border p-[16px] text-left"
+                      className="dm-tap flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-lg)] border p-[16px] text-left"
                       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
                     >
-                      <span className="flex h-[48px] w-[48px] flex-none items-center justify-center rounded-[16px]" style={{ background: `color-mix(in srgb, ${r.from} 20%, transparent)` }}>
+                      <span className="flex h-[48px] w-[48px] flex-none items-center justify-center rounded-[var(--radius-lg)]" style={{ background: `color-mix(in srgb, ${r.from} 20%, transparent)` }}>
                         <r.Icon className="h-[22px] w-[22px]" aria-hidden style={{ color: r.from }} />
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
@@ -500,7 +500,7 @@ export function SignupExperience() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="dm-quiet absolute top-1/2 right-[10px] flex h-[34px] -translate-y-1/2 items-center gap-[5px] rounded-full px-[10px] text-[12px] font-semibold"
+                          className="dm-quiet absolute top-1/2 right-[10px] flex h-[34px] -translate-y-1/2 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12px] font-semibold"
                           style={{ fontFamily: "var(--font-body)", color: "var(--primary)" }}
                         >
                           {showPassword ? <EyeOff className="h-[15px] w-[15px]" aria-hidden /> : <Eye className="h-[15px] w-[15px]" aria-hidden />}
@@ -575,7 +575,7 @@ function PrimaryButton({ children, onClick, accent, loading }: { children: React
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="dm-solid flex h-[52px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] text-[16px] font-bold text-white disabled:cursor-default disabled:opacity-70"
+      className="dm-solid flex h-[52px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] text-[16px] font-semibold text-white disabled:cursor-default disabled:opacity-70"
       style={{ fontFamily: "var(--font-display)", background: `linear-gradient(120deg, ${accent}, color-mix(in srgb, ${accent} 65%, white))`, boxShadow: `0 16px 32px -16px color-mix(in srgb, ${accent} 65%, transparent)` }}
     >
       {loading ? "One sec…" : children}

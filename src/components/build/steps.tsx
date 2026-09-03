@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
@@ -62,14 +61,14 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
            flex-wrap lets two long names break onto a second line cleanly. */}
-        <div className={`mb-3 rounded-xl border px-3.5 py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
+        <div className={`mb-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
@@ -115,7 +114,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
@@ -148,7 +147,7 @@ function VibeButtonRow({
 }) {
   const confirming = useConfirmGlow(value !== null);
   return (
-    <div className={`rounded-2xl border px-4 py-3.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
+    <div className={`rounded-[var(--radius-lg)] border px-4 py-3.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
       <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">{label}</p>
       <div className="mt-2.5 grid grid-cols-3 gap-2">
         {options.map((option) => {
@@ -163,7 +162,7 @@ function VibeButtonRow({
                 dispatchAuroraPulse("select", e);
                 onChange(option);
               }}
-              className={`relative rounded-xl border px-2 py-2 text-[13px] font-semibold transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+              className={`dm-tap relative rounded-[var(--radius-md)] border px-2 py-2 text-[13px] font-semibold transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
               style={{
                 background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
                 borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
@@ -199,7 +198,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
@@ -211,7 +210,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
             <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
           </div>
           <div
-            className={`flex flex-col justify-center gap-4 rounded-xl border px-4 py-4 ${GLASS_PANEL_CLASS}`}
+            className={`flex flex-col justify-center gap-4 rounded-[var(--radius-md)] border px-4 py-4 ${GLASS_PANEL_CLASS}`}
             style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
           >
             <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
@@ -238,9 +237,9 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-        <QuestionHeading sprite={sprite} title="How much school feels right for you?" />
+        <QuestionHeading sprite={sprite} title="How many years of education are you open to after high school?" />
         {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
            direct feedback: a scrolling row of answer options reads as broken,
            not as a deliberate rhythm change). Fits as many of the 5 cards as
@@ -262,7 +261,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                   react();
                   patch({ education: option.title });
                 }}
-                className={`relative h-full rounded-xl border px-3.5 py-3 text-left transition-all duration-150 hover:-translate-y-px ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+                className={`dm-tap relative h-full rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
                 style={{
                   background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)",
                   borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
@@ -299,7 +298,7 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
           value={value}
           aria-label={label}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full cursor-pointer appearance-none rounded-xl border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+          className={`w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: value ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
@@ -341,7 +340,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
@@ -405,7 +404,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
 // 50% interstitial — celebration beat. Dreamy parties: dedicated bounce keyframe
 // (globals.css: dreamy-celebrate) instead of the ambient float, plus the page-level
 // Confetti the orchestrator fires for this stage.
-export function MilestoneScreen({ onNext, percent }: { onNext: () => void; percent: number }) {
+export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => void; onBack: () => void; percent: number }) {
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
     const chime = setTimeout(() => playMilestoneChime(), 200);
@@ -418,8 +417,15 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
     };
   }, []);
   return (
-    <div className="mx-auto w-full max-w-[560px]">
+    // Same three-part skeleton as every step (CardHud pinned top, centered
+    // middle, footer at the bottom): this screen used to be a free-floating
+    // block, so the HUD drifted down to meet the content and the layout
+    // jumped between steps. Back exists here too -- a celebration is not a
+    // one-way door.
+    <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="mx-auto w-full max-w-[560px]">
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
         <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
@@ -429,18 +435,15 @@ export function MilestoneScreen({ onNext, percent }: { onNext: () => void; perce
         <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re moving fast. 🚀" /></h1>
         <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">The good part is coming.</p>
       </GlassCard>
-      <div className="mt-5 flex justify-center">
-        {/* Dreamy IS this screen -- the pulse always launches from him here rather than
-           leaving it to the usual one-in-three coin flip. */}
-        <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e, { forceDreamyOrigin: true }); onNext(); }} type="button">
-          <span className="inline-flex items-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
-        </Button>
       </div>
+      </div>
+      {/* Dreamy IS this screen -- the pulse always launches from him here. */}
+      <StepFooter onBack={onBack} onNext={onNext} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }
 
-export function CompletionScreen({ onSeeMatches }: { onSeeMatches: () => void }) {
+export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () => void; onBack: () => void }) {
   const [burstNonce, setBurstNonce] = useState(0);
   useEffect(() => {
     const chime = setTimeout(() => playMilestoneChime(), 200);
@@ -453,7 +456,13 @@ export function CompletionScreen({ onSeeMatches }: { onSeeMatches: () => void })
     };
   }, []);
   return (
-    <div className="mx-auto w-full max-w-[640px]">
+    <div className="flex h-full w-full flex-col">
+      {/* The HUD stays on the last screen too, at 100 -- it had simply
+         disappeared here, so the bar the student watched fill for eight
+         steps never got to show itself full. */}
+      <CardHud percent={100} />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
         <div className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
@@ -470,11 +479,9 @@ export function CompletionScreen({ onSeeMatches }: { onSeeMatches: () => void })
         </div>
         <h1 className={`${bricolage.className} text-[32px] font-extrabold text-[var(--color-night-foreground)] sm:text-[38px]`}><InkText text="Congratulations!" /></h1>
       </GlassCard>
-      <div className="mt-5 flex justify-center">
-        <Button variant="primary" size="large" onClick={(e) => { dispatchAuroraPulse("cta", e); onSeeMatches(); }} type="button">
-          <span className="inline-flex items-center gap-[6px]">See matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
-        </Button>
       </div>
+      </div>
+      <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">See matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }

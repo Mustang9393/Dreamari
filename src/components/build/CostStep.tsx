@@ -8,7 +8,7 @@ import type { StepProps } from "./steps";
 // <input type=range> drives everything (keyboard + screen-reader + touch for free);
 // the visuals are custom-painted around it: a gradient fill that grows with the
 // value, tick dots that light as the thumb passes them, a glowing thumb, and
-// clickable stop labels that jump the slider. Discrete 6 stops per the reference.
+// clickable stop labels that jump the slider. Discrete stops, one per COST_STOPS entry (7 as of 2026-09-03).
 
 const AMBER = "var(--color-world-business-money-office)";
 
@@ -27,12 +27,12 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="What total school or training cost feels realistic?" />
+      <QuestionHeading sprite={sprite} title="How much would you consider spending on your education after high school?" />
 
       <div
-        className={`rounded-2xl border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
+        className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
         style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {/* One readout, no eyebrow and no placeholder: the question above already
@@ -78,7 +78,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
             max={COST_STOPS.length - 1}
             step={1}
             value={value}
-            aria-label="What total school or training cost feels realistic?"
+            aria-label="How much would you consider spending on your education after high school?"
             aria-valuetext={COST_STOPS[value]}
             onChange={(e) => setIndex(Number(e.target.value))}
             className="absolute inset-0 w-full cursor-pointer opacity-0"
@@ -104,13 +104,15 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
            selected words (edges clamp inward to stay inside the card). */}
         <div className="relative h-[38px]">
           {(
+            // two-line breaks of COST_STOPS, in the same order (one entry per stop)
             [
-              ["As little as", "possible"],
+              ["As low as", "possible"],
               ["$25,000", "or less"],
               ["$50,000", "or less"],
               ["$100,000", "or less"],
               ["Over $100,000", "for the right path"],
-              ["I’m not sure yet", ""],
+              ["Cost is not a", "major factor for me"],
+              ["I’m not", "sure yet"],
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;
@@ -122,7 +124,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
                 key={COST_STOPS[i]}
                 type="button"
                 onClick={() => setIndex(i)}
-                className={`absolute top-0 max-w-[92px] text-[11px] leading-tight font-semibold transition-colors sm:text-[11.5px] ${
+                className={`absolute top-0 max-w-[76px] text-[10.5px] leading-tight font-semibold transition-colors sm:max-w-[96px] sm:text-[11.5px] ${
                   isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
                 }`}
                 style={{

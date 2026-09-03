@@ -88,7 +88,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
         aria-label={open ? "Close quick links" : "Quick links"}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-xl)] border backdrop-blur-[10px]"
+        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border backdrop-blur-[10px]"
         style={{ background: "var(--glass-surface-2)", borderColor: open ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -146,7 +146,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
          streak/XP cluster are unequal, so flex centering would sit left of
          true center. */}
       <nav
-        className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-xl)] border px-[var(--space-2)] py-[6px]"
+        className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
         style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
       >
         {NAV_ITEMS.map((item) => {
@@ -156,7 +156,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
               key={item.label}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className="dm-quiet rounded-[var(--radius-md-alt)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
+              className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
               style={{
                 background: isActive ? "var(--primary)" : "transparent",
                 color: isActive ? "var(--primary-foreground)" : "var(--foreground)",

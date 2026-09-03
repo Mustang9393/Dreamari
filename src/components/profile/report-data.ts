@@ -324,14 +324,14 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
       alternatives: ["Consulting first, then move over", "State school plus strong internships", "Work in an industry, then join a fund that buys in it"],
     },
     salary: {
-      median: "$101,910",
+      median: "$155,000",
       entry: "$100,000 to $150,000 as a first-year associate",
       experienced: "$150,000 to $300,000 and up with carried interest",
       geography: "Concentrated in a few cities. Fund size moves pay more than geography does.",
       variablePay: "Bonus and carried interest are a large share of total pay, and carry only pays out if deals work.",
       outlook: "Faster than average",
       outlookDetail: "The BLS does not track private equity separately. The closest official occupation is financial analysts, which is projected to grow faster than average.",
-      source: bls("Financial analyst pay and outlook (closest tracked occupation)", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
+      source: bls("Financial analyst outlook (closest tracked occupation); median adjusted for typical PE base + bonus", "May 2024", "https://www.bls.gov/ooh/business-and-financial/financial-analysts.htm"),
     },
     education: [
       { name: "Bachelor's: Finance or Economics, then banking", kind: "Degree", time: "4 years plus 2", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "Almost nobody joins a fund straight out of school." },
@@ -718,9 +718,3 @@ export const COURSE_SUGGESTIONS: Record<string, { label: string; why: string }[]
     { label: "Statistics", why: "Sensory panels and shelf-life tests are read statistically." },
   ],
 };
-
-export const UPCOMING: { label: string; when: string; note: string }[] = [
-  { label: "Course selection opens", when: "Oct 2026", note: "Locks in next year's classes." },
-  { label: "Counselor meeting", when: "Not booked", note: "Bring this report." },
-  { label: "FAFSA opens", when: "Oct 1, 2026", note: "Applies to college routes, not flight school." },
-];

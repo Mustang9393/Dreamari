@@ -235,7 +235,7 @@ function RowCard({
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
   // The featured card's copy reads left-aligned (a billboard); every side
   // card centers its copy, matching Browse's own PosterCard convention.
-  const className = `dm-tap group relative flex-none overflow-hidden rounded-[16px] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
+  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
   const style = {
     borderColor: "var(--color-glass-border-raised)",
     background: "var(--glass-surface-1)",
@@ -296,7 +296,7 @@ function RowCard({
   // <Link> overlay, so a pressable side card gets its own absolute overlay
   // button instead (same idiom as the whole-card links across the app).
   return (
-    <article className={className} style={style}>
+    <article className={`dm-tap ${className}`} style={style}>
       {content}
       {!large && candidate.kind === "sim" && onSelect && (
         <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
@@ -366,7 +366,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
         {first.expressCut && first.expressCut.length > 0 && (
           <Link
             href={`/play/${sim.id}?mode=express`}
-            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
             style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Zap className="h-[13px] w-[13px]" aria-hidden />
@@ -380,7 +380,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
           <button
             type="button"
             onClick={onTrailer}
-            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[11.5px] font-extrabold backdrop-blur-[8px]"
+            className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[13px] text-[11.5px] font-semibold backdrop-blur-[8px]"
             style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)", color: "#FFFFFF" }}
           >
             <Film className="h-[13px] w-[13px]" aria-hidden />
@@ -415,7 +415,7 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
   return (
     <li className="flex-none">
       <span
-        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[16px] border p-[10px] ${SHELF_HEIGHT}`}
+        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[10px] ${SHELF_HEIGHT}`}
         style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
       >
         {cover ? (
@@ -452,7 +452,7 @@ function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string;
   return (
     <Link
       href={`/play/glossary/${game.careerSlug}`}
-      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[16px] border ${SHELF_HEIGHT}`}
+      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
     >
       {game.cover ? (
@@ -463,7 +463,7 @@ function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string;
         </span>
       )}
       <span
-        className="absolute top-[10px] left-[10px] rounded-full px-[9px] py-[3px] text-[10px] font-extrabold tracking-[0.1em] uppercase"
+        className="absolute top-[10px] left-[10px] rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[10px] font-extrabold tracking-[0.1em] uppercase"
         style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
       >
         Glossary Game

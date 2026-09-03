@@ -240,11 +240,15 @@ export function StepFooter({
   onNext,
   nextDisabled,
   nextLabel = "Next Step",
+  pulseFromDreamy = false,
 }: {
   onBack?: () => void;
   onNext: () => void;
   nextDisabled?: boolean;
   nextLabel?: React.ReactNode;
+  /** Milestone/completion screens: the CTA pulse launches from Dreamy, who IS
+      that screen, instead of the usual one-in-three coin flip. */
+  pulseFromDreamy?: boolean;
 }) {
   const [holding, setHolding] = useState(false);
   return (
@@ -266,15 +270,21 @@ export function StepFooter({
     <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
-          Previous
+          Back
         </Button>
       ) : (
-        <span />
+        // Same box as the real button, just not drawn: keeps the footer's height
+        // identical on the first step (it measured 2px shorter with a bare span).
+        <span className="invisible" aria-hidden>
+          <Button variant="secondary" type="button" tabIndex={-1}>
+            Back
+          </Button>
+        </span>
       )}
       <Button
         variant="primary"
         onClick={(e) => {
-          dispatchAuroraPulse("cta", e);
+          dispatchAuroraPulse("cta", e, pulseFromDreamy ? { forceDreamyOrigin: true } : undefined);
           // Give the selected answer its shimmer-and-lift moment before the step actually
           // changes, instead of the screen cutting away the instant it's chosen. holding
           // (not nextDisabled, which would visually greys the button mid-confirm) blocks a
@@ -374,8 +384,8 @@ export function ChipGrid({
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
-              isLocked ? "cursor-not-allowed opacity-40" : "hover:-translate-y-px"
+            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
+              isLocked ? "cursor-not-allowed opacity-40" : "dm-tap"
             } ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-raised))` : "var(--color-glass-surface-raised)",
@@ -415,7 +425,7 @@ export function ChipGrid({
             setExpandedBy("tap");
             dispatchAuroraPulse("select", e);
           }}
-          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
+          className={`dm-quiet mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-md)] border px-3 py-2.5 text-[13px] font-semibold ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,
@@ -435,7 +445,7 @@ export function ChipGrid({
             setExpandedBy(null);
             gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
-          className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition-colors ${GLASS_PANEL_CLASS}`}
+          className={`dm-quiet mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-md)] border px-3 py-2.5 text-[13px] font-semibold ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,

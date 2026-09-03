@@ -85,8 +85,6 @@ export function GestureSpotlight({
 
   if (!active || !rect) return null;
 
-  const pad = 10;
-
   return (
     // pointer-events: none on the whole thing -- purely visual. An earlier
     // version put onPointerDown on this full-screen div to dismiss on tap,
@@ -96,22 +94,10 @@ export function GestureSpotlight({
     // element underneath. Dismissal is entirely the caller's job -- flip
     // `active` to false from real gesture handlers.
     <div className="pointer-events-none fixed inset-0 z-[200] motion-safe:animate-[fade-slide-up_0.28s_ease]" aria-hidden>
-      {/* One rounded box-shadow spread, not a full-screen scrim + a
-         separate hole -- cheaper, and the cutout tracks any border-radius
-         for free. */}
-      <div
-        aria-hidden
-        className="absolute rounded-[16px]"
-        style={{
-          left: rect.left - pad,
-          top: rect.top - pad,
-          width: rect.width + pad * 2,
-          height: rect.height + pad * 2,
-          // Lighter than the first version (0.74): the spotlighted element now
-          // moves and previews its outcome, and that has to read.
-          boxShadow: "0 0 0 9999px rgba(3,5,14,0.62)",
-        }}
-      />
+      {/* No dimming scrim -- the card was never meant to be dimmed, and the
+         previous box-shadow: 0 0 0 9999px spotlight trick rendered as a hard
+         torn seam across the card on Safari/macOS (reported on a real
+         MacBook Pro). Just the gesture's motion and label, on the card. */}
       {/* Right where a real thumb or cursor would actually be: centered on
          the target itself, not floating off it in empty space above/below. */}
       <div
@@ -123,7 +109,7 @@ export function GestureSpotlight({
         }}
       >
         <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
-        <span className="rounded-full px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+        <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
           {label}
         </span>
       </div>

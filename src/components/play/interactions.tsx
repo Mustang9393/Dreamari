@@ -175,7 +175,7 @@ function OptionButton({
       // A right pick previously just recolored; a wrong one shook and the revealed
       // answer popped, so getting it right was the least-marked outcome. It now
       // gets the Build flow's confirm moment: a lift plus one light sweep.
-      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[16px] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
+      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
         bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
       } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""} ${
         mark === "right" ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""
@@ -274,7 +274,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
           playSelect();
           onNext();
         }}
-        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         {beat.cta}
@@ -293,7 +293,7 @@ function BandLadder() {
   return (
     <ul className="flex list-none flex-col gap-[5px] p-0">
       {[...BANDS].reverse().map((band) => (
-        <li key={band.name} className="flex items-center justify-between rounded-[10px] border px-[11px] py-[8px] text-[13px] font-bold" style={{ borderColor: "transparent", color: "var(--muted-foreground)" }}>
+        <li key={band.name} className="flex items-center justify-between rounded-[var(--radius-sm)] border px-[11px] py-[8px] text-[13px] font-bold" style={{ borderColor: "transparent", color: "var(--muted-foreground)" }}>
           <span>{band.name}</span>
           <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>
             {band.max === 100 ? `${band.min}+` : `${band.min} to ${band.max}`}
@@ -347,7 +347,7 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
               {rung.label}
             </span>
             {rung.lit && rung.label.startsWith("You") && (
-              <span className="rounded-full px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
+              <span className="rounded-[var(--radius-sm)] px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
                 You
               </span>
             )}
@@ -441,7 +441,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
                 if (option.correct) solve();
                 else miss(index);
               }}
-              className={`flex w-full cursor-pointer items-center gap-[12px] rounded-[16px] border px-[18px] py-[15px] text-left text-[16px] font-semibold transition-[border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+              className={`flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[18px] py-[15px] text-left text-[16px] font-semibold transition-[border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[17px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
               style={{
                 animationDelay: `${index * 55}ms`,
                 background: solved && option.correct ? "color-mix(in srgb, var(--color-feedback-success) 18%, var(--glass-surface-1))" : "var(--glass-surface-1)",
@@ -471,7 +471,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
               autoFocus
               inputMode={/^\d+$/.test(beat.answer ?? "") ? "numeric" : "text"}
               aria-label="Your answer"
-              className="w-full rounded-[14px] border-2 bg-transparent px-[16px] py-[14px] text-center text-[24px] font-extrabold tabular-nums outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+              className="w-full rounded-[var(--radius-lg)] border-2 bg-transparent px-[16px] py-[14px] text-center text-[24px] font-extrabold tabular-nums outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
               style={{ borderColor: solved ? "var(--color-feedback-success)" : "var(--color-glass-border-raised)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}
             />
           </form>
@@ -483,7 +483,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
             </p>
           )}
           {!solved && (
-            <button type="button" onClick={submitTyped} className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-full px-[18px] py-[13px] text-[16px] font-extrabold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+            <button type="button" onClick={submitTyped} className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               Check
             </button>
           )}
@@ -496,7 +496,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
              the point (D75) -- it feels like a game, not a quiz. Idle, it
              breathes; held, it grows and glows; over a card, THAT card
              lights up before the drop, so the reach itself gives feedback. */}
-          <div className="flex justify-center rounded-[14px] border border-dashed py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+          <div className="flex justify-center rounded-[var(--radius-lg)] border border-dashed py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
             {solved ? (
               <span className="flex h-[48px] items-center gap-[6px] text-[12px] font-bold tracking-[0.08em] uppercase motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)]" style={{ color: "var(--color-feedback-success)" }}>
                 <Check className="h-[14px] w-[14px]" aria-hidden /> Locked in
@@ -537,7 +537,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
               <div
                 key={option.label}
                 ref={(el) => { cardRefs.current[index] = el; }}
-                className={`flex flex-col gap-[4px] rounded-[16px] border px-[16px] py-[13px] text-[15.5px] font-semibold transition-[border-color,background,transform,opacity] duration-150 sm:text-[16px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""} ${solved && option.correct ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
+                className={`flex flex-col gap-[4px] rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-[15.5px] font-semibold transition-[border-color,background,transform,opacity] duration-150 sm:text-[16px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""} ${solved && option.correct ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
                 style={{
                   background:
                     solved && option.correct
@@ -572,7 +572,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
           <button
             type="button"
             onClick={() => { playSelect(); onNext(); }}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             {beat.cta}
@@ -613,7 +613,7 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
                 playSelect();
                 setOpen((current) => new Set(current).add(index));
               }}
-              className="flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[16px] border px-[16px] py-[14px] text-left text-[15px] font-semibold transition-[border-color,background] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[16px]"
+              className="flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-md)] border px-[16px] py-[14px] text-left text-[15px] font-semibold transition-[border-color,background] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] sm:text-[16px]"
               style={{
                 animationDelay: `${index * 55}ms`,
                 background: revealed ? `color-mix(in srgb, ${tint} 12%, var(--glass-surface-1))` : "var(--glass-surface-1)",
@@ -647,7 +647,7 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
         <button
           type="button"
           onClick={() => { playSelect(); onNext(); }}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {beat.cta}
@@ -697,7 +697,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
           initial={{ rotateY: -70, opacity: 0 }}
           animate={{ rotateY: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex w-full cursor-pointer flex-col items-center gap-[10px] rounded-[18px] border px-[20px] py-[26px] text-center disabled:cursor-default sm:py-[34px]"
+          className="flex w-full cursor-pointer flex-col items-center gap-[10px] rounded-[var(--radius-md)] border px-[20px] py-[26px] text-center disabled:cursor-default sm:py-[34px]"
           style={{
             transformOrigin: "left center",
             // The glossary flipbook's binder page: ruled paper over a faint
@@ -748,7 +748,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
         <button
           type="button"
           onClick={() => { playSelect(); onNext(); }}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.34s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {beat.cta}
@@ -859,7 +859,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
               const pointer = event as PointerEvent;
               dropTile(choice, pointer.clientX, pointer.clientY);
             }}
-            className="relative cursor-grab touch-none rounded-full border px-[18px] py-[15px] text-[16px] font-bold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
+            className="relative cursor-grab touch-none rounded-[var(--radius-md)] border px-[18px] py-[15px] text-[15px] font-semibold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
             style={{
               animationDelay: `${index * 55}ms`,
               background:
@@ -939,7 +939,7 @@ export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onR
   return (
     <div className="flex flex-col items-center gap-[var(--space-3)] text-center">
       <span
-        className="flex h-[52px] w-[52px] items-center justify-center rounded-[16px]"
+        className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--radius-lg)]"
         style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
       >
         <Trophy className="h-[26px] w-[26px]" aria-hidden />
@@ -1112,7 +1112,7 @@ function MatchTile({
       onClick={onClick}
       disabled={state === "done"}
       aria-pressed={state === "picked"}
-      className={`flex min-h-[58px] w-full items-center rounded-[16px] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
+      className={`flex min-h-[58px] w-full items-center rounded-[var(--radius-lg)] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
         strong ? "text-[16px] font-extrabold" : "text-[14.5px] font-semibold"
       } ${state === "done" ? "opacity-45" : "cursor-pointer"} ${
         state === "wrong" ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
@@ -1336,7 +1336,7 @@ export function SliderBody({ beat, onResolve }: { beat: SliderBeat; onResolve: R
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
-      <div className="rounded-[14px] border px-[14px] pt-[16px] pb-[12px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
+      <div className="rounded-[var(--radius-lg)] border px-[14px] pt-[16px] pb-[12px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
         <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: shade[Math.min(at, shade.length - 1)] }}>
           {beat.steps[at]?.label}
         </p>
@@ -1390,7 +1390,7 @@ export function SliderBody({ beat, onResolve }: { beat: SliderBeat; onResolve: R
           tierSound(step.tier);
           onResolve(step.tier, step.why);
         }}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:opacity-50"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:opacity-50"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit
@@ -1466,7 +1466,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
       <button
         type="button"
         onClick={() => submit(marked)}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit findings
@@ -1589,10 +1589,10 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
               </span>
               <span className="min-w-0 flex-1 text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
-                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
                   <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
                 </button>
-                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[9px] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
                   <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
                 </button>
               </span>
@@ -1616,7 +1616,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
           else if (close) onResolve("acceptable", beat.whenClose ?? beat.whenWrong);
           else onResolve("wrong", beat.whenWrong);
         }}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:opacity-50"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:opacity-50"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit rank
@@ -1704,7 +1704,7 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
         type="button"
         disabled={!full}
         onClick={() => submit(chosen)}
-        className="dm-solid w-full cursor-pointer rounded-full px-[18px] py-[13px] text-[16px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
+        className="dm-solid w-full cursor-pointer rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         Submit
@@ -1771,7 +1771,7 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
         <span className="text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>{need} of {beat.items.length} to pass</span>
       </div>
       <p
-        className="rounded-[14px] border-2 px-[14px] py-[16px] text-[16px] leading-[23px] font-bold motion-safe:animate-[play-pop_0.36s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="rounded-[var(--radius-lg)] border-2 px-[14px] py-[16px] text-[16px] leading-[23px] font-bold motion-safe:animate-[play-pop_0.36s_cubic-bezier(0.34,1.56,0.64,1)]"
         key={item.label}
         style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
       >
@@ -1788,7 +1788,7 @@ export function BucketBody({ beat, onResolve }: { beat: BucketBeat; onResolve: R
               type="button"
               onClick={() => put(side)}
               disabled={flash !== null}
-              className={`flex-1 cursor-pointer rounded-[14px] border-2 px-[12px] py-[14px] text-[14.5px] font-extrabold transition-[border-color,background] duration-150 disabled:cursor-default ${
+              className={`flex-1 cursor-pointer rounded-[var(--radius-md)] border-2 px-[12px] py-[14px] text-[14.5px] font-extrabold transition-[border-color,background] duration-150 disabled:cursor-default ${
                 lit && !ok ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
               }`}
               style={{

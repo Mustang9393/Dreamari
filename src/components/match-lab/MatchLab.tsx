@@ -3,15 +3,15 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, ChevronDown, ChevronUp, ChevronsUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { GESTURE_HINT_CYCLE_S } from "@/components/flow/GestureHint";
 import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
-import { HomeButton } from "@/components/flow/HomeButton";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { picksParam, writePicks } from "@/lib/picks";
@@ -319,29 +319,40 @@ export function MatchLab() {
   }
 
   const topId = top?.id;
+  // How many gesture steps the guide has advanced through this run -- caps
+  // the walk at two full loops (up/right/left, up/right/left) instead of
+  // cycling forever, per direct feedback. Reset whenever a fresh run starts.
+  const guideStepRef = useRef(0);
   // First card only (deckIndex 0), and only while nothing has been
   // demonstrated yet -- the moment any real gesture lands, this stops and
   // never restarts for the rest of the visit. Opens on scroll-up.
   useEffect(() => {
     if (!topId || deckIndex !== 0 || demonstrated.size > 0) return;
+    guideStepRef.current = 0;
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated]);
-  // While it's up, walk scroll-up -> swipe right -> swipe left with a
-  // comfortable dwell on each (one GestureHint pass plus its built-in rest),
-  // and keep walking until a real gesture ends it. Only the direction/label
-  // change on the ONE persistent overlay, so the dark scrim never drops and
-  // re-raises between gestures -- that mount/unmount flicker was the
-  // complaint with the earlier per-gesture instances.
+  // While it's up, walk scroll-up -> swipe right -> swipe left, one
+  // GestureHint cycle's dwell on each, for two full loops -- then stop on
+  // its own. A real gesture ends it early at any point (markDemonstratedRef
+  // above). Only the direction/label change on the ONE persistent overlay,
+  // so the dark scrim never drops and re-raises between gestures -- that
+  // mount/unmount flicker was the complaint with the earlier per-gesture
+  // instances.
   useEffect(() => {
     if (guideGesture === null) return;
     const timer = window.setTimeout(() => {
+      guideStepRef.current += 1;
+      if (guideStepRef.current >= GUIDE_ORDER.length * 2) {
+        setGuideGesture(null);
+        return;
+      }
       setGuideGesture((current) => {
         if (current === null) return null;
         const index = GUIDE_ORDER.indexOf(current);
         return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
       });
-    }, 5200); // exactly two 2.6s hint cycles: one pass to notice, one to read
+    }, GESTURE_HINT_CYCLE_S * 1000);
     return () => window.clearTimeout(timer);
   }, [guideGesture]);
   const dragXRef = useRef(0);
@@ -402,13 +413,16 @@ export function MatchLab() {
 
   return (
     <ThemeProvider>
+      {/* marketing-v2: the app's semantic tokens (--primary, --radius-md, the
+         glass surfaces) that ui/Button and FlowChrome read. display:contents,
+         so it adds no box to the h-dvh layout below. */}
+      <div className="marketing-v2 themeable contents">
       {/* The world poster faces (Viaoda, Science Gothic, Lora, Fraunces,
          Nunito, Heebo) — React hoists this into <head>. */}
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
       <BackgroundSpace />
       <AuroraBackground accent={top?.color?.startsWith("var") ? "#2f6bf2" : "#2f6bf2"} visitedAccents={[]} finale={liked.length >= MAX_SLOTS} lightning={false} />
-      <HomeButton />
-      <ThemeToggle />
+      <FlowChrome />
 
       <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-5 sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
@@ -416,7 +430,7 @@ export function MatchLab() {
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
             <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
             <span
-              className="flex flex-none items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
+              className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
             >
               <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${"#33c78c"}` }} />
@@ -440,7 +454,7 @@ export function MatchLab() {
                   onKeyDown={(e) => {
                     if ((e.key === "Enter" || e.key === " ") && liked.length > 0) setManageOpen(true);
                   }}
-                  className={`relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-visible rounded-full border px-2.5 text-[11.5px] font-semibold transition-all duration-300 ${c ? "cursor-pointer" : ""}`}
+                  className={`relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-visible rounded-[var(--radius-md)] border px-2.5 text-[11.5px] font-semibold transition-all duration-300 ${c ? "cursor-pointer" : ""}`}
                   style={
                     c
                       ? {
@@ -473,12 +487,20 @@ export function MatchLab() {
               aria-label="Rank and edit your picks"
               onClick={() => setManageOpen(true)}
               disabled={liked.length === 0}
-              className="flex h-9 w-9 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-35"
+              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border disabled:opacity-35"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-muted-foreground)" }}
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
           </div>
+
+          {/* Three saved and cards still left: the way forward is always on
+             screen (direct feedback), not only in the once-only sheet. */}
+          {!deckDone && liked.length === MAX_SLOTS && (
+            <Button variant="primary" size="compact" onClick={() => toReport()} type="button" className="mb-3 w-full">
+              Continue with your 3 <ArrowRight className="h-4 w-4" aria-hidden />
+            </Button>
+          )}
 
           {/* ---- deck ---- */}
           <div className="relative min-h-0 w-full flex-1">
@@ -508,7 +530,7 @@ export function MatchLab() {
                     // Full literal class strings per direction (not a template): Tailwind
                     // only generates classes it can see whole in source. The plain
                     // guide-preview-* marker is for globals.css's stamp rule, not Tailwind.
-                    className={`absolute inset-x-0 top-0 bottom-7 overflow-hidden rounded-3xl border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
+                    className={`absolute inset-x-0 top-0 overflow-hidden rounded-[var(--radius-lg)] border ${isTop ? "cursor-grab select-none active:cursor-grabbing" : "pointer-events-none"} ${
                       !nudging
                         ? ""
                         : guideGesture === "right"
@@ -526,6 +548,15 @@ export function MatchLab() {
                       transform,
                       opacity: isExiting ? 0 : 1 - depth * 0.26,
                       transition: isDragging ? "none" : "transform 0.38s cubic-bezier(0.22,1,0.36,1), opacity 0.38s",
+                      // The deck area is `flex-1`, so on a tall desktop viewport
+                      // (a MacBook Pro screen, not a phone) this card stretched
+                      // edge-to-edge to fill it -- a 440px-wide card that tall
+                      // reads as broken, not just big. `min()` keeps the old
+                      // "fill available height minus the 28px stack-peek band"
+                      // behavior on phone-sized viewports (where that's under
+                      // the cap anyway) while capping it to a real phone-card
+                      // proportion everywhere else.
+                      height: "min(calc(100% - 28px), 680px)",
                     }}
                     onPointerDown={isTop ? onPointerDown : undefined}
                     onPointerMove={isTop ? onPointerMove : undefined}
@@ -578,12 +609,12 @@ export function MatchLab() {
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>Top 3 Matches Found!</h2>
             <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-              Lock these in and view your personalized Career Report, or keep swiping — new likes will ask to swap in.
+              Lock these in and choose where to start, or keep swiping. New likes will ask to swap in.
             </p>
             <MiniRanking liked={liked} />
             <div className="flex w-full flex-col gap-2.5">
               <Button variant="primary" size="large" onClick={() => toReport()} type="button">
-                Save These 3 & View Career Report
+                Save these 3 & continue
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
@@ -607,7 +638,7 @@ export function MatchLab() {
                   key={c.id}
                   type="button"
                   onClick={() => commitSwap(i)}
-                  className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all hover:-translate-y-px"
+                  className="dm-tap flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 text-left"
                   style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -632,13 +663,13 @@ export function MatchLab() {
         <Sheet onClose={() => setManageOpen(false)}>
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Rank your picks</h2>
-            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">#1 is your top choice — it leads your Career Report.</p>
+            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">#1 is your top choice. It leads your Career Report.</p>
             <div className="flex w-full flex-col gap-2">
-              {liked.length === 0 && <p className="py-4 text-[13px] text-[var(--color-night-muted-foreground)]">Nothing saved yet — swipe right on a career you like.</p>}
+              {liked.length === 0 && <p className="py-4 text-[13px] text-[var(--color-night-muted-foreground)]">Nothing saved yet. Swipe right on a career you like.</p>}
               {liked.map((c, i) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-2.5 rounded-xl border px-3 py-2.5"
+                  className="flex items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2.5"
                   style={{ background: `color-mix(in srgb, ${c.color} 10%, var(--color-glass-surface-raised))`, borderColor: "var(--color-glass-border-raised)" }}
                 >
                   <span className={`${bricolage.className} w-7 flex-none text-[16px] font-extrabold`} style={{ color: c.color }}>
@@ -660,7 +691,7 @@ export function MatchLab() {
             <div className="flex w-full flex-col gap-2.5">
               {liked.length > 0 && (
                 <Button variant="primary" onClick={() => toReport()} type="button">
-                  {liked.length === MAX_SLOTS ? "Lock In & View Career Report" : `Continue with ${liked.length}`}
+                  {liked.length === MAX_SLOTS ? "Lock in & continue" : `Continue with ${liked.length}`}
                 </Button>
               )}
               <Button variant="secondary" onClick={() => setManageOpen(false)} type="button">
@@ -670,6 +701,7 @@ export function MatchLab() {
           </div>
         </Sheet>
       )}
+      </div>
     </ThemeProvider>
   );
 }
@@ -700,13 +732,13 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
           <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 94vw, 440px" className="object-cover" draggable={false} priority={isTop} />
           <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4">
             <span
-              className="max-w-[60%] truncate rounded-full border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
+              className="max-w-[60%] truncate rounded-[var(--radius-sm)] border px-2.5 py-1 text-[10.5px] font-semibold text-[var(--color-night-foreground)] backdrop-blur-md"
               style={{ background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)", borderColor: "var(--color-glass-border)" }}
             >
               {career.employers}
             </span>
             <span
-              className="flex-none rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
+              className="flex-none rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md"
               style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 80%, transparent)" }}
             >
               {career.salary}
@@ -727,13 +759,6 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
             <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
               {career.world}
             </p>
-            <span
-              className="mt-1 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold normal-case backdrop-blur-md motion-safe:animate-bounce"
-              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
-            >
-              <ChevronsUp className="h-3.5 w-3.5" style={{ color: career.color }} />
-              Scroll for the breakdown
-            </span>
           </div>
         </div>
 
@@ -812,7 +837,7 @@ function Stamp({ side, color, opacity, children }: { side: "left" | "right"; col
       // THIS stamp partway in while its swipe is being taught -- previewing what the
       // gesture does, not just where it goes.
       data-stamp={side}
-      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-lg border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
+      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-[var(--radius-md)] border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
       style={{
         [side]: 24,
         color,
@@ -834,7 +859,7 @@ function ActionButton({ label, color, size, onClick, disabled, children }: { lab
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center justify-center rounded-full border backdrop-blur transition-all duration-200 hover:scale-110 disabled:opacity-35 disabled:hover:scale-100"
+      className="dm-tap flex items-center justify-center rounded-full border backdrop-blur disabled:opacity-35 disabled:hover:scale-100"
       style={{
         width: size,
         height: size,
@@ -870,7 +895,7 @@ function MiniRanking({ liked }: { liked: Career[] }) {
   return (
     <div className="flex w-full flex-col gap-2">
       {liked.map((c, i) => (
-        <div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
+        <div key={c.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
           <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold" style={{ color: c.color }}>
             #{i + 1} <span className="truncate text-[var(--color-night-foreground)]">{c.title}</span>
           </span>
@@ -898,7 +923,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
       aria-modal="true"
     >
       <div
-        className="w-full max-w-[440px] rounded-3xl border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="w-full max-w-[440px] rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}
@@ -918,7 +943,7 @@ function FlyGhost({ career, from, to }: { career: Career; from: DOMRect; to: DOM
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed z-[90] overflow-hidden rounded-2xl border"
+      className="pointer-events-none fixed z-[90] overflow-hidden rounded-[var(--radius-lg)] border"
       style={{
         left: r.left,
         top: r.top,
@@ -946,7 +971,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
   }, [complete]);
   return (
     <div
-      className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
+      className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border p-6 text-center backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
       style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)" }}
     >
       {complete && <LocalBurst nonce={1} />}
@@ -955,7 +980,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       </h2>
       <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
-          ? "Lock them in to build your personalized Career Report."
+          ? "Lock them in and choose where to start."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
             : "Knowing what's NOT for you is real progress. Wander through Explore — hundreds of paths, no pressure — and come back when one sparks."}
@@ -964,7 +989,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">
         {likedCount > 0 ? (
           <Button variant="primary" size="large" onClick={onReport} type="button">
-            {likedCount === MAX_SLOTS ? "View Career Report" : `Continue with ${likedCount}`}
+            {likedCount === MAX_SLOTS ? "Continue with your 3" : `Continue with ${likedCount}`}
           </Button>
         ) : (
           <Button variant="primary" size="large" onClick={onExplore} type="button">

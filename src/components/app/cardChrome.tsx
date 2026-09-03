@@ -8,16 +8,25 @@
  *  mask band, composited into a smooth sharp-to-frosted ramp. */
 const CARD_BLUR_STOPS = [1, 2, 4, 8, 14];
 
-export function CardProgressiveBlur() {
-  const total = CARD_BLUR_STOPS.length;
+/** Which way the frost ramps. "up": sharp at the top of the band, frosted at
+ *  the card's bottom edge (the default, for bottom-anchored text). "left":
+ *  sharp at the band's right, frosted at its left edge, for a photo that
+ *  sits on a card's right and has to dissolve into a text panel. */
+type BlurDirection = "up" | "left";
+
+export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }: { direction?: BlurDirection; size?: string; maxBlur?: number } = {}) {
+  const stops = maxBlur ? [...CARD_BLUR_STOPS.filter((b) => b < maxBlur), maxBlur] : CARD_BLUR_STOPS;
+  const total = stops.length;
+  const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : { insetBlock: 0, left: 0, width: size };
+  const toward = direction === "up" ? "to bottom" : "to left";
   return (
-    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] overflow-hidden">
-      {CARD_BLUR_STOPS.map((blur, index) => {
+    <span aria-hidden className="pointer-events-none absolute overflow-hidden" style={box}>
+      {stops.map((blur, index) => {
         /* every band -- including the first -- fades in from transparent, so
            the ramp truly starts at 0px with no visible seam */
         const fadeStart = (index / total) * 62;
         const fadeEnd = fadeStart + 62 / total + 14;
-        const mask = `linear-gradient(to bottom, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
+        const mask = `linear-gradient(${toward}, transparent ${fadeStart.toFixed(1)}%, black ${Math.min(100, fadeEnd).toFixed(1)}%, black 100%)`;
         return (
           <span
             key={blur}

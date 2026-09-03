@@ -56,9 +56,9 @@ are NOT part of the product flow (per direct instruction); "Previous" is real.
 ### 5. Education & Training — 63%
 - Dreamy: "How much education or training feels right? ✨"
 - Header: "Education & Training" / "Choose one" (graduation-cap icon)
-- Question: "How much school feels right for you?"
+- Question: "How many years of education are you open to after high school?"
 - Option cards (title / subtitle):
-  - "Start work after HS" / "HS or short training"
+  - "Start work after high school" / "High school or short training"
   - "1–2 more years" / "Certificate or 2-year college"
   - "4 more years" / "4-year college"
   - "4+ more years" / "Advanced degree paths"
@@ -67,7 +67,7 @@ are NOT part of the product flow (per direct instruction); "Previous" is real.
 ### 6. Education Cost — 75%
 - Dreamy: "Choose a range that feels realistic. ✨"
 - Header: "Education Cost" / "Choose one" (target icon)
-- Question: "What total school or training cost feels realistic?" / "Select a
+- Question: "How much would you consider spending on your education after high school?" / "Select a
   range. You can change it later."
 - "SELECTED RANGE" card showing the current label ("Select a range" until moved),
   discrete 6-stop slider: "As little as possible" · "$25,000 or less" · "$50,000

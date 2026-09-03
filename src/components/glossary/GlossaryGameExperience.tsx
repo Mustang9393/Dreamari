@@ -11,13 +11,10 @@ import {
   Check,
   CircleDollarSign,
   Flame,
-  Home,
   Paintbrush,
   Sparkles,
   UserRound,
   Trophy,
-  Moon,
-  Sun,
   Volume2,
   VolumeX,
   X,
@@ -25,6 +22,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { QuickLinksMenu } from "@/components/app/chrome";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
@@ -175,36 +173,17 @@ function MuteToggle() {
   );
 }
 
-// Same global light/dark switch already on every other app screen
-// (app/chrome.tsx's QuickLinksMenu) -- this game's TopBar has no chrome menu
-// to carry it, so it gets its own button here, same hook, same persistence.
-function ThemeToggle() {
-  const { theme, toggle } = useGlobalTheme();
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      {theme === "dark" ? <Sun className="h-[17px] w-[17px]" aria-hidden /> : <Moon className="h-[17px] w-[17px]" aria-hidden />}
-    </button>
-  );
-}
-
-function TopBar({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
+function TopBar({ onBack }: { onBack: () => void }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
+      {/* Mute stays (it is this game's own control); everything else is the
+         app's one hamburger, same as every screen. */}
       <div className="flex items-center gap-[var(--space-2)]">
-        <ThemeToggle />
         <MuteToggle />
-        <button type="button" onClick={onHome} aria-label="Exit to career page" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-          <Home className="h-4 w-4" aria-hidden />
-        </button>
+        <QuickLinksMenu />
       </div>
     </header>
   );
@@ -218,7 +197,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
       <DreamyFace pose="idea" size={64} />
-      <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <h1 className="text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           Meet {lesson.exampleCompany}
         </h1>
@@ -229,7 +208,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
       <button
         type="button"
         onClick={onNext}
-        className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Next <ArrowRight className="h-4 w-4" aria-hidden />
@@ -261,7 +240,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
         <button
           type="button"
           onClick={onStart}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Start Learning Finance <ArrowRight className="h-4 w-4" aria-hidden />
@@ -284,7 +263,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
         Learn the Language of Finance
       </h1>
 
-      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))" }}>
           <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>
             ${lesson.companyValue.toLocaleString()}
@@ -301,7 +280,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 
         <div className="flex flex-wrap gap-[var(--space-2)]">
           {lesson.terms.map((term) => (
-            <span key={term.id} className="rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <span key={term.id} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {term.term}
             </span>
           ))}
@@ -311,7 +290,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Lesson {lesson.lessonNumber} <ArrowRight className="h-4 w-4" aria-hidden />
@@ -331,7 +310,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 function SketchFace({ term, icon, style }: { term: string; icon: string; style?: React.CSSProperties }) {
   return (
     <span
-      className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden]"
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 4%, var(--card))",
@@ -461,7 +440,7 @@ function UnlockScreen({
 
               {/* BACK: the written page, ring-bound edge and all. */}
               <span
-                className="absolute inset-0 flex overflow-hidden rounded-[var(--radius-xl)] border [backface-visibility:hidden]"
+                className="absolute inset-0 flex overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden]"
                 style={{
                   background: "var(--card)",
                   borderColor: "var(--glass-border)",
@@ -522,7 +501,7 @@ function UnlockScreen({
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
         transition={{ duration: 0.12 }}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Unlock {term.term} <TermIcon icon={term.icon} className="h-4 w-4" />
@@ -552,7 +531,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
           </span>
         ))}
       </div>
-      <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <Trophy className="h-8 w-8" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
         <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           All {lesson.terms.length} terms unlocked!
@@ -564,7 +543,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
       <button
         type="button"
         onClick={onStartPractice}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Practice <ArrowRight className="h-4 w-4" aria-hidden />
@@ -681,7 +660,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
               type="button"
               disabled={checked !== null}
               onClick={() => setValue(word)}
-              className="dm-tap rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               style={{ borderColor: value === word ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)", background: value === word ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "transparent" }}
             >
               {word}
@@ -713,7 +692,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
           type="button"
           disabled={!value.trim()}
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           Check Answer
@@ -917,7 +896,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
                 key={item.text}
                 type="button"
                 onClick={() => setPicked(item.text)}
-                className="dm-tap rounded-full border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
+                className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
                 {item.text}
@@ -952,7 +931,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
                 return (
                   <span
                     key={item.text}
-                    className="rounded-full px-[var(--space-3)] py-[4px] text-[12px] font-semibold"
+                    className="rounded-[var(--radius-sm)] px-[var(--space-3)] py-[4px] text-[12px] font-semibold"
                     style={{
                       background: checked ? (wrongPlacement ? "color-mix(in srgb, var(--danger, #e0483e) 20%, var(--card))" : "color-mix(in srgb, var(--world-food-farming-nature) 20%, var(--card))") : "color-mix(in srgb, var(--amber-400) 22%, var(--card))",
                       color: checked ? (wrongPlacement ? "var(--danger, #e0483e)" : CORRECT_COLOR) : "var(--foreground)",
@@ -970,7 +949,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
         <button
           type="button"
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
         >
           Check My Sorting
@@ -1035,7 +1014,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
           type="button"
           disabled={!allFilled}
           onClick={check}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
         >
           Check My Math
@@ -1135,7 +1114,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
       <div
-        className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-xl)] border p-[var(--space-5)]"
+        className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
       >
         <div className="flex items-start gap-[var(--space-3)]">
@@ -1155,7 +1134,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
         <button
           type="button"
           onClick={onNext}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
         >
           {isLast ? "See Results" : "Next Question"} <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1175,7 +1154,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5" onClick={onDismiss}>
       <div
-        className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-xl)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1190,7 +1169,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
         <button
           type="button"
           onClick={onDismiss}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-5)] py-[var(--space-3)] text-[15px] font-bold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[15px] font-semibold"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           Keep Going <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1218,7 +1197,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1260,13 +1239,13 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
-            <span key={word} className="rounded-full border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <span key={word} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {word}
             </span>
           ))}
       </div>
 
-      <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-xl)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <LocalBurst nonce={burstNonce} />
         {parts.map((part, i) => {
           const gapMatch = part.match(/^\{(\d+)\}$/);
@@ -1309,7 +1288,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         type="button"
         disabled={!allFilled}
         onClick={allCorrect ? onComplete : check}
-        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+        className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
         style={{ background: allCorrect ? CORRECT_COLOR : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
       >
         {allCorrect ? (
@@ -1372,7 +1351,7 @@ function CompleteScreen({
         Lesson Complete!
       </h2>
 
-      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-xl)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
+      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
         <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--world-business-money-office)" }}>
           <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
         </span>
@@ -1403,7 +1382,7 @@ function CompleteScreen({
       <button
         type="button"
         onClick={onContinue}
-        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-bold"
+        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Continue <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1494,7 +1473,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         fontFamily: "var(--font-body)",
       }}
     >
-      <TopBar onBack={() => router.back()} onHome={exitToCareer} />
+      <TopBar onBack={() => router.back()} />
 
       {screen === "question" && (
         <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">

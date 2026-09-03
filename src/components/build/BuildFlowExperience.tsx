@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
-import { HomeButton } from "@/components/flow/HomeButton";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { ThemeToggle } from "@/components/flow/theme/ThemeToggle";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -98,16 +97,19 @@ export function BuildFlowExperience() {
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;
   else if (stageId === "subjects") content = <SubjectsStep {...stepProps} onBack={back} />;
   else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
-  else if (stageId === "milestone") content = <MilestoneScreen onNext={next} percent={stage.percent} />;
+  else if (stageId === "milestone") content = <MilestoneScreen onNext={next} onBack={back} percent={stage.percent} />;
   else if (stageId === "education") content = <EducationStep {...stepProps} onBack={back} />;
   else if (stageId === "cost") content = <CostStep {...stepProps} onBack={back} />;
   else if (stageId === "location") content = <LocationStep {...stepProps} onBack={back} />;
   else if (stageId === "profile") content = <ProfileStep {...stepProps} onBack={back} />;
-  else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} />;
+  else if (stageId === "complete") content = <CompletionScreen onSeeMatches={seeMatches} onBack={back} />;
 
 
   return (
     <ThemeProvider>
+      {/* marketing-v2: the semantic tokens ui/Button and FlowChrome read;
+         display:contents adds no box. */}
+      <div className="marketing-v2 themeable contents">
         <BackgroundSpace />
         {/* The current accent tracks the progress bar's gradient at the
            current percent (unchanged); visitedAccents now carries a short
@@ -115,8 +117,7 @@ export function BuildFlowExperience() {
            Screen-wide confetti is still reserved for the Match celebration —
            the flow's own celebrations are Dreamy-local bursts. */}
         <AuroraBackground accent={accent} visitedAccents={visitedAccents} finale={isComplete} lightning={false} />
-        <HomeButton />
-        <ThemeToggle />
+        <FlowChrome />
 
         {/* h-dvh + overflow-hidden: the flow never page-scrolls. If a stage's
            content exceeds the viewport (short landscape phones), the step column
@@ -150,6 +151,7 @@ export function BuildFlowExperience() {
             </div>
           </div>
         </section>
+      </div>
     </ThemeProvider>
   );
 }

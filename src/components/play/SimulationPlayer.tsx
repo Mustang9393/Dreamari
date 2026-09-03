@@ -644,7 +644,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {repair && repair.length > 0 && phase === "beat" && (
         <div className="absolute inset-x-0 top-[74px] z-30 flex justify-center px-3">
           <span
-            className="flex items-center gap-[9px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
+            className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--primary)", color: "var(--foreground)" }}
           >
             <Wrench className="h-[14px] w-[14px]" aria-hidden />
@@ -657,7 +657,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {resumed && phase === "beat" && (
         <div className="pointer-events-none absolute inset-x-0 top-[74px] z-30 flex justify-center px-3 animate-[play-notice_11s_ease-out_both]">
           <span
-            className="pointer-events-auto flex items-center gap-[10px] rounded-full border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
+            className="pointer-events-auto flex items-center gap-[10px] rounded-[var(--radius-sm)] border px-[14px] py-[7px] text-[12.5px] font-bold backdrop-blur-[10px]"
             style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
             Picked up where you left off
@@ -1270,7 +1270,7 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
         <button
           type="button"
           onClick={onNext}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           See the decision
@@ -1408,7 +1408,7 @@ function ScoreGauge({ reputation, band, delta, demo = false }: { reputation: num
               {reputation}
             </span>
           </span>
-          <span className="rounded-full px-[14px] py-[4px] text-[13px] font-extrabold tracking-[0.3em] uppercase backdrop-blur-[10px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", color, textShadow: `0 0 18px ${color}` }}>
+          <span className="rounded-[var(--radius-sm)] px-[14px] py-[4px] text-[13px] font-extrabold tracking-[0.3em] uppercase backdrop-blur-[10px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", color, textShadow: `0 0 18px ${color}` }}>
             Reputation
           </span>
         </motion.span>
@@ -1659,10 +1659,10 @@ function DialogueBox({
   // round, a different object entirely.
   const shape =
     voice === "system"
-      ? "rounded-[10px] border"
+      ? "rounded-[var(--radius-sm)] border"
       : voice === "character"
-        ? "rounded-[20px] rounded-tl-[6px] border-2"
-        : "rounded-[20px] border-2";
+        ? "rounded-[var(--radius-lg)] rounded-tl-[6px] border-2"
+        : "rounded-[var(--radius-lg)] border-2";
 
   return (
     <div className="relative">
@@ -1671,7 +1671,7 @@ function DialogueBox({
          in the scene said rather than as narration about them. */}
       {speaker && !portrait && ambient && (
         <span
-          className="absolute -top-[13px] left-[14px] z-10 rounded-full px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
+          className="absolute -top-[13px] left-[14px] z-10 rounded-[var(--radius-sm)] px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}
         >
           {speaker}
@@ -1694,7 +1694,7 @@ function DialogueBox({
             {portrait && (
               <span
                 aria-hidden
-                className="mt-[2px] flex-none overflow-hidden rounded-[14px] border-2"
+                className="mt-[2px] flex-none overflow-hidden rounded-[var(--radius-lg)] border-2"
                 style={{ borderColor: accent, background: "color-mix(in srgb, var(--background) 60%, transparent)" }}
               >
                 <Image
@@ -1776,7 +1776,7 @@ function DialogueBox({
           <div
             role="dialog"
             aria-label={lex.title}
-            className="relative w-full max-w-[360px] rounded-[10px] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            className="relative w-full max-w-[360px] rounded-[var(--radius-sm)] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
             style={{ background: "color-mix(in srgb, var(--background) 95%, transparent)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))" }}
           >
             <div className="flex items-start gap-[14px]">
@@ -1822,7 +1822,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
           playSelect();
           setOpen(true);
         }}
-        className="dm-quiet cursor-pointer rounded-full"
+        className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
       >
         <ScoreGauge reputation={reputation} band={band} delta={delta} />
       </button>
@@ -1838,7 +1838,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
           <div
             role="dialog"
             aria-label="What your reputation decides"
-            className="relative w-full max-w-[360px] rounded-[10px] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            className="relative w-full max-w-[360px] rounded-[var(--radius-sm)] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
             style={{ background: "color-mix(in srgb, var(--background) 95%, transparent)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))" }}
           >
             <span className="block text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Reputation</span>
@@ -2092,7 +2092,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)" }}>
       <div
-        className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[20px] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
+        className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
       >
         <p className="flex items-center justify-between gap-[var(--space-3)]">
@@ -2110,7 +2110,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
                 aria-hidden
                 width={192}
                 height={192}
-                className="h-[72px] w-[72px] flex-none rounded-[16px] border-2 object-cover object-top motion-safe:animate-[play-character-enter_0.32s_ease-out_both]"
+                className="h-[72px] w-[72px] flex-none rounded-[var(--radius-lg)] border-2 object-cover object-top motion-safe:animate-[play-character-enter_0.32s_ease-out_both]"
                 style={{ borderColor: color }}
               />
             )}
@@ -2137,7 +2137,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
                   type="button"
                   onClick={() => setOpenSkill((current) => (current === skill ? null : skill))}
                   aria-expanded={openSkill === skill}
-                  className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold"
+                  className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[10px] py-[4px] text-[11.5px] font-semibold"
                   style={{
                     borderColor: openSkill === skill ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
                     color: openSkill === skill ? "var(--foreground)" : "var(--muted-foreground)",
@@ -2159,7 +2159,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
           type="button"
           onClick={onNext}
           autoFocus
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {cta}
@@ -2199,10 +2199,10 @@ function EndingCard({
   }, [ending.advances]);
   return (
     <div
-      className="mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[22px] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: BAND_COLOR[band] }}
     >
-      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[18px]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
+      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
         <Icon className="h-[28px] w-[28px]" aria-hidden />
       </span>
       <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
@@ -2221,7 +2221,7 @@ function EndingCard({
         {ending.advances && next ? (
           <Link
             href={`/play/${simulation.id}?level=${next.n}`}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Start Level {next.n} · {next.role}
@@ -2229,7 +2229,7 @@ function EndingCard({
           </Link>
         ) : ending.advances ? (
           <span
-            className="flex w-full items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"
+            className="flex w-full items-center justify-center gap-[8px] rounded-[var(--radius-sm)] px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             aria-disabled
           >
@@ -2242,7 +2242,7 @@ function EndingCard({
             <button
               type="button"
               onClick={onRepair}
-              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+              className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
               style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               <Wrench className="h-[16px] w-[16px]" aria-hidden />
@@ -2254,7 +2254,7 @@ function EndingCard({
             <button
               type="button"
               onClick={onReplay}
-              className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-full border px-[18px] py-[12px] text-[15px] font-bold"
+              className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
               style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
             >
               <RotateCcw className="h-[15px] w-[15px]" aria-hidden />
@@ -2265,7 +2265,7 @@ function EndingCard({
           <button
             type="button"
             onClick={onReplay}
-            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-full px-[18px] py-[13px] text-[16px] font-extrabold"
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             <RotateCcw className="h-[16px] w-[16px]" aria-hidden />
@@ -2279,7 +2279,7 @@ function EndingCard({
         )}
         <Link
           href="/play"
-          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-full border px-[18px] py-[12px] text-[15px] font-bold"
+          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
           style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
         >
           <X className="h-[15px] w-[15px]" aria-hidden />

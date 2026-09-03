@@ -115,7 +115,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
           style={{ background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)", borderLeft: "1px solid var(--color-glass-border)", borderBottom: "1px solid var(--color-glass-border)" }}
         />
         <p
-          className={`${bricolage.className} relative rounded-2xl px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
+          className={`${bricolage.className} relative rounded-[var(--radius-lg)] px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
           style={{
             background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)",
             border: "1px solid var(--color-glass-border)",

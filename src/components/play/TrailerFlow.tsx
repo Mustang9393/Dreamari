@@ -246,7 +246,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                 y: { duration: 0.6, delay: 0.4 + LADDER.length * 0.22 + 0.2 },
                 scale: { duration: 1.8, delay: 0.4 + LADDER.length * 0.22 + 1, repeat: Infinity, ease: "easeInOut" },
               }}
-              className="dm-solid flex min-h-[52px] w-full max-w-[320px] cursor-pointer items-center justify-center gap-[9px] rounded-full px-[26px] text-[15px] font-extrabold tracking-[0.08em] uppercase"
+              className="dm-solid flex min-h-[52px] w-full max-w-[320px] cursor-pointer items-center justify-center gap-[9px] rounded-[var(--radius-md)] px-[26px] text-[15px] font-semibold tracking-[0.08em] uppercase"
               style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 12px 44px -10px color-mix(in srgb, var(--primary) 85%, transparent)" }}
             >
               ▶ Start Level 1

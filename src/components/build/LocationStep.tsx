@@ -82,13 +82,13 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
 
       {/* Map | List segmented toggle. */}
       <div
-        className={`mb-4 grid grid-cols-2 gap-1 rounded-xl border p-1 ${GLASS_PANEL_CLASS}`}
+        className={`mb-4 grid grid-cols-2 gap-1 rounded-[var(--radius-md)] border p-1 ${GLASS_PANEL_CLASS}`}
         style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {(["map", "list"] as const).map((tab) => (
@@ -97,7 +97,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             type="button"
             aria-pressed={view === tab}
             onClick={() => setView(tab)}
-            className="rounded-lg py-2 text-[14px] font-bold capitalize transition-colors"
+            className="rounded-[var(--radius-md)] py-2 text-[14px] font-bold capitalize transition-colors"
             style={{
               background: view === tab ? "var(--color-brand-500)" : "transparent",
               color: view === tab ? "#ffffff" : "var(--color-night-muted-foreground)",
@@ -110,7 +110,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
 
       {view === "map" ? (
         <div
-          className="rounded-2xl border p-2.5 sm:p-3"
+          className="rounded-[var(--radius-lg)] border p-2.5 sm:p-3"
           // Solid, not the shared frosted-panel mix: this box holds ~51 small
           // state shapes that need to read as distinct regions, not text on
           // a background. A see-through card would let the ambient scene
@@ -132,7 +132,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             </span>
           </div>
 
-          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[52vh] w-[calc(100%+8px)]">
+          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[44dvh] w-[calc(100%+8px)]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
               const isSelected = selected === name;
@@ -228,7 +228,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
           aria-label="Choose a state"
           value={selected}
           onChange={(e) => pickState(e.target.value)}
-          className={`w-full rounded-xl border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+          className={`w-full rounded-[var(--radius-md)] border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,

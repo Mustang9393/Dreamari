@@ -38,7 +38,79 @@ tokens above, in both modes).
 
 ## Current session
 
-- Date: 2026-09-01
+- Date: 2026-09-02
+
+### 2026-09-02 (later still) Career Detail: drop inconsistent software logos, organic hero scrim
+
+- Reference material this round: a 40s screen recording of dreamonna.com's
+  own `/explore/emt` page (extracted to frames via ffmpeg -- the file name
+  had a U+202F narrow-no-break-space before "PM" that broke naive path
+  matching, worth remembering next time a Desktop screen-recording path
+  "doesn't exist") plus an earlier screenshot of dreamonna.com's Actor page.
+  Confirmed both are the reference production site, not this prototype.
+- **"All things should have relevant logos or nothing should... logos need
+  to be transparent PNGs not white bounding boxes."** The reference has ZERO
+  brand logos anywhere on the whole page (software, employers, colleges are
+  all plain text/pills) -- confirmed by walking every section of the EMT
+  recording. This prototype's "Software you would use" list special-cased
+  ~20 known tools with a real SVG logo on a `bg-white` tile and fell back to
+  a plain dot for anything else, which is exactly the "some things have
+  logos, some don't, and they sit in a white box" complaint. Fixed by going
+  with "nothing" (matches the reference, and is the only option that can't
+  drift back into partial coverage as more careers/tools get added): dropped
+  the `leading` prop so software renders through the same plain `DotList` as
+  every other section. Removed the now-dead `LOGOS` map, `SoftwareLogo`
+  component, and all 20 orphaned SVGs under `public/images/logos/`.
+- **"The headers are stupid with these colors... make the transition smooth
+  and organic... progressive blue text scrim if required."** The hero panel
+  behind the title used the career's world accent at FULL saturation as a
+  solid block (0-38%), then two hard color-mix steps to transparent by 88%.
+  Some world colors read as garish at that strength, and the falloff was
+  visibly banded, not a blend. Changed both the mobile and desktop gradients
+  to mix each accent into `#05070f` (this app's existing night-surface tone,
+  hardcoded rather than tokenized since the panel has to stay dark
+  regardless of site theme, same as the hardcoded `#fff` text color right
+  next to it) instead of using the raw hue, and doubled the gradient stops
+  for a continuous falloff instead of banding. No exact reference existed
+  for a photo-based header (the EMT reference has no photo at all), so this
+  is the "be artistic" half of the ask -- live-verified on Carpenter (warm
+  brown/amber world) and Investment Banking (gold): both now read as a
+  tasteful dark vignette dissolving into the photo, not a colored block.
+- `npx tsc --noEmit`, `eslint`, `npm run tokens:check` all clean.
+
+### 2026-09-02 (later) Match Lab: cap the deck card's height on wide desktop viewports
+
+- Direct report with a screenshot from a MacBook Pro: the swipe card was
+  stretching edge-to-edge, nearly the full viewport height, on a wide desktop
+  screen. Root cause: the card div is `absolute inset-x-0 top-0 bottom-7`
+  inside a `flex-1` deck area, so its height was always "100% of whatever
+  vertical space the page happens to have" -- fine on a phone viewport, wrong
+  on a tall desktop one, at a fixed 440px card width.
+  `src/components/match-lab/MatchLab.tsx`: replaced `bottom-7` with an inline
+  `height: "min(calc(100% - 28px), 680px)"` -- unchanged on phone-sized
+  viewports (already under the cap), capped everywhere else. Live-verified at
+  1512x982: card now reads as a real card, not a stretched banner.
+- `npx tsc --noEmit` and `eslint` clean. Not yet committed.
+
+### 2026-09-02 Profile dashboard cleanup; Match Lab gesture-guide fixes (COMMITTED, not yet pushed)
+
+- **Profile page** (`ProfileExperience.tsx`, `data.ts`, `report-data.ts`), all per direct, itemized feedback:
+  - Removed the "Next steps, clear and small · built for the {route} route" subtitle under the Plan header -- flagged as too much info. `PlanTab`/`MyPlanTab` no longer take a `chosenRoute` prop now that nothing in them reads it.
+  - Removed the "Courses and experiences to consider" / "Coming up" two-card block from the Plan tab, AND the separate "Coming up" card on Overview (both, not just one -- first pass was too selective, called out directly). `UPCOMING` export in report-data.ts is now dead everywhere and was deleted.
+  - Removed the duplicate "12 day streak" chip from the bottom Overview strip (the header already shows the streak at the top); removed "10 inputs behind your report" from that same strip entirely. What's left of "Profile and privacy" now lives in a real dropdown off the header's Settings gear (`settingsMenuOpen` state, same open/close-overlay pattern as the Top3 card kebab menu) instead of the header linking straight to the tab.
+  - Retasked the Overview "Do this next" plan item (`ib-3-1` in data.ts) from "Complete the finance glossary game" to "Complete the Investment Banking career simulation", fixed its href from the stale `/match-lab` to the real `/play/investment-banking` route.
+  - Top 3 comparison cards: fixed a real pixel-level misalignment -- the "Your #1" badge was `h-[27px]` while the unfocused "Make my #1" button was `min-h-[36px]`, a 9px offset that cascaded through every section below it on desktop's 3-up row. Both are now `h-[36px]`. Also switched the row from `items-start` to `items-stretch` and gave each card `h-full` so all cards in a row always match the tallest one's height, not just whichever one happens to reserve the right min-heights. Live-verified via getBoundingClientRect: `estimated pay` row and badge row both land at identical pixel `top` across cards now.
+  - Investment Banking and Private Equity showed the identical `$101,910` median salary (both cite BLS "financial analyst" as the closest tracked occupation) -- read as fake/copy-pasted side by side. PE's median changed to `$155,000` (still within its own stated $100K-150K entry / $150K-300K+carry range, and higher than IB's, which is directionally correct for PE comp) with the source label updated to say the number is adjusted for typical PE base+bonus, not a raw BLS figure.
+  - Restructured Overview's layout per direct request: the identity/name header is now its own bordered card; the tablist + the three bento doorways + "Do this next" are one unified dashboard surface (single card) instead of separate floating pieces. Scoped to the Overview tab only -- Top Three/Plan/Report/Resume keep their own existing tablist-plus-content layout, since Report in particular was just redesigned by the other session and doubling its card treatment wasn't asked for.
+- **Match Lab gesture guide** (`GestureSpotlight.tsx`, `MatchLab.tsx`) -- direct report: "the match screen broke for my CEO on his MacBook Pro" with a screenshot showing a hard vertical seam torn across the card.
+  - Root cause: `GestureSpotlight`'s spotlight cutout used the `box-shadow: 0 0 0 9999px rgba(...)` trick to dim everything outside the card. That technique is a known Safari/macOS compositor landmine at large spread values -- confirmed as the cause by removing it. Per direct follow-up ("we're not dimming the card anyway right?"), the fix is not a safer dimming approach but no dimming at all: the box-shadow div is gone, only the animated gesture dot + label pill render now.
+  - The up/right/left demo cycled forever until a real gesture landed. Now caps at two full loops (6 steps) via a `guideStepRef` counter, then hides itself -- still interruptible at any point by a real gesture (unchanged `markDemonstratedRef` path). Per-step dwell also halved, from a hardcoded 5200ms (two hint cycles) to one `GESTURE_HINT_CYCLE_S` (2.6s) cycle, per "make it quicker."
+  - Removed the separate static "⌃⌃ Scroll for the breakdown" nudge chip under the card title -- redundant now that the gesture guide's own "Scroll up for details" step teaches the same thing.
+- `npx tsc --noEmit`, `eslint` on every touched file, and `npm run tokens:check` all clean. No token changes; contract files untouched.
+- Live-verified in isolated worktrees on ports 3100-3102: Profile's word-bank/settings-menu/card-alignment fixes confirmed via DOM inspection (`getBoundingClientRect`, computed styles) since the Browser tool's screenshot cache was stale/unreliable for several checks this round -- read_page/get_page_text/javascript_tool are the reliable read path when a screenshot looks wrong. Match Lab's fixed gesture guide and removed nudge chip confirmed via get_page_text.
+- **Not yet pushed** -- per standing instruction, push needs an explicit go-ahead even after local verification. Everything above is committed locally on `build-flow-dynamic-background`.
+
+### 2026-09-01
 
 ### 2026-09-01 (night) connect-redesign-lab MERGED TO MAIN (user-authorized) — all four card lanes live
 
@@ -5289,6 +5361,7 @@ Working through a large "DREAMARI UPDATES AUGUST 29" spec doc, starting with the
   7. Per the spec doc: removed "More Glossary Games" (the second glossary section for not-yet-authored glossary games) entirely, along with its now-dead `glossarySoon` computation.
 - Verified: `tsc --noEmit`, `eslint`, `tokens:check`, and a full production build all clean. Live-verified the row's uniform height, the featured column's attached CTA, world-label accent colors, uppercase/scaled titles, and side-card centering on both mobile (375px) and desktop (1440px) viewports.
 
+
 ## 2026-09-02 — Build flow polish rolled out app-wide, backgrounds un-blacked, Profile QA, Connect confirmations (all on main)
 A long session driven by a demo complaint that the app felt static. Everything here is pushed to `main` and `demo` (latest `e727195`).
 
@@ -5309,3 +5382,62 @@ DREAMARI CONNECT 2.pdf, student side built out, professional side as a one-scree
 - `data.ts`: `Pro` + world/field/story/followers/studentsReached/totalLikes/questionsAnswered/activeDaysAgo (all 15 enriched); `Insight` + optional views/saves. Every pro name in badges, insight cards and comments opens the profile. Board cards show Views.
 - Safety in structure: students follow pros, never the reverse; no student follower counts; no message entry point; answers public. Deferred on purpose: activity tiers, company aggregation, downloadable summaries, real pro login, persisted follows.
 - Verified live (dev): rail, profile, follow (+1 on reach/followers), AMA composer, name links from cards and comments, dashboard preview. `tsc`, `eslint`, `tokens:check` clean. **Next**: user review, then push/merge decision; then continue the micro-interaction list with Play.
+
+## 2026-09-02 (later) — Build layout QA: HUD, content and CTAs hold position on every screen; Back on the milestone
+Direct feedback: "things are still moving around... keep the progress bar HUD stationary, questions/answers centred, CTAs bottom; the map overlaps the CTAs; no back button on the You're moving fast screen; use numbers instead of emojis in the Career Report sections."
+
+- MilestoneScreen and CompletionScreen adopted the same three-part skeleton as every step (CardHud pinned, centered middle, shared StepFooter with Back). Completion shows the bar at 100 (it had vanished on the last screen). StepFooter gained `pulseFromDreamy` so the milestone's CTA pulse still launches from Dreamy.
+- Every step's middle block scrolls internally (`overflow-y-auto` + `safe center`) so tall content (map, profile form) never runs under the sticky footer; map max height 44dvh.
+- First step's footer was 2px shorter (bare span in the Back slot); an invisible placeholder button equalizes it.
+- Career Report `ReportSection` leads with the two-digit section number in the tile, no pictogram.
+- **Measured** with an in-page harness (`scripts/qa/build-layout-harness.js`, paste into the browser console on /flow) walking all nine screens at 375x812, 375x640 and 1280x900: HUD top and footer top/bottom identical on every screen per viewport; gap-above == gap-below wherever content fits; internal scroll with no overlap where it doesn't; Back present on every screen after the first. Re-run this after any Build layout change.
+
+- 2026-09-02 (later): Top 3 cards on My Profile: the world-accent glow blob (right/bottom -40px, blur 38px) bled past the card border because the card is overflow-visible (the kebab menu must escape it). Moved the blob into its own `absolute inset-0 overflow-hidden rounded-[inherit]` layer so it clips to the card radius. Sweep found no other card-bound blobs (remaining hits are speech-bubble tails and page-level ambient blobs behind marketing sections, intentional). Verified at 1280x900: wrapper radius 24px matches card, blob still overhangs wrapper by 40px on both axes but is clipped.
+- 2026-09-02 (later): Career Report readability: the report slab's dark palette lifted from near-black (#0d0f14) to slate (#1e2431, raised #29303f, sunken #343c4c, rules a step lighter) so it sits on the navy background as a card; slab and Reflection slab now use uniform padding (space-5, sm: space-6) with the inner 920px column removed so content fills to that padding; section number tiles are 18/23 to match the section title (h 34). Verified at 1280x900: bg rgb(30,36,49), padding 24 on all four sides, numeral font-size equals h3 font-size.
+
+## 2026-09-02 (evening): Career Detail rebuilt for skimming (`/career/[slug]`)
+
+Reference: production page export "Carpenter · Dreamari.pdf" (dreamonna.com/explore/carpenter). Production is login-gated, so EMT copy could not be fetched; Carpenter's copy and figures are transcribed verbatim into `src/components/career/profiles.ts` (`CareerProfile`), and `resolveCareer` attaches `profile` when one exists (title/world/photo fall back to it too, so Carpenter renders without a catalog entry).
+
+`CareerDetailExperience.tsx` is a fresh layout, one shape for every career:
+- Header card in the production look (title on a world-accent panel inside a dark card, CTA row below) plus the poster photo: top band below md, right column from md.
+- First screen only: header, four quick facts (one strip, dividers), Pay by state as bars (Best states / Whole country tabs), Career ladder as collapsed rows (number in the accent, title, pay, a bar for the pay climb). Everything else is folded with a one-line preview of its own first items: know about, good at, software, education, and the fallback "What they actually do".
+- Type scale, strictly descending everywhere: title 40 → 56..72 Bricolage; section 22 → 26 Bricolage; sub-heading/rung title/pay 18; label-over-value 16 semibold (facts, states, dt); body 15; dd 14. Values never outsize the label above them (direct feedback on "Typical degree").
+- Software logos are real current brand marks committed under `public/images/logos/*.svg` (Wikimedia Commons), shown on a white tile at 18px tall; tools without an exact mark get the plain list marker (e.g. "Microsoft Office software"). Simple Icons glyphs removed.
+- Careers without a profile: facts from report/reel/catalog, ladder from CAREER_EXTRAS (oneLiner as description, skills as "What you do"); placeholder "Coming soon" values are dropped rather than rendered; empty sections are omitted (Roofer shows header + Careers like this one only).
+- Only `--space-1..6, 8, 10, 12, 13, 14` exist in tokens.css; `--space-7` does not (it silently zeroed padding in the first pass). Do not use it.
+
+Assumptions to confirm with the user: "Whole country" tab shows the Typical pay figure (the reference did not show that tab's content); "Sign in to save this career." and "Play the ladder game" were not carried (logged-in prototype, no ladder game route); the world tag was removed from the header panel because it sat above the larger summary line.
+
+Verified at 1280x900 and 375x812: h1 56/Bricolage, h2 26/Bricolage, fact label 16 over value 15, rung title = pay = 18, no horizontal overflow, all four Carpenter logos load. Not pushed.
+
+## 2026-09-02 (night): Connect photos-only, Replit information order; career header dissolve; JA events
+
+- **Connect communities**: the A/B lanes (fusion / people / shapes) and the `?cards=` switcher are deleted along with their code (SHAPE_*, ShapeBadge, POSTER_COVER, PEOPLE_FOCUS, fusion CSS). One card remains: the CEO's photography, full bleed, but dimmed (brightness .78) and frosted with the poster card's stack (progressive blur over 74%, heavy bottom vignette, top scrim, accent tint, grain) so type reads. Information follows the Replit card the CEO calls the gold standard: name and world up top, four stat tiles (Students / Pros / Posts / Companies), a "Professionals from" row, one action at the right ("Open Community" filled when joined, "Join Community" outlined otherwise; Join opens the JoinSheet). Topics moved off the card into the board banner (under the title) and the About tab, per direct feedback that chips would crowd the card.
+- `CardProgressiveBlur` (app/cardChrome.tsx) now takes `direction` ("up" | "left"), `size`, `maxBlur`.
+- **Career Detail header**: one photo runs behind the whole panel; on md+ a leftward progressive blur frosts it toward the text and the world accent fades over the frosted half, so the title panel dissolves into the picture on the card's right (below md the same, top to bottom). Verified by DOM at 375 (mobile image 333x412, title at 177px) and 1280.
+- **Events**: two spring partnership boards from the Replit (Dream Opportunity Morgan Stanley NYC, joined, 312/87/203; Junior Achievement Goldman Sachs NYC, code JA-GS-2026, 236/52/98). Fixed a host regex where `/ey/` matched "Morgan Stanl-ey" and dressed it in EY's logo and yellow; now `\bey\b`.
+- Browser pane was hidden during the final pass, so the Connect and header results were checked by DOM measurement and earlier screenshots, not a final eyeball.
+- 2026-09-02 (late): `src/app/match-lab/page.tsx` carried a TEMP inline error trap from 2cfebe2 whose template literal emitted a raw newline into a quoted string, so every Match load threw `Uncaught SyntaxError: Invalid or unexpected token` (visible in the console on production too). Removed; the "lab build" marker from the same commit was already gone. Also committed the parallel motion-graphics session's changes here (Profile dashboard card + settings menu, Match guide capped at two loops, spotlight scrim removed for Safari) after tsc/eslint and a render check of /profile and /match-lab.
+
+## 2026-09-02 (night, 2): buttons made uniform; post-Match chooser; one header for focus flows
+
+- **Buttons** (engineering review via the user: states inconsistent, hovers harsh, pills everywhere). `src/components/ui/Button.tsx` is the one text button: radius `var(--radius-md)`, primary = brand blue / white, secondary = bordered glass, quiet = text; hover is dm-solid (lift + brightness 1.05, softened from 1.08) or dm-quiet (wash + inset ring), never a fill flip; sizes compact 36 / default 44 / large 52 with 14 / 15 / 16 semibold labels in the body face. The old Figma CTA (light fill flipping to dark glass on hover) is gone. App-wide sweep: 59 text buttons across Connect, Play, Profile, Career, Signup, Glossary lost `rounded-full` for radius-md and their labels normalized to semibold 15 (or 14 compact). Circular icon-only buttons and non-interactive status badges keep their shape on purpose. Build footer says "Back", not "Previous".
+- **Post-Match chooser** (`/career-report`, `ReportChooser.tsx`): rewritten. Three browse cards (Explore's PosterCard, no salary badge) side by side, staggered entrance, tap to choose (ring in the world accent, others dim), one "Start with {career}" button; their deck #1 starts chosen. On phones the row scroll-snaps. Hands off to `/profile?picks=…&focus=…` exactly as before. The three-report carousel and its reading overlay are gone.
+- **Match**: once three are saved and cards remain, a compact "Continue with your 3" sits above the deck (was only the once-only sheet). Copy no longer promises "View Career Report" (the chooser comes next) and the em dashes in the sheets are gone.
+- **Header**: `src/components/app/FlowChrome.tsx` = Wordmark + QuickLinksMenu (the app's hamburger, theme switch inside it), fixed, no destination tabs, used by Build, Match and the Glossary game. `flow/HomeButton.tsx` and `flow/theme/ThemeToggle.tsx` deleted; `/flow` and `/match-lab` pages now import tokens.css + app.css for it.
+- **Gesture tutorial** on Match verified at 375x812 (scroll-up → swipe right → swipe left at 2.6s steps, ends after two loops at ~15s) and 390x844 (hint centred on the card, in viewport). A synthetic PointerEvent swipe does not register (the card listens for real pointer/touch input), so "a real gesture ends it early" rests on the code path in like()/pass(). The in-app Browser pane hung on multi-size batches, so 320/768/1024/1440 geometry was not re-measured tonight.
+
+## 2026-09-03 (early): radius system, badges/inputs, career header v3, company chips
+
+- **Radius system** (direct feedback: no fully rounded corners except segmented toggles and circular icon buttons; nested boxes follow Apple's concentric rule, outer minus padding, floored at 8): cards/panels/hero cards 16 (`--radius-lg`), sheets 20 on top, controls 12 (`--radius-md`), nested tiles and status badges 8 (`--radius-sm`). Every app component (not marketing/motion-lab) was remapped: 24/20 → 16, Tailwind `rounded-xl/2xl/3xl` → tokens, ad-hoc px radii → tokens, 40 text badges/chips → 8, search fields → 12, 21 leftover 16px text buttons → 12. Root cause of Build "ballooning": once Build/Match sat inside the marketing-v2 scope, Tailwind's `rounded-xl/2xl` resolved to the 20/24px tokens.
+- **Focus/hover**: global `:focus-visible` ring and pointer for every button/link/tab/radio/input in app.css; dm-solid hover brightness 1.05.
+- **Career header v3**: photo full bleed + CardProgressiveBlur (72%) + vignette + top scrim, no accent wash; title/summary/scenario and the action row all inside the card; 300px (320 desktop).
+- **Connect**: "Professionals from" is a scrolling row of chips with real company marks (`public/images/logos/companies`, 19 of 20; Blackstone had no exact mark → text chip). Same chips in the board's About.
+- **Home** hero CTA on the primary fill at 12px. Glossary/Play primary buttons at 12px.
+- Screens eyeballed at the pane's 614px width after the sweep: Build (2 steps), Match, chooser, Home, Explore, Play, Connect, Profile overview, Career, Glossary intro, Signup, Colleges.
+- 2026-09-03: Career page follows the live production data shape one for one (screenshots of Carpenter and Actor): `payByState` now carries `title` ("Pay by state" / "Where the jobs are"), `yourStates`, and label values ("more than usual"); Carpenter updated to the live figures (Your states: South Dakota $48K; Best: Vermont, Idaho, Utah). Bars removed everywhere (direct feedback: too many graphs); key figures (typical pay, state pay, ladder pay) use production's gradient numeral in the world accent at the same size as body values, so labels still outsize them. Actor was not added: no poster asset exists for it. Connect: chip tooltips are per chip (named group), whole card is the tap target (open or join), the world caption under the community name is gone.
+- 2026-09-03: Every catalog career now renders the Carpenter blueprint. `src/components/career/profiles.generated.ts` holds 39 generated profiles (approximate BLS/O*NET figures, clearly marked prototype data; five salaries aligned to the poster badges the catalog already shows); `careerProfile()` prefers hand-transcribed production data (Carpenter) and falls back to the generated set. Quick facts use the accent gradient on all four values (never just pay). Header photo: top-anchored crop; on md+ it occupies the right half and fades into the card base so faces are not cropped to a wide band. Hover audit across 11 screens: every text control carries one dm-* utility; the last ad-hoc hovers (Build option chips, Match action circles and pencil, Home panel dots, Play cards, Build "Show all") moved to dm-tap / dm-quiet.
+- 2026-09-03: Career quick facts carry production's (i) details. `FactDetails` on `CareerProfile`: degree opens a sheet (door asks for / experience first / training after hiring, the note, "Even so, N% do not have a bachelor's", the BLS education mix as bars); pay and openings open a small popover (starting / typical / top earners + note; what "openings" counts + growth). Carpenter's text is transcribed from the production screenshots (em dashes removed); the generator derives the rest (pay bands at 0.62x / 1.68x of typical, an education mix template per degree tier, a growth sentence), marked demo data.
+- 2026-09-03: Pay by state is a view switch again (production reference): "Your states" is the list; "Whole country" is `src/components/career/PayMap.tsx`, the @svg-maps/usa map shaded by pay in the world accent, the student's state outlined white, hover/focus/tap reads the figure. Demo data: states without a listed figure take the typical pay with a seeded ±22% spread; production has every state.
+- 2026-09-03: Connect notes from the CEO applied. Thread: no "Question" eyebrow, no "Shown as …" line, likes sit by the question (resume thread carries 337), "Add to Plan" removed from answers and insights (the board's own Add to my Plan stays), Report is 11px at 55% opacity, the 😂 reaction chip is gone (🔥 💯 remain). Board cards: no "Answered by" line, Save is small and sits next to comments, comment counts come from a demo `comments` field (17+) with the real list as fallback, likes seeded 70..300 across threads and insights. "Ask this community anything" → "Ask a question". Professionals always wear their portrait (Elena Martinez: avatars/w22.jpg); students stay behind USE_PHOTO_AVATARS. Connect's Card primitive uses the career page's frosted panel.

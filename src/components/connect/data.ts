@@ -44,6 +44,9 @@ export type Thread = {
   routedScope: string;
   expectedWindow: string;
   helpful: number;
+  /** Demo display count for the card (direct feedback: show 17+); the
+   *  thread may hold fewer real comments. */
+  comments?: number;
   followers: number;
   responses: (ProResponse | FollowUp | PeerPerspective)[];
   saved?: boolean;
@@ -252,8 +255,9 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 1 day",
     views: 3412,
     location: "United States",
-    helpful: 27,
+    helpful: 260,
     followers: 8,
+    comments: 30,
     unreadAnswer: true,
     responses: [
       {
@@ -301,8 +305,9 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 1 day",
     views: 1120,
     location: "United Kingdom",
-    helpful: 9,
+    helpful: 126,
     followers: 3,
+    comments: 43,
     responses: [
       {
         kind: "answer",
@@ -339,8 +344,9 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 2 days",
     views: 5891,
     location: "United States",
-    helpful: 34,
+    helpful: 223,
     followers: 12,
+    comments: 24,
     unreadAnswer: true,
     saved: true,
     responses: [
@@ -384,8 +390,9 @@ export const THREADS: Thread[] = [
     expectedWindow: "within 3 days",
     views: 2304,
     location: "United States",
-    helpful: 18,
+    helpful: 89,
     followers: 5,
+    comments: 37,
     responses: [
       {
         kind: "answer",
@@ -424,8 +431,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
-    helpful: 41,
+    helpful: 337,
     followers: 9,
+    comments: 18,
     responses: [
       {
         kind: "answer",
@@ -463,8 +471,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
-    helpful: 12,
+    helpful: 283,
     followers: 3,
+    comments: 31,
     responses: [
       {
         kind: "answer",
@@ -500,8 +509,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Consulting & professional services",
     expectedWindow: "within 2 days",
-    helpful: 28,
+    helpful: 149,
     followers: 7,
+    comments: 44,
     responses: [
       {
         kind: "answer",
@@ -540,8 +550,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Finance & banking careers",
     expectedWindow: "within 2 days",
-    helpful: 15,
+    helpful: 246,
     followers: 4,
+    comments: 25,
     responses: [
       {
         kind: "answer",
@@ -577,8 +588,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Nursing & patient care careers",
     expectedWindow: "within 3 days",
-    helpful: 22,
+    helpful: 112,
     followers: 6,
+    comments: 38,
     responses: [
       {
         kind: "answer",
@@ -616,8 +628,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Design & creative careers",
     expectedWindow: "within 3 days",
-    helpful: 19,
+    helpful: 209,
     followers: 5,
+    comments: 19,
     responses: [
       {
         kind: "answer",
@@ -656,8 +669,9 @@ export const THREADS: Thread[] = [
     state: "answered",
     routedScope: "Design & creative careers",
     expectedWindow: "within 3 days",
-    helpful: 8,
+    helpful: 75,
     followers: 2,
+    comments: 32,
     responses: [
       {
         kind: "answer",
@@ -691,7 +705,7 @@ export const INSIGHTS: Insight[] = [
     title: "A day in the life of a software engineer at Amazon",
     body: "People assume software engineers code 8 hours straight. In reality, my day is roughly 3 hours of coding, 2 hours of meetings, 1 hour of code review, and the rest reading documentation or unblocking teammates. Communication skills matter more than most people expect.",
     postedAgo: "3d ago",
-    helpful: 52,
+    helpful: 153,
     saved: true,
     replies: [
       { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 14 },
@@ -712,7 +726,7 @@ export const INSIGHTS: Insight[] = [
     title: "What I wish I knew before my first finance internship",
     body: "Nobody expects you to know the technical work on day one, they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
     postedAgo: "5d ago",
-    helpful: 38,
+    helpful: 250,
     replies: [
       { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 12 },
       { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 5 },
@@ -729,7 +743,7 @@ export const INSIGHTS: Insight[] = [
     title: "The 30-second answer to 'tell me about yourself'",
     body: "One line on who you are, one on what you've done that you're proud of, one on why you're here. Practice it out loud twice. Interviewers aren't grading your biography, they're checking whether you can organize a thought.",
     postedAgo: "2d ago",
-    helpful: 44,
+    helpful: 116,
     replies: [
       { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 16 },
       { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 4 },
@@ -747,7 +761,7 @@ export const INSIGHTS: Insight[] = [
     title: "Three things nobody tells you about your first year as a nurse",
     body: "You will ask hundreds of questions and that's the job, not a weakness. Twelve-hour shifts mean three-day weeks. And the nurses who last are the ones who say something the moment a patient looks different.",
     postedAgo: "4d ago",
-    helpful: 31,
+    helpful: 213,
     replies: [
       { handle: "Sana", grade: "Junior", body: "Three-day weeks sounds amazing until you remember each day is twelve hours.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
       { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
@@ -766,7 +780,7 @@ export const INSIGHTS: Insight[] = [
     title: "What a brand actually pays a designer for",
     body: "Not prettiness, decisions. Why this color, why this type, why this layout for this audience. The day you can defend your choices out loud is the day you stop being a student and start being a designer.",
     postedAgo: "1d ago",
-    helpful: 27,
+    helpful: 79,
     replies: [
       { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
       { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
@@ -781,7 +795,7 @@ export const INSIGHTS: Insight[] = [
     title: "What I look for in a first portfolio project",
     body: "Finished beats fancy. A small app that works, with a README that explains your decisions, tells me more than an ambitious half-build. Bonus points if you added one feature nobody asked for because you wanted it.",
     postedAgo: "1d ago",
-    helpful: 29,
+    helpful: 176,
     replies: [
       { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 5 },
       { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 7, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
@@ -797,7 +811,7 @@ export const INSIGHTS: Insight[] = [
     title: "The bug that taught me more than any class",
     body: "My first production bug took three days to find and was one wrong character. What I actually learned: read the error message slowly, reproduce it before touching anything, and write down what you ruled out. That checklist is half of engineering.",
     postedAgo: "6d ago",
-    helpful: 41,
+    helpful: 273,
     replies: [
       { handle: "Priya", grade: "Sophomore", body: "Writing down what you ruled out is such a good idea for math homework too honestly.", postedAgo: "5d ago", likes: 8 },
       { handle: "Sam", grade: "Senior", body: "Three days for one character. I feel better about my week now.", postedAgo: "5d ago", likes: 15 },
@@ -812,7 +826,7 @@ export const INSIGHTS: Insight[] = [
     title: "What an analyst actually does before 10 AM",
     body: "Check overnight market moves, update the numbers that changed, and flag anything weird before your team's morning call. It's less glamorous than the movies and more about being the person who noticed first.",
     postedAgo: "2d ago",
-    helpful: 33,
+    helpful: 139,
     replies: [
       { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 9 },
       { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 4 },
@@ -828,7 +842,7 @@ export const INSIGHTS: Insight[] = [
     title: "Three things that surprised me in my first week at a bank",
     body: "Nobody expected me to know finance, they expected me to be careful. Half the job is writing clearly. And the people who moved up fastest were the ones other people wanted on their team.",
     postedAgo: "1w ago",
-    helpful: 27,
+    helpful: 236,
     replies: [
       { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 13 },
       { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 7 },
@@ -843,7 +857,7 @@ export const INSIGHTS: Insight[] = [
     title: "Networking when you don't know anybody",
     body: "Networking isn't collecting contacts, it's being genuinely curious one person at a time. Ask someone how they got their job and what surprised them about it. People remember the student who asked a real question.",
     postedAgo: "3d ago",
-    helpful: 36,
+    helpful: 102,
     replies: [
       { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 10 },
       { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 7 },
@@ -859,7 +873,7 @@ export const INSIGHTS: Insight[] = [
     title: "What to say when you don't know the answer in an interview",
     body: "Say 'I don't know, but here's how I'd find out', and then actually walk through it. Interviewers aren't testing your memory, they're testing what you do at the edge of what you know.",
     postedAgo: "5d ago",
-    helpful: 48,
+    helpful: 199,
     replies: [
       { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
       { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 6 },
@@ -874,7 +888,7 @@ export const INSIGHTS: Insight[] = [
     title: "Day shift vs night shift, honestly",
     body: "Days are busier and you learn faster; nights are calmer and you get more time with each patient. Most new nurses do some of both in year one. Neither is the easy option, they're different kinds of hard.",
     postedAgo: "2d ago",
-    helpful: 24,
+    helpful: 296,
     replies: [
       { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 3 },
       { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 9 },
@@ -889,7 +903,7 @@ export const INSIGHTS: Insight[] = [
     title: "The question I ask every student who shadows me",
     body: "Could you do this at 3 AM, tired, for someone who isn't grateful? If the answer is still yes, nursing will give you more back than almost any job I know. If it's no, that's a useful thing to learn at seventeen.",
     postedAgo: "6d ago",
-    helpful: 39,
+    helpful: 162,
     replies: [
       { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 17, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
       { handle: "Noah", grade: "Sophomore", body: "seventeen and rethinking everything right now", postedAgo: "4d ago", likes: 8 },
@@ -903,7 +917,7 @@ export const INSIGHTS: Insight[] = [
     title: "Your sketchbook is already a portfolio",
     body: "Students wait for permission to have 'real work'. The messy process pages, the versions you rejected and why, are often more impressive to me than the polished final. Show your thinking, not just your taste.",
     postedAgo: "3d ago",
-    helpful: 22,
+    helpful: 259,
     replies: [
       { handle: "Ruby", grade: "Junior", body: "Posting my process pages instead of hiding them from now on.", postedAgo: "2d ago", likes: 8 },
       { handle: "Theo", grade: "Sophomore", body: "Does this apply to video edits too? I have so many drafts.", postedAgo: "2d ago", likes: 4 },
@@ -919,7 +933,7 @@ export const INSIGHTS: Insight[] = [
     title: "What an art director actually does all day",
     body: "Less drawing than you'd think, more deciding. I spend my day reviewing work, giving direction that keeps ten people rowing the same way, and defending good ideas in rooms where they could die. The craft got me here; the communication keeps me here.",
     postedAgo: "1w ago",
-    helpful: 31,
+    helpful: 125,
     replies: [
       { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 12 },
       { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 10 },
@@ -1032,6 +1046,41 @@ export const EVENTS: EventBoard[] = [
       { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
     ],
   },
+  // The two spring partnership boards the Replit prototype carried, which
+  // the CEO of JA Singapore singled out (Slack, Sep 2): a nonprofit plus a
+  // corporate partner, with the Replit's own figures. Morgan Stanley is
+  // already joined; the Junior Achievement board unlocks with its code.
+  {
+    id: "event-do-morgan-stanley-nyc",
+    name: "Dream Opportunity Morgan Stanley NYC",
+    host: "Morgan Stanley",
+    date: "March 12, 2026",
+    location: "Morgan Stanley, New York City",
+    lifecycle: "Active follow-up",
+    closesOn: "September 30, 2026",
+    students: 312,
+    pros: 87,
+    postCount: 203,
+    orgs: ["Dream Opportunity", "Morgan Stanley", "Dreamari"],
+    topics: ["Finance", "Investing", "Networking"],
+    entitled: true,
+  },
+  {
+    id: "event-ja-goldman-sachs-nyc",
+    name: "Junior Achievement Goldman Sachs NYC",
+    host: "Junior Achievement",
+    date: "April 16, 2026",
+    location: "Goldman Sachs, New York City",
+    lifecycle: "Active follow-up",
+    closesOn: "October 15, 2026",
+    students: 236,
+    pros: 52,
+    postCount: 98,
+    orgs: ["Junior Achievement", "Goldman Sachs", "Dreamari"],
+    topics: ["Finance", "Banking", "Networking"],
+    entitled: false,
+    code: "JA-GS-2026",
+  },
   // The three ACTUAL fall events (from Slack, Sep 1): Brooklyn/JPMorgan
   // Chase Oct 23, Dallas/AT&T Oct 29, New Jersey/EY Nov 4. All upcoming --
   // their boards open after each event happens, same lifecycle rule as
@@ -1086,8 +1135,9 @@ export const EVENT_THREADS: Thread[] = [
     expectedWindow: "within 2 days",
     views: 1908,
     location: "United States",
-    helpful: 34,
+    helpful: 277,
     followers: 19,
+    comments: 45,
     responses: [
       { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 11 },
       { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 13, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
@@ -1114,8 +1164,9 @@ export const EVENT_THREADS: Thread[] = [
     expectedWindow: "within 2 days",
     views: 942,
     location: "United States",
-    helpful: 17,
+    helpful: 143,
     followers: 4,
+    comments: 26,
     responses: [
       {
         kind: "answer",
@@ -1145,8 +1196,9 @@ export const EVENT_THREADS: Thread[] = [
     expectedWindow: "within 2 days",
     views: 1655,
     location: "United States",
-    helpful: 29,
+    helpful: 240,
     followers: 6,
+    comments: 39,
     unreadAnswer: true,
     responses: [
       {
