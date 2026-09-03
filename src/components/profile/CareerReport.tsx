@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ArrowRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
@@ -478,10 +479,18 @@ const REPORT_TABS = [
 ] as const;
 type ReportTabId = (typeof REPORT_TABS)[number]["id"];
 
+// Light world accents (amber, teal, the greens) need dark ink on a filled
+// button; the rest keep white.
+const LIGHT_ACCENTS = new Set(["Business & Money", "Health & Medicine", "Food & Cooking", "Farming, Animals & Nature", "Building & Construction"]);
+
 export function CareerReportView(props: ReportViewProps) {
   const { student, career } = props;
   const report = reportV2(career.id);
   const [tab, setTab] = useState<ReportTabId>("report");
+  // the report is accented with the career's own world colour: every
+  // --primary inside it (numbers, headings, the common-path tile, buttons)
+  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const accentVars = { "--primary": accent, "--accent-subtle": accent, "--primary-foreground": LIGHT_ACCENTS.has(career.world) ? "#14122a" : "#ffffff" } as React.CSSProperties;
 
   if (!report) {
     return (
@@ -493,7 +502,7 @@ export function CareerReportView(props: ReportViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
+    <div className="flex flex-col gap-[var(--space-4)]" style={accentVars}>
       {/* App chrome, never printed */}
       <div data-print-hide className="no-print flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
         <div
