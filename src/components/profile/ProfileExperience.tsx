@@ -435,11 +435,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
 
         {/* ---- Quick facts, as on a career page: one strip, dividers, label
              over figure. ---- */}
-        <dl className="grid grid-cols-3 rounded-[var(--radius-lg)] border" style={GLASS}>
+        {/* the streak cell carries the most text, so it gets the widest column */}
+        <dl className="grid grid-cols-[1fr_1fr_1.7fr] rounded-[var(--radius-lg)] border sm:grid-cols-3" style={GLASS}>
           {[
             { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
             { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
-            { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142 of 190 days", verified: false },
+            { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142/190", verified: false },
           ].map((fact, i) => (
             <div key={fact.label} className={`flex min-w-0 flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i > 0 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
               <dt className="flex items-center gap-[4px] text-[16px] leading-[22px] font-semibold">
@@ -451,10 +452,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   </>
                 )}
               </dt>
-              <dd className="flex flex-wrap items-baseline gap-x-[6px]">
+              <dd className="flex items-baseline gap-x-[6px] whitespace-nowrap">
                 <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>{fact.value}</span>
                 {fact.note && <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
-                {fact.sub && <span className="hidden w-full text-[12px] leading-[16px] font-semibold sm:block" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
+                {/* the season so far, on the same line: "12 days · 142/190" */}
+                {fact.sub && <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>· {fact.sub}</span>}
               </dd>
             </div>
           ))}
