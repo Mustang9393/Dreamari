@@ -32,8 +32,8 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { ConnectNav } from "./primitives";
-import { PeopleToFollow, ProDashboardView, ProProfileView, type Follows } from "./ProProfile";
+import { CompanyChip, CompanyMark, ConnectNav, CONTACT_INFO, CONTACT_WARNING } from "./primitives";
+import { NewFromFollowing, Panel, PanelRow, PeopleToFollow, ProDashboardView, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
 import {
   COMMUNITIES,
   EVENTS,
@@ -97,9 +97,11 @@ type View =
   | { kind: "proDashboard" }
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string }
-  | { kind: "insight"; id: string };
+  | { kind: "insight"; id: string }
+  | { kind: "saved" };
 
 function viewToQuery(view: View): string {
+  if (view.kind === "saved") return "?saved=1";
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
@@ -111,6 +113,7 @@ function viewToQuery(view: View): string {
 
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
+  if (q.get("saved")) return { kind: "saved" };
   if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
@@ -362,9 +365,9 @@ function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: 
       <Avatar name={pro.name} verified size={size} />
       <div className="flex min-w-0 flex-col">
         <button type="button" onClick={() => nav?.openPro(proId)} className="dm-link w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-        <span className="text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-          {pro.org} · {pro.role}
-          {postedAgo ? ` · ${postedAgo}` : ""}
+        <span className="flex flex-wrap items-center gap-x-[5px] text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+          {pro.role} at <CompanyMark name={pro.org} ink="var(--muted-foreground)" />
+          {postedAgo ? <span>· {postedAgo}</span> : null}
         </span>
       </div>
     </div>
@@ -502,100 +505,6 @@ const PHOTO_FOCUS: Record<string, string> = {
 // The community card follows the Replit prototype's structure one for one
 // (the CEO's gold standard): a header band carrying the name and its
 // category, four stat tiles, then one action at the right. Ours puts the
-// CEO's photography in the band, with the poster card's legibility stack
-// (progressive blur, vignette, top scrim, grain) so the title always reads.
-// Real company marks for the "Professionals from" chips (Wikimedia Commons,
-// 2026-09-03, committed under public/images/logos/companies), drawn as a
-// white silhouette through a CSS mask (direct feedback: no white tiles; the
-// logo in white on the chip). `w` is each mark's rendered width at 12px
-// tall, so wordmarks and square marks take the room their shape needs. A
-// company with no exact current mark gets a text-only chip (Blackstone; and
-// Goldman Sachs, whose only mark is a filled square that masks to a blank tile).
-// Microsoft uses the 2012 wordmark, not the four-square symbol, for the same reason.
-const COMPANY_MARKS: Record<string, { file: string; aspect: number }> = {
-  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93 },
-  Amazon: { file: "amazon", aspect: 3.31 },
-  EY: { file: "ey", aspect: 0.99 },
-  Google: { file: "google", aspect: 3.04 },
-  Deloitte: { file: "deloitte", aspect: 5.31 },
-  "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
-  Microsoft: { file: "microsoft", aspect: 4.69 },
-  Meta: { file: "meta", aspect: 4.96 },
-  Apple: { file: "apple", aspect: 0.81 },
-  "CVS Health": { file: "cvs-health", aspect: 8.2 },
-  "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
-  Pfizer: { file: "pfizer", aspect: 2.44 },
-  "Mayo Clinic": { file: "mayo-clinic", aspect: 0.92 },
-  Disney: { file: "disney", aspect: 2.41 },
-  Nike: { file: "nike", aspect: 2.82 },
-  Spotify: { file: "spotify", aspect: 1.0 },
-  Netflix: { file: "netflix", aspect: 3.7 },
-  Adobe: { file: "adobe", aspect: 3.8 },
-};
-
-// Equal visual weight (direct feedback: letters the same height, chips the
-// same height, nothing too big or small). Every SVG is trimmed to its ink
-// bounds (viewBox rewritten from a rendered alpha scan, 2026-09-03), so the
-// box IS the letters: wordmarks render 11px tall and as wide as their own
-// letters need; compact symbol marks (aspect under 1.3) render 14px tall.
-function markBox(aspect: number): { width: number; height: number } {
-  const height = aspect < 1.3 ? 14 : aspect > 6 ? 13 : 11;
-  return { width: Math.round(height * aspect), height };
-}
-
-function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
-  const mark = COMPANY_MARKS[name];
-  const onPhoto = tone === "photo";
-  const ink = onPhoto ? "#FFFFFF" : "var(--foreground)";
-  // Logo only when we have the real mark (direct feedback); the name stays
-  // for screen readers and as the fallback when no exact mark exists.
-  return (
-    <span
-      className="group/chip relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
-      title={name}
-      tabIndex={mark ? 0 : undefined}
-      style={{
-        background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
-        borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
-        color: ink,
-        textShadow: "none",
-      }}
-    >
-      {mark ? (
-        <>
-          <span
-            aria-hidden
-            className="block flex-none"
-            style={{
-              ...markBox(mark.aspect),
-              background: ink,
-              maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
-              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
-          <span className="sr-only">{name}</span>
-          {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/chip:opacity-100 group-focus-visible/chip:opacity-100"
-            style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
-          >
-            {name}
-          </span>
-        </>
-      ) : (
-        name
-      )}
-    </span>
-  );
-}
-
 function StatTile({ icon: Icon, value, label, accent }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: number | string; label: string; accent: string }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[4px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
@@ -826,7 +735,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
           <div className="flex flex-wrap items-center gap-[6px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
             <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
-            <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
+            <span className="flex min-w-0 items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> at <CompanyMark name={pro.org} ink="var(--muted-foreground)" /></span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
@@ -898,6 +807,11 @@ export function ConnectExperience() {
   // Connect 2.0: who the student follows (local for the prototype).
   const [follows, setFollows] = useState<Follows>({});
   const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
+  // Connect 2.0: every question the student posts this session, from any
+  // composer, so "Your questions" on the landing can show it waiting.
+  const [asked, setAsked] = useState<AskedQuestion[]>([]);
+  const [askOpen, setAskOpen] = useState(false);
+  const [reportFor, setReportFor] = useState<string | null>(null);
 
   // restore view from URL on mount; keep URL in sync so filters survive
   // reload/share (handoff 8.3). Deliberately an effect, not a lazy useState
@@ -922,6 +836,9 @@ export function ConnectExperience() {
       openThread: (id: string) => setView({ kind: "thread", id }),
       openInsight: (id: string) => setView({ kind: "insight", id }),
       openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
+      openSaved: () => setView({ kind: "saved" }),
+      noteAsked: (title: string, boardId: string) => setAsked((current) => [{ id: `asked-${Date.now()}`, title, boardId }, ...current]),
+      report: (id: string) => setReportFor(id),
     }),
     [setView],
   );
@@ -996,6 +913,10 @@ export function ConnectExperience() {
             follows={follows}
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
+            asked={asked}
+            onAsk={() => setAskOpen(true)}
+            onOpenThread={(id) => setView({ kind: "thread", id })}
+            savedCount={Object.values(saves).filter(Boolean).length}
           />
         )}
 
@@ -1003,9 +924,11 @@ export function ConnectExperience() {
           (() => {
             const pro = PROS.find((p) => p.id === view.id);
             if (!pro) return null;
-            return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} />;
+            const boardId = COMMUNITIES.find((c) => c.world === pro.world)?.id ?? "teaching-education";
+            return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} onAsked={(title) => nav.noteAsked(title, boardId)} />;
           })()}
         {view.kind === "proDashboard" && <ProDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "saved" && <SavedView saves={saves} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1131,8 +1054,257 @@ export function ConnectExperience() {
         />
       )}
 
+      {askOpen && (
+        <AskSheet
+          onClose={() => setAskOpen(false)}
+          onOpenThread={(id) => { setAskOpen(false); setView({ kind: "thread", id }); }}
+          onPost={(title, boardId) => {
+            dispatchAuroraPulse("cta");
+            nav.noteAsked(title, boardId);
+            setAskOpen(false);
+            const community = COMMUNITIES.find((c) => c.id === boardId);
+            say(`Sent to verified pros in ${community?.name ?? "the community"}. ${community?.responseWindow ?? "Most questions are answered within 2 days"}.`);
+          }}
+        />
+      )}
+      {reportFor && (
+        <ReportSheet
+          onClose={() => setReportFor(null)}
+          onSubmit={() => {
+            setReportFor(null);
+            say("Thanks. A moderator will look at it.");
+          }}
+        />
+      )}
+
       <MobileNav active="Connect" />
       </ConnectNav.Provider>
+    </div>
+  );
+}
+
+// ——— Connect 2.0: your questions, ask from anywhere, saved, report ———
+
+type AskedQuestion = { id: string; title: string; boardId: string };
+
+/** The signed-in student's own questions: the seeded ones Jordan asked plus
+ *  anything posted this session. One row each: what happened to it, then the
+ *  question. The panel's aside is the way into Saved. */
+function YourQuestions({ asked, onOpenThread, onAsk, savedCount }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; onAsk: () => void; savedCount: number }) {
+  const nav = useContext(ConnectNav);
+  const mine = ALL_THREADS.filter((t) => t.handle === "Jordan");
+  const empty = asked.length === 0 && mine.length === 0;
+  const ask = <PrimaryCta onClick={onAsk} className="min-h-[36px] px-[var(--space-4)] text-[13px]">Ask a question</PrimaryCta>;
+  return (
+    <Panel id="your-questions-title" title="Your questions" aside={ask}>
+      {empty && (
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Ask verified pros anything about a career or school. Answers show up here.</p>
+      )}
+      <ul className="-mt-[var(--space-2)] flex flex-col">
+        {asked.map((q) => (
+          <li key={q.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
+            <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: STATE_COLOR.routed }}>
+              <Clock className="h-3 w-3" aria-hidden /> Waiting for an answer
+            </span>
+            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
+          </li>
+        ))}
+        {mine.map((t) => {
+          const answered = t.state === "answered" || t.state === "resolved";
+          const fresh = answered && t.unreadAnswer;
+          return (
+            <PanelRow key={t.id} onClick={() => onOpenThread(t.id)}>
+              <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: answered ? STATE_COLOR.answered : STATE_COLOR.routed }}>
+                {answered ? <CheckCircle2 className="h-3 w-3" aria-hidden /> : <Clock className="h-3 w-3" aria-hidden />}
+                {fresh ? "New answer" : STATE_LABEL[t.state]}
+              </span>
+              <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+            </PanelRow>
+          );
+        })}
+        {/* the way into Saved: one row, no extra control in the header */}
+        <li className={`border-t ${empty ? "-mt-[var(--space-2)]" : ""}`} style={{ borderColor: RULE }}>
+          <button type="button" onClick={() => nav?.openSaved()} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-3)] text-left">
+            <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+              <Bookmark className="h-3.5 w-3.5" aria-hidden /> Saved answers and posts · {savedCount}
+            </span>
+            <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          </button>
+        </li>
+      </ul>
+    </Panel>
+  );
+}
+
+// Where a question goes when the student doesn't pick: the words in it.
+const ROUTE_WORDS: { id: string; test: RegExp }[] = [
+  { id: "business-money", test: /\b(bank|financ|invest|money|account|econom|stock|business|consult|trad)/i },
+  { id: "tech-engineering", test: /\b(cod|software|tech|computer|engineer|cyber|data|ai\b|program|app\b|robot)/i },
+  { id: "health-medicine", test: /\b(nurs|doctor|medic|health|hospital|patient|biolog|surg|therap)/i },
+  { id: "arts-media", test: /\b(design|art\b|artist|music|film|video|content|creat|media|market|brand|photo)/i },
+];
+
+const STOP = new Set(["what", "does", "have", "with", "that", "this", "your", "from", "when", "should", "really", "actually", "there", "they", "them", "about", "into", "like", "want", "need", "know"]);
+
+/** The one place to ask from the landing. Type the question; it picks the
+ *  community from your words (changeable), shows a question that was already
+ *  answered when there is one, and keeps contact details out. */
+function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPost: (title: string, boardId: string) => void; onOpenThread: (id: string) => void }) {
+  const worlds = useStudentWorlds();
+  const [text, setText] = useState("");
+  const [picked, setPicked] = useState<string | null>(null);
+  const fromWords = ROUTE_WORDS.find((r) => r.test.test(text))?.id;
+  const fromTop3 = COMMUNITIES.find((c) => worlds.includes(c.world))?.id;
+  const boardId = picked ?? fromWords ?? fromTop3 ?? "teaching-education";
+  const community = COMMUNITIES.find((c) => c.id === boardId)!;
+  const accent = communityAccent(community);
+  const blocked = CONTACT_INFO.test(text);
+  const words = text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP.has(w));
+  const similar = words.length === 0 ? [] : ALL_THREADS.filter((t) => (t.state === "answered" || t.state === "resolved") && words.some((w) => t.title.toLowerCase().includes(w))).slice(0, 2);
+  const canPost = text.trim().length > 0 && !blocked;
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <div className="relative z-[1] flex w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-3)]">
+          <h2 id="ask-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <label className="block">
+          <span className="sr-only">Your question</span>
+          <textarea
+            autoFocus
+            value={text}
+            maxLength={280}
+            rows={3}
+            onChange={(event) => setText(event.target.value)}
+            placeholder="What do you want to know?"
+            className="w-full resize-none rounded-[var(--radius-md)] border px-[14px] py-[12px] text-[16px] leading-[23px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+            style={{ background: "var(--glass-surface-1)", borderColor: blocked ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)" }}
+          />
+        </label>
+        {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
+
+        {/* where it goes: picked from the words, one tap to change */}
+        <div className="flex flex-col gap-[8px]">
+          <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Goes to</span>
+          <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
+            {COMMUNITIES.map((c) => {
+              const on = c.id === boardId;
+              const a = communityAccent(c);
+              return (
+                <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => setPicked(c.id)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {similar.length > 0 && (
+          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+            <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
+            {similar.map((t) => (
+              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left">
+                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+                <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+          <span className="flex min-w-0 flex-1 items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
+            <span>Posting as Jordan · Junior. Verified pros in {community.name} answer in public. {community.responseWindow}.</span>
+          </span>
+          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+            <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></span>
+          </PrimaryCta>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Everything the student saved, resolved from the one saves map: whole
+ *  questions, single answers, posts and event takeaways. */
+function SavedView({ saves, onBack, onOpenThread, onOpenInsight }: { saves: Record<string, boolean>; onBack: () => void; onOpenThread: (id: string) => void; onOpenInsight: (id: string) => void }) {
+  const rows: { key: string; kicker: string; title: string; open: () => void }[] = [];
+  for (const id of Object.keys(saves).filter((k) => saves[k])) {
+    const thread = ALL_THREADS.find((t) => t.id === id);
+    if (thread) { rows.push({ key: id, kicker: "Question", title: `“${thread.title}”`, open: () => onOpenThread(thread.id) }); continue; }
+    const insight = INSIGHTS.find((i) => i.id === id);
+    if (insight) { rows.push({ key: id, kicker: `Post by ${proById(insight.proId).name}`, title: insight.title, open: () => onOpenInsight(insight.id) }); continue; }
+    const answer = id.match(/^(.+)-a(\d+)$/);
+    if (answer) {
+      const t = ALL_THREADS.find((x) => x.id === answer[1]);
+      const r = t?.responses[Number(answer[2])];
+      if (t && r && r.kind === "answer") { rows.push({ key: id, kicker: `Answer by ${proById(r.proId).name}`, title: `“${t.title}”`, open: () => onOpenThread(t.id) }); continue; }
+    }
+    const recap = id.match(/^recap-(.+)$/);
+    if (recap) {
+      const e = eventById(recap[1]);
+      if (e) rows.push({ key: id, kicker: "Event takeaways", title: e.name, open: () => {} });
+    }
+  }
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+      </button>
+      <Panel id="saved-title" title="Saved" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} saved</span>}>
+        {rows.length === 0 ? (
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet. Tap Save on any answer or post and it lands here.</p>
+        ) : (
+          <ul className="-mt-[var(--space-2)] flex flex-col">
+            {rows.map((row) => (
+              <PanelRow key={row.key} onClick={row.open}>
+                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.kicker}</span>
+                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{row.title}</span>
+              </PanelRow>
+            ))}
+          </ul>
+        )}
+      </Panel>
+    </>
+  );
+}
+
+const REPORT_REASONS = ["Shares personal contact details", "Unkind or bullying", "Not about careers or school", "Something else"];
+
+/** Report, made visible (safety by design): pick why, send, done. */
+function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
+  const [reason, setReason] = useState<string | null>(null);
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="report-title">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <div className="relative z-[1] flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-3)]">
+          <h2 id="report-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Report this</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>A moderator reads every report. The person you report never sees who sent it.</p>
+        <div className="flex flex-col" role="radiogroup" aria-label="Reason">
+          {REPORT_REASONS.map((r) => {
+            const on = reason === r;
+            return (
+              <button key={r} type="button" role="radio" aria-checked={on} onClick={() => setReason(r)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] border-t px-[8px] py-[12px] text-left text-[15px] leading-[21px] font-semibold first:border-t-0" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+                <span aria-hidden className="flex size-[18px] flex-none items-center justify-center rounded-full border-2" style={{ borderColor: on ? "var(--primary)" : "var(--muted-foreground)" }}>
+                  {on && <span className="size-[8px] rounded-full" style={{ background: "var(--primary)" }} />}
+                </span>
+                {r}
+              </button>
+            );
+          })}
+        </div>
+        <PrimaryCta onClick={() => reason && onSubmit(reason)} className={reason ? "" : "pointer-events-none opacity-50"}>Send report</PrimaryCta>
+      </div>
     </div>
   );
 }
@@ -1151,6 +1323,10 @@ function HomeView({
   follows,
   onFollow,
   joinedCount,
+  asked,
+  onAsk,
+  onOpenThread,
+  savedCount,
 }: {
   tab: "communities" | "events";
   onTab: (tab: "communities" | "events") => void;
@@ -1163,6 +1339,10 @@ function HomeView({
   follows: Follows;
   onFollow: (id: string) => void;
   joinedCount: number;
+  asked: AskedQuestion[];
+  onAsk: () => void;
+  onOpenThread: (id: string) => void;
+  savedCount: number;
 }) {
   const [query, setQuery] = useState("");
   const eventInk = "#f6f5fb";
@@ -1200,7 +1380,7 @@ function HomeView({
           )}
         </label>
 
-      {tab === "communities" && !query && <PeopleToFollow follows={follows} onFollow={onFollow} />}
+      {tab === "communities" && !query && <YourQuestions asked={asked} onOpenThread={onOpenThread} onAsk={onAsk} savedCount={savedCount} />}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
@@ -1236,6 +1416,12 @@ function HomeView({
           )}
         </section>
       )}
+
+      {/* People after places (direct feedback): the communities are the
+         doors, the people are who is behind them. Then what the people you
+         already follow did lately, only once you follow someone. */}
+      {tab === "communities" && !query && <PeopleToFollow follows={follows} onFollow={onFollow} />}
+      {tab === "communities" && !query && <NewFromFollowing follows={follows} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -1418,6 +1604,7 @@ function BoardView({
   const about = filter === "about";
   const bannerCover = PHOTO_COVER[community.id];
   const bannerInk = "#f6f5fb";
+  const nav = useContext(ConnectNav);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
 
   return (
@@ -1527,7 +1714,7 @@ function BoardView({
                   joined={joined}
                   onRequireJoin={onJoin}
                   accent={communityAccent(community)}
-                  onPost={(text) => setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current])}
+                  onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
                 />
                 {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
                 {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
@@ -1715,6 +1902,7 @@ function ThreadView({
   const boardAccent = boardCommunity ? communityAccent(boardCommunity) : EVENT_ACCENT;
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
   const p = cardProps(thread.id);
+  const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
 
   return (
@@ -1770,7 +1958,7 @@ function ThreadView({
                   <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
                     <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save insight"}
                   </button>
-                  <button type="button" aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+                  <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
                     <Flag className="h-3 w-3" aria-hidden /> Report
                   </button>
                 </div>
@@ -1797,7 +1985,8 @@ function ThreadView({
 
         {thread.responses.length === 0 && (
           <Card>
-            <p className="text-[13px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet. We&apos;ll notify you.</p>
+            <p className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet.</p>
+            <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Sent to verified pros in {boardName}. Most questions here are answered {thread.expectedWindow}. We&apos;ll let you know.</p>
           </Card>
         )}
 
@@ -1815,7 +2004,7 @@ function ThreadView({
           <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
             <Bookmark className="h-3.5 w-3.5" aria-hidden /> {p.saved ? "Saved" : "Save"}
           </button>
-          <button type="button" className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+          <button type="button" onClick={() => nav?.report(thread.id)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
             <Flag className="h-3.5 w-3.5" aria-hidden /> Report
           </button>
         </div>

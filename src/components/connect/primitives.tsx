@@ -19,7 +19,18 @@ export const ConnectNav = createContext<{
   openThread: (id: string) => void;
   openInsight: (id: string) => void;
   openBoard: (id: string) => void;
+  openSaved: () => void;
+  /** a question was posted from any composer: lands in "Your questions" */
+  noteAsked: (title: string, boardId: string) => void;
+  /** opens the report sheet for a thread, answer, post or comment id */
+  report: (id: string) => void;
 } | null>(null);
+
+/** Phone numbers, emails, @handles and DM apps have no place in a public
+ *  question. The check is a client-side assist only (handoff 11.2); the
+ *  draft is preserved and the student is told why. */
+export const CONTACT_INFO = /\S+@\S+\.\S+|\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b|(^|\s)@\w{3,}|\b(snap(chat)?|whatsapp|discord|telegram|dm me|text me)\b/i;
+export const CONTACT_WARNING = "Keep phone numbers, emails and usernames out. Pros answer here in public, and that keeps everyone safe.";
 
 /** "9,418" for profile totals; "8.4K" (compact) for per-post views -- the two
  *  formats the Connect 2.0 doc uses. */
@@ -147,8 +158,9 @@ export function InlineAsk({
 }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  const blocked = CONTACT_INFO.test(text);
   const submit = () => {
-    if (!text.trim()) return;
+    if (!text.trim() || blocked) return;
     dispatchAuroraPulse("cta");
     onPost(text.trim());
     setText("");
@@ -159,19 +171,19 @@ export function InlineAsk({
       <button
         type="button"
         onClick={() => (joined ? setOpen(true) : onRequireJoin?.())}
-        className="dm-tap flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-full border px-[var(--space-4)] text-left"
+        className="dm-tap flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left"
         style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
       >
         <Avatar name="Jordan Rivera" size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{placeholder}</span>
-        <span className="flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
+        <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
           Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
         </span>
       </button>
     );
   }
   return (
-    <div className="rounded-[var(--radius-xl)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
+    <div className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
       <div className="flex items-start gap-[12px]">
         <Avatar name="Jordan Rivera" size={30} />
         <label className="min-w-0 flex-1">
@@ -189,21 +201,24 @@ export function InlineAsk({
           />
         </label>
       </div>
+      {blocked && (
+        <p role="alert" className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>
+      )}
       <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
-        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
+        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
           <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
         </button>
-        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Polish
         </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
-        <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
         </button>
-        <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-full px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
           Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
         </button>
       </div>
@@ -295,3 +310,133 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
   );
 }
 
+// CEO's photography in the band, with the poster card's legibility stack
+// (progressive blur, vignette, top scrim, grain) so the title always reads.
+// Real company marks for the "Professionals from" chips (Wikimedia Commons,
+// 2026-09-03, committed under public/images/logos/companies), drawn as a
+// white silhouette through a CSS mask (direct feedback: no white tiles; the
+// logo in white on the chip). `w` is each mark's rendered width at 12px
+// tall, so wordmarks and square marks take the room their shape needs. A
+// company with no exact current mark would get a text-only chip; today every
+// company in the data has one.
+// Microsoft uses the 2012 wordmark, not the four-square symbol, for the same reason.
+export const COMPANY_MARKS: Record<string, { file: string; aspect: number; height?: number }> = {
+  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93 },
+  // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
+  // not the blue box: a filled square masks to a blank tile. Two lines need
+  // more height than a one-line wordmark to stay legible.
+  "Goldman Sachs": { file: "goldman-sachs", aspect: 2.39, height: 16 },
+  // the current one-word wordmark (Commons "The Blackstone Group logo (2).svg"),
+  // its black backing rectangle removed so only the letters mask
+  Blackstone: { file: "blackstone", aspect: 6.27 },
+  Amazon: { file: "amazon", aspect: 3.31 },
+  EY: { file: "ey", aspect: 0.99 },
+  Google: { file: "google", aspect: 3.04 },
+  Deloitte: { file: "deloitte", aspect: 5.31 },
+  "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
+  Microsoft: { file: "microsoft", aspect: 4.69 },
+  Meta: { file: "meta", aspect: 4.96 },
+  Apple: { file: "apple", aspect: 0.81 },
+  "CVS Health": { file: "cvs-health", aspect: 8.2 },
+  "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
+  Pfizer: { file: "pfizer", aspect: 2.44 },
+  "Mayo Clinic": { file: "mayo-clinic", aspect: 0.92 },
+  Disney: { file: "disney", aspect: 2.41 },
+  Nike: { file: "nike", aspect: 2.82 },
+  Spotify: { file: "spotify", aspect: 1.0 },
+  Netflix: { file: "netflix", aspect: 3.7 },
+  Adobe: { file: "adobe", aspect: 3.8 },
+};
+
+// Equal visual weight (direct feedback: letters the same height, chips the
+// same height, nothing too big or small). Every SVG is trimmed to its ink
+// bounds (viewBox rewritten from a rendered alpha scan, 2026-09-03), so the
+// box IS the letters: wordmarks render 11px tall and as wide as their own
+// letters need; compact symbol marks (aspect under 1.3) render 14px tall.
+export function markBox(aspect: number, override?: number): { width: number; height: number } {
+  const height = override ?? (aspect < 1.3 ? 14 : aspect > 6 ? 13 : 11);
+  return { width: Math.round(height * aspect), height };
+}
+
+export function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
+  const mark = COMPANY_MARKS[name];
+  const onPhoto = tone === "photo";
+  const ink = onPhoto ? "#FFFFFF" : "var(--foreground)";
+  // Logo only when we have the real mark (direct feedback); the name stays
+  // for screen readers and as the fallback when no exact mark exists.
+  return (
+    <span
+      className="group/chip relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
+      title={name}
+      tabIndex={mark ? 0 : undefined}
+      style={{
+        background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
+        borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
+        color: ink,
+        textShadow: "none",
+      }}
+    >
+      {mark ? (
+        <>
+          <span
+            aria-hidden
+            className="block flex-none"
+            style={{
+              ...markBox(mark.aspect, mark.height),
+              background: ink,
+              maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+          <span className="sr-only">{name}</span>
+          {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-[30px] left-0 rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[11px] leading-[14px] font-semibold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/chip:opacity-100 group-focus-visible/chip:opacity-100"
+            style={{ background: "rgba(9,10,20,0.92)", color: "#FFFFFF", boxShadow: "0 6px 16px -8px rgba(0,0,0,0.8)" }}
+          >
+            {name}
+          </span>
+        </>
+      ) : (
+        name
+      )}
+    </span>
+  );
+}
+
+/** The bare white-silhouette mark, no chip: for a line like "Brand
+ *  Strategist at [EY]" beside text, sized so the letters sit at text
+ *  x-height (a wordmark 11px tall, a compact symbol 14px). Falls back to the
+ *  company's name when no exact mark exists, so the line never goes blank. */
+export function CompanyMark({ name, ink = "currentColor", className = "" }: { name: string; ink?: string; className?: string }) {
+  const mark = COMPANY_MARKS[name];
+  if (!mark) return <span className={className}>{name}</span>;
+  return (
+    <span className={`inline-flex items-center ${className}`} title={name}>
+      <span
+        aria-hidden
+        className="block flex-none"
+        style={{
+          ...markBox(mark.aspect, mark.height),
+          background: ink,
+          maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskPosition: "center",
+        }}
+      />
+      <span className="sr-only">{name}</span>
+    </span>
+  );
+}
