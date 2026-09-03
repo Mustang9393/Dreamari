@@ -123,7 +123,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What a year costs, by family income</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships. Find the row that matches what your family earns.</p>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships.</p>
                   <div className="mt-[var(--space-4)]">
                     <HBars rows={d.bands.map((b) => ({ label: `Family earns ${b.label.toLowerCase()}`, value: b.pay, display: money(b.pay) }))} />
                   </div>
@@ -131,7 +131,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Help with the bill</h3>
-                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>How many students get money they do not pay back.</p>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Money you do not pay back.</p>
                     <div className="mt-[var(--space-2)]">
                       {d.scholarshipShare !== undefined && <Row label="Get a scholarship from the college" note={d.scholarshipAvg && d.scholarshipShare ? `about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each, new students` : "new students"} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
                       {d.pell !== undefined && <Row label="Get a federal Pell grant" note="for lower-income families" value={`${d.pell}%`} last />}
@@ -141,7 +141,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {(d.tuitionInState !== null || d.housing) && (
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>The full price, before any aid</h3>
-                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The list price. Almost nobody pays this.</p>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Almost nobody pays this.</p>
                     <div className="mt-[var(--space-2)]">
                       {d.tuitionInState !== null && <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />}
                       {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
