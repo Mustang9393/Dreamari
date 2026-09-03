@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Bookmark, BookOpen, ChevronDown, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { PayMap } from "./PayMap";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -56,8 +56,19 @@ const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, tra
 
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
+// Checked poster by poster against the phone header box (335x300, 2026-09-03):
+// the default keeps heads in frame for portraits shot at chest height; these
+// are the exceptions (heads at the very top edge, or a top-down shot with the
+// face low in the frame).
 const HERO_FOCUS: Record<string, string> = {
   "asset-management": "center 68%",
+  "sports-medicine-doctor": "50% 0%",
+  animator: "50% 0%",
+  "game-designer": "50% 0%",
+  "video-game-designer": "50% 0%",
+  "pediatric-surgeon": "50% 0%",
+  electrician: "50% 0%",
+  quant: "50% 48%",
 };
 
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
@@ -434,10 +445,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
               <Image src={career.photo} alt="" fill sizes="520px" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.6) 30%, transparent 70%)" }} />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
             </span>
-            <CardProgressiveBlur size="60%" />
-            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.7) 34%, rgba(12,16,35,0.22) 62%, transparent 100%), ${cardTopScrim()}` }} />
+            <CardProgressiveBlur size="52%" />
+            {/* lighter than before (direct feedback: the blur and the side fade
+               already carry the type, so the photo can show) */}
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">

@@ -55,3 +55,8 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - The degree pop-up now says what you need in words. The education-mix numbers and percentages are gone.
 - Each career ladder level opens to two short bullet lists: "What you do" and "What you need", so the climb between levels is clear.
 - Kept as is: the (i) "What you need to get in", pay by state.
+
+## Later: My Profile and career headers
+- My Profile now looks like a career page: a cover photo behind the header (pick one of six or upload your own), your photo and name on it, and Grade / GPA / Streak as one clean strip. Every card on the page uses the same frosted panel.
+- Career page headers are brighter. The photo shows through more; the blur and fade still carry the text.
+- Checked all 39 career photos at phone size and re-framed the seven where a head was cut off.

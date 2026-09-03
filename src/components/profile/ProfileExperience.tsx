@@ -33,8 +33,10 @@ import {
   Users,
   Wrench,
   X,
+  ImagePlus,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -73,7 +75,21 @@ const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase
 // flat --card) -- an opaque fill here was blocking that gradient under every
 // stacked card, which is why the page read as flat/dark despite sharing the
 // exact same background gradient string as Home.
-const GLASS = { background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" } as const;
+// The career page's frosted panel: one recipe for every section here too.
+const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+const RULE = "rgba(255,255,255,0.12)";
+
+// Cover photos a student can pick for their header (the app's own
+// photography), or upload their own. Persisted per browser.
+const COVERS = [
+  "/images/connect/covers/photo4-tech-engineering.webp",
+  "/images/connect/covers/photo4-business-money.webp",
+  "/images/connect/covers/photo4-health-medicine.webp",
+  "/images/connect/covers/photo4-arts-media.webp",
+  "/images/connect/covers/photo4-teaching-education.webp",
+  "/images/connect/covers/creative.webp",
+];
+const COVER_KEY = "dreamari-cover";
 
 // Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
 // navigates with (so the right career server-renders, no flash of someone
@@ -169,6 +185,22 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
+  const [coverUrl, setCoverUrl] = useState(COVERS[0]);
+  const [coverOpen, setCoverOpen] = useState(false);
+  useEffect(() => {
+    // the browser is the store for the prototype; read after mount so the
+    // server render and the first paint match
+    try {
+      const saved = window.localStorage.getItem(COVER_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved) setCoverUrl(saved);
+    } catch {}
+  }, []);
+  const pickCover = (url: string) => {
+    setCoverUrl(url);
+    setCoverOpen(false);
+    try { window.localStorage.setItem(COVER_KEY, url); } catch {}
+  };
   const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
 
   // Swapping a career or changing the focus here is a real choice too, so it
@@ -295,20 +327,47 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
              byline; the numeric facts sit in their own strip so they line up
              at every width instead of forming a ragged grid on phones. Its
              own card, separate from the tabs/dashboard surface below. ---- */}
-        <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS}>
-          <div className="flex items-center gap-[var(--space-3)]">
-            <label className="group relative size-12 flex-none cursor-pointer" aria-label="Change profile photo">
-              <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-12 rounded-full object-cover" />
-              <span className="absolute -right-0.5 -bottom-0.5 flex size-[19px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "var(--background)", color: "var(--foreground)" }}>
-                <Pencil className="h-[10px] w-[10px]" />
+        {/* ---- Header in the career page's language: the cover photo runs
+             behind the card and dissolves upward through the progressive blur;
+             the name sits on the photo; the student picks or uploads the cover. ---- */}
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+          <div className="absolute inset-0" aria-hidden>
+            <img src={coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 40%" }} />
+            <CardProgressiveBlur size="56%" />
+            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 36%, rgba(12,16,35,0.08) 66%, transparent 100%)" }} />
+          </div>
+          <div className="relative flex min-h-[224px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-5)] pt-[88px] sm:min-h-[264px] sm:p-[var(--space-6)]">
+            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex items-center gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
+              <span className="relative">
+                <button
+                  type="button"
+                  aria-label="Change cover photo"
+                  aria-expanded={coverOpen}
+                  onClick={() => setCoverOpen((open) => !open)}
+                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                  style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
+                >
+                  <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Cover</span>
+                </button>
+                {coverOpen && (
+                  <>
+                    <button type="button" aria-label="Close" className="fixed inset-0 z-[55] cursor-default" onClick={() => setCoverOpen(false)} />
+                    <div className="absolute top-[44px] right-0 z-[56] flex w-[264px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)", color: "var(--foreground)" }}>
+                      <div className="grid grid-cols-3 gap-[6px]">
+                        {COVERS.map((url) => (
+                          <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                            <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                      <label className="dm-quiet flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+                        <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Upload your own
+                        <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) pickCover(URL.createObjectURL(file)); }} />
+                      </label>
+                    </div>
+                  </>
+                )}
               </span>
-              <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
-            </label>
-            <span className="flex min-w-0 flex-1 flex-col">
-              <h2 className="text-[21px] leading-[25px] font-extrabold tracking-[-0.02em] text-balance sm:truncate sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
-              <span className="text-[14px] leading-[17px] font-bold sm:truncate sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
-            </span>
-            <span className="flex flex-none items-center gap-[2px]">
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
@@ -347,35 +406,49 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   </>
                 )}
               </span>
-            </span>
+            </div>
+            <div className="flex items-end gap-[var(--space-4)]">
+              <label className="group relative size-[72px] flex-none cursor-pointer" aria-label="Change profile photo">
+                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-[72px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
+                <span className="absolute right-0 bottom-0 flex size-[22px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "#0e0c20", color: "var(--foreground)", textShadow: "none" }}>
+                  <Pencil className="h-[11px] w-[11px]" />
+                </span>
+                <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
+              </label>
+              <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
+                <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
+                <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>
+              </span>
+            </div>
           </div>
-          <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-3)] sm:flex sm:gap-x-[44px]" style={{ borderColor: "var(--glass-border)" }}>
-            {[
-              { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
-              { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
-              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142 of 190 days", verified: false },
-            ].map((fact) => (
-              <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
-                <dt className="flex items-center gap-[4px] text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>
-                  {fact.label}
-                  {fact.verified && (
-                    <>
-                      <BadgeCheck className="h-[12px] w-[12px]" aria-hidden />
-                      <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
-                    </>
-                  )}
-                </dt>
-                <dd className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[1px]">
-                  <span className="flex items-baseline gap-[4px]">
-                    <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{fact.value}</span>
-                    {fact.note && <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
-                  </span>
-                  {fact.sub && <span className="text-[11.5px] leading-[14px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </section>
+
+        {/* ---- Quick facts, as on a career page: one strip, dividers, label
+             over figure. ---- */}
+        <dl className="grid grid-cols-3 rounded-[var(--radius-lg)] border" style={GLASS}>
+          {[
+            { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
+            { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
+            { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142 of 190 days", verified: false },
+          ].map((fact, i) => (
+            <div key={fact.label} className={`flex min-w-0 flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i > 0 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
+              <dt className="flex items-center gap-[4px] text-[16px] leading-[22px] font-semibold">
+                {fact.label}
+                {fact.verified && (
+                  <>
+                    <BadgeCheck className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+                    <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
+                  </>
+                )}
+              </dt>
+              <dd className="flex flex-wrap items-baseline gap-x-[6px]">
+                <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>{fact.value}</span>
+                {fact.note && <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
+                {fact.sub && <span className="block w-full text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
         {/* SR announcement for focus changes */}
         <span aria-live="polite" className="sr-only">{announce}</span>
