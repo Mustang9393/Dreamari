@@ -101,7 +101,9 @@ const AVATAR_PHOTO: Record<string, string> = {
 // A verified badge overlaps the corner exactly like the app's other verified
 // affordances — a small ShieldCheck on a solid chip, never color alone.
 export function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  const photo = USE_PHOTO_AVATARS ? AVATAR_PHOTO[name] : undefined;
+  // Professionals always wear their portrait; students stay behind the flag.
+  const isPro = PROS.some((p) => p.name === name);
+  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
   const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
@@ -232,12 +234,15 @@ export function LocalQuestionCard({ title }: { title: string }) {
 export function Card({ children, className = "", accent }: { children: React.ReactNode; className?: string; accent?: string }) {
   return (
     <div
-      className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] ${className}`}
-      style={
-        accent
-          ? { background: `color-mix(in srgb, ${accent} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 26%, var(--glass-border))` }
-          : { background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }
-      }
+      className={`rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`}
+      // the app's frosted panel (career page, Connect boards)
+      style={{
+        background: accent ? `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))` : "var(--glass-surface-2)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderColor: accent ? `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` : "rgba(255,255,255,0.16)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)",
+      }}
     >
       {children}
     </div>
@@ -250,7 +255,7 @@ export function PrimaryCta({ children, onClick, className = "" }: { children: Re
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-3)] text-[13px] leading-[18px] font-bold transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${className}`}
+      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] leading-[20px] font-semibold ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF" }}
     >
       {children}
@@ -268,7 +273,7 @@ export function QuietCta({ children, onClick, className = "", done = false }: { 
       type="button"
       onClick={onClick}
       aria-pressed={done || undefined}
-      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-3)] text-[13px] leading-[18px] font-semibold ${className}`}
+      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] leading-[20px] font-semibold ${className}`}
       style={
         done
           ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }

@@ -3,7 +3,7 @@
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -32,6 +32,8 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { ConnectNav } from "./primitives";
+import { PeopleToFollow, ProDashboardView, ProProfileView, type Follows } from "./ProProfile";
 import {
   COMMUNITIES,
   EVENTS,
@@ -91,6 +93,8 @@ const EVENT_ACCENT = "#f59e0b";
 type View =
   | { kind: "home"; tab: "communities" | "events" }
   | { kind: "board"; id: string; filter: string }
+  | { kind: "pro"; id: string }
+  | { kind: "proDashboard" }
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string };
@@ -98,6 +102,8 @@ type View =
 function viewToQuery(view: View): string {
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
+  if (view.kind === "pro") return `?pro=${view.id}`;
+  if (view.kind === "proDashboard") return "?dashboard=pro";
   if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "insight") return `?insight=${view.id}`;
   return `?thread=${view.id}`;
@@ -109,6 +115,8 @@ function queryToView(search: string): View {
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "questions" };
+  if (q.get("dashboard") === "pro") return { kind: "proDashboard" };
+  if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
   return { kind: "home", tab: tab === "events" ? tab : "communities" };
 }
@@ -348,11 +356,12 @@ function IdentityBadge({ handle, grade, postedAgo }: { handle: string; grade: st
 // itself, not repeated in text), name, company + role. Nothing else.
 function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: string; size?: number }) {
   const pro = proById(proId);
+  const nav = useContext(ConnectNav);
   return (
     <div className="flex items-center gap-[10px]">
       <Avatar name={pro.name} verified size={size} />
       <div className="flex min-w-0 flex-col">
-        <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+        <button type="button" onClick={() => nav?.openPro(proId)} className="dm-link w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
         <span className="text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
           {pro.org} · {pro.role}
           {postedAgo ? ` · ${postedAgo}` : ""}
@@ -800,6 +809,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 // insight's own thread, where the conversation lives.
 function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
   const pro = proById(insight.proId);
+  const nav = useContext(ConnectNav);
   return (
     <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the insight's thread -- overlay target under
@@ -814,7 +824,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
         <Avatar name={pro.name} verified size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
-            <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
             <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
             <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
           </div>
@@ -885,6 +895,9 @@ export function ConnectExperience() {
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
   const [announce, setAnnounce] = useState("");
+  // Connect 2.0: who the student follows (local for the prototype).
+  const [follows, setFollows] = useState<Follows>({});
+  const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
 
   // restore view from URL on mount; keep URL in sync so filters survive
   // reload/share (handoff 8.3). Deliberately an effect, not a lazy useState
@@ -902,6 +915,16 @@ export function ConnectExperience() {
     window.history.replaceState(null, "", "/connect" + base);
     window.scrollTo(0, 0);
   }, []);
+
+  const nav = useMemo(
+    () => ({
+      openPro: (id: string) => setView({ kind: "pro", id }),
+      openThread: (id: string) => setView({ kind: "thread", id }),
+      openInsight: (id: string) => setView({ kind: "insight", id }),
+      openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
+    }),
+    [setView],
+  );
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -931,6 +954,7 @@ export function ConnectExperience() {
 
   return (
     <div data-connect className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
+      <ConnectNav.Provider value={nav}>
       <DesktopNavigation active="Connect" />
 
       {/* Mobile header (matches Home's pattern) */}
@@ -969,9 +993,19 @@ export function ConnectExperience() {
             onEnterCode={(id) => setCodeOpenFor(id)}
             joined={joined}
             onJoinCommunity={(id) => setJoinFor(id)}
+            follows={follows}
+            onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
           />
         )}
+
+        {view.kind === "pro" &&
+          (() => {
+            const pro = PROS.find((p) => p.id === view.id);
+            if (!pro) return null;
+            return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} />;
+          })()}
+        {view.kind === "proDashboard" && <ProDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1098,6 +1132,7 @@ export function ConnectExperience() {
       )}
 
       <MobileNav active="Connect" />
+      </ConnectNav.Provider>
     </div>
   );
 }
@@ -1113,6 +1148,8 @@ function HomeView({
   onEnterCode,
   joined,
   onJoinCommunity,
+  follows,
+  onFollow,
   joinedCount,
 }: {
   tab: "communities" | "events";
@@ -1123,6 +1160,8 @@ function HomeView({
   onEnterCode: (id: string) => void;
   joined: Record<string, boolean>;
   onJoinCommunity: (id: string) => void;
+  follows: Follows;
+  onFollow: (id: string) => void;
   joinedCount: number;
 }) {
   const [query, setQuery] = useState("");
@@ -1160,6 +1199,8 @@ function HomeView({
             </button>
           )}
         </label>
+
+      {tab === "communities" && !query && <PeopleToFollow follows={follows} onFollow={onFollow} />}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
