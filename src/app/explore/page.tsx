@@ -10,17 +10,18 @@ export const metadata: Metadata = {
 
 // Explore — For You (Figma 2288:16179 + Mobile Reel 2530:46431) and
 // Browse All (Figma 3185:17011 / mobile 2428:3454), toggled via ?tab=browse.
-export default async function ExplorePage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
+export default async function ExplorePage({ searchParams }: { searchParams: Promise<{ tab?: string | string[]; q?: string | string[] }> }) {
   const params = await searchParams;
   const requested = Array.isArray(params.tab) ? params.tab[0] : params.tab;
   // Browse is the default view (per user 2026-08-21); the reel stays one tap away.
   const initialTab = requested === "foryou" ? "foryou" : "browse";
+  const q = Array.isArray(params.q) ? params.q[0] : params.q;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
-      <ExploreExperience initialTab={initialTab} />
+      <ExploreExperience initialTab={q ? "browse" : initialTab} initialQuery={q ?? ""} />
     </>
   );
 }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
-import { ArrowRight, Bookmark, GraduationCap, Landmark, Undo2, Wallet } from "lucide-react";
+import { ArrowRight, Bookmark, GraduationCap, Landmark } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, money, type College } from "./data";
@@ -82,16 +82,6 @@ export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle:
  *  place at the top; three stat tiles; the three words; one ghost action.
  *  Figures sit at body size: nothing on the card outranks its title. */
 const GRAIN = "/images/connect/covers/grain.png";
-function StatTile({ icon: Icon, value, label }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: string; label: string }) {
-  return (
-    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
-      <Icon className="h-[14px] w-[14px]" aria-hidden style={{ color: `color-mix(in srgb, ${ACCENT} 60%, #FFFFFF)` }} />
-      <span className="text-[15px] leading-[20px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
-      <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
-    </div>
-  );
-}
-
 export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
   const img = collegeImage(c);
   const mark = collegeMark(c);
@@ -122,12 +112,13 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
         <h3 className="pr-[48px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
         <p className="mt-[3px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
 
-        <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
-          <StatTile icon={Wallet} value={c.netPrice === null ? "n/a" : money(c.netPrice)} label="Really pay a year" />
-          <StatTile icon={GraduationCap} value={pct(c.finish)} label="Finish" />
-          <StatTile icon={Undo2} value={pct(c.retention)} label="Come back" />
-        </div>
-        <ul className="mt-[10px] flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
+        {/* two plain sentences instead of stat boxes: the cost a family
+           pays after grants, and how many finish. Nothing else on the card. */}
+        <p className="mt-auto pt-[var(--space-5)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+          {c.netPrice === null ? "Yearly cost not published." : `About ${money(Math.round(c.netPrice / 100) * 100)} a year after grants.`}
+          {c.finish !== null && <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>{c.finish} in 100 students finish.</span>}
+        </p>
+        <ul className="mt-[8px] flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
           {tags(c).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.1)", color: "#fff" }}>{t}</li>)}
           {c.admission === "open" && <li className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(12,16,35,0.6))", color: "#fff" }}>Everyone gets in</li>}
         </ul>

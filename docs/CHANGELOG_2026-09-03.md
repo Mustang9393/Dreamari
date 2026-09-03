@@ -89,3 +89,12 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 
 ## Documents
 - Connect 2.0 journeys report (PDF and web page) and a full UX audit with research sources and the interaction spec (posting, asking, commenting, liking, sharing, saving), in the docs folder.
+
+## College lookup (branch `college-lookup`, pushed as a branch, not on main)
+- Research first: the live Find a college page studied at phone, tablet and desktop; competitive audit of College Scorecard, BigFuture, Niche, College Navigator and Scoir; search patterns from NN/g and Baymard; Gen Z social-search research. Written up in docs/COLLEGE_LOOKUP_AUDIT.md.
+- Find a college: one search box with results as you type, six quick picks in a student's words (Near home, 4-year, 2-year, Trade school, Under $15K a year, Everyone gets in), "All filters" in a tray over the results, applied filters as removable chips. Home state first, then by how many finish. We do not rank.
+- College cards in the community card shape: campus photo, name, place, two plain sentences ("About $6,100 a year after grants. 98 in 100 students finish."), three words, Compare and Open. Save on every card. Compare up to three side by side.
+- College pages in the career page anatomy with a strict top-down type order: title, section headings, subheadings, body. Figures are bold body text, never bigger than the heading above them. "At a glance" rows, then folded sections: What it costs, Getting in, What you can study, Life there, Who is there, After college, See it then ask someone, Where these numbers come from.
+- Data: 30 colleges (10 New Jersey, 20 South Dakota). 16 with figures transcribed from the live site; the rest carry generated sample detail in the same shape, marked in the page's sources. Real campus photos from Wikimedia Commons with licences recorded.
+- Copy: "Really pay" replaced everywhere with "Cost for a year, after grants" and plain sentences.
+- Sitewide search: a search button beside the menu on every app screen (and Cmd/Ctrl+K). Results grouped into Careers, Colleges, People, Companies, Communities and events, with a scope row and "All in Explore / Find a college / Connect" doors. With nothing typed it shows three doors (Careers, Colleges, People) and things to try. Explore now accepts a search from the URL.

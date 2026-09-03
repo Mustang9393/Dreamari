@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+ 
 
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -661,11 +661,12 @@ function ForYouFace() {
   );
 }
 
-export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "browse" }) {
+export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTab: "foryou" | "browse"; initialQuery?: string }) {
   const router = useRouter();
   const [tab, setTab] = useState<"foryou" | "browse">(initialTab);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  // ?q= from the sitewide search lands here with the box already open
+  const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
+  const [query, setQuery] = useState(initialQuery);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);

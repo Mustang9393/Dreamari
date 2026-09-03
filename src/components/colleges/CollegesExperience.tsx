@@ -194,7 +194,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         )}
 
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          Government figures for 2024-25. &ldquo;Really pay&rdquo; is the average a family paid for a year after grants and scholarships, not the sticker price.
+          Government figures for 2024-25. Costs are what families paid for a year after grants and scholarships, not the sticker price.
         </p>
       </main>
 
@@ -268,7 +268,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
             ))}
             {STATES.length > 6 && <button type="button" onClick={() => setStatesOpen((v) => !v)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: SOFT }}>{statesOpen ? "Fewer" : `All ${STATES.length}`} <ChevronDown className="h-4 w-4" style={{ transform: statesOpen ? "rotate(180deg)" : undefined }} aria-hidden /></button>}
           </Group>
-          <Group title="What it costs" note="What families really pay for a year, after grants.">
+          <Group title="What it costs" note="What a year costs a family after grants.">
             <Chip on={filters.costCap === null} onToggle={() => set({ costCap: null })}>Any</Chip>
             {COST_CAPS.map((cap) => <Chip key={cap} on={filters.costCap === cap} onToggle={() => set({ costCap: filters.costCap === cap ? null : cap })}>Under {money(cap)}</Chip>)}
           </Group>
@@ -312,7 +312,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
 function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () => void }) {
   if (typeof document === "undefined") return null;
   const rows: { label: string; get: (c: College) => string }[] = [
-    { label: "Really pay a year", get: (c) => (c.netPrice === null ? "Not published" : money(c.netPrice)) },
+    { label: "Cost for a year, after grants", get: (c) => (c.netPrice === null ? "Not published" : money(c.netPrice)) },
     { label: "Getting in", get: (c) => admissionWord(c) },
     { label: "Finish their degree", get: (c) => pct(c.finish) },
     { label: "Come back for year 2", get: (c) => pct(c.retention) },

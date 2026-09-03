@@ -96,7 +96,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
           <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
           <div className="pt-[var(--space-2)]">
-            <Row label="What students really pay" note="a year, after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+            <Row label="Cost for a year" note="what families pay after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
             <Row label="Getting in" note={c.admitRate === null ? "open admission, no test scores" : c.applied ? `${c.applied.toLocaleString("en-US")} applied` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate}% are admitted`} />
             <Row label="Finish their degree" note="within 6 years, everyone who started" value={pct(c.finish)} />
             <Row label="Come back for year 2" value={pct(c.retention)} />
@@ -109,7 +109,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families really pay</h3>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families pay</h3>
                   <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>A year, after grants, by what the family earns.</p>
                   <div className="mt-[var(--space-3)]">
                     {d.bands.map((b, i) => <Row key={b.label} label={b.label} value={`${money(b.pay)}`} last={i === d.bands.length - 1} />)}
@@ -257,7 +257,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
         <Folded id="sources" title="Where these numbers come from" open={open.has("sources")} onToggle={() => toggle("sources")}>
           <div className="flex flex-col gap-[var(--space-3)]">
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Really pay.</strong> The average a family paid for a year after grants, from the federal IPEDS survey. Published for full-time, first-time students who got federal aid. Use the college&apos;s own calculator for your number.</p>
+            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Cost for a year.</strong> The average a family paid for a year after grants, from the federal IPEDS survey. Published for full-time, first-time students who got federal aid. Use the college&apos;s own calculator for your number.</p>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Finish.</strong> Counts every student who started, part-time and transfers included, so it is the harder, honest test.</p>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Pay and debt.</strong> From the federal College Scorecard. They describe everyone who went here, in every subject, not one programme.</p>
             {d?.sample && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Prototype note.</strong> The headline figures for this college are from the government data. The detail sections are sample figures in the same shape, until the live data is wired in.</p>}
