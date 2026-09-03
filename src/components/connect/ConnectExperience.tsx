@@ -483,28 +483,40 @@ function partnerCompany(host: string): string {
 
 /** Every event is Dream Opportunity's with a partner. Not chips: the two
  *  marks alone, in one light, over an ambient glow in the partner's brand
- *  colour, with a slow shimmer moving through the ink. Both marks are sized
- *  by their letters (LetterMark), so DO's letters and the partner's letters
- *  are the same height on the same baseline, whatever flourish a brand has
- *  above or below them. Two-line wordmarks (Junior Achievement, Goldman
- *  Sachs) get a little more height so a line is not smaller than a letter. */
+ *  colour, with a slow shimmer moving through the ink. The lockup is one
+ *  fixed box on every card (same width, same height), the pair centred in
+ *  it; letters are sized to DO's letter height, and a long wordmark that
+ *  would overflow the box scales down to fit instead of stretching the box. */
+const LOCKUP = { md: { w: 236, h: 48, L: 22 }, lg: { w: 328, h: 64, L: 30 } } as const;
 function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" }) {
   const partner = partnerCompany(host);
   const brand = COMPANY_BRAND[partner] ?? { bg: EVENT_ACCENT, ink: "#FFFFFF" };
-  const L = size === "lg" ? 30 : 22;
+  const box = LOCKUP[size];
+  const gap = 14, cross = 10;
+  const doMark = COMPANY_MARKS["Dream Opportunity"];
+  const doW = (box.L / (doMark.letters?.h ?? 1)) * doMark.aspect;
+  const avail = box.w - doW - gap * 2 - cross;
+  const pm = COMPANY_MARKS[partner];
   const twoLine = partner === "Junior Achievement" || partner === "Goldman Sachs";
+  let partnerL = twoLine ? Math.round(box.L * 1.45) : box.L;
+  if (pm) {
+    const pw = (partnerL / (pm.letters?.h ?? 1)) * pm.aspect;
+    if (pw > avail) partnerL = Math.max(12, Math.floor(partnerL * (avail / pw)));
+  }
   const tint = brand.bg === "#000000" || brand.bg === "#111111" || brand.bg === "#141414" ? "#ffffff" : `color-mix(in srgb, ${brand.bg} 55%, #ffffff)`;
   const ink = `linear-gradient(110deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.94) 38%, ${tint} 50%, rgba(255,255,255,0.94) 62%, rgba(255,255,255,0.94) 100%)`;
   return (
-    <span className="relative inline-flex flex-none items-end gap-[14px] py-[8px]" style={{ textShadow: "none" }}>
-      <span aria-hidden className="pointer-events-none absolute -inset-x-[56px] -inset-y-[44px] opacity-70" style={{ background: `radial-gradient(60% 70% at 60% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
-      <LetterMark name="Dream Opportunity" ink={ink} letterHeight={L} markClassName="dm-logo-shimmer" className="relative" />
-      <span aria-hidden className="relative flex items-center text-[14px] font-light" style={{ height: L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
-      {COMPANY_MARKS[partner] ? (
-        <LetterMark name={partner} ink={ink} letterHeight={twoLine ? Math.round(L * 1.45) : L} markClassName="dm-logo-shimmer" className="relative" />
-      ) : (
-        <span className="relative flex items-center font-extrabold tracking-[-0.01em]" style={{ height: L, fontSize: L * 0.78, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
-      )}
+    <span className="relative flex flex-none items-center justify-center" style={{ width: box.w, height: box.h, textShadow: "none" }}>
+      <span aria-hidden className="pointer-events-none absolute -inset-x-[40px] -inset-y-[36px] opacity-70" style={{ background: `radial-gradient(60% 70% at 55% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
+      <span className="relative flex items-end" style={{ gap }}>
+        <LetterMark name="Dream Opportunity" ink={ink} letterHeight={box.L} markClassName="dm-logo-shimmer" />
+        <span aria-hidden className="flex items-center justify-center text-[14px] font-light" style={{ width: cross, height: box.L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
+        {pm ? (
+          <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
+        ) : (
+          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: avail, fontSize: box.L * 0.78, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
+        )}
+      </span>
     </span>
   );
 }
