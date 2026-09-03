@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ExternalLink, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
+import { ArrowLeft, Bookmark, BookOpen, ChevronDown, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -641,34 +641,22 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
                 <ul className="flex flex-col gap-[var(--space-2)]">
                   {vm.education.studies.map((s) => (
-                    <li key={s.name}>
-                      {s.href ? (
-                        <a href={s.href} target="_blank" rel="noreferrer" className={`dm-link ${SMALL} inline-flex items-center gap-[6px]`} style={{ color: "var(--accent-subtle)" }}>
-                          {s.name} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                        </a>
-                      ) : (
-                        <span className={`${SMALL} inline-flex items-center gap-[var(--space-3)]`}>
-                          <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                          {s.name}
-                        </span>
-                      )}
+                    <li key={s.name} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
+                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
+                      {s.name}
                     </li>
                   ))}
                 </ul>
               </div>
               <div className="flex flex-col gap-[var(--space-3)]">
                 <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
-                <ul className="flex flex-col">
-                  {vm.education.where.map((w, i) => (
-                    <li key={w.credential} className={`flex items-baseline gap-[var(--space-4)] py-[var(--space-2)] ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
-                      <span className={`${SMALL} w-[48px] flex-none font-bold tabular-nums`} style={DISPLAY}>{w.count}</span>
-                      {w.href ? (
-                        <a href={w.href} target="_blank" rel="noreferrer" className={`dm-link ${SMALL} inline-flex items-center gap-[6px]`} style={{ color: "var(--accent-subtle)" }}>
-                          {w.credential} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                        </a>
-                      ) : (
-                        <span className={SMALL}>{w.credential}</span>
-                      )}
+                {/* the credential in words only: the school counts and the
+                   college-search links confused students (Josh's notes) */}
+                <ul className="flex flex-col gap-[var(--space-2)]">
+                  {vm.education.where.map((w) => (
+                    <li key={w.credential} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
+                      <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
+                      {w.credential}
                     </li>
                   ))}
                 </ul>
