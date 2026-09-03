@@ -152,9 +152,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               ) : (
                 <div className="flex flex-col gap-[var(--space-6)]">
                   <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Of every 100 who apply</h3>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>How hard it is to get in</h3>
                     <div className="mt-[var(--space-3)]">
-                      <DotGrid pct={c.admitRate} caption={`${c.admitRate} get in${c.applied ? `. ${c.applied.toLocaleString("en-US")} applied last year.` : "."}`} />
+                      <DotGrid pct={c.admitRate} figure={`${c.admitRate} of every 100 who apply get in`} note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} />
                     </div>
                   </div>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
