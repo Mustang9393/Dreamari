@@ -83,7 +83,7 @@ const RULE = "rgba(255,255,255,0.12)";
 // glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
 // warm-lit register (scratchpad/covers.js renders them), or their own upload.
 // No subject, nothing to crop. Persisted per browser.
-const COVERS = ["fluted-amber", "fluted-ember", "fluted-dusk", "molten", "ripple", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
+const COVERS = ["streaks", "fluted", "smoke", "molten", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
 /** the sentinel that means "use my #1 career's poster as the cover" */
 const COVER_CAREER = "career";
@@ -366,9 +366,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   /* a sheet through the portal: the header clips and the blurred
                      cluster would otherwise contain a fixed child */
                   <Portal>
-                  <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
-                    <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
-                    <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+                  <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                    {/* the page stays visible behind a frosted overlay, never a black screen */}
+                    <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+                    <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
                       <div className="flex items-center justify-between gap-[var(--space-3)]">
                         <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
                         <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
