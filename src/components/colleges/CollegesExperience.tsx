@@ -245,7 +245,7 @@ function Group({ title, note, children }: { title: string; note?: string; childr
 function Option({ on, onToggle, children, count, radio = false }: { on: boolean; onToggle: () => void; children: React.ReactNode; count?: number; radio?: boolean }) {
   return (
     <li>
-      <button type="button" role={radio ? "radio" : "checkbox"} aria-checked={on} onClick={onToggle} className="dm-quiet flex min-h-[40px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[var(--space-2)] text-left text-[14px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>
+      <button type="button" role={radio ? "radio" : "checkbox"} aria-checked={on} onClick={onToggle} className="dm-quiet flex min-h-[40px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] pl-[var(--space-2)] pr-[var(--space-3)] text-left text-[14px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>
         <span aria-hidden className={`flex size-[18px] flex-none items-center justify-center border ${radio ? "rounded-full" : "rounded-[4px]"}`} style={{ borderColor: on ? ACCENT : "rgba(255,255,255,0.35)", background: on ? ACCENT : "transparent" }}>
           {on && (radio ? <span className="size-[7px] rounded-full" style={{ background: "#fff" }} /> : <svg viewBox="0 0 12 12" className="size-[11px]" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 6.5 5 9l4.5-5.5" /></svg>)}
         </span>
@@ -271,7 +271,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
             <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
           </span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-3)]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-3)] [scrollbar-gutter:stable]">
           <Group title="Where">
             {STATES.slice(0, statesOpen ? undefined : 6).map((s) => <Option key={s.code} on={filters.states.has(s.code)} onToggle={() => set({ states: toggleIn(filters.states, s.code) })} count={s.n}>{s.name}</Option>)}
             {STATES.length > 6 && <li><button type="button" onClick={() => setStatesOpen((v) => !v)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[4px] px-[var(--space-2)] text-[13px] font-bold" style={{ color: SOFT }}>{statesOpen ? "Fewer states" : `All ${STATES.length} states`} <ChevronDown className="h-4 w-4" style={{ transform: statesOpen ? "rotate(180deg)" : undefined }} aria-hidden /></button></li>}
