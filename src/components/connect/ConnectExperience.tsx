@@ -615,19 +615,21 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
-          {/* the third mark shows only when the card itself is wide enough
-             (a container query, not a screen breakpoint) for three marks,
-             the count and Open to sit on one row without touching */}
+          {/* marks step down with the card's own width (container query):
+             one under 320px, two under 400px, three above. The count chip
+             always says how many are missing, so Open never gets crowded. */}
           <div className="flex min-w-0 items-center gap-[6px]">
             {community.professionalsFrom.slice(0, 3).map((name, index) => (
-              <span key={name} className={index === 2 ? "hidden @[400px]:flex" : "flex"}><CompanyChip name={name} /></span>
+              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[320px]:flex" : "hidden @[400px]:flex"}><CompanyChip name={name} /></span>
             ))}
-            {community.professionalsFrom.length > 2 && (
-              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold @[400px]:hidden" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 2}</span>
-            )}
-            {community.professionalsFrom.length > 3 && (
-              <span className="hidden h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold @[400px]:flex" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
-            )}
+            {[1, 2, 3].map((shown) => {
+              const missing = community.professionalsFrom.length - shown;
+              if (missing <= 0) return null;
+              const vis = shown === 1 ? "flex @[320px]:hidden" : shown === 2 ? "hidden @[320px]:flex @[400px]:hidden" : "hidden @[400px]:flex";
+              return (
+                <span key={shown} className={`${vis} h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold`} style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{missing}{shown === 3 ? " more" : ""}</span>
+              );
+            })}
           </div>
           <button
             type="button"
@@ -1648,15 +1650,9 @@ function HomeView({
                     <div className="mt-auto pt-[var(--space-6)]"><EventMarks host={event.host} ink={ink} /></div>
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${ink} 18%, transparent)` }}>
+                    {/* no counts on the card (direct feedback); upcoming events say when they open */}
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 62%, transparent)` }}>
-                      {typeof event.students === "number" ? (
-                        <>
-                          <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${ink} 90%, transparent)` }}>{event.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${ink} 90%, transparent)` }}>{event.pros}</strong> pros
-                          <span className="hidden sm:inline"> · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${ink} 90%, transparent)` }}>{event.postCount}</strong> posts</span>
-                        </>
-                      ) : (
-                        "Opens after the event"
-                      )}
+                      {typeof event.students === "number" ? "" : "Opens after the event"}
                     </span>
                     {joined ? (
                       <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${ink})` }}>
