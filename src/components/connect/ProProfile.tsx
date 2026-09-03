@@ -161,7 +161,7 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 
 /** Instagram's "Suggested for you" shape: portrait, name, one line for what
  *  they do and where, Follow. The whole card opens the profile. */
-export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
+export function PeopleToFollow({ follows, onFollow, limit = 4 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
   const ranked = useMemo(() => rankPros(PROS, worlds).slice(0, limit), [worlds, limit]);
@@ -171,7 +171,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
       {/* the same grid as the community cards above (same gutters, same
          edges): two across on a phone, three on a tablet, six on desktop.
          Phones show four so the section stays two rows. */}
-      <div className="grid grid-cols-2 gap-[var(--space-5)] sm:grid-cols-3 lg:grid-cols-6 max-sm:[&>*:nth-child(n+5)]:hidden">
+      <div className="grid grid-cols-2 gap-[var(--space-6)] lg:grid-cols-4">
         {ranked.map((pro) => {
           const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
           return (

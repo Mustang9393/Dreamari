@@ -534,7 +534,7 @@ function EventMarks({ host, size = "md", ink: inkColor }: { host: string; size?:
       <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint, filter: dark ? "none" : `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
         <path d="M6 6 L18 18 M18 6 L6 18" />
       </svg>
-      <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
+      <span className="relative flex flex-none items-center justify-end" style={{ width: box.slot, height: box.h }}>
         {COMPANY_MARKS[partner] ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (
@@ -977,8 +977,8 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <main
         style={{ fontFamily: FEED_FONT }}
-        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-5)] px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
-          view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
+        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
+          view.kind === "home" ? "max-w-[1100px]" : "max-w-[880px]"
         }`}
       >
         <RoleTabs
@@ -1596,14 +1596,14 @@ function HomeView({
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
              centered beneath. */}
-          <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searched.map((c, index) => (
-              <div key={c.id} className="lg:col-span-2">
+              <div key={c.id}>
                 <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
               </div>
             ))}
             {(
-              <div className="lg:col-span-2">
+              <div>
                 <ComingSoonCard />
               </div>
             )}
@@ -1631,21 +1631,19 @@ function HomeView({
               return (
                 <div
                   key={event.id}
-                  className="group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
-                  style={{ background: `linear-gradient(135deg, ${pAccent} 0%, color-mix(in srgb, ${pAccent} 55%, #0e0c20) 70%, #0e0c20 100%)`, border: `1px solid color-mix(in srgb, ${pAccent} 70%, transparent)`, fontFamily: "var(--font-display)", boxShadow: `0 18px 44px -22px color-mix(in srgb, ${pAccent} 60%, rgba(0,0,0,0.65))`, textShadow: /^#f/i.test(ink) ? CARD_TEXT_SHADOW : "none" }}
+                  className="group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-6)]"
+                  style={{ background: pAccent, border: `1px solid color-mix(in srgb, ${ink} 18%, transparent)`, fontFamily: "var(--font-display)", boxShadow: `0 18px 44px -22px color-mix(in srgb, ${pAccent} 70%, rgba(0,0,0,0.6))`, textShadow: "none" }}
                 >
-                  {/* the company's colour is the card, like the company card on a
-                     volunteer's dashboard; the photo sits under it as texture */}
-                  <Image src={eventCover(event.host)} alt="" fill sizes="640px" className="object-cover opacity-[0.28] mix-blend-luminosity" style={{ objectPosition: "62% 45%" }} />
-                  <span aria-hidden className="absolute top-[-90px] right-[-60px] size-[260px] rounded-full opacity-30 blur-[70px]" style={{ background: "#ffffff" }} />
-                  <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.6) 0%, rgba(14,12,32,0.2) 45%, transparent 75%)" }} />
-                  <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${ink} 18%, transparent)` }} />
+                  {/* one solid brand colour and the partner's own ink, like the
+                     company card on a volunteer's dashboard: nothing behind the
+                     words but the colour (direct feedback: legibility) */}
+                  <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${ink} 28%, transparent)` }} />
                   <div className="relative z-10 flex flex-1 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[10px]">
                     <div className="min-w-[180px] flex-1 self-start">
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: ink }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)` }}>{event.date} · {event.location}</p>
                     </div>
-                    <EventMarks host={event.host} ink={ink} />
+                    <span className="ml-auto flex"><EventMarks host={event.host} ink={ink} /></span>
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${ink} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 62%, transparent)` }}>
