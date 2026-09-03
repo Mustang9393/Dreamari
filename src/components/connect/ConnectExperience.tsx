@@ -1596,16 +1596,18 @@ function HomeView({
       </div>
 
       {tab === "communities" && (
-        /* the one primary action on the page: tinted in the primary, ringed,
-           so it never reads as one more card surface (direct feedback) */
+        /* the one primary action on the page, drawn as a text field: a solid
+           input surface with the focus ring already on, placeholder-grey
+           prompt, the Ask pill inside. Prominent, but a box you type in, not
+           a button (direct feedback). */
         <button
           type="button"
           onClick={onAsk}
-          className="dm-tap flex min-h-[56px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left"
-          style={{ borderColor: "color-mix(in srgb, var(--primary) 70%, transparent)", background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 26%, var(--glass-surface-2)), color-mix(in srgb, var(--primary) 12%, var(--glass-surface-2)))", boxShadow: "0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent), 0 12px 32px -18px color-mix(in srgb, var(--primary) 80%, transparent)" }}
+          className="dm-tap flex min-h-[54px] w-full cursor-text items-center gap-[12px] rounded-[var(--radius-md)] border px-[var(--space-3)] text-left"
+          style={{ borderColor: "var(--primary)", background: "color-mix(in srgb, var(--foreground) 9%, var(--background))", boxShadow: "0 0 0 3px color-mix(in srgb, var(--primary) 28%, transparent), inset 0 1px 0 rgba(255,255,255,0.06)" }}
         >
           <Avatar name="Jordan Rivera" size={30} />
-          <span className="min-w-0 flex-1 truncate text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Ask a question…</span>
+          <span className="min-w-0 flex-1 truncate text-[15px] leading-[20px] font-medium" style={{ color: "var(--muted-foreground)" }}>Ask a question…</span>
           <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[8px] text-[13px] leading-[16px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
           </span>
