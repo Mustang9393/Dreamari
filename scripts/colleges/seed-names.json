@@ -1,0 +1,165 @@
+[
+ {
+  "slug": "south-dakota-state-university",
+  "name": "South Dakota State University"
+ },
+ {
+  "slug": "university-of-south-dakota",
+  "name": "University of South Dakota"
+ },
+ {
+  "slug": "southeast-technical-college",
+  "name": "Southeast Technical College",
+  "wiki": "Southeast_Technical_College",
+  "query": "Southeast Technical Institute Sioux Falls"
+ },
+ {
+  "slug": "lake-area-technical-college",
+  "name": "Lake Area Technical College",
+  "wiki": "Lake_Area_Technical_College",
+  "query": "Lake Area Technical Institute Watertown"
+ },
+ {
+  "slug": "dakota-state-university",
+  "name": "Dakota State University",
+  "query": null
+ },
+ {
+  "slug": "mitchell-technical-college",
+  "name": "Mitchell Technical College",
+  "wiki": "Mitchell_Technical_College",
+  "query": null
+ },
+ {
+  "slug": "augustana-university",
+  "name": "Augustana University",
+  "wiki": "Augustana_University"
+ },
+ {
+  "slug": "south-dakota-school-of-mines-and-technology",
+  "name": "South Dakota School of Mines and Technology",
+  "wiki": "South_Dakota_School_of_Mines_and_Technology"
+ },
+ {
+  "slug": "black-hills-state-university",
+  "name": "Black Hills State University",
+  "query": "Black Hills State University Spearfish"
+ },
+ {
+  "slug": "university-of-sioux-falls",
+  "name": "University of Sioux Falls"
+ },
+ {
+  "slug": "northern-state-university",
+  "name": "Northern State University",
+  "query": "Northern State University Aberdeen building"
+ },
+ {
+  "slug": "western-dakota-technical-college",
+  "name": "Western Dakota Technical College",
+  "wiki": "Western_Dakota_Technical_College",
+  "query": "Western Dakota Tech Rapid City"
+ },
+ {
+  "slug": "mount-marty-university",
+  "name": "Mount Marty University",
+  "query": "Mount Marty College Yankton"
+ },
+ {
+  "slug": "kairos-university",
+  "name": "Kairos University",
+  "wiki": "Kairos_University",
+  "query": "Sioux Falls Seminary building"
+ },
+ {
+  "slug": "dakota-wesleyan-university",
+  "name": "Dakota Wesleyan University",
+  "query": "Dakota Wesleyan University Mitchell"
+ },
+ {
+  "slug": "oglala-lakota-college",
+  "name": "Oglala Lakota College",
+  "query": null
+ },
+ {
+  "slug": "stewart-school",
+  "name": "Stewart School",
+  "wiki": null,
+  "query": null
+ },
+ {
+  "slug": "sinte-gleska-university",
+  "name": "Sinte Gleska University",
+  "query": "Sinte Gleska University Mission"
+ },
+ {
+  "slug": "paul-mitchell-the-school-rapid-city",
+  "name": "Paul Mitchell the School Rapid City",
+  "wiki": null
+ },
+ {
+  "slug": "sisseton-wahpeton-college",
+  "name": "Sisseton Wahpeton College",
+  "query": null
+ },
+ {
+  "slug": "rutgers-university-new-brunswick",
+  "name": "Rutgers University-New Brunswick",
+  "wiki": "Rutgers University–New Brunswick",
+  "query": "Old Queens Rutgers"
+ },
+ {
+  "slug": "the-college-of-new-jersey",
+  "name": "The College of New Jersey",
+  "wiki": "The_College_of_New_Jersey",
+  "query": "The College of New Jersey Ewing"
+ },
+ {
+  "slug": "ramapo-college-of-new-jersey",
+  "name": "Ramapo College of New Jersey",
+  "wiki": "Ramapo_College",
+  "query": "Ramapo College"
+ },
+ {
+  "slug": "bergen-community-college",
+  "name": "Bergen Community College",
+  "wiki": "Bergen_Community_College",
+  "query": "Bergen Community College Paramus"
+ },
+ {
+  "slug": "middlesex-college",
+  "name": "Middlesex College",
+  "wiki": "Middlesex_College_(New_Jersey)",
+  "query": null
+ },
+ {
+  "slug": "montclair-state-university",
+  "name": "Montclair State University",
+  "wiki": "Montclair_State_University",
+  "query": "Montclair State University campus"
+ },
+ {
+  "slug": "new-jersey-institute-of-technology",
+  "name": "New Jersey Institute of Technology",
+  "wiki": "New_Jersey_Institute_of_Technology",
+  "query": "New Jersey Institute of Technology campus"
+ },
+ {
+  "slug": "princeton-university",
+  "name": "Princeton University",
+  "wiki": "Princeton_University",
+  "query": "Princeton University Nassau Hall"
+ },
+ {
+  "slug": "rowan-university",
+  "name": "Rowan University",
+  "wiki": "Rowan_University",
+  "query": "Bunce Hall Rowan University"
+ },
+ {
+  "slug": "kean-university",
+  "name": "Kean University",
+  "wiki": "Kean_University",
+  "query": "Kean University Union"
+ }
+]

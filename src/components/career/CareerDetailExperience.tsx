@@ -43,17 +43,17 @@ import { careerSlug } from "./slug";
 // Spacing uses the marketing token scale (tokens.css defines 1-6, 8, 10, 12,
 // 13, 14 -- there is no --space-7, which is what silently zeroed the first
 // pass of this layout) or explicit px where a step in between is needed.
-const DISPLAY = { fontFamily: "var(--font-display)" } as const;
-const BIG = "text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]";
-const MEDIUM = "text-[18px] leading-[24px] font-semibold";
+export const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+export const BIG = "text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]";
+export const MEDIUM = "text-[18px] leading-[24px] font-semibold";
 const FIGURE = "text-[18px] leading-[24px] font-bold tabular-nums";
-const LABEL = "text-[16px] leading-[22px] font-semibold";
-const SMALL = "text-[15px] leading-[22px]";
+export const LABEL = "text-[16px] leading-[22px] font-semibold";
+export const SMALL = "text-[15px] leading-[22px]";
 const TINY = "text-[14px] leading-[20px]";
 // The frosted panel every info box on this page sits in (direct feedback:
 // more contrast, frostier): a stronger glass fill, a real backdrop blur and a
 // brighter hairline than the page's default glass-surface-1.
-const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
@@ -91,7 +91,7 @@ function IconButton({ label, active = false, onClick, children }: { label: strin
 // Used sparingly (direct feedback): typical pay, pay by state, ladder pay.
 // Same size tier as the body value it replaces, so it never outsizes the
 // label above it; the gradient carries the emphasis, not the size.
-function Figure({ children, accent }: { children: React.ReactNode; accent: string }) {
+export function Figure({ children, accent }: { children: React.ReactNode; accent: string }) {
   return (
     <span
       className={`${SMALL} font-bold tabular-nums`}
@@ -109,7 +109,7 @@ function Figure({ children, accent }: { children: React.ReactNode; accent: strin
 // ---- Section shells -------------------------------------------------------
 
 // Always-open section: heading row (with an optional control) over content.
-function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+export function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
       {/* the title row is ruled off edge to edge (direct feedback): the line
@@ -125,7 +125,7 @@ function Section({ title, action, children }: { title: string; action?: React.Re
 
 // Folded section: the heading is the control. Collapsed, it is the heading
 // alone (direct feedback: no caption under it); open, the content.
-function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+export function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <section className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
       <button
@@ -148,7 +148,7 @@ function Folded({ id, title, open, onToggle, children }: { id: string; title: st
 
 // One marker, one line per item. The marker is the world accent so the list
 // reads as this career's without a second color system.
-function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
+export function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
   return (
     <ul className="flex flex-col gap-[var(--space-3)]">
       {items.map((item) => (
@@ -677,7 +677,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   {vm.education.where.map((w) => (
                     <li key={w.credential} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
                       <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      <Link href={w.href ?? `/colleges?school=${encodeURIComponent(w.credential)}`} className="dm-link flex min-h-[28px] items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
+                      <Link href={w.href ?? `/colleges?type=${/certif/i.test(w.credential) ? "trade" : /associate/i.test(w.credential) ? "2-year" : "4-year"}`} className="dm-link flex min-h-[28px] items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
                         {w.credential}
                         <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
                       </Link>
