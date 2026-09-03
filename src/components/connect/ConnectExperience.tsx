@@ -615,15 +615,22 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+          {/* two marks on a phone, three from sm, so the action always breathes */}
           <div className="flex min-w-0 items-center gap-[6px]">
-            {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
+            {community.professionalsFrom.slice(0, 3).map((name, index) => (
+              <span key={name} className={index === 2 ? "hidden sm:flex" : "flex"}><CompanyChip name={name} /></span>
+            ))}
+            {community.professionalsFrom.length > 2 && (
+              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold sm:hidden" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 2}</span>
+            )}
             {community.professionalsFrom.length > 3 && (
-              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
+              <span className="hidden h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold sm:flex" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
             )}
           </div>
           <button
             type="button"
             onClick={onOpen}
+            aria-label={`Open ${community.name}`}
             className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
             style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}
           >
