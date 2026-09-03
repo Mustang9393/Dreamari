@@ -46,13 +46,13 @@ export function HBars({ rows, marker, unit = "" }: { rows: { label: string; valu
 }
 
 /** One hundred people, some of them let in, spread across the card as a
- *  band of twenty by five so it reads left to right like a sentence and
- *  never sits in a corner. The figure follows underneath. */
+ *  band that fills the card's width: the dots stay small and the column
+ *  count follows the space, phone to desktop. The figure follows underneath. */
 export function DotGrid({ pct, figure, note }: { pct: number; figure: string; note?: string }) {
   const on = Math.round(pct);
   return (
     <figure className="m-0 flex flex-col gap-[var(--space-3)]">
-      <div className="grid w-full max-w-[440px] gap-[5px]" style={{ gridTemplateColumns: "repeat(20, minmax(0, 1fr))" }} role="img" aria-label={`${on} of every 100 who apply get in`}>
+      <div className="grid w-full gap-[6px]" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(13px, 1fr))" }} role="img" aria-label={`${on} of every 100 who apply get in`}>
         {Array.from({ length: 100 }, (_, i) => (
           <span key={i} className="aspect-square w-full rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
         ))}
