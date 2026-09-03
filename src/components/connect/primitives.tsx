@@ -9,7 +9,7 @@ import Image from "next/image";
 import { createContext, useState } from "react";
 import { ArrowRight, CheckCircle2, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import type { Thread } from "./data";
+import { PROS, type Thread } from "./data";
 
 /** In-page navigation for anything rendered inside Connect: lets a pro's
  *  name deep in a thread open the profile without threading callbacks
