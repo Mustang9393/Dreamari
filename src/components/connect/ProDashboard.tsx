@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useMemo, useState } from "react";
-import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download, Eye, MessagesSquare, PenLine, ShieldCheck, ThumbsUp, Undo2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download, Eye, MessagesSquare, PenLine, ThumbsUp, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS } from "./data";
@@ -250,7 +250,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
       {tab === "impact" && (
         <>
           {/* the private analytics, opened by what the numbers mean */}
-          <Panel id="metrics-title" title="This month" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Only you see this</span>}>
+          <Panel id="metrics-title" title="This month" >
             <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-3)] sm:grid-cols-3">
               {metrics.map((m, i) => (
                 <div key={m.label} className={`py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>

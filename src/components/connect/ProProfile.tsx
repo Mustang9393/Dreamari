@@ -322,10 +322,6 @@ export function ProProfileView({
           }}
         />
         {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-        <p className="flex items-center gap-[6px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-          Public answers. No private messages.
-        </p>
       </Panel>
 
       {answers.length > 0 && (
@@ -478,9 +474,6 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
             </div>
           ))}
         </div>
-        <p className="flex items-center gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
-          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Totals only. No student data.
-        </p>
       </Panel>
 
       <Panel id="partner-events-title" title="Events" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>8 of 19 completed</span>}>

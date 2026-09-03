@@ -1312,7 +1312,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="flex min-w-0 flex-1 items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
-            <span>Public answer, usually within 2 days.</span>
+            <span>Posting as Jordan · Junior</span>
           </span>
           <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
             <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></span>
@@ -1382,7 +1382,6 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Reports are anonymous.</p>
         <div className="flex flex-col" role="radiogroup" aria-label="Reason">
           {REPORT_REASONS.map((r) => {
             const on = reason === r;
@@ -1449,10 +1448,6 @@ function HomeView({
       <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
         <div className="min-w-0">
           <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find your community</h1>
-          <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
-          <p className="mt-[8px] flex w-fit items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 45%, var(--glass-border))", background: "color-mix(in srgb, var(--world-food-farming-nature) 10%, transparent)", color: "var(--foreground)" }}>
-            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> Verified professionals · Moderated questions
-          </p>
         </div>
         <div className="flex w-full min-w-0 items-center gap-[var(--space-3)] sm:w-auto">
           <TopTabs tab={tab} onTab={onTab} />
@@ -1540,9 +1535,6 @@ function HomeView({
              (star chip, event name, date · location in white), then the
              stats row, the Partner line, and one action for this event's
              state. */}
-          {!query && (
-            <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Keep the conversation going after the event.</h2>
-          )}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
@@ -1659,8 +1651,6 @@ function ComingSoonCard() {
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
         <h3 className="pr-[104px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>More communities</h3>
-        <p className="mt-[3px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>New rooms open as verified pros join.</p>
-        <p className="mt-auto pt-[var(--space-5)] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>Want one sooner?</p>
         <div className="mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           <button
             type="button"
