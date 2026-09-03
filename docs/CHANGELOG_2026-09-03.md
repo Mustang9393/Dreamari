@@ -56,7 +56,6 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 ## Connect 2.0 · concepts and data still to be decided
 - All numbers are demo data. Real counts, real routing and real moderation queues come from the engineer.
 - Company brand colours are approximations; use official hex values.
-- The "Dream Opportunity + partner" event naming is inferred from the Replit's board names, not written down anywhere as a rule. Confirm with the CEO.
 - Event boards: who can post, how event codes are issued, and how long a board stays open after the event.
 - Volunteer activity tiers (Gold, Silver) are private to the volunteer in this build. Decide whether any of it is ever shown to students.
 - Demo controls must be removed or gated before production.
