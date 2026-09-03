@@ -6,7 +6,7 @@
 // Nothing here is new; every component moved verbatim.
 
 import Image from "next/image";
-import { createContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { ArrowRight, CheckCircle2, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PROS, type Thread } from "./data";
@@ -147,6 +147,24 @@ export function Avatar({ name, size = 34, verified }: { name: string; size?: num
 }
 
 
+
+/** A professional's portrait that opens their profile: tap the face, get
+ *  the person, from anywhere in Connect. Stops the tap from also firing
+ *  whatever card it sits on. */
+export function ProAvatar({ proId, name, size = 34, className = "" }: { proId: string; name: string; size?: number; className?: string }) {
+  const nav = useContext(ConnectNav);
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); nav?.openPro(proId); }}
+      className={`dm-quiet relative z-20 flex-none cursor-pointer rounded-full ${className}`}
+      aria-label={`Open ${name}'s profile`}
+    >
+      <Avatar name={name} verified size={size} />
+    </button>
+  );
+}
+
 export function InlineAsk({
   joined,
   onRequireJoin,
@@ -269,12 +287,21 @@ export function Card({ children, className = "", accent }: { children: React.Rea
 }
 
 
-export function PrimaryCta({ children, onClick, className = "", style }: { children: React.ReactNode; onClick?: () => void; className?: string; style?: React.CSSProperties }) {
+// one size scale for both CTAs: md is the default control, sm the compact
+// pill (Follow on a person card, Follow under an answer). One class set per
+// size, never two heights on the same element.
+const CTA_SIZE = {
+  md: "min-h-[44px] px-[var(--space-5)] text-[15px] leading-[20px] rounded-[var(--radius-md)]",
+  sm: "min-h-[32px] px-[14px] text-[13px] leading-[18px] rounded-[var(--radius-sm)]",
+} as const;
+export type CtaSize = keyof typeof CTA_SIZE;
+
+export function PrimaryCta({ children, onClick, className = "", style, size = "md" }: { children: React.ReactNode; onClick?: () => void; className?: string; style?: React.CSSProperties; size?: CtaSize }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] leading-[20px] font-semibold ${className}`}
+      className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold ${CTA_SIZE[size]} ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF", ...style }}
     >
       {children}
@@ -286,13 +313,13 @@ export function PrimaryCta({ children, onClick, className = "", style }: { child
 // `done`: the confirmed state of the SAME control -- filled with the success
 // tint plus a check, and aria-pressed so the data-connect lift rule fires once
 // as it flips. The label doesn't change; the state does, visibly.
-export function QuietCta({ children, onClick, className = "", done = false }: { children: React.ReactNode; onClick?: () => void; className?: string; done?: boolean }) {
+export function QuietCta({ children, onClick, className = "", done = false, size = "md" }: { children: React.ReactNode; onClick?: () => void; className?: string; done?: boolean; size?: CtaSize }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={done || undefined}
-      className={`dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] leading-[20px] font-semibold ${className}`}
+      className={`dm-quiet flex cursor-pointer items-center justify-center gap-[6px] border font-semibold ${CTA_SIZE[size]} ${className}`}
       style={
         done
           ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }

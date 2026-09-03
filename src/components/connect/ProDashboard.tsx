@@ -8,7 +8,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
 import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
-import { AreaChart, MetricTile, Ring, Segmented, demoSeries } from "./viz";
+import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
 // and 3; the CEO's Replit /volunteer/dashboard). Two jobs, two tabs:
@@ -303,7 +303,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
           <Panel id="metrics-title" title="This month" >
             <dl className="-mx-[var(--space-2)] grid grid-cols-2 sm:grid-cols-3">
               {metrics.map((m, i) => (
-                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i % 3 !== 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={ruledCell(i, 3)} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={accent} />
                 </div>
               ))}

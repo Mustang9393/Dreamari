@@ -31,6 +31,20 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
   );
 }
 
+/** Rules for one cell of a ruled metric grid: a hairline to the left of
+ *  every cell that is not first in its row and above every cell that is
+ *  not in the first row, at both column counts (2 below sm, `sm` at sm+).
+ *  Each edge resolves to one class set, so the two breakpoints never fight. */
+export function ruledCell(i: number, sm: number): string {
+  const leftBase = i % 2 === 1;
+  const leftSm = i % sm !== 0;
+  const topBase = i >= 2;
+  const topSm = i >= sm;
+  const left = leftBase && leftSm ? "border-l" : leftBase ? "border-l sm:border-l-0" : leftSm ? "sm:border-l" : "";
+  const top = topBase && topSm ? "border-t" : topBase ? "border-t sm:border-t-0" : topSm ? "sm:border-t" : "";
+  return `px-[var(--space-3)] py-[var(--space-4)] ${left} ${top}`.trim();
+}
+
 type Icon = React.ComponentType<{ className?: string; "aria-hidden"?: boolean; style?: React.CSSProperties }>;
 
 /** Value, label, and how it moved: the creator-analytics tile every volunteer

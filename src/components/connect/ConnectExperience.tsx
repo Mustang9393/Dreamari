@@ -34,7 +34,7 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark } from "./primitives";
+import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
@@ -377,7 +377,7 @@ function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: 
   const nav = useContext(ConnectNav);
   return (
     <div className="flex items-center gap-[10px]">
-      <Avatar name={pro.name} verified size={size} />
+      <ProAvatar proId={proId} name={pro.name} size={size} />
       <div className="flex min-w-0 flex-col">
         <button type="button" onClick={() => nav?.openPro(proId)} className="dm-link w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
         <span className="flex flex-wrap items-center gap-x-[6px] gap-y-[3px] text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
@@ -484,12 +484,12 @@ function partnerCompany(host: string): string {
 
 /** Every event is Dream Opportunity's with a partner. Not chips: the two
  *  marks alone, in one light, over an ambient glow in the partner's brand
- *  colour, with a slow shimmer moving through the ink. Stacked like a
- *  poster credit: DO and a small × on the first line, the partner under it,
- *  both starting at the same left pixel. The lockup is one fixed box on
- *  every card (same width, same height); letters are sized to DO's letter
- *  height, and a wordmark wider than the box scales down to fit. */
-const LOCKUP = { md: { w: 168, L: 14, row: 22, gap: 4 }, lg: { w: 232, L: 19, row: 30, gap: 6 } } as const;
+ *  colour, with a slow shimmer moving through the ink. One line, one
+ *  baseline: the lead mark, a small ×, then the partner in a fixed-width
+ *  slot, so on every card the lead starts, the × sits and the partner
+ *  begins at the same pixels. Letters are sized to the lead's letter
+ *  height; a wordmark wider than its slot scales down to fit. */
+const LOCKUP = { md: { L: 16, slot: 118, h: 36 }, lg: { L: 21, slot: 160, h: 48 } } as const;
 function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" }) {
   // the card's ambient colour follows its host; the two marks follow the
   // event's name (a Junior Achievement event is JA × the company hosting it)
@@ -498,35 +498,41 @@ function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" })
   const lead = brandKey === "Junior Achievement" ? "Junior Achievement" : "Dream Opportunity";
   const partner = lead === "Junior Achievement" ? "Goldman Sachs" : brandKey;
   const box = LOCKUP[size];
-  const height = box.row * 2 + box.gap;
-  const pm = COMPANY_MARKS[partner];
-  const twoLine = partner === "Junior Achievement" || partner === "Goldman Sachs";
-  const leadL = lead === "Junior Achievement" ? Math.round(box.L * 1.4) : box.L;
-  let partnerL = twoLine ? Math.round(box.L * 1.4) : box.L;
-  if (pm) {
-    const pw = (partnerL / (pm.letters?.h ?? 1)) * pm.aspect;
-    if (pw > box.w) partnerL = Math.max(10, Math.floor(partnerL * (box.w / pw)));
-  }
-  const cross = Math.round(box.L * 0.72);
+  const gap = Math.round(box.L * 0.6);
+  const cross = Math.round(box.L * 0.62);
+  const fit = (name: string, tall: boolean, max: number) => {
+    const m = COMPANY_MARKS[name];
+    let L = tall ? Math.round(box.L * 1.4) : box.L;
+    if (m) {
+      const w = (L / (m.letters?.h ?? 1)) * m.aspect;
+      if (w > max) L = Math.max(10, Math.floor(L * (max / w)));
+    }
+    return L;
+  };
+  // the lead slot is exactly the lead mark's width, so the box starts where
+  // the mark starts (no dead space when the lockup wraps under a title)
+  const leadL = fit(lead, lead === "Junior Achievement", Math.round(box.L * 3.9));
+  const lm = COMPANY_MARKS[lead];
+  const leadSlot = Math.round((leadL / (lm?.letters?.h ?? 1)) * (lm?.aspect ?? 1.79));
+  const partnerL = fit(partner, partner === "Junior Achievement" || partner === "Goldman Sachs", box.slot);
+  const width = leadSlot + gap + cross + gap + box.slot;
   const tint = brand.bg === "#000000" || brand.bg === "#111111" || brand.bg === "#141414" ? "#ffffff" : `color-mix(in srgb, ${brand.bg} 55%, #ffffff)`;
   const ink = `linear-gradient(110deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.94) 38%, ${tint} 50%, rgba(255,255,255,0.94) 62%, rgba(255,255,255,0.94) 100%)`;
   return (
-    <span className="relative flex flex-none flex-col items-start" style={{ width: box.w, height, gap: box.gap, textShadow: "none" }}>
-      <span aria-hidden className="pointer-events-none absolute -inset-x-[32px] -inset-y-[28px] opacity-70" style={{ background: `radial-gradient(60% 70% at 40% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
-      {/* line one: DO, then the collab mark, a rounded × in the partner's
-         light, breathing slowly, the way drop culture writes "A × B" */}
-      <span className="relative flex items-center" style={{ height: box.row, gap: Math.round(box.L * 0.55) }}>
+    <span className="relative flex flex-none items-center" style={{ width, height: box.h, gap, textShadow: "none" }}>
+      <span aria-hidden className="pointer-events-none absolute -inset-x-[32px] -inset-y-[28px] opacity-70" style={{ background: `radial-gradient(60% 70% at 50% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
+      <span className="relative flex flex-none items-center justify-end" style={{ width: leadSlot, height: box.h }}>
         <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" />
-        <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark flex-none" style={{ width: cross, height: cross, color: tint, filter: `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
-          <path d="M6 6 L18 18 M18 6 L6 18" />
-        </svg>
       </span>
-      {/* line two: the partner, starting at the same left pixel as DO */}
-      <span className="relative flex items-center" style={{ height: box.row }}>
-        {pm ? (
+      {/* the collab mark: a rounded × in the partner's light, breathing slowly */}
+      <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: tint, filter: `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+        <path d="M6 6 L18 18 M18 6 L6 18" />
+      </svg>
+      <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
+        {COMPANY_MARKS[partner] ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (
-          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: box.w, fontSize: box.L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
+          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: box.slot, fontSize: box.L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
         )}
       </span>
     </span>
@@ -769,7 +775,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
-        <Avatar name={pro.name} verified size={36} />
+        <ProAvatar proId={pro.id} name={pro.name} size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
@@ -2256,12 +2262,18 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
 function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
+  // a professional's face and name open their profile; students have none
+  const pro = chipTone === "pro" ? PROS.find((p) => p.name === name) : undefined;
   return (
     <div className="flex items-start gap-[12px]">
-      <Avatar name={name} verified={chipTone === "pro"} size={32} />
+      {pro ? <ProAvatar proId={pro.id} name={name} size={32} /> : <Avatar name={name} size={32} />}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-[6px]">
-          <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+          {pro ? (
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</button>
+          ) : (
+            <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+          )}
           <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
           {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
           <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>

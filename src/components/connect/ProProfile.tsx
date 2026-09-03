@@ -114,16 +114,16 @@ export function FollowButton({ following, onToggle, compact = false, className =
     dispatchAuroraPulse(following ? "select" : "cta");
     onToggle();
   };
-  const size = compact ? "min-h-[36px] px-[var(--space-4)] text-[13px]" : "";
+  const size = compact ? "sm" : "md";
   if (following) {
     return (
-      <QuietCta onClick={press} done className={`${size} ${className}`}>
+      <QuietCta onClick={press} done size={size} className={className}>
         Following
       </QuietCta>
     );
   }
   return (
-    <PrimaryCta onClick={press} className={`${size} ${className}`}>
+    <PrimaryCta onClick={press} size={size} className={className}>
       Follow
     </PrimaryCta>
   );
@@ -161,42 +161,38 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 
 /** Instagram's "Suggested for you" shape: portrait, name, one line for what
  *  they do and where, Follow. The whole card opens the profile. */
-export function PeopleToFollow({ follows, onFollow, limit = 8 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
+export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
   const ranked = useMemo(() => rankPros(PROS, worlds).slice(0, limit), [worlds, limit]);
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to Follow">
-      <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
-        <SectionHead>People to Follow</SectionHead>
-        {worlds.length > 0 && (
-          <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Picked for your Top 3
-          </span>
-        )}
-      </div>
-      <div className="-mx-5 flex snap-x gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none]">
+      <SectionHead>People to Follow</SectionHead>
+      {/* the same grid as the community cards above (same gutters, same
+         edges): two across on a phone, three on a tablet, six on desktop.
+         Phones show four so the section stays two rows. */}
+      <div className="grid grid-cols-2 gap-[var(--space-5)] sm:grid-cols-3 lg:grid-cols-6 max-sm:[&>*:nth-child(n+5)]:hidden">
         {ranked.map((pro) => {
           const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
           return (
             <div
               key={pro.id}
-              className="dm-tap relative flex w-[172px] flex-none snap-start flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] pt-[var(--space-5)] pb-[var(--space-3)] text-center"
+              className="dm-tap relative flex min-w-0 flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] pt-[var(--space-4)] pb-[var(--space-3)] text-center"
               style={{ ...PANEL, background: `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` }}
             >
               <button type="button" onClick={() => nav?.openPro(pro.id)} className="absolute inset-0 z-0 cursor-pointer rounded-[inherit]">
                 <span className="sr-only">Open {pro.name}&apos;s profile</span>
               </button>
-              <Avatar name={pro.name} verified size={72} />
-              <div className="relative z-[1] flex min-w-0 w-full flex-col items-center gap-[2px]">
-                <span className="block w-full truncate text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</span>
+              <Avatar name={pro.name} verified size={56} />
+              <div className="relative z-[1] flex w-full min-w-0 flex-col items-center gap-[2px]">
+                <span className="block w-full truncate text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</span>
                 <span className="block w-full truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                <span className="mt-[6px] flex items-center">
+                <span className="mt-[4px] flex items-center">
                   <CompanyChip name={pro.org} tone="surface" size="sm" />
                 </span>
               </div>
-              <div className="relative z-[1] mt-[2px] w-full">
-                <FollowButton compact className="w-full" following={!!follows[pro.id]} onToggle={() => onFollow(pro.id)} />
+              <div className="relative z-[1] mt-[2px]">
+                <FollowButton compact following={!!follows[pro.id]} onToggle={() => onFollow(pro.id)} />
               </div>
             </div>
           );

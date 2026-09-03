@@ -5,9 +5,9 @@ import { ArrowLeft, Building2, CheckCircle2, Flag, GraduationCap, MessagesSquare
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, PROS, THREADS } from "./data";
-import { Avatar, CompanyChip, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, QuietCta, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE } from "./ProProfile";
-import { AreaChart, Meter, MetricTile, Ring, Segmented, demoSeries } from "./viz";
+import { AreaChart, Meter, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
 // Dreamari staff view (demo): what is happening across the whole app, who is
 // on it, what needs a human. Four tabs, one job each:
@@ -99,7 +99,7 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
                 { icon: Building2, value: String(partners.length), label: "Partner companies", delta: 0 },
                 { icon: School, value: "214", label: "Schools", delta: 5 },
               ].map((m, i) => (
-                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i > 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={ruledCell(i, 4)} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={ACCENT} />
                 </div>
               ))}
@@ -192,7 +192,7 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
                   <li key={p.id} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
                     <span className="flex flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[4px]">
                       <span className="flex items-center gap-[8px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                        <Avatar name={pro.name} verified size={24} /> <strong className="font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</strong> <CompanyChip name={pro.org} tone="surface" size="sm" />
+                        <ProAvatar proId={pro.id} name={pro.name} size={24} /> <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button> <CompanyChip name={pro.org} tone="surface" size="sm" />
                       </span>
                       <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{p.ago}</span>
                     </span>
@@ -233,7 +233,7 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
                 { icon: Building2, value: String(partners.length), label: "Partners", delta: 0 },
                 { icon: Users, value: "9", label: "Staff", delta: 0 },
               ].map((m, i) => (
-                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i > 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={ruledCell(i, 4)} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={ACCENT} />
                 </div>
               ))}

@@ -1219,7 +1219,7 @@ export type EventBoard = {
 export const EVENTS: EventBoard[] = [
   {
     id: "event-ey",
-    name: "Dream Opportunity × EY Dallas",
+    name: "Dream Opportunity EY Student Impact Day",
     host: "Ernst & Young",
     date: "August 14, 2026",
     location: "EY Dallas Office",
@@ -1251,7 +1251,7 @@ export const EVENTS: EventBoard[] = [
   // already joined; the Junior Achievement board unlocks with its code.
   {
     id: "event-do-morgan-stanley-nyc",
-    name: "Dream Opportunity × Morgan Stanley NYC",
+    name: "Dream Opportunity Morgan Stanley NYC",
     host: "Morgan Stanley",
     date: "March 12, 2026",
     location: "Morgan Stanley, New York City",
@@ -1266,7 +1266,7 @@ export const EVENTS: EventBoard[] = [
   },
   {
     id: "event-ja-goldman-sachs-nyc",
-    name: "Junior Achievement × Goldman Sachs NYC",
+    name: "Junior Achievement Goldman Sachs NYC",
     host: "Junior Achievement",
     date: "April 16, 2026",
     location: "Goldman Sachs, New York City",
@@ -1286,7 +1286,7 @@ export const EVENTS: EventBoard[] = [
   // always. No invented stats: an event that has not happened has none.
   {
     id: "event-jpmc-brooklyn",
-    name: "Dream Opportunity × JPMorgan Chase Brooklyn",
+    name: "Dream Opportunity JPMorgan Chase Student Event",
     host: "JPMorgan Chase",
     date: "October 23, 2026",
     location: "Brooklyn, New York",
@@ -1297,7 +1297,7 @@ export const EVENTS: EventBoard[] = [
   },
   {
     id: "event-att-dallas",
-    name: "Dream Opportunity × AT&T Dallas",
+    name: "Dream Opportunity AT&T Student Event",
     host: "AT&T",
     date: "October 29, 2026",
     location: "Dallas, Texas",
@@ -1308,7 +1308,7 @@ export const EVENTS: EventBoard[] = [
   },
   {
     id: "event-ey-newjersey",
-    name: "Dream Opportunity × EY New Jersey",
+    name: "Dream Opportunity EY Student Event",
     host: "Ernst & Young",
     date: "November 4, 2026",
     location: "New Jersey",
