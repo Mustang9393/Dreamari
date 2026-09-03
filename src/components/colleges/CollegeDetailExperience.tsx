@@ -126,10 +126,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What your family would pay for a year</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The average bill after grants and scholarships, by what the family earns.</p>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Families who earn less get more grant money, so the bill depends on income. These are the averages after grants.</p>
                   <div className="mt-[var(--space-2)]">
                     {d.bands.map((b, i) => <Row key={b.label} label={`If your family earns ${b.label.toLowerCase()}`} value={`${money(b.pay)} a year`} last={i === d.bands.length - 1} />)}
                   </div>
+                  {d.bands.some((b, i) => i > 0 && b.pay < d.bands[i - 1].pay) && (
+                    <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Some lower-income families here pay a little more than the band above. Aid also depends on savings and on living at home.</p>
+                  )}
                 </div>
                 {(d.tuitionInState !== null || d.housing) && (
                   <div>
