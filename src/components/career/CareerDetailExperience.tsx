@@ -179,21 +179,24 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
       {hasDetail && open && (
         <div className="flex flex-col gap-[var(--space-3)] pb-[var(--space-5)] pl-[48px]">
           {rung.description && <p className="max-w-[62ch] text-[16px] leading-[24px]">{rung.description}</p>}
+          {/* two short lists, one under the other, so what each level asks
+             for reads at a glance and the climb between levels is visible */}
           {(rung.whatYouDo.length > 0 || rung.toGetHere.length > 0) && (
-            <dl className="flex flex-col gap-[var(--space-2)]">
-              {rung.whatYouDo.length > 0 && (
-                <div className="flex flex-col gap-[2px] sm:flex-row sm:gap-[var(--space-4)]">
-                  <dt className={`${SMALL} font-semibold sm:w-[112px] sm:flex-none`}>What you do</dt>
-                  <dd className={`${TINY} min-w-0 sm:pt-[1px]`} style={{ color: "var(--muted-foreground)" }}>{rung.whatYouDo.join(" · ")}</dd>
+            <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+              {[["What you do", rung.whatYouDo], ["What you need", rung.toGetHere]].map(([label, items]) => (items as string[]).length > 0 && (
+                <div key={label as string} className="flex flex-col gap-[6px]">
+                  <h4 className={`${SMALL} font-semibold`} style={{ color: accent }}>{label as string}</h4>
+                  <ul className="m-0 flex list-none flex-col gap-[4px] p-0">
+                    {(items as string[]).map((item) => (
+                      <li key={item} className={`${SMALL} flex gap-[8px]`} style={{ color: "rgba(255,255,255,0.86)" }}>
+                        <span aria-hidden className="mt-[9px] size-[5px] flex-none rounded-full" style={{ background: accent }} />
+                        <span className="min-w-0">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )}
-              {rung.toGetHere.length > 0 && (
-                <div className="flex flex-col gap-[2px] sm:flex-row sm:gap-[var(--space-4)]">
-                  <dt className={`${SMALL} font-semibold sm:w-[112px] sm:flex-none`}>To get here</dt>
-                  <dd className={`${TINY} min-w-0 sm:pt-[1px]`} style={{ color: "var(--muted-foreground)" }}>{rung.toGetHere.join(" · ")}</dd>
-                </div>
-              )}
-            </dl>
+              ))}
+            </div>
           )}
         </div>
       )}
@@ -274,7 +277,7 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
 
 // The degree sheet: the three door questions, the note, the "not the only
 // route" line, and how people in the job actually finished, as bars.
-function DegreeSheet({ career, detail, accent, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; accent: string; onClose: () => void }) {
+function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -282,7 +285,6 @@ function DegreeSheet({ career, detail, accent, onClose }: { career: string; deta
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  const top = Math.max(...detail.distribution.map((d) => d.pct));
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)" }}>
@@ -311,30 +313,6 @@ function DegreeSheet({ career, detail, accent, onClose }: { career: string; deta
         </dl>
 
         <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.note}</p>
-        <p className={SMALL}>
-          <strong className="font-semibold">Even so, {detail.noBachelorPct} of people doing this job do not have a bachelor&apos;s degree.</strong>{" "}
-          <span style={{ color: "var(--muted-foreground)" }}>The usual route is not the only one.</span>
-        </p>
-        {detail.extra && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{detail.extra}</p>}
-
-        <div className="flex flex-col gap-[var(--space-3)]">
-          <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people in this job finished</h3>
-          <p className={TINY} style={{ color: "var(--muted-foreground)" }}>According to the U.S. Bureau of Labor Statistics.</p>
-          <ul className="flex flex-col gap-[8px]">
-            {detail.distribution.map((row) => {
-              const lead = row.pct === top;
-              return (
-                <li key={row.label} className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_56px] items-center gap-[var(--space-3)]">
-                  <span className={`${TINY} truncate ${lead ? "font-semibold" : ""}`} style={{ color: lead ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.label}</span>
-                  <span className="h-[8px] w-full overflow-hidden rounded-full" style={{ background: "var(--glass-surface-1)" }}>
-                    <span className="block h-full rounded-full" style={{ width: `${Math.max(2, row.pct)}%`, background: lead ? accent : "color-mix(in srgb, var(--foreground) 35%, transparent)" }} />
-                  </span>
-                  <span className={`${TINY} text-right tabular-nums ${lead ? "font-semibold" : ""}`} style={{ color: lead ? "var(--foreground)" : "var(--muted-foreground)" }}>{row.pct}%</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
       </div>
     </div>,
     document.body,
@@ -360,7 +338,7 @@ function viewModel(career: ResolvedCareer) {
     summary: p?.summary ?? career.description,
     scenario: p?.scenario ?? career.realLifeExample,
     whatTheyDo,
-    facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER),
+    facts: facts.filter((f) => f.value && f.value !== PLACEHOLDER && !/people doing|jobs open/i.test(f.label)),
     payByState: p?.payByState,
     knowAbout: p?.knowAbout ?? [],
     goodAt: p?.goodAt ?? [],
@@ -520,7 +498,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
-          <section aria-label="Quick facts" className={`grid grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`} style={PANEL}>
+          <section aria-label="Quick facts" className={`grid grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}
@@ -710,7 +688,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         )}
 
         {openFact === "degree" && vm.details?.degree && (
-          <DegreeSheet career={career.title} detail={vm.details.degree} accent={accent} onClose={() => setOpenFact(null)} />
+          <DegreeSheet career={career.title} detail={vm.details.degree} onClose={() => setOpenFact(null)} />
         )}
 
         {vm.sources && (

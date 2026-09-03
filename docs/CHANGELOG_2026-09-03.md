@@ -49,3 +49,9 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Saved page: remove a saved item in place.
 - Volunteers: posts have a title and a body, can be deleted; answers need a few sentences and can carry "Based on my own experience".
 - Written up: how each action works, what we borrowed from Instagram, TikTok, Quora, Brainly and Stack Overflow, and the edge cases.
+
+## Career page (Josh's notes, not yet pushed)
+- Removed the "People doing it" and "Jobs open each year" facts.
+- The degree pop-up now says what you need in words. The education-mix numbers and percentages are gone.
+- Each career ladder level opens to two short bullet lists: "What you do" and "What you need", so the climb between levels is clear.
+- Kept as is: the (i) "What you need to get in", pay by state.
