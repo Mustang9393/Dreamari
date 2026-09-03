@@ -112,7 +112,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                       </span>
                       <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: state === "answered" ? "var(--world-food-farming-nature)" : state === "skipped" ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
                         {state === "answered" ? <CheckCircle2 className="h-3 w-3" aria-hidden /> : <Clock className="h-3 w-3" aria-hidden />}
-                        {state === "answered" ? "Answered" : state === "skipped" ? "Skipped" : "Awaiting"}
+                        {state === "answered" ? "Answered" : state === "skipped" ? "Skipped" : "Waiting"}
                       </span>
                     </div>
                     <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
@@ -293,14 +293,9 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             </div>
           </Panel>
 
-          {/* recognition a professional can actually use: a card to post, like Wrapped */}
-          <Panel
-            id="summary-title"
-            title="2026 Impact Summary"
-            aside={<PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>}
-          >
-            <ImpactCard pro={pro} accent={accent} />
-          </Panel>
+          {/* recognition a professional can actually use: the card itself is the
+             section, nothing wrapped around it */}
+          <ImpactCard pro={pro} accent={accent} />
         </>
       )}
     </>
@@ -311,17 +306,18 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
  *  hero number, three supporting ones, who it is about. Sized to post. */
 function ImpactCard({ pro, accent }: { pro: (typeof PROS)[number]; accent: string }) {
   return (
-    <div
-      className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]"
+    <section
+      aria-label="2026 Impact Summary"
+      className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]"
       style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${accent} 55%, transparent), transparent 60%), linear-gradient(160deg, color-mix(in srgb, ${accent} 42%, #0e0c20) 0%, #0e0c20 100%)`, borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 24px 60px -30px rgba(0,0,0,0.8)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}
     >
       <span aria-hidden className="absolute top-[-60px] right-[-40px] size-[220px] rounded-full opacity-40 blur-[50px]" style={{ background: accent }} />
-      <div className="relative flex items-start justify-between gap-[var(--space-3)]">
-        <span className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "rgba(255,255,255,0.8)" }}>2026 · Dreamari Impact Summary</span>
-        <CompanyChip name={pro.org} tone="photo" size="sm" />
+      <div className="relative flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <h2 className="text-[22px] leading-[27px] font-extrabold">2026 Impact Summary</h2>
+        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]" style={{ background: "rgba(255,255,255,0.92)", color: "#0e0c20" }}><span className="flex items-center gap-[6px]"><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>
       </div>
       <div className="relative mt-[var(--space-6)] flex flex-col">
-        <span className="text-[64px] leading-[64px] font-extrabold tracking-[-0.02em] tabular-nums">842</span>
+        <span className="font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontSize: 64, lineHeight: "64px" }}>842</span>
         <span className="text-[18px] leading-[24px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>students reached</span>
       </div>
       <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "rgba(255,255,255,0.22)" }}>
@@ -332,13 +328,16 @@ function ImpactCard({ pro, accent }: { pro: (typeof PROS)[number]; accent: strin
           </div>
         ))}
       </dl>
-      <div className="relative mt-[var(--space-5)] flex items-center gap-[10px]" style={{ fontFamily: "var(--font-body)" }}>
-        <Avatar name={pro.name} verified size={36} />
-        <span className="min-w-0">
-          <span className="block truncate text-[14px] leading-[18px] font-bold">{pro.name}</span>
-          <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{pro.role}</span>
+      <div className="relative mt-[var(--space-5)] flex items-center justify-between gap-[var(--space-3)]" style={{ fontFamily: "var(--font-body)" }}>
+        <span className="flex min-w-0 items-center gap-[10px]">
+          <Avatar name={pro.name} verified size={36} />
+          <span className="min-w-0">
+            <span className="block truncate text-[14px] leading-[18px] font-bold">{pro.name}</span>
+            <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{pro.role}</span>
+          </span>
         </span>
+        <CompanyChip name={pro.org} tone="photo" size="sm" />
       </div>
-    </div>
+    </section>
   );
 }

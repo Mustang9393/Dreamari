@@ -75,3 +75,24 @@ Kept, because the audit confirmed them: Ask from the landing with routing and al
 ## 5. Not built, and why
 
 Real analytics, time ranges and deltas need a backend. Per-region growth and budget belong to the corporate product, not the prototype. Public activity tiers are excluded by the brief. Private messaging is excluded by design.
+
+## 6. Research: notifications and everything else, for 8th graders of every ability (2026-09-03, later)
+
+Question asked: should "Your questions" live behind a notifications bell? Sources read: Nielsen Norman Group's teen usability research (100 teens, 13 to 17, US/UK/AU; 130 guidelines), the W3C COGA note "Making Content Usable for People with Cognitive and Learning Disabilities", CAST's Universal Design for Learning guidelines (executive function), reporting on notification anxiety in teens (Common Sense Media via CNN, 2023), and the way Google Classroom surfaces a student's own items.
+
+What the research says
+- Teens read at or below a 6th-grade level on screens, give up fast, and blame the design. Anything that needs decoding (an unlabelled icon, a hidden panel) is skipped. Icons need words next to them.
+- The most important task belongs at the top of the page, visible without a tap (COGA 4.3.1, 4.2.1). Students who have to click into things to find what concerns them get lost (the Google Classroom Stream lesson; its fix was a To-do list on the Stream itself).
+- Badge counts create an open loop and measurable anxiety in adolescents. A bell with a number is the pattern that harms this audience most.
+- Executive-function support (UDL): fewer options at once, visible progress and status, one clear next step.
+- Teens want to do things, not read about them: ask, follow, like, save.
+
+Decision
+- The bell is out. A student's own questions sit as a two-row strip directly under the Ask row: who answered (a face and a name) or "Waiting for an answer", then the question. Nothing to decode, nothing to open, no badge. More than two → "See all".
+- Ask sheet: the community it goes to is one line ("Goes to Finance Careers · Change"); the five chips appear only if they tap Change.
+- Words at a 6th-grade level everywhere a student reads: Posts (not Insights), Top answer (not Primary answer), Save (not Save insight), Pro (not Professional), Waiting (not Awaiting).
+- No search box on a tab with two items.
+- One rhythm: every panel and card pads space-5 on phones and space-6 from tablet; every Connect page stacks its sections at space-5.
+- The 2026 Impact Summary is one gold card with its own Download; nothing nested around it.
+
+Sources: nngroup.com/articles/usability-of-websites-for-teenagers, nngroup.com/reports/teenagers-on-the-web, w3.org/TR/coga-usable/design_guide.html, udlguidelines.cast.org, cnn.com/2023/09/26/health/teen-hundreds-of-phone-notifications-report-wellness, alicekeeler.com/2023/08/19/student-engagement-setting-up-google-classroom.

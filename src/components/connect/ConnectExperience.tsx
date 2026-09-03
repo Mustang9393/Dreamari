@@ -7,7 +7,6 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
   Bookmark,
   Calendar,
   CheckCircle2,
@@ -24,7 +23,6 @@ import {
   KeyRound,
   MapPin,
   Pin,
-  Search,
   ShieldCheck,
   ThumbsUp,
   Users,
@@ -743,7 +741,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-            <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
+            <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Pro</span>
             <span className="flex min-w-0 items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> <CompanyChip name={pro.org} tone="surface" size="sm" /></span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
@@ -914,7 +912,7 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <main
         style={{ fontFamily: FEED_FONT }}
-        className={`relative z-10 mx-auto flex w-full flex-col px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${view.kind === "home" ? "gap-[var(--space-4)]" : "gap-[var(--space-6)]"} ${
+        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-5)] px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
@@ -943,8 +941,9 @@ export function ConnectExperience() {
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
             onAsk={() => setAskOpen(true)}
-            onOpenActivity={() => setView({ kind: "activity" })}
-            unread={ALL_THREADS.filter((t) => t.handle === "Jordan" && t.unreadAnswer).length}
+            asked={asked}
+            onOpenThread={(id) => setView({ kind: "thread", id })}
+            onOpenAll={() => setView({ kind: "activity" })}
           />
         )}
 
@@ -1195,7 +1194,7 @@ function YourQuestions({ asked, onOpenThread, savedCount }: { asked: AskedQuesti
             <PanelRow key={t.id} onClick={() => onOpenThread(t.id)}>
               <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: answered ? STATE_COLOR.answered : STATE_COLOR.routed }}>
                 {who ? <Avatar name={who.name} size={20} /> : <Clock className="h-3 w-3" aria-hidden />}
-                {who ? <span>{fresh ? "New answer" : "Answered"} <span style={{ color: "var(--muted-foreground)" }}>from</span> <span style={{ color: "var(--foreground)" }}>{who.name}</span></span> : STATE_LABEL[t.state]}
+                {who ? <span>{fresh ? "New answer" : "Answered"} <span style={{ color: "var(--muted-foreground)" }}>{fresh ? "from" : "by"}</span> <span style={{ color: "var(--foreground)" }}>{who.name}</span></span> : STATE_LABEL[t.state]}
               </span>
               <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
             </PanelRow>
@@ -1215,7 +1214,45 @@ function YourQuestions({ asked, onOpenThread, savedCount }: { asked: AskedQuesti
   );
 }
 
-/** The bell: everything that happened to you. Your questions and their
+/** Your latest questions, right under where you ask (Google Classroom's
+ *  To-do on the Stream; Duolingo's next step on the path): the answer a
+ *  student is waiting for is visible with no tap, no icon to decode, no
+ *  badge. Two rows at most; the rest behind "See all". */
+function YourQuestionsStrip({ asked, onOpenThread, onOpenAll }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; onOpenAll: () => void }) {
+  const mine = ALL_THREADS.filter((t) => t.handle === "Jordan").sort((a, b) => Number(!!b.unreadAnswer) - Number(!!a.unreadAnswer));
+  const total = asked.length + mine.length;
+  if (total === 0) return null;
+  const rows: { key: string; who: ReturnType<typeof proById> | null; label: string; fresh: boolean; title: string; open?: () => void }[] = [
+    ...asked.map((q) => ({ key: q.id, who: null, label: "Waiting for an answer", fresh: false, title: q.title })),
+    ...mine.map((t) => {
+      const primary = t.responses.find((r) => r.kind === "answer" && r.primary) ?? t.responses.find((r) => r.kind === "answer");
+      const who = primary && primary.kind === "answer" ? proById(primary.proId) : null;
+      const answered = t.state === "answered" || t.state === "resolved";
+      return { key: t.id, who, label: who ? (t.unreadAnswer ? "New answer from " : "Answered by ") + who.name : answered ? "Answered" : "Waiting for an answer", fresh: !!t.unreadAnswer && answered, title: t.title, open: () => onOpenThread(t.id) };
+    }),
+  ].slice(0, 2);
+  return (
+    <div className="flex flex-col rounded-[var(--radius-lg)] border" style={{ background: "var(--glass-surface-2)", borderColor: "rgba(255,255,255,0.16)" }}>
+      {rows.map((row, i) => (
+        <button key={row.key} type="button" onClick={row.open} disabled={!row.open} className={`dm-quiet flex w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[12px] text-left disabled:cursor-default ${i > 0 ? "border-t" : ""}`} style={{ borderColor: RULE }}>
+          {row.who ? <Avatar name={row.who.name} size={32} /> : <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-1)" }}><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span>}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: row.fresh ? STATE_COLOR.answered : "var(--muted-foreground)" }}>{row.label}</span>
+            <span className="block truncate text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{row.title}</span>
+          </span>
+          {row.open && <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+        </button>
+      ))}
+      {total > 2 && (
+        <button type="button" onClick={onOpenAll} className="dm-quiet flex w-full cursor-pointer items-center justify-between border-t px-[var(--space-4)] py-[10px] text-[13px] leading-[18px] font-semibold" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+          See all · {total} <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Everything of yours in one place: the "See all" page. Your questions and their
  *  answers, what the people you follow did, and the way into Saved. */
 function ActivityView({ asked, follows, savedCount, onBack, onOpenThread }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; onOpenThread: (id: string) => void }) {
   return (
@@ -1246,6 +1283,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
   const worlds = useStudentWorlds();
   const [text, setText] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
+  const [choosing, setChoosing] = useState(false);
   const fromWords = ROUTE_WORDS.find((r) => r.test.test(text))?.id;
   const fromTop3 = COMMUNITIES.find((c) => worlds.includes(c.world))?.id;
   const boardId = picked ?? fromWords ?? fromTop3 ?? "teaching-education";
@@ -1283,18 +1321,23 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
 
         {/* where it goes: picked from the words, one tap to change */}
         <div className="flex flex-col gap-[8px]">
-          <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Goes to</span>
+          <span className="flex flex-wrap items-center gap-x-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            Goes to <strong className="font-bold" style={{ color: accent }}>{community.name}</strong>
+            {!choosing && <button type="button" onClick={() => setChoosing(true)} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Change</button>}
+          </span>
+          {choosing && (
           <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
             {COMMUNITIES.map((c) => {
               const on = c.id === boardId;
               const a = communityAccent(c);
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => setPicked(c.id)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+                <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                   {c.name}
                 </button>
               );
             })}
           </div>
+          )}
         </div>
 
         {similar.length > 0 && (
@@ -1416,8 +1459,9 @@ function HomeView({
   onFollow,
   joinedCount,
   onAsk,
-  onOpenActivity,
-  unread,
+  asked,
+  onOpenThread,
+  onOpenAll,
 }: {
   tab: "communities" | "events";
   onTab: (tab: "communities" | "events") => void;
@@ -1431,13 +1475,13 @@ function HomeView({
   onFollow: (id: string) => void;
   joinedCount: number;
   onAsk: () => void;
-  onOpenActivity: () => void;
-  unread: number;
+  asked: AskedQuestion[];
+  onOpenThread: (id: string) => void;
+  onOpenAll: () => void;
 }) {
-  const [query, setQuery] = useState("");
   const eventInk = "#f6f5fb";
-  const searched = COMMUNITIES.filter((c) => !query || (c.name + " " + c.purpose + " " + c.topics.join(" ") + " " + c.professionalsFrom.join(" ")).toLowerCase().includes(query.toLowerCase()));
-  const searchedEvents = EVENTS.filter((e) => !query || (e.name + " " + e.host + " " + e.location).toLowerCase().includes(query.toLowerCase()));
+  const searched = COMMUNITIES;
+  const searchedEvents = EVENTS;
 
   return (
     <>
@@ -1449,15 +1493,7 @@ function HomeView({
         <div className="min-w-0">
           <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find your community</h1>
         </div>
-        <div className="flex w-full min-w-0 items-center gap-[var(--space-3)] sm:w-auto">
-          <TopTabs tab={tab} onTab={onTab} />
-          <button type="button" onClick={onOpenActivity} aria-label={unread > 0 ? `Activity, ${unread} new` : "Activity"} className="dm-quiet relative flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <Bell className="h-[18px] w-[18px]" aria-hidden />
-            {unread > 0 && (
-              <span aria-hidden className="absolute top-[6px] right-[6px] flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10px] leading-[12px] font-extrabold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>{unread}</span>
-            )}
-          </button>
-        </div>
+        <TopTabs tab={tab} onTab={onTab} />
       </div>
 
       {tab === "communities" && (
@@ -1470,24 +1506,7 @@ function HomeView({
           </span>
         </button>
       )}
-      {tab === "events" && (
-      <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-          <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-          <span className="sr-only">Search events</span>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search events, hosts, or cities"
-            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-            style={{ color: "var(--foreground)" }}
-          />
-          {query && (
-            <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex size-6 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          )}
-        </label>
-      )}
+      {tab === "communities" && <YourQuestionsStrip asked={asked} onOpenThread={onOpenThread} onOpenAll={onOpenAll} />}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
@@ -1496,11 +1515,11 @@ function HomeView({
            "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SectionHead>{query ? `Matching “${query}”` : "Your Communities"}</SectionHead>
+            <SectionHead>Your Communities</SectionHead>
             {/* The card-style A/B switcher that sat here was a lab control in a
                student's face; the lane still rides ?cards= in the URL. This
                slot is the doc's joined count. */}
-            {!query && (
+            {(
               <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{joinedCount} joined</span>
             )}
           </div>
@@ -1509,25 +1528,22 @@ function HomeView({
           <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-6">
             {searched.map((c, index) => (
               <div key={c.id} className="lg:col-span-2">
-                <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0 && !query} />
+                <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
               </div>
             ))}
-            {!query && (
+            {(
               <div className="lg:col-span-2">
                 <ComingSoonCard />
               </div>
             )}
           </div>
-          {searched.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches “{query}” yet.</p>
-          )}
         </section>
       )}
 
       {/* People after places (direct feedback): the communities are the
          doors, the people are who is behind them. Then what the people you
          already follow did lately, only once you follow someone. */}
-      {tab === "communities" && !query && <PeopleToFollow follows={follows} onFollow={onFollow} />}
+      {tab === "communities" && <PeopleToFollow follows={follows} onFollow={onFollow} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -1582,9 +1598,6 @@ function HomeView({
               );
             })}
           </div>
-          {searchedEvents.length === 0 && (
-            <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>No events match &ldquo;{query}&rdquo; yet.</p>
-          )}
         </section>
       )}
     </>
@@ -1748,7 +1761,7 @@ function BoardView({
 
       {/* one row of tabs for the whole board (Questions, Insights, About); the
          feed cards sit straight on the page, no box around boxes */}
-      <Segmented ariaLabel="Board section" value={filter === "about" ? "about" : filter === "insights" ? "insights" : "questions"} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: `Questions · ${threads.length}` }, { key: "insights", label: `Insights · ${insights.length}` }, { key: "about", label: "About" }]} />
+      <Segmented ariaLabel="Board section" value={filter === "about" ? "about" : filter === "insights" ? "insights" : "questions"} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: `Questions · ${threads.length}` }, { key: "insights", label: `Posts · ${insights.length}` }, { key: "about", label: "About" }]} />
 
       {about && (
         <Panel id="about-community-title" title="About this community">
@@ -2006,7 +2019,7 @@ function ThreadView({
                   {nav && <FollowButton compact following={nav.isFollowing(r.proId)} onToggle={() => nav.toggleFollow(r.proId)} />}
                   {r.primary && (
                     <span className="flex-none rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
-                      Primary answer
+                      Top answer
                     </span>
                   )}
                   </span>
@@ -2022,7 +2035,7 @@ function ThreadView({
                     <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful
                   </button>
                   <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save insight"}
+                    <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
                   </button>
                   <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
                     <Flag className="h-3 w-3" aria-hidden /> Report

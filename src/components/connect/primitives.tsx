@@ -251,7 +251,7 @@ export function LocalQuestionCard({ title }: { title: string }) {
 export function Card({ children, className = "", accent }: { children: React.ReactNode; className?: string; accent?: string }) {
   return (
     <div
-      className={`rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`}
+      className={`rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)] ${className}`}
       // the app's frosted panel (career page, Connect boards)
       style={{
         background: accent ? `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))` : "var(--glass-surface-2)",
@@ -267,13 +267,13 @@ export function Card({ children, className = "", accent }: { children: React.Rea
 }
 
 
-export function PrimaryCta({ children, onClick, className = "" }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+export function PrimaryCta({ children, onClick, className = "", style }: { children: React.ReactNode; onClick?: () => void; className?: string; style?: React.CSSProperties }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={`dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] leading-[20px] font-semibold ${className}`}
-      style={{ background: "var(--primary)", color: "#FFFFFF" }}
+      style={{ background: "var(--primary)", color: "#FFFFFF", ...style }}
     >
       {children}
     </button>
