@@ -106,12 +106,14 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
     >
       <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
         {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" style={{ filter: "brightness(0.78) saturate(0.92)" }} />
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" style={{ filter: "brightness(0.72) saturate(0.9)" }} />
         ) : (
           <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
         )}
         <CardProgressiveBlur size="74%" />
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${ACCENT} 12%, transparent), transparent 60%)` }} />
+        {/* a real band behind the title, not just the folio scrim: bright
+           campus photos (Princeton) otherwise swallow the name */}
+        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), linear-gradient(to bottom, rgba(12,16,35,0.82) 0%, rgba(12,16,35,0.55) 34%, rgba(12,16,35,0.12) 58%, transparent 72%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${ACCENT} 12%, transparent), transparent 60%)` }} />
         <span className="absolute inset-0" style={{ backgroundImage: `url(${GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
       </span>
       <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: ACCENT }} />

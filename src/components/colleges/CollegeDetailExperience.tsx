@@ -122,26 +122,27 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families pay, by what they earn</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>For a year, after grants and scholarships.</p>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What a year costs, by family income</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships. Find the row that matches what your family earns.</p>
                   <div className="mt-[var(--space-4)]">
-                    <HBars
-                      rows={d.bands.map((b) => ({ label: b.label, value: b.pay, display: money(b.pay) }))}
-                      marker={d.tuitionInState !== null && d.fees !== null ? { value: d.tuitionInState + d.fees, label: "Full price before aid:" } : undefined}
-                      unit="$"
-                    />
+                    <HBars rows={d.bands.map((b) => ({ label: `Family earns ${b.label.toLowerCase()}`, value: b.pay, display: money(b.pay) }))} />
                   </div>
-                  {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
-                    <div className="mt-[var(--space-4)]">
-                      {d.scholarshipShare !== undefined && <Row label="Got a college scholarship" note={d.scholarshipAvg && d.scholarshipShare ? `new students, about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each` : "new students"} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
-                      {d.pell !== undefined && <Row label="Got a federal Pell grant" value={`${d.pell}%`} last />}
-                    </div>
-                  )}
                 </div>
+                {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Help with the bill</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>How many students get money they do not pay back.</p>
+                    <div className="mt-[var(--space-2)]">
+                      {d.scholarshipShare !== undefined && <Row label="Get a scholarship from the college" note={d.scholarshipAvg && d.scholarshipShare ? `about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each, new students` : "new students"} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
+                      {d.pell !== undefined && <Row label="Get a federal Pell grant" note="for lower-income families" value={`${d.pell}%`} last />}
+                    </div>
+                  </div>
+                )}
                 {(d.tuitionInState !== null || d.housing) && (
                   <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>The full price, before aid</h3>
-                    <div className="mt-[var(--space-3)]">
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>The full price, before any aid</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The list price. Almost nobody pays this.</p>
+                    <div className="mt-[var(--space-2)]">
                       {d.tuitionInState !== null && <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />}
                       {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
                       {d.fees !== null && <Row label="Required fees" value={d.fees === 0 ? "None" : money(d.fees)} />}
@@ -186,18 +187,24 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Folded id="study" title="What you can study" open={open.has("study")} onToggle={() => toggle("study")}>
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{d.programmeCount} programmes</h3>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Degrees offered</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{d.programmeCount} programmes in total.</p>
                   <div className="mt-[var(--space-2)]">
-                    {d.levels.filter((l) => l.n > 0).map((l) => <Row key={l.label} label={/degree|certificate/i.test(l.label) ? l.label : `${l.label} degrees`} value={String(l.n)} />)}
+                    {d.levels.filter((l) => l.n > 0).map((l, i, arr) => <Row key={l.label} label={/degree|certificate/i.test(l.label) ? l.label : `${l.label} degrees`} value={String(l.n)} last={i === arr.length - 1} />)}
+                  </div>
+                </div>
+                <div>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Classes</h3>
+                  <div className="mt-[var(--space-2)]">
                     <Row label="Students per teacher" value={d.ratio.replace(" to 1", "")} last={!d.finish4} />
-                    {d.finish4 ? <Row label="Finish a bachelor's in 4 years" value={`${d.finish4}%`} last /> : null}
+                    {d.finish4 ? <Row label="Finish a bachelor's in four years" value={`${d.finish4}%`} last /> : null}
                   </div>
                 </div>
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, and pay one year out.</p>
-                  <div className="mt-[var(--space-3)]">
-                    {d.programmes.slice(0, 6).map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} a year`} value={p.pay === "not published" ? "Pay not published" : p.pay} last={i === arr.length - 1} />)}
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>What graduates earned one year out.</p>
+                  <div className="mt-[var(--space-2)]">
+                    {d.programmes.slice(0, 6).map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} graduates a year`} value={p.pay === "not published" ? "Not published" : `${p.pay} a year`} last={i === arr.length - 1} />)}
                   </div>
                 </div>
               </div>
@@ -214,10 +221,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     <Row label="Men" value={`${d.men}%`} />
                     <Row label="Study full time" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} last />
                   </div>
+                </div>
+                <div>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Where undergraduates come from</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Federal categories. International means students on visas.</p>
                   <div className="mt-[var(--space-4)]">
                     <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct }))} />
                   </div>
-                  <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Federal categories. International means students on visas.</p>
                 </div>
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
@@ -242,13 +252,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
             <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
               <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
+              <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject.</p>
               <div className="mt-[var(--space-2)]">
-                <Row label="Typical pay" note="6 years after starting" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
+                <Row label="Typical pay" note="six years after starting" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
                 <Row label="Debt at graduation" note="federal loans" value={d.debt ? money(Math.round(d.debt / 100) * 100) : "Not published"} />
                 {d.monthly ? <Row label="Monthly repayment" value={money(d.monthly)} /> : null}
                 <Row label="Paying it back" note="of those who borrowed" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
               </div>
-              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject. Source: College Scorecard.</p>
+              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Source: College Scorecard.</p>
             </Folded>
           </>
         )}
