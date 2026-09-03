@@ -82,12 +82,12 @@ const RULE = "rgba(255,255,255,0.12)";
 // Cover photos a student can pick for their header (the app's own
 // photography), or upload their own. Persisted per browser.
 const COVERS = [
-  "/images/connect/covers/photo4-tech-engineering.webp",
-  "/images/connect/covers/photo4-business-money.webp",
-  "/images/connect/covers/photo4-health-medicine.webp",
-  "/images/connect/covers/photo4-arts-media.webp",
-  "/images/connect/covers/photo4-teaching-education.webp",
-  "/images/connect/covers/creative.webp",
+  "/images/app/env-aerospace-engineer.png",
+  "/images/app/env-marine-biologist.png",
+  "/images/app/env-biomedical-researcher.png",
+  "/images/app/env-neurosurgeon.png",
+  "/images/app/env-creative-director.png",
+  "/images/app/env-product-designer.png",
 ];
 const COVER_KEY = "dreamari-cover";
 
@@ -350,22 +350,32 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                   <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Cover</span>
                 </button>
                 {coverOpen && (
-                  <>
-                    <button type="button" aria-label="Close" className="fixed inset-0 z-[55] cursor-default" onClick={() => setCoverOpen(false)} />
-                    <div className="absolute top-[44px] right-0 z-[56] flex w-[264px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)", color: "var(--foreground)" }}>
-                      <div className="grid grid-cols-3 gap-[6px]">
+                  /* a sheet through the portal: the header clips and the blurred
+                     cluster would otherwise contain a fixed child */
+                  <Portal>
+                  <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                    <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+                    <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+                      <div className="flex items-center justify-between gap-[var(--space-3)]">
+                        <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
+                        <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                          <X className="h-4 w-4" aria-hidden />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
                           <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                             <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                           </button>
                         ))}
                       </div>
-                      <label className="dm-quiet flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
-                        <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Upload your own
+                      <label className="dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[15px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--glass-surface-1)" }}>
+                        <ImagePlus className="h-4 w-4" aria-hidden /> Upload your own
                         <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) pickCover(URL.createObjectURL(file)); }} />
                       </label>
                     </div>
-                  </>
+                  </div>
+                  </Portal>
                 )}
               </span>
               {/* Resume moved into the main tablist below -- it deserves the
@@ -444,7 +454,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               <dd className="flex flex-wrap items-baseline gap-x-[6px]">
                 <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>{fact.value}</span>
                 {fact.note && <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
-                {fact.sub && <span className="block w-full text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
+                {fact.sub && <span className="hidden w-full text-[12px] leading-[16px] font-semibold sm:block" style={{ color: "var(--muted-foreground)" }}>{fact.sub}</span>}
               </dd>
             </div>
           ))}
@@ -457,79 +467,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "locker" || tab === "settings") ? null : tab === "overview" ? (
-          // Overview is the dashboard: tabs, the three doorways, and "Do
-          // this next" all read as ONE surface, not a stack of separate
-          // floating cards -- the tablist sits inside the same card instead
-          // of its own pill above it.
+        {(tab === "locker" || tab === "settings") ? null : (
+          /* One surface for every tab (direct feedback): the tab bar and the
+             active panel share the same card, whichever tab is open. */
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
-            <div
-              ref={tablistRef}
-              role="tablist"
-              aria-label="Career sections"
-              onKeyDown={(event) => {
-                const order: TabId[] = ["overview", "top3", "plan", "report", "resume"];
-                const index = order.indexOf(tab);
-                if (index === -1) return;
-                let next: TabId | null = null;
-                if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
-                if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
-                if (next) {
-                  event.preventDefault();
-                  setTab(next);
-                  document.getElementById(`profile-tab-${next}`)?.focus();
-                }
-              }}
-              className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] p-[var(--space-1)] [scrollbar-width:none]"
-              style={{
-                background: "var(--glass-surface-2)",
-                ...(tabsOverflow ? { maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" } : {}),
-              }}
-            >
-              {(
-                [
-                  { id: "overview", label: "Overview" },
-                  { id: "top3", label: "Top Three" },
-                  { id: "plan", label: "Plan" },
-                  { id: "report", label: "Report" },
-                  { id: "resume", label: "Resume" },
-                ] as const
-              ).map((item) => (
-                <button
-                  key={item.id}
-                  id={`profile-tab-${item.id}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === item.id}
-                  aria-controls={`profile-panel-${item.id}`}
-                  tabIndex={tab === item.id ? 0 : -1}
-                  onClick={() => setTab(item.id)}
-                  className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
-                  style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
-                >
-                  {item.label}
-                  {pings[item.id] && (
-                    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-                      <span
-                        className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[profile-tab-ping-shimmer_2.4s_ease-in-out_1]"
-                        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.85) 45%, transparent 90%)" }}
-                      />
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
-              <OverviewTab
-                focus={focus} nextTask={nextTask} planProgress={planProgress} top3Count={top3.length}
-                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
-                onGoLocker={() => setTab("locker")}
-              />
-            </div>
-          </div>
-        ) : (
-        <>
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
            feedback, but redundant with the new side-by-side Top 3 (which
@@ -556,12 +497,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               document.getElementById(`profile-tab-${next}`)?.focus();
             }
           }}
-          className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] border p-[var(--space-1)] [scrollbar-width:none]"
-          style={
-            tabsOverflow
-              ? { ...GLASS, maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" }
-              : GLASS
-          }
+          className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] p-[var(--space-1)] [scrollbar-width:none]"
+          style={{
+            background: "var(--glass-surface-2)",
+            ...(tabsOverflow ? { maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" } : {}),
+          }}
         >
           {(
             [
@@ -596,8 +536,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             </button>
           ))}
         </div>
-        </>
-        )}
+
+            {tab === "overview" && (
+            <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
+              <OverviewTab
+                focus={focus} nextTask={nextTask} planProgress={planProgress} top3Count={top3.length}
+                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                onGoLocker={() => setTab("locker")}
+              />
+            </div>
+            )}
         {tab === "top3" && (
           <div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3">
             <Top3Tab
@@ -607,10 +555,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             />
           </div>
         )}
-        {/* Reachable only via PlanTab's "Change route" link now, not a main
-           tab -- hidden from the tablist per direct feedback (see the
-           comment above), but the underlying route-choice flow still needs
-           a real destination rather than a dead link. */}
         {tab === "routes" && (
           <div role="tabpanel" id="profile-panel-routes" aria-labelledby="profile-tab-plan">
             <RoutesTab
@@ -638,13 +582,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             />
           </div>
         )}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
-        {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
             <ResumeView />
           </div>
         )}
+          </div>
+        )}
+        {/* Reachable only via PlanTab's "Change route" link now, not a main
+           tab -- hidden from the tablist per direct feedback (see the
+           comment above), but the underlying route-choice flow still needs
+           a real destination rather than a dead link. */}
+        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
+        {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
       </main>
 
       {compareOpen && (

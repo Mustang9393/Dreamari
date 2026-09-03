@@ -60,3 +60,5 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - My Profile now looks like a career page: a cover photo behind the header (pick one of six or upload your own), your photo and name on it, and Grade / GPA / Streak as one clean strip. Every card on the page uses the same frosted panel.
 - Career page headers are brighter. The photo shows through more; the blur and fade still carry the text.
 - Checked all 39 career photos at phone size and re-framed the seven where a head was cut off.
+- Profile tabs all live inside the same card as the tab bar now. Cover photos are the app's environment scenes and the picker opens as a sheet.
+- Career quick facts: the info button and the values line up the same way in every box.

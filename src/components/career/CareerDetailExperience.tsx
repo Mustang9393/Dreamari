@@ -519,8 +519,11 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
                 style={{ borderColor: "rgba(255,255,255,0.12)" }}
               >
-                <span className="flex items-center gap-[6px]">
-                  <span className={LABEL}>{fact.label}</span>
+                {/* the (i) always sits top-right of the cell, on the label's
+                   first line, whether the label wraps or not; the figure
+                   always sits at the bottom, so figures line up across cells */}
+                <span className="flex items-start justify-between gap-[6px]">
+                  <span className={`${LABEL} min-w-0`}>{fact.label}</span>
                   {factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
                     <button
                       type="button"
@@ -530,14 +533,14 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                         setFactAnchor(e.currentTarget);
                         setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
                       }}
-                      className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full"
+                      className="dm-quiet -mr-[4px] -mt-[1px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
                       style={{ color: "var(--muted-foreground)" }}
                     >
                       <Info className="h-[15px] w-[15px]" aria-hidden />
                     </button>
                   )}
                 </span>
-                <Figure accent={accent}>{fact.value}</Figure>
+                <span className="mt-auto"><Figure accent={accent}>{fact.value}</Figure></span>
                 {openFact === "pay" && factKey(fact.label) === "pay" && vm.details?.pay && (
                   <FactPopover anchor={factAnchor} onClose={() => setOpenFact(null)}>
                     <dl className="flex flex-col gap-[6px]">
