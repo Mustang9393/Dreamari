@@ -301,9 +301,9 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
         <>
           {/* the private analytics, opened by what the numbers mean */}
           <Panel id="metrics-title" title="This month" >
-            <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-3)] sm:grid-cols-3">
+            <dl className="-mx-[var(--space-2)] grid grid-cols-2 sm:grid-cols-3">
               {metrics.map((m, i) => (
-                <div key={m.label} className={`py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i % 3 !== 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={accent} />
                 </div>
               ))}

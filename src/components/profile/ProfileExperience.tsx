@@ -183,6 +183,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   const [coverUrl, setCoverUrl] = useState<string>(COVER_CAREER);
+  // the last background picked, kept so both cover layers stay mounted and
+  // the A/B switch is a crossfade, never a half-decoded swap
+  const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
   const [coverOpen, setCoverOpen] = useState(false);
   useEffect(() => {
     // the browser is the store for the prototype; read after mount so the
@@ -191,10 +194,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
       const saved = window.localStorage.getItem(COVER_KEY);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setCoverUrl(saved);
+      if (saved && saved !== COVER_CAREER) setBgUrl(saved);
     } catch {}
   }, []);
   const pickCover = (url: string) => {
     setCoverUrl(url);
+    if (url !== COVER_CAREER) setBgUrl(url);
     setCoverOpen(false);
     try { window.localStorage.setItem(COVER_KEY, url); } catch {}
   };
@@ -213,8 +218,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   // your Top 3 changes) or one of the abstract light fields / an upload.
   const coverIsCareer = coverUrl === COVER_CAREER;
   const heroAccent = (focus && WORLD_COLORS[focus.world]) || "var(--accent-subtle)";
-  const coverSrc = coverIsCareer ? (focus?.photo ?? COVERS[0]) : coverUrl;
-  const coverPosition = coverIsCareer ? (focus?.photoFocus ?? "50% 30%") : "50% 40%";
+  const careerSrc = focus?.photo ?? COVERS[0];
+  const careerPosition = focus?.photoFocus ?? "50% 30%";
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
@@ -333,7 +338,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
              the name sits on the photo; the student picks or uploads the cover. ---- */}
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
-            <img src={coverSrc} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: coverPosition }} />
+            {/* both layers stay mounted; A/B crossfades between them */}
+            <img src={careerSrc} alt="" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ objectPosition: careerPosition, opacity: coverIsCareer ? 1 : 0 }} />
+            <img src={bgUrl} alt="" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%", opacity: coverIsCareer ? 0 : 1 }} />
             <CardProgressiveBlur size="66%" />
             <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.62) 34%, rgba(12,16,35,0.12) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
           </div>
@@ -344,7 +351,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                 {[{ key: "career", label: "Career", letter: "A" }, { key: "picked", label: "Background", letter: "B" }].map((o) => {
                   const on = o.key === "career" ? coverIsCareer : !coverIsCareer;
                   return (
-                    <button key={o.key} type="button" role="tab" aria-selected={on} onClick={() => { if (o.key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(COVERS[0]); }} className="dm-quiet flex min-h-[30px] cursor-pointer items-center rounded-[6px] px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "rgba(255,255,255,0.8)" }}>
+                    <button key={o.key} type="button" role="tab" aria-selected={on} onClick={() => { if (o.key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(bgUrl); }} className="dm-quiet flex min-h-[30px] cursor-pointer items-center rounded-[6px] px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "rgba(255,255,255,0.8)" }}>
                       {o.letter}<span className="hidden sm:inline"> · {o.label}</span>
                     </button>
                   );

@@ -92,14 +92,14 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
       {tab === "overview" && (
         <>
           <Panel id="site-title" title="Right now">
-            <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-3)] sm:grid-cols-4">
+            <dl className="-mx-[var(--space-2)] grid grid-cols-2 sm:grid-cols-4">
               {[
                 { icon: GraduationCap, value: formatCount(12480), label: "Students", delta: 8 },
                 { icon: ShieldCheck, value: "150", label: "Volunteers", delta: 12 },
                 { icon: Building2, value: String(partners.length), label: "Partner companies", delta: 0 },
                 { icon: School, value: "214", label: "Schools", delta: 5 },
               ].map((m, i) => (
-                <div key={m.label} className={`py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i > 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={ACCENT} />
                 </div>
               ))}
@@ -226,14 +226,14 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
       {tab === "people" && (
         <>
           <Panel id="roles-title" title="By role">
-            <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-3)] sm:grid-cols-4">
+            <dl className="-mx-[var(--space-2)] grid grid-cols-2 sm:grid-cols-4">
               {[
                 { icon: GraduationCap, value: formatCount(12480), label: "Students", delta: 8 },
                 { icon: ShieldCheck, value: "150", label: "Volunteers", delta: 12 },
                 { icon: Building2, value: String(partners.length), label: "Partners", delta: 0 },
                 { icon: Users, value: "9", label: "Staff", delta: 0 },
               ].map((m, i) => (
-                <div key={m.label} className={`py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
+                <div key={m.label} className={`px-[var(--space-3)] py-[var(--space-4)] ${i % 2 === 1 ? "border-l sm:border-l-0" : ""} ${i > 0 ? "sm:border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
                   <MetricTile icon={m.icon} value={m.value} label={m.label} delta={m.delta} accent={ACCENT} />
                 </div>
               ))}

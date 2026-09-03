@@ -39,20 +39,22 @@ type Icon = React.ComponentType<{ className?: string; "aria-hidden"?: boolean; s
 export function MetricTile({ icon: TileIcon, value, label, delta, accent }: { icon: Icon; value: string; label: string; delta?: number; accent: string }) {
   const up = (delta ?? 0) >= 0;
   return (
-    <div className="flex flex-col gap-[10px]">
-      <div className="flex items-center justify-between gap-[8px]">
-        <span className="flex size-[32px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}>
-          <TileIcon className="h-4 w-4" aria-hidden />
+    // one tight group: icon at the left, the figure with its change on one
+    // line, the label under the figure. Nothing floats to the far corner.
+    <div className="flex items-start gap-[12px]">
+      <span className="mt-[2px] flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}>
+        <TileIcon className="h-[18px] w-[18px]" aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-col gap-[2px]">
+        <span className="flex flex-wrap items-baseline gap-x-[8px]">
+          <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+          {typeof delta === "number" && (
+            <span className="flex items-center gap-[3px] text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: up ? "var(--world-food-farming-nature)" : "var(--world-business-money-office)" }}>
+              {up ? <TrendingUp className="h-3 w-3" aria-hidden /> : <TrendingDown className="h-3 w-3" aria-hidden />}
+              {up ? "+" : ""}{delta}%
+            </span>
+          )}
         </span>
-        {typeof delta === "number" && (
-          <span className="flex items-center gap-[3px] rounded-[var(--radius-sm)] px-[7px] py-[2px] text-[11.5px] leading-[15px] font-bold tabular-nums" style={{ background: up ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, transparent)" : "color-mix(in srgb, var(--world-business-money-office) 16%, transparent)", color: up ? "var(--world-food-farming-nature)" : "var(--world-business-money-office)" }}>
-            {up ? <TrendingUp className="h-3 w-3" aria-hidden /> : <TrendingDown className="h-3 w-3" aria-hidden />}
-            {up ? "+" : ""}{delta}%
-          </span>
-        )}
-      </div>
-      <div className="flex flex-col gap-[2px]">
-        <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
         <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
       </div>
     </div>

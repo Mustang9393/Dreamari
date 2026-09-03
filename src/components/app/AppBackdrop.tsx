@@ -9,8 +9,19 @@ export function AppBackdrop() {
       aria-hidden
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{
-        background:
-          "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)",
+        // the landing page's colour field (MarketingApp), composed for one
+        // viewport: brand blue top-left, the hero purple top-right, the sky
+        // blue mid-left, accent mid-right, blue and purple low. Light and
+        // colourful, and identical on every screen.
+        background: [
+          "radial-gradient(ellipse 85% 30% at 15% 0%, color-mix(in srgb, var(--primary) 48%, transparent), transparent 62%)",
+          "radial-gradient(ellipse 75% 26% at 100% 16%, color-mix(in srgb, var(--hero-accent-purple) 85%, transparent), transparent 60%)",
+          "radial-gradient(ellipse 90% 30% at 0% 36%, color-mix(in srgb, var(--world-driving-flying-shipping) 42%, transparent), transparent 62%)",
+          "radial-gradient(ellipse 85% 28% at 90% 56%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 60%)",
+          "radial-gradient(ellipse 100% 26% at 30% 76%, color-mix(in srgb, var(--primary) 42%, transparent), transparent 62%)",
+          "radial-gradient(ellipse 90% 24% at 70% 92%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 62%)",
+          "var(--background)",
+        ].join(", "),
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
