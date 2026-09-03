@@ -110,9 +110,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
           <div className="pt-[var(--space-2)]">
             <Row label="Cost for a year" note="after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
-            <Row label="Getting in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate} of 100 applicants`} />
-            <Row label="Finish their degree" note="within 6 years" value={pct(c.finish)} />
-            <Row label="Come back for year 2" value={pct(c.retention)} />
+            <Row label="Applicants admitted" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} value={c.admitRate === null ? "Everyone" : `${c.admitRate} of 100`} />
+            <Row label="Students who finish" note="within six years" value={pct(c.finish)} />
+            <Row label="Students who come back for year two" value={pct(c.retention)} />
             <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} last />
           </div>
         </section>
@@ -125,25 +125,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What a year costs, by family income</h3>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Cost for a year, by family income</h3>
                   <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships.</p>
                   <div className="mt-[var(--space-2)]">
                     {d.bands.map((b, i) => <Row key={b.label} label={`Family earns ${b.label.toLowerCase()}`} value={money(b.pay)} last={i === d.bands.length - 1} />)}
                   </div>
                 </div>
-                {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Help with the bill</h3>
-                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Money you do not pay back.</p>
-                    <div className="mt-[var(--space-2)]">
-                      {d.scholarshipShare !== undefined && <Row label="Get a scholarship from the college" note={d.scholarshipAvg && d.scholarshipShare ? `about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each, new students` : "new students"} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
-                      {d.pell !== undefined && <Row label="Get a federal Pell grant" note="for lower-income families" value={`${d.pell}%`} last />}
-                    </div>
-                  </div>
-                )}
                 {(d.tuitionInState !== null || d.housing) && (
                   <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>The full price, before any aid</h3>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Full price before aid</h3>
                     <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Almost nobody pays this.</p>
                     <div className="mt-[var(--space-2)]">
                       {d.tuitionInState !== null && <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />}
@@ -152,6 +142,16 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                       <Row label="Housing on campus" value={d.housing ? "Yes" : "No, commute only"} last={d.housingCost === undefined} />
                       {d.housingCost !== undefined && <Row label={d.foodCost ? "Housing for a year" : "Housing and food for a year"} value={money(d.housingCost)} last={d.foodCost === undefined} />}
                       {d.foodCost !== undefined && <Row label="Food for a year" value={money(d.foodCost)} last />}
+                    </div>
+                  </div>
+                )}
+                {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Grants and scholarships</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Money students do not pay back.</p>
+                    <div className="mt-[var(--space-2)]">
+                      {d.scholarshipShare !== undefined && <Row label="New students with a scholarship from the college" note={d.scholarshipAvg && d.scholarshipShare ? `about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each` : undefined} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
+                      {d.pell !== undefined && <Row label="Students with a federal Pell grant" note="for lower-income families" value={`${d.pell}%`} last />}
                     </div>
                   </div>
                 )}
@@ -200,7 +200,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Classes</h3>
                   <div className="mt-[var(--space-2)]">
                     <Row label="Students per teacher" value={d.ratio.replace(" to 1", "")} last={!d.finish4} />
-                    {d.finish4 ? <Row label="Finish a bachelor's in four years" value={`${d.finish4}%`} last /> : null}
+                    {d.finish4 ? <Row label="Bachelor's students who finish in four years" value={`${d.finish4}%`} last /> : null}
                   </div>
                 </div>
                 <div>
@@ -222,7 +222,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     {d.gradStudents ? <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} /> : null}
                     <Row label="Women" value={`${d.women}%`} />
                     <Row label="Men" value={`${d.men}%`} />
-                    <Row label="Study full time" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} last />
+                    <Row label="Full-time students" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} last />
                   </div>
                 </div>
                 <div>
@@ -260,7 +260,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <Row label="Typical pay" note="six years after starting" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
                 <Row label="Debt at graduation" note="federal loans" value={d.debt ? money(Math.round(d.debt / 100) * 100) : "Not published"} />
                 {d.monthly ? <Row label="Monthly repayment" value={money(d.monthly)} /> : null}
-                <Row label="Paying it back" note="of those who borrowed" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
+                <Row label="Borrowers paying it back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
               </div>
               <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Source: College Scorecard.</p>
             </Folded>
