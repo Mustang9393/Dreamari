@@ -199,7 +199,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         )}
 
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          Government figures for 2024-25. Costs are what families paid for a year after grants and scholarships, not the sticker price.
+          Government figures, 2024-25. Costs are what families paid after grants, not the sticker price.
         </p>
       </main>
 

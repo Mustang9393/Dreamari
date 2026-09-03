@@ -7,14 +7,27 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
-import { collegeBySlug, money } from "./data";
-import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
+import { LEVEL_WORD, collegeBySlug, money } from "./data";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, tags, useSaved } from "./shared";
 import { Donut, HBars } from "./viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
 // student needs them. Every number keeps its plain label. Design notes:
 // docs/COLLEGE_LOOKUP_AUDIT.md.
+
+const SIZE_WORD = { Small: "Small", Medium: "Mid-size", Large: "Big" } as const;
+const SETTING_WORD = { City: "in a city", Suburb: "in the suburbs", Town: "in a town", Countryside: "in the countryside" } as const;
+/** Four or five plain lines: cost, getting in, finishing, what kind of place, and anything worth knowing. */
+function tldr(c: NonNullable<ReturnType<typeof collegeBySlug>>, worth: string | null): string[] {
+  const lines: string[] = [];
+  lines.push(c.netPrice === null ? "Yearly cost not published" : `${money(Math.round(c.netPrice / 100) * 100)} a year after grants`);
+  lines.push(c.admitRate === null ? "Everyone who applies gets in" : `${c.admitRate} of 100 applicants get in`);
+  if (c.finish !== null) lines.push(`${c.finish} of 100 finish${c.retention !== null ? ` · ${c.retention} of 100 come back for year two` : ""}`);
+  lines.push(`${SIZE_WORD[c.size]} ${c.control.toLowerCase()} ${LEVEL_WORD[c.level].toLowerCase() === "trade school" ? "trade school" : `${LEVEL_WORD[c.level]} college`} · ${SETTING_WORD[c.setting].replace(/^in (a |the )?/, "")} · ${c.undergrads.toLocaleString("en-US")} undergrads`);
+  if (worth) lines.push(worth);
+  return lines;
+}
 
 type SectionKey = "cost" | "in" | "study" | "life" | "who" | "after" | "see" | "sources";
 
@@ -35,7 +48,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   }
 
   const d = c.detail;
-  const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few students finish. Fewer than a quarter finish within six years." : c.control === "For profit" ? "Run for profit. This college is a business with owners to pay, not a public or non-profit school." : null);
+  const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few finish: under a quarter within six years" : c.control === "For profit" ? "Run for profit" : null);
   const tourUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${c.name} campus tour`)}`;
 
   return (
@@ -87,23 +100,19 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </div>
         </section>
 
-        {worth && (
-          <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>
-            <strong className="font-bold" style={{ color: "var(--foreground)" }}>Worth knowing.</strong> {worth}
-          </p>
-        )}
-
-        {/* at a glance: five rows, body-sized figures. Headings stay
-           headings; no number is ever set larger than the text above it. */}
-        <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-          <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
-          <div className="pt-[var(--space-2)]">
-            <Row label="Cost for a year" note="what families pay after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
-            <Row label="Getting in" note={c.admitRate === null ? "open admission, no test scores" : c.applied ? `${c.applied.toLocaleString("en-US")} applied` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate}% are admitted`} />
-            <Row label="Finish their degree" note="within 6 years, everyone who started" value={pct(c.finish)} />
-            <Row label="Come back for year 2" value={pct(c.retention)} />
-            <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} last />
-          </div>
+        {/* The short version: the whole college in four or five fragments,
+           one idea each. "TL;DR" was considered; the phrase works for every
+           reader, including the ones an acronym would slow down. */}
+        <section aria-labelledby="tldr-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+          <h2 id="tldr-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>The short version</h2>
+          <ul className="flex flex-col gap-[var(--space-3)] pt-[var(--space-4)]">
+            {tldr(c, worth).map((line) => (
+              <li key={line} className={`${SMALL} flex items-start gap-[var(--space-3)]`}>
+                <span aria-hidden className="mt-[9px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: ACCENT }} />
+                <span className="min-w-0">{line}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {d && (
@@ -119,15 +128,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   <div className="mt-[var(--space-4)]">
                     <HBars
                       rows={d.bands.map((b) => ({ label: b.label, value: b.pay, display: money(b.pay) }))}
-                      marker={d.tuitionInState !== null && d.fees !== null ? { value: d.tuitionInState + d.fees, label: "What the college charges before aid:" } : undefined}
+                      marker={d.tuitionInState !== null && d.fees !== null ? { value: d.tuitionInState + d.fees, label: "Full price before aid:" } : undefined}
                       unit="$"
                     />
                   </div>
                   {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
-                    <p className={`${SMALL} mt-[var(--space-4)]`}>
-                      {d.scholarshipShare ? `${d.scholarshipShare}% of first-years got a scholarship from the college${d.scholarshipAvg ? `, about ${money(d.scholarshipAvg)} each` : ""}. ` : "The college gave no scholarships of its own. "}
-                      {d.pell !== undefined ? `${d.pell}% got a federal Pell grant, which goes to lower-income families.` : ""}
-                    </p>
+                    <div className="mt-[var(--space-4)]">
+                      {d.scholarshipShare !== undefined && <Row label="Got a college scholarship" note="new students" value={d.scholarshipShare ? `${d.scholarshipShare}%${d.scholarshipAvg ? ` · about ${money(Math.round(d.scholarshipAvg / 100) * 100)}` : ""}` : "None"} last={d.pell === undefined} />}
+                      {d.pell !== undefined && <Row label="Got a federal Pell grant" value={`${d.pell}%`} last />}
+                    </div>
                   )}
                 </div>
                 {(d.tuitionInState !== null || d.housing) && (
@@ -148,14 +157,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
             <Folded id="in" title="Getting in" open={open.has("in")} onToggle={() => toggle("in")}>
               {c.admitRate === null ? (
-                <p className={SMALL}>Everyone who applies is admitted. There is no competition to get in and no test scores to worry about. You still need to meet the requirements for the course you pick.</p>
+                <DotList items={["Everyone who applies gets in", "No test scores needed", "Course requirements still apply"]} accent={ACCENT} />
               ) : (
                 <div className="flex flex-col gap-[var(--space-6)]">
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>How hard it is to get in</h3>
-                    <p className={`${SMALL} mt-[var(--space-2)]`}>
-                      <strong className="font-bold">{c.admitRate} of every 100 who apply get in.</strong>{c.applied ? ` ${c.applied.toLocaleString("en-US")} applied last year.` : ""}
-                    </p>
+                    <div className="mt-[var(--space-2)]">
+                      <Row label="Get in" value={`${c.admitRate} of 100 applicants`} last={!c.applied} />
+                      {c.applied && <Row label="Applied last year" value={c.applied.toLocaleString("en-US")} last />}
+                    </div>
                   </div>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                     <div>
@@ -170,9 +180,11 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   {d.scores && (
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Test scores</h3>
-                      <p className={`${SMALL} mt-[var(--space-2)]`}>
-                        Most students who sent scores got {d.scores.sat} on the SAT, out of 1600{d.scores.act ? `, or ${d.scores.act} on the ACT, out of 36` : ""}. Only {d.scores.sentSat}% sent an SAT score, so being below this is not a reason to rule yourself out.
-                      </p>
+                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Middle half of students who sent scores. A lower score is not a no.</p>
+                      <div className="mt-[var(--space-2)]">
+                        <Row label="SAT" note={`${d.scores.sentSat}% sent one`} value={`${d.scores.sat} of 1600`} last={!d.scores.act} />
+                        {d.scores.act && <Row label="ACT" note={d.scores.sentAct !== undefined ? `${d.scores.sentAct}% sent one` : undefined} value={`${d.scores.act} of 36`} last />}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -183,26 +195,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{d.programmeCount} programmes</h3>
-                  <p className={`${SMALL} mt-[var(--space-2)]`}>
-                    {(() => {
-                      // undergraduate degrees first, since that is what a student is choosing
-                      const n = (label: string) => d.levels.find((l) => l.label === label)?.n ?? 0;
-                      const under: string[] = [];
-                      if (n("Bachelor's")) under.push(`${n("Bachelor's")} bachelor's degrees`);
-                      if (n("Associate")) under.push(`${n("Associate")} associate degrees`);
-                      if (n("Certificates")) under.push(`${n("Certificates")} certificates`);
-                      const grad: string[] = [];
-                      if (n("Master's")) grad.push(`${n("Master's")} master's`);
-                      if (n("Doctorates")) grad.push(`${n("Doctorates")} doctorates`);
-                      const first = under.length ? under[0].charAt(0).toUpperCase() + under.slice(0, 1).join("").slice(1) + (under.length > 1 ? `, plus ${under.slice(1).join(" and ")}` : "") + "." : "";
-                      const second = grad.length ? ` For later, ${grad.join(" and ")}.` : "";
-                      return `${first}${second} Classes have about ${d.ratio.replace(" to 1", "")} students to every teacher.${d.finish4 ? ` ${d.finish4}% of bachelor's students finish in four years.` : ""}`;
-                    })()}
-                  </p>
+                  <div className="mt-[var(--space-2)]">
+                    {d.levels.filter((l) => l.n > 0).map((l) => <Row key={l.label} label={/degree|certificate/i.test(l.label) ? l.label : `${l.label} degrees`} value={String(l.n)} />)}
+                    <Row label="Students per teacher" value={d.ratio.replace(" to 1", "")} last={!d.finish4} />
+                    {d.finish4 ? <Row label="Finish a bachelor's in 4 years" value={`${d.finish4}%`} last /> : null}
+                  </div>
                 </div>
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, and what they earned one year out.</p>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year · pay one year out.</p>
                   <div className="mt-[var(--space-3)]">
                     {d.programmes.slice(0, 6).map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} a year`} value={p.pay === "not published" ? "Pay not published" : p.pay} last={i === arr.length - 1} />)}
                   </div>
@@ -214,13 +215,16 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Who is there</h3>
-                  <p className={`${SMALL} mt-[var(--space-2)]`}>
-                    {c.undergrads.toLocaleString("en-US")} undergraduates{d.gradStudents ? ` and ${d.gradStudents.toLocaleString("en-US")} graduate students` : ""}. {d.women === d.men ? "Half women, half men" : d.women > d.men ? `${d.women}% women, ${d.men}% men` : `${d.men}% men, ${d.women}% women`}. {d.partTime / (d.fullTime + d.partTime) < 0.15 ? "Nearly everyone studies full time." : d.partTime > d.fullTime ? "Most study part time, around a job." : `About ${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}% study part time.`}
-                  </p>
+                  <div className="mt-[var(--space-2)]">
+                    <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} />
+                    {d.gradStudents ? <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} /> : null}
+                    <Row label="Women · men" value={`${d.women}% · ${d.men}%`} />
+                    <Row label="Full time · part time" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}% · ${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} last />
+                  </div>
                   <div className="mt-[var(--space-4)]">
                     <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct }))} />
                   </div>
-                  <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Undergraduates, in the categories the federal government collects. &ldquo;International&rdquo; means students on visas.</p>
+                  <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Federal categories · International = students on visas</p>
                 </div>
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
@@ -236,7 +240,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {d.sport && (
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
-                    <p className={`${SMALL} mt-[var(--space-2)]`}>{d.sport.league}. {d.sport.students.toLocaleString("en-US")} students play on a team. Clubs are not counted by any government survey; the college&apos;s own site lists them.</p>
+                    <p className={`${SMALL} mt-[var(--space-2)]`}>{d.sport.league} · {d.sport.students.toLocaleString("en-US")} students on teams</p>
                     <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
                   </div>
                 )}
@@ -245,12 +249,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
             <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
               <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
-              <p className={`${SMALL} mt-[var(--space-2)]`}>
-                {d.pay6 ? `People who went here typically earn about ${money(Math.round(d.pay6 / 100) * 100)} a year six years after starting, whether or not they finished. ` : "Typical pay is not published for this college. "}
-                {d.debt ? `Those who borrowed owe about ${money(Math.round(d.debt / 100) * 100)} when they finish${d.monthly ? `, roughly ${money(d.monthly)} a month to repay` : ""}. ` : ""}
-                {c.repay !== null ? `${c.repay}% of them are paying it back.` : ""}
-              </p>
-              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Pay and debt cover everyone who went here, in every subject, from the federal College Scorecard.</p>
+              <div className="mt-[var(--space-2)]">
+                <Row label="Typical pay" note="6 years after starting" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
+                <Row label="Debt at graduation" note="federal loans" value={d.debt ? money(Math.round(d.debt / 100) * 100) : "Not published"} />
+                {d.monthly ? <Row label="Monthly repayment" value={money(d.monthly)} /> : null}
+                <Row label="Paying it back" note="of those who borrowed" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
+              </div>
+              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, every subject · College Scorecard</p>
             </Folded>
           </>
         )}
@@ -261,26 +266,26 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <PlayCircle className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
                 <span className="text-[15px] leading-[20px] font-bold">Campus tours on YouTube</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students walking around. Opens outside Dreamari.</span>
+                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students, real campus · opens outside Dreamari</span>
               </span>
             </a>
             <Link href="/connect" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <MessagesSquare className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
                 <span className="text-[15px] leading-[20px] font-bold">Ask a pro on Connect</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified professionals answer questions about where they studied.</span>
+                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified pros · ask about where they studied</span>
               </span>
             </Link>
           </div>
         </Folded>
 
         <Folded id="sources" title="Where these numbers come from" open={open.has("sources")} onToggle={() => toggle("sources")}>
-          <div className="flex flex-col gap-[var(--space-3)]">
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Cost for a year.</strong> The average a family paid for a year after grants, from the federal IPEDS survey. Published for full-time, first-time students who got federal aid. Use the college&apos;s own calculator for your number.</p>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Finish.</strong> Counts every student who started, part-time and transfers included, so it is the harder, honest test.</p>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Pay and debt.</strong> From the federal College Scorecard. They describe everyone who went here, in every subject, not one programme.</p>
-            {d?.sample && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}><strong className="font-bold" style={{ color: "var(--foreground)" }}>Prototype note.</strong> The headline figures for this college are from the government data. The detail sections are sample figures in the same shape, until the live data is wired in.</p>}
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Collected for 2024-25. Government data arrives about 18 months late, so check anything time-sensitive with the college.</p>
+          <div>
+            <Row label="Cost" note="what families paid after grants" value="IPEDS" />
+            <Row label="Finish" note="everyone who started, part-time and transfers included" value="IPEDS" />
+            <Row label="Pay and debt" note="everyone who went here, not one programme" value="College Scorecard" />
+            <Row label="Year" note="government data runs about 18 months behind" value="2024-25" last={!d?.sample} />
+            {d?.sample && <Row label="Prototype note" note="headline figures are real; detail is sample data until the live feed is wired in" value="Sample" last />}
           </div>
         </Folded>
       </main>

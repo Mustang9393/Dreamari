@@ -236,7 +236,7 @@ export const COLLEGES: College[] = [
       makeup: [{ label: "White", n: 1925, pct: 33 }, { label: "Asian", n: 1343, pct: 23 }, { label: "International", n: 751, pct: 13 }, { label: "Hispanic or Latino", n: 577, pct: 10 }, { label: "Black or African American", n: 499, pct: 9 }, { label: "Two or more races", n: 413, pct: 7 }],
       ways: ["Study abroad", "Undergraduate research", "ROTC (Army, Navy, Air Force)", "Teacher training"], helps: ["Careers advice", "Help finding work while you study", "Help finding a job when you finish", "Childcare on campus"],
       sport: { league: "NCAA Division I-FCS", students: 1189, teams: ["Football", "Rowing", "Lacrosse", "Swimming and Diving", "Soccer", "Ice Hockey", "Fencing", "Basketball", "Squash", "Tennis", "Field Hockey"] },
-      pay6: 87815, debt: 10320, monthly: 109, worth: "Almost free for most families. Families earning under $75,000 paid about $1,200 a year or less after aid. Getting in is the hard part: 5 of every 100 who apply are admitted.",
+      pay6: 87815, debt: 10320, monthly: 109, worth: "Almost free under $75,000 income · about $1,200 a year or less",
     },
   },
   {
@@ -349,7 +349,7 @@ export const COLLEGES: College[] = [
       makeup: [{ label: "White", n: 1457, pct: 73 }, { label: "International", n: 225, pct: 11 }, { label: "Black or African American", n: 101, pct: 5 }, { label: "Hispanic or Latino", n: 94, pct: 5 }],
       ways: ["Study abroad", "ROTC (Army, Air Force)", "Teacher training", "Programme for students with an intellectual disability"], helps: ["Careers advice", "Help finding work while you study", "Help finding a job when you finish", "Childcare on campus"],
       sport: { league: "NCAA Division II", students: 700, teams: ["Football", "Track and Field", "Baseball", "Wrestling", "Ice Hockey", "Swimming and Diving", "Basketball", "Golf", "Tennis", "Soccer", "Softball", "Volleyball"] },
-      pay6: 49826, debt: 25000, monthly: 265, worth: "Every first-year student got a scholarship from the college, about $28,000 on average. The sticker price is high; hardly anyone pays it.",
+      pay6: 49826, debt: 25000, monthly: 265, worth: "Every new student got a scholarship · about $28,000 on average",
     },
   },
   {
@@ -365,7 +365,7 @@ export const COLLEGES: College[] = [
       gradStudents: 49, fullTime: 436, partTime: 752, women: 70, men: 30,
       makeup: [{ label: "American Indian or Alaska Native", n: 1093, pct: 96 }, { label: "White", n: 23, pct: 2 }],
       ways: ["Undergraduate research", "Teacher training"], helps: ["Careers advice", "Help finding a job when you finish"], notOffered: ["Help finding work while you study", "Childcare on campus"],
-      pay6: 20536, debt: null, worth: "Few students finish. Fewer than a quarter finish within six years. It is also one of the cheapest colleges anywhere: families earning under $48,000 paid about $1,400 a year or less.",
+      pay6: 20536, debt: null, worth: "Few finish · under a quarter in six years · one of the cheapest colleges anywhere",
     },
   },
   {
@@ -381,7 +381,7 @@ export const COLLEGES: College[] = [
       fullTime: 133, partTime: 0, women: 99, men: 1,
       makeup: [{ label: "White", n: 114, pct: 86 }, { label: "Black or African American", n: 7, pct: 5 }, { label: "Two or more races", n: 5, pct: 4 }],
       ways: [], helps: ["Careers advice", "Help finding a job when you finish"], notOffered: ["Help finding work while you study", "Childcare on campus"],
-      pay6: 28339, debt: 6864, monthly: 73, worth: "Run for profit. This college is a business with owners to pay, not a public or non-profit school. Most students finish, and most finish in under two years.",
+      pay6: 28339, debt: 6864, monthly: 73, worth: "Run for profit · most finish in under two years",
     },
   },
 
