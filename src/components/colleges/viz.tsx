@@ -1,6 +1,5 @@
 "use client";
 
-import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ACCENT } from "./shared";
 
 // One data picture for the college page: who is there, as a ring. Cost by
