@@ -9,7 +9,7 @@ import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
-import { Donut, HBars } from "./viz";
+import { Donut } from "./viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
@@ -127,8 +127,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What a year costs, by family income</h3>
                   <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships.</p>
-                  <div className="mt-[var(--space-4)]">
-                    <HBars rows={d.bands.map((b) => ({ label: `Family earns ${b.label.toLowerCase()}`, value: b.pay, display: money(b.pay) }))} />
+                  <div className="mt-[var(--space-2)]">
+                    {d.bands.map((b, i) => <Row key={b.label} label={`Family earns ${b.label.toLowerCase()}`} value={money(b.pay)} last={i === d.bands.length - 1} />)}
                   </div>
                 </div>
                 {(d.scholarshipShare !== undefined || d.pell !== undefined) && (

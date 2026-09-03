@@ -3,47 +3,14 @@
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ACCENT } from "./shared";
 
-// Two data pictures for the college page: what it costs (bars) and who is
-// there (ring). Getting in is a sentence; "58 of every 100" needs no icons.
+// One data picture for the college page: who is there, as a ring. Cost by
+// income was bars, but a bar scaled to the biggest row read as "full", so the
+// numbers stand on their own as rows.
 // One hue, thin marks, values as text in text tokens. Everything else on
 // the page is a sentence, because a sentence is the cheapest thing on screen.
 
-const TRACK = "rgba(255,255,255,0.1)";
 const MUTED = { color: "var(--muted-foreground)" } as const;
 const INK = { color: "var(--foreground)" } as const;
-
-/** Horizontal bars, one hue, value at the tip; `marker` draws a hairline
- *  reference (the sticker price) with its own label. */
-export function HBars({ rows, marker, unit = "" }: { rows: { label: string; value: number; display: string }[]; marker?: { value: number; label: string }; unit?: string }) {
-  const top = Math.max(marker?.value ?? 0, ...rows.map((r) => r.value)) || 1;
-  return (
-    <div className="flex flex-col gap-[10px]">
-      {marker && (
-        <p className="text-[13px] leading-[17px]" style={MUTED}>
-          <span aria-hidden className="mr-[6px] inline-block h-[10px] w-[2px] translate-y-[1px] rounded-[1px]" style={{ background: "rgba(255,255,255,0.55)" }} />
-          {marker.label} {unit}{marker.value.toLocaleString("en-US")}
-        </p>
-      )}
-      <ul className="flex flex-col gap-[8px]">
-        {rows.map((r) => {
-          const pct = Math.max(0, Math.min(100, (r.value / top) * 100));
-          return (
-            <li key={r.label} className="flex flex-col gap-[4px]" title={`${r.label}: ${r.display}`}>
-              <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-                <span className={SMALL} style={INK}>{r.label}</span>
-                <span className={`${SMALL} flex-none font-bold tabular-nums`} style={INK}>{r.display}</span>
-              </div>
-              <div className="relative h-[12px] w-full overflow-hidden rounded-[3px]" style={{ background: TRACK }} aria-hidden>
-                <span className="absolute inset-y-0 left-0 rounded-r-[4px]" style={{ width: `${pct}%`, background: ACCENT }} />
-                {marker && <span className="absolute inset-y-[-2px] w-[2px]" style={{ left: `calc(${Math.min(100, (marker.value / top) * 100)}% - 1px)`, background: "rgba(255,255,255,0.7)" }} />}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
 
 /** A ring of who is there. Slices are tints of the one hue, largest first,
  *  a 2px surface gap between them, named in a legend with their share.
