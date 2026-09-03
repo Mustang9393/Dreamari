@@ -137,7 +137,7 @@ function InlineAsk({
   joined,
   onRequireJoin,
   onPost,
-  placeholder = "Ask this community anything…",
+  placeholder = "Ask a question…",
   accent = "var(--primary)",
 }: {
   joined: boolean;
@@ -297,7 +297,10 @@ const AVATAR_PHOTO: Record<string, string> = {
 // A verified badge overlaps the corner exactly like the app's other verified
 // affordances — a small ShieldCheck on a solid chip, never color alone.
 function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  const photo = USE_PHOTO_AVATARS ? AVATAR_PHOTO[name] : undefined;
+  // Professionals always wear their portrait (direct feedback: a face for
+  // Elena Martinez); students stay behind the flag.
+  const isPro = PROS.some((p) => p.name === name);
+  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
   const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
@@ -678,11 +681,14 @@ function Card({ children, className = "", accent }: { children: React.ReactNode;
   return (
     <div
       className={`rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`}
-      style={
-        accent
-          ? { background: `color-mix(in srgb, ${accent} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${accent} 26%, var(--glass-border))` }
-          : { background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }
-      }
+      // the career page's frosted panel (direct feedback: same aesthetic)
+      style={{
+        background: accent ? `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))` : "var(--glass-surface-2)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderColor: accent ? `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` : "rgba(255,255,255,0.16)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)",
+      }}
     >
       {children}
     </div>
@@ -739,8 +745,9 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
 function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
-  const comments = thread.responses.length;
-  const answeredBy = thread.responses.find((r): r is Extract<Thread["responses"][number], { kind: "answer" }> => r.kind === "answer");
+  // Display count for the demo (data.ts `comments`), falling back to the
+  // real list; the thread itself may hold fewer. Direct feedback.
+  const comments = thread.comments ?? thread.responses.length;
   return (
     <Card accent={accent} className="dm-tap group relative cursor-pointer">
       {/* The WHOLE card opens the thread (direct feedback: "make it
@@ -770,12 +777,6 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
       <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-      {answeredBy && (
-        <p className="mt-[8px] flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}>
-          <CheckCircle2 className="h-[13px] w-[13px] flex-none" aria-hidden />
-          Answered by {proById(answeredBy.proId).name} · {proById(answeredBy.proId).org}
-        </p>
-      )}
       <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
@@ -783,8 +784,10 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
           <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
         </button>
-        <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-          <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+        {/* Save rides next to comments at a smaller size (direct feedback):
+           one cluster to read, not three corners. */}
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[6px] text-[11.5px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+          <Bookmark className="h-3 w-3" aria-hidden /> {saved ? "Saved" : "Save"}
         </button>
       </div>
     </Card>
@@ -1004,7 +1007,6 @@ export function ConnectExperience() {
                 onHelpful={p.onHelpful}
                 helpfuls={helpfuls}
                 toggleHelpful={toggleHelpful}
-                onAddToPlan={() => say("Added to your Plan as a next action.")}
               />
             );
           })()}
@@ -1022,8 +1024,8 @@ export function ConnectExperience() {
                   onBack={() => setView({ kind: "home", tab: "events" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
-                  takeawaySaved={!!saves["recap-" + event.id]}
                   onAddToPlan={() => say("Added to your Plan as a next action.")}
+                  takeawaySaved={!!saves["recap-" + event.id]}
                   cardProps={cardProps}
                 />
               );
@@ -1057,7 +1059,6 @@ export function ConnectExperience() {
               setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "all" } : { kind: "board", id: thread.boardId, filter: "questions" });
             }}
             onOpenThread={(id) => setView({ kind: "thread", id })}
-            onAddToPlan={() => say("Added to your Plan as a next action.")}
             cardProps={cardProps}
             saves={saves}
             toggleSave={toggleSave}
@@ -1653,7 +1654,6 @@ function ThreadView({
   thread,
   onBack,
   onOpenThread,
-  onAddToPlan,
   cardProps,
   saves,
   toggleSave,
@@ -1663,7 +1663,6 @@ function ThreadView({
   thread: Thread;
   onBack: () => void;
   onOpenThread: (id: string) => void;
-  onAddToPlan: () => void;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
   saves: Record<string, boolean>;
   toggleSave: (id: string, what?: string) => void;
@@ -1690,17 +1689,18 @@ function ThreadView({
 
       <article className="flex flex-col gap-[var(--space-5)]">
         <div>
-          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Question</span>
-          <h1 className="mt-[3px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h1>
+          <h1 className="text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h1>
           {thread.context && <p className="mt-[6px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{thread.context}</p>}
           <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px] border-b pb-[12px] text-[12px] leading-[16px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          {/* Who it went to is our plumbing, not their business. */}
+        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] border-b pb-[12px] text-[12px] leading-[16px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           <StatusChip state={thread.state} />
-          <span aria-hidden>·</span>
-          <span>Shown as {thread.handle} · {thread.grade}</span>
+          {/* the question's likes live up here with the question, not at the
+             bottom of the answer (direct feedback) */}
+          <button type="button" onClick={() => toggleHelpful(thread.id)} aria-pressed={!!helpfuls[thread.id]} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[12.5px] font-semibold" style={{ color: helpfuls[thread.id] ? "var(--accent-subtle)" : "var(--foreground)" }}>
+            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpfuls[thread.id] ? 1 : 0)}
+          </button>
         </div>
 
         {thread.responses.map((r, index) => {
@@ -1729,11 +1729,8 @@ function ThreadView({
                   <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
                     <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save insight"}
                   </button>
-                  <button type="button" onClick={onAddToPlan} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden /> Add to Plan
-                  </button>
-                  <button type="button" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[5px]">
-                    <Flag className="h-3.5 w-3.5" aria-hidden /> Report
+                  <button type="button" aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+                    <Flag className="h-3 w-3" aria-hidden /> Report
                   </button>
                 </div>
               </div>
@@ -1800,7 +1797,7 @@ function ThreadView({
 
 // ——— comments: one shape everywhere ———
 
-const EXTRA_REACTIONS = ["🔥", "💯", "😂"] as const;
+const EXTRA_REACTIONS = ["🔥", "💯"] as const;
 
 /** Deterministic seeded counts so reaction chips look lived-in without
  *  Math.random (render purity). */
@@ -1928,7 +1925,6 @@ function InsightThreadView({
   onHelpful,
   helpfuls,
   toggleHelpful,
-  onAddToPlan,
 }: {
   insight: Insight;
   onBack: () => void;
@@ -1938,7 +1934,6 @@ function InsightThreadView({
   onHelpful: () => void;
   helpfuls: Record<string, boolean>;
   toggleHelpful: (id: string) => void;
-  onAddToPlan: () => void;
 }) {
   const pro = proById(insight.proId);
   const boardCommunity = COMMUNITIES.find((c) => c.id === insight.boardId);
@@ -1972,11 +1967,8 @@ function InsightThreadView({
               <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
                 <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
               </button>
-              <button type="button" onClick={onAddToPlan} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden /> Add to Plan
-              </button>
-              <button type="button" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[5px]">
-                <Flag className="h-3.5 w-3.5" aria-hidden /> Report
+              <button type="button" aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+                <Flag className="h-3 w-3" aria-hidden /> Report
               </button>
             </div>
           </div>
