@@ -170,7 +170,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
         >
           {rung.number}
         </span>
-        <span className={`${MEDIUM} min-w-0 truncate`}>{rung.jobTitle}</span>
+        <span className={`${MEDIUM} min-w-0 text-balance sm:truncate`}>{rung.jobTitle}</span>
         <span className="flex items-center gap-[var(--space-3)]">
           {rung.pay && <Figure accent={accent}>{rung.pay}</Figure>}
           {hasDetail && <ChevronDown className="h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />}

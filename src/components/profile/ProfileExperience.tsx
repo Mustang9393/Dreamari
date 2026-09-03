@@ -305,8 +305,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
               <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
             </label>
             <span className="flex min-w-0 flex-1 flex-col">
-              <h2 className="truncate text-[23px] leading-[27px] font-extrabold tracking-[-0.02em] sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
-              <span className="truncate text-[15px] leading-[17px] font-bold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
+              <h2 className="text-[21px] leading-[25px] font-extrabold tracking-[-0.02em] text-balance sm:truncate sm:text-[29px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
+              <span className="text-[14px] leading-[17px] font-bold sm:truncate sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school}</span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
               {/* Resume moved into the main tablist below -- it deserves the
@@ -353,7 +353,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             {[
               { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
               { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
-              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "Active 142 of 190 days · 75%", verified: false },
+              { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142 of 190 days", verified: false },
             ].map((fact) => (
               <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                 <dt className="flex items-center gap-[4px] text-[12px] font-bold tracking-[1.2px] uppercase" style={{ color: "var(--accent-subtle)" }}>

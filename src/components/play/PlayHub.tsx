@@ -122,7 +122,7 @@ const ROW_HEIGHT = "h-[212px] sm:h-[300px] md:h-[380px] lg:h-[430px]";
 // classes: the expand-in-place animation transitions `width` with CSS, so
 // the card RE-LAYS-OUT each frame -- framer's transform-based `layout`
 // animation scaled the contents and read as stretchy (direct feedback).
-const FEATURED_W = "w-[377px] sm:w-[533px] md:w-[676px] lg:w-[764px]";
+const FEATURED_W = "w-[calc(100vw-40px)] sm:w-[533px] md:w-[676px] lg:w-[764px]";
 const SIDE_W = "w-[150px] sm:w-[212px] md:w-[269px] lg:w-[304px]";
 // Rows BELOW the hero: uniform smaller shelves, Netflix-style.
 const SHELF_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";

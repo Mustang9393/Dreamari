@@ -678,7 +678,7 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
       <DesktopNavigation active="Explore" />
 
       {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-center gap-[20px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
+      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[120px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
         <button
           type="button"
           onClick={() => switchTab("foryou")}
