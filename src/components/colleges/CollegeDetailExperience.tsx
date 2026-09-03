@@ -8,7 +8,7 @@ import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } fr
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { LEVEL_WORD, collegeBySlug, money } from "./data";
-import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, tags, useSaved } from "./shared";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 import { Donut, HBars } from "./viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
@@ -17,18 +17,6 @@ import { Donut, HBars } from "./viz";
 // docs/COLLEGE_LOOKUP_AUDIT.md.
 
 const SIZE_WORD = { Small: "Small", Medium: "Mid-size", Large: "Big" } as const;
-const SETTING_WORD = { City: "in a city", Suburb: "in the suburbs", Town: "in a town", Countryside: "in the countryside" } as const;
-/** Four or five plain lines: cost, getting in, finishing, what kind of place, and anything worth knowing. */
-function tldr(c: NonNullable<ReturnType<typeof collegeBySlug>>, worth: string | null): string[] {
-  const lines: string[] = [];
-  lines.push(c.netPrice === null ? "Yearly cost not published" : `${money(Math.round(c.netPrice / 100) * 100)} a year after grants`);
-  lines.push(c.admitRate === null ? "Everyone who applies gets in" : `${c.admitRate} of 100 applicants get in`);
-  if (c.finish !== null) lines.push(`${c.finish} of 100 finish${c.retention !== null ? ` · ${c.retention} of 100 come back for year two` : ""}`);
-  lines.push(`${SIZE_WORD[c.size]} ${c.control.toLowerCase()} ${LEVEL_WORD[c.level].toLowerCase() === "trade school" ? "trade school" : `${LEVEL_WORD[c.level]} college`} · ${SETTING_WORD[c.setting].replace(/^in (a |the )?/, "")} · ${c.undergrads.toLocaleString("en-US")} undergrads`);
-  if (worth) lines.push(worth);
-  return lines;
-}
-
 type SectionKey = "cost" | "in" | "study" | "life" | "who" | "after" | "see" | "sources";
 
 export function CollegeDetailExperience({ slug }: { slug: string }) {
@@ -100,19 +88,24 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </div>
         </section>
 
-        {/* The short version: the whole college in four or five fragments,
-           one idea each. "TL;DR" was considered; the phrase works for every
-           reader, including the ones an acronym would slow down. */}
-        <section aria-labelledby="tldr-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-          <h2 id="tldr-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>The short version</h2>
-          <ul className="flex flex-col gap-[var(--space-3)] pt-[var(--space-4)]">
-            {tldr(c, worth).map((line) => (
-              <li key={line} className={`${SMALL} flex items-start gap-[var(--space-3)]`}>
-                <span aria-hidden className="mt-[9px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: ACCENT }} />
-                <span className="min-w-0">{line}</span>
-              </li>
-            ))}
-          </ul>
+        {worth && (
+          <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>
+            <strong className="font-bold" style={{ color: "var(--foreground)" }}>Worth knowing.</strong> {worth}
+          </p>
+        )}
+
+        {/* At a glance: label and value rows, the calmest way to give the
+           four answers a student came for. */}
+        <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+          <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
+          <div className="pt-[var(--space-2)]">
+            <Row label="Cost for a year" note="after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+            <Row label="Getting in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate} of 100 applicants`} />
+            <Row label="Finish their degree" note="within 6 years" value={pct(c.finish)} />
+            <Row label="Come back for year 2" value={pct(c.retention)} />
+            <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} />
+            <Row label="What kind of place" value={`${SIZE_WORD[c.size]} · ${c.control.toLowerCase()} · ${LEVEL_WORD[c.level].toLowerCase()}`} last />
+          </div>
         </section>
 
         {d && (
@@ -160,13 +153,6 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <DotList items={["Everyone who applies gets in", "No test scores needed", "Course requirements still apply"]} accent={ACCENT} />
               ) : (
                 <div className="flex flex-col gap-[var(--space-6)]">
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>How hard it is to get in</h3>
-                    <div className="mt-[var(--space-2)]">
-                      <Row label="Get in" value={`${c.admitRate} of 100 applicants`} last={!c.applied} />
-                      {c.applied && <Row label="Applied last year" value={c.applied.toLocaleString("en-US")} last />}
-                    </div>
-                  </div>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What they require</h3>
