@@ -116,6 +116,25 @@ One idea per line. Say what happens next ("Sent to verified pros in Finance Care
 
 Real routing and time-based "still waiting" state. Persisted follows, saves and questions. Notification badge on the Connect tab. Pro login and the real dashboard. Anonymized outcomes ("18 students you supported graduated"). Company-level aggregation. Invite flow for the Founding 150.
 
+## Alignment with the CEO's Replit (dceeai.replit.app, read 2026-09-03)
+
+Design ignored on purpose; flows and elements noted so ours line up with his mental model.
+
+| Replit element | Where it lives | Ours |
+| --- | --- | --- |
+| Connect header "Verified professionals · Moderated questions" trust line | /community-boards | Safety line lives in every composer and on profiles; consider one trust line under the Connect title |
+| Communities / People as two tabs | /community-boards | People to Follow is a rail under the communities (direct feedback); no separate People tab |
+| People to Follow with filters (career, industry, company) and three rails: Recommended for You, Popular This Week, New Professionals | People tab | One ranked rail, relevance first. Filters and the extra rails would add load; skipped |
+| Person card: initials, name, role, company, View profile, Follow, "18.4K students reached · 3.2K followers" | People tab | Portrait, name, role, company logo, Follow. Counts moved to the profile |
+| "Enter Community" only shows a toast; no board exists yet | /community-boards | Full boards exist (Feed: Student Questions / Professional Insights, About) |
+| Profile: Follow, story, three numbers, tabs Ask Me Anything / Posts / About; Report on each answered question; "View discussion"; "Follow Sarah" under an answer | profile | Same numbers and AMA. About tab (education, career journey, topics they can help with) not built; worth adding as a folded section |
+| Volunteer dashboard, My Profile tab: "Ask Me · 64 asked · 58 answered", routed questions with Awaiting Response / Answered, My Posts with Create Post, Communities the pro belongs to | /volunteer/dashboard | Routed questions with Answer / Skip and an inline composer; Career posts prompts. Asked/answered counter not shown; pro's communities not shown |
+| Volunteer dashboard, My Impact tab: six numbers each with a percent change, 30-day chart, "Your advice is moving people forward", Gold volunteer status shown to the pro with "no penalty for taking a break" | /volunteer/dashboard | Six numbers, one overall +28%, positive sentence, "Active weekly. Only you can see this." Per-number deltas and the chart skipped for density; the tier is private, as the brief asks |
+| Corporate Partnership Dashboard: Export, tabs Overview / Financial Oversight / DO Events / DCAI Mentorship / Impact Quality; goals vs targets; in-person vs virtual lanes; events with volunteers/students fill; budget; regional growth; satisfaction scores | /corporate/dashboard | Partner view: Export, 2026 goals with progress, In person vs On Dreamari lanes, events list, professionals, satisfaction line. Budget, regions and per-location growth left out of the prototype |
+| Student My Profile: Top 3, Plan, Career Report, "Do this next", Coming up (counselor meeting, FAFSA) | /my-profile | Matches our Profile; "Do this next" is the same idea as the Home proposal's next-step line |
+
+Not in the Replit yet: Saved, Report flow with reasons, the Ask sheet with routing and already-answered matches, New from people you follow, event code boards. Those come from the brief and the earlier handoff.
+
 ## Home page: evaluation and proposal
 
 What Home does today: a three-panel hero carousel (Today's Drop, Continue the simulation, Trending career), a Continue rail of three activity cards, a rail of recommended careers, and the Your Signal banner to the Career Report.

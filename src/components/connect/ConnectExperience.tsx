@@ -815,9 +815,10 @@ export function ConnectExperience() {
   const [asked, setAsked] = useState<AskedQuestion[]>([]);
   const [askOpen, setAskOpen] = useState(false);
   const [reportFor, setReportFor] = useState<string | null>(null);
-  // Demo only: which of the four roles this screen is being shown as.
-  const [rolesOpen, setRolesOpen] = useState(false);
-  const role: DemoRole = view.kind === "proDashboard" ? "pro" : view.kind === "partner" ? "partner" : (view.kind === "home" && view.tab === "events") || view.kind === "event" ? "attendee" : "student";
+  // Demo only: which of the four roles Connect is being shown as. A
+  // segmented switch at the top (like the earlier ?cards= lane switcher), so
+  // the demo can flip between journeys in one tap.
+  const [role, setRole] = useState<DemoRole>("student");
 
   // restore view from URL on mount; keep URL in sync so filters survive
   // reload/share (handoff 8.3). Deliberately an effect, not a lazy useState
@@ -828,11 +829,14 @@ export function ConnectExperience() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setViewState(queryToView(window.location.search));
+    const as = new URLSearchParams(window.location.search).get("as");
+    if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
   }, []);
-  const setView = useCallback((next: View) => {
+  const setView = useCallback((next: View, as?: DemoRole) => {
     setViewState(next);
     const base = viewToQuery(next);
-    window.history.replaceState(null, "", "/connect" + base);
+    const keep = as ?? new URLSearchParams(window.location.search).get("as");
+    window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
     window.scrollTo(0, 0);
   }, []);
 
@@ -906,7 +910,16 @@ export function ConnectExperience() {
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
-        <RoleChip role={role} onSwitch={() => setRolesOpen(true)} />
+        <RoleTabs
+          role={role}
+          onPick={(next) => {
+            setRole(next);
+            if (next === "student") setView({ kind: "home", tab: "communities" }, next);
+            if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
+            if (next === "pro") setView({ kind: "proDashboard" }, next);
+            if (next === "partner") setView({ kind: "partner", org: "JPMorgan Chase" }, next);
+          }}
+        />
 
         {view.kind === "home" && (
           <HomeView
@@ -1076,19 +1089,6 @@ export function ConnectExperience() {
           }}
         />
       )}
-      {rolesOpen && (
-        <RoleSheet
-          role={role}
-          onClose={() => setRolesOpen(false)}
-          onPick={(next) => {
-            setRolesOpen(false);
-            if (next === "student") setView({ kind: "home", tab: "communities" });
-            if (next === "attendee") setView({ kind: "home", tab: "events" });
-            if (next === "pro") setView({ kind: "proDashboard" });
-            if (next === "partner") setView({ kind: "partner", org: "JPMorgan Chase" });
-          }}
-        />
-      )}
       {reportFor && (
         <ReportSheet
           onClose={() => setReportFor(null)}
@@ -1112,59 +1112,34 @@ type DemoRole = "student" | "attendee" | "pro" | "partner";
 const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: LucideIcon }[] = [
   { key: "student", title: "Student", who: "Jordan · Junior", line: "Asks, follows, saves. The default Connect tab.", Icon: GraduationCap },
   { key: "attendee", title: "Event attendee", who: "Jordan, after a JA event", line: "Unlocks the event board with a code and keeps the conversation going.", Icon: Calendar },
-  { key: "pro", title: "Professional volunteer", who: "Amara Okafor · JPMorgan Chase", line: "Answers routed questions in minutes and sees the impact, privately.", Icon: ShieldCheck },
-  { key: "partner", title: "Partner / employer", who: "JPMorgan Chase", line: "Company-level impact for recognition and sponsorship reporting.", Icon: Building2 },
+  { key: "pro", title: "Volunteer", who: "Amara Okafor · JPMorgan Chase", line: "Answers routed questions in minutes and sees the impact, privately.", Icon: ShieldCheck },
+  { key: "partner", title: "Partner", who: "JPMorgan Chase", line: "Company-level impact for recognition and sponsorship reporting.", Icon: Building2 },
 ];
 
-/** One quiet line at the top of every Connect screen: who we are viewing
- *  as, and one tap to switch. */
-function RoleChip({ role, onSwitch }: { role: DemoRole; onSwitch: () => void }) {
-  const current = ROLES.find((r) => r.key === role)!;
+/** Demo switch: one segmented control at the top of every Connect screen,
+ *  the way the ?cards= lane switcher worked, so a demo flips between the
+ *  four journeys in one tap. Rides the URL as ?as=. */
+function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-      <span className="rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)" }}>Demo</span>
-      <span>Viewing as <strong style={{ color: "var(--foreground)" }}>{current.title}</strong></span>
-      <button type="button" onClick={onSwitch} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Switch role</button>
-    </div>
-  );
-}
-
-function RoleSheet({ role, onClose, onPick }: { role: DemoRole; onClose: () => void; onPick: (role: DemoRole) => void }) {
-  return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="roles-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] flex w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-        <div className="flex items-center justify-between gap-[var(--space-3)]">
-          <div>
-            <h2 id="roles-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Show Connect as</h2>
-            <p className="mt-[2px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Each role sees a different Connect. Demo only.</p>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
-        <ul className="-mt-[var(--space-2)] flex flex-col" role="radiogroup" aria-label="Role">
-          {ROLES.map(({ key, title, who, line, Icon }) => {
-            const on = key === role;
-            return (
-              <li key={key} className="border-t first:border-t-0" style={{ borderColor: RULE }}>
-                <button type="button" role="radio" aria-checked={on} onClick={() => onPick(key)} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[12px] text-left">
-                  <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: on ? "color-mix(in srgb, var(--primary) 22%, transparent)" : "var(--glass-surface-1)", color: on ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-baseline gap-x-[8px]">
-                      <span className="text-[16px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
-                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who}</span>
-                    </span>
-                    <span className="block text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{line}</span>
-                  </span>
-                  {on ? <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> : <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+    <div className="flex flex-wrap items-center gap-[10px]">
+      <span className="rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Demo</span>
+      <div role="tablist" aria-label="Show Connect as" className="-mx-1 flex max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+        {ROLES.map(({ key, title, Icon }) => {
+          const on = key === role;
+          return (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => onPick(key)}
+              className="dm-quiet flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap"
+              style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "var(--muted-foreground)" }}
+            >
+              <Icon className="h-[14px] w-[14px]" aria-hidden /> {title}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

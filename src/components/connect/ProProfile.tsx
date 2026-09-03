@@ -545,18 +545,29 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
 
 // ——— partner / employer side, one screen, preview only ———
 
-/** Company-level impact (brief: "Boeing professionals reached 14,000
- *  students this year"). Aggregates only; no student data reaches an
- *  employer. Numbers are demo figures for the named company. */
+// Shape follows the CEO's Replit "Corporate Partnership Dashboard"
+// (/corporate/dashboard): goals against targets, the two lanes (in-person
+// events and virtual mentorship on Dreamari), the events themselves, the
+// professionals, and an exportable report. Demo figures for the named company.
+const PARTNER_GOALS = [
+  { label: "Students reached", value: 3420, target: 4000 },
+  { label: "Employee volunteers", value: 1247, target: 2000 },
+  { label: "Events completed", value: 8, target: 19 },
+];
+const PARTNER_EVENTS = [
+  { name: "Interview Prep Workshop", where: "Wilmington campus", when: "Jan 8", volunteers: 88, students: 150, done: true },
+  { name: "Networking Workshop", where: "Jersey City campus", when: "Jan 29", volunteers: 94, students: 200, done: true },
+  { name: "STEM in Corporate", where: "Chicago tower", when: "Feb 5", volunteers: 97, students: 188, done: true },
+  { name: "Career Exposure Panel", where: "Park Ave, New York", when: "Oct 14", volunteers: 61, students: 0, done: false },
+];
+
 export function PartnerView({ org, onBack }: { org: string; onBack: () => void }) {
   const nav = useContext(ConnectNav);
   const people = PROS.filter((p) => p.org === org);
   const accent = WORLD_COLORS[people[0]?.world ?? "Business & Money"] ?? "var(--primary)";
-  const totals = [
-    { value: 42, label: "Professionals active" },
-    { value: 14000, label: "Students reached" },
-    { value: 2300, label: "Questions answered" },
-    { value: 118, label: "Schools reached" },
+  const lanes = [
+    { title: "In person", sub: "Dream Opportunity events", stats: [["8", "events"], ["1,247", "volunteers"], ["3,118", "hours"]] },
+    { title: "On Dreamari", sub: "Answers, posts and follows", stats: [["42", "professionals"], ["2,300", "answers"], ["14,000", "students"]] },
   ];
   return (
     <>
@@ -565,23 +576,77 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h1 className="flex items-center gap-[10px] text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          <CompanyMark name={org} ink="var(--foreground)" height={22} /> <span>on Dreamari</span>
-        </h1>
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-[10px] text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <CompanyMark name={org} ink="var(--foreground)" height={22} /> <span>on Dreamari</span>
+          </h1>
+          <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Partnership dashboard · 2026</p>
+        </div>
+        <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Export report</span></PrimaryCta>
       </div>
 
-      <Panel id="company-impact-title" title="This year" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}><TrendingUp className="h-4 w-4" aria-hidden /> +31% students vs. last year</span>}>
-        <dl className="grid grid-cols-2 gap-x-[var(--space-5)] sm:grid-cols-4">
-          {totals.map((stat, i) => (
-            <div key={stat.label} className={`flex flex-col gap-[2px] py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
-              <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(stat.value)}</dd>
-              <dt className="order-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+      {/* goals against targets: the Replit's "North Star" block, as three rows */}
+      <Panel id="partner-goals-title" title="2026 goals" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}><TrendingUp className="h-4 w-4" aria-hidden /> +27% volunteers vs. last year</span>}>
+        <ul className="-mt-[var(--space-2)] flex flex-col">
+          {PARTNER_GOALS.map((g) => {
+            const pct = Math.round((g.value / g.target) * 100);
+            return (
+              <li key={g.label} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+                <span className="flex items-baseline justify-between gap-[var(--space-3)]">
+                  <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{g.label}</span>
+                  <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+                    <strong className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(g.value)}</strong> of {formatCount(g.target)} · {pct}%
+                  </span>
+                </span>
+                <span className="relative block h-[6px] w-full overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }} aria-hidden>
+                  <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${pct}%`, background: accent }} />
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>Students rate these sessions 4.7 out of 5. Employees 4.5 out of 5.</p>
+      </Panel>
+
+      {/* the two lanes the CEO reports on */}
+      <Panel id="partner-lanes-title" title="This year">
+        <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
+          {lanes.map((lane, i) => (
+            <div key={lane.title} className={`flex flex-col gap-[var(--space-3)] ${i === 1 ? "border-t pt-[var(--space-4)] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : ""}`} style={{ borderColor: RULE }}>
+              <div>
+                <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: accent }}>{lane.title}</h3>
+                <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{lane.sub}</p>
+              </div>
+              <dl className="grid grid-cols-3 gap-[var(--space-3)]">
+                {lane.stats.map(([value, label]) => (
+                  <div key={label} className="flex flex-col gap-[2px]">
+                    <dd className="order-1 text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</dd>
+                    <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</dt>
+                  </div>
+                ))}
+              </dl>
             </div>
           ))}
-        </dl>
+        </div>
         <p className="flex items-center gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
           <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Totals only. No student names or individual answers are shared with employers.
         </p>
+      </Panel>
+
+      <Panel id="partner-events-title" title="Events" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>8 of 19 completed</span>}>
+        <ul className="-mt-[var(--space-2)] flex flex-col">
+          {PARTNER_EVENTS.map((e) => (
+            <li key={e.name + e.when} className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[4px] border-t py-[var(--space-3)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{e.name}</span>
+                <span className="block text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{e.when} · {e.where}</span>
+              </span>
+              <span className="flex-none text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: e.done ? "var(--muted-foreground)" : accent }}>
+                {e.done ? `${e.volunteers} volunteers · ${e.students} students` : `Upcoming · ${e.volunteers} volunteers signed up`}
+              </span>
+            </li>
+          ))}
+        </ul>
       </Panel>
 
       <Panel id="company-people-title" title="Your professionals" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{people.length} on Dreamari</span>}>
@@ -601,10 +666,6 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
             </PanelRow>
           ))}
         </ul>
-      </Panel>
-
-      <Panel id="company-report-title" title="Impact report" aside={<PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>}>
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>A one-page summary of {org}&apos;s volunteer impact for social impact reporting, employee recognition and sponsorship reviews. Verified volunteer hours included.</p>
       </Panel>
     </>
   );
