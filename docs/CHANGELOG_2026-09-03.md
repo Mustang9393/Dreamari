@@ -103,3 +103,9 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - College cards: the campus photo is only a cover now, with the college's logo or seal on a white disc at its edge. All words sit below on a calm panel: name, place, two sentences, three words, Compare. No text over photos.
 - Filters: the tray is short checkbox and radio lists with small headings instead of rows of chips. Same filters, half the noise.
 - Sitewide search is pinned. Find a college is reached from the hamburger.
+- Connect landing: three tabs, Community, Events, Notifications. Ask a question and "your questions" moved off the landing into Notifications (with new posts from people you follow). Every board still has its own Ask.
+- Community cards: bigger title, two numbers (Students, Pros) without icons, three company logos and "+N more" instead of the "Pros from" line and the Posts and Companies counts.
+- Event cards: taller, coloured in the partner's real brand colour like a volunteer's company card, with the photo as faint texture. Text and logos switch to dark ink on light brands (EY).
+- Professional profiles: Answers and Career posts show three, then "View all N".
+- Threads: answers, comments and follow-ups share one surface and border.
+- Ask row on Connect redrawn as a text field before it moved.

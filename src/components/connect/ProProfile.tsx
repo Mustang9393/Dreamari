@@ -202,6 +202,16 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
   );
 }
 
+/** Three rows, then the rest on request: "View all 7" / "Show less". */
+function MoreToggle({ total, open, onToggle }: { total: number; open: boolean; onToggle: () => void }) {
+  if (total <= 3) return <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{total}</span>;
+  return (
+    <button type="button" onClick={onToggle} aria-expanded={open} className="dm-link flex min-h-[32px] cursor-pointer items-center text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+      {open ? "Show less" : `View all ${total}`}
+    </button>
+  );
+}
+
 // ——— New from people you follow ———
 
 type FeedItem = { key: string; pro: Pro; verb: "answered" | "posted"; title: string; open: () => void };
@@ -258,6 +268,8 @@ export function ProProfileView({
   const answers = answersBy(pro.id);
   const posts = postsBy(pro.id);
   const [asked, setAsked] = useState<{ id: string; title: string }[]>([]);
+  const [allAnswers, setAllAnswers] = useState(false);
+  const [allPosts, setAllPosts] = useState(false);
   const following = !!follows[pro.id];
 
   return (
@@ -321,9 +333,9 @@ export function ProProfileView({
       </Panel>
 
       {answers.length > 0 && (
-        <Panel id="answers-title" title="Answers" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{answers.length} answered</span>}>
+        <Panel id="answers-title" title="Answers" aside={<MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />}>
           <ul className="-mt-[var(--space-2)] flex flex-col">
-            {answers.map((thread) => {
+            {(allAnswers ? answers : answers.slice(0, 3)).map((thread) => {
               const s = signals(thread.views, thread.helpful, undefined);
               return (
                 <PanelRow key={thread.id} onClick={() => nav?.openThread(thread.id)}>
@@ -337,9 +349,9 @@ export function ProProfileView({
       )}
 
       {posts.length > 0 && (
-        <Panel id="posts-title" title="Career posts">
+        <Panel id="posts-title" title="Career posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
           <ul className="-mt-[var(--space-2)] flex flex-col">
-            {posts.map((insight) => {
+            {(allPosts ? posts : posts.slice(0, 3)).map((insight) => {
               const s = signals(insight.views, insight.helpful, insight.saves);
               return (
                 <PanelRow key={insight.id} onClick={() => nav?.openInsight(insight.id)}>
