@@ -75,7 +75,11 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <ul className="flex flex-wrap gap-[6px]" aria-label="About this college" style={{ textShadow: "none" }}>
                 {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff" }}>{t}</li>)}
               </ul>
-              <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>{d?.address && !d.sample ? `${d.address} · ` : ""}Accredited by {c.accreditor}{d?.partOf ? ` · Part of ${d.partOf}` : ""}</p>
+              <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {d?.address && !d.sample && <span className="block">{d.address}</span>}
+                <span className="block">Accredited by {c.accreditor}</span>
+                {d?.partOf && <span className="block">Part of {d.partOf}</span>}
+              </p>
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
                 {c.website && (
                   <a href={c.website} target="_blank" rel="noreferrer" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
@@ -129,7 +133,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                   {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
                     <div className="mt-[var(--space-4)]">
-                      {d.scholarshipShare !== undefined && <Row label="Got a college scholarship" note="new students" value={d.scholarshipShare ? `${d.scholarshipShare}%${d.scholarshipAvg ? ` · about ${money(Math.round(d.scholarshipAvg / 100) * 100)}` : ""}` : "None"} last={d.pell === undefined} />}
+                      {d.scholarshipShare !== undefined && <Row label="Got a college scholarship" note={d.scholarshipAvg && d.scholarshipShare ? `new students, about ${money(Math.round(d.scholarshipAvg / 100) * 100)} each` : "new students"} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
                       {d.pell !== undefined && <Row label="Got a federal Pell grant" value={`${d.pell}%`} last />}
                     </div>
                   )}
@@ -206,8 +210,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   <div className="mt-[var(--space-2)]">
                     <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} />
                     {d.gradStudents ? <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} /> : null}
-                    <Row label="Women · men" value={`${d.women}% · ${d.men}%`} />
-                    <Row label="Full time · part time" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}% · ${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} last />
+                    <Row label="Women" value={`${d.women}%`} />
+                    <Row label="Men" value={`${d.men}%`} />
+                    <Row label="Study full time" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} last />
                   </div>
                   <div className="mt-[var(--space-4)]">
                     <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct }))} />
