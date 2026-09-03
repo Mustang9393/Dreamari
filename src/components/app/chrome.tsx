@@ -60,6 +60,16 @@ const QUICK_LINKS = [
   { label: "Sign Up", href: "/signup" },
 ] as const;
 
+// Demo perspectives (Connect 2.0): each role's own Connect, one tap from any
+// screen. Demo scaffolding; remove before production.
+const DEMO_LINKS = [
+  { label: "Student", href: "/connect" },
+  { label: "Event attendee", href: "/connect?tab=events&as=attendee" },
+  { label: "Volunteer", href: "/connect?dashboard=pro-okafor&as=pro" },
+  { label: "Partner", href: "/connect?partner=JPMorgan%20Chase&as=partner" },
+  { label: "Staff", href: "/connect?admin=1&as=admin" },
+] as const;
+
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
   return (
@@ -108,6 +118,18 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold tracking-[0.08em] uppercase transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+                style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>
+            {DEMO_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
                 style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
               >
                 {link.label}

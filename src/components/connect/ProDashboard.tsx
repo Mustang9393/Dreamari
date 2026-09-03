@@ -5,7 +5,7 @@ import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download, Eye, MessagesSquare, PenLine, ThumbsUp, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { COMMUNITIES, INSIGHTS, PROS, THREADS } from "./data";
+import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
 import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries } from "./viz";
@@ -23,15 +23,38 @@ type Tab = "profile" | "impact";
 type Range = "30d" | "month" | "90d";
 type RoutedState = "open" | "answering" | "answered" | "skipped";
 
-/** Routed this week: one real seeded thread from the volunteer's board plus
- *  two demo questions, so "Answer one?" has something behind it. */
-const ROUTED: { id: string; handle: string; grade: string; where: string; ago: string; title: string; threadId?: string }[] = [
-  { id: "r1", handle: "Diego", grade: "Sophomore", where: "NJ", ago: "2h", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
-  { id: "r2", handle: "Priya", grade: "Junior", where: "TX", ago: "1d", title: "Is going to a state school a dealbreaker for investment banking?" },
-  { id: "r3", handle: "Theo", grade: "Freshman", where: "CA", ago: "2d", title: "What should I major in if I want to work in finance?" },
-];
+/** Routed this week, by the volunteer's world: three demo questions each, so
+ *  "Answer one?" has something behind it for every volunteer. */
+type Routed = { id: string; handle: string; grade: string; ago: string; title: string; threadId?: string };
+const ROUTED_BY_WORLD: Record<string, Routed[]> = {
+  "Business & Money": [
+    { id: "r1", handle: "Diego", grade: "Sophomore", ago: "2h", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
+    { id: "r2", handle: "Priya", grade: "Junior", ago: "1d", title: "Is going to a state school a dealbreaker for finance jobs?" },
+    { id: "r3", handle: "Theo", grade: "Freshman", ago: "2d", title: "What should I major in if I want to work in finance?" },
+  ],
+  "Tech & Engineering": [
+    { id: "r1", handle: "Ethan", grade: "Junior", ago: "3h", title: "Do I need a CS degree to work in tech?", threadId: "t-cs-degree" },
+    { id: "r2", handle: "Zoe", grade: "Sophomore", ago: "1d", title: "What should my first coding project be?" },
+    { id: "r3", handle: "Sam", grade: "Senior", ago: "2d", title: "Is it too late to start coding in 12th grade?" },
+  ],
+  "Health & Medicine": [
+    { id: "r1", handle: "Zoe", grade: "Sophomore", ago: "5h", title: "How do I shadow a nurse while still in high school?", threadId: "t-nurse-shadow" },
+    { id: "r2", handle: "Sana", grade: "Junior", ago: "1d", title: "Is nursing school harder than regular college?" },
+    { id: "r3", handle: "Noah", grade: "Freshman", ago: "2d", title: "Can I work in healthcare if I hate blood?" },
+  ],
+  "Arts, Media & Sport": [
+    { id: "r1", handle: "Ruby", grade: "Junior", ago: "4h", title: "Do I need to go to art school to become a designer?", threadId: "t-creative-art-school" },
+    { id: "r2", handle: "Theo", grade: "Sophomore", ago: "1d", title: "How do I make a portfolio with no clients?" },
+    { id: "r3", handle: "Lena", grade: "Senior", ago: "3d", title: "Is it realistic to make money making videos?" },
+  ],
+  "Teaching & Education": [
+    { id: "r1", handle: "Lena", grade: "Junior", ago: "2h", title: "How do I write a resume with no work experience?", threadId: "t-gpd-resume" },
+    { id: "r2", handle: "Marcus", grade: "Freshman", ago: "1d", title: "What do I say when they ask about my weaknesses?" },
+    { id: "r3", handle: "Ava", grade: "Sophomore", ago: "2d", title: "Should I email a recruiter after a career fair?" },
+  ],
+};
 
-const POST_PROMPTS = ["5 things I wish I knew before starting my career", "What people misunderstand about investment banking", "What I actually do during a normal workday", "What I would tell my 16-year-old self"];
+const POST_PROMPTS = (field: string) => ["5 things I wish I knew before starting my career", `What people misunderstand about ${field.toLowerCase()}`, "What I actually do during a normal workday", "What I would tell my 16-year-old self"];
 
 const RANGE: Record<Range, { label: string; days: number; base: number; labels: [string, string, string] }> = {
   "30d": { label: "Last 30 days", days: 30, base: 26, labels: ["30 days ago", "15 days ago", "Today"] },
@@ -39,8 +62,9 @@ const RANGE: Record<Range, { label: string; days: number; base: number; labels: 
   "90d": { label: "Last 90 days", days: 90, base: 22, labels: ["90 days ago", "45 days ago", "Today"] },
 };
 
-export function ProDashboardView({ onBack }: { onBack: () => void }) {
-  const pro = PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
+export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: () => void }) {
+  const pro = given ?? PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
+  const ROUTED = ROUTED_BY_WORLD[pro.world] ?? ROUTED_BY_WORLD["Teaching & Education"];
   const nav = useContext(ConnectNav);
   const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
   const [tab, setTab] = useState<Tab>("profile");
@@ -61,14 +85,27 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
 
+  // the month's numbers, scaled from this volunteer's totals (demo)
+  const m = {
+    impressions: Math.round(pro.studentsReached * 0.34),
+    reached: Math.round(pro.studentsReached * 0.062),
+    followers: Math.round(pro.followers * 0.05),
+    saves: Math.round(pro.totalLikes * 0.019),
+    likes: Math.round(pro.totalLikes * 0.18),
+    year: Math.round(pro.studentsReached * 0.067),
+    hours: Math.max(3, Math.round(pro.questionsAnswered * 0.22)),
+    schools: Math.max(4, Math.round(pro.studentsReached / 520)),
+    asked: pro.questionsAnswered + 6,
+  };
   const metrics = [
-    { icon: Eye, value: formatCount(4281), label: "Impressions", delta: 18 },
-    { icon: Users, value: formatCount(786), label: "Students reached", delta: 24 },
-    { icon: UserPlus, value: formatCount(63), label: "New followers", delta: 16 },
-    { icon: Bookmark, value: formatCount(91), label: "Saves", delta: 9 },
-    { icon: ThumbsUp, value: formatCount(1204), label: "Likes", delta: 11 },
-    { icon: MessagesSquare, value: formatCount(37 + answeredNow), label: "Questions answered", delta: 7 },
+    { icon: Eye, value: formatCount(m.impressions), label: "Impressions", delta: 18 },
+    { icon: Users, value: formatCount(m.reached), label: "Students reached", delta: 24 },
+    { icon: UserPlus, value: formatCount(m.followers), label: "New followers", delta: 16 },
+    { icon: Bookmark, value: formatCount(m.saves), label: "Saves", delta: 9 },
+    { icon: ThumbsUp, value: formatCount(m.likes), label: "Likes", delta: 11 },
+    { icon: MessagesSquare, value: formatCount(pro.questionsAnswered + answeredNow), label: "Questions answered", delta: 7 },
   ];
+  const company = { pros: 8 + (pro.org.length * 7) % 40, get students() { return this.pros * 330; }, get answers() { return this.pros * 55; } };
 
   return (
     <>
@@ -83,6 +120,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
           <div className="min-w-0">
             <h1 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
             <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><RoleLine pro={pro} /></p>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link mt-[4px] flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
         </div>
         <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "impact", label: "My Impact" }]} />
@@ -95,10 +133,10 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
           <Panel
             id="ama-routed-title"
             title="Ask Me Anything"
-            aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{64 + 0}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{58 + answeredNow}</strong> answered</span>}
+            aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{m.asked}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered + answeredNow}</strong> answered</span>}
           >
             <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              {openCount > 0 ? `${words} students asked about investment banking this week. Answer one?` : "All answered. We will route the next one."}
+              {openCount > 0 ? `${words} students asked about ${pro.field.toLowerCase()} this week. Answer one?` : "All answered. We will route the next one."}
             </h3>
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {ROUTED.map((q) => {
@@ -192,7 +230,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             {composing && (
               <div className="flex flex-col gap-[10px] border-b pb-[var(--space-4)]" style={{ borderColor: RULE }}>
                 <div className="flex flex-wrap gap-[6px]">
-                  {POST_PROMPTS.map((p) => (
+                  {POST_PROMPTS(pro.field).map((p) => (
                     <button key={p} type="button" onClick={() => setPostDraft(p)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: postDraft === p ? `color-mix(in srgb, ${accent} 60%, var(--glass-border))` : "var(--glass-border)", color: "var(--foreground)", background: postDraft === p ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }}>{p}</button>
                   ))}
                 </div>
@@ -293,7 +331,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                   <span className="text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${brand.ink} 78%, transparent)` }}>on Dreamari · 2026</span>
                 </div>
                 <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${brand.ink} 22%, transparent)` }}>
-                  {[["42", "pros"], ["14,000", "students"], ["2,300", "answers"]].map(([v, l]) => (
+                  {[[formatCount(company.pros), "pros"], [formatCount(company.students), "students"], [formatCount(company.answers), "answers"]].map(([v, l]) => (
                     <div key={l} className="flex flex-col"><dd className="order-1 text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{v}</dd><dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: `color-mix(in srgb, ${brand.ink} 78%, transparent)` }}>{l}</dt></div>
                   ))}
                 </dl>
@@ -303,7 +341,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
 
           {/* recognition a professional can actually use: the card itself is the
              section, nothing wrapped around it */}
-          <ImpactCard pro={pro} accent={accent} />
+          <ImpactCard pro={pro} accent={accent} numbers={m} />
         </>
       )}
     </>
@@ -312,7 +350,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
 
 /** The Wrapped-style card: one gradient in the person's world accent, one
  *  hero number, three supporting ones, who it is about. Sized to post. */
-function ImpactCard({ pro, accent }: { pro: (typeof PROS)[number]; accent: string }) {
+function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; numbers: { year: number; hours: number; schools: number } }) {
   return (
     <section
       aria-label="2026 Impact Summary"
@@ -325,11 +363,11 @@ function ImpactCard({ pro, accent }: { pro: (typeof PROS)[number]; accent: strin
         <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]" style={{ background: "rgba(255,255,255,0.92)", color: "#0e0c20" }}><span className="flex items-center gap-[6px]"><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>
       </div>
       <div className="relative mt-[var(--space-6)] flex flex-col">
-        <span className="font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontSize: 64, lineHeight: "64px" }}>842</span>
+        <span className="font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontSize: 64, lineHeight: "64px" }}>{formatCount(numbers.year)}</span>
         <span className="text-[18px] leading-[24px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>students reached</span>
       </div>
       <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "rgba(255,255,255,0.22)" }}>
-        {[["63", "questions answered"], ["14", "volunteer hours"], ["27", "schools"]].map(([value, label]) => (
+        {[[String(pro.questionsAnswered), "questions answered"], [String(numbers.hours), "volunteer hours"], [String(numbers.schools), "schools"]].map(([value, label]) => (
           <div key={label} className="flex flex-col">
             <dd className="order-1 text-[24px] leading-[28px] font-extrabold tabular-nums">{value}</dd>
             <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)", fontFamily: "var(--font-body)" }}>{label}</dt>

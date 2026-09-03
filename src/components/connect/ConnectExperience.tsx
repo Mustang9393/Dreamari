@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Flag,
   KeyRound,
+  LayoutDashboard,
   MapPin,
   Pin,
   ShieldCheck,
@@ -36,6 +37,7 @@ import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
+import { AdminDashboardView } from "./AdminDashboard";
 import {
   COMMUNITIES,
   EVENTS,
@@ -96,22 +98,24 @@ type View =
   | { kind: "home"; tab: "communities" | "events" }
   | { kind: "board"; id: string; filter: string }
   | { kind: "pro"; id: string }
-  | { kind: "proDashboard" }
+  | { kind: "proDashboard"; id: string }
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string }
   | { kind: "saved" }
   | { kind: "activity" }
+  | { kind: "admin" }
   | { kind: "partner"; org: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "saved") return "?saved=1";
   if (view.kind === "activity") return "?activity=1";
+  if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
-  if (view.kind === "proDashboard") return "?dashboard=pro";
+  if (view.kind === "proDashboard") return `?dashboard=${view.id}`;
   if (view.kind === "event") return `?event=${view.id}${view.filter !== "all" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "insight") return `?insight=${view.id}`;
   return `?thread=${view.id}`;
@@ -121,12 +125,13 @@ function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
   if (q.get("activity")) return { kind: "activity" };
+  if (q.get("admin")) return { kind: "admin" };
   if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
   if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "questions" };
-  if (q.get("dashboard") === "pro") return { kind: "proDashboard" };
+  if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
   return { kind: "home", tab: tab === "events" ? tab : "communities" };
@@ -823,6 +828,8 @@ export function ConnectExperience() {
   // segmented switch at the top (like the earlier ?cards= lane switcher), so
   // the demo can flip between journeys in one tap.
   const [role, setRole] = useState<DemoRole>("student");
+  // Demo only: which volunteer the Volunteer and Partner roles are shown for.
+  const volunteer = view.kind === "proDashboard" ? view.id : view.kind === "partner" ? (PROS.find((p) => p.org === view.org)?.id ?? "pro-okafor") : "pro-okafor";
 
   // restore view from URL on mount; keep URL in sync so filters survive
   // reload/share (handoff 8.3). Deliberately an effect, not a lazy useState
@@ -833,8 +840,12 @@ export function ConnectExperience() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setViewState(queryToView(window.location.search));
-    const as = new URLSearchParams(window.location.search).get("as");
+    const params = new URLSearchParams(window.location.search);
+    const as = params.get("as");
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
+    else if (params.get("admin")) setRole("admin");
+    else if (params.get("dashboard")) setRole("pro");
+    else if (params.get("partner")) setRole("partner");
   }, []);
   const setView = useCallback((next: View, as?: DemoRole) => {
     setViewState(next);
@@ -922,10 +933,21 @@ export function ConnectExperience() {
             setRole(next);
             if (next === "student") setView({ kind: "home", tab: "communities" }, next);
             if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
-            if (next === "pro") setView({ kind: "proDashboard" }, next);
-            if (next === "partner") setView({ kind: "partner", org: "JPMorgan Chase" }, next);
+            if (next === "pro") setView({ kind: "proDashboard", id: volunteer }, next);
+            if (next === "partner") setView({ kind: "partner", org: PROS.find((p) => p.id === volunteer)?.org ?? "JPMorgan Chase" }, next);
+            if (next === "admin") setView({ kind: "admin" }, next);
           }}
         />
+        {(role === "pro" || role === "partner") && (
+          <VolunteerPicker
+            selected={volunteer}
+            onPick={(id) => {
+              const p = PROS.find((x) => x.id === id)!;
+              if (role === "partner") setView({ kind: "partner", org: p.org }, role);
+              else setView({ kind: "proDashboard", id }, role);
+            }}
+          />
+        )}
 
         {view.kind === "home" && (
           <HomeView
@@ -954,7 +976,8 @@ export function ConnectExperience() {
             const boardId = COMMUNITIES.find((c) => c.world === pro.world)?.id ?? "teaching-education";
             return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} onAsked={(title) => nav.noteAsked(title, boardId)} />;
           })()}
-        {view.kind === "proDashboard" && <ProDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "admin" && <AdminDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
         {view.kind === "partner" && <PartnerView org={view.org} onBack={() => setView({ kind: "home", tab: "communities" })} />}
         {view.kind === "activity" && (
           <ActivityView
@@ -1122,14 +1145,32 @@ export function ConnectExperience() {
 
 // ——— demo role switcher (for showing the journeys separately, not a product feature) ———
 
-type DemoRole = "student" | "attendee" | "pro" | "partner";
+type DemoRole = "student" | "attendee" | "pro" | "partner" | "admin";
 
 const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: LucideIcon }[] = [
   { key: "student", title: "Student", who: "Jordan · Junior", line: "Asks, follows, saves. The default Connect tab.", Icon: GraduationCap },
   { key: "attendee", title: "Attendee", who: "Jordan, after a JA event", line: "Unlocks the event board with a code and keeps the conversation going.", Icon: Calendar },
   { key: "pro", title: "Volunteer", who: "Amara Okafor · JPMorgan Chase", line: "Answers routed questions in minutes and sees the impact, privately.", Icon: ShieldCheck },
   { key: "partner", title: "Partner", who: "JPMorgan Chase", line: "Company-level impact for recognition and sponsorship reporting.", Icon: Building2 },
+  { key: "admin", title: "Staff", who: "Dreamari", line: "Sitewide numbers, moderation, people and features.", Icon: LayoutDashboard },
 ];
+
+/** Demo: which volunteer we are looking at. Faces first, the name under. */
+function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: string) => void }) {
+  return (
+    <div role="tablist" aria-label="Volunteer" className="-mx-5 flex gap-[var(--space-2)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none]">
+      {PROS.map((p) => {
+        const on = p.id === selected;
+        return (
+          <button key={p.id} type="button" role="tab" aria-selected={on} onClick={() => onPick(p.id)} className="dm-quiet flex w-[72px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[8px]" style={on ? { background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" } : undefined}>
+            <Avatar name={p.name} verified size={40} />
+            <span className="w-full truncate text-center text-[11px] leading-[14px] font-semibold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{p.name.split(" ")[0]}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 /** Demo switch: one segmented control at the top of every Connect screen,
  *  the way the ?cards= lane switcher worked, so a demo flips between the
