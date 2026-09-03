@@ -24,6 +24,8 @@ export const ConnectNav = createContext<{
   noteAsked: (title: string, boardId: string) => void;
   /** opens the report sheet for a thread, answer, post or comment id */
   report: (id: string) => void;
+  isFollowing: (id: string) => boolean;
+  toggleFollow: (id: string) => void;
 } | null>(null);
 
 /** Phone numbers, emails, @handles and DM apps have no place in a public
@@ -358,18 +360,29 @@ export function markBox(aspect: number, override?: number): { width: number; hei
   return { width: Math.round(height * aspect), height };
 }
 
-export function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "photo" | "surface" }) {
+const CHIP_SIZE = { sm: { h: 22, px: 8, scale: 0.82, text: "text-[11px] leading-[14px]" }, md: { h: 28, px: 10, scale: 1, text: "text-[12px] leading-[16px]" }, lg: { h: 40, px: 14, scale: 1.55, text: "text-[15px] leading-[20px]" } } as const;
+
+/** The company as its logo inside a chip (the community-card style), in
+ *  three sizes: sm beside small meta text, md in rows, lg in headings.
+ *  Direct feedback: bare marks sat off the text line; the chip gives them a
+ *  box to sit in wherever a company is named. */
+export function CompanyChip({ name, tone = "photo", size = "md" }: { name: string; tone?: "photo" | "surface"; size?: keyof typeof CHIP_SIZE }) {
   const mark = COMPANY_MARKS[name];
   const onPhoto = tone === "photo";
   const ink = onPhoto ? "#FFFFFF" : "var(--foreground)";
+  const dims = CHIP_SIZE[size];
+  const box = mark ? markBox(mark.aspect, mark.height) : { width: 0, height: 0 };
+  const scaled = { width: Math.round(box.width * dims.scale), height: Math.round(box.height * dims.scale) };
   // Logo only when we have the real mark (direct feedback); the name stays
   // for screen readers and as the fallback when no exact mark exists.
   return (
     <span
-      className="group/chip relative inline-flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap focus-visible:outline-none"
+      className={`group/chip relative inline-flex flex-none items-center rounded-[var(--radius-sm)] border font-semibold whitespace-nowrap focus-visible:outline-none ${dims.text}`}
       title={name}
       tabIndex={mark ? 0 : undefined}
       style={{
+        height: dims.h,
+        paddingInline: dims.px,
         background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
         borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
         color: ink,
@@ -382,7 +395,7 @@ export function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "ph
             aria-hidden
             className="block flex-none"
             style={{
-              ...markBox(mark.aspect, mark.height),
+              ...scaled,
               background: ink,
               maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
               WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,

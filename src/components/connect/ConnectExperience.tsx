@@ -32,8 +32,11 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { CompanyChip, CompanyMark, ConnectNav, CONTACT_INFO, CONTACT_WARNING } from "./primitives";
-import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProDashboardView, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
+import { CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING } from "./primitives";
+import { Segmented } from "./viz";
+import { FollowButton } from "./ProProfile";
+import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
+import { ProDashboardView } from "./ProDashboard";
 import {
   COMMUNITIES,
   EVENTS,
@@ -368,8 +371,8 @@ function ProBadge({ proId, postedAgo, size = 34 }: { proId: string; postedAgo?: 
       <Avatar name={pro.name} verified size={size} />
       <div className="flex min-w-0 flex-col">
         <button type="button" onClick={() => nav?.openPro(proId)} className="dm-link w-fit cursor-pointer text-left text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-        <span className="flex flex-wrap items-center gap-x-[5px] text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-          {pro.role} at <CompanyMark name={pro.org} ink="var(--muted-foreground)" />
+        <span className="flex flex-wrap items-center gap-x-[6px] gap-y-[3px] text-[11px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+          {pro.role} <CompanyChip name={pro.org} tone="surface" size="sm" />
           {postedAgo ? <span>· {postedAgo}</span> : null}
         </span>
       </div>
@@ -393,7 +396,6 @@ function communityAccent(community: Pick<Community, "world">): string {
 // The references' shaped masks stay -- but they hold the community's own
 // people-free artwork, not a portrait. Symmetric grid, every tile equal.
 // Signals kept to the earned three: name, verified-pro count, students.
-const CARD_INK = "#221e33";
 
 // Community feeds read in the platform's own UI face (what Instagram,
 // Facebook, and every OS-native feed does): sturdy at small sizes, high
@@ -738,7 +740,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
           <div className="flex flex-wrap items-center gap-[6px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
             <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Professional</span>
-            <span className="flex min-w-0 items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> at <CompanyMark name={pro.org} ink="var(--muted-foreground)" /></span>
+            <span className="flex min-w-0 items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> <CompanyChip name={pro.org} tone="surface" size="sm" /></span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
@@ -849,8 +851,10 @@ export function ConnectExperience() {
       openSaved: () => setView({ kind: "saved" }),
       noteAsked: (title: string, boardId: string) => setAsked((current) => [{ id: `asked-${Date.now()}`, title, boardId }, ...current]),
       report: (id: string) => setReportFor(id),
+      isFollowing: (id: string) => !!follows[id],
+      toggleFollow,
     }),
-    [setView],
+    [setView, follows],
   );
 
   const say = useCallback((message: string) => {
@@ -1174,11 +1178,13 @@ function YourQuestions({ asked, onOpenThread, onAsk, savedCount }: { asked: Aske
         {mine.map((t) => {
           const answered = t.state === "answered" || t.state === "resolved";
           const fresh = answered && t.unreadAnswer;
+          const primary = t.responses.find((r) => r.kind === "answer" && r.primary) ?? t.responses.find((r) => r.kind === "answer");
+          const who = primary && primary.kind === "answer" ? proById(primary.proId) : null;
           return (
             <PanelRow key={t.id} onClick={() => onOpenThread(t.id)}>
-              <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: answered ? STATE_COLOR.answered : STATE_COLOR.routed }}>
-                {answered ? <CheckCircle2 className="h-3 w-3" aria-hidden /> : <Clock className="h-3 w-3" aria-hidden />}
-                {fresh ? "New answer" : STATE_LABEL[t.state]}
+              <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: answered ? STATE_COLOR.answered : STATE_COLOR.routed }}>
+                {who ? <Avatar name={who.name} size={20} /> : <Clock className="h-3 w-3" aria-hidden />}
+                {who ? <span>{fresh ? "New answer" : "Answered"} <span style={{ color: "var(--muted-foreground)" }}>from</span> <span style={{ color: "var(--foreground)" }}>{who.name}</span></span> : STATE_LABEL[t.state]}
               </span>
               <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
             </PanelRow>
@@ -1421,6 +1427,9 @@ function HomeView({
         <div className="min-w-0">
           <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find your community</h1>
           <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Explore careers and connect with professionals.</p>
+          <p className="mt-[8px] flex w-fit items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 45%, var(--glass-border))", background: "color-mix(in srgb, var(--world-food-farming-nature) 10%, transparent)", color: "var(--foreground)" }}>
+            <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> Verified professionals · Moderated questions
+          </p>
         </div>
         <TopTabs tab={tab} onTab={onTab} />
       </div>
@@ -1693,22 +1702,6 @@ function BoardView({
             <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${bannerInk} 80%, transparent)` }}>{community.topics.join(" · ")}</p>
           </div>
         </div>
-        <div className="relative z-10 mt-[4px] flex flex-wrap items-center gap-[8px]">
-          {[
-            { key: "feed", label: "Feed", active: !about, onPick: () => onFilter(about ? "questions" : filter) },
-            { key: "about", label: "About", active: about, onPick: () => onFilter("about") },
-          ].map((pill) => (
-            <button
-              key={pill.key}
-              type="button"
-              onClick={pill.onPick}
-              className="dm-quiet min-h-[34px] cursor-pointer rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
-              style={pill.active ? { background: bannerInk, color: "#16132b" } : { background: `color-mix(in srgb, ${bannerInk} 18%, transparent)`, color: bannerInk }}
-            >
-              {pill.label}
-            </button>
-          ))}
-        </div>
         <div className="relative z-10 mt-[var(--space-4)] flex w-full flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[4px] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${bannerInk} 18%, transparent)` }}>
           <span className="min-w-0 text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${bannerInk} 62%, transparent)` }}>
             <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.students}</strong> students · <strong className="font-extrabold" style={{ color: `color-mix(in srgb, ${bannerInk} 90%, transparent)` }}>{community.activePros}</strong> verified pros{" "}
@@ -1727,80 +1720,62 @@ function BoardView({
         </div>
       </section>
 
-      {about ? (
-        <div className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 9%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 26%, var(--glass-border))` }}>
-          <h2 className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>About this community</h2>
-          <p className="mt-[8px] text-[14px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{community.purpose}</p>
-          <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-            <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Topics</p>
-            <div className="mt-[8px] flex flex-wrap gap-[6px]">
+      {/* one row of tabs for the whole board (Questions, Insights, About); the
+         feed cards sit straight on the page, no box around boxes */}
+      <Segmented ariaLabel="Board section" value={filter === "about" ? "about" : filter === "insights" ? "insights" : "questions"} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: `Questions · ${threads.length}` }, { key: "insights", label: `Insights · ${insights.length}` }, { key: "about", label: "About" }]} />
+
+      {about && (
+        <Panel id="about-community-title" title="About this community">
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{community.purpose}</p>
+          <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Topics</span>
+            <div className="flex flex-wrap gap-[6px]">
               {community.topics.map((name) => (
                 <span key={name} className="rounded-[var(--radius-sm)] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
               ))}
             </div>
           </div>
-          <div className="mt-[16px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-            <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Pros from</p>
-            <div className="mt-[8px] flex flex-wrap gap-[6px]">
+          <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Pros from</span>
+            <div className="flex flex-wrap gap-[6px]">
               {community.professionalsFrom.map((name) => <CompanyChip key={name} name={name} tone="surface" />)}
             </div>
           </div>
-          <div className="mt-[14px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-            <p className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <ShieldCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: communityAccent(community) }} />
-              {community.responseWindow}.
-            </p>
-          </div>
-        </div>
-      ) : (
-        /* The Replit reference's board layout, verified at desktop width:
-           the banner sits above ONE content card that contains both the
-           left rail (Student Questions / Professional Insights -- the doc
-           cuts Industry Updates) and the active panel. The rail collapses
-           to a pill row on phones. */
-        <div className="flex flex-col gap-[var(--space-6)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:p-[var(--space-7)]" style={{ background: `color-mix(in srgb, ${communityAccent(community)} 7%, var(--card))`, borderColor: `color-mix(in srgb, ${communityAccent(community)} 30%, var(--glass-border))` }}>
-          <FilterRow
-            options={[
-              { key: "questions", label: "Student Questions", Icon: MessagesSquare },
-              { key: "insights", label: "Professional Insights", Icon: ShieldCheck },
-            ]}
-            active={filter}
-            onPick={onFilter}
-            accent={communityAccent(community)}
-          />
+          <p className="flex items-center gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+            <ShieldCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: communityAccent(community) }} />
+            {community.responseWindow}.
+          </p>
+        </Panel>
+      )}
 
-          <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-6)]">
-            {filter === "questions" && (
-              <>
-                <InlineAsk
-                  joined={joined}
-                  onRequireJoin={onJoin}
-                  accent={communityAccent(community)}
-                  onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
-                />
-                {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-                {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
-                {threads.length === 0 && (
-                  <Card>
-                    <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
-                    <ul className="mt-[8px] flex flex-col gap-[6px]">
-                      {STARTER_PROMPTS.map((p) => (
-                        <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
-                      ))}
-                    </ul>
-                  </Card>
-                )}
-              </>
-            )}
-            {filter === "insights" && (
-              <>
-                {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
-                {insights.length === 0 && (
-                  <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
-                )}
-              </>
-            )}
-          </div>
+      {filter === "questions" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <InlineAsk
+            joined={joined}
+            onRequireJoin={onJoin}
+            accent={communityAccent(community)}
+            onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
+          />
+          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
+          {threads.length === 0 && (
+            <Card>
+              <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
+              <ul className="mt-[8px] flex flex-col gap-[6px]">
+                {STARTER_PROMPTS.map((p) => (
+                  <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
+      )}
+      {filter === "insights" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
+          {insights.length === 0 && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
+          )}
         </div>
       )}
     </>
@@ -1972,8 +1947,8 @@ function ThreadView({
       <button
         type="button"
         onClick={onBack}
-        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
-        style={{ background: `color-mix(in srgb, ${boardAccent} 24%, #f4f1ea)`, color: CARD_INK, fontFamily: "var(--font-display)" }}
+        className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
+        style={{ color: "var(--muted-foreground)" }}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
       </button>
@@ -1999,13 +1974,16 @@ function ThreadView({
             const rid = thread.id + "-a" + index;
             return (
               <div key={rid} className="rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
-                <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+                <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
                   <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
+                  <span className="flex items-center gap-[8px]">
+                  {nav && <FollowButton compact following={nav.isFollowing(r.proId)} onToggle={() => nav.toggleFollow(r.proId)} />}
                   {r.primary && (
                     <span className="flex-none rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
                       Primary answer
                     </span>
                   )}
+                  </span>
                 </div>
                 <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
                 <p className="mt-[12px] text-[14px] leading-[22px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
@@ -2060,9 +2038,6 @@ function ThreadView({
         <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <button type="button" onClick={p.onHelpful} aria-pressed={p.helpful} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.helpful ? "var(--accent-subtle)" : undefined }}>
-            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {thread.helpful + (p.helpful ? 1 : 0)}
-          </button>
           <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
             <Bookmark className="h-3.5 w-3.5" aria-hidden /> {p.saved ? "Saved" : "Save"}
           </button>
@@ -2230,7 +2205,7 @@ function InsightThreadView({
   const pro = proById(insight.proId);
   const boardCommunity = COMMUNITIES.find((c) => c.id === insight.boardId);
   const boardName = boardCommunity?.name ?? "Community";
-  const boardAccent = boardCommunity ? communityAccent(boardCommunity) : EVENT_ACCENT;
+  const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
 
   return (
@@ -2238,8 +2213,8 @@ function InsightThreadView({
       <button
         type="button"
         onClick={onBack}
-        className="dm-quiet flex min-h-[38px] w-fit cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[16px] text-[13px] leading-[18px] font-semibold"
-        style={{ background: `color-mix(in srgb, ${boardAccent} 24%, #f4f1ea)`, color: CARD_INK, fontFamily: "var(--font-display)" }}
+        className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
+        style={{ color: "var(--muted-foreground)" }}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
       </button>
@@ -2259,7 +2234,7 @@ function InsightThreadView({
               <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
                 <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
               </button>
-              <button type="button" aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+              <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
                 <Flag className="h-3 w-3" aria-hidden /> Report
               </button>
             </div>

@@ -1,13 +1,14 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, CheckCircle2, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
+import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
-import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
+import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
+import { Avatar, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -73,13 +74,13 @@ export function postsBy(proId: string): Insight[] {
 /** Per-post learning signals in the doc's own format, "8.4K Views · 642 Likes
  *  · 187 Saves". Views and saves that the seed data doesn't carry are derived
  *  deterministically from what it does, so a post never reads as zero. */
-function signals(views: number | undefined, likes: number, saves: number | undefined) {
+export function signals(views: number | undefined, likes: number, saves: number | undefined) {
   const v = views ?? likes * 23 + 140;
   const s = saves ?? Math.max(1, Math.round(likes * 0.29));
   return { views: v, likes, saves: s };
 }
 
-function SignalRow({ views, likes, saves, accent }: { views: number; likes: number; saves: number; accent: string }) {
+export function SignalRow({ views, likes, saves, accent }: { views: number; likes: number; saves: number; accent: string }) {
   return (
     <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
       <span className="flex items-center gap-[4px]"><Eye className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(views, "compact")} Views</span>
@@ -92,12 +93,11 @@ function SignalRow({ views, likes, saves, accent }: { views: number; likes: numb
 }
 
 /** "Brand Strategist at [EY]": the role in words, the company as its mark. */
-function RoleLine({ pro, className = "" }: { pro: Pro; className?: string }) {
+export function RoleLine({ pro, className = "", size = "sm" }: { pro: Pro; className?: string; size?: "sm" | "md" }) {
   return (
-    <span className={`inline-flex min-w-0 flex-wrap items-center gap-x-[6px] gap-y-[2px] ${className}`}>
+    <span className={`inline-flex min-w-0 flex-wrap items-center gap-x-[8px] gap-y-[4px] ${className}`}>
       <span className="min-w-0 truncate">{pro.role}</span>
-      <span className="flex-none">at</span>
-      <CompanyMark name={pro.org} ink="currentColor" />
+      <CompanyChip name={pro.org} tone="surface" size={size} />
     </span>
   );
 }
@@ -191,8 +191,8 @@ export function PeopleToFollow({ follows, onFollow, limit = 8 }: { follows: Foll
               <div className="relative z-[1] flex min-w-0 w-full flex-col items-center gap-[2px]">
                 <span className="block w-full truncate text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</span>
                 <span className="block w-full truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                <span className="mt-[4px] flex h-[16px] items-center" style={{ color: "var(--foreground)" }}>
-                  <CompanyMark name={pro.org} ink="var(--foreground)" className="text-[12px] leading-[16px] font-semibold" />
+                <span className="mt-[6px] flex items-center">
+                  <CompanyChip name={pro.org} tone="surface" size="sm" />
                 </span>
               </div>
               <div className="relative z-[1] mt-[2px] w-full">
@@ -277,8 +277,8 @@ export function ProProfileView({
           <Avatar name={pro.name} verified size={72} />
           <div className="min-w-0 flex-1">
             <h1 className="text-[26px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
-            <p className="mt-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <RoleLine pro={pro} />
+            <p className="mt-[6px] text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <RoleLine pro={pro} size="md" />
             </p>
           </div>
           <div className="flex-none">
@@ -358,187 +358,31 @@ export function ProProfileView({
           </ul>
         </Panel>
       )}
-    </>
-  );
-}
-
-// ——— professional side, one screen, preview only ———
-
-/** The questions Dreamari routed to this professional this week: one real
- *  seeded thread from their board plus two demo questions, so the
- *  "Answer one?" prompt has something behind it. */
-const ROUTED: { id: string; handle: string; grade: string; title: string; threadId?: string }[] = [
-  { id: "r1", handle: "Diego", grade: "Sophomore", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
-  { id: "r2", handle: "Priya", grade: "Junior", title: "Is going to a state school a dealbreaker for investment banking?" },
-  { id: "r3", handle: "Theo", grade: "Freshman", title: "What should I major in if I want to work in finance?" },
-];
-
-type RoutedState = "open" | "answering" | "answered" | "skipped";
-
-/** Not reachable from any student surface: it exists so the flywheel the doc
- *  describes (route a question -> answer in minutes -> see the impact) can be
- *  demoed end to end. Numbers and copy are the doc's own examples. */
-export function ProDashboardView({ onBack }: { onBack: () => void }) {
-  const pro = PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
-  const nav = useContext(ConnectNav);
-  const [routed, setRouted] = useState<Record<string, RoutedState>>({});
-  const [draft, setDraft] = useState("");
-  const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
-  const board = COMMUNITIES.find((c) => c.world === pro.world)?.name ?? "the community";
-  const answeredNow = Object.values(routed).filter((s) => s === "answered").length;
-  const openCount = ROUTED.filter((q) => (routed[q.id] ?? "open") === "open" || routed[q.id] === "answering").length;
-  const impact = [
-    { value: 4281, label: "Impressions" },
-    { value: 786, label: "Students Reached" },
-    { value: 142, label: "Profile Views" },
-    { value: 91, label: "Saves" },
-    { value: 63, label: "New Followers" },
-    { value: 37 + answeredNow, label: "Questions Answered" },
-  ];
-  const words = openCount === 3 ? "Three" : openCount === 2 ? "Two" : openCount === 1 ? "One" : "No";
-
-  return (
-    <>
-      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
-      </button>
-
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <div className="flex items-center gap-[12px]">
-          <Avatar name={pro.name} verified size={44} />
-          <div className="min-w-0">
-            <h1 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
-            <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><RoleLine pro={pro} /></p>
-          </div>
-        </div>
-      </div>
-
-      {/* Ask Me Anything routing: a direct student question is a far stronger
-         reason to respond than a blank page. Answer · Skip, never an
-         obligation. Each row is one routed question. */}
-      <Panel id="route-title" title="Ask Me Anything">
-        <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {openCount > 0 ? `${words} students asked questions about investment banking this week. Answer one?` : "You answered this week's questions. We will route the next relevant one."}
-        </h3>
-        <ul className="-mt-[var(--space-2)] flex flex-col">
-          {ROUTED.map((q) => {
-            const state = routed[q.id] ?? "open";
-            return (
-              <li key={q.id} className="flex flex-col gap-[10px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
-                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{q.handle} · {q.grade}</span>
-                <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
-                {state === "open" && (
-                  <div className="flex flex-wrap gap-[var(--space-2)]">
-                    <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => { dispatchAuroraPulse("select"); setRouted((r) => ({ ...r, [q.id]: "answering" })); setDraft(""); }}>Answer</PrimaryCta>
-                    <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "skipped" }))}>Skip</QuietCta>
-                  </div>
-                )}
-                {state === "answering" && (
-                  <div className="flex flex-col gap-[8px]">
-                    <label className="block">
-                      <span className="sr-only">Your answer</span>
-                      <textarea
-                        autoFocus
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        rows={3}
-                        placeholder="A few honest sentences from your own experience is plenty."
-                        className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-                        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                      />
-                    </label>
-                    <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-                      <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => { if (!draft.trim()) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
-                      <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))}>Cancel</QuietCta>
-                      <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Public on {board}. Students see your name and company, never their classmates&apos; details.</span>
-                    </div>
-                  </div>
-                )}
-                {state === "answered" && (
-                  <span className="flex flex-wrap items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}>
-                    <CheckCircle2 className="h-4 w-4" aria-hidden /> Live on {board}.
-                    {q.threadId && (
-                      <button type="button" onClick={() => nav?.openThread(q.threadId!)} className="dm-link cursor-pointer" style={{ color: "var(--foreground)" }}>See the thread</button>
-                    )}
-                  </span>
-                )}
-                {state === "skipped" && (
-                  <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Skipped. Nothing changes.</span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </Panel>
-
-      {/* Career posts stay secondary (doc). Suggested prompts remove the
-         blank-page problem. */}
-      <Panel id="post-title" title="Career posts">
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Optional. Start from a prompt.</p>
-        <div className="flex flex-wrap gap-[8px]">
-          {["5 things I wish I knew before starting my career", "What people misunderstand about investment banking", "What I actually do during a normal workday", "What I would tell my 16-year-old self"].map((p) => (
-            <button key={p} type="button" className="dm-quiet rounded-[var(--radius-md)] border px-[14px] py-[9px] text-left text-[14px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
-              {p}
-            </button>
-          ))}
-        </div>
-      </Panel>
-
-      {/* Private Impact Dashboard: the doc's example numbers. Private,
-         motivational, never a public badge. */}
-      <Panel
-        id="impact-title"
-        title="Private Impact Dashboard"
-        aside={
-          <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--world-food-farming-nature)" }}>
-            <TrendingUp className="h-4 w-4" aria-hidden /> +28% Reach vs. Last Month
-          </span>
-        }
-      >
-        <dl className="grid grid-cols-2 gap-x-[var(--space-5)] sm:grid-cols-3">
-          {impact.map((stat, i) => (
-            <div key={stat.label} className={`flex flex-col gap-[2px] py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>
-              <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(stat.value)}</dd>
-              <dt className="order-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
-            </div>
-          ))}
-        </dl>
-        <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>
-            Your answers reached 18% more students this month. Staying active helps us recommend your expertise to more students.
-          </p>
-          <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Active weekly. Only you can see this.</p>
-        </div>
-        <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <h3 className="flex items-center gap-[8px] text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: accent }}>
-            <CompanyMark name={pro.org} ink={accent} /> <span>on Dreamari</span>
-          </h3>
-          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{pro.org} professionals reached 14,000 students and answered 2,300 career questions this year.</p>
-        </div>
-      </Panel>
-
-      {/* Recognition professionals can actually use: the Spotify-Wrapped style
-         summary and who it is for. */}
-      <Panel id="summary-title" title="2026 Dreamari Impact Summary" aside={<PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]">Download</PrimaryCta>}>
-        <div className="flex flex-col gap-[var(--space-3)]">
-          <ul className="m-0 grid list-none grid-cols-2 gap-[var(--space-3)] p-0 sm:grid-cols-4">
-            {[["842", "students reached"], ["63", "questions answered"], ["14", "volunteer hours contributed"], ["27", "schools impacted"]].map(([value, label]) => (
-              <li key={label} className="flex flex-col gap-[2px]">
-                <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-              </li>
+      {(pro.education || pro.journey || pro.topics) && (
+        <Panel id="about-title" title={`About ${firstName(pro.name)}`}>
+          <dl className="-mt-[var(--space-2)] flex flex-col">
+            {[
+              ["Education", pro.education],
+              ["Career journey", pro.journey],
+            ].filter(([, v]) => v).map(([k, v]) => (
+              <div key={k} className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
+                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+                <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{v}</dd>
+              </div>
             ))}
-          </ul>
-          <div className="flex flex-wrap items-center gap-[8px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-            <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <Users className="h-3.5 w-3.5" aria-hidden /> Share with
-            </span>
-            {["Your manager", "Employee resource groups", "Social impact teams", "LinkedIn"].map((who) => (
-              <span key={who} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{who}</span>
-            ))}
-          </div>
-        </div>
-      </Panel>
+            {pro.topics && (
+              <div className="flex flex-col gap-[8px] border-t py-[var(--space-3)]" style={{ borderColor: RULE }}>
+                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Can help with</dt>
+                <dd className="flex flex-wrap gap-[6px]">
+                  {pro.topics.map((t) => (
+                    <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>{t}</span>
+                  ))}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </Panel>
+      )}
     </>
   );
 }
@@ -578,7 +422,7 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <div className="min-w-0">
           <h1 className="flex items-center gap-[10px] text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <CompanyMark name={org} ink="var(--foreground)" height={22} /> <span>on Dreamari</span>
+            <CompanyChip name={org} tone="surface" size="lg" /> <span>on Dreamari</span>
           </h1>
           <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Partnership dashboard · 2026</p>
         </div>
@@ -587,19 +431,19 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
 
       {/* goals against targets: the Replit's "North Star" block, as three rows */}
       <Panel id="partner-goals-title" title="2026 goals" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}><TrendingUp className="h-4 w-4" aria-hidden /> +27% volunteers vs. last year</span>}>
-        <ul className="-mt-[var(--space-2)] flex flex-col">
-          {PARTNER_GOALS.map((g) => {
+        <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+          {PARTNER_GOALS.map((g, i) => {
             const pct = Math.round((g.value / g.target) * 100);
             return (
-              <li key={g.label} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
-                <span className="flex items-baseline justify-between gap-[var(--space-3)]">
+              <li key={g.label} className={`flex items-center gap-[var(--space-4)] ${i > 0 ? "border-t pt-[var(--space-4)] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-4)]" : ""}`} style={{ borderColor: RULE }}>
+                <Ring pct={pct} accent={accent} size={84}>
+                  <span className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pct}%</span>
+                </Ring>
+                <span className="min-w-0 flex flex-col gap-[2px]">
                   <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{g.label}</span>
                   <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-                    <strong className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(g.value)}</strong> of {formatCount(g.target)} · {pct}%
+                    <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{formatCount(g.value)}</strong> of {formatCount(g.target)}
                   </span>
-                </span>
-                <span className="relative block h-[6px] w-full overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }} aria-hidden>
-                  <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${pct}%`, background: accent }} />
                 </span>
               </li>
             );
@@ -608,8 +452,18 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
         <p className="border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>Students rate these sessions 4.7 out of 5. Employees 4.5 out of 5.</p>
       </Panel>
 
-      {/* the two lanes the CEO reports on */}
-      <Panel id="partner-lanes-title" title="This year">
+      {/* the two lanes the CEO reports on, and how the students split between them */}
+      <Panel id="partner-lanes-title" title="This year" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>16,220</strong> students reached</span>}>
+        <div className="flex flex-col gap-[6px]">
+          <span className="flex h-[10px] w-full overflow-hidden rounded-[5px]" aria-hidden>
+            <span className="h-full" style={{ width: "21%", background: `color-mix(in srgb, ${accent} 70%, #ffffff)` }} />
+            <span className="h-full flex-1" style={{ background: accent }} />
+          </span>
+          <span className="flex justify-between text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+            <span><span aria-hidden className="mr-[6px] inline-block size-[8px] rounded-[2px] align-[-1px]" style={{ background: `color-mix(in srgb, ${accent} 70%, #ffffff)` }} />In person 3,420 · 21%</span>
+            <span><span aria-hidden className="mr-[6px] inline-block size-[8px] rounded-[2px] align-[-1px]" style={{ background: accent }} />On Dreamari 12,800 · 79%</span>
+          </span>
+        </div>
         <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
           {lanes.map((lane, i) => (
             <div key={lane.title} className={`flex flex-col gap-[var(--space-3)] ${i === 1 ? "border-t pt-[var(--space-4)] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : ""}`} style={{ borderColor: RULE }}>
@@ -641,8 +495,9 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
                 <span className="block text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{e.name}</span>
                 <span className="block text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{e.when} · {e.where}</span>
               </span>
-              <span className="flex-none text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: e.done ? "var(--muted-foreground)" : accent }}>
-                {e.done ? `${e.volunteers} volunteers · ${e.students} students` : `Upcoming · ${e.volunteers} volunteers signed up`}
+              <span className="flex flex-none flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px]">
+                <Meter value={e.volunteers} max={200} accent={accent} label="volunteers" />
+                {e.done ? <Meter value={e.students} max={300} accent={`color-mix(in srgb, ${accent} 70%, #ffffff)`} label="students" /> : <span className="text-[12px] leading-[16px] font-semibold" style={{ color: accent }}>Upcoming</span>}
               </span>
             </li>
           ))}
