@@ -274,15 +274,16 @@ export function ProProfileView({
          verification. The company is its logo, once. */}
       <section aria-label="Profile" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ ...PANEL, background: `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` }}>
         <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-          <Avatar name={pro.name} verified size={72} />
+          <Avatar name={pro.name} verified size={64} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-[26px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
+            <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
             <p className="mt-[6px] text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               <RoleLine pro={pro} size="md" />
             </p>
           </div>
-          <div className="flex-none">
-            <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
+          {/* full width under the identity on phones, beside it from sm */}
+          <div className="basis-full sm:basis-auto">
+            <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" />
           </div>
         </div>
 
@@ -323,7 +324,7 @@ export function ProProfileView({
         {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
         <p className="flex items-center gap-[6px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
           <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-          Answers are public, so one answer helps every student. There are no private messages.
+          Public answers. No private messages.
         </p>
       </Panel>
 
@@ -410,8 +411,8 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
   const people = PROS.filter((p) => p.org === org);
   const accent = WORLD_COLORS[people[0]?.world ?? "Business & Money"] ?? "var(--primary)";
   const lanes = [
-    { title: "In person", sub: "Dream Opportunity events", stats: [["8", "events"], ["1,247", "volunteers"], ["3,118", "hours"]] },
-    { title: "On Dreamari", sub: "Answers, posts and follows", stats: [["42", "professionals"], ["2,300", "answers"], ["14,000", "students"]] },
+    { title: "In person", stats: [["8", "events"], ["1,247", "volunteers"], ["3,118", "hours"]] },
+    { title: "On Dreamari", stats: [["42", "professionals"], ["2,300", "answers"], ["14,000", "students"]] },
   ];
   return (
     <>
@@ -424,7 +425,6 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
           <h1 className="flex items-center gap-[10px] text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             <CompanyChip name={org} tone="surface" size="lg" /> <span>on Dreamari</span>
           </h1>
-          <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Partnership dashboard · 2026</p>
         </div>
         <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Export report</span></PrimaryCta>
       </div>
@@ -449,7 +449,6 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
             );
           })}
         </ul>
-        <p className="border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>Students rate these sessions 4.7 out of 5. Employees 4.5 out of 5.</p>
       </Panel>
 
       {/* the two lanes the CEO reports on, and how the students split between them */}
@@ -467,10 +466,7 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
         <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
           {lanes.map((lane, i) => (
             <div key={lane.title} className={`flex flex-col gap-[var(--space-3)] ${i === 1 ? "border-t pt-[var(--space-4)] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : ""}`} style={{ borderColor: RULE }}>
-              <div>
-                <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: accent }}>{lane.title}</h3>
-                <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{lane.sub}</p>
-              </div>
+              <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: accent }}>{lane.title}</h3>
               <dl className="grid grid-cols-3 gap-[var(--space-3)]">
                 {lane.stats.map(([value, label]) => (
                   <div key={label} className="flex flex-col gap-[2px]">
@@ -483,19 +479,19 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
           ))}
         </div>
         <p className="flex items-center gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
-          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Totals only. No student names or individual answers are shared with employers.
+          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Totals only. No student data.
         </p>
       </Panel>
 
       <Panel id="partner-events-title" title="Events" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>8 of 19 completed</span>}>
         <ul className="-mt-[var(--space-2)] flex flex-col">
           {PARTNER_EVENTS.map((e) => (
-            <li key={e.name + e.when} className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[4px] border-t py-[var(--space-3)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
-              <span className="min-w-0 flex-1">
+            <li key={e.name + e.when} className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[8px] border-t py-[var(--space-3)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+              <span className="min-w-0 basis-full sm:flex-1 sm:basis-auto">
                 <span className="block text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{e.name}</span>
                 <span className="block text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{e.when} · {e.where}</span>
               </span>
-              <span className="flex flex-none flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px]">
+              <span className="flex basis-full flex-wrap items-center gap-x-[var(--space-4)] gap-y-[6px] sm:basis-auto">
                 <Meter value={e.volunteers} max={200} accent={accent} label="volunteers" />
                 {e.done ? <Meter value={e.students} max={300} accent={`color-mix(in srgb, ${accent} 70%, #ffffff)`} label="students" /> : <span className="text-[12px] leading-[16px] font-semibold" style={{ color: accent }}>Upcoming</span>}
               </span>

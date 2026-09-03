@@ -7,6 +7,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Bell,
   Bookmark,
   Calendar,
   CheckCircle2,
@@ -102,10 +103,12 @@ type View =
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string }
   | { kind: "saved" }
+  | { kind: "activity" }
   | { kind: "partner"; org: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "saved") return "?saved=1";
+  if (view.kind === "activity") return "?activity=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
@@ -119,6 +122,7 @@ function viewToQuery(view: View): string {
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
+  if (q.get("activity")) return { kind: "activity" };
   if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
   if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
@@ -512,10 +516,10 @@ const PHOTO_FOCUS: Record<string, string> = {
 // category, four stat tiles, then one action at the right. Ours puts the
 function StatTile({ icon: Icon, value, label, accent }: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }>; value: number | string; label: string; accent: string }) {
   return (
-    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[4px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       <Icon className="h-[14px] w-[14px]" aria-hidden style={{ color: `color-mix(in srgb, ${accent} 60%, #FFFFFF)` }} />
       <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
-      <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
+      <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
     </div>
   );
 }
@@ -938,10 +942,9 @@ export function ConnectExperience() {
             follows={follows}
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
-            asked={asked}
             onAsk={() => setAskOpen(true)}
-            onOpenThread={(id) => setView({ kind: "thread", id })}
-            savedCount={Object.values(saves).filter(Boolean).length}
+            onOpenActivity={() => setView({ kind: "activity" })}
+            unread={ALL_THREADS.filter((t) => t.handle === "Jordan" && t.unreadAnswer).length}
           />
         )}
 
@@ -954,6 +957,15 @@ export function ConnectExperience() {
           })()}
         {view.kind === "proDashboard" && <ProDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
         {view.kind === "partner" && <PartnerView org={view.org} onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "activity" && (
+          <ActivityView
+            asked={asked}
+            follows={follows}
+            savedCount={Object.values(saves).filter(Boolean).length}
+            onBack={() => setView({ kind: "home", tab: "communities" })}
+            onOpenThread={(id) => setView({ kind: "thread", id })}
+          />
+        )}
         {view.kind === "saved" && <SavedView saves={saves} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
 
         {view.kind === "board" &&
@@ -1115,7 +1127,7 @@ type DemoRole = "student" | "attendee" | "pro" | "partner";
 
 const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: LucideIcon }[] = [
   { key: "student", title: "Student", who: "Jordan · Junior", line: "Asks, follows, saves. The default Connect tab.", Icon: GraduationCap },
-  { key: "attendee", title: "Event attendee", who: "Jordan, after a JA event", line: "Unlocks the event board with a code and keeps the conversation going.", Icon: Calendar },
+  { key: "attendee", title: "Attendee", who: "Jordan, after a JA event", line: "Unlocks the event board with a code and keeps the conversation going.", Icon: Calendar },
   { key: "pro", title: "Volunteer", who: "Amara Okafor · JPMorgan Chase", line: "Answers routed questions in minutes and sees the impact, privately.", Icon: ShieldCheck },
   { key: "partner", title: "Partner", who: "JPMorgan Chase", line: "Company-level impact for recognition and sponsorship reporting.", Icon: Building2 },
 ];
@@ -1125,9 +1137,9 @@ const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: Lu
  *  four journeys in one tap. Rides the URL as ?as=. */
 function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-[10px]">
-      <span className="rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Demo</span>
-      <div role="tablist" aria-label="Show Connect as" className="-mx-1 flex max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <div className="flex items-center gap-[10px]">
+      <span className="hidden flex-none rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase sm:inline" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Demo</span>
+      <div role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1137,10 +1149,10 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
               role="tab"
               aria-selected={on}
               onClick={() => onPick(key)}
-              className="dm-quiet flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap"
+              className="dm-quiet flex min-h-[32px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:flex-none sm:px-[12px]"
               style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "var(--muted-foreground)" }}
             >
-              <Icon className="h-[14px] w-[14px]" aria-hidden /> {title}
+              <Icon className="hidden h-[14px] w-[14px] sm:block" aria-hidden /> {title}
             </button>
           );
         })}
@@ -1156,15 +1168,14 @@ type AskedQuestion = { id: string; title: string; boardId: string };
 /** The signed-in student's own questions: the seeded ones Jordan asked plus
  *  anything posted this session. One row each: what happened to it, then the
  *  question. The panel's aside is the way into Saved. */
-function YourQuestions({ asked, onOpenThread, onAsk, savedCount }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; onAsk: () => void; savedCount: number }) {
+function YourQuestions({ asked, onOpenThread, savedCount }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number }) {
   const nav = useContext(ConnectNav);
   const mine = ALL_THREADS.filter((t) => t.handle === "Jordan");
   const empty = asked.length === 0 && mine.length === 0;
-  const ask = <PrimaryCta onClick={onAsk} className="min-h-[36px] px-[var(--space-4)] text-[13px]">Ask a question</PrimaryCta>;
   return (
-    <Panel id="your-questions-title" title="Your questions" aside={ask}>
+    <Panel id="your-questions-title" title="Your questions">
       {empty && (
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Ask verified pros anything about a career or school. Answers show up here.</p>
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Nothing yet.</p>
       )}
       <ul className="-mt-[var(--space-2)] flex flex-col">
         {asked.map((q) => (
@@ -1194,13 +1205,27 @@ function YourQuestions({ asked, onOpenThread, onAsk, savedCount }: { asked: Aske
         <li className={`border-t ${empty ? "-mt-[var(--space-2)]" : ""}`} style={{ borderColor: RULE }}>
           <button type="button" onClick={() => nav?.openSaved()} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-3)] text-left">
             <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-              <Bookmark className="h-3.5 w-3.5" aria-hidden /> Saved answers and posts · {savedCount}
+              <Bookmark className="h-3.5 w-3.5" aria-hidden /> Saved · {savedCount}
             </span>
             <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           </button>
         </li>
       </ul>
     </Panel>
+  );
+}
+
+/** The bell: everything that happened to you. Your questions and their
+ *  answers, what the people you follow did, and the way into Saved. */
+function ActivityView({ asked, follows, savedCount, onBack, onOpenThread }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; onOpenThread: (id: string) => void }) {
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+      </button>
+      <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} />
+      <NewFromFollowing follows={follows} />
+    </>
   );
 }
 
@@ -1287,7 +1312,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="flex min-w-0 flex-1 items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
-            <span>Posting as Jordan · Junior. Verified pros in {community.name} answer in public. {community.responseWindow}.</span>
+            <span>Public answer, usually within 2 days.</span>
           </span>
           <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
             <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></span>
@@ -1326,7 +1351,7 @@ function SavedView({ saves, onBack, onOpenThread, onOpenInsight }: { saves: Reco
       </button>
       <Panel id="saved-title" title="Saved" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} saved</span>}>
         {rows.length === 0 ? (
-          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet. Tap Save on any answer or post and it lands here.</p>
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet.</p>
         ) : (
           <ul className="-mt-[var(--space-2)] flex flex-col">
             {rows.map((row) => (
@@ -1357,7 +1382,7 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>A moderator reads every report. The person you report never sees who sent it.</p>
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Reports are anonymous.</p>
         <div className="flex flex-col" role="radiogroup" aria-label="Reason">
           {REPORT_REASONS.map((r) => {
             const on = reason === r;
@@ -1391,10 +1416,9 @@ function HomeView({
   follows,
   onFollow,
   joinedCount,
-  asked,
   onAsk,
-  onOpenThread,
-  savedCount,
+  onOpenActivity,
+  unread,
 }: {
   tab: "communities" | "events";
   onTab: (tab: "communities" | "events") => void;
@@ -1407,10 +1431,9 @@ function HomeView({
   follows: Follows;
   onFollow: (id: string) => void;
   joinedCount: number;
-  asked: AskedQuestion[];
   onAsk: () => void;
-  onOpenThread: (id: string) => void;
-  savedCount: number;
+  onOpenActivity: () => void;
+  unread: number;
 }) {
   const [query, setQuery] = useState("");
   const eventInk = "#f6f5fb";
@@ -1431,16 +1454,35 @@ function HomeView({
             <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> Verified professionals · Moderated questions
           </p>
         </div>
-        <TopTabs tab={tab} onTab={onTab} />
+        <div className="flex w-full min-w-0 items-center gap-[var(--space-3)] sm:w-auto">
+          <TopTabs tab={tab} onTab={onTab} />
+          <button type="button" onClick={onOpenActivity} aria-label={unread > 0 ? `Activity, ${unread} new` : "Activity"} className="dm-quiet relative flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <Bell className="h-[18px] w-[18px]" aria-hidden />
+            {unread > 0 && (
+              <span aria-hidden className="absolute top-[6px] right-[6px] flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10px] leading-[12px] font-extrabold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>{unread}</span>
+            )}
+          </button>
+        </div>
       </div>
 
+      {tab === "communities" && (
+        /* the one primary action, in the composer's own shape; opens the Ask sheet */
+        <button type="button" onClick={onAsk} className="dm-tap flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <Avatar name="Jordan Rivera" size={30} />
+          <span className="min-w-0 flex-1 truncate text-[14px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>Ask a question…</span>
+          <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          </span>
+        </button>
+      )}
+      {tab === "events" && (
       <label className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[13px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-          <span className="sr-only">{tab === "communities" ? "Search communities" : "Search events"}</span>
+          <span className="sr-only">Search events</span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={tab === "communities" ? "Search communities, topics, or companies" : "Search events, hosts, or cities"}
+            placeholder="Search events, hosts, or cities"
             className="min-w-0 flex-1 bg-transparent text-[14px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
             style={{ color: "var(--foreground)" }}
           />
@@ -1450,8 +1492,7 @@ function HomeView({
             </button>
           )}
         </label>
-
-      {tab === "communities" && !query && <YourQuestions asked={asked} onOpenThread={onOpenThread} onAsk={onAsk} savedCount={savedCount} />}
+      )}
 
       {tab === "communities" && (
         /* One section, exactly like the doc: "Your Communities" with the
@@ -1492,7 +1533,6 @@ function HomeView({
          doors, the people are who is behind them. Then what the people you
          already follow did lately, only once you follow someone. */}
       {tab === "communities" && !query && <PeopleToFollow follows={follows} onFollow={onFollow} />}
-      {tab === "communities" && !query && <NewFromFollowing follows={follows} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -1501,10 +1541,7 @@ function HomeView({
              stats row, the Partner line, and one action for this event's
              state. */}
           {!query && (
-            <Card>
-              <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Keep the conversation going after the event.</h2>
-              <p className="mt-[6px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>A private community for everyone who attended. Ask follow-up questions, hear more from professionals, and access resources shared after the event.</p>
-            </Card>
+            <h2 className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Keep the conversation going after the event.</h2>
           )}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
@@ -1525,11 +1562,10 @@ function HomeView({
                     <div className="min-w-[180px] flex-1 self-start">
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
-                      <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>Partner: {event.host}</p>
                     </div>
                     <PartnerMark host={event.host} size="card" />
                   </div>
-                  <div className="relative z-10 mt-[10px] flex w-full items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
+                  <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 62%, transparent)` }}>
                       {typeof event.students === "number" ? (
                         <>
@@ -2026,7 +2062,7 @@ function ThreadView({
         {thread.responses.length === 0 && (
           <Card>
             <p className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>No answer yet.</p>
-            <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Sent to verified pros in {boardName}. Most questions here are answered {thread.expectedWindow}. We&apos;ll let you know.</p>
+            <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Sent to verified pros in {boardName}. Usually answered {thread.expectedWindow}.</p>
           </Card>
         )}
 
@@ -2315,12 +2351,9 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
           {/* No unlock ladder, no points gate (direct feedback): joining is
              one agreement away. What you get, then the ground rules. */}
           {perks.map((perk) => (
-            <div key={perk.title} className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-3)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <CheckCircle2 aria-hidden className="mt-[2px] h-[16px] w-[16px] flex-none" style={{ color: "var(--world-food-farming-nature)" }} />
-              <span className="min-w-0 flex-1">
-                <strong className="block text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{perk.title}</strong>
-                <span className="mt-[2px] block text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{perk.body}</span>
-              </span>
+            <div key={perk.title} className="flex items-center gap-[12px] py-[6px]">
+              <CheckCircle2 aria-hidden className="h-[16px] w-[16px] flex-none" style={{ color: "var(--world-food-farming-nature)" }} />
+              <strong className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{perk.title}</strong>
             </div>
           ))}
           <label className="flex cursor-pointer items-start gap-[10px] pt-[2px]">

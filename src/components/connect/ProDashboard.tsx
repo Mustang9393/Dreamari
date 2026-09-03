@@ -26,9 +26,9 @@ type RoutedState = "open" | "answering" | "answered" | "skipped";
 /** Routed this week: one real seeded thread from the volunteer's board plus
  *  two demo questions, so "Answer one?" has something behind it. */
 const ROUTED: { id: string; handle: string; grade: string; where: string; ago: string; title: string; threadId?: string }[] = [
-  { id: "r1", handle: "Diego", grade: "Sophomore", where: "NJ", ago: "2 hours ago", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
-  { id: "r2", handle: "Priya", grade: "Junior", where: "TX", ago: "Yesterday", title: "Is going to a state school a dealbreaker for investment banking?" },
-  { id: "r3", handle: "Theo", grade: "Freshman", where: "CA", ago: "2 days ago", title: "What should I major in if I want to work in finance?" },
+  { id: "r1", handle: "Diego", grade: "Sophomore", where: "NJ", ago: "2h", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
+  { id: "r2", handle: "Priya", grade: "Junior", where: "TX", ago: "1d", title: "Is going to a state school a dealbreaker for investment banking?" },
+  { id: "r3", handle: "Theo", grade: "Freshman", where: "CA", ago: "2d", title: "What should I major in if I want to work in finance?" },
 ];
 
 const POST_PROMPTS = ["5 things I wish I knew before starting my career", "What people misunderstand about investment banking", "What I actually do during a normal workday", "What I would tell my 16-year-old self"];
@@ -60,7 +60,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
-  const reached = series.reduce((a, b) => a + b, 0);
 
   const metrics = [
     { icon: Eye, value: formatCount(4281), label: "Impressions", delta: 18 },
@@ -99,7 +98,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{64 + 0}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{58 + answeredNow}</strong> answered</span>}
           >
             <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              {openCount > 0 ? `${words} students asked about investment banking this week. Answer one?` : "You answered this week's questions. We will route the next relevant one."}
+              {openCount > 0 ? `${words} students asked about investment banking this week. Answer one?` : "All answered. We will route the next one."}
             </h3>
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {ROUTED.map((q) => {
@@ -109,11 +108,11 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                     <div className="flex items-center justify-between gap-[var(--space-3)]">
                       <span className="flex min-w-0 items-center gap-[8px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                         <Avatar name={q.handle} size={26} />
-                        <strong className="font-bold" style={{ color: "var(--foreground)" }}>{q.handle}</strong> · {q.grade} · {q.where} · {q.ago}
+                        <span className="truncate"><strong className="font-bold" style={{ color: "var(--foreground)" }}>{q.handle}</strong> · {q.grade} · {q.ago}</span>
                       </span>
                       <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: state === "answered" ? "var(--world-food-farming-nature)" : state === "skipped" ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
                         {state === "answered" ? <CheckCircle2 className="h-3 w-3" aria-hidden /> : <Clock className="h-3 w-3" aria-hidden />}
-                        {state === "answered" ? "Answered" : state === "skipped" ? "Skipped" : "Awaiting response"}
+                        {state === "answered" ? "Answered" : state === "skipped" ? "Skipped" : "Awaiting"}
                       </span>
                     </div>
                     <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
@@ -140,19 +139,18 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                         <div className="flex flex-wrap items-center gap-[var(--space-2)]">
                           <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${draft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!draft.trim()) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
                           <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))}>Cancel</QuietCta>
-                          <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Public on {boardName}. Students see your name and company.</span>
                         </div>
                       </div>
                     )}
                     {state === "answered" && (
                       <span className="flex flex-wrap items-center gap-[10px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                        Live on {boardName}. Students will see it in their feed.
+                        Live on {boardName}.
                         {q.threadId && <button type="button" onClick={() => nav?.openThread(q.threadId!)} className="dm-link cursor-pointer" style={{ color: "var(--foreground)" }}>View response</button>}
                       </span>
                     )}
                     {state === "skipped" && (
                       <button type="button" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))} className="dm-link flex w-fit cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                        <Undo2 className="h-3.5 w-3.5" aria-hidden /> Undo. Nothing changes when you skip.
+                        <Undo2 className="h-3.5 w-3.5" aria-hidden /> Undo
                       </button>
                     )}
                   </li>
@@ -193,7 +191,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
           >
             {composing && (
               <div className="flex flex-col gap-[10px] border-b pb-[var(--space-4)]" style={{ borderColor: RULE }}>
-                <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Start from a prompt, or write your own.</p>
                 <div className="flex flex-wrap gap-[6px]">
                   {POST_PROMPTS.map((p) => (
                     <button key={p} type="button" onClick={() => setPostDraft(p)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: postDraft === p ? `color-mix(in srgb, ${accent} 60%, var(--glass-border))` : "var(--glass-border)", color: "var(--foreground)", background: postDraft === p ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }}>{p}</button>
@@ -214,7 +211,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                 <li key={title} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                   <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · Just now</span>
                   <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{title}</span>
-                  <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Live on your profile and in {boardName}.</span>
                 </li>
               ))}
               {posts.map((post) => {
@@ -254,15 +250,7 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
       {tab === "impact" && (
         <>
           {/* the private analytics, opened by what the numbers mean */}
-          <div className="flex flex-col gap-[6px]">
-            <span className="flex items-center gap-[6px] text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-              <ShieldCheck className="h-3 w-3" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Private analytics · Only you can see this
-            </span>
-            <h2 className="text-[26px] leading-[31px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Your advice is moving people forward.</h2>
-            <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Students saved your answers 91 times this month, and 58 students got a direct answer from you.</p>
-          </div>
-
-          <Panel id="metrics-title" title="This month" aside={<span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>vs. last month</span>}>
+          <Panel id="metrics-title" title="This month" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Only you see this</span>}>
             <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-3)] sm:grid-cols-3">
               {metrics.map((m, i) => (
                 <div key={m.label} className={`py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""} ${i >= 3 ? "sm:border-t" : ""}`} style={{ borderColor: RULE }}>
@@ -277,9 +265,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             title="Students reached"
             aside={<Segmented<Range> ariaLabel="Time range" value={range} onChange={setRange} options={(Object.keys(RANGE) as Range[]).map((k) => ({ key: k, label: RANGE[k].label }))} />}
           >
-            <p className="-mt-[var(--space-2)] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-              <strong className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(reached)}</strong> students read something you wrote, {RANGE[range].label.toLowerCase()}.
-            </p>
             <AreaChart points={series} accent={accent} labels={RANGE[range].labels} />
           </Panel>
 
@@ -290,9 +275,8 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
                 <Award className="h-7 w-7" aria-hidden style={{ color: "#f5c04e" }} />
               </Ring>
               <div className="min-w-0 flex-1">
-                <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Gold volunteer · active weekly</h3>
-                <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>You helped this week. Your answers reached 18% more students than last month, and staying active helps us recommend you to more of them.</p>
-                <p className="mt-[4px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Answer whenever you have time. There is no penalty for taking a break, and no one else sees this status.</p>
+                <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Gold volunteer</h3>
+                <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>You helped this week. No penalty for a break.</p>
               </div>
             </div>
           </Panel>
@@ -301,9 +285,11 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
           <Panel id="company-title" title="Your company">
             <div className="flex flex-wrap items-center gap-[var(--space-4)]">
               <CompanyChip name={pro.org} tone="surface" size="lg" />
-              <p className="min-w-0 flex-1 text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>
-                {pro.org} professionals reached <strong className="font-extrabold">14,000 students</strong> and answered <strong className="font-extrabold">2,300 career questions</strong> this year. You are one of 42.
-              </p>
+              <dl className="grid basis-full grid-cols-3 gap-[var(--space-3)] sm:flex-1 sm:basis-auto">
+                {[["42", "pros"], ["14,000", "students"], ["2,300", "answers"]].map(([v, l]) => (
+                  <div key={l} className="flex flex-col"><dd className="order-1 text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</dd><dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</dt></div>
+                ))}
+              </dl>
             </div>
           </Panel>
 
@@ -314,12 +300,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             aside={<PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>}
           >
             <ImpactCard pro={pro} accent={accent} />
-            <div className="flex flex-wrap items-center gap-[8px]">
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Share with</span>
-              {["Your manager", "Employee resource groups", "Social impact team", "LinkedIn"].map((who) => (
-                <button key={who} type="button" onClick={() => dispatchAuroraPulse("select")} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{who}</button>
-              ))}
-            </div>
           </Panel>
         </>
       )}
@@ -356,7 +336,7 @@ function ImpactCard({ pro, accent }: { pro: (typeof PROS)[number]; accent: strin
         <Avatar name={pro.name} verified size={36} />
         <span className="min-w-0">
           <span className="block truncate text-[14px] leading-[18px] font-bold">{pro.name}</span>
-          <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{pro.role} · {pro.org}</span>
+          <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{pro.role}</span>
         </span>
       </div>
     </div>
