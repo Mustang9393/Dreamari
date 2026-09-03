@@ -133,7 +133,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
 
         <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
           {c.netPrice === null ? "Yearly cost not published." : `About ${money(Math.round(c.netPrice / 100) * 100)} a year after grants.`}
-          {c.finish !== null && <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>{c.finish} in 100 students finish.</span>}
+          {c.finish !== null && <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>{c.finish}% of students finish their degree.</span>}
         </p>
         <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none", fontFamily: "var(--font-body)" }}>
           <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">

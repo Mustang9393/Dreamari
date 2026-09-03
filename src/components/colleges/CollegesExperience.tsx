@@ -8,7 +8,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
-import { ACCENT, CollegeCard, RULE, SOFT, admissionWord, pct, tags, useSaved } from "./shared";
+import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 
 // Find a college. One search box, six quick picks, everything else in a
 // tray over the results (NN/g mobile facets), applied filters as removable
@@ -325,14 +325,14 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
   if (typeof document === "undefined") return null;
   const rows: { label: string; get: (c: College) => string }[] = [
     { label: "Cost for a year, after grants", get: (c) => (c.netPrice === null ? "Not published" : money(c.netPrice)) },
-    { label: "Getting in", get: (c) => admissionWord(c) },
-    { label: "Finish their degree", get: (c) => pct(c.finish) },
-    { label: "Come back for year 2", get: (c) => pct(c.retention) },
-    { label: "Paying back loans", get: (c) => pct(c.repay) },
+    { label: "Applicants who get in", get: (c) => (c.admitRate === null ? "All of them" : `${c.admitRate}%`) },
+    { label: "Students who finish their degree", get: (c) => pct(c.finish) },
+    { label: "First-years who come back", get: (c) => pct(c.retention) },
+    { label: "Borrowers paying loans back", get: (c) => pct(c.repay) },
     { label: "Students", get: (c) => c.undergrads.toLocaleString("en-US") },
     { label: "Type", get: (c) => tags(c).join(" · ") },
-    { label: "Pay 6 years after starting", get: (c) => (c.detail?.pay6 ? money(c.detail.pay6) : "Not published") },
-    { label: "Owe when they finish", get: (c) => (c.detail?.debt ? money(c.detail.debt) : "Not published") },
+    { label: "Typical pay six years after starting", get: (c) => (c.detail?.pay6 ? money(c.detail.pay6) : "Not published") },
+    { label: "Owed when they finish", get: (c) => (c.detail?.debt ? money(c.detail.debt) : "Not published") },
   ];
   const head = { background: "color-mix(in srgb, var(--primary) 12%, var(--background))" } as const;
   return createPortal(

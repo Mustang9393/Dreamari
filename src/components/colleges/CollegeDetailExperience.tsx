@@ -110,9 +110,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
           <div className="pt-[var(--space-2)]">
             <Row label="Cost for a year" note="after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
-            <Row label="Applicants admitted" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} value={c.admitRate === null ? "Everyone" : `${c.admitRate} of 100`} />
-            <Row label="Students who finish" note="within six years" value={pct(c.finish)} />
-            <Row label="Students who come back for year two" value={pct(c.retention)} />
+            <Row label="Applicants who get in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : "open admission"} value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
+            <Row label="Students who finish their degree" note="within six years, counting everyone who started" value={pct(c.finish)} />
+            <Row label="First-years who come back for year two" value={pct(c.retention)} />
             <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} last />
           </div>
         </section>
@@ -176,10 +176,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   {d.scores && (
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Test scores</h3>
-                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Middle half of students who sent scores. A lower score is not a no.</p>
+                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The middle half of scores. Most students did not send one, so a lower score is not a no.</p>
                       <div className="mt-[var(--space-2)]">
-                        <Row label="SAT" note={`${d.scores.sentSat}% sent one`} value={`${d.scores.sat} of 1600`} last={!d.scores.act} />
-                        {d.scores.act && <Row label="ACT" note={d.scores.sentAct !== undefined ? `${d.scores.sentAct}% sent one` : undefined} value={`${d.scores.act} of 36`} last />}
+                        <Row label="SAT" note={`out of 1600. ${d.scores.sentSat}% of students sent one`} value={d.scores.sat} last={!d.scores.act} />
+                        {d.scores.act && <Row label="ACT" note={d.scores.sentAct !== undefined ? `out of 36. ${d.scores.sentAct}% of students sent one` : "out of 36"} value={d.scores.act} last />}
                       </div>
                     </div>
                   )}
@@ -199,7 +199,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Classes</h3>
                   <div className="mt-[var(--space-2)]">
-                    <Row label="Students per teacher" value={d.ratio.replace(" to 1", "")} last={!d.finish4} />
+                    <Row label="Students per teacher" value={d.ratio} last={!d.finish4} />
                     {d.finish4 ? <Row label="Bachelor's students who finish in four years" value={`${d.finish4}%`} last /> : null}
                   </div>
                 </div>
@@ -255,12 +255,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
             <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
               <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
-              <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject.</p>
+              <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Every subject, everyone who went here.</p>
               <div className="mt-[var(--space-2)]">
-                <Row label="Typical pay" note="six years after starting" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
-                <Row label="Debt at graduation" note="federal loans" value={d.debt ? money(Math.round(d.debt / 100) * 100) : "Not published"} />
-                {d.monthly ? <Row label="Monthly repayment" value={money(d.monthly)} /> : null}
-                <Row label="Borrowers paying it back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
+                <Row label="Typical pay six years after starting" note="everyone who enrolled, finished or not" value={d.pay6 ? `${money(Math.round(d.pay6 / 100) * 100)} a year` : "Not published"} />
+                <Row label="Owed when they finish" note="federal loans" value={d.debt ? money(Math.round(d.debt / 100) * 100) : "Not published"} />
+                {d.monthly ? <Row label="Loan payment each month" value={money(d.monthly)} /> : null}
+                <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
               </div>
               <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Source: College Scorecard.</p>
             </Folded>
