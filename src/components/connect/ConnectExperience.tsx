@@ -33,7 +33,7 @@ import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/compon
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { CompanyChip, CompanyMark, ConnectNav, CONTACT_INFO, CONTACT_WARNING } from "./primitives";
-import { NewFromFollowing, Panel, PanelRow, PeopleToFollow, ProDashboardView, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
+import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProDashboardView, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
 import {
   COMMUNITIES,
   EVENTS,
@@ -98,10 +98,12 @@ type View =
   | { kind: "event"; id: string; filter: string }
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string }
-  | { kind: "saved" };
+  | { kind: "saved" }
+  | { kind: "partner"; org: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "saved") return "?saved=1";
+  if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
   if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
@@ -114,6 +116,7 @@ function viewToQuery(view: View): string {
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
+  if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
   if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
   if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
@@ -812,6 +815,9 @@ export function ConnectExperience() {
   const [asked, setAsked] = useState<AskedQuestion[]>([]);
   const [askOpen, setAskOpen] = useState(false);
   const [reportFor, setReportFor] = useState<string | null>(null);
+  // Demo only: which of the four roles this screen is being shown as.
+  const [rolesOpen, setRolesOpen] = useState(false);
+  const role: DemoRole = view.kind === "proDashboard" ? "pro" : view.kind === "partner" ? "partner" : (view.kind === "home" && view.tab === "events") || view.kind === "event" ? "attendee" : "student";
 
   // restore view from URL on mount; keep URL in sync so filters survive
   // reload/share (handoff 8.3). Deliberately an effect, not a lazy useState
@@ -900,6 +906,8 @@ export function ConnectExperience() {
           view.kind === "home" ? "max-w-[1280px]" : "max-w-[880px]"
         }`}
       >
+        <RoleChip role={role} onSwitch={() => setRolesOpen(true)} />
+
         {view.kind === "home" && (
           <HomeView
             tab={view.tab}
@@ -928,6 +936,7 @@ export function ConnectExperience() {
             return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} onAsked={(title) => nav.noteAsked(title, boardId)} />;
           })()}
         {view.kind === "proDashboard" && <ProDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "partner" && <PartnerView org={view.org} onBack={() => setView({ kind: "home", tab: "communities" })} />}
         {view.kind === "saved" && <SavedView saves={saves} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
 
         {view.kind === "board" &&
@@ -1067,6 +1076,19 @@ export function ConnectExperience() {
           }}
         />
       )}
+      {rolesOpen && (
+        <RoleSheet
+          role={role}
+          onClose={() => setRolesOpen(false)}
+          onPick={(next) => {
+            setRolesOpen(false);
+            if (next === "student") setView({ kind: "home", tab: "communities" });
+            if (next === "attendee") setView({ kind: "home", tab: "events" });
+            if (next === "pro") setView({ kind: "proDashboard" });
+            if (next === "partner") setView({ kind: "partner", org: "JPMorgan Chase" });
+          }}
+        />
+      )}
       {reportFor && (
         <ReportSheet
           onClose={() => setReportFor(null)}
@@ -1079,6 +1101,71 @@ export function ConnectExperience() {
 
       <MobileNav active="Connect" />
       </ConnectNav.Provider>
+    </div>
+  );
+}
+
+// ——— demo role switcher (for showing the journeys separately, not a product feature) ———
+
+type DemoRole = "student" | "attendee" | "pro" | "partner";
+
+const ROLES: { key: DemoRole; title: string; who: string; line: string; Icon: LucideIcon }[] = [
+  { key: "student", title: "Student", who: "Jordan · Junior", line: "Asks, follows, saves. The default Connect tab.", Icon: GraduationCap },
+  { key: "attendee", title: "Event attendee", who: "Jordan, after a JA event", line: "Unlocks the event board with a code and keeps the conversation going.", Icon: Calendar },
+  { key: "pro", title: "Professional volunteer", who: "Amara Okafor · JPMorgan Chase", line: "Answers routed questions in minutes and sees the impact, privately.", Icon: ShieldCheck },
+  { key: "partner", title: "Partner / employer", who: "JPMorgan Chase", line: "Company-level impact for recognition and sponsorship reporting.", Icon: Building2 },
+];
+
+/** One quiet line at the top of every Connect screen: who we are viewing
+ *  as, and one tap to switch. */
+function RoleChip({ role, onSwitch }: { role: DemoRole; onSwitch: () => void }) {
+  const current = ROLES.find((r) => r.key === role)!;
+  return (
+    <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      <span className="rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)" }}>Demo</span>
+      <span>Viewing as <strong style={{ color: "var(--foreground)" }}>{current.title}</strong></span>
+      <button type="button" onClick={onSwitch} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Switch role</button>
+    </div>
+  );
+}
+
+function RoleSheet({ role, onClose, onPick }: { role: DemoRole; onClose: () => void; onPick: (role: DemoRole) => void }) {
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="roles-title">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <div className="relative z-[1] flex w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-3)]">
+          <div>
+            <h2 id="roles-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Show Connect as</h2>
+            <p className="mt-[2px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Each role sees a different Connect. Demo only.</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <ul className="-mt-[var(--space-2)] flex flex-col" role="radiogroup" aria-label="Role">
+          {ROLES.map(({ key, title, who, line, Icon }) => {
+            const on = key === role;
+            return (
+              <li key={key} className="border-t first:border-t-0" style={{ borderColor: RULE }}>
+                <button type="button" role="radio" aria-checked={on} onClick={() => onPick(key)} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[12px] text-left">
+                  <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: on ? "color-mix(in srgb, var(--primary) 22%, transparent)" : "var(--glass-surface-1)", color: on ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-baseline gap-x-[8px]">
+                      <span className="text-[16px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
+                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who}</span>
+                    </span>
+                    <span className="block text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{line}</span>
+                  </span>
+                  {on ? <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> : <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

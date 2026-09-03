@@ -415,7 +415,7 @@ export function CompanyChip({ name, tone = "photo" }: { name: string; tone?: "ph
  *  Strategist at [EY]" beside text, sized so the letters sit at text
  *  x-height (a wordmark 11px tall, a compact symbol 14px). Falls back to the
  *  company's name when no exact mark exists, so the line never goes blank. */
-export function CompanyMark({ name, ink = "currentColor", className = "" }: { name: string; ink?: string; className?: string }) {
+export function CompanyMark({ name, ink = "currentColor", className = "", height }: { name: string; ink?: string; className?: string; /** override the mark's letter height, e.g. for a heading */ height?: number }) {
   const mark = COMPANY_MARKS[name];
   if (!mark) return <span className={className}>{name}</span>;
   return (
@@ -424,7 +424,7 @@ export function CompanyMark({ name, ink = "currentColor", className = "" }: { na
         aria-hidden
         className="block flex-none"
         style={{
-          ...markBox(mark.aspect, mark.height),
+          ...markBox(mark.aspect, height ?? mark.height),
           background: ink,
           maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
           WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,

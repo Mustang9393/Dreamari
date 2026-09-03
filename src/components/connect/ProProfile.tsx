@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, CheckCircle2, Eye, ShieldCheck, ThumbsUp, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, Bookmark, CheckCircle2, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
@@ -411,9 +411,6 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><RoleLine pro={pro} /></p>
           </div>
         </div>
-        <span className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          Professional view · preview
-        </span>
       </div>
 
       {/* Ask Me Anything routing: a direct student question is a far stronger
@@ -541,6 +538,73 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         </div>
+      </Panel>
+    </>
+  );
+}
+
+// ——— partner / employer side, one screen, preview only ———
+
+/** Company-level impact (brief: "Boeing professionals reached 14,000
+ *  students this year"). Aggregates only; no student data reaches an
+ *  employer. Numbers are demo figures for the named company. */
+export function PartnerView({ org, onBack }: { org: string; onBack: () => void }) {
+  const nav = useContext(ConnectNav);
+  const people = PROS.filter((p) => p.org === org);
+  const accent = WORLD_COLORS[people[0]?.world ?? "Business & Money"] ?? "var(--primary)";
+  const totals = [
+    { value: 42, label: "Professionals active" },
+    { value: 14000, label: "Students reached" },
+    { value: 2300, label: "Questions answered" },
+    { value: 118, label: "Schools reached" },
+  ];
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+      </button>
+
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <h1 className="flex items-center gap-[10px] text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          <CompanyMark name={org} ink="var(--foreground)" height={22} /> <span>on Dreamari</span>
+        </h1>
+      </div>
+
+      <Panel id="company-impact-title" title="This year" aside={<span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-food-farming-nature)" }}><TrendingUp className="h-4 w-4" aria-hidden /> +31% students vs. last year</span>}>
+        <dl className="grid grid-cols-2 gap-x-[var(--space-5)] sm:grid-cols-4">
+          {totals.map((stat, i) => (
+            <div key={stat.label} className={`flex flex-col gap-[2px] py-[var(--space-3)] ${i >= 2 ? "border-t sm:border-t-0" : ""}`} style={{ borderColor: RULE }}>
+              <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(stat.value)}</dd>
+              <dt className="order-2 text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+            </div>
+          ))}
+        </dl>
+        <p className="flex items-center gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+          <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Totals only. No student names or individual answers are shared with employers.
+        </p>
+      </Panel>
+
+      <Panel id="company-people-title" title="Your professionals" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{people.length} on Dreamari</span>}>
+        <ul className="-mt-[var(--space-2)] flex flex-col">
+          {people.map((pro) => (
+            <PanelRow key={pro.id} onClick={() => nav?.openPro(pro.id)}>
+              <span className="flex w-full items-center gap-[10px]">
+                <Avatar name={pro.name} verified size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+                  <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+                </span>
+                <span className="flex-none text-right text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+                  <strong className="block text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: accent }}>{formatCount(pro.studentsReached)}</strong> students reached
+                </span>
+              </span>
+            </PanelRow>
+          ))}
+        </ul>
+      </Panel>
+
+      <Panel id="company-report-title" title="Impact report" aside={<PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]"><span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>}>
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>A one-page summary of {org}&apos;s volunteer impact for social impact reporting, employee recognition and sponsorship reviews. Verified volunteer hours included.</p>
       </Panel>
     </>
   );
