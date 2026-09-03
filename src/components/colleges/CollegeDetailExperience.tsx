@@ -64,8 +64,11 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <CollegePicture c={c} sizes="560px" priority className="absolute inset-0 h-full w-full" />
               <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.5) 28%, transparent 60%)" }} />
             </span>
-            <CardProgressiveBlur size="52%" />
-            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.55) 34%, rgba(12,16,35,0.12) 62%, transparent 100%)" }} />
+            <CardProgressiveBlur size="58%" />
+            {/* a flat dim over the whole photo, then a heavy bottom gradient:
+               bright campuses (Princeton) were washing out the title */}
+            <span className="absolute inset-0" style={{ background: "rgba(12,16,35,0.34)" }} />
+            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.78) 30%, rgba(12,16,35,0.4) 56%, rgba(12,16,35,0.1) 78%, transparent 100%)" }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[60%]">
