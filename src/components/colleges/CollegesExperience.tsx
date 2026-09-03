@@ -233,13 +233,13 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
 
 function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <fieldset className="flex flex-col gap-[10px] border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
-      <legend className="float-left w-full">
-        <span className="block text-[16px] leading-[20px] font-bold" style={DISPLAY}>{title}</span>
-        {note && <span className="mt-[2px] block text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
-      </legend>
-      <div className="clear-both flex flex-wrap gap-[8px]">{children}</div>
-    </fieldset>
+    <div role="group" aria-label={title} className="flex flex-col gap-[12px] border-b py-[var(--space-5)]" style={{ borderColor: RULE }}>
+      <div className="flex flex-col gap-[2px]">
+        <h3 className="text-[16px] leading-[20px] font-bold" style={DISPLAY}>{title}</h3>
+        {note && <p className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{note}</p>}
+      </div>
+      <div className="flex flex-wrap gap-[8px]">{children}</div>
+    </div>
   );
 }
 
