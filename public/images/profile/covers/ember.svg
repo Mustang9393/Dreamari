@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="140"/></filter>
+<linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/></linearGradient></defs>
+<rect width="1600" height="900" fill="#1a0c0c"/>
+<circle cx="1200" cy="675" r="520" fill="#f97316" fill-opacity="0.9" filter="url(#b)"/><circle cx="320" cy="270" r="480" fill="#dc2626" fill-opacity="0.7" filter="url(#b)"/><circle cx="800" cy="855" r="400" fill="#facc15" fill-opacity="0.55" filter="url(#b)"/><circle cx="1360" cy="180" r="380" fill="#fb7185" fill-opacity="0.45" filter="url(#b)"/>
+<rect width="1600" height="900" fill="url(#v)"/>
+</svg>

@@ -79,16 +79,10 @@ const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 const RULE = "rgba(255,255,255,0.12)";
 
-// Cover photos a student can pick for their header (the app's own
-// photography), or upload their own. Persisted per browser.
-const COVERS = [
-  "/images/app/env-aerospace-engineer.png",
-  "/images/app/env-marine-biologist.png",
-  "/images/app/env-biomedical-researcher.png",
-  "/images/app/env-neurosurgeon.png",
-  "/images/app/env-creative-director.png",
-  "/images/app/env-product-designer.png",
-];
+// Covers a student can pick for their header: six abstract light fields in
+// the manner of desktop screensavers (no subject, nothing to crop), or their
+// own upload. Persisted per browser.
+const COVERS = ["aurora", "dusk", "ocean", "ember", "forest", "nebula"].map((n) => `/images/profile/covers/${n}.svg`);
 const COVER_KEY = "dreamari-cover";
 
 // Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
