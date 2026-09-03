@@ -613,35 +613,22 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
           <StatTile value={community.activePros} label="Pros" />
           <StatTile value={community.posts} label="Posts" />
         </div>
-        <div className="mt-[10px] flex min-w-0 items-center justify-center gap-[6px]" style={{ textShadow: "none" }}>
-          {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
-          {community.professionalsFrom.length > 3 && (
-            <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
-          )}
-        </div>
-        <div className="pointer-events-auto mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
-          {/* Ghost, all caps, accent-tinted, arrow on Open: the card's original
-             action (direct feedback: the blue gradient fill read badly on the
-             photo). */}
-          {joined ? (
-            <button
-              type="button"
-              onClick={onOpen}
-              className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
-              style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}
-            >
-              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onJoin}
-              className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
-              style={{ color: "#FFFFFF" }}
-            >
-              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
-            </button>
-          )}
+        {/* one row closes the card: the marks left, the action right. No rule. */}
+        <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+          <div className="flex min-w-0 items-center gap-[6px]">
+            {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
+            {community.professionalsFrom.length > 3 && (
+              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onOpen}
+            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
+            style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}
+          >
+            Open <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+          </button>
         </div>
       </div>
     </div>
