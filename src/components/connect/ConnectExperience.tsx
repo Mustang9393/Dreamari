@@ -513,7 +513,13 @@ function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" })
          partner always ends at its right edge, the × sits in whatever is between */}
       <span className="relative flex w-full items-end justify-between" style={{ gap }}>
         <LetterMark name="Dream Opportunity" ink={ink} letterHeight={box.L} markClassName="dm-logo-shimmer" />
-        <span aria-hidden className="flex flex-1 items-center justify-center text-[14px] font-light" style={{ minWidth: cross, height: box.L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
+        {/* the collab mark: a big rounded × in the partner's light, breathing
+           slowly, the way drop culture writes "A × B" */}
+        <span aria-hidden className="flex flex-1 items-center justify-center" style={{ minWidth: cross, height: box.L }}>
+          <svg viewBox="0 0 24 24" className="dm-collab-mark" style={{ width: Math.round(box.L * 0.78), height: Math.round(box.L * 0.78), color: tint, filter: `drop-shadow(0 0 10px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+            <path d="M6 6 L18 18 M18 6 L6 18" />
+          </svg>
+        </span>
         {pm ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (

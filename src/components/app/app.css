@@ -407,3 +407,13 @@ html.light .dm-report {
 @media (prefers-reduced-motion: reduce) {
   .dm-logo-shimmer { animation: none; background-position: 50% 0; }
 }
+
+
+/* The × between two marks in a collab lockup: slow breathe and a quarter
+   turn, so the pair reads as alive without moving the logos themselves. */
+.dm-collab-mark { animation: dm-collab-breathe 4.8s ease-in-out infinite; transform-origin: 50% 50%; }
+@keyframes dm-collab-breathe {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.18) rotate(90deg); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .dm-collab-mark { animation: none; } }

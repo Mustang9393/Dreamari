@@ -73,3 +73,4 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Junior Achievement events now carry JA Singapore's own mark (from ja.org.sg), the tagline cropped, in the DO × partner lockup with JA's teal as the ambient colour.
 - One app background everywhere, fixed to the screen: it no longer shifts when a tab changes the page height. Every app screen (Home, Explore, Play, Connect, Profile, career pages, colleges, sign-up, report chooser) uses the same backdrop.
 - Event lockups: DO always starts at the same pixel and the partner logo always ends at the same pixel on every card.
+- The × between DO and the partner is now a big rounded collab mark in the partner's colour with a glow, breathing slowly.
