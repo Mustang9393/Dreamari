@@ -45,16 +45,16 @@ export function HBars({ rows, marker, unit = "" }: { rows: { label: string; valu
   );
 }
 
-/** One hundred people, some of them let in. The grid sits beside its figure
- *  so the two read as one statement: "58 of every 100 get in". Smaller dots
- *  keep it a picture in the text, not a chart with a footnote. */
+/** One hundred people, some of them let in, spread across the card as a
+ *  band of twenty by five so it reads left to right like a sentence and
+ *  never sits in a corner. The figure follows underneath. */
 export function DotGrid({ pct, figure, note }: { pct: number; figure: string; note?: string }) {
   const on = Math.round(pct);
   return (
-    <figure className="m-0 flex flex-wrap items-center gap-x-[var(--space-6)] gap-y-[var(--space-3)]">
-      <div className="grid w-fit flex-none grid-cols-10 gap-[4px]" role="img" aria-label={`${on} of every 100 who apply get in`}>
+    <figure className="m-0 flex flex-col gap-[var(--space-3)]">
+      <div className="grid w-full max-w-[560px] gap-[5px]" style={{ gridTemplateColumns: "repeat(20, minmax(0, 1fr))" }} role="img" aria-label={`${on} of every 100 who apply get in`}>
         {Array.from({ length: 100 }, (_, i) => (
-          <span key={i} className="size-[10px] rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
+          <span key={i} className="aspect-square w-full rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
         ))}
       </div>
       <figcaption className="flex min-w-0 flex-col gap-[2px]">
