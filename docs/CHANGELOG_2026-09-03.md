@@ -40,3 +40,12 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Real data everywhere: all numbers are demo. Company brand colours are approximations; the engineer should use official hex values.
 - Home page proposal (state-aware hero, From Connect panel, Top 3 strip) is written up, not built.
 - Demo controls must be removed or gated before production.
+
+## Later that night (not yet pushed)
+- Share on every question, answer and post: phone share sheet, or copy link with "Link copied".
+- Likes with counts on answers too, so one thumbs-up works the same everywhere.
+- Report on every comment. Comments block contact details, post on Enter, cap at 280.
+- Asking needs a full sentence (a short nudge if not); you can delete a question you asked before anyone answers.
+- Saved page: remove a saved item in place.
+- Volunteers: posts have a title and a body, can be deleted; answers need a few sentences and can carry "Based on my own experience".
+- Written up: how each action works, what we borrowed from Instagram, TikTok, Quora, Brainly and Stack Overflow, and the edge cases.

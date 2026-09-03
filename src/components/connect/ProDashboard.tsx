@@ -72,7 +72,9 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   const [draft, setDraft] = useState("");
   const [composing, setComposing] = useState(false);
   const [postDraft, setPostDraft] = useState("");
-  const [localPosts, setLocalPosts] = useState<string[]>([]);
+  const [postBody, setPostBody] = useState("");
+  const [disclose, setDisclose] = useState(true);
+  const [localPosts, setLocalPosts] = useState<{ title: string; body: string }[]>([]);
   const [range, setRange] = useState<Range>("30d");
 
   const board = COMMUNITIES.find((c) => c.world === pro.world);
@@ -174,8 +176,11 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                           />
                         </label>
+                        <label className="flex w-fit cursor-pointer items-center gap-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                          <input type="checkbox" checked={disclose} onChange={(event) => setDisclose(event.target.checked)} className="size-4 accent-[var(--primary)]" /> Add &ldquo;Based on my own experience&rdquo;
+                        </label>
                         <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-                          <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${draft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!draft.trim()) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
+                          <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${draft.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (draft.trim().length < 40) return; dispatchAuroraPulse("cta"); setRouted((r) => ({ ...r, [q.id]: "answered" })); }}>Post answer</PrimaryCta>
                           <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setRouted((r) => ({ ...r, [q.id]: "open" }))}>Cancel</QuietCta>
                         </div>
                       </div>
@@ -236,19 +241,26 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                 </div>
                 <label className="block">
                   <span className="sr-only">Post title</span>
-                  <input value={postDraft} onChange={(event) => setPostDraft(event.target.value)} placeholder="Title of your post" className="w-full rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+                  <input value={postDraft} onChange={(event) => setPostDraft(event.target.value)} maxLength={90} placeholder="Title" className="w-full rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
                 </label>
-                <div className="flex flex-wrap gap-[var(--space-2)]">
-                  <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim()) return; dispatchAuroraPulse("cta"); setLocalPosts((l) => [postDraft.trim(), ...l]); setComposing(false); }}>Publish</PrimaryCta>
+                <label className="block">
+                  <span className="sr-only">Post body</span>
+                  <textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} rows={4} maxLength={600} placeholder="Three to five sentences. Plain words, one idea each." className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+                </label>
+                <div className="flex flex-wrap items-center gap-[var(--space-2)]">
+                  <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() && postBody.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim() || postBody.trim().length < 40) return; dispatchAuroraPulse("cta"); setLocalPosts((l) => [{ title: postDraft.trim(), body: postBody.trim() }, ...l]); setComposing(false); setPostBody(""); }}>Publish</PrimaryCta>
                   <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setComposing(false)}>Cancel</QuietCta>
+                  {postBody.length > 500 && <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{600 - postBody.length} left</span>}
                 </div>
               </div>
             )}
             <ul className="-mt-[var(--space-2)] flex flex-col">
-              {localPosts.map((title) => (
-                <li key={title} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
+              {localPosts.map((post) => (
+                <li key={post.title} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                   <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · Just now</span>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{title}</span>
+                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>
+                  <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{post.body}</span>
+                  <button type="button" onClick={() => setLocalPosts((l) => l.filter((x) => x.title !== post.title))} className="dm-link w-fit cursor-pointer text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Delete</button>
                 </li>
               ))}
               {posts.map((post) => {

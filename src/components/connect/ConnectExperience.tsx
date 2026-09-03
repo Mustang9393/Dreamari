@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Flag,
   KeyRound,
+  Share2,
   LayoutDashboard,
   MapPin,
   Pin,
@@ -855,6 +856,11 @@ export function ConnectExperience() {
     window.scrollTo(0, 0);
   }, []);
 
+  const say = useCallback((message: string) => {
+    setAnnounce(message);
+    window.setTimeout(() => setAnnounce(""), 4000);
+  }, []);
+
   const nav = useMemo(
     () => ({
       openPro: (id: string) => setView({ kind: "pro", id }),
@@ -866,14 +872,24 @@ export function ConnectExperience() {
       report: (id: string) => setReportFor(id),
       isFollowing: (id: string) => !!follows[id],
       toggleFollow,
+      share: async (query: string, title: string) => {
+        const url = `${window.location.origin}/connect${query}`;
+        dispatchAuroraPulse("select");
+        try {
+          if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            await navigator.share({ title, url });
+            return;
+          }
+          await navigator.clipboard.writeText(url);
+          say("Link copied.");
+        } catch {
+          say("Could not copy. Long-press the address bar to copy the link.");
+        }
+      },
     }),
-    [setView, follows],
+    [setView, follows, say],
   );
 
-  const say = useCallback((message: string) => {
-    setAnnounce(message);
-    window.setTimeout(() => setAnnounce(""), 4000);
-  }, []);
 
   const toggleSave = (id: string, what = "insight") => {
     dispatchAuroraPulse("select");
@@ -986,9 +1002,10 @@ export function ConnectExperience() {
             savedCount={Object.values(saves).filter(Boolean).length}
             onBack={() => setView({ kind: "home", tab: "communities" })}
             onOpenThread={(id) => setView({ kind: "thread", id })}
+            onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
           />
         )}
-        {view.kind === "saved" && <SavedView saves={saves} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1208,7 +1225,7 @@ type AskedQuestion = { id: string; title: string; boardId: string };
 /** The signed-in student's own questions: the seeded ones Jordan asked plus
  *  anything posted this session. One row each: what happened to it, then the
  *  question. The panel's aside is the way into Saved. */
-function YourQuestions({ asked, onOpenThread, savedCount }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number }) {
+function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number; onDeleteAsked?: (id: string) => void }) {
   const nav = useContext(ConnectNav);
   const mine = ALL_THREADS.filter((t) => t.handle === "Jordan");
   const empty = asked.length === 0 && mine.length === 0;
@@ -1220,8 +1237,9 @@ function YourQuestions({ asked, onOpenThread, savedCount }: { asked: AskedQuesti
       <ul className="-mt-[var(--space-2)] flex flex-col">
         {asked.map((q) => (
           <li key={q.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
-            <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: STATE_COLOR.routed }}>
-              <Clock className="h-3 w-3" aria-hidden /> Waiting for an answer
+            <span className="flex items-center justify-between gap-[var(--space-3)] text-[12px] leading-[16px] font-semibold" style={{ color: STATE_COLOR.routed }}>
+              <span className="flex items-center gap-[5px]"><Clock className="h-3 w-3" aria-hidden /> Waiting for an answer</span>
+              {onDeleteAsked && <button type="button" onClick={() => onDeleteAsked(q.id)} className="dm-link cursor-pointer" style={{ color: "var(--muted-foreground)" }}>Delete</button>}
             </span>
             <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{q.title}&rdquo;</span>
           </li>
@@ -1295,13 +1313,13 @@ function YourQuestionsStrip({ asked, onOpenThread, onOpenAll }: { asked: AskedQu
 
 /** Everything of yours in one place: the "See all" page. Your questions and their
  *  answers, what the people you follow did, and the way into Saved. */
-function ActivityView({ asked, follows, savedCount, onBack, onOpenThread }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; onOpenThread: (id: string) => void }) {
+function ActivityView({ asked, follows, savedCount, onBack, onOpenThread, onDeleteAsked }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </button>
-      <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} />
+      <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
       <NewFromFollowing follows={follows} />
     </>
   );
@@ -1333,7 +1351,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
   const blocked = CONTACT_INFO.test(text);
   const words = text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP.has(w));
   const similar = words.length === 0 ? [] : ALL_THREADS.filter((t) => (t.state === "answered" || t.state === "resolved") && words.some((w) => t.title.toLowerCase().includes(w))).slice(0, 2);
-  const canPost = text.trim().length > 0 && !blocked;
+  const canPost = text.trim().length >= 12 && !blocked;
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="ask-title">
@@ -1359,6 +1377,8 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
           />
         </label>
         {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
+        {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
+        {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
 
         {/* where it goes: picked from the words, one tap to change */}
         <div className="flex flex-col gap-[8px]">
@@ -1409,7 +1429,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
 
 /** Everything the student saved, resolved from the one saves map: whole
  *  questions, single answers, posts and event takeaways. */
-function SavedView({ saves, onBack, onOpenThread, onOpenInsight }: { saves: Record<string, boolean>; onBack: () => void; onOpenThread: (id: string) => void; onOpenInsight: (id: string) => void }) {
+function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { saves: Record<string, boolean>; onUnsave: (id: string) => void; onBack: () => void; onOpenThread: (id: string) => void; onOpenInsight: (id: string) => void }) {
   const rows: { key: string; kicker: string; title: string; open: () => void }[] = [];
   for (const id of Object.keys(saves).filter((k) => saves[k])) {
     const thread = ALL_THREADS.find((t) => t.id === id);
@@ -1439,10 +1459,15 @@ function SavedView({ saves, onBack, onOpenThread, onOpenInsight }: { saves: Reco
         ) : (
           <ul className="-mt-[var(--space-2)] flex flex-col">
             {rows.map((row) => (
-              <PanelRow key={row.key} onClick={row.open}>
-                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.kicker}</span>
-                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{row.title}</span>
-              </PanelRow>
+              <li key={row.key} className="flex items-center gap-[var(--space-3)] border-t first:border-t-0" style={{ borderColor: RULE }}>
+                <button type="button" onClick={row.open} className="dm-quiet -mx-[8px] flex min-w-0 flex-1 cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-4)] text-left">
+                  <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.kicker}</span>
+                  <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{row.title}</span>
+                </button>
+                <button type="button" onClick={() => onUnsave(row.key)} aria-label="Remove from Saved" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--accent-subtle)" }}>
+                  <Bookmark className="h-4 w-4" aria-hidden fill="currentColor" />
+                </button>
+              </li>
             ))}
           </ul>
         )}
@@ -2072,11 +2097,14 @@ function ThreadView({
                 )}
                 <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
                 <div className="mt-[12px] flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Helpful
+                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
+                    <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {answerLikes(rid, r.primary) + (helpfuls[rid] ? 1 : 0)}
                   </button>
                   <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
                     <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
+                  </button>
+                  <button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+                    <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
                   </button>
                   <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
                     <Flag className="h-3 w-3" aria-hidden /> Report
@@ -2121,8 +2149,11 @@ function ThreadView({
           <button type="button" onClick={p.onSave} aria-pressed={p.saved} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: p.saved ? "var(--accent-subtle)" : undefined }}>
             <Bookmark className="h-3.5 w-3.5" aria-hidden /> {p.saved ? "Saved" : "Save"}
           </button>
-          <button type="button" onClick={() => nav?.report(thread.id)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
-            <Flag className="h-3.5 w-3.5" aria-hidden /> Report
+          <button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
+            <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
+          </button>
+          <button type="button" onClick={() => nav?.report(thread.id)} className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+            <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
         </div>
 
@@ -2140,6 +2171,14 @@ function ThreadView({
       </article>
     </>
   );
+}
+
+/** Seeded like count for an answer (the data carries likes per thread, not
+ *  per answer): the top answer leads, the others trail it. */
+function answerLikes(rid: string, primary?: boolean): number {
+  let h = 2166136261;
+  for (let i = 0; i < rid.length; i++) { h ^= rid.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (primary ? 120 : 24) + ((h >>> 0) % (primary ? 180 : 60));
 }
 
 // ——— comments: one shape everywhere ———
@@ -2189,6 +2228,7 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
  *  seeded count; the toggle adds the student's own on top. */
 function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
+  const nav = useContext(ConnectNav);
   return (
     <div className="flex items-start gap-[12px]">
       <Avatar name={name} verified={chipTone === "pro"} size={32} />
@@ -2211,6 +2251,9 @@ function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, li
           <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
           </button>
+          <button type="button" onClick={() => nav?.report(id)} aria-label="Report this comment" className="dm-link mt-[6px] ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] leading-[15px] font-semibold opacity-55 hover:opacity-100" style={{ color: "var(--muted-foreground)" }}>
+            <Flag className="h-3 w-3" aria-hidden /> Report
+          </button>
         </div>
       </div>
     </div>
@@ -2227,8 +2270,10 @@ function focusReplyComposer() {
 
 function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   const [text, setText] = useState("");
+  const blocked = CONTACT_INFO.test(text);
   const submit = () => {
-    if (!text.trim()) return;
+    if (!text.trim() || blocked) return;
+    dispatchAuroraPulse("cta");
     onPost(text.trim());
     setText("");
   };
@@ -2241,15 +2286,18 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
           <textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
+            onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(); } }}
+            maxLength={280}
             rows={2}
             placeholder="Add a comment…"
             className="w-full resize-none rounded-[var(--radius-md)] border p-[10px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
             style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
           />
         </label>
+        {blocked && <p role="alert" className="mt-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
-          <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior</span>
-          <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
+          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
@@ -2313,6 +2361,9 @@ function InsightThreadView({
               </button>
               <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
                 <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+              </button>
+              <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
+                <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
               </button>
               <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
                 <Flag className="h-3 w-3" aria-hidden /> Report

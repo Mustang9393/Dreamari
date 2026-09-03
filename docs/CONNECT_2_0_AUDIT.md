@@ -96,3 +96,45 @@ Decision
 - The 2026 Impact Summary is one gold card with its own Download; nothing nested around it.
 
 Sources: nngroup.com/articles/usability-of-websites-for-teenagers, nngroup.com/reports/teenagers-on-the-web, w3.org/TR/coga-usable/design_guide.html, udlguidelines.cast.org, cnn.com/2023/09/26/health/teen-hundreds-of-phone-notifications-report-wellness, alicekeeler.com/2023/08/19/student-engagement-setting-up-google-classroom.
+
+## 7. The interactions, one by one (2026-09-03, night)
+
+How each social action works, what the research says, what we borrowed, and the edge cases. Sources as in section 6, plus the way Instagram, TikTok, YouTube, Reddit, Quora, Brainly and Stack Overflow handle the same actions.
+
+### Asking a question
+- Where: the Ask row on the landing, the composer on a board, Ask Me Anything on a profile. Same sheet, same rules.
+- Research: teens are hesitant to enter information and give up on friction (NN/g); routed questions beat blank-page posting (brief). Brainly and Quora both show similar questions before you post; Stack Overflow's duplicate check cuts repeat questions.
+- Ours: routing from the words with one Change link; up to two already-answered matches above Post; contact details block Post and keep the draft; under 12 characters Post stays off with one hint ("A few more words helps the right pro find it"); the counter appears only after 220 characters; posting shows a toast and the question appears under the Ask row as Waiting; an unanswered question you asked can be deleted from See all.
+- Edge cases: not joined → Join sheet first; same question twice → the match shows first; offline or failure → backend; a question that is really a comment (no question mark) still routes.
+
+### Answering (volunteer)
+- Research: creators return when the ask is specific and small (brief; Stack Overflow's inbox). A minimum length prevents one-word answers; a disclosure line ("Based on my own experience") is what the handoff asks for.
+- Ours: inline composer under the routed question; Post stays off under 40 characters; the disclosure checkbox is on by default; after posting, "Live on Finance Careers" with View response; Skip has Undo; Questions answered ticks up.
+
+### Commenting (students, on threads and posts)
+- Research: TikTok and Instagram keep replies one level deep and put the composer at the bottom; Reddit-style nesting is what the CEO rejected. Enter posts, Shift+Enter breaks (every chat app teens use). Emoji reactions on peer comments are the Gen Z register the doc shows.
+- Ours: one composer per thread, one level of replies (Reply focuses the composer), 280 characters with the counter only after 200, the same contact guard as every composer, the identity line "Posts as Jordan · Junior", Report on every comment, like plus two emoji reactions on peer comments.
+- Edge cases: empty → Post off; contact details → blocked with the reason; a reply to a reply → lands as a comment, never a sub-thread.
+
+### Liking
+- Research: one symbol everywhere (Instagram's heart); a count next to it tells the volunteer it mattered (brief: visible learning signals). "Helpful" without a number told the volunteer nothing.
+- Ours: thumbs up with a count on the question, on every answer, on posts and on comments; tap again to undo; the count moves at once; no separate Helpful verb.
+
+### Saving
+- Research: Instagram's bookmark is understood by every teen; a save is private and needs a place to go back to.
+- Ours: Save on questions, answers and posts; Saved page reachable from See all; each saved row has its own bookmark to remove it; the toast says where it went.
+- Edge cases: unsave from the list or from the item; nothing saved → one line.
+
+### Sharing
+- Research: NN/g: give teens Copy Link, never force sharing or public profiles; on phones the native share sheet is the pattern they know (Instagram, TikTok, YouTube).
+- Ours: Share on threads, answers and posts; on phones the system share sheet, elsewhere copies the link and confirms "Link copied"; only public content is shareable, there is nothing private to leak; clipboard failure explains what to do.
+
+### Posting (volunteer)
+- Research: prompts remove the blank page (brief); short posts get read (NN/g: dense text is the teen repellent).
+- Ours: Create post from four prompts, title plus a 600-character body, Publish off until 40 characters, the post appears at the top with Delete; each post shows Views · Likes · Saves.
+
+### Following
+- Ours: Follow on the rail, the profile and every answer card; flips to Following; New from people you follow on See all. Students follow pros only.
+
+### Reporting
+- Ours: on questions, answers, posts and comments; four reasons; toast; anonymous. Staff see the queue with Remove or Keep.

@@ -26,6 +26,8 @@ export const ConnectNav = createContext<{
   report: (id: string) => void;
   isFollowing: (id: string) => boolean;
   toggleFollow: (id: string) => void;
+  /** native share sheet on phones, copy link elsewhere; always confirms */
+  share: (query: string, title: string) => void;
 } | null>(null);
 
 /** Phone numbers, emails, @handles and DM apps have no place in a public
