@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
-import { LEVEL_WORD, collegeBySlug, money } from "./data";
+import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 import { Donut, HBars } from "./viz";
 
@@ -36,7 +36,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   }
 
   const d = c.detail;
-  const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few finish: under a quarter within six years" : c.control === "For profit" ? "Run for profit" : null);
+  const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few finish, under a quarter within six years." : c.control === "For profit" ? "Run for profit." : null);
   const tourUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${c.name} campus tour`)}`;
 
   return (
@@ -71,7 +71,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[60%]">
               <MarkBadge c={c} size={52} />
               <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={DISPLAY}>{c.name}</h1>
-              <p className={LABEL} style={{ color: "rgba(255,255,255,0.85)" }}>{c.city}, {c.stateName} · {tags(c).join(" · ")}</p>
+              <p className={LABEL} style={{ color: "rgba(255,255,255,0.85)" }}>{c.city}, {c.stateName}</p>
+              <ul className="flex flex-wrap gap-[6px]" aria-label="About this college" style={{ textShadow: "none" }}>
+                {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff" }}>{t}</li>)}
+              </ul>
               <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>{d?.address && !d.sample ? `${d.address} · ` : ""}Accredited by {c.accreditor}{d?.partOf ? ` · Part of ${d.partOf}` : ""}</p>
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
                 {c.website && (
@@ -103,8 +106,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Row label="Getting in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} value={c.admitRate === null ? "Everyone who applies" : `${c.admitRate} of 100 applicants`} />
             <Row label="Finish their degree" note="within 6 years" value={pct(c.finish)} />
             <Row label="Come back for year 2" value={pct(c.retention)} />
-            <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} />
-            <Row label="What kind of place" value={`${SIZE_WORD[c.size]} · ${c.control.toLowerCase()} · ${LEVEL_WORD[c.level].toLowerCase()}`} last />
+            <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} last />
           </div>
         </section>
 
@@ -189,7 +191,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 </div>
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year · pay one year out.</p>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, and pay one year out.</p>
                   <div className="mt-[var(--space-3)]">
                     {d.programmes.slice(0, 6).map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} a year`} value={p.pay === "not published" ? "Pay not published" : p.pay} last={i === arr.length - 1} />)}
                   </div>
@@ -210,7 +212,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   <div className="mt-[var(--space-4)]">
                     <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct }))} />
                   </div>
-                  <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Federal categories · International = students on visas</p>
+                  <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Federal categories. International means students on visas.</p>
                 </div>
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
@@ -226,7 +228,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {d.sport && (
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
-                    <p className={`${SMALL} mt-[var(--space-2)]`}>{d.sport.league} · {d.sport.students.toLocaleString("en-US")} students on teams</p>
+                    <div className="mt-[var(--space-2)]"><Row label="League" value={d.sport.league} /><Row label="Students on a team" value={d.sport.students.toLocaleString("en-US")} last /></div>
                     <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
                   </div>
                 )}
@@ -241,7 +243,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {d.monthly ? <Row label="Monthly repayment" value={money(d.monthly)} /> : null}
                 <Row label="Paying it back" note="of those who borrowed" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
               </div>
-              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, every subject · College Scorecard</p>
+              <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject. Source: College Scorecard.</p>
             </Folded>
           </>
         )}
@@ -252,14 +254,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               <PlayCircle className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
                 <span className="text-[15px] leading-[20px] font-bold">Campus tours on YouTube</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students, real campus · opens outside Dreamari</span>
+                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students, real campus. Opens outside Dreamari.</span>
               </span>
             </a>
             <Link href="/connect" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <MessagesSquare className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
                 <span className="text-[15px] leading-[20px] font-bold">Ask a pro on Connect</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified pros · ask about where they studied</span>
+                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified pros answer questions about where they studied.</span>
               </span>
             </Link>
           </div>
