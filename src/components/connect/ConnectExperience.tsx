@@ -33,7 +33,7 @@ import {
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING } from "./primitives";
+import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
@@ -481,16 +481,30 @@ function partnerCompany(host: string): string {
   return host;
 }
 
-/** Every event is Dream Opportunity's with a partner: the DO mark, a small
- *  ×, the partner's mark. Two chips of the same size (the community cards'
- *  chip at lg), so every logo on the screen sits at one scale and one
- *  baseline, whatever shape the brand is. */
+/** Every event is Dream Opportunity's with a partner. Not chips: the two
+ *  marks alone, in one light, over an ambient glow in the partner's brand
+ *  colour, with a slow shimmer moving through the ink. Both marks are sized
+ *  by their letters (LetterMark), so DO's letters and the partner's letters
+ *  are the same height on the same baseline, whatever flourish a brand has
+ *  above or below them. Two-line wordmarks (Junior Achievement, Goldman
+ *  Sachs) get a little more height so a line is not smaller than a letter. */
 function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" }) {
+  const partner = partnerCompany(host);
+  const brand = COMPANY_BRAND[partner] ?? { bg: EVENT_ACCENT, ink: "#FFFFFF" };
+  const L = size === "lg" ? 30 : 22;
+  const twoLine = partner === "Junior Achievement" || partner === "Goldman Sachs";
+  const tint = brand.bg === "#000000" || brand.bg === "#111111" || brand.bg === "#141414" ? "#ffffff" : `color-mix(in srgb, ${brand.bg} 55%, #ffffff)`;
+  const ink = `linear-gradient(110deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.94) 38%, ${tint} 50%, rgba(255,255,255,0.94) 62%, rgba(255,255,255,0.94) 100%)`;
   return (
-    <span className="inline-flex flex-none items-center gap-[8px]" style={{ textShadow: "none" }}>
-      <CompanyChip name="Dream Opportunity" tone="photo" size={size} />
-      <span aria-hidden className="text-[13px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>×</span>
-      <CompanyChip name={partnerCompany(host)} tone="photo" size={size} />
+    <span className="relative inline-flex flex-none items-end gap-[14px] py-[8px]" style={{ textShadow: "none" }}>
+      <span aria-hidden className="pointer-events-none absolute -inset-x-[56px] -inset-y-[44px] opacity-70" style={{ background: `radial-gradient(60% 70% at 60% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
+      <LetterMark name="Dream Opportunity" ink={ink} letterHeight={L} markClassName="dm-logo-shimmer" className="relative" />
+      <span aria-hidden className="relative flex items-center text-[14px] font-light" style={{ height: L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
+      {COMPANY_MARKS[partner] ? (
+        <LetterMark name={partner} ink={ink} letterHeight={twoLine ? Math.round(L * 1.45) : L} markClassName="dm-logo-shimmer" className="relative" />
+      ) : (
+        <span className="relative flex items-center font-extrabold tracking-[-0.01em]" style={{ height: L, fontSize: L * 0.78, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
+      )}
     </span>
   );
 }

@@ -324,12 +324,19 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
 // company with no exact current mark would get a text-only chip; today every
 // company in the data has one.
 // Microsoft uses the 2012 wordmark, not the four-square symbol, for the same reason.
-export const COMPANY_MARKS: Record<string, { file: string; aspect: number; height?: number; ext?: "svg" | "png" }> = {
+/** `letters` says where the letters sit inside the mark's ink box (top offset
+ *  and height, as fractions), for marks that carry a flourish above or below
+ *  the letters: EY's beam sits above, AT&T's globe is taller than its text,
+ *  J.P.Morgan's J descends. Lockups scale every mark so its LETTERS share one
+ *  height and one baseline; marks without `letters` are all letters. */
+export type MarkMeta = { file: string; aspect: number; height?: number; ext?: "svg" | "png"; letters?: { y: number; h: number } };
+export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
   // the full lockup with the wordmark is dream-opportunity-full.svg)
   "Dream Opportunity": { file: "dream-opportunity", aspect: 1.79, height: 16 },
-  "AT&T": { file: "att", aspect: 2.43, height: 13, ext: "png" },
-  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93 },
+  "AT&T": { file: "att", aspect: 2.43, height: 13, ext: "png", letters: { y: 0.28, h: 0.47 } },
+  "Junior Achievement": { file: "junior-achievement", aspect: 4.43, height: 16 },
+  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93, letters: { y: 0, h: 0.72 } },
   // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
   // not the blue box: a filled square masks to a blank tile. Two lines need
   // more height than a one-line wordmark to stay legible.
@@ -338,7 +345,7 @@ export const COMPANY_MARKS: Record<string, { file: string; aspect: number; heigh
   // its black backing rectangle removed so only the letters mask
   Blackstone: { file: "blackstone", aspect: 6.27 },
   Amazon: { file: "amazon", aspect: 3.31 },
-  EY: { file: "ey", aspect: 0.99 },
+  EY: { file: "ey", aspect: 0.99, letters: { y: 0.5, h: 0.5 } },
   Google: { file: "google", aspect: 3.04 },
   Deloitte: { file: "deloitte", aspect: 5.31 },
   "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
@@ -456,20 +463,54 @@ export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   Blackstone: { bg: "#000000", ink: "#FFFFFF" },
 };
 
+/** A mark sized by its LETTERS: the container is exactly `letterHeight` tall,
+ *  the letters fill it, and any flourish above or below (EY's beam, a
+ *  descender) hangs outside the container. Put several in a row with
+ *  items-end and every brand's letters share one height and one baseline. */
+export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName = "", className = "" }: { name: string; ink?: string; letterHeight: number; markClassName?: string; className?: string }) {
+  const mark = COMPANY_MARKS[name];
+  if (!mark) return null;
+  const letters = mark.letters ?? { y: 0, h: 1 };
+  const boxH = letterHeight / letters.h;
+  const boxW = boxH * mark.aspect;
+  return (
+    <span className={`relative block flex-none ${className}`} style={{ height: letterHeight, width: Math.round(boxW) }} title={name}>
+      <span
+        aria-hidden
+        className={`absolute left-0 block ${markClassName}`}
+        style={{
+          top: -letters.y * boxH,
+          width: Math.round(boxW),
+          height: Math.round(boxH),
+          background: ink,
+          maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+          maskSize: "100% 100%",
+          WebkitMaskSize: "100% 100%",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+        }}
+      />
+      <span className="sr-only">{name}</span>
+    </span>
+  );
+}
+
 /** The bare white-silhouette mark, no chip: for a line like "Brand
  *  Strategist at [EY]" beside text, sized so the letters sit at text
  *  x-height (a wordmark 11px tall, a compact symbol 14px). Falls back to the
  *  company's name when no exact mark exists, so the line never goes blank. */
-export function CompanyMark({ name, ink = "currentColor", className = "", height }: { name: string; ink?: string; className?: string; /** override the mark's letter height, e.g. for a heading */ height?: number }) {
+export function CompanyMark({ name, ink = "currentColor", className = "", height, scale = 1, markClassName = "" }: { name: string; ink?: string; className?: string; /** override the mark's letter height, e.g. for a heading */ height?: number; /** multiply the mark's natural box (keeps wordmarks and symbols in proportion to each other) */ scale?: number; /** class on the masked box itself, e.g. a shimmer */ markClassName?: string }) {
   const mark = COMPANY_MARKS[name];
   if (!mark) return <span className={className}>{name}</span>;
+  const box = markBox(mark.aspect, height ?? mark.height);
   return (
     <span className={`inline-flex items-center ${className}`} title={name}>
       <span
         aria-hidden
-        className="block flex-none"
+        className={`block flex-none ${markClassName}`}
         style={{
-          ...markBox(mark.aspect, height ?? mark.height),
+          width: Math.round(box.width * scale), height: Math.round(box.height * scale),
           background: ink,
           maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
           WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,

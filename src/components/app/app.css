@@ -391,3 +391,19 @@ html.light .dm-report {
 :where(button, [role="button"], [role="tab"], [role="radio"]):not(:disabled) {
   cursor: pointer;
 }
+
+
+/* A slow light passing through a masked logo: the mark's fill is a gradient
+   wider than the box, slid across it. Used by Connect's event lockups. */
+.dm-logo-shimmer {
+  background-size: 260% 100% !important;
+  background-position: 120% 0;
+  animation: dm-logo-shimmer 5.5s ease-in-out infinite;
+}
+@keyframes dm-logo-shimmer {
+  0%, 55% { background-position: 120% 0; }
+  85%, 100% { background-position: -30% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-logo-shimmer { animation: none; background-position: 50% 0; }
+}
