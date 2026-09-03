@@ -4,6 +4,8 @@
 // College Scorecard API. Imagery: Wikimedia Commons (credits.json) and
 // Wikipedia lead images for marks; both prototype only.
 
+import { MARKS, PHOTOS } from "./images";
+
 export type Level = "Certificates" | "Associate degrees" | "Bachelor's degrees";
 export type Control = "Public" | "Private" | "For profit";
 export type Setting = "City" | "Suburb" | "Town" | "Countryside";
@@ -38,6 +40,7 @@ export type College = {
   applied?: number;
   flags?: ("tribal" | "forProfit" | "fewFinish" | "hbcu" | "online" | "religious")[];
   religion?: string;
+  /** kept for reference; the files on disk decide (images.ts) */
   photo?: boolean;
   mark?: boolean;
   website?: string;
@@ -402,10 +405,10 @@ export function collegeBySlug(slug: string): College | undefined {
 }
 
 export function collegeImage(c: College): string | null {
-  return c.photo ? `/images/colleges/${c.slug}.webp` : null;
+  return PHOTOS.has(c.slug) ? `/images/colleges/${c.slug}.webp` : null;
 }
 export function collegeMark(c: College): string | null {
-  return c.mark ? `/images/colleges/${c.slug}-mark.webp` : null;
+  return MARKS.has(c.slug) ? `/images/colleges/${c.slug}-mark.webp` : null;
 }
 
 /** Plain words for the card tags. */
