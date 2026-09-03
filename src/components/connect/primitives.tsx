@@ -324,7 +324,11 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
 // company with no exact current mark would get a text-only chip; today every
 // company in the data has one.
 // Microsoft uses the 2012 wordmark, not the four-square symbol, for the same reason.
-export const COMPANY_MARKS: Record<string, { file: string; aspect: number; height?: number }> = {
+export const COMPANY_MARKS: Record<string, { file: string; aspect: number; height?: number; ext?: "svg" | "png" }> = {
+  // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
+  // the full lockup with the wordmark is dream-opportunity-full.svg)
+  "Dream Opportunity": { file: "dream-opportunity", aspect: 1.79, height: 16 },
+  "AT&T": { file: "att", aspect: 2.43, height: 13, ext: "png" },
   "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93 },
   // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
   // not the blue box: a filled square masks to a blank tile. Two lines need
@@ -399,8 +403,8 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
             style={{
               ...scaled,
               background: ink,
-              maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
-              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+              maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
               maskSize: "contain",
               WebkitMaskSize: "contain",
               maskRepeat: "no-repeat",
@@ -467,8 +471,8 @@ export function CompanyMark({ name, ink = "currentColor", className = "", height
         style={{
           ...markBox(mark.aspect, height ?? mark.height),
           background: ink,
-          maskImage: `url(/images/logos/companies/${mark.file}.svg)`,
-          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.svg)`,
+          maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
           maskSize: "contain",
           WebkitMaskSize: "contain",
           maskRepeat: "no-repeat",

@@ -452,21 +452,6 @@ function partnerAccent(host: string): string {
   return EVENT_ACCENT;
 }
 
-/** centerOffset compensates assets whose visible mark isn't centered in
- *  its own canvas -- EY's file carries the brand's diagonal beam flourish
- *  ABOVE the "EY" letters, so the wordmark itself sits well below the
- *  canvas's geometric middle (measured by isolating the two ink clusters:
- *  the letters run rows 488-968 of 969, centered at 75.1% down / 42.8%
- *  across, vs. the canvas's own 50%/50%). Expressed as the translate (as
- *  a fraction of the rendered box) needed to pull the LETTERS, not the
- *  frame, onto center. JPMC and AT&T are single contiguous wordmarks with
- *  no such split, so they need no correction. */
-function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: number; h: number; centerOffset?: { x: number; y: number } } | null {
-  if (/jpmorgan|chase/i.test(host)) return { src: `/images/connect/partners/jpmc-${tone}.png`, w: 958, h: 195 };
-  if (/at&t/i.test(host)) return { src: `/images/connect/partners/att-${tone}.png`, w: 960, h: 395 };
-  if (/ernst|\bey\b/i.test(host)) return { src: `/images/connect/partners/ey-${tone}.png`, w: 959, h: 969, centerOffset: { x: 0.0725, y: -0.2513 } };
-  return null;
-}
 
 
 /** The partner's mark, alone -- no "DO x" lockup. A live "DO" wordmark next
@@ -486,27 +471,30 @@ function partnerLogo(host: string, tone: "white" | "ink"): { src: string; w: num
  *  entirely. As a normal flex child next to the title, a wide card keeps
  *  them side by side and a narrow one wraps the mark onto its own line
  *  below the title -- never fighting it for the same horizontal space. */
-function PartnerMark({ host, size = "card" }: { host: string; size?: "card" | "banner" }) {
-  const logo = partnerLogo(host, "white");
-  if (!logo) return null;
-  const box = size === "banner" ? "h-[54px] w-[156px] sm:h-[68px] sm:w-[196px]" : "h-[44px] w-[128px] sm:h-[56px] sm:w-[160px]";
-  const offset = logo.centerOffset;
+/** Which company chip a host maps to (the hosts are written as people say
+ *  them; the marks are keyed by brand name). No match → a text chip. */
+function partnerCompany(host: string): string {
+  if (/jpmorgan|chase/i.test(host)) return "JPMorgan Chase";
+  if (/ernst|\bey\b/i.test(host)) return "EY";
+  if (/morgan stanley/i.test(host)) return "Morgan Stanley";
+  if (/at&t/i.test(host)) return "AT&T";
+  return host;
+}
+
+/** Every event is Dream Opportunity's with a partner: the DO mark, a small
+ *  ×, the partner's mark. Two chips of the same size (the community cards'
+ *  chip at lg), so every logo on the screen sits at one scale and one
+ *  baseline, whatever shape the brand is. */
+function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" }) {
   return (
-    <span aria-hidden className={`pointer-events-none relative flex-none ${box}`}>
-      <Image
-        src={logo.src}
-        alt=""
-        width={logo.w}
-        height={logo.h}
-        className="relative h-full w-full object-contain opacity-95"
-        style={{
-          filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.55)) drop-shadow(0 6px 18px rgba(0,0,0,0.4))",
-          transform: offset ? `translate(${offset.x * 100}%, ${offset.y * 100}%)` : undefined,
-        }}
-      />
+    <span className="inline-flex flex-none items-center gap-[8px]" style={{ textShadow: "none" }}>
+      <CompanyChip name="Dream Opportunity" tone="photo" size={size} />
+      <span aria-hidden className="text-[13px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>×</span>
+      <CompanyChip name={partnerCompany(host)} tone="photo" size={size} />
     </span>
   );
 }
+
 const PHOTO_FOCUS: Record<string, string> = {
   "teaching-education": "58% 42%",
   "business-money": "68% 42%",
@@ -1637,7 +1625,7 @@ function HomeView({
                       <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>{event.date} · {event.location}</p>
                     </div>
-                    <PartnerMark host={event.host} size="card" />
+                    <EventMarks host={event.host} />
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 62%, transparent)` }}>
@@ -1940,7 +1928,7 @@ function EventView({
               <span>Hosted by {event.host}</span>
             </p>
           </div>
-          <PartnerMark host={event.host} size="banner" />
+          <EventMarks host={event.host} size="lg" />
         </div>
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
