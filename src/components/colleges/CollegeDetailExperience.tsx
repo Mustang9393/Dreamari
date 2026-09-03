@@ -7,8 +7,9 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, collegeBySlug, money } from "./data";
+import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
+import { DotGrid, HBars, MeterRow, RangeBar, SplitBar } from "./viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
@@ -107,33 +108,44 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
         {d && (
           <>
+            {/* Every section: heading (the fold), subheading, then body. Numbers
+               that already sit in At a glance are not repeated below. */}
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
-              <div className="grid gap-[var(--space-6)] md:grid-cols-2">
+              <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families pay</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>A year, after grants, by what the family earns.</p>
-                  <div className="mt-[var(--space-3)]">
-                    {d.bands.map((b, i) => <Row key={b.label} label={b.label} value={`${money(b.pay)}`} last={i === d.bands.length - 1} />)}
-                  </div>
-                  {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
-                    <p className={`${SMALL} mt-[var(--space-3)]`} style={{ color: "var(--muted-foreground)" }}>
-                      {d.scholarshipShare !== undefined && d.scholarshipShare > 0 ? `${d.scholarshipShare}% of first-years got a scholarship from the college${d.scholarshipAvg ? `, about ${money(d.scholarshipAvg)} each` : ""}. ` : ""}
-                      {d.pell !== undefined ? `${d.pell}% got a federal Pell grant.` : ""}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What the college charges</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Before any aid. Hardly anyone pays this.</p>
-                  <div className="mt-[var(--space-3)]">
-                    {d.tuitionInState !== null && <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />}
-                    {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
-                    {d.fees !== null && <Row label="Required fees" value={d.fees === 0 ? "None" : money(d.fees)} />}
-                    <Row label="Housing on campus" value={d.housing ? "Yes" : "No, commute only"} />
-                    {d.housingCost !== undefined && <Row label={d.foodCost ? "Housing for a year" : "Housing and food for a year"} value={money(d.housingCost)} />}
-                    {d.foodCost !== undefined && <Row label="Food for a year" value={money(d.foodCost)} last />}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families pay, by what they earn</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>For a year, after grants and scholarships. The line is what the college charges before any aid.</p>
+                  <div className="mt-[var(--space-4)]">
+                    <HBars
+                      rows={d.bands.map((b) => ({ label: b.label, value: b.pay, display: money(b.pay) }))}
+                      marker={d.tuitionInState !== null && d.fees !== null ? { value: d.tuitionInState + d.fees, label: "Sticker price, tuition and fees:" } : undefined}
+                      unit="$"
+                    />
                   </div>
                 </div>
+                {(d.tuitionInState !== null || d.housing) && (
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What the college charges</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Before any aid. Hardly anyone pays this.</p>
+                    <div className="mt-[var(--space-3)]">
+                      {d.tuitionInState !== null && <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />}
+                      {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
+                      {d.fees !== null && <Row label="Required fees" value={d.fees === 0 ? "None" : money(d.fees)} />}
+                      <Row label="Housing on campus" value={d.housing ? "Yes" : "No, commute only"} last={d.housingCost === undefined} />
+                      {d.housingCost !== undefined && <Row label={d.foodCost ? "Housing for a year" : "Housing and food for a year"} value={money(d.housingCost)} last={d.foodCost === undefined} />}
+                      {d.foodCost !== undefined && <Row label="Food for a year" value={money(d.foodCost)} last />}
+                    </div>
+                  </div>
+                )}
+                {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Help with the bill</h3>
+                    <div className="mt-[var(--space-2)]">
+                      {d.scholarshipShare !== undefined && <MeterRow label="Got a scholarship from the college" note={d.scholarshipAvg ? `first-years · about ${money(d.scholarshipAvg)} each` : "first-years"} pct={d.scholarshipShare} last={d.pell === undefined} />}
+                      {d.pell !== undefined && <MeterRow label="Got a federal Pell grant" note="for lower-income families" pct={d.pell} last />}
+                    </div>
+                  </div>
+                )}
               </div>
             </Folded>
 
@@ -141,8 +153,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               {c.admitRate === null ? (
                 <p className={SMALL}>Everyone who applies is admitted. There is no competition to get in and no test scores to worry about. You still need to meet the requirements for the course you pick.</p>
               ) : (
-                <div className="flex flex-col gap-[var(--space-5)]">
-                  <p className={SMALL}><strong className="font-bold">{c.admitRate}% of applicants are admitted</strong>{c.applied ? `, from ${c.applied.toLocaleString("en-US")} who applied` : ""}.</p>
+                <div className="flex flex-col gap-[var(--space-6)]">
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Of every 100 who apply</h3>
+                    <div className="mt-[var(--space-3)]">
+                      <DotGrid pct={c.admitRate} caption={`${c.admitRate} are admitted${c.applied ? ` · ${c.applied.toLocaleString("en-US")} applied last year` : ""}`} />
+                    </div>
+                  </div>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What they require</h3>
@@ -154,27 +171,34 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     </div>
                   </div>
                   {d.scores && (
-                    <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>
-                      Students who sent scores: SAT {d.scores.sat}{d.scores.act ? `, ACT ${d.scores.act}` : ""}. Only {d.scores.sentSat}% sent an SAT score{d.scores.sentAct !== undefined ? ` and ${d.scores.sentAct}% an ACT` : ""}, so being below this is not a reason to rule yourself out.
-                    </p>
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Scores of students who sent them</h3>
+                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The middle half. Only {d.scores.sentSat}% sent an SAT score{d.scores.sentAct !== undefined ? ` and ${d.scores.sentAct}% an ACT` : ""}, so being below this is not a reason to rule yourself out.</p>
+                      <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-4)]">
+                        {(() => { const [lo, hi] = d.scores.sat.split(" to ").map(Number); return Number.isFinite(lo) && Number.isFinite(hi) ? <RangeBar label="SAT" min={400} max={1600} lo={lo} hi={hi} /> : null; })()}
+                        {d.scores.act && (() => { const [lo, hi] = d.scores.act!.split(" to ").map(Number); return Number.isFinite(lo) && Number.isFinite(hi) ? <RangeBar label="ACT" min={1} max={36} lo={lo} hi={hi} /> : null; })()}
+                      </div>
+                    </div>
                   )}
-                  <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{ADMISSION_WORD[c.admission]}: that is the short version of what you would send them.</p>
                 </div>
               )}
             </Folded>
 
             <Folded id="study" title="What you can study" open={open.has("study")} onToggle={() => toggle("study")}>
-              <div className="flex flex-col gap-[var(--space-4)]">
-                <ul className="flex flex-wrap gap-[8px]" aria-label="Programme levels">
-                  {d.levels.map((l) => <li key={l.label} className="rounded-full border px-[12px] py-[5px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{l.label} <strong className="font-extrabold tabular-nums" style={{ color: SOFT }}>{l.n}</strong></li>)}
-                </ul>
+              <div className="grid gap-[var(--space-6)] md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+                <div>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Degrees offered</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{d.programmeCount} programmes in total.</p>
+                  <div className="mt-[var(--space-4)]">
+                    <HBars rows={d.levels.map((l) => ({ label: l.label, value: l.n, display: String(l.n) }))} />
+                  </div>
+                </div>
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, and what they earned one year out.</p>
-                  <div className="mt-[var(--space-3)]">
-                    {d.programmes.slice(0, 6).map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} a year · ${p.share}% of graduates`} value={p.pay} last={i === arr.length - 1} />)}
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Share of everyone who graduates here, and what they earned one year out.</p>
+                  <div className="mt-[var(--space-4)]">
+                    <HBars rows={d.programmes.slice(0, 6).map((p) => ({ label: p.name, value: p.share, display: `${p.share}%`, note: `${p.grads} a year · ${p.pay === "not published" ? "pay not published" : `${p.pay} a year out`}` }))} max={Math.max(20, ...d.programmes.slice(0, 6).map((p) => p.share))} />
                   </div>
-                  <p className={`${SMALL} mt-[var(--space-3)]`} style={{ color: "var(--muted-foreground)" }}>{d.programmeCount} programmes in total. Pay is published for about a third of them and held back where too few people graduated.</p>
                 </div>
               </div>
             </Folded>
@@ -192,51 +216,57 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 </div>
                 {d.sport && (
                   <div className="md:col-span-2">
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{d.sport.league} · {d.sport.students} students on a team</span></h3>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{d.sport.league} · {d.sport.students.toLocaleString("en-US")} students on a team. Clubs are not counted by any government survey; the college&apos;s own site lists them.</p>
                     <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
                   </div>
                 )}
-                <p className={`${SMALL} md:col-span-2`} style={{ color: "var(--muted-foreground)" }}>Clubs are not here because no government survey collects them. Every college has far more than its sports teams; its own website is the place to look.</p>
               </div>
             </Folded>
 
             <Folded id="who" title="Who is there" open={open.has("who")} onToggle={() => toggle("who")}>
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
-                  <Row label="Undergraduates" value={c.undergrads.toLocaleString("en-US")} />
-                  {d.gradStudents !== undefined && <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} />}
-                  <Row label="Studying full time" value={d.fullTime.toLocaleString("en-US")} />
-                  <Row label="Studying part time" value={d.partTime.toLocaleString("en-US")} />
-                  <Row label="Women · Men" value={`${d.women}% · ${d.men}%`} last />
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>How students study</h3>
+                  <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-5)]">
+                    {d.gradStudents !== undefined && <SplitBar title="Undergraduates and graduate students" a={{ label: "undergraduates", value: c.undergrads }} b={{ label: "graduate students", value: d.gradStudents }} />}
+                    <SplitBar title="Full time and part time" a={{ label: "full time", value: d.fullTime }} b={{ label: "part time", value: d.partTime }} />
+                    <SplitBar title="Women and men" a={{ label: "women", value: Math.round((c.undergrads * d.women) / 100) }} b={{ label: "men", value: Math.round((c.undergrads * d.men) / 100) }} />
+                  </div>
                 </div>
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Undergraduates</h3>
-                  <div className="mt-[var(--space-3)]">
-                    {d.makeup.map((m, i) => (
-                      <div key={m.label} className={`flex flex-col gap-[6px] py-[9px] ${i === d.makeup.length - 1 ? "" : "border-b"}`} style={{ borderColor: RULE }}>
-                        <span className="flex items-baseline justify-between gap-[var(--space-3)]"><span className={SMALL}>{m.label}</span><span className={`${SMALL} font-bold tabular-nums`}>{m.pct}%</span></span>
-                        <span className="block h-[4px] w-full overflow-hidden rounded-[2px]" style={{ background: "rgba(255,255,255,0.1)" }} aria-hidden><span className="block h-full rounded-[2px]" style={{ width: `${Math.max(2, m.pct)}%`, background: ACCENT }} /></span>
-                      </div>
-                    ))}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Where undergraduates come from</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The categories the federal government collects. &ldquo;International&rdquo; means students on visas.</p>
+                  <div className="mt-[var(--space-4)]">
+                    <HBars rows={d.makeup.map((m) => ({ label: m.label, value: m.pct, display: `${m.pct}%` }))} max={100} />
                   </div>
-                  <p className={`${SMALL} mt-[var(--space-3)]`} style={{ color: "var(--muted-foreground)" }}>Categories are the ones the federal government collects. &ldquo;International&rdquo; means students on visas.</p>
                 </div>
               </div>
             </Folded>
 
             <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
-              <div>
-                <Row label="Typical pay" note="6 years after starting, finished or not" value={d.pay6 ? money(d.pay6) : "Not published"} />
-                <Row label="Owe when they finish" note="federal loans" value={d.debt ? money(d.debt) : "Not published"} />
-                <Row label="Loan payment" note="a month" value={d.monthly ? `${money(d.monthly)}` : "Not published"} />
-                <Row label="Paying it back" note="of those who borrowed" value={pct(c.repay)} last />
+              <div className="grid gap-[var(--space-6)] md:grid-cols-2">
+                <div>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject. Debt is federal loans owed at graduation.</p>
+                  <div className="mt-[var(--space-4)]">
+                    <HBars rows={[
+                      { label: "Typical pay", note: "6 years after starting", value: d.pay6 ?? 0, display: d.pay6 ? money(d.pay6) : "Not published" },
+                      { label: "Owe when they finish", note: d.monthly ? `about ${money(d.monthly)} a month to repay` : undefined, value: d.debt ?? 0, display: d.debt ? money(d.debt) : "Not published" },
+                    ]} />
+                  </div>
+                </div>
+                <div>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Paying it back</h3>
+                  <div className="mt-[var(--space-2)]">
+                    <MeterRow label="Reduced what they owe" note="of those who borrowed" pct={c.repay} last />
+                  </div>
+                </div>
               </div>
-              <p className={`${SMALL} mt-[var(--space-3)]`} style={{ color: "var(--muted-foreground)" }}>Pay covers everyone who enrolled and now works, finished or not, in every subject. Debt is what graduates owed on federal loans.</p>
             </Folded>
           </>
         )}
 
-        {/* the social-search answer, without embedding social media */}
         <Folded id="see" title="See it, then ask someone" open={open.has("see")} onToggle={() => toggle("see")}>
           <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
             <a href={tourUrl} target="_blank" rel="noreferrer" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>

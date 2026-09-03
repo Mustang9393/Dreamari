@@ -109,3 +109,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Professional profiles: Answers and Career posts show three, then "View all N".
 - Threads: answers, comments and follow-ups share one surface and border.
 - Ask row on Connect redrawn as a text field before it moved.
+- College pages: the numbers are pictures now. Pay by income as bars with the sticker price as a marker line; "of every 100 who apply" as a 100-dot grid; SAT and ACT as a middle-half range on the real scale; degrees and biggest programmes as bars; undergrad vs graduate, full vs part time, women vs men as split bars; where students come from as bars; pay and debt as bars on one dollar scale; scholarship, Pell and repayment as meters. One hue throughout, values in text, nothing repeated from At a glance. Every section keeps heading, subheading, body.
