@@ -158,7 +158,7 @@ export function Row({ label, value, note, last = false }: { label: string; value
         <span className={SMALL} style={{ color: "var(--foreground)" }}>{label}</span>
         {note && <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
       </span>
-      <span className={`${SMALL} flex-none font-bold tabular-nums text-right`} style={{ color: "var(--foreground)" }}>{value}</span>
+      <span className={`${SMALL} max-w-[48%] shrink-0 font-bold tabular-nums text-right`} style={{ color: "var(--foreground)" }}>{value}</span>
     </div>
   );
 }

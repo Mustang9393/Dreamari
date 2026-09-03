@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, MessagesSquare, PlayCircle } from "lucide-react";
+import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -10,6 +10,8 @@ import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/co
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 import { Donut, SplitBar } from "./viz";
+import { EXTRA } from "./extra";
+import { Segmented } from "@/components/connect/viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
@@ -19,10 +21,24 @@ import { Donut, SplitBar } from "./viz";
 const SIZE_WORD = { Small: "Small", Medium: "Mid-size", Large: "Big" } as const;
 type SectionKey = "in" | "cost" | "academics" | "study" | "who" | "life" | "after" | "see" | "sources";
 
+/** A quiet in-section disclosure: the headline rows stay, the rest wait
+ *  behind one link so a section never opens as a wall of numbers. */
+function Reveal({ label, children }: { label: string; children: React.ReactNode }) {
+  const [on, setOn] = useState(false);
+  if (on) return <>{children}</>;
+  return (
+    <button type="button" onClick={() => setOn(true)} className="dm-link mt-[var(--space-2)] flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
+      {label} <ChevronDown className="h-4 w-4" aria-hidden />
+    </button>
+  );
+}
+
 export function CollegeDetailExperience({ slug }: { slug: string }) {
   const c = collegeBySlug(slug);
   const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>(["in"]));
   const [saved, toggleSaved] = useSaved();
+  const [level, setLevel] = useState<string | null>(null);
+  const [allRows, setAllRows] = useState(false);
   const toggle = (k: SectionKey) => setOpen((cur) => { const n = new Set(cur); if (n.has(k)) n.delete(k); else n.add(k); return n; });
 
   if (!c) {
@@ -36,6 +52,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   }
 
   const d = c.detail;
+  const x = EXTRA[c.slug];
   const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few finish, under a quarter within six years." : c.control === "For profit" ? "Run for profit." : null);
   const tourUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${c.name} campus tour`)}`;
 
@@ -79,7 +96,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff" }}>{t}</li>)}
               </ul>
               <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>
-                {d?.address && !d.sample && <span className="block">{d.address}</span>}
+                {d?.address && !d.sample && (x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link block underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}</a> : <span className="block">{d.address}</span>)}
                 <span className="block">Accredited by {c.accreditor}</span>
                 {d?.partOf && <span className="block">Part of {d.partOf}</span>}
               </p>
@@ -89,9 +106,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     Their website <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
                 )}
-                <Link href={`/colleges?q=${encodeURIComponent(c.city)}`} className="dm-quiet flex min-h-[44px] items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.4)", color: "#fff" }}>
-                  Others in {c.city}
-                </Link>
+                {x?.links.aid && <a href={x.links.aid} target="_blank" rel="noreferrer" className="dm-quiet flex min-h-[44px] items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.4)", color: "#fff" }}>Financial aid <ArrowUpRight className="h-4 w-4" aria-hidden /></a>}
+                {x?.links.apply && <a href={x.links.apply} target="_blank" rel="noreferrer" className="dm-quiet flex min-h-[44px] items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.4)", color: "#fff" }}>How to apply <ArrowUpRight className="h-4 w-4" aria-hidden /></a>}
                 <SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={44} />
               </div>
             </div>
@@ -142,8 +158,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Scores of students who sent them</h3>
                       <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The middle half. Most students did not send a score, so a lower score is not a no.</p>
                       <div className="mt-[var(--space-2)]">
-                        <Row label="SAT" note={`out of 1600. ${d.scores.sentSat}% of students sent one`} value={d.scores.sat} last={!d.scores.act} />
-                        {d.scores.act && <Row label="ACT" note={d.scores.sentAct !== undefined ? `out of 36. ${d.scores.sentAct}% of students sent one` : "out of 36"} value={d.scores.act} last />}
+                        {x?.satR && x.satM ? (
+                          <>
+                            <Row label="SAT reading" note={`out of 800. ${x.satR.sent}% of students sent scores`} value={`${x.satR.lo} to ${x.satR.hi}`} />
+                            <Row label="SAT maths" note="out of 800" value={`${x.satM.lo} to ${x.satM.hi}`} last={!x.act} />
+                          </>
+                        ) : (
+                          <Row label="SAT" note={`out of 1600. ${d.scores.sentSat}% of students sent one`} value={d.scores.sat} last={!d.scores.act} />
+                        )}
+                        {x?.act ? <Row label="ACT" note={`out of 36. ${x.act.sent}% of students sent scores`} value={`${x.act.lo} to ${x.act.hi}`} last /> : d.scores.act && !x?.satR ? <Row label="ACT" note={d.scores.sentAct !== undefined ? `out of 36. ${d.scores.sentAct}% of students sent one` : "out of 36"} value={d.scores.act} last /> : null}
                       </div>
                     </div>
                   )}
@@ -162,8 +185,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                       {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
                       {d.fees !== null && <Row label="Required fees" value={d.fees === 0 ? "None" : money(d.fees)} />}
                       <Row label="Housing on campus" value={d.housing ? "Yes" : "No, commute only"} last={d.housingCost === undefined} />
-                      {d.housingCost !== undefined && <Row label={d.foodCost ? "Housing for a year" : "Housing and food for a year"} value={money(d.housingCost)} last={d.foodCost === undefined} />}
-                      {d.foodCost !== undefined && <Row label="Food for a year" value={money(d.foodCost)} last />}
+                      {d.housingCost !== undefined && <Row label={d.foodCost ? "Housing for a year" : "Housing and food for a year"} value={money(d.housingCost)} last={d.foodCost === undefined && !x?.meal} />}
+                      {d.foodCost !== undefined && <Row label="Food for a year" value={money(d.foodCost)} last={!x?.meal} />}
+                      {x?.meal && <Row label="Meal plans" value={x.meal} last />}
                     </div>
                   </div>
                 )}
@@ -177,8 +201,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   {d.bands.some((b, i) => i > 0 && b.pay < d.bands[i - 1].pay) && (
                     <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Some lower-income families here pay a little more than the group above. Aid also depends on savings and on living at home.</p>
                   )}
-                  {c.website && (
-                    <a href={c.website} target="_blank" rel="noreferrer" className="dm-link mt-[var(--space-3)] flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
+                  {(x?.links.calc || c.website) && (
+                    <a href={x?.links.calc ?? c.website} target="_blank" rel="noreferrer" className="dm-link mt-[var(--space-3)] flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
                       Work out what your family would pay <ArrowUpRight className="h-4 w-4" aria-hidden />
                     </a>
                   )}
@@ -201,14 +225,23 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Finishing</h3>
                   <div className="mt-[var(--space-2)]">
-                    <Row label="Students who finish their degree" note="within six years, counting everyone who started" value={pct(c.finish)} last={!d.finish4 && d.finish4 !== 0} />
-                    {typeof d.finish4 === "number" && <Row label="Bachelor's students who finish in four years" note="students who started here" value={`${d.finish4}%`} last />}
+                    <Row label="Finish within six years" note="everyone who started, part time and transfers included" value={pct(c.finish)} />
+                    {typeof d.finish4 === "number" && <Row label="Finish in four years" note="bachelor's students who started here" value={`${d.finish4}%`} last={!x} />}
+                    {x && (
+                      <Reveal label="More finish rates">
+                        {x.finish5 !== null && <Row label="Finish in five years" note="bachelor's students who started here" value={`${x.finish5}%`} />}
+                        {x.finish6b !== null && <Row label="Finish in six years" note="bachelor's students who started here" value={`${x.finish6b}%`} />}
+                        {x.finish6ft !== null && <Row label="Finish in six years" note="full-time students only" value={`${x.finish6ft}%`} />}
+                        <Row label="Finish within eight years" note="everyone who started" value={x.finish8 !== null ? `${x.finish8}%` : "Not published"} last />
+                      </Reveal>
+                    )}
                   </div>
                 </div>
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Staying and class size</h3>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Staying, and class size</h3>
                   <div className="mt-[var(--space-2)]">
                     <Row label="First-years who come back for year two" value={pct(c.retention)} />
+                    {x?.retPart !== null && x?.retPart !== undefined && <Row label="Part-time students who come back" value={`${x.retPart}%`} />}
                     <Row label="Students per teacher" value={d.ratio} last />
                   </div>
                 </div>
@@ -216,21 +249,47 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             </Folded>
 
             <Folded id="study" title="What you can study" open={open.has("study")} onToggle={() => toggle("study")}>
-              <div className="flex flex-col gap-[var(--space-6)]">
-                <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{d.programmeCount} programmes</h3>
-                  <div className="mt-[var(--space-2)]">
-                    {d.levels.filter((l) => l.n > 0).map((l, i, arr) => <Row key={l.label} label={/degree|certificate/i.test(l.label) ? l.label : `${l.label} degrees`} value={String(l.n)} last={i === arr.length - 1} />)}
+              {x && Object.keys(x.programmes).length > 0 ? (() => {
+                const levels = Object.keys(x.programmes);
+                const active = level && levels.includes(level) ? level : levels.includes("Bachelor's degrees") ? "Bachelor's degrees" : levels[0];
+                const rows = x.programmes[active] ?? [];
+                const total = x.counts[active] ?? rows.length;
+                const shown = allRows ? rows : rows.slice(0, 5);
+                return (
+                  <div className="flex flex-col gap-[var(--space-4)]">
+                    <Segmented ariaLabel="Programme level" value={active} onChange={(k) => { setLevel(k); setAllRows(false); }} options={levels.map((l) => ({ key: l, label: l.replace(/ degrees$/, "").replace("Graduate certificates", "Grad certificates") }))} />
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{total} {active.toLowerCase()}</h3>
+                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Biggest first. Graduates a year, their share of all graduates, pay one year out.</p>
+                      <div className="mt-[var(--space-2)]">
+                        {shown.map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads.toLocaleString("en-US")} graduates a year, ${p.share} of all graduates${p.pay === "not reported" ? ". Pay not reported" : p.pay === "too few graduates" ? ". Too few graduates to publish pay" : ""}`} value={p.pay.startsWith("$") ? `${p.pay} a year` : ""} last={i === arr.length - 1} />)}
+                      </div>
+                      {rows.length > 5 && !allRows && (
+                        <button type="button" onClick={() => setAllRows(true)} className="dm-link mt-[var(--space-2)] flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>{rows.length} biggest <ChevronDown className="h-4 w-4" aria-hidden /></button>
+                      )}
+                      {allRows && total > rows.length && c.website && (
+                        <a href={c.website} target="_blank" rel="noreferrer" className="dm-link mt-[var(--space-2)] flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>All {total} on the college&apos;s site <ArrowUpRight className="h-4 w-4" aria-hidden /></a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })() : (
+                <div className="flex flex-col gap-[var(--space-6)]">
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{d.programmeCount} programmes</h3>
+                    <div className="mt-[var(--space-2)]">
+                      {d.levels.filter((l) => l.n > 0).map((l, i, arr) => <Row key={l.label} label={/degree|certificate/i.test(l.label) ? l.label : `${l.label} degrees`} value={String(l.n)} last={i === arr.length - 1} />)}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
+                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, their share of everyone who graduates here, and pay one year out.</p>
+                    <div className="mt-[var(--space-2)]">
+                      {d.programmes.map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} graduates a year, ${p.share}% of all graduates`} value={p.pay === "not published" ? "Pay not published" : `${p.pay} a year`} last={i === arr.length - 1} />)}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Graduates a year, their share of everyone who graduates here, and pay one year out.</p>
-                  <div className="mt-[var(--space-2)]">
-                    {d.programmes.map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} graduates a year, ${p.share}% of all graduates`} value={p.pay === "not published" ? "Pay not published" : `${p.pay} a year`} last={i === arr.length - 1} />)}
-                  </div>
-                </div>
-              </div>
+              )}
             </Folded>
 
             <Folded id="who" title="Who is there" open={open.has("who")} onToggle={() => toggle("who")}>
@@ -262,7 +321,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Ways to study here</h3>
-                    <div className="mt-[var(--space-3)]">{d.ways.length ? <DotList items={d.ways} accent={ACCENT} /> : <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>None of the extras: no study abroad, no ROTC, no evening classes.</p>}</div>
+                    <div className="mt-[var(--space-2)]">
+                      {x && x.ways.length ? x.ways.map((w, i, arr) => <Row key={w.name} label={w.name} note={w.note} value="" last={i === arr.length - 1} />) : d.ways.length ? <DotList items={d.ways} accent={ACCENT} /> : <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>None of the extras: no study abroad, no ROTC, no evening classes.</p>}
+                    </div>
                   </div>
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What the college helps with</h3>
@@ -273,7 +334,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 {d.sport && (
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
-                    <div className="mt-[var(--space-2)]"><Row label="League" value={d.sport.league} /><Row label="Students on a team" value={d.sport.students.toLocaleString("en-US")} last /></div>
+                    <div className="mt-[var(--space-2)]">
+                      <Row label="League" value={d.sport.league} />
+                      <Row label="Students on a team" value={d.sport.students.toLocaleString("en-US")} last={!x?.teamMen} />
+                      {x?.teamMen !== null && x?.teamMen !== undefined && <Row label="Men" value={x.teamMen.toLocaleString("en-US")} />}
+                      {x?.teamWomen !== null && x?.teamWomen !== undefined && <Row label="Women" value={x.teamWomen.toLocaleString("en-US")} last />}
+                    </div>
                     <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
                     <p className="mt-[var(--space-3)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Clubs are not counted by any government survey. The college&apos;s own site lists them.</p>
                   </div>
@@ -288,7 +354,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <Row label="Typical pay six years after starting" note="everyone who enrolled, finished or not" value={d.pay6 ? `${money(d.pay6)} a year` : "Not published"} />
                 <Row label="Owed when they finish" note="federal loans" value={d.debt ? money(d.debt) : "Not published"} />
                 {d.monthly ? <Row label="Loan payment each month" value={money(d.monthly)} /> : null}
-                <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last />
+                <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last={x?.fallBehind === null || x?.fallBehind === undefined} />
+                {x?.fallBehind !== null && x?.fallBehind !== undefined && <Row label="Borrowers who fall behind on their loans" value={`${x.fallBehind}%`} last />}
               </div>
             </Folded>
           </>
