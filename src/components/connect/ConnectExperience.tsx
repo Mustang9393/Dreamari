@@ -1742,7 +1742,8 @@ function ComingSoonCard() {
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
         <h3 className="pr-[104px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>More communities</h3>
-        <div className="mt-[10px] flex items-center justify-center border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
+        {/* the one action sits in the middle of the card, not on the title row */}
+        <div className="flex flex-1 items-center justify-center py-[var(--space-6)]" style={{ textShadow: "none" }}>
           <button
             type="button"
             onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
