@@ -52,7 +52,7 @@ export function DotGrid({ pct, figure, note }: { pct: number; figure: string; no
   const on = Math.round(pct);
   return (
     <figure className="m-0 flex flex-col gap-[var(--space-3)]">
-      <div className="grid w-full max-w-[560px] gap-[5px]" style={{ gridTemplateColumns: "repeat(20, minmax(0, 1fr))" }} role="img" aria-label={`${on} of every 100 who apply get in`}>
+      <div className="grid w-full max-w-[440px] gap-[5px]" style={{ gridTemplateColumns: "repeat(20, minmax(0, 1fr))" }} role="img" aria-label={`${on} of every 100 who apply get in`}>
         {Array.from({ length: 100 }, (_, i) => (
           <span key={i} className="aspect-square w-full rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
         ))}
