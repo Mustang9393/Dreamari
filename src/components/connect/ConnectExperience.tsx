@@ -534,7 +534,7 @@ function EventMarks({ host, size = "md", ink: inkColor }: { host: string; size?:
       <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint, filter: dark ? "none" : `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
         <path d="M6 6 L18 18 M18 6 L6 18" />
       </svg>
-      <span className="relative flex flex-none items-center justify-end" style={{ width: box.slot, height: box.h }}>
+      <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
         {COMPANY_MARKS[partner] ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (
@@ -603,18 +603,21 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
          stat tiles; the companies row; one action at the right. */}
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* the title carries the card: bigger than anything under it */}
-        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name}</h3>
+        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
 
-        <div className="mt-auto grid grid-cols-2 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
-          <StatTile value={community.students} label="Students" />
-          <StatTile value={community.activePros} label="Pros" />
-        </div>
-        {/* three company marks and how many more, no words */}
-        <div className="mt-[10px] flex min-w-0 items-center gap-[6px]" style={{ textShadow: "none" }}>
-          {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
-          {community.professionalsFrom.length > 3 && (
-            <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
-          )}
+        {/* stats and logos share one left-aligned column: the two tiles are
+           exactly as wide as the band of marks under them */}
+        <div className="mt-auto flex w-fit max-w-full flex-col gap-[10px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
+          <div className="grid grid-cols-2 gap-[8px]">
+            <StatTile value={community.students} label="Students" />
+            <StatTile value={community.activePros} label="Pros" />
+          </div>
+          <div className="flex min-w-0 items-center gap-[6px]">
+            {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
+            {community.professionalsFrom.length > 3 && (
+              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
+            )}
+          </div>
         </div>
         <div className="pointer-events-auto mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           {/* Ghost, all caps, accent-tinted, arrow on Open: the card's original
@@ -1638,12 +1641,13 @@ function HomeView({
                      company card on a volunteer's dashboard: nothing behind the
                      words but the colour (direct feedback: legibility) */}
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${ink} 28%, transparent)` }} />
-                  <div className="relative z-10 flex flex-1 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[10px]">
-                    <div className="min-w-[180px] flex-1 self-start">
-                      <h3 className="min-h-[50px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: ink }}>{event.name}</h3>
-                      <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)` }}>{event.date} · {event.location}</p>
-                    </div>
-                    <span className="ml-auto flex"><EventMarks host={event.host} ink={ink} /></span>
+                  <div className="relative z-10 flex flex-1 flex-col">
+                    <h3 className="text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: ink }}>{event.name}</h3>
+                    <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)` }}>{event.date} · {event.location}</p>
+                    {/* the lockup lives in one place on every card: bottom-left of
+                       the upper area, flush with the text. DO starts, the × sits
+                       and the partner ends at the same pixels card to card. */}
+                    <div className="mt-auto pt-[var(--space-6)]"><EventMarks host={event.host} ink={ink} /></div>
                   </div>
                   <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${ink} 18%, transparent)` }}>
                     <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 62%, transparent)` }}>
