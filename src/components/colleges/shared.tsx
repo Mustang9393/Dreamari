@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
-import { ArrowRight, Bookmark, GraduationCap, Landmark } from "lucide-react";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { SMALL } from "@/components/career/CareerDetailExperience";
+import { Bookmark, GraduationCap, Landmark } from "lucide-react";
+import { PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, money, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
@@ -77,60 +76,58 @@ export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle:
   );
 }
 
-/** The result card in the community card's shape (the CEO's approved card):
- *  the campus photo full-bleed, dimmed and frosted so type wins; name and
- *  place at the top; three stat tiles; the three words; one ghost action.
- *  Figures sit at body size: nothing on the card outranks its title. */
-const GRAIN = "/images/connect/covers/grain.png";
-export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
-  const img = collegeImage(c);
+/** The college's mark on a white disc: seals and logos were drawn for
+ *  white paper, so they read there; a letter stands in when we have none. */
+export function MarkBadge({ c, size = 44 }: { c: College; size?: number }) {
   const mark = collegeMark(c);
   return (
-    <article
-      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-      style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
-    >
-      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" style={{ filter: "brightness(0.78) saturate(0.92)" }} />
-        ) : (
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }}>
-            {mark && <Image src={mark} alt="" fill sizes="160px" className="object-contain p-[22%] opacity-40" />}
-          </span>
-        )}
-        <CardProgressiveBlur size="74%" />
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${ACCENT} 12%, transparent), transparent 60%)` }} />
-        <span className="absolute inset-0" style={{ backgroundImage: `url(${GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
-      </span>
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: ACCENT }} />
+    <span className="relative flex flex-none items-center justify-center overflow-hidden rounded-full border-2" style={{ width: size, height: size, background: "#fff", borderColor: "#0e0c20", boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }} aria-hidden>
+      {mark ? (
+        <Image src={mark} alt="" fill sizes={`${size * 2}px`} className="object-contain p-[12%]" />
+      ) : (
+        <span className="text-[18px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#0e0c20" }}>{c.name[0]}</span>
+      )}
+    </span>
+  );
+}
 
-      {/* the whole card opens the college */}
+/** The result card: the campus photo is only a cover, the college's mark
+ *  sits on its edge, and every word lives below on a calm panel. Two
+ *  sentences carry the decision; the three words and Compare close it. */
+export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
+  const img = collegeImage(c);
+  return (
+    <article className="dm-tap group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, borderColor: compared ? `color-mix(in srgb, ${ACCENT} 60%, transparent)` : PANEL.borderColor }}>
       <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      <div className="relative aspect-[5/3] w-full overflow-hidden" aria-hidden>
+        {img ? (
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+        ) : (
+          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
+        )}
+        <span className="absolute inset-x-0 bottom-0 h-[40%]" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55), transparent)" }} />
+      </div>
+      <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      <span className="absolute left-[var(--space-4)] z-20" style={{ top: "calc(60% - 22px)" }}><MarkBadge c={c} /></span>
 
-      <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
-        <h3 className="pr-[48px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
-        <p className="mt-[3px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
-
-        {/* two plain sentences instead of stat boxes: the cost a family
-           pays after grants, and how many finish. Nothing else on the card. */}
-        <p className="mt-auto pt-[var(--space-5)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+      <div className="relative z-[5] flex flex-1 flex-col gap-[var(--space-3)] px-[var(--space-4)] pt-[30px] pb-[var(--space-4)]">
+        <div className="flex flex-col gap-[2px]">
+          <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</h3>
+          <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.stateName}</p>
+        </div>
+        <p className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>
           {c.netPrice === null ? "Yearly cost not published." : `About ${money(Math.round(c.netPrice / 100) * 100)} a year after grants.`}
-          {c.finish !== null && <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>{c.finish} in 100 students finish.</span>}
+          {c.finish !== null && <span className="block" style={{ color: "var(--muted-foreground)" }}>{c.finish} in 100 students finish.</span>}
         </p>
-        <ul className="mt-[8px] flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
-          {tags(c).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.1)", color: "#fff" }}>{t}</li>)}
-          {c.admission === "open" && <li className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 22%, rgba(12,16,35,0.6))", color: "#fff" }}>Everyone gets in</li>}
-        </ul>
-        <div className="pointer-events-auto mt-[10px] flex items-center justify-between border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
-          {onCompare ? (
-            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] uppercase" style={{ color: compared ? "#fff" : "rgba(255,255,255,0.72)", background: compared ? `color-mix(in srgb, ${ACCENT} 45%, transparent)` : "transparent" }}>
-              <Landmark className="h-[14px] w-[14px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
+        <div className="mt-auto flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: RULE }}>
+          <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">
+            {tags(c).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "var(--foreground)" }}>{t}</li>)}
+          </ul>
+          {onCompare && (
+            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-20 flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold" style={{ color: compared ? SOFT : "var(--muted-foreground)", background: compared ? `color-mix(in srgb, ${ACCENT} 16%, transparent)` : "transparent" }}>
+              <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
             </button>
-          ) : <span />}
-          <Link href={`/colleges/${c.slug}`} className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${ACCENT} 45%, #FFFFFF)` }}>
-            Open <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
-          </Link>
+          )}
         </div>
       </div>
     </article>

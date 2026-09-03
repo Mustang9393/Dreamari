@@ -229,25 +229,30 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
   );
 }
 
-// ---- the tray: every filter, over the results, results still visible -----
+// ---- the tray: every filter as short checkbox lists, over the results ----
 
 function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <div role="group" aria-label={title} className="flex flex-col gap-[12px] border-b py-[var(--space-5)]" style={{ borderColor: RULE }}>
-      <div className="flex flex-col gap-[2px]">
-        <h3 className="text-[16px] leading-[20px] font-bold" style={DISPLAY}>{title}</h3>
-        {note && <p className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{note}</p>}
-      </div>
-      <div className="flex flex-wrap gap-[8px]">{children}</div>
+    <div role="group" aria-label={title} className="border-b py-[var(--space-3)]" style={{ borderColor: RULE }}>
+      <h3 className="px-[var(--space-2)] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{title}{note ? <span className="ml-[6px] font-medium normal-case tracking-normal">{note}</span> : null}</h3>
+      <ul className="mt-[4px] flex flex-col">{children}</ul>
     </div>
   );
 }
 
-function Chip({ on, onToggle, children }: { on: boolean; onToggle: () => void; children: React.ReactNode }) {
+/** One row: a small square (or dot) at the left, the label, an optional
+ *  count at the right. 40px tall, the whole row is the target. */
+function Option({ on, onToggle, children, count, radio = false }: { on: boolean; onToggle: () => void; children: React.ReactNode; count?: number; radio?: boolean }) {
   return (
-    <button type="button" role="checkbox" aria-checked={on} onClick={onToggle} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[14px] leading-[18px] font-semibold" style={on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-      {children}
-    </button>
+    <li>
+      <button type="button" role={radio ? "radio" : "checkbox"} aria-checked={on} onClick={onToggle} className="dm-quiet flex min-h-[40px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[var(--space-2)] text-left text-[14px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>
+        <span aria-hidden className={`flex size-[18px] flex-none items-center justify-center border ${radio ? "rounded-full" : "rounded-[4px]"}`} style={{ borderColor: on ? ACCENT : "rgba(255,255,255,0.35)", background: on ? ACCENT : "transparent" }}>
+          {on && (radio ? <span className="size-[7px] rounded-full" style={{ background: "#fff" }} /> : <svg viewBox="0 0 12 12" className="size-[11px]" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 6.5 5 9l4.5-5.5" /></svg>)}
+        </span>
+        <span className="min-w-0 flex-1 truncate">{children}</span>
+        {typeof count === "number" && <span className="flex-none text-[12px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{count}</span>}
+      </button>
+    </li>
   );
 }
 
@@ -255,54 +260,54 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="All filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+    <div className="fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
       {/* the results stay visible behind: dimmed and softened, never black */}
       <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)" }} />
-      <div className="relative z-[1] flex max-h-[88dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[400px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
-        <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <h2 className="text-[20px] leading-[25px] font-extrabold" style={DISPLAY}>All filters</h2>
+      <div className="relative z-[1] flex max-h-[86dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: RULE }}>
+          <h2 className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>Filters</h2>
           <span className="flex items-center gap-[var(--space-2)]">
-            <button type="button" onClick={onClear} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Clear</button>
+            <button type="button" onClick={onClear} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Clear</button>
             <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
           </span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-5)]">
-          <Group title="Where" note="Pick any states you are open to.">
-            {STATES.slice(0, statesOpen ? undefined : 6).map((s) => (
-              <Chip key={s.code} on={filters.states.has(s.code)} onToggle={() => set({ states: toggleIn(filters.states, s.code) })}>{s.name} <span style={{ opacity: 0.7 }}>{s.n}</span></Chip>
-            ))}
-            {STATES.length > 6 && <button type="button" onClick={() => setStatesOpen((v) => !v)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: SOFT }}>{statesOpen ? "Fewer" : `All ${STATES.length}`} <ChevronDown className="h-4 w-4" style={{ transform: statesOpen ? "rotate(180deg)" : undefined }} aria-hidden /></button>}
+        <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-3)]">
+          <Group title="Where">
+            {STATES.slice(0, statesOpen ? undefined : 6).map((s) => <Option key={s.code} on={filters.states.has(s.code)} onToggle={() => set({ states: toggleIn(filters.states, s.code) })} count={s.n}>{s.name}</Option>)}
+            {STATES.length > 6 && <li><button type="button" onClick={() => setStatesOpen((v) => !v)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[4px] px-[var(--space-2)] text-[13px] font-bold" style={{ color: SOFT }}>{statesOpen ? "Fewer states" : `All ${STATES.length} states`} <ChevronDown className="h-4 w-4" style={{ transform: statesOpen ? "rotate(180deg)" : undefined }} aria-hidden /></button></li>}
           </Group>
-          <Group title="What it costs" note="What a year costs a family after grants.">
-            <Chip on={filters.costCap === null} onToggle={() => set({ costCap: null })}>Any</Chip>
-            {COST_CAPS.map((cap) => <Chip key={cap} on={filters.costCap === cap} onToggle={() => set({ costCap: filters.costCap === cap ? null : cap })}>Under {money(cap)}</Chip>)}
+          <Group title="Cost for a year" note="after grants">
+            <Option radio on={filters.costCap === null} onToggle={() => set({ costCap: null })}>Any</Option>
+            {COST_CAPS.map((cap) => <Option key={cap} radio on={filters.costCap === cap} onToggle={() => set({ costCap: cap })}>Under {money(cap)}</Option>)}
           </Group>
           <Group title="Type">
-            <Chip on={filters.levels.has("Certificates")} onToggle={() => set({ levels: toggleIn(filters.levels, "Certificates") })}>Trade school</Chip>
-            <Chip on={filters.levels.has("Associate degrees")} onToggle={() => set({ levels: toggleIn(filters.levels, "Associate degrees") })}>2-year</Chip>
-            <Chip on={filters.levels.has("Bachelor's degrees")} onToggle={() => set({ levels: toggleIn(filters.levels, "Bachelor's degrees") })}>4-year</Chip>
+            <Option on={filters.levels.has("Certificates")} onToggle={() => set({ levels: toggleIn(filters.levels, "Certificates") })}>Trade school</Option>
+            <Option on={filters.levels.has("Associate degrees")} onToggle={() => set({ levels: toggleIn(filters.levels, "Associate degrees") })}>2-year</Option>
+            <Option on={filters.levels.has("Bachelor's degrees")} onToggle={() => set({ levels: toggleIn(filters.levels, "Bachelor's degrees") })}>4-year</Option>
           </Group>
           <Group title="Who runs it">
-            {(["Public", "Private", "For profit"] as Control[]).map((c) => <Chip key={c} on={filters.controls.has(c)} onToggle={() => set({ controls: toggleIn(filters.controls, c) })}>{c}</Chip>)}
+            {(["Public", "Private", "For profit"] as Control[]).map((c) => <Option key={c} on={filters.controls.has(c)} onToggle={() => set({ controls: toggleIn(filters.controls, c) })}>{c}</Option>)}
           </Group>
-          <Group title="Size" note="Small is under 5,000 students. Large is over 20,000.">
-            {(["Small", "Medium", "Large"] as Size[]).map((s) => <Chip key={s} on={filters.sizes.has(s)} onToggle={() => set({ sizes: toggleIn(filters.sizes, s) })}>{s}</Chip>)}
+          <Group title="Size">
+            <Option on={filters.sizes.has("Small")} onToggle={() => set({ sizes: toggleIn(filters.sizes, "Small") })}>Small, under 5,000 students</Option>
+            <Option on={filters.sizes.has("Medium")} onToggle={() => set({ sizes: toggleIn(filters.sizes, "Medium") })}>Medium, 5,000 to 20,000</Option>
+            <Option on={filters.sizes.has("Large")} onToggle={() => set({ sizes: toggleIn(filters.sizes, "Large") })}>Large, over 20,000</Option>
           </Group>
           <Group title="Where it is">
-            {(["City", "Suburb", "Town", "Countryside"] as Setting[]).map((s) => <Chip key={s} on={filters.settings.has(s)} onToggle={() => set({ settings: toggleIn(filters.settings, s) })}>{s}</Chip>)}
+            {(["City", "Suburb", "Town", "Countryside"] as Setting[]).map((s) => <Option key={s} on={filters.settings.has(s)} onToggle={() => set({ settings: toggleIn(filters.settings, s) })}>{s}</Option>)}
           </Group>
-          <Group title="Getting in" note="What you would have to send them.">
-            {(["open", "grades", "more"] as Admission[]).map((a) => <Chip key={a} on={filters.admissions.has(a)} onToggle={() => set({ admissions: toggleIn(filters.admissions, a) })}>{ADMISSION_WORD[a]}</Chip>)}
+          <Group title="Getting in">
+            {(["open", "grades", "more"] as Admission[]).map((a) => <Option key={a} on={filters.admissions.has(a)} onToggle={() => set({ admissions: toggleIn(filters.admissions, a) })}>{ADMISSION_WORD[a]}</Option>)}
           </Group>
           <Group title="Also">
-            <Chip on={filters.also.has("tribal")} onToggle={() => set({ also: toggleIn(filters.also, "tribal") })}>Tribal college</Chip>
-            <Chip on={filters.also.has("religious")} onToggle={() => set({ also: toggleIn(filters.also, "religious") })}>Religious</Chip>
-            <Chip on={filters.also.has("forProfit")} onToggle={() => set({ also: toggleIn(filters.also, "forProfit") })}>Run for profit</Chip>
+            <Option on={filters.also.has("tribal")} onToggle={() => set({ also: toggleIn(filters.also, "tribal") })}>Tribal college</Option>
+            <Option on={filters.also.has("religious")} onToggle={() => set({ also: toggleIn(filters.also, "religious") })}>Religious</Option>
+            <Option on={filters.also.has("forProfit")} onToggle={() => set({ also: toggleIn(filters.also, "forProfit") })}>Run for profit</Option>
           </Group>
-          <div className="h-[var(--space-4)]" />
+          <div className="h-[var(--space-3)]" />
         </div>
-        <div className="border-t p-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <button type="button" onClick={onClose} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+        <div className="border-t p-[var(--space-3)]" style={{ borderColor: RULE }}>
+          <button type="button" onClick={onClose} className="dm-solid flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
             Show {count} {count === 1 ? "college" : "colleges"}
           </button>
         </div>

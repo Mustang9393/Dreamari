@@ -8,7 +8,7 @@ import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } fr
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, collegeBySlug, money } from "./data";
-import { ACCENT, CollegePicture, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
@@ -67,6 +67,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[60%]">
+              <MarkBadge c={c} size={52} />
               <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={DISPLAY}>{c.name}</h1>
               <p className={LABEL} style={{ color: "rgba(255,255,255,0.85)" }}>{c.city}, {c.stateName} · {tags(c).join(" · ")}</p>
               <p className="text-[13px] leading-[17px]" style={{ color: "rgba(255,255,255,0.6)" }}>Accredited by {c.accreditor}{d?.partOf ? ` · Part of ${d.partOf}` : ""}</p>

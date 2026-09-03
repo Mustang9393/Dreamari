@@ -98,3 +98,8 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Data: 30 colleges (10 New Jersey, 20 South Dakota). 16 with figures transcribed from the live site; the rest carry generated sample detail in the same shape, marked in the page's sources. Real campus photos from Wikimedia Commons with licences recorded.
 - Copy: "Really pay" replaced everywhere with "Cost for a year, after grants" and plain sentences.
 - Sitewide search was tried and pulled the same night: too heavy and busy. College search stays its own page for now; we come back to sitewide search with a calmer design. Explore accepts a search from the URL, which stays.
+
+## 4 September, morning (on main)
+- College cards: the campus photo is only a cover now, with the college's logo or seal on a white disc at its edge. All words sit below on a calm panel: name, place, two sentences, three words, Compare. No text over photos.
+- Filters: the tray is short checkbox and radio lists with small headings instead of rows of chips. Same filters, half the noise.
+- Sitewide search is pinned. Find a college is reached from the hamburger.
