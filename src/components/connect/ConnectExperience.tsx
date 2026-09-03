@@ -570,7 +570,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
   const accent = communityAccent(community);
   return (
     <div
-      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      className="dm-tap group @container relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
       {/* Our full-bleed photo, but dimmed and frosted so type wins: the photo
@@ -615,16 +615,18 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
-          {/* two marks on a phone, three from sm, so the action always breathes */}
+          {/* the third mark shows only when the card itself is wide enough
+             (a container query, not a screen breakpoint) for three marks,
+             the count and Open to sit on one row without touching */}
           <div className="flex min-w-0 items-center gap-[6px]">
             {community.professionalsFrom.slice(0, 3).map((name, index) => (
-              <span key={name} className={index === 2 ? "hidden sm:flex" : "flex"}><CompanyChip name={name} /></span>
+              <span key={name} className={index === 2 ? "hidden @[400px]:flex" : "flex"}><CompanyChip name={name} /></span>
             ))}
             {community.professionalsFrom.length > 2 && (
-              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold sm:hidden" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 2}</span>
+              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold @[400px]:hidden" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 2}</span>
             )}
             {community.professionalsFrom.length > 3 && (
-              <span className="hidden h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold sm:flex" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
+              <span className="hidden h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold @[400px]:flex" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
             )}
           </div>
           <button
