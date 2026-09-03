@@ -424,6 +424,32 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
   );
 }
 
+/** Brand colours for the one place a company is the subject, not a tag: the
+ *  volunteer's "Your company" card. Primary brand colour and the ink that
+ *  reads on it (dark ink on the light brands: EY yellow, Amazon orange). */
+export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
+  "JPMorgan Chase": { bg: "#5B3A29", ink: "#FFFFFF" },
+  Amazon: { bg: "#FF9900", ink: "#131921" },
+  EY: { bg: "#FFE600", ink: "#2E2E38" },
+  Google: { bg: "#4285F4", ink: "#FFFFFF" },
+  Deloitte: { bg: "#0F1F16", ink: "#86BC25" },
+  "Morgan Stanley": { bg: "#002B51", ink: "#FFFFFF" },
+  Microsoft: { bg: "#0078D4", ink: "#FFFFFF" },
+  Meta: { bg: "#0866FF", ink: "#FFFFFF" },
+  Apple: { bg: "#1D1D1F", ink: "#F5F5F7" },
+  "CVS Health": { bg: "#CC0000", ink: "#FFFFFF" },
+  "Johnson & Johnson": { bg: "#D51900", ink: "#FFFFFF" },
+  Pfizer: { bg: "#0000C9", ink: "#FFFFFF" },
+  "Mayo Clinic": { bg: "#0057B8", ink: "#FFFFFF" },
+  Disney: { bg: "#113CCF", ink: "#FFFFFF" },
+  Nike: { bg: "#111111", ink: "#FFFFFF" },
+  Spotify: { bg: "#1DB954", ink: "#191414" },
+  Netflix: { bg: "#141414", ink: "#E50914" },
+  Adobe: { bg: "#FA0F00", ink: "#FFFFFF" },
+  "Goldman Sachs": { bg: "#7399C6", ink: "#FFFFFF" },
+  Blackstone: { bg: "#000000", ink: "#FFFFFF" },
+};
+
 /** The bare white-silhouette mark, no chip: for a line like "Brand
  *  Strategist at [EY]" beside text, sized so the letters sit at text
  *  x-height (a wordmark 11px tall, a compact symbol 14px). Falls back to the

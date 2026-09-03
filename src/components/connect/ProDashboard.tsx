@@ -6,7 +6,7 @@ import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS } from "./data";
-import { Avatar, CompanyChip, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
+import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries } from "./viz";
 
@@ -281,17 +281,25 @@ export function ProDashboardView({ onBack }: { onBack: () => void }) {
             </div>
           </Panel>
 
-          {/* company-level impact, the employer's story */}
-          <Panel id="company-title" title="Your company">
-            <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-              <CompanyChip name={pro.org} tone="surface" size="lg" />
-              <dl className="grid basis-full grid-cols-3 gap-[var(--space-3)] sm:flex-1 sm:basis-auto">
-                {[["42", "pros"], ["14,000", "students"], ["2,300", "answers"]].map(([v, l]) => (
-                  <div key={l} className="flex flex-col"><dd className="order-1 text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</dd><dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</dt></div>
-                ))}
-              </dl>
-            </div>
-          </Panel>
+          {/* company-level impact, in the company's own colours: the one place
+             the employer is the subject rather than a tag */}
+          {(() => {
+            const brand = COMPANY_BRAND[pro.org] ?? { bg: "#1c1a2e", ink: "#FFFFFF" };
+            return (
+              <section aria-label={`${pro.org} on Dreamari`} className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: `linear-gradient(135deg, ${brand.bg} 0%, color-mix(in srgb, ${brand.bg} 78%, #000000) 100%)`, borderColor: `color-mix(in srgb, ${brand.ink} 22%, transparent)`, color: brand.ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
+                <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-25 blur-[60px]" style={{ background: brand.ink }} />
+                <div className="relative flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+                  <CompanyMark name={pro.org} ink={brand.ink} height={26} />
+                  <span className="text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${brand.ink} 78%, transparent)` }}>on Dreamari · 2026</span>
+                </div>
+                <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${brand.ink} 22%, transparent)` }}>
+                  {[["42", "pros"], ["14,000", "students"], ["2,300", "answers"]].map(([v, l]) => (
+                    <div key={l} className="flex flex-col"><dd className="order-1 text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{v}</dd><dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: `color-mix(in srgb, ${brand.ink} 78%, transparent)` }}>{l}</dt></div>
+                  ))}
+                </dl>
+              </section>
+            );
+          })()}
 
           {/* recognition a professional can actually use: the card itself is the
              section, nothing wrapped around it */}
