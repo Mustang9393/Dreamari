@@ -131,8 +131,10 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           </p>
         </div>
 
-        {/* the search: one box, results change as you type */}
-        <label className="flex min-h-[56px] items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: q ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
+        {/* the search: one box, results change as you type, and the door to
+           every filter fixed beside it (never off the edge of a scroll row) */}
+        <div className="flex items-stretch gap-[var(--space-3)]">
+        <label className="flex min-h-[56px] min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: q ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
           <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? SOFT : "var(--muted-foreground)" }} />
           <span className="sr-only">Search colleges by name, city or state</span>
           <input
@@ -152,6 +154,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             </button>
           )}
         </label>
+        <button type="button" onClick={() => setTrayOpen(true)} aria-haspopup="dialog" aria-expanded={trayOpen} aria-label={`Filters${applied.length ? `, ${applied.length} on` : ""}`} className="dm-quiet flex min-h-[56px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-4)] text-[15px] leading-[20px] font-semibold" style={{ ...PANEL, borderColor: applied.length ? ACCENT : PANEL.borderColor, color: "var(--foreground)" }}>
+          <SlidersHorizontal className="h-5 w-5" aria-hidden />
+          <span className="hidden sm:inline">Filters</span>
+          {applied.length > 0 && <span className="flex size-[22px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: ACCENT, color: "#fff" }}>{applied.length}</span>}
+        </button>
+        </div>
 
         {/* quick picks + the door to every other filter */}
         <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none]" role="group" aria-label="Quick filters">
@@ -160,9 +168,6 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
               {p.label}
             </button>
           ))}
-          <button type="button" onClick={() => setTrayOpen(true)} aria-haspopup="dialog" aria-expanded={trayOpen} className="dm-quiet flex min-h-[38px] flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap" style={{ background: "var(--glass-surface-1)", borderColor: applied.length ? ACCENT : "var(--glass-border)", color: "var(--foreground)" }}>
-            <SlidersHorizontal className="h-4 w-4" aria-hidden /> All filters{applied.length ? ` · ${applied.length}` : ""}
-          </button>
         </div>
 
         {/* what is applied from the tray, each removable */}
