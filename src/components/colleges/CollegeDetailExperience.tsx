@@ -125,10 +125,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Cost for a year, by family income</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>After grants and scholarships.</p>
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What your family would pay for a year</h3>
+                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The average bill after grants and scholarships, by what the family earns.</p>
                   <div className="mt-[var(--space-2)]">
-                    {d.bands.map((b, i) => <Row key={b.label} label={`Family earns ${b.label.toLowerCase()}`} value={money(b.pay)} last={i === d.bands.length - 1} />)}
+                    {d.bands.map((b, i) => <Row key={b.label} label={`If your family earns ${b.label.toLowerCase()}`} value={`${money(b.pay)} a year`} last={i === d.bands.length - 1} />)}
                   </div>
                 </div>
                 {(d.tuitionInState !== null || d.housing) && (
