@@ -46,13 +46,13 @@ export function HBars({ rows, marker, unit = "" }: { rows: { label: string; valu
 }
 
 /** One hundred people, some of them let in, spread across the card as a
- *  band that fills the card's width with whole rows: 25 across on phones
- *  (four rows), 50 across from tablet up (two rows). The figure follows. */
+ *  band that fills the card's width in whole rows only: 20 across on phones
+ *  (five rows), 50 across from tablet up (two rows). Never a ragged row. */
 export function DotGrid({ pct, figure, note }: { pct: number; figure: string; note?: string }) {
   const on = Math.round(pct);
   return (
     <figure className="m-0 flex flex-col gap-[var(--space-3)]">
-      <div className="grid w-full gap-[5px] grid-cols-[repeat(25,minmax(0,1fr))] md:gap-[6px] md:grid-cols-[repeat(50,minmax(0,1fr))]" role="img" aria-label={`${on} of every 100 who apply get in`}>
+      <div className="grid w-full gap-[5px] grid-cols-[repeat(20,minmax(0,1fr))] md:gap-[6px] md:grid-cols-[repeat(50,minmax(0,1fr))]" role="img" aria-label={`${on} of every 100 who apply get in`}>
         {Array.from({ length: 100 }, (_, i) => (
           <span key={i} className="aspect-square w-full rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
         ))}
