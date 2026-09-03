@@ -1,86 +1,92 @@
 # Dreamari changelog · 3 September 2026
 
-Plain-English list of today's updates. Everything below is on the live site after this push.
+Plain-English summary for the team. Everything below is live on main and demo. Connect 2.0 was started from scratch today and iterated to the state described here; each item gives where we started and where we ended.
 
-## Connect (the big one)
-- Connect now has one clean landing: the Community/Events switch, an "Ask a question" row, your latest questions right under it, then the community cards. The descriptive lines under the title are gone.
-- Your latest questions show who answered (with their photo) or "Waiting for an answer". No bell, no badge. More than two shows "See all".
-- Asking a question opens a simple sheet. It picks the right community from your words, shows any question that was already answered so you can read it right away, and blocks phone numbers or usernames before posting.
-- People to Follow moved below the communities and now shows a portrait, name, job and company logo with one Follow button.
-- Saved answers and posts have their own page. Report has a real flow with reasons.
-- Community boards have one row of tabs (Questions, Posts, About) with the cards straight on the page.
-- Every answer now has a Follow button for the professional who wrote it.
-- Every professional's profile has an About section (education, career journey, what they can help with) and at least two posts.
-- Company logos appear wherever a company is named, always in the same chip style. Goldman Sachs and Blackstone logos added.
-- Words simplified for 8th graders throughout (Posts, Top answer, Save, Pro, Waiting).
+## Connect 2.0 · features built today
 
-## Volunteer dashboard (new)
-- Two tabs: My Profile and My Impact.
-- My Profile: questions routed to you with Answer or Skip (Skip can be undone), your posts with a Create post flow, your communities.
-- My Impact: six numbers with how they moved, a 30-day chart, your activity status (Gold, Silver, etc., private to you), your company card in the company's own colours, and a shareable 2026 Impact Summary card.
-- Every volunteer has their own dashboard. Pick any of the 15 from the row of faces.
+**Connect landing**
+- Started: one page with descriptive text under the title, a notifications idea, and people above communities.
+- Ended: a clean landing. Community/Events switch, an "Ask a question" row, your latest questions right under it (who answered, with their photo, or "Waiting"), then the community cards, then People to Follow. No bell, no badges, no explanatory lines.
 
-## Partner dashboard (new)
-- Goals against targets as rings, in-person vs on-Dreamari split, events with volunteer and student fill, your professionals, export report.
+**Asking a question**
+- Started: a plain text box.
+- Ended: a sheet that picks the right community from your words, shows any question already answered so you can read it right away, needs a full sentence, blocks phone numbers and usernames, and lets you delete your question before anyone answers.
 
-## Staff dashboard (new)
-- Overview (students, volunteers, partners, schools, questions chart, answer rate and wait time, communities), Moderation (reports, answers awaiting review, blocked posts), People (roles, private activity tiers, all volunteers, partners), Features (usage this week).
+**People to Follow**
+- Started: nothing.
+- Ended: a grid of professionals aligned to the community cards (two across on phones, three on tablets, six on desktop). Portrait, name, job, company logo, small Follow pill. Tap the card, the photo or the name to open the profile.
 
-## Demo controls
-- A role switch at the top of Connect: Student, Attendee, Volunteer, Partner, Staff. Each has its own link.
-- The hamburger menu has a "Connect demo · view as" section with the same five.
+**Professional profiles**
+- Started: name and a few numbers.
+- Ended: portrait, role and company, Follow, three counts, tabs for Ask Me Anything, Answers, Posts and About (education, career journey, what they can help with). Tapping any professional's photo or name anywhere in Connect (answers, comments, badges, staff lists) opens their profile.
 
-## Mobile
-- Every Connect screen checked at phone size. Also fixed on phones: Explore's tabs no longer sit under the search button, the Play featured card fits the screen, the Profile name and school no longer cut off, career ladder titles wrap.
+**Community boards and threads**
+- Started: one long feed.
+- Ended: one row of tabs (Questions, Posts, About) with the cards straight on the page. Every answer has Like with a count, Share, Report and a Follow button for its author. Comments are one level deep, block contact details, post on Enter, cap at 280 characters.
+
+**Saving, sharing, reporting**
+- Started: none of the three.
+- Ended: Save on every question, answer and post with a Saved page where items can be removed in place. Share opens the phone share sheet or copies a link. Report has a real flow with reasons and appears on every comment.
+
+**Events**
+- Started: events named after the partner ("EY Student Impact Day") with a text host line.
+- Ended: one naming syntax, Dream Opportunity first, then the partner, then the event (Dream Opportunity EY Student Impact Day, Dream Opportunity Morgan Stanley NYC, Dream Opportunity JPMorgan Chase Student Event, Dream Opportunity AT&T Student Event, Dream Opportunity EY Student Event). The Junior Achievement event stays its own thing, as on the Replit: Junior Achievement Goldman Sachs NYC. Each card carries a logo lockup: the lead mark, a small ×, the partner mark, one line, one baseline, the same positions on every card. Real logos for Junior Achievement, Goldman Sachs, Morgan Stanley, JPMorgan, AT&T and EY.
+
+**Volunteer dashboard**
+- Started: nothing.
+- Ended: every one of the 15 volunteers has their own dashboard with two tabs. My Profile: questions routed to you with Answer or Skip (undo), your posts with a Create post flow (title and body, delete), your communities. My Impact: six numbers with how they moved, a 30-day chart, a private activity status (Gold, Silver, etc.), a company card in the company's colours, and a shareable 2026 Impact Summary.
+
+**Partner dashboard**
+- Started: nothing.
+- Ended: goals against targets as rings, in-person vs on-Dreamari split, events with volunteer and student fill, your professionals, export.
+
+**Staff dashboard**
+- Started: nothing.
+- Ended: Overview (students, volunteers, partners, schools, questions chart, answer rate and wait time), Moderation (reports, answers awaiting review, blocked posts), People (roles, activity tiers, all volunteers and partners), Features (usage this week).
+
+**Demo controls**
+- A role switch at the top of Connect: Student, Attendee, Volunteer, Partner, Staff. The hamburger menu has the same five under "Connect demo · view as".
+
+**Company logos**
+- Company logos appear wherever a company is named, in one chip style, and as bare marks in the event lockups.
+
+**Words**
+- All Connect copy written for 8th graders: Posts, Top answer, Save, Pro, Waiting. No explanatory sentences.
+
+## Connect 2.0 · concepts and data still to be decided
+- All numbers are demo data. Real counts, real routing and real moderation queues come from the engineer.
+- Company brand colours are approximations; use official hex values.
+- The "Dream Opportunity + partner" event naming is inferred from the Replit's board names, not written down anywhere as a rule. Confirm with the CEO.
+- Event boards: who can post, how event codes are issued, and how long a board stays open after the event.
+- Volunteer activity tiers (Gold, Silver) are private to the volunteer in this build. Decide whether any of it is ever shown to students.
+- Demo controls must be removed or gated before production.
+- Home page proposal (state-aware hero, From Connect panel, Top 3 strip) is written up in docs, not built.
+
+## Career pages (Josh's notes)
+- Removed "People doing it" and "Jobs open each year".
+- The degree pop-up says what you need in words; the education-mix numbers are gone.
+- Each ladder level opens to two short lists: "What you do" and "What you need".
+- Education: "Where you would study it" rows now link to college pages. Those pages are not designed yet, so the links land on the College Lookup shell with the credential carried across as a placeholder.
+
+## My Profile
+- Header is a cover photo with your name and photo on it, and Grade, GPA and Streak as three icon tiles coloured by your #1 career. An A/B switch beside Cover, Saved and Settings previews the cover as your #1 career's poster (A) or a background (B).
+- Six cover backgrounds rendered as glass materials in the brand palette; upload your own. The picker opens centred over a blurred page.
+- All tabs live inside one card. Career Report is accented by your #1 career's colour.
+- Side by side comparison ("My top 3") is now one table at every size: a tinted factor column pinned to the left, the careers scroll sideways. Phones compare the same way desktop does.
+
+## Overall improvements
+- One app background on every screen, fixed to the viewport, so it never shifts when a tab changes the page height. Blue field, purple only in the top-right corner.
+- Uniform paddings, gaps and margins across Connect, checked at phone, tablet and desktop widths.
+- Every Connect screen and the Profile checked pixel by pixel at phone size.
+- Follow buttons share one small size on people cards and under answers.
+
+## Bug fixes
+- Background turned fully black behind the career "What you need to get in" sheet. The page now stays visible behind a dimmed, blurred overlay.
+- Profile cover A/B got stuck half-swapped. Both images stay loaded and crossfade.
+- Metric tiles: the change (+18%) wrapped under the figure on some tiles and not others. It now sits under the figure on phones and tablets and beside it on desktop, the same on every tile.
+- Metric grids: the hairline dividers appeared at random. They now run between every column and above every row.
+- Morgan Stanley and other partner logos had extra padding. Fixed by stripping the width and height from the SVGs.
+- Explore's tabs sat under the search button on phones; the Play featured card overflowed; Profile name and school were cut off; career ladder titles did not wrap. All fixed.
 
 ## Documents
-- Connect 2.0 journeys report (PDF and web page) and a full UX audit with research sources, both in the docs folder.
-
-## Not done / needs a decision
-- Real data everywhere: all numbers are demo. Company brand colours are approximations; the engineer should use official hex values.
-- Home page proposal (state-aware hero, From Connect panel, Top 3 strip) is written up, not built.
-- Demo controls must be removed or gated before production.
-
-## Later that night (not yet pushed)
-- Share on every question, answer and post: phone share sheet, or copy link with "Link copied".
-- Likes with counts on answers too, so one thumbs-up works the same everywhere.
-- Report on every comment. Comments block contact details, post on Enter, cap at 280.
-- Asking needs a full sentence (a short nudge if not); you can delete a question you asked before anyone answers.
-- Saved page: remove a saved item in place.
-- Volunteers: posts have a title and a body, can be deleted; answers need a few sentences and can carry "Based on my own experience".
-- Written up: how each action works, what we borrowed from Instagram, TikTok, Quora, Brainly and Stack Overflow, and the edge cases.
-
-## Career page (Josh's notes, not yet pushed)
-- Removed the "People doing it" and "Jobs open each year" facts.
-- The degree pop-up now says what you need in words. The education-mix numbers and percentages are gone.
-- Each career ladder level opens to two short bullet lists: "What you do" and "What you need", so the climb between levels is clear.
-- Kept as is: the (i) "What you need to get in", pay by state.
-
-## Later: My Profile and career headers
-- My Profile now looks like a career page: a cover photo behind the header (pick one of six or upload your own), your photo and name on it, and Grade / GPA / Streak as one clean strip. Every card on the page uses the same frosted panel.
-- Career page headers are brighter. The photo shows through more; the blur and fade still carry the text.
-- Checked all 39 career photos at phone size and re-framed the seven where a head was cut off.
-- Profile tabs all live inside the same card as the tab bar now. Cover photos are the app's environment scenes and the picker opens as a sheet.
-- Career quick facts: the info button and the values line up the same way in every box.
-- Profile cover photos are now six abstract light fields (aurora, dusk, ocean, ember, forest, nebula), like desktop screensavers. No people, nothing to crop. Upload still works.
-
-## Evening additions (pushed with this build)
-- My Profile header: Grade, GPA and Streak now sit inside the header as three tiles with icons, coloured by your #1 career's world. An A/B switch beside Cover, Saved and Settings shows the cover as your #1 career's poster (A) or a background (B).
-- Cover backgrounds are six rendered glass materials in the brand palette (blue light streaks, indigo fluted glass, teal smoke, blue glass pebble, blue frosted band, pink horizon). The picker opens centred over a blurred page.
-- Events: the Dream Opportunity logo × the partner's logo is the graphic on every event card and banner. No chips: bare marks over a glow in the partner's colour with a slow shimmer, letters matched in height and baseline. Junior Achievement's real logo added. Fixed the extra padding around Morgan Stanley and other partner logos.
-- Career Report is accented with your #1 career's world colour (title, section numbers, the common-path tile, buttons), the same accent as the profile header.
-- Event logos: the DO × partner lockup is the same size box on every card (236×48; 328×64 on the event banner), the pair centred, long wordmarks scaled to fit.
-- Junior Achievement events now carry JA Singapore's own mark (from ja.org.sg), the tagline cropped, in the DO × partner lockup with JA's teal as the ambient colour.
-- One app background everywhere, fixed to the screen: it no longer shifts when a tab changes the page height. Every app screen (Home, Explore, Play, Connect, Profile, career pages, colleges, sign-up, report chooser) uses the same backdrop.
-- Event lockups: DO always starts at the same pixel and the partner logo always ends at the same pixel on every card.
-- The × between DO and the partner is now a big rounded collab mark in the partner's colour with a glow, breathing slowly.
-- Profile cover A/B now crossfades (both images stay loaded), no more half-swapped picture.
-- The app background is the landing page's colour field on every screen.
-- Volunteer and staff metric tiles are grouped tighter: icon, figure with its change on one line, label under, in a ruled grid.
-- Background dialled back to the earlier app field: purple only in the top-right corner, blue elsewhere, no pink or purple through the middle. Still fixed to the screen, so it never changes within a tab.
-- Event names use one syntax everywhere: "Dream Opportunity" first, then the partner, then the event (Dream Opportunity EY Student Impact Day, Dream Opportunity Morgan Stanley NYC, Dream Opportunity JPMorgan Chase Student Event, Dream Opportunity AT&T Student Event, Dream Opportunity EY Student Event). The JA event stays its own thing, as on the Replit: Junior Achievement Goldman Sachs NYC.
-- Event logo lockup is one line again and smaller: the lead mark, a small ×, then the partner in a fixed-width slot, all on one baseline. On every card the lead ends, the × sits and the partner begins at the same pixels. The JA card shows JA × Goldman Sachs.
-- Volunteer and staff metric grids: the hairline dividers are now between every column and above every row at both column counts. Before, two Tailwind border classes fought each other and rules appeared at random.
-- People to Follow is a grid that lines up with the community cards above (same gutters, same left and right edges): two across on phones, three on tablets, six on desktop. Phones show four people. Cards are cleaner: smaller portrait, name, role, company, and a small Follow pill. The "Picked for your Top 3" line is gone.
-- Tap any professional's photo or name anywhere in Connect (answers, comments, badges, staff activity) and you land on their profile.
-- Follow buttons under answers and on people cards share one small size.
+- Connect 2.0 journeys report (PDF and web page) and a full UX audit with research sources and the interaction spec (posting, asking, commenting, liking, sharing, saving), in the docs folder.

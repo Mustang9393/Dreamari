@@ -159,62 +159,43 @@ const COMPARE_FIELDS: { key: string; label: string; get: (r: CareerReportV2["com
 ];
 
 function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCareer; report: CareerReportV2 }[]; focusId: string }) {
+  // one table at every width: the factor column is tinted and pinned to the
+  // left, the careers scroll sideways under a finger, so a phone compares
+  // the same way a desktop does instead of stacking one career per block
+  const head = { background: "color-mix(in srgb, var(--primary) 12%, var(--card))" } as const;
   return (
-    <>
-      {/* Desktop and print */}
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full border-collapse text-left text-[13px]">
-          <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
-          <thead>
-            <tr>
-              <th scope="col" className="w-[150px] border-b pb-[10px] text-[14px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-                Factor
+    <div className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y", scrollbarWidth: "thin" }}>
+      <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + entries.length * 200 }}>
+        <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
+        <thead>
+          <tr>
+            <th scope="col" className="sticky left-0 z-[1] w-[120px] min-w-[120px] border-b px-[12px] py-[10px] text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase md:w-[150px] md:min-w-[150px]" style={{ ...head, borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
+              Factor
+            </th>
+            {entries.map(({ career }) => (
+              <th key={career.id} scope="col" className="min-w-[200px] border-b px-[14px] py-[10px] align-bottom text-[15px] leading-[19px] font-extrabold md:text-[16px]" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
+                {career.title}
+                {career.id === focusId && <span className="ml-[6px] align-middle text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
               </th>
-              {entries.map(({ career }) => (
-                <th key={career.id} scope="col" className="border-b pb-[10px] pl-[16px] text-[16px] font-extrabold" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
-                  {career.title}
-                  {career.id === focusId && <span className="ml-[6px] align-middle text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
-                </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {COMPARE_FIELDS.map((field) => (
+            <tr key={field.key}>
+              <th scope="row" className="sticky left-0 z-[1] border-b px-[12px] py-[10px] align-top text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={{ ...head, borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
+                {field.label}
+              </th>
+              {entries.map(({ career, report }) => (
+                <td key={career.id} className="border-b px-[14px] py-[10px] align-top leading-[18px]" style={{ borderColor: "var(--rule)" }}>
+                  {field.get(report.comparison)}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody>
-            {COMPARE_FIELDS.map((field) => (
-              <tr key={field.key}>
-                <th scope="row" className="border-b py-[10px] pr-[12px] align-top text-[14px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
-                  {field.label}
-                </th>
-                {entries.map(({ career, report }) => (
-                  <td key={career.id} className="border-b py-[10px] pl-[16px] align-top leading-[18px]" style={{ borderColor: "var(--rule)" }}>
-                    {field.get(report.comparison)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Phones: one career per block, identical field order */}
-      <div className="flex flex-col gap-[20px] md:hidden">
-        {entries.map(({ career, report }) => (
-          <div key={career.id} data-keep-together>
-            <h4 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-              {career.title}
-              {career.id === focusId && <span className="ml-[6px] text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
-            </h4>
-            <dl className="mt-[6px] divide-y" style={{ borderColor: "var(--rule)" }}>
-              {COMPARE_FIELDS.map((field) => (
-                <div key={field.key} className="grid grid-cols-[110px_minmax(0,1fr)] gap-[10px] border-t py-[8px]" style={{ borderColor: "var(--rule)" }}>
-                  <dt className="text-[14px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--ink-faint)" }}>{field.label}</dt>
-                  <dd className="text-[13px] leading-[18px]">{field.get(report.comparison)}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        ))}
-      </div>
-    </>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

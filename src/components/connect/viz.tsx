@@ -60,10 +60,13 @@ export function MetricTile({ icon: TileIcon, value, label, delta, accent }: { ic
         <TileIcon className="h-[18px] w-[18px]" aria-hidden />
       </span>
       <div className="flex min-w-0 flex-col gap-[2px]">
-        <span className="flex flex-wrap items-baseline gap-x-[8px]">
-          <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+        {/* the change sits under the figure on phones and tablets and beside
+           it from md up: one arrangement per width, so no tile ever wraps
+           differently from its neighbours */}
+        <span className="flex flex-col items-start gap-[1px] md:flex-row md:flex-nowrap md:items-baseline md:gap-x-[8px]">
+          <span className="text-[24px] leading-[28px] font-extrabold tabular-nums whitespace-nowrap" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
           {typeof delta === "number" && (
-            <span className="flex items-center gap-[3px] text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: up ? "var(--world-food-farming-nature)" : "var(--world-business-money-office)" }}>
+            <span className="flex items-center gap-[3px] text-[12px] leading-[16px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? "var(--world-food-farming-nature)" : "var(--world-business-money-office)" }}>
               {up ? <TrendingUp className="h-3 w-3" aria-hidden /> : <TrendingDown className="h-3 w-3" aria-hidden />}
               {up ? "+" : ""}{delta}%
             </span>

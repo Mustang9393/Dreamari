@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Bookmark, BookOpen, ChevronDown, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
+import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -299,7 +299,7 @@ function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonN
   }, [onClose]);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
       <div
         className="relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
@@ -669,13 +669,18 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               </div>
               <div className="flex flex-col gap-[var(--space-3)]">
                 <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Where you would study it</h3>
-                {/* the credential in words only: the school counts and the
-                   college-search links confused students (Josh's notes) */}
+                {/* the credential in words (no school counts, Josh's notes);
+                   each one links to its college page. Those pages are not
+                   designed yet, so the links land on the College Lookup shell
+                   with the credential carried across as a placeholder. */}
                 <ul className="flex flex-col gap-[var(--space-2)]">
                   {vm.education.where.map((w) => (
                     <li key={w.credential} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
                       <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />
-                      {w.credential}
+                      <Link href={w.href ?? `/colleges?school=${encodeURIComponent(w.credential)}`} className="dm-link flex min-h-[28px] items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
+                        {w.credential}
+                        <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
+                      </Link>
                     </li>
                   ))}
                 </ul>
