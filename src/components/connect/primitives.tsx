@@ -335,7 +335,8 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // the full lockup with the wordmark is dream-opportunity-full.svg)
   "Dream Opportunity": { file: "dream-opportunity", aspect: 1.79, height: 16 },
   "AT&T": { file: "att", aspect: 2.43, height: 13, ext: "png", letters: { y: 0.28, h: 0.47 } },
-  "Junior Achievement": { file: "junior-achievement", aspect: 4.43, height: 16 },
+  // JA Singapore (ja.org.sg header lockup, tagline cropped): the triangles mark + "JA / Singapore"
+  "Junior Achievement": { file: "ja-singapore", aspect: 2.76, height: 16, ext: "png" },
   "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93, letters: { y: 0, h: 0.72 } },
   // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
   // not the blue box: a filled square masks to a blank tile. Two lines need
@@ -460,6 +461,7 @@ export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   Netflix: { bg: "#141414", ink: "#E50914" },
   Adobe: { bg: "#FA0F00", ink: "#FFFFFF" },
   "Goldman Sachs": { bg: "#7399C6", ink: "#FFFFFF" },
+  "Junior Achievement": { bg: "#1aa7b5", ink: "#FFFFFF" },
   Blackstone: { bg: "#000000", ink: "#FFFFFF" },
 };
 

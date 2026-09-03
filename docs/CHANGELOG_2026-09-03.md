@@ -70,3 +70,4 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Events: the Dream Opportunity logo × the partner's logo is the graphic on every event card and banner. No chips: bare marks over a glow in the partner's colour with a slow shimmer, letters matched in height and baseline. Junior Achievement's real logo added. Fixed the extra padding around Morgan Stanley and other partner logos.
 - Career Report is accented with your #1 career's world colour (title, section numbers, the common-path tile, buttons), the same accent as the profile header.
 - Event logos: the DO × partner lockup is the same size box on every card (236×48; 328×64 on the event banner), the pair centred, long wordmarks scaled to fit.
+- Junior Achievement events now carry JA Singapore's own mark (from ja.org.sg), the tagline cropped, in the DO × partner lockup with JA's teal as the ambient colour.
