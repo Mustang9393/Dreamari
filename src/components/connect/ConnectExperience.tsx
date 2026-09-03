@@ -522,16 +522,17 @@ function EventMarks({ host, size = "md", ink: inkColor }: { host: string; size?:
   const width = leadSlot + gap + cross + gap + box.slot;
   const dark = !!inkColor && !/^#f/i.test(inkColor);
   const base = dark ? inkColor! : "rgba(255,255,255,0.94)";
-  const tint = dark ? `color-mix(in srgb, ${inkColor} 70%, #ffffff)` : brand.bg === "#000000" || brand.bg === "#111111" || brand.bg === "#141414" ? "#ffffff" : `color-mix(in srgb, ${brand.bg} 55%, #ffffff)`;
+  const tint = dark ? `color-mix(in srgb, ${inkColor} 70%, #ffffff)` : "rgba(255,255,255,0.7)";
   const ink = `linear-gradient(110deg, ${base} 0%, ${base} 38%, ${tint} 50%, ${base} 62%, ${base} 100%)`;
+  void brand;
   return (
     <span className="relative flex flex-none items-center" style={{ width, height: box.h, gap, textShadow: "none" }}>
-      {!dark && <span aria-hidden className="pointer-events-none absolute -inset-x-[32px] -inset-y-[28px] opacity-70" style={{ background: `radial-gradient(60% 70% at 50% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />}
+      
       <span className="relative flex flex-none items-center justify-end" style={{ width: leadSlot, height: box.h }}>
         <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" />
       </span>
       {/* the collab mark: a rounded × in the partner's light, breathing slowly */}
-      <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint, filter: dark ? "none" : `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+      <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
         <path d="M6 6 L18 18 M18 6 L6 18" />
       </svg>
       <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
@@ -590,7 +591,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
 
       {/* the whole card is the tap target (direct feedback) */}
       <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
-        <span className="sr-only">{joined ? `Open ${community.name}` : `Join ${community.name}`}</span>
+        <span className="sr-only">Open {community.name}</span>
       </button>
 
       {featured && (
@@ -605,19 +606,18 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         {/* the title carries the card: bigger than anything under it */}
         <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
 
-        {/* stats and logos share one left-aligned column: the two tiles are
-           exactly as wide as the band of marks under them */}
-        <div className="mt-auto flex w-fit max-w-full flex-col gap-[10px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
-          <div className="grid grid-cols-2 gap-[8px]">
-            <StatTile value={community.students} label="Students" />
-            <StatTile value={community.activePros} label="Pros" />
-          </div>
-          <div className="flex min-w-0 items-center gap-[6px]">
-            {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
-            {community.professionalsFrom.length > 3 && (
-              <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
-            )}
-          </div>
+        {/* three tiles fill the card's width, the same on every card; the
+           marks sit centred under them */}
+        <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
+          <StatTile value={community.students} label="Students" />
+          <StatTile value={community.activePros} label="Pros" />
+          <StatTile value={community.posts} label="Posts" />
+        </div>
+        <div className="mt-[10px] flex min-w-0 items-center justify-center gap-[6px]" style={{ textShadow: "none" }}>
+          {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} />)}
+          {community.professionalsFrom.length > 3 && (
+            <span className="flex h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{community.professionalsFrom.length - 3} more</span>
+          )}
         </div>
         <div className="pointer-events-auto mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           {/* Ghost, all caps, accent-tinted, arrow on Open: the card's original
@@ -639,7 +639,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
               className="dm-quiet group/cta flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[10px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
               style={{ color: "#FFFFFF" }}
             >
-              Join Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+              Open Community <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
             </button>
           )}
         </div>
@@ -1643,7 +1643,9 @@ function HomeView({
                   <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${ink} 28%, transparent)` }} />
                   <div className="relative z-10 flex flex-1 flex-col">
                     <h3 className="text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: ink }}>{event.name}</h3>
-                    <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)` }}>{event.date} · {event.location}</p>
+                    {/* heading, then the date as the subheading, then the place */}
+                    <p className="mt-[6px] text-[15px] leading-[20px] font-bold" style={{ color: ink }}>{event.date}</p>
+                    <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)`, fontFamily: "var(--font-body)" }}>{event.location}</p>
                     {/* the lockup lives in one place on every card: bottom-left of
                        the upper area, flush with the text. DO starts, the × sits
                        and the partner ends at the same pixels card to card. */}
@@ -1740,7 +1742,7 @@ function ComingSoonCard() {
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
         <h3 className="pr-[104px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>More communities</h3>
-        <div className="mt-[10px] flex items-center justify-end border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
+        <div className="mt-[10px] flex items-center justify-center border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none" }}>
           <button
             type="button"
             onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
@@ -2447,13 +2449,13 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
     { title: "Save what helps", body: "Keep answers and insights in your Locker for later." },
   ];
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Join ${community.name}`}>
+    <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={community.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] w-full max-w-[480px] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
           <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
-          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "#f6f5fb", textShadow: CARD_TEXT_SHADOW }}>Join {community.name}</h2>
+          <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "#f6f5fb", textShadow: CARD_TEXT_SHADOW }}>{community.name}</h2>
           <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet relative z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "#f6f5fb" }}>
             <X className="h-4 w-4" aria-hidden />
           </button>

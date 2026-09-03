@@ -475,6 +475,7 @@ export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   Google: { bg: "#4285F4", ink: "#FFFFFF" },
   Deloitte: { bg: "#0F1F16", ink: "#86BC25" },
   "Morgan Stanley": { bg: "#002B51", ink: "#FFFFFF" },
+  "AT&T": { bg: "#00A8E0", ink: "#FFFFFF" },
   Microsoft: { bg: "#0078D4", ink: "#FFFFFF" },
   Meta: { bg: "#0866FF", ink: "#FFFFFF" },
   Apple: { bg: "#1D1D1F", ink: "#F5F5F7" },
