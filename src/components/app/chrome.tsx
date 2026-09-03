@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SearchTrigger } from "@/components/app/GlobalSearch";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
@@ -93,9 +92,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useGlobalTheme();
   return (
-    <div className={`${className ?? "relative"} flex items-center gap-[8px]`}>
-      {/* sitewide search sits beside the menu on every app screen */}
-      <SearchTrigger />
+    <div className={className ?? "relative"}>
       <button
         type="button"
         aria-label={open ? "Close quick links" : "Quick links"}

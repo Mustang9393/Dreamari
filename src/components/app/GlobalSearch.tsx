@@ -10,6 +10,9 @@ import { COLLEGES, money } from "@/components/colleges/data";
 import { COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip } from "@/components/connect/primitives";
 
+// PARKED (2026-09-03): first cut of sitewide search, pulled from the chrome
+// after review ("heavy, busy, misaligned"). Not rendered anywhere. Kept so
+// the grouped-results model and the doors idea survive for the next pass.
 // Sitewide search. One box from anywhere; results grouped by what they are
 // (careers, colleges, people, companies, communities), a scope row to
 // narrow, and "See all" doors into each area's own search page. With
