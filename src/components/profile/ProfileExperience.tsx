@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { Segmented } from "@/components/connect/viz";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -84,6 +85,8 @@ const RULE = "rgba(255,255,255,0.12)";
 // own upload. Persisted per browser.
 const COVERS = ["aurora", "dusk", "ocean", "ember", "forest", "nebula"].map((n) => `/images/profile/covers/${n}.svg`);
 const COVER_KEY = "dreamari-cover";
+/** the sentinel that means "use my #1 career's poster as the cover" */
+const COVER_CAREER = "career";
 
 // Where the Top 3 comes from, in order: the ?picks= handoff the report chooser
 // navigates with (so the right career server-renders, no flash of someone
@@ -179,7 +182,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
-  const [coverUrl, setCoverUrl] = useState(COVERS[0]);
+  const [coverUrl, setCoverUrl] = useState<string>(COVER_CAREER);
   const [coverOpen, setCoverOpen] = useState(false);
   useEffect(() => {
     // the browser is the store for the prototype; read after mount so the
@@ -206,6 +209,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   }, [edits]);
 
   const focus = careerById(focusId);
+  // Two ways to wear a cover: your #1 career's poster (default, changes as
+  // your Top 3 changes) or one of the abstract light fields / an upload.
+  const coverIsCareer = coverUrl === COVER_CAREER;
+  const coverSrc = coverIsCareer ? (focus?.photo ?? COVERS[0]) : coverUrl;
+  const coverPosition = coverIsCareer ? (focus?.photoFocus ?? "50% 30%") : "50% 40%";
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
@@ -326,7 +334,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
              the name sits on the photo; the student picks or uploads the cover. ---- */}
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
-            <img src={coverUrl} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 40%" }} />
+            <img src={coverSrc} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: coverPosition }} />
             <CardProgressiveBlur size="56%" />
             <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 36%, rgba(12,16,35,0.08) 66%, transparent 100%)" }} />
           </div>
@@ -356,6 +364,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                           <X className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
+                      <Segmented<"career" | "picked">
+                        ariaLabel="Cover style"
+                        grow
+                        value={coverIsCareer ? "career" : "picked"}
+                        onChange={(key) => { if (key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(COVERS[0]); }}
+                        options={[{ key: "career", label: focus ? `Your #1: ${focus.title}` : "Your #1 career" }, { key: "picked", label: "Backgrounds" }]}
+                      />
+                      {coverIsCareer && focus && (
+                        <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Changes with your Top 3.</p>
+                      )}
                       <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
                           <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
