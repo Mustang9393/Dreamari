@@ -63,3 +63,8 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Profile tabs all live inside the same card as the tab bar now. Cover photos are the app's environment scenes and the picker opens as a sheet.
 - Career quick facts: the info button and the values line up the same way in every box.
 - Profile cover photos are now six abstract light fields (aurora, dusk, ocean, ember, forest, nebula), like desktop screensavers. No people, nothing to crop. Upload still works.
+
+## Evening additions (pushed with this build)
+- My Profile header: Grade, GPA and Streak now sit inside the header as three tiles with icons, coloured by your #1 career's world. An A/B switch beside Cover, Saved and Settings shows the cover as your #1 career's poster (A) or a background (B).
+- Cover backgrounds are six rendered glass materials in the brand palette (blue light streaks, indigo fluted glass, teal smoke, blue glass pebble, blue frosted band, pink horizon). The picker opens centred over a blurred page.
+- Events: the Dream Opportunity logo × the partner's logo is the graphic on every event card and banner. No chips: bare marks over a glow in the partner's colour with a slow shimmer, letters matched in height and baseline. Junior Achievement's real logo added. Fixed the extra padding around Morgan Stanley and other partner logos.

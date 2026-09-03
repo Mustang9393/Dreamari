@@ -77,7 +77,6 @@ const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase
 // exact same background gradient string as Home.
 // The career page's frosted panel: one recipe for every section here too.
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
-const RULE = "rgba(255,255,255,0.12)";
 
 // Covers a student can pick for their header: six rendered materials (fluted
 // glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
@@ -212,6 +211,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   // Two ways to wear a cover: your #1 career's poster (default, changes as
   // your Top 3 changes) or one of the abstract light fields / an upload.
   const coverIsCareer = coverUrl === COVER_CAREER;
+  const heroAccent = (focus && WORLD_COLORS[focus.world]) || "var(--accent-subtle)";
   const coverSrc = coverIsCareer ? (focus?.photo ?? COVERS[0]) : coverUrl;
   const coverPosition = coverIsCareer ? (focus?.photoFocus ?? "50% 30%") : "50% 40%";
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
@@ -332,13 +332,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
         {/* ---- Header in the career page's language: the cover photo runs
              behind the card and dissolves upward through the progressive blur;
              the name sits on the photo; the student picks or uploads the cover. ---- */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
             <img src={coverSrc} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: coverPosition }} />
-            <CardProgressiveBlur size="56%" />
-            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 36%, rgba(12,16,35,0.08) 66%, transparent 100%)" }} />
+            <CardProgressiveBlur size="66%" />
+            <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.62) 34%, rgba(12,16,35,0.12) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
           </div>
-          <div className="relative flex min-h-[224px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-5)] pt-[88px] sm:min-h-[264px] sm:p-[var(--space-6)]">
+          <div className="relative flex min-h-[280px] flex-col justify-end gap-[var(--space-5)] p-[var(--space-5)] pt-[96px] sm:min-h-[312px] sm:p-[var(--space-6)]">
             <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
               {/* A/B for the demo: the cover is your #1 career's poster, or a background */}
               <div role="tablist" aria-label="Cover version" className="flex gap-[2px] rounded-[var(--radius-sm)] p-[2px]" style={{ background: "rgba(255,255,255,0.08)" }}>
@@ -444,37 +444,30 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                 <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>
               </span>
             </div>
+            {/* the three facts as the community cards' tiles: icon in the
+               #1 career's accent, the figure, then the label */}
+            <dl className="grid grid-cols-3 gap-[8px]" style={{ textShadow: "none" }}>
+              {[
+                { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), note: null as string | null, label: "Grade", verified: false, sub: null as string | null },
+                { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, note: null as string | null, label: "GPA", verified: ACADEMIC_RECORD.verified, sub: null as string | null },
+                { Icon: Flame, value: `${STUDENT.streakDays}`, note: "days" as string | null, label: "Streak", verified: false, sub: "142/190" as string | null },
+              ].map((fact) => (
+                <div key={fact.label} className="flex min-w-0 flex-col items-center gap-[2px] rounded-[var(--radius-sm)] px-[6px] py-[10px] text-center" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                  <fact.Icon className="h-[16px] w-[16px]" aria-hidden style={{ color: heroAccent }} />
+                  <dd className="order-2 flex items-baseline gap-[4px] text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                    {fact.value}
+                    {fact.note && <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{fact.note}</span>}
+                  </dd>
+                  <dt className="order-3 flex items-center gap-[4px] text-[11.5px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    {fact.label}{fact.sub ? ` · ${fact.sub}` : ""}
+                    {fact.verified && <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>}
+                  </dt>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 
-        {/* ---- Quick facts, as on a career page: one strip, dividers, label
-             over figure. ---- */}
-        {/* the streak cell carries the most text, so it gets the widest column */}
-        <dl className="grid grid-cols-[1fr_1fr_1.7fr] rounded-[var(--radius-lg)] border sm:grid-cols-3" style={GLASS}>
-          {[
-            { label: "Grade", value: STUDENT.grade.replace("Grade ", ""), note: null, sub: null, verified: false },
-            { label: "GPA", value: ACADEMIC_RECORD.gpa, note: null, sub: null, verified: ACADEMIC_RECORD.verified },
-            { label: "Streak", value: `${STUDENT.streakDays}`, note: "days", sub: "142/190", verified: false },
-          ].map((fact, i) => (
-            <div key={fact.label} className={`flex min-w-0 flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i > 0 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
-              <dt className="flex items-center gap-[4px] text-[16px] leading-[22px] font-semibold">
-                {fact.label}
-                {fact.verified && (
-                  <>
-                    <BadgeCheck className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-                    <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>
-                  </>
-                )}
-              </dt>
-              <dd className="flex items-baseline gap-x-[6px] whitespace-nowrap">
-                <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>{fact.value}</span>
-                {fact.note && <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{fact.note}</span>}
-                {/* the season so far, on the same line: "12 days · 142/190" */}
-                {fact.sub && <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>· {fact.sub}</span>}
-              </dd>
-            </div>
-          ))}
-        </dl>
 
         {/* SR announcement for focus changes */}
         <span aria-live="polite" className="sr-only">{announce}</span>
