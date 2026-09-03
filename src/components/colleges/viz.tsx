@@ -3,8 +3,8 @@
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ACCENT } from "./shared";
 
-// Three data pictures for the college page, one per question a student
-// brings: what it costs (bars), can I get in (dots), who is there (ring).
+// Two data pictures for the college page: what it costs (bars) and who is
+// there (ring). Getting in is a sentence; "58 of every 100" needs no icons.
 // One hue, thin marks, values as text in text tokens. Everything else on
 // the page is a sentence, because a sentence is the cheapest thing on screen.
 
@@ -42,26 +42,6 @@ export function HBars({ rows, marker, unit = "" }: { rows: { label: string; valu
         })}
       </ul>
     </div>
-  );
-}
-
-/** One hundred people, some of them let in, spread across the card as a
- *  band that fills the card's width in whole rows only: 20 across on phones
- *  (five rows), 25 on tablets (four), 50 on desktop (two). Never a ragged row. */
-export function DotGrid({ pct, figure, note }: { pct: number; figure: string; note?: string }) {
-  const on = Math.round(pct);
-  return (
-    <figure className="m-0 flex flex-col gap-[var(--space-3)]">
-      <div className="grid w-full gap-[5px] grid-cols-[repeat(20,minmax(0,1fr))] md:gap-[6px] md:grid-cols-[repeat(25,minmax(0,1fr))] lg:grid-cols-[repeat(50,minmax(0,1fr))]" role="img" aria-label={`${on} of every 100 who apply get in`}>
-        {Array.from({ length: 100 }, (_, i) => (
-          <span key={i} className="aspect-square w-full rounded-full" style={{ background: i < on ? ACCENT : TRACK }} />
-        ))}
-      </div>
-      <figcaption className="flex min-w-0 flex-col gap-[2px]">
-        <span className={`${SMALL} font-bold`} style={INK}>{figure}</span>
-        {note && <span className="text-[13px] leading-[17px]" style={MUTED}>{note}</span>}
-      </figcaption>
-    </figure>
   );
 }
 

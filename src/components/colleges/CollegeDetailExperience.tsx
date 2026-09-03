@@ -9,7 +9,7 @@ import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
-import { DotGrid, Donut, HBars } from "./viz";
+import { Donut, HBars } from "./viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, a strip of four facts, then folded sections in the order a
@@ -153,9 +153,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <div className="flex flex-col gap-[var(--space-6)]">
                   <div>
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>How hard it is to get in</h3>
-                    <div className="mt-[var(--space-3)]">
-                      <DotGrid pct={c.admitRate} figure={`${c.admitRate} of every 100 who apply get in`} note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : undefined} />
-                    </div>
+                    <p className={`${SMALL} mt-[var(--space-2)]`}>
+                      <strong className="font-bold">{c.admitRate} of every 100 who apply get in.</strong>{c.applied ? ` ${c.applied.toLocaleString("en-US")} applied last year.` : ""}
+                    </p>
                   </div>
                   <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                     <div>
