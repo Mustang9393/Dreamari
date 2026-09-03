@@ -616,16 +616,16 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
           {/* marks step down with the card's own width (container query):
-             one under 320px, two under 400px, three above. The count chip
+             one under 360px, two under 460px, three above. The count chip
              always says how many are missing, so Open never gets crowded. */}
           <div className="flex min-w-0 items-center gap-[6px]">
             {community.professionalsFrom.slice(0, 3).map((name, index) => (
-              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[320px]:flex" : "hidden @[400px]:flex"}><CompanyChip name={name} /></span>
+              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[360px]:flex" : "hidden @[460px]:flex"}><CompanyChip name={name} /></span>
             ))}
             {[1, 2, 3].map((shown) => {
               const missing = community.professionalsFrom.length - shown;
               if (missing <= 0) return null;
-              const vis = shown === 1 ? "flex @[320px]:hidden" : shown === 2 ? "hidden @[320px]:flex @[400px]:hidden" : "hidden @[400px]:flex";
+              const vis = shown === 1 ? "flex @[360px]:hidden" : shown === 2 ? "hidden @[360px]:flex @[460px]:hidden" : "hidden @[460px]:flex";
               return (
                 <span key={shown} className={`${vis} h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold`} style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{missing}{shown === 3 ? " more" : ""}</span>
               );
