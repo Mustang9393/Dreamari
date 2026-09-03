@@ -484,46 +484,49 @@ function partnerCompany(host: string): string {
 
 /** Every event is Dream Opportunity's with a partner. Not chips: the two
  *  marks alone, in one light, over an ambient glow in the partner's brand
- *  colour, with a slow shimmer moving through the ink. The lockup is one
- *  fixed box on every card (same width, same height), the pair centred in
- *  it; letters are sized to DO's letter height, and a long wordmark that
- *  would overflow the box scales down to fit instead of stretching the box. */
-const LOCKUP = { md: { w: 236, h: 48, L: 22 }, lg: { w: 328, h: 64, L: 30 } } as const;
+ *  colour, with a slow shimmer moving through the ink. Stacked like a
+ *  poster credit: DO and a small × on the first line, the partner under it,
+ *  both starting at the same left pixel. The lockup is one fixed box on
+ *  every card (same width, same height); letters are sized to DO's letter
+ *  height, and a wordmark wider than the box scales down to fit. */
+const LOCKUP = { md: { w: 168, L: 14, row: 22, gap: 4 }, lg: { w: 232, L: 19, row: 30, gap: 6 } } as const;
 function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" }) {
-  const partner = partnerCompany(host);
-  const brand = COMPANY_BRAND[partner] ?? { bg: EVENT_ACCENT, ink: "#FFFFFF" };
+  // the card's ambient colour follows its host; the two marks follow the
+  // event's name (a Junior Achievement event is JA × the company hosting it)
+  const brandKey = partnerCompany(host);
+  const brand = COMPANY_BRAND[brandKey] ?? { bg: EVENT_ACCENT, ink: "#FFFFFF" };
+  const lead = brandKey === "Junior Achievement" ? "Junior Achievement" : "Dream Opportunity";
+  const partner = lead === "Junior Achievement" ? "Goldman Sachs" : brandKey;
   const box = LOCKUP[size];
-  const gap = 14, cross = 10;
-  const doMark = COMPANY_MARKS["Dream Opportunity"];
-  const doW = (box.L / (doMark.letters?.h ?? 1)) * doMark.aspect;
-  const avail = box.w - doW - gap * 2 - cross;
+  const height = box.row * 2 + box.gap;
   const pm = COMPANY_MARKS[partner];
   const twoLine = partner === "Junior Achievement" || partner === "Goldman Sachs";
-  let partnerL = twoLine ? Math.round(box.L * 1.45) : box.L;
+  const leadL = lead === "Junior Achievement" ? Math.round(box.L * 1.4) : box.L;
+  let partnerL = twoLine ? Math.round(box.L * 1.4) : box.L;
   if (pm) {
     const pw = (partnerL / (pm.letters?.h ?? 1)) * pm.aspect;
-    if (pw > avail) partnerL = Math.max(12, Math.floor(partnerL * (avail / pw)));
+    if (pw > box.w) partnerL = Math.max(10, Math.floor(partnerL * (box.w / pw)));
   }
+  const cross = Math.round(box.L * 0.72);
   const tint = brand.bg === "#000000" || brand.bg === "#111111" || brand.bg === "#141414" ? "#ffffff" : `color-mix(in srgb, ${brand.bg} 55%, #ffffff)`;
   const ink = `linear-gradient(110deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.94) 38%, ${tint} 50%, rgba(255,255,255,0.94) 62%, rgba(255,255,255,0.94) 100%)`;
   return (
-    <span className="relative flex flex-none items-center justify-center" style={{ width: box.w, height: box.h, textShadow: "none" }}>
-      <span aria-hidden className="pointer-events-none absolute -inset-x-[40px] -inset-y-[36px] opacity-70" style={{ background: `radial-gradient(60% 70% at 55% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
-      {/* anchored, not centred: DO always starts at the box's left edge, the
-         partner always ends at its right edge, the × sits in whatever is between */}
-      <span className="relative flex w-full items-end justify-between" style={{ gap }}>
-        <LetterMark name="Dream Opportunity" ink={ink} letterHeight={box.L} markClassName="dm-logo-shimmer" />
-        {/* the collab mark: a big rounded × in the partner's light, breathing
-           slowly, the way drop culture writes "A × B" */}
-        <span aria-hidden className="flex flex-1 items-center justify-center" style={{ minWidth: cross, height: box.L }}>
-          <svg viewBox="0 0 24 24" className="dm-collab-mark" style={{ width: Math.round(box.L * 0.78), height: Math.round(box.L * 0.78), color: tint, filter: `drop-shadow(0 0 10px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
-            <path d="M6 6 L18 18 M18 6 L6 18" />
-          </svg>
-        </span>
+    <span className="relative flex flex-none flex-col items-start" style={{ width: box.w, height, gap: box.gap, textShadow: "none" }}>
+      <span aria-hidden className="pointer-events-none absolute -inset-x-[32px] -inset-y-[28px] opacity-70" style={{ background: `radial-gradient(60% 70% at 40% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
+      {/* line one: DO, then the collab mark, a rounded × in the partner's
+         light, breathing slowly, the way drop culture writes "A × B" */}
+      <span className="relative flex items-center" style={{ height: box.row, gap: Math.round(box.L * 0.55) }}>
+        <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" />
+        <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark flex-none" style={{ width: cross, height: cross, color: tint, filter: `drop-shadow(0 0 8px color-mix(in srgb, ${brand.bg} 70%, #ffffff))` }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+          <path d="M6 6 L18 18 M18 6 L6 18" />
+        </svg>
+      </span>
+      {/* line two: the partner, starting at the same left pixel as DO */}
+      <span className="relative flex items-center" style={{ height: box.row }}>
         {pm ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (
-          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: avail, fontSize: box.L * 0.78, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
+          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: box.w, fontSize: box.L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.94)" }}>{partner}</span>
         )}
       </span>
     </span>

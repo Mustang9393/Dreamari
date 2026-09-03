@@ -78,3 +78,5 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - The app background is the landing page's colour field on every screen.
 - Volunteer and staff metric tiles are grouped tighter: icon, figure with its change on one line, label under, in a ruled grid.
 - Background dialled back to the earlier app field: purple only in the top-right corner, blue elsewhere, no pink or purple through the middle. Still fixed to the screen, so it never changes within a tab.
+- Event names follow the CEO's Replit pattern on all six events: "Dream Opportunity × Company City" (EY Dallas, Morgan Stanley NYC, JPMorgan Chase Brooklyn, AT&T Dallas, EY New Jersey), and "Junior Achievement × Goldman Sachs NYC" for the JA event.
+- Event logo lockup is now stacked and smaller: the host mark with a small × on the first line, the partner mark under it, both starting at the same left pixel, in one fixed box (168×48 on cards, 232×66 on the banner). The JA event shows JA × Goldman Sachs to match its name. Quieter now that the title says the same thing.
