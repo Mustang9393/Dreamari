@@ -1,6 +1,7 @@
 "use client";
 
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 
 import Image from "next/image";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -508,9 +509,11 @@ function EventMarks({ host, size = "md" }: { host: string; size?: "md" | "lg" })
   return (
     <span className="relative flex flex-none items-center justify-center" style={{ width: box.w, height: box.h, textShadow: "none" }}>
       <span aria-hidden className="pointer-events-none absolute -inset-x-[40px] -inset-y-[36px] opacity-70" style={{ background: `radial-gradient(60% 70% at 55% 50%, color-mix(in srgb, ${brand.bg} 55%, transparent), transparent 70%)`, filter: "blur(18px)" }} />
-      <span className="relative flex items-end" style={{ gap }}>
+      {/* anchored, not centred: DO always starts at the box's left edge, the
+         partner always ends at its right edge, the × sits in whatever is between */}
+      <span className="relative flex w-full items-end justify-between" style={{ gap }}>
         <LetterMark name="Dream Opportunity" ink={ink} letterHeight={box.L} markClassName="dm-logo-shimmer" />
-        <span aria-hidden className="flex items-center justify-center text-[14px] font-light" style={{ width: cross, height: box.L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
+        <span aria-hidden className="flex flex-1 items-center justify-center text-[14px] font-light" style={{ minWidth: cross, height: box.L, color: `color-mix(in srgb, ${brand.bg} 40%, #ffffff)` }}>×</span>
         {pm ? (
           <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
         ) : (
@@ -927,7 +930,8 @@ export function ConnectExperience() {
   });
 
   return (
-    <div data-connect className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
+    <div data-connect className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
+      <AppBackdrop />
       <ConnectNav.Provider value={nav}>
       <DesktopNavigation active="Connect" />
 

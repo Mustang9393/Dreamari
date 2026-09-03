@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
 import { FlowChrome } from "@/components/app/FlowChrome";
@@ -65,18 +66,17 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
     window.setTimeout(() => router.push(`/profile?picks=${picksParam(ordered)}&focus=${chosenCareer.id}`), 260);
   }
 
-  const accent = chosenCareer ? (WORLD_COLORS[chosenCareer.world] ?? "var(--primary)") : "var(--primary)";
-
   return (
     <div
       className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
       style={{
-        background: `radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)`,
+        background: "transparent",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
         transition: "background 600ms ease",
       }}
     >
+      <AppBackdrop />
       <FlowChrome />
 
       <main className="relative z-10 mx-auto flex w-full max-w-[880px] flex-1 flex-col items-center justify-center gap-[var(--space-8)] px-5 pt-[96px] pb-[var(--space-10)] md:px-8">

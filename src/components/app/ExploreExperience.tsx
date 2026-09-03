@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
@@ -673,7 +674,8 @@ export function ExploreExperience({ initialTab }: { initialTab: "foryou" | "brow
   }
 
   return (
-    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)" }}>
+    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
+      <AppBackdrop />
 
       <DesktopNavigation active="Explore" />
 

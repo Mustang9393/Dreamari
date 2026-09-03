@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -304,10 +305,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   return (
     // overflowX clip (not the class's hidden) keeps sideways-drag protection without
     // creating a scroll container, so the report's sticky section rail can pin.
-    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "radial-gradient(120% 85% at 85% -10%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 60%), radial-gradient(95% 70% at -12% 30%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%), radial-gradient(110% 80% at 75% 115%, color-mix(in srgb, var(--hero-accent-teal) 45%, transparent), transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--hero-accent-purple) 26%, var(--background)) 0%, var(--background) 48%, color-mix(in srgb, var(--hero-accent-teal) 20%, var(--background)) 100%)", color: "var(--foreground)", fontFamily: "var(--font-body)", overflowX: "clip" }}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
-      </div>
+    <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)", overflowX: "clip" }}>
+      <AppBackdrop />
 
       <div className="no-print">
         <DesktopNavigation active="Profile" />

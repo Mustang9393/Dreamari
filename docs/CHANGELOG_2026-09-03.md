@@ -71,3 +71,5 @@ Plain-English list of today's updates. Everything below is on the live site afte
 - Career Report is accented with your #1 career's world colour (title, section numbers, the common-path tile, buttons), the same accent as the profile header.
 - Event logos: the DO × partner lockup is the same size box on every card (236×48; 328×64 on the event banner), the pair centred, long wordmarks scaled to fit.
 - Junior Achievement events now carry JA Singapore's own mark (from ja.org.sg), the tagline cropped, in the DO × partner lockup with JA's teal as the ambient colour.
+- One app background everywhere, fixed to the screen: it no longer shifts when a tab changes the page height. Every app screen (Home, Explore, Play, Connect, Profile, career pages, colleges, sign-up, report chooser) uses the same backdrop.
+- Event lockups: DO always starts at the same pixel and the partner logo always ends at the same pixel on every card.
