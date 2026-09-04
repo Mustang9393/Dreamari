@@ -76,6 +76,9 @@ function careerById(id: string | null): ProfileCareer | null {
 // stacked card, which is why the page read as flat/dark despite sharing the
 // exact same background gradient string as Home.
 // The career page's frosted panel: one recipe for every section here too.
+/** A group inside the tab card: a border on the shared surface, no second
+ *  layer of glass (direct feedback, 4 Sept: glass on glass read as disjointed). */
+const INSET = { background: "transparent", borderColor: "rgba(255,255,255,0.14)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Covers a student can pick for their header: six rendered materials (fluted
@@ -469,10 +472,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
         {(tab === "locker" || tab === "settings") ? null : (
-          /* No card around the tab panels (CEO, 4 Sept: translucent cards on
-             translucent cards hurt readability). The tab bar and each panel's
-             own sections sit straight on the page, like the career page. */
-          <div className="flex flex-col gap-[var(--space-5)]">
+          /* One surface for every tab: the tab bar and the active panel share
+             this card. Inside it nothing is a card again (direct feedback,
+             4 Sept): groups are drawn with borders on the shared surface,
+             the way the career report keeps one sheet of paper. */
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
            feedback, but redundant with the new side-by-side Top 3 (which
@@ -756,7 +760,7 @@ function Top3Tab({
 
   if (top3.length === 0) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers here to compare them and choose your #1.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
@@ -924,7 +928,7 @@ function Top3Tab({
       </div>
 
       {!focusId && (
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "transparent", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
           <span className="text-[14px] font-bold">Choose your #1 career to build your plan around it.</span>
           <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Choose my #1</button>
         </div>
@@ -985,7 +989,7 @@ function OverviewTab({
 }) {
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
         <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Swipe through some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
         <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
@@ -1008,7 +1012,7 @@ function OverviewTab({
       <section aria-labelledby="bento-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         <h3 id="bento-title" className="sr-only">Your top three, plan and report at a glance</h3>
 
-        <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -1016,7 +1020,7 @@ function OverviewTab({
           <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
-        <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Plan</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -1027,7 +1031,7 @@ function OverviewTab({
           </span>
         </button>
 
-        <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
+        <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
             <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -1037,7 +1041,7 @@ function OverviewTab({
       </section>
 
       {/* The one thing to do next — a single action, nothing else in the box */}
-      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }}>
+      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "transparent", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
         <span className="flex min-w-0 flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
           <h3 id="next-title" className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
@@ -1452,7 +1456,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
 
   if (!focus) {
     return (
-      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={GLASS}>
+      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={INSET}>
         <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its plan</p>
         <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
       </section>
@@ -1468,7 +1472,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
       {/* One header surface: title, the change-route link, and the whole-plan
          progress as a single line. Built like the career page's panels: one
          layer of glass, hairlines inside, nothing stacked on top. */}
-      <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={GLASS}>
+      <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={INSET}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
           <h2 key={focus.id} className="text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan for ${focus.title}`} /></h2>
           <button type="button" onClick={onGoPath} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route <ArrowRight size={14} strokeWidth={2.75} aria-hidden /></button>
@@ -1488,7 +1492,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         const isOpen = openHorizon === horizon.id;
         const tasks = tasksFor(focus, horizon.id);
         return (
-          <section key={horizon.id} className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.85 }}>
+          <section key={horizon.id} className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={{ ...INSET, opacity: unlocked ? 1 : 0.85 }}>
             <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? null : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
@@ -1955,7 +1959,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
 
 function ResumeView() {
   return (
-    <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-8)]" style={GLASS}>
+    <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={INSET}>
       <div className="flex flex-wrap items-center gap-[var(--space-3)]">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
         {/* Said plainly (CEO, 4 Sept): a partner was told this exists, opened
