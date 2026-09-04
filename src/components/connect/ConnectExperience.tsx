@@ -471,15 +471,18 @@ function MockQr({ seed, size = 84, ink = "#0e0c20", paper = "#ffffff" }: { seed:
   );
 }
 
-/** The three counts in small circles (direct feedback: circle outlines, not
- *  full-width boxes and not graphs). Just the figure inside a thin ring of
- *  the partner's colour, the label under it. */
-function RingStats({ items, accent }: { items: [number, string][]; accent: string }) {
+/** The three counts on small frosted discs (direct feedback: not coloured
+ *  rings, a quiet blurred surface under each figure), tighter than before,
+ *  the label under each. */
+function RingStats({ items }: { items: [number, string][] }) {
   return (
     <div className="flex items-start gap-[var(--space-3)]" style={{ textShadow: "none" }}>
       {items.map(([value, label]) => (
         <span key={label} className="flex flex-col items-center gap-[4px]">
-          <span className="flex size-[54px] items-center justify-center rounded-full border-[1.5px]" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, rgba(255,255,255,0.2))` }}>
+          <span
+            className="flex size-[46px] items-center justify-center rounded-full border"
+            style={{ background: "rgba(255,255,255,0.09)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+          >
             <span className="text-[13px] leading-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{value.toLocaleString("en-US")}</span>
           </span>
           <span className="text-[10.5px] leading-[13px] font-semibold tracking-[0.04em] uppercase" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.7)" }}>{label}</span>
@@ -1818,9 +1821,9 @@ function HomeView({
                       </p>
                       {/* fixed zones so every ticket is the same height: the
                          counts row, then the action on its own line */}
-                      <div className="mt-auto flex min-h-[71px] items-end pt-[var(--space-4)]">
+                      <div className="mt-auto flex min-h-[63px] items-end pt-[var(--space-4)]">
                         {typeof event.students === "number" && (
-                          <RingStats accent={lit} items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
+                          <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
                         )}
                       </div>
                       {/* the action row: a button, or for an unopened event the one
