@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Play, X } from "lucide-react";
-import { CompanyChip } from "@/components/connect/primitives";
+import { CompanyChip, CompanyMark } from "@/components/connect/primitives";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 
 /** "Videos Inside Leading Companies" (Explore > Browse, under Typical Pay):
@@ -27,9 +27,6 @@ export function CompanyVideoCards() {
         >
           <span className="sr-only">Play {item.company} {item.title}</span>
           <Image src={item.poster} alt="" fill sizes="210px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-          <span aria-hidden className="absolute top-[12px] left-[12px]">
-            <CompanyChip name={item.company} tone="frost" size="sm" />
-          </span>
           <span
             aria-hidden
             className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
@@ -37,9 +34,11 @@ export function CompanyVideoCards() {
           >
             <Play className="ml-[3px] h-[22px] w-[22px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
           </span>
-          {/* the company is the chip up top; naming it again here would
-             double up (density rule) */}
-          <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col px-[14px] pt-[40px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+          {/* the company mark sits on the dark scrim right above the title,
+             white and at a readable size (direct feedback: the frosted chip up
+             top vanished against bright footage) */}
+          <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[7px] px-[14px] pt-[44px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+            <CompanyMark name={item.company} ink="#FFFFFF" scale={1.45} className="self-start" />
             <span className="block text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
           </span>
         </button>

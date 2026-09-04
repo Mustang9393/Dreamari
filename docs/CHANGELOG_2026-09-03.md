@@ -203,3 +203,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Phones: the graphic sits at the centre of every chapter screen with the heading and caption directly above it; Get Hired's card is a touch shorter on phones so its copy clears it.
 - Landing Play: no auto-answer. The cursor rests on the right choice and only a tap confirms it. The "Deal Team Kickoff / Scene 1" filler is gone; the question is visible from the start, dimmed while Christina is still talking.
 - Landing Play: the blurred colour halo behind the card is removed; the card sits on the page with just its rim-lit edge.
+- Explore > Browse videos: the company mark moved from the frosted chip at the top of each card to the dark scrim right above the title, white and larger, so it reads against bright footage.
