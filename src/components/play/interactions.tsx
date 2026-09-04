@@ -798,10 +798,12 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
 }
 
 /** Drag to Blank (Interaction Rules): the sentence keeps its shape, the
- *  word tiles sit on a rail below, and a tile is DRAGGED into the slot
- *  rather than tapped (D75 -- a drag costs a deliberate second and feels
- *  like a game rather than a quiz). One attempt on a scored beat, same as
- *  every other scored interaction: whichever tile lands in the slot
+ *  word tiles sit on a rail below, and a tile can be DRAGGED into the slot
+ *  (D75 -- a drag costs a deliberate second and feels like a game rather
+ *  than a quiz) or simply TAPPED. Tap was added after players got stuck on
+ *  the data-room beat: a drag that misses the slot springs back with no
+ *  other way forward. One attempt on a scored beat, same as every other
+ *  scored interaction: whichever tile lands in (or is tapped into) the slot
  *  commits. Number keys still commit directly (ChoiceBody's useDigitKeys),
  *  so the keyboard path stays one press. */
 function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
@@ -810,10 +812,15 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
   const [before, after] = beat.question.split("___");
   const slotRef = useRef<HTMLSpanElement>(null);
   const firstTileRef = useRef<HTMLButtonElement>(null);
-  // The tiles are drag-only -- tapping does nothing -- with no visual cue
-  // beyond a cursor-grab style that's invisible on touch. First encounter
-  // only (see useFirstUseHint), and dismissed the moment a drag starts.
+  // Drag has no visual cue beyond a cursor-grab style that's invisible on
+  // touch, so the first encounter gets a spotlight (see useFirstUseHint),
+  // dismissed the moment a drag or tap happens.
   const [hintOn, dismissHint] = useFirstUseHint("blank-drag");
+  const commit = (choice: ChoiceBeat["choices"][number]) => {
+    if (locked !== null) return;
+    tierSound(choice.tier);
+    onResolve(choice.tier, choice.why, choice.id);
+  };
   const dropTile = (choice: ChoiceBeat["choices"][number], x: number, y: number) => {
     if (locked !== null) return;
     const rect = slotRef.current?.getBoundingClientRect();
@@ -821,10 +828,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
     // A forgiving halo around the slot -- a drop just shy of a small inline
     // target should not read as a miss (a real miss springs the tile back).
     const pad = 26;
-    if (x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad) {
-      tierSound(choice.tier);
-      onResolve(choice.tier, choice.why, choice.id);
-    }
+    if (x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad) commit(choice);
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
@@ -859,6 +863,10 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
               const pointer = event as PointerEvent;
               dropTile(choice, pointer.clientX, pointer.clientY);
             }}
+            // A press with no drag: framer fires onTap only when the
+            // pointer did not move past the drag threshold, so a drag
+            // that misses never double-commits through this path.
+            onTap={() => { dismissHint(); commit(choice); }}
             className="relative cursor-grab touch-none rounded-[var(--radius-md)] border px-[18px] py-[15px] text-[15px] font-semibold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
             style={{
               animationDelay: `${index * 55}ms`,
@@ -882,7 +890,7 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
           </motion.button>
         ))}
       </div>
-      <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag into the blank" hintSize={22} hintDistance={28} />
+      <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag or tap into the blank" hintSize={22} hintDistance={28} />
     </div>
   );
 }

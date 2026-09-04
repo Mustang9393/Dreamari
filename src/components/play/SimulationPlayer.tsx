@@ -1171,7 +1171,7 @@ function BeatStage({
 function DEFAULT_PROMPT(beat: Beat): string | undefined {
   switch (beat.kind) {
     case "choice":
-      if (beat.layout === "blank" || beat.layout === "tiles") return "Drag the right word into the space.";
+      if (beat.layout === "blank" || beat.layout === "tiles") return "Drag or tap the right word into the space.";
       if (beat.layout === "document") return "Tap the line with the mistake.";
       if (beat.layout === "boss") return "Choose one.";
       return "timer" in beat && beat.timer ? "Tap one before the timer runs out." : "Tap one.";

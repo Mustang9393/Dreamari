@@ -45,7 +45,7 @@ type BeatBase = {
   id: string;
   /** Action Prompt (Interaction Rules): the short grey line telling the
    *  student what to do on screens whose action is not a labelled button --
-   *  "Tap one.", "Drag the right word into the space.". Button screens skip
+   *  "Tap one.", "Drag or tap the right word into the space.". Button screens skip
    *  it: there the button label IS the prompt. */
   prompt?: string;
   /** Calls the player's eye to a HUD element this beat is talking about --

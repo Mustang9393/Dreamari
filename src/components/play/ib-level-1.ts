@@ -352,7 +352,7 @@ export const IB_LEVEL_1: Level = {
       speaker: "Christina",
       setup: '"Before you share anything: client materials stay secure."',
       question: "Client files belong in the secure ___.",
-      prompt: "Drag the right word into the space.",
+      prompt: "Drag or tap the right word into the space.",
       choices: [
         { id: "a", label: "data room", tier: "best", why: "Right. A data room is a locked folder only approved people can open." },
         { id: "b", label: "group chat", tier: "risky", why: "Chats are how client files leak. Once shared, nobody knows where it goes." },

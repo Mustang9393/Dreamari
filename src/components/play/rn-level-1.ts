@@ -359,7 +359,7 @@ export const RN_LEVEL_1: Level = {
       speaker: "Rosa",
       setup: '"A patient record is private. The system logs every person who opens one."',
       question: "You may only open the record of a patient who is ___.",
-      prompt: "Drag the right words into the space.",
+      prompt: "Drag or tap the right words into the space.",
       choices: [
         { id: "a", label: "yours today", tier: "best", why: "Right. If they are not your patient, you have no reason to be in there." },
         { id: "b", label: "someone you know", tier: "risky", why: "Looking up someone you know is how nurses lose their licence. Every open is logged with your name." },
