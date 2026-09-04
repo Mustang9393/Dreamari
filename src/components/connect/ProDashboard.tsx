@@ -423,13 +423,13 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
 function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; numbers: { year: number; hours: number; schools: number } }) {
   return (
     <section
-      aria-label="2026 Impact Summary"
+      aria-label="My 2026 Impact Summary"
       className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]"
       style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${accent} 55%, transparent), transparent 60%), linear-gradient(160deg, color-mix(in srgb, ${accent} 42%, #0e0c20) 0%, #0e0c20 100%)`, borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 24px 60px -30px rgba(0,0,0,0.8)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}
     >
       <span aria-hidden className="absolute top-[-60px] right-[-40px] size-[220px] rounded-full opacity-40 blur-[50px]" style={{ background: accent }} />
       <div className="relative flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2 className="text-[22px] leading-[27px] font-extrabold">2026 Impact Summary</h2>
+        <h2 className="text-[22px] leading-[27px] font-extrabold">My 2026 Impact Summary</h2>
         <PrimaryCta onClick={() => dispatchAuroraPulse("cta")} className="min-h-[36px] px-[var(--space-4)] text-[14px]" style={{ background: "rgba(255,255,255,0.92)", color: "#0e0c20" }}><span className="flex items-center gap-[6px]"><Download className="h-4 w-4" aria-hidden /> Download</span></PrimaryCta>
       </div>
       <div className="relative mt-[var(--space-6)] flex flex-col">

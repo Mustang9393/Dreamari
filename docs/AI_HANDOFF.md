@@ -5527,3 +5527,8 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 - dceeai.replit.app/v2-connect (click Let's Get Started, Got it twice, Enter Boards, then Enter Community) is the reference for HOW a board delivers information: Feed and About, three named feeds with a subtitle each (Student Questions, Professional Insights, Industry Updates with firm filter chips), question cards with grade, location, likes, views, comments and an Unanswered tag, composer at the bottom, About with description, counts, Community Rules, Moderators.
 - `BoardView` now has those four tabs (`filter` values: questions, insights, updates, about), `UpdateCard` renders `OPPORTUNITIES` for the board, three finance programmes were added to `OPPORTUNITIES` for the business-money board. Header, cards, and the landing were left as they were (direct instruction).
 - Not adopted, on purpose: the Dream Points unlock ladder (Read free, Reply at 300, Post at 700) and the AI Ideas and Polish buttons on the composer. Both are product decisions the CEO has not made; note them when the volunteer influencer concept lands.
+
+## 4 Sept 2026: volunteer view, per the CEO's Connect note
+
+- "2026 Impact Summary" is now "My 2026 Impact Summary" so the volunteer's own numbers read apart from the company block beneath them.
+- Volunteers and students share the same community boards. Today the volunteer dashboard lists "My communities" (the boards for the pro's world plus General Professional Development) as rows that open the same board screen a student sees. A volunteer does not yet get the student-style browse-and-join grid; joining is assumed from their verified scope. Whether volunteers should also browse and join other boards is open with the CEO.
