@@ -173,3 +173,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - About gained Community rules and Moderators as disclosures.
 - Card designs and the board header are unchanged, as asked. Not adopted from the reference: the Dream Points read, reply, post ladder, and the "professional insights maps to volunteer influencers" idea, both flagged by the CEO as not thought through yet.
 - Profile, later: one card holds the tab bar and whichever panel is open. Inside it the groups are a darker sunken step in the career report's paper colour, not a second layer of glass. The three Overview doorways sit side by side as smaller cards at every width.
+- Connect, Professionals to Follow: no more cards. A row of large portraits with a world-colour ring, a follow badge on the corner, first name, role and firm. Scrolls sideways on phones, wraps on wider screens. Tapping the face opens the profile.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
+import { ArrowLeft, Bookmark, Check, Download, Eye, Plus, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -159,45 +159,55 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 
 // ——— People to Follow (below the communities) ———
 
-/** Instagram's "Suggested for you" shape: portrait, name, one line for what
- *  they do and where, Follow. The whole card opens the profile. */
-export function PeopleToFollow({ follows, onFollow, limit = 4 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
+/** A row of faces, no frames (direct feedback): the portrait is the card.
+ *  Big avatar with a world-colour ring, a follow badge on its corner, the
+ *  name, then what they do and where. The rail scrolls sideways on phones
+ *  and shows everyone at once on wider screens. Tapping the face opens the
+ *  profile; the badge follows. */
+export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
   const ranked = useMemo(() => rankPros(PROS, worlds).slice(0, limit), [worlds, limit]);
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="Professionals to Follow">
       <SectionHead>Professionals to Follow</SectionHead>
-      {/* the same grid as the community cards above (same gutters, same
-         edges): two across on a phone, three on a tablet, six on desktop.
-         Phones show four so the section stays two rows. */}
-      <div className="grid grid-cols-2 gap-[var(--space-6)] lg:grid-cols-4">
+      <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
           const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
+          const following = !!follows[pro.id];
           return (
-            <div
-              key={pro.id}
-              className="dm-tap relative flex min-w-0 flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] pt-[var(--space-4)] pb-[var(--space-3)] text-center"
-              style={{ ...PANEL, background: `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` }}
-            >
-              <button type="button" onClick={() => nav?.openPro(pro.id)} className="absolute inset-0 z-0 cursor-pointer rounded-[inherit]">
-                <span className="sr-only">Open {pro.name}&apos;s profile</span>
-              </button>
-              <Avatar name={pro.name} verified size={56} />
-              <div className="relative z-[1] flex w-full min-w-0 flex-col items-center gap-[2px]">
-                <span className="block w-full truncate text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</span>
+            <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
+              <span className="relative">
+                <button
+                  type="button"
+                  onClick={() => nav?.openPro(pro.id)}
+                  aria-label={`Open ${pro.name}'s profile`}
+                  className="dm-tap block cursor-pointer rounded-full p-[3px]"
+                  style={{ boxShadow: `0 0 0 2px color-mix(in srgb, ${accent} 70%, transparent)` }}
+                >
+                  {/* no verified shield here: it shares the corner with the follow badge, and every pro in this rail is verified anyway */}
+                  <Avatar name={pro.name} size={80} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { dispatchAuroraPulse(following ? "select" : "cta"); onFollow(pro.id); }}
+                  aria-pressed={following}
+                  aria-label={following ? `Unfollow ${pro.name}` : `Follow ${pro.name}`}
+                  className="dm-quiet absolute right-[-2px] bottom-[2px] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-2"
+                  style={{ background: following ? "var(--color-feedback-success, #33c78c)" : "var(--primary)", borderColor: "var(--background)", color: following ? "#05070f" : "#FFFFFF" }}
+                >
+                  {following ? <Check className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} /> : <Plus className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} />}
+                </button>
+              </span>
+              <span className="flex w-full min-w-0 flex-col items-center gap-[1px]">
+                <span className="block w-full truncate text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
                 <span className="block w-full truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                <span className="mt-[4px] flex items-center">
-                  <CompanyChip name={pro.org} tone="surface" size="sm" />
-                </span>
-              </div>
-              <div className="relative z-[1] mt-[2px]">
-                <FollowButton compact following={!!follows[pro.id]} onToggle={() => onFollow(pro.id)} />
-              </div>
-            </div>
+                <span className="block w-full truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
+              </span>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </section>
   );
 }
