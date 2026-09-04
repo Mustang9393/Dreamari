@@ -2,20 +2,22 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, Flame, Sparkle } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame, Play, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim, cardTopScrim } from "./cardChrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
 import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
+import type { Simulation } from "@/components/play/types";
+import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
+import { WORLD_COLORS, posterTitleFont } from "./worlds";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Daily Drop / Continue / Trending), Continue rail of
@@ -139,6 +141,7 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 }
 
 function HeroBanner() {
+  const ibRun = useSimRun(INVESTMENT_BANKING);
   const router = useRouter();
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -239,21 +242,22 @@ function HeroBanner() {
                 Day in the Life: Investment Banker
               </p>
               <p className="text-[15px] leading-[20px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Level 1 · Intern
+                Level {INVESTMENT_BANKING.levels[0].n} · {INVESTMENT_BANKING.levels[0].role}
               </p>
             </div>
-            <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
-              <div className="flex items-center justify-between text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                <span style={{ color: "var(--muted-foreground)" }}>62% COMPLETE</span>
-                <span style={{ color: "var(--world-business-money-office)" }}>18 min left</span>
+            {ibRun.pct > 0 && (
+              <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
+                <div className="flex items-center justify-between text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
+                  <span style={{ color: "var(--muted-foreground)" }}>{ibRun.pct}% DONE</span>
+                </div>
+                <div className="relative h-[6px] w-full rounded-[var(--radius-full,999px)]" style={{ background: "var(--glass-surface-2)" }}>
+                  <div className="absolute inset-y-0 left-0 rounded-[999px]" style={{ width: `${ibRun.pct}%`, background: "var(--world-business-money-office)", boxShadow: "0 0 9px color-mix(in srgb, var(--world-business-money-office) 50%, transparent)" }} />
+                </div>
               </div>
-              <div className="relative h-[6px] w-full rounded-[var(--radius-full,999px)]" style={{ background: "var(--glass-surface-2)" }}>
-                <div className="absolute inset-y-0 left-0 w-[62%] rounded-[999px]" style={{ background: "var(--world-business-money-office)", boxShadow: "0 0 9px color-mix(in srgb, var(--world-business-money-office) 50%, transparent)" }} />
-              </div>
-            </div>
+            )}
             <div>
               <HeroCta onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
-                <span className="inline-flex items-center gap-[6px]">Play<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
+                <span className="inline-flex items-center gap-[6px]">{ibRun.pct > 0 ? "Continue" : "Play"}<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
               </HeroCta>
             </div>
           </div>
@@ -344,121 +348,59 @@ function HeroBanner() {
   );
 }
 
-type Activity = {
-  /** Drives the progress bar/stat accent color -- no longer a badge chip
-      (removed per direct feedback), but kept the name's "badge" root since
-      it's still the card's one accent color, not a generic "color" prop
-      that could be mistaken for the whole card's background. */
-  badgeColor: string;
-  title: string;
-  /** the specific simulation/chapter name, shown italic under the title */
-  chapter?: string;
-  sub: string;
-  fill: number;
-  stat: string;
-  cta: string;
-  photo?: string;
-  /** object-position for the card photo -- the glossary thumbnail is a tall
-      portrait crop (real desk photography, not a mockup), so it needs its
-      own focus point rather than the landscape shots' default. */
-  photoFocus?: string;
-  /** Where the card's own CTA goes. Every card links to a page that exists;
-      the rail only shows games the app actually has. */
-  href?: string;
-};
+/** The same words, cover and progress as the Play tab (CEO, 4 Sept): a
+ *  game is recognisable anywhere it appears, so the card reads the saved run
+ *  the Play tab reads, not a demo figure. */
+function useSimRun(sim: Simulation): { pct: number; label: string } {
+  const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
+  const first = sim.levels[0];
+  const run = readRun(progress, sim.id, first.n);
+  const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
+  const pct = resumable ? Math.round((resumable.index / first.beats.length) * 100) : 0;
+  return { pct, label: `Level ${first.n} · ${first.role}${pct ? ` · ${pct}% done` : ""}` };
+}
 
-// Continue Learning & Playing cards. Names and covers are the Play tab's own
-// (CEO note, 4 Sept): the same game must look and read the same everywhere,
-// so nobody has to learn a plot name like "The $30B Deal" or wonder whether
-// "Deal Team Kickoff" was a second game. Only games that exist are listed.
+type Activity =
+  | { kind: "sim"; sim: Simulation }
+  | { kind: "glossary"; title: string; world: string; cover: string; href: string; pct: number; label: string };
+
+// Continue Learning & Playing: the two simulations the app has, and the one
+// glossary game, each with the Play tab's own name and cover. "Deal Team
+// Kickoff" (a plot beat, not a game) is gone (CEO, 4 Sept).
 const ACTIVITIES: Activity[] = [
-  {
-    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "Day in the Life: Investment Banker",
-    chapter: "Level 1 · Intern",
-    sub: "",
-    fill: 62,
-    stat: "62% · 18 min left",
-    cta: "Play",
-    photo: INVESTMENT_BANKING.cover,
-    href: `/play/${INVESTMENT_BANKING.id}`,
-  },
-  {
-    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "Finance Glossary Game",
-    chapter: "Learn key finance terms",
-    sub: "",
-    fill: 60,
-    stat: "6 of 10 terms mastered",
-    cta: "Play",
-    photo: "/images/app/glossary-finance-thumb.png",
-    photoFocus: "50% 38%",
-    href: "/play/glossary/investment-banking",
-  },
-  {
-    badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "Day in the Life: Registered Nurse",
-    chapter: "Level 1 · New Grad RN",
-    sub: "",
-    fill: 0,
-    stat: "Not started",
-    cta: "Play",
-    photo: REGISTERED_NURSE.cover,
-    href: `/play/${REGISTERED_NURSE.id}`,
-  },
+  { kind: "sim", sim: INVESTMENT_BANKING },
+  { kind: "glossary", title: "Finance Glossary Game", world: "Business & Money", cover: "/images/app/glossary-finance-thumb.png", href: "/play/glossary/investment-banking", pct: 60, label: "6 of 10 terms mastered" },
+  { kind: "sim", sim: REGISTERED_NURSE },
 ];
 
-// Full-bleed photo + CardProgressiveBlur + soft scrim, matching Connect's
-// photo-card treatment: the old version was a solid-panel card with a photo
-// masked into just the right third via a 1-stop gradient, which read as a
-// visible seam. Content also moved off fixed pixel offsets onto a real flex
-// column, so it doesn't need re-tuning by hand every time copy changes.
+/** One card, built exactly like the Play tab's poster card: cover, the
+ *  poster scrim, the title in the world's poster face, the world label in
+ *  its colour, the level and progress line, and a play badge in the middle.
+ *  The whole card is the link; there is no separate button. */
 function ActivityCard({ activity }: { activity: Activity }) {
-  const className = `dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[196px] sm:w-[360px] ${activity.href ? "block cursor-pointer" : ""}`;
-  const style = { borderColor: "var(--glass-border)", background: "#0e0c20" };
-
-  const content = (
-    <>
-      <Image src={activity.photo ?? ""} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" style={{ objectPosition: activity.photoFocus ?? "50% 20%" }} />
-      <CardProgressiveBlur />
-      <span aria-hidden className="absolute inset-0" style={{ background: cardBottomScrim() }} />
-      <span aria-hidden className="absolute inset-0" style={{ background: cardTopScrim() }} />
-
-      <div className="relative z-10 flex h-full w-full flex-col justify-between px-[17px] py-[15px] sm:px-[19px] sm:py-[17px]" style={{ fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}>
-        <div>
-          <p className="font-bold" style={{ color: "#FFFFFF", fontSize: activity.title.length > 24 ? 15 : 19, lineHeight: activity.title.length > 24 ? "19px" : "24px" }}>
-            {activity.title}
-          </p>
-          {(activity.chapter ?? activity.sub) && (
-            <p className="mt-[3px] text-[11px] leading-[15px] font-medium italic" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.82)" }}>
-              {activity.chapter ?? activity.sub}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-[7px]">
-          <SparkBar className="w-full max-w-[200px]" percent={activity.fill} height={5} track="rgba(255,255,255,0.2)" fill={activity.badgeColor} glow={activity.badgeColor} />
-          <p className="flex items-center justify-between gap-[10px] text-[10.5px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-            <span className="min-w-0 truncate" style={{ color: "rgba(255,255,255,0.78)" }}>{activity.stat}</span>
-            <span className="inline-flex flex-none items-center gap-[4px]" style={{ color: "#FFFFFF" }}>
-              {activity.cta}
-              <ArrowRight size={11} strokeWidth={3} aria-hidden />
-            </span>
-          </p>
-        </div>
-      </div>
-    </>
-  );
-  if (activity.href) {
-    return (
-      <Link href={activity.href} className={className} style={style}>
-        {content}
-      </Link>
-    );
-  }
+  const ib = useSimRun(activity.kind === "sim" ? activity.sim : INVESTMENT_BANKING);
+  const title = activity.kind === "sim" ? activity.sim.title : activity.title;
+  const world = activity.kind === "sim" ? activity.sim.world : activity.world;
+  const cover = activity.kind === "sim" ? activity.sim.cover : activity.cover;
+  const href = activity.kind === "sim" ? `/play/${activity.sim.id}` : activity.href;
+  const pct = activity.kind === "sim" ? ib.pct : activity.pct;
+  const label = activity.kind === "sim" ? ib.label : activity.label;
+  const verb = pct > 0 ? "Continue" : "Play";
   return (
-    <article className={className} style={style}>
-      {content}
-    </article>
+    <Link href={href} className="dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[212px] sm:w-[360px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+      <span className="sr-only">{verb} {title}</span>
+      <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+      <span aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
+        <Play className="ml-[3px] h-[22px] w-[22px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
+      </span>
+      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[14px] pt-[32px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        {activity.kind === "sim" && <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>}
+        <span className="block text-[20px] leading-[1.15] font-extrabold uppercase" style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>{title}</span>
+        <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>{world}</span>
+        <span className="mt-[2px] text-[12px] leading-[15px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.85 }}>{label}</span>
+        {pct > 0 && <span aria-hidden className="block w-full max-w-[220px]"><SparkBar percent={pct} height={5} track="color-mix(in srgb, var(--poster-title) 25%, transparent)" fill="var(--primary)" glow="var(--primary)" /></span>}
+      </span>
+    </Link>
   );
 }
 
@@ -499,7 +441,7 @@ export function HomeExperience() {
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (
-              <ActivityCard key={activity.title} activity={activity} />
+              <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
             ))}
           </div>
         </section>

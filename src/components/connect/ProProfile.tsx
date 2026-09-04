@@ -166,8 +166,8 @@ export function PeopleToFollow({ follows, onFollow, limit = 4 }: { follows: Foll
   const worlds = useStudentWorlds();
   const ranked = useMemo(() => rankPros(PROS, worlds).slice(0, limit), [worlds, limit]);
   return (
-    <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to Follow">
-      <SectionHead>People to Follow</SectionHead>
+    <section className="flex flex-col gap-[var(--space-3)]" aria-label="Professionals to Follow">
+      <SectionHead>Professionals to Follow</SectionHead>
       {/* the same grid as the community cards above (same gutters, same
          edges): two across on a phone, three on a tablet, six on desktop.
          Phones show four so the section stays two rows. */}

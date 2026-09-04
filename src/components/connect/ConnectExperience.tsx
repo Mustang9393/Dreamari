@@ -24,13 +24,14 @@ import {
   KeyRound,
   Share2,
   LayoutDashboard,
-  MapPin,
   Pin,
   ShieldCheck,
   ThumbsUp,
   Users,
   X,
   Bell,
+  Search,
+  Camera,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -437,13 +438,18 @@ const PHOTO_COVER: Record<string, string> = {
 // Events are Dream Opportunity branded in the photo lane -- one DO cover
 // for all events, with the partner's own logo as the identity mark.
 // Internal demo; we work with these partners, so their logos are cleared.
-const DO_EVENT_COVER = "/images/connect/covers/do-event.webp";
-
-function eventCover(host: string): string {
-  if (/jpmorgan|chase/i.test(host)) return "/images/connect/covers/do-event-jpmc.webp";
-  if (/at&t/i.test(host)) return "/images/connect/covers/do-event-att.webp";
-  if (/ernst|\bey\b/i.test(host)) return "/images/connect/covers/do-event-ey.webp";
-  return DO_EVENT_COVER;
+// Real photography per board. The do-event-*.webp files that sat here are
+// flat colour gradients, which is exactly what read as "large colour blobs"
+// (CEO, 4 Sept); a board now gets a photo and its partner's colour as a glow.
+const EVENT_COVER: Record<string, { src: string; focus: string }> = {
+  "event-ey": { src: "/images/connect/covers/poster7-business-money.webp", focus: "50% 30%" },
+  "event-do-morgan-stanley-nyc": { src: "/images/connect/covers/finance.webp", focus: "70% 50%" },
+  "event-ja-goldman-sachs-nyc": { src: "/images/connect/covers/people-teaching-education.webp", focus: "50% 30%" },
+  "event-seo-scholars-nyc": { src: "/images/connect/covers/photo4-event-door.webp", focus: "68% 45%" },
+  "event-jpmc-brooklyn": { src: "/images/connect/covers/people-business-money.webp", focus: "50% 30%" },
+};
+function eventCover(id: string): { src: string; focus: string } {
+  return EVENT_COVER[id] ?? { src: "/images/connect/covers/photo4-event-door.webp", focus: "68% 45%" };
 }
 
 // Each event wears its partner's brand accent (EY yellow, Chase blue,
@@ -494,18 +500,21 @@ function partnerCompany(host: string): string {
  *  begins at the same pixels. Letters are sized to the lead's letter
  *  height; a wordmark wider than its slot scales down to fit. */
 const LOCKUP = { md: { L: 16, slot: 118, h: 36 }, lg: { L: 21, slot: 160, h: 48 } } as const;
-function EventMarks({ host, size = "md", ink: inkColor }: { host: string; size?: "md" | "lg"; ink?: string }) {
-  // the card's ambient colour follows its host; the two marks follow the
-  // event's name (a Junior Achievement event is JA × the company hosting it)
-  const brandKey = partnerCompany(host);
-  const brand = COMPANY_BRAND[brandKey] ?? { bg: EVENT_ACCENT, ink: "#FFFFFF" };
-  const lead = brandKey === "Junior Achievement" ? "Junior Achievement" : "Dream Opportunity";
-  const partner = lead === "Junior Achievement" ? "Goldman Sachs" : brandKey;
+// Marks we hold that are WRONG for the board they would sit on. The only
+// Junior Achievement file is JA Singapore's lockup, and the board is New
+// York (CEO caught it, 4 Sept), so JA is set in type until a US mark arrives.
+const NO_MARK = new Set(["Junior Achievement"]);
+/** A partner with no mark file yet, set in the display face at letter height. */
+function MarkWord({ name, max, L, color }: { name: string; max: number; L: number; color: string }) {
+  return <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: L, maxWidth: max, fontSize: L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color }}>{name}</span>;
+}
+function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: string; partner?: string; size?: "md" | "lg"; ink?: string }) {
   const box = LOCKUP[size];
   const gap = Math.round(box.L * 0.6);
   const cross = Math.round(box.L * 0.62);
+  const markOf = (name: string) => (NO_MARK.has(name) ? undefined : COMPANY_MARKS[name]);
   const fit = (name: string, tall: boolean, max: number) => {
-    const m = COMPANY_MARKS[name];
+    const m = markOf(name);
     let L = tall ? Math.round(box.L * 1.4) : box.L;
     if (m) {
       const w = (L / (m.letters?.h ?? 1)) * m.aspect;
@@ -515,33 +524,33 @@ function EventMarks({ host, size = "md", ink: inkColor }: { host: string; size?:
   };
   // the lead slot is exactly the lead mark's width, so the box starts where
   // the mark starts (no dead space when the lockup wraps under a title)
-  const leadL = fit(lead, lead === "Junior Achievement", Math.round(box.L * 3.9));
-  const lm = COMPANY_MARKS[lead];
-  const leadSlot = Math.round((leadL / (lm?.letters?.h ?? 1)) * (lm?.aspect ?? 1.79));
-  const partnerL = fit(partner, partner === "Junior Achievement" || partner === "Goldman Sachs", box.slot);
-  const width = leadSlot + gap + cross + gap + box.slot;
+  const leadL = fit(lead, false, Math.round(box.L * 3.9));
+  const lm = markOf(lead);
+  // a wordmark set in type needs about half a letter height per character in
+  // the display face at 0.9 L; a touch of room so it never truncates
+  const leadSlot = lm ? Math.round((leadL / (lm.letters?.h ?? 1)) * lm.aspect) : Math.round(box.L * 0.52 * lead.length) + 8;
+  const partnerL = partner ? fit(partner, partner === "Goldman Sachs", box.slot) : 0;
+  const width = partner ? leadSlot + gap + cross + gap + box.slot : leadSlot;
   const dark = !!inkColor && !/^#f/i.test(inkColor);
   const base = dark ? inkColor! : "rgba(255,255,255,0.94)";
   const tint = dark ? `color-mix(in srgb, ${inkColor} 70%, #ffffff)` : "rgba(255,255,255,0.7)";
   const ink = `linear-gradient(110deg, ${base} 0%, ${base} 38%, ${tint} 50%, ${base} 62%, ${base} 100%)`;
-  void brand;
   return (
-    <span className="relative flex flex-none items-center" style={{ width, height: box.h, gap, textShadow: "none" }}>
-      
-      <span className="relative flex flex-none items-center justify-end" style={{ width: leadSlot, height: box.h }}>
-        <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" />
+    <span className="relative flex flex-none items-center" style={{ width: lm ? width : undefined, height: box.h, gap, textShadow: "none" }}>
+      <span className="relative flex flex-none items-center justify-end" style={{ width: lm ? leadSlot : undefined, height: box.h }}>
+        {lm ? <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" /> : <MarkWord name={lead} max={leadSlot} L={box.L} color={base} />}
       </span>
-      {/* the collab mark: a rounded × in the partner's light, breathing slowly */}
-      <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
-        <path d="M6 6 L18 18 M18 6 L6 18" />
-      </svg>
-      <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
-        {COMPANY_MARKS[partner] ? (
-          <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" />
-        ) : (
-          <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: box.L, maxWidth: box.slot, fontSize: box.L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color: base }}>{partner}</span>
-        )}
-      </span>
+      {partner && (
+        <>
+          {/* the collab mark: a rounded × in the partner's light, breathing slowly */}
+          <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+            <path d="M6 6 L18 18 M18 6 L6 18" />
+          </svg>
+          <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
+            {markOf(partner) ? <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" /> : <MarkWord name={partner} max={box.slot} L={box.L} color={base} />}
+          </span>
+        </>
+      )}
     </span>
   );
 }
@@ -608,10 +617,11 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
 
         {/* three tiles fill the card's width, the same on every card; the
            marks sit centred under them */}
-        <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
-          <StatTile value={community.students} label="Students" />
-          <StatTile value={community.activePros} label="Pros" />
-          <StatTile value={community.posts} label="Posts" />
+        {/* two tiles (CEO, 4 Sept): who is here and which companies. Post
+           counts came off; they competed with the name for attention. */}
+        <div className="mt-auto grid grid-cols-2 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
+          <StatTile value={community.students.toLocaleString("en-US")} label="Students" />
+          <StatTile value={community.professionalsFrom.length} label="Companies" />
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
@@ -1097,6 +1107,7 @@ export function ConnectExperience() {
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
                   onBack={() => setView({ kind: "home", tab: "events" })}
+                  onOpenCommunity={(id) => setView({ kind: "board", id, filter: "questions" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
                   onAddToPlan={() => say("Added to your Plan as a next action.")}
@@ -1554,9 +1565,15 @@ function HomeView({
   onDeleteAsked: (id: string) => void;
 }) {
   const eventInk = "#f6f5fb";
-  const searched = COMMUNITIES;
   void onAsk; void onOpenAll;
-  const searchedEvents = EVENTS;
+  // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
+  // to find the right room, and asking lives inside each room. Typing
+  // "invest" narrows the communities and boards to finance as you type.
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const hit = (...fields: (string | string[] | undefined)[]) => !q || fields.some((f) => (Array.isArray(f) ? f : [f ?? ""]).some((v) => v.toLowerCase().includes(q)));
+  const searched = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
+  const searchedEvents = EVENTS.filter((e) => hit(e.name, e.host, e.location, e.topics, e.orgs));
 
   return (
     <>
@@ -1570,6 +1587,26 @@ function HomeView({
         </div>
         <TopTabs tab={tab} onTab={onTab} />
       </div>
+
+      {tab !== "notifications" && (
+        <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+          <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={tab === "events" ? "Search events and partners" : "Search communities, topics, companies"}
+            aria-label={tab === "events" ? "Search events" : "Search communities"}
+            className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
+            style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex h-[28px] w-[28px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          )}
+        </label>
+      )}
 
       {/* Ask and "your questions" moved off the landing (direct feedback):
          they live under Notifications, and every board has its own Ask. */}
@@ -1603,12 +1640,13 @@ function HomeView({
                 <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
               </div>
             ))}
-            {(
+            {!q && (
               <div>
-                <ComingSoonCard />
+                <LaunchVoteCard />
               </div>
             )}
           </div>
+          {q && searched.length === 0 && <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No community matches &ldquo;{query}&rdquo; yet. Vote for it below when the search is cleared.</p>}
         </section>
       )}
 
@@ -1619,50 +1657,54 @@ function HomeView({
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
-          {/* The doc's event card, one for one: an orange gradient header
-             (star chip, event name, date · location in white), then the
-             stats row, the Partner line, and one action for this event's
-             state. */}
+          {/* Photo cards, the same anatomy as the community cards: the
+             partnership's photo under a wash of the partner's colour (a
+             flat colour block read as a blob, CEO 4 Sept), the name, the
+             last or next event date (the name already says company and
+             city, so neither repeats), the three counts a paying nonprofit
+             wants to see at a glance, then the lockup and one solid button. */}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const pAccent = partnerAccent(event.host);
-              const ink = COMPANY_BRAND[partnerCompany(event.host)]?.ink ?? eventInk;
               const joined = eventJoined[event.id];
+              const when = upcoming ? (/^[A-Z][a-z]+ \d/.test(event.date) ? `Next event ${event.date}` : event.date) : event.nextDate ? `Next event ${event.nextDate}` : `Last event ${event.date}`;
               return (
                 <div
                   key={event.id}
-                  className="group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-6)]"
-                  style={{ background: pAccent, border: `1px solid color-mix(in srgb, ${ink} 18%, transparent)`, fontFamily: "var(--font-display)", boxShadow: `0 18px 44px -22px color-mix(in srgb, ${pAccent} 70%, rgba(0,0,0,0.6))`, textShadow: "none" }}
+                  className="group relative flex min-h-[250px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+                  style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
-                  {/* one solid brand colour and the partner's own ink, like the
-                     company card on a volunteer's dashboard: nothing behind the
-                     words but the colour (direct feedback: legibility) */}
-                  <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${ink} 28%, transparent)` }} />
-                  <div className="relative z-10 flex flex-1 flex-col">
-                    <h3 className="text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: ink }}>{event.name}</h3>
-                    {/* heading, then the date as the subheading, then the place */}
-                    <p className="mt-[6px] text-[15px] leading-[20px] font-bold" style={{ color: ink }}>{event.date}</p>
-                    <p className="mt-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 74%, transparent)`, fontFamily: "var(--font-body)" }}>{event.location}</p>
-                    {/* the lockup lives in one place on every card: bottom-left of
-                       the upper area, flush with the text. DO starts, the × sits
-                       and the partner ends at the same pixels card to card. */}
-                    <div className="mt-auto pt-[var(--space-6)]"><EventMarks host={event.host} ink={ink} /></div>
-                  </div>
-                  <div className="relative z-10 mt-[10px] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${ink} 18%, transparent)` }}>
-                    {/* no counts on the card (direct feedback); upcoming events say when they open */}
-                    <span className="min-w-0 truncate text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${ink} 62%, transparent)` }}>
-                      {typeof event.students === "number" ? "" : "Opens after the event"}
-                    </span>
-                    {joined ? (
-                      <button type="button" onClick={() => onOpenEvent(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${ink})` }}>
-                        Open Event Board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
-                      </button>
-                    ) : upcoming ? null : (
-                      <button type="button" onClick={() => onEnterCode(event.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] whitespace-nowrap uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${ink})` }}>
-                        <KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter Code
-                      </button>
-                    )}
+                  {/* no photo and no flat colour block (direct feedback, both): a
+                     dark glass card, the partner's colour as one glow rising from
+                     the top-right corner, and a fine ruled pattern for texture */}
+                  <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${pAccent} 58%, transparent) 0%, color-mix(in srgb, ${pAccent} 18%, transparent) 42%, transparent 72%)` }} />
+                  <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
+                  <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
+                  <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
+                  <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: pAccent }} />
+                  <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]">
+                    <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+                    <p className="mt-[6px] text-[14px] leading-[19px] font-semibold" style={{ color: "rgba(255,255,255,0.78)", fontFamily: "var(--font-body)" }}>{when}</p>
+                    <div className="mt-auto pt-[var(--space-5)]">
+                      {typeof event.students === "number" ? (
+                        <div className="grid grid-cols-3 gap-[6px]">
+                          <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
+                          <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
+                          <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
+                        </div>
+                      ) : (
+                        <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
+                      )}
+                    </div>
+                    <div className="mt-[var(--space-4)] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)]">
+                      <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+                      {joined ? (
+                        <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                      ) : upcoming ? null : (
+                        <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -1716,42 +1758,53 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
 /** The sixth grid cell: a quiet promise. Same card anatomy as its five
  *  neighbors -- title, sub in the dek slot, folio rule -- but ghosted, with
  *  the suggest affordance living in the folio where a CTA belongs. */
-function ComingSoonCard() {
-  const [sent, setSent] = useState(false);
+/** What should we launch next? (CEO, 4 Sept) Instead of a free-text
+ *  suggestion, the communities being considered, and one vote each: real
+ *  demand data, and the student sees their pick land. Votes are local to the
+ *  prototype. */
+const LAUNCH_CANDIDATES = [
+  { id: "law", name: "Law & Government", votes: 214 },
+  { id: "trades", name: "Engineering & Trades", votes: 187 },
+  { id: "sport", name: "Sports & Fitness", votes: 162 },
+  { id: "founders", name: "Entrepreneurship", votes: 149 },
+];
+function LaunchVoteCard() {
+  const [picked, setPicked] = useState<string | null>(null);
+  const top = Math.max(...LAUNCH_CANDIDATES.map((c) => c.votes)) + 1;
   return (
     <div
-      className="dm-tap group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      className="group relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: "1px solid color-mix(in srgb, var(--primary) 45%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW, fontFamily: "var(--font-display)" }}
     >
-      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        <Image src="/images/connect/covers/photo4-event-door.webp" alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "68% 45%", filter: "brightness(0.78) saturate(0.92)" }} />
+      <span aria-hidden className="absolute inset-0">
+        <Image src="/images/connect/covers/photo4-event-door.webp" alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: "68% 45%", filter: "brightness(0.6) saturate(0.85)" }} />
         <CardProgressiveBlur size="74%" />
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}` }} />
-        <span className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
-      </span>
-      <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium tracking-[0.06em] uppercase" style={{ background: "rgba(9,10,20,0.72)", color: "rgba(255,255,255,0.85)" }}>
-        Coming Soon
+        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.88) 40%, rgba(12,16,35,0.5) 70%, rgba(12,16,35,0.2) 100%), ${cardTopScrim()}` }} />
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
-        <h3 className="pr-[104px] text-[20px] leading-[25px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>More communities</h3>
-        {/* the one action sits in the middle of the card, not on the title row */}
-        <div className="flex flex-1 items-center justify-center py-[var(--space-6)]" style={{ textShadow: "none" }}>
-          <button
-            type="button"
-            onClick={() => { dispatchAuroraPulse("cta"); setSent(true); }}
-            disabled={sent}
-            className={`dm-quiet flex min-h-[38px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[16px] text-[14px] leading-[18px] font-semibold disabled:cursor-default ${sent ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
-            style={{ borderColor: sent ? "color-mix(in srgb, var(--world-food-farming-nature) 70%, transparent)" : "rgba(255,255,255,0.45)", color: sent ? "var(--world-food-farming-nature)" : "#FFFFFF", background: "rgba(12,16,35,0.35)" }}
-          >
-            {sent ? (
-              <>
-                <CheckCircle2 className="h-[15px] w-[15px]" aria-hidden /> Request Sent
-              </>
-            ) : (
-              <>Suggest a Community</>
-            )}
-          </button>
-        </div>
+        <h3 className="text-[24px] leading-[28px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>What should we launch next?</h3>
+        <p className="mt-[4px] text-[13px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "var(--font-body)" }}>{picked ? "Your vote is in. We launch the winner." : "One vote. The winner opens first."}</p>
+        <ul className="mt-auto flex flex-col gap-[6px] pt-[var(--space-4)]" style={{ textShadow: "none" }}>
+          {LAUNCH_CANDIDATES.map((c) => {
+            const votes = c.votes + (picked === c.id ? 1 : 0);
+            const mine = picked === c.id;
+            return (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  disabled={picked !== null}
+                  onClick={() => { dispatchAuroraPulse("cta"); setPicked(c.id); }}
+                  className={`dm-quiet relative flex min-h-[40px] w-full cursor-pointer items-center justify-between gap-[10px] overflow-hidden rounded-[var(--radius-sm)] px-[12px] text-left text-[14px] leading-[18px] font-semibold disabled:cursor-default ${mine ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+                  style={{ background: "rgba(12,16,35,0.58)", boxShadow: `inset 0 0 0 1px ${mine ? "var(--primary)" : "rgba(255,255,255,0.12)"}`, color: "#FFFFFF" }}
+                >
+                  {picked && <span aria-hidden className="absolute inset-y-0 left-0 rounded-[var(--radius-sm)]" style={{ width: `${(votes / top) * 100}%`, background: mine ? "color-mix(in srgb, var(--primary) 45%, transparent)" : "rgba(255,255,255,0.08)", transition: "width 600ms cubic-bezier(0.16,1,0.3,1)" }} />}
+                  <span className="relative flex items-center gap-[8px]">{mine && <CheckCircle2 className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />}{c.name}</span>
+                  <span className="relative text-[12px] tabular-nums" style={{ color: "rgba(255,255,255,0.7)" }}>{picked ? `${votes} votes` : "Vote"}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );
@@ -1901,6 +1954,7 @@ function EventView({
   filter,
   onFilter,
   onBack,
+  onOpenCommunity,
   onOpenThread,
   onSaveTakeaway,
   takeawaySaved,
@@ -1911,6 +1965,7 @@ function EventView({
   filter: string;
   onFilter: (f: string) => void;
   onBack: () => void;
+  onOpenCommunity?: (id: string) => void;
   onOpenThread: (id: string) => void;
   onSaveTakeaway: () => void;
   takeawaySaved: boolean;
@@ -1933,7 +1988,7 @@ function EventView({
         className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
-        <Image src={eventCover(event.host)} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "62% 45%" }} />
+        <Image src={eventCover(event.id).src} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: eventCover(event.id).focus, filter: "brightness(0.8)" }} />
         <CardProgressiveBlur />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
         <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
@@ -1941,14 +1996,23 @@ function EventView({
           <div className="min-w-[220px] flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
+            {/* the name already carries the company and the city; the line
+               under it says only when (CEO, 4 Sept) */}
             <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
-              <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> {event.date}</span>
-              <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {event.location}</span>
-              <span>Hosted by {event.host}</span>
+              <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> Last event {event.date}</span>
+              {event.nextDate && <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> Next event {event.nextDate}</span>}
             </p>
           </div>
-          <EventMarks host={event.host} size="lg" />
+          <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} size="lg" />
         </div>
+        {/* who is inside: the numbers a partner nonprofit is paying for */}
+        {typeof event.students === "number" && (
+          <div className="relative z-10 mt-[var(--space-4)] grid max-w-[420px] grid-cols-3 gap-[6px]">
+            <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
+            <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
+            <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
+          </div>
+        )}
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
             <ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 70%, ${eventInk})` }} />
@@ -1964,6 +2028,37 @@ function EventView({
         onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
       />
       {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+
+      {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
+         going after the day ends. Rows and short lists, no essay. */}
+      {event.official && (
+        <Card accent={pAccent}>
+          <div className="flex items-center gap-[10px]">
+            <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+              <LetterMark name="Dream Opportunity" ink="#FFFFFF" letterHeight={14} />
+            </span>
+            <span className="flex min-w-0 flex-col">
+              <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Dream Opportunity <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
+              <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Official event account · {event.official.postedAgo}</span>
+            </span>
+          </div>
+          <p className="mt-[12px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
+          <p className="mt-[10px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.official.about}</p>
+          <p className="mt-[14px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What to do next</p>
+          <ul className="mt-[6px] flex flex-col gap-[6px]">
+            {event.official.next.map((line, i) => (
+              <li key={line} className="flex items-start gap-[10px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
+                <span className="mt-[1px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${pAccent} 30%, transparent)`, color: "var(--foreground)" }}>{i + 1}</span>
+                {line}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-[14px] flex flex-wrap gap-[8px]">
+            <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
+            <QuietCta onClick={() => dispatchAuroraPulse("cta")}><Camera className="h-[14px] w-[14px]" aria-hidden /> {event.official.photosLabel}</QuietCta>
+          </div>
+        </Card>
+      )}
 
       {/* Pinned host recap with three takeaways (handoff 10.3) */}
       {event.recap && (
@@ -2522,7 +2617,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
             <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
-            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{event.date} · {event.location} · Hosted by {event.host}</p>
+            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Last event {event.date}</p>
             <p className="mt-[10px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>
               This private board is limited to verified attendees and event professionals. Joining adds it to Your events. You won&apos;t need the code again, and access can be managed by the host.
             </p>

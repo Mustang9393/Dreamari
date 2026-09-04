@@ -1181,7 +1181,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     title: "EY Discover Internship Program",
     body: "Hands-on exposure to consulting and professional services work for high school students, hosted at EY offices.",
     eligibility: "High school juniors & seniors",
-    location: "Dallas, TX",
+    location: "New York and New Jersey offices",
     deadline: "Nov 15, 2026",
     sourceLabel: "ey.com/careers/students",
     verifiedDate: "Verified Aug 20, 2026",
@@ -1193,9 +1193,19 @@ export const OPPORTUNITIES: Opportunity[] = [
 
 export type EventBoard = {
   id: string;
+  /** "Nonprofit & Company City" (CEO, 4 Sept): a board is an ongoing channel
+   *  for a partnership, not one day's event, so no "Student Impact Day". */
   name: string;
   host: string;
+  /** The two marks in the lockup: the nonprofit that brings the students and
+   *  the company that opens its doors. Partner is optional for a board that
+   *  has not announced one yet. */
+  lead: string;
+  partner?: string;
+  /** The most recent event this board followed up on. */
   date: string;
+  /** The next event on this board's calendar, when one is booked. */
+  nextDate?: string;
   location: string;
   // Lifecycle per handoff 9.4 (Draft/Scheduled/Live collapsed for this
   // prototype into the two states the UI actually distinguishes): a
@@ -1214,21 +1224,33 @@ export type EventBoard = {
   // until the event itself has happened.
   recap?: { proId: string; takeaways: string[]; postedAgo: string };
   resources?: { title: string; description: string; sourceLabel: string }[];
+  /** The official Dream Opportunity post that keeps the event going after
+   *  the day itself (CEO, 4 Sept): what happened, who you visited, what to
+   *  do next, where to keep talking to the people you met, the photos. */
+  official?: { postedAgo: string; summary: string; about: string; next: string[]; communityId: string; communityName: string; photosLabel: string };
 };
 
 export const EVENTS: EventBoard[] = [
+  // One board per partnership, from one student's point of view (CEO, 4
+  // Sept): a New Jersey student who goes to things in NJ and New York. A
+  // Dallas board made no sense next to these, so AT&T Dallas is out until
+  // there is a Dallas student to show it to. Names are "Nonprofit & Company
+  // City"; dates are the last event and, where booked, the next one.
   {
     id: "event-ey",
-    name: "Dream Opportunity EY Student Impact Day",
+    name: "Dream Opportunity & EY NJ",
     host: "Ernst & Young",
+    lead: "Dream Opportunity",
+    partner: "EY",
     date: "August 14, 2026",
-    location: "EY Dallas Office",
+    nextDate: "November 4, 2026",
+    location: "EY, Hoboken",
     lifecycle: "Active follow-up",
     closesOn: "September 5, 2026",
     students: 142,
     pros: 28,
     postCount: 48,
-    orgs: ["Ernst & Young", "Dreamari"],
+    orgs: ["Dream Opportunity", "Ernst & Young", "Dreamari"],
     topics: ["Consulting", "Finance", "Networking"],
     entitled: true, // already joined, demonstrates the straight-into-the-board state
     recap: {
@@ -1244,15 +1266,30 @@ export const EVENTS: EventBoard[] = [
       { title: "Panel slides & career overviews", description: "Everything shown on stage, plus the career one-pagers each speaker recommended.", sourceLabel: "dreamari.co/resources" },
       { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
     ],
+    official: {
+      postedAgo: "1d ago",
+      summary: "142 students spent the day at EY in Hoboken: a panel with five EY professionals, small-group career conversations, and a tour of the floor.",
+      about: "EY is one of the four biggest professional services firms in the world. In New Jersey and New York it employs thousands of people in consulting, tax, audit and technology.",
+      next: [
+        "Follow up with one person you met within 48 hours. A two-line thank you is enough.",
+        "Follow the EY professionals here so their answers reach you first.",
+        "Save two careers you heard about today so your plan remembers them.",
+      ],
+      communityId: "business-money",
+      communityName: "Finance",
+      photosLabel: "Event photos",
+    },
   },
-  // The two spring partnership boards the Replit prototype carried, which
-  // the CEO of JA Singapore singled out (Slack, Sep 2): a nonprofit plus a
-  // corporate partner, with the Replit's own figures. Morgan Stanley is
-  // already joined; the Junior Achievement board unlocks with its code.
+  // The two partnership boards the Replit prototype carried, which the CEO
+  // of JA Singapore singled out (Slack, Sep 2), with the Replit's own
+  // figures. Morgan Stanley is already joined; Junior Achievement unlocks
+  // with its code.
   {
     id: "event-do-morgan-stanley-nyc",
-    name: "Dream Opportunity Morgan Stanley NYC",
+    name: "Dream Opportunity & Morgan Stanley NYC",
     host: "Morgan Stanley",
+    lead: "Dream Opportunity",
+    partner: "Morgan Stanley",
     date: "March 12, 2026",
     location: "Morgan Stanley, New York City",
     lifecycle: "Active follow-up",
@@ -1266,8 +1303,10 @@ export const EVENTS: EventBoard[] = [
   },
   {
     id: "event-ja-goldman-sachs-nyc",
-    name: "Junior Achievement Goldman Sachs NYC",
+    name: "Junior Achievement & Goldman Sachs NYC",
     host: "Junior Achievement",
+    lead: "Junior Achievement",
+    partner: "Goldman Sachs",
     date: "April 16, 2026",
     location: "Goldman Sachs, New York City",
     lifecycle: "Active follow-up",
@@ -1280,41 +1319,36 @@ export const EVENTS: EventBoard[] = [
     entitled: false,
     code: "JA-GS-2026",
   },
-  // The three ACTUAL fall events (from Slack, Sep 1): Brooklyn/JPMorgan
-  // Chase Oct 23, Dallas/AT&T Oct 29, New Jersey/EY Nov 4. All upcoming --
-  // their boards open after each event happens, same lifecycle rule as
-  // always. No invented stats: an event that has not happened has none.
+  // Asked for by the CEO (4 Sept). No company partner, date or figures have
+  // been given yet, so none are invented: the board exists, and opens after
+  // its first event.
+  {
+    id: "event-seo-scholars-nyc",
+    name: "Dream Opportunity & SEO Scholars NYC",
+    host: "SEO Scholars",
+    lead: "Dream Opportunity",
+    partner: "SEO Scholars",
+    date: "First event to be announced",
+    location: "New York City",
+    lifecycle: "Upcoming",
+    orgs: ["SEO Scholars", "Dream Opportunity", "Dreamari"],
+    topics: ["College", "Careers", "Networking"],
+    entitled: false,
+  },
+  // The real fall event within this student's reach (Slack, Sep 1):
+  // Brooklyn with JPMorgan Chase on Oct 23. Its board opens after the
+  // event, same lifecycle rule as always. No invented stats.
   {
     id: "event-jpmc-brooklyn",
-    name: "Dream Opportunity JPMorgan Chase Student Event",
+    name: "Dream Opportunity & JPMorgan Chase Brooklyn",
     host: "JPMorgan Chase",
+    lead: "Dream Opportunity",
+    partner: "JPMorgan Chase",
     date: "October 23, 2026",
     location: "Brooklyn, New York",
     lifecycle: "Upcoming",
-    orgs: ["JPMorgan Chase", "Dreamari"],
+    orgs: ["Dream Opportunity", "JPMorgan Chase", "Dreamari"],
     topics: ["Finance", "Networking"],
-    entitled: false,
-  },
-  {
-    id: "event-att-dallas",
-    name: "Dream Opportunity AT&T Student Event",
-    host: "AT&T",
-    date: "October 29, 2026",
-    location: "Dallas, Texas",
-    lifecycle: "Upcoming",
-    orgs: ["AT&T", "Dreamari"],
-    topics: ["Technology", "Networking"],
-    entitled: false,
-  },
-  {
-    id: "event-ey-newjersey",
-    name: "Dream Opportunity EY Student Event",
-    host: "Ernst & Young",
-    date: "November 4, 2026",
-    location: "New Jersey",
-    lifecycle: "Upcoming",
-    orgs: ["Ernst & Young", "Dreamari"],
-    topics: ["Consulting", "Networking"],
     entitled: false,
   },
 ];

@@ -135,3 +135,17 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Trending panel: "Featured in 3 career worlds" removed.
 - Career simulation panel: same cover as the Play tab, button says "Play", the "$30B Deal" subtitle is replaced by the level name.
 - Continue Learning & Playing: the investment banker card is "Day in the Life: Investment Banker" with the Play tab cover; "Finance Essentials" is "Finance Glossary Game" on Home and in Play; "Deal Team Kickoff" is removed and the Registered Nurse simulation card takes its place.
+
+## Connect, 4 Sept (CEO notes)
+
+- Event boards are named "Nonprofit & Company City" and are ongoing channels, not one day's event: Dream Opportunity & EY NJ, Dream Opportunity & Morgan Stanley NYC, Junior Achievement & Goldman Sachs NYC, Dream Opportunity & SEO Scholars NYC (new, partner and date to confirm), Dream Opportunity & JPMorgan Chase Brooklyn. AT&T Dallas is out: the boards follow one New Jersey student. The card shows the last or next event date only, since the name already says company and city.
+- Event cards are no longer colour blocks: dark glass, the partner's colour as a corner glow, a fine ruled texture. Students, Pros and Posts are back on every card and in the board header, because partner nonprofits pay to see them. Open board and Enter code are solid buttons.
+- The Junior Achievement mark was JA Singapore's; it is set in type until a US mark arrives.
+- Ask a question is replaced by a search bar on the Connect landing (communities, topics, companies, events). Asking lives inside each board.
+- Community cards: name first, then two tiles, Students and Companies. Post counts are gone. "Suggest a Community" is now "What should we launch next?" with four candidate communities and one vote each.
+- "People to Follow" is "Professionals to Follow".
+- Event boards carry an official Dream Opportunity post: what happened, about the company, what to do next, a link back to the matching community, and event photos.
+
+## Home rail, 4 Sept
+
+- The Continue Learning & Playing cards are built exactly like the Play tab's cards: cover, poster title, world label, level and real progress from the same save the Play tab reads, and a play badge in the middle. Cards in progress say Continue; new ones say Play. Home, Play and the game all say "Day in the Life".

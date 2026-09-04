@@ -267,6 +267,9 @@ function RowCard({
          as Browse's own PosterCard -- accent color lives on the world
          label, never the title itself, matching that convention exactly. */}
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[12px] pt-[32px] pb-[12px] sm:px-[16px] sm:pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        {/* the series name, so Home, Play and the game itself all say
+           "Day in the Life: <career>" (CEO, 4 Sept) */}
+        {candidate.kind === "sim" && <span className={`block font-semibold tracking-[0.6px] uppercase ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>}
         <span className={`block leading-[1.15] font-extrabold uppercase transition-[font-size] duration-500 [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>
           {breakable(title)}
         </span>
