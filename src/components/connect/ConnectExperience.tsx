@@ -1930,12 +1930,6 @@ function BoardView({
       {about && (
         <Panel id="about-community-title" title="About this community">
           <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{community.purpose}</p>
-          <div className="grid grid-cols-3 gap-[8px]">
-            {[[community.students.toLocaleString("en-US"), "Students"], [String(community.activePros), "Professionals"], [community.posts.toLocaleString("en-US"), "Posts"]].map(([v, l]) => (
-              <div key={l} className="flex flex-col items-center rounded-[var(--radius-sm)] px-[6px] py-[10px]" style={{ background: "var(--glass-surface-1)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
-                <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{v}</span>
-                <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
-              </div>
             ))}
           </div>
           <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
