@@ -222,3 +222,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Brand marks: every mark is cleared for demo use. Microsoft, Apple and Netflix show their marks again instead of type. Register updated.
 - Landing on phones: after a scripted advance (Play to Connect), the browser now treats the new chapter as the snapped one, so tapping Enter Community no longer snaps the page back to Play.
 - Landing: Get Hired has its own scroll cue again (there is more below it), so on tablets the only cue in view is no longer the previous chapter's.
+- Docs: Figma v2.0 audited against the prototype. docs/DESIGN_SYSTEM_ALIGNMENT.md records what is aligned (colours, glass, radius, spacing, display face), the four stale Figma values (labels still Montserrat, white primary CTA, card fill, Favorit), everything the prototype has that Figma does not, and instructions for the production app and its agent. AGENTS.md points to it.
