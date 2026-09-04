@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Play, X } from "lucide-react";
-import { CompanyChip, CompanyMark } from "@/components/connect/primitives";
+import { LetterMark } from "@/components/connect/primitives";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 
 /** "Videos Inside Leading Companies" (Explore > Browse, under Typical Pay):
@@ -38,7 +38,11 @@ export function CompanyVideoCards() {
              white and at a readable size (direct feedback: the frosted chip up
              top vanished against bright footage) */}
           <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[7px] px-[14px] pt-[44px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-            <CompanyMark name={item.company} ink="#FFFFFF" scale={1.45} className="self-start" />
+            {/* LetterMark: every brand's LETTERS are exactly 15px tall and share
+               a baseline; flourishes (EY's beam, Kellogg's descenders, the
+               AT&T globe) hang outside that box, so no mark reads bigger
+               because its file has more air or ornament in it */}
+            <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="#FFFFFF" letterHeight={15} /></span>
             <span className="block text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
           </span>
         </button>
@@ -84,7 +88,7 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
       </button>
       <div className="flex max-h-full w-full max-w-[420px] flex-col gap-[var(--space-3)]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-[var(--space-3)] px-[2px]">
-          <CompanyChip name={item.company} tone="frost" size="sm" />
+          <LetterMark name={item.company} ink="#FFFFFF" letterHeight={13} />
           <span className="text-[15px] leading-[20px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{item.title}</span>
         </div>
         <video

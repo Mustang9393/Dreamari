@@ -205,3 +205,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Landing Play: the blurred colour halo behind the card is removed; the card sits on the page with just its rim-lit edge.
 - Explore > Browse videos: the company mark moved from the frosted chip at the top of each card to the dark scrim right above the title, white and larger, so it reads against bright footage.
 - Explore > Browse videos: both EY cybersecurity clips are in, titled "Senior Cyber Consultant, Part 1" and "Part 2" (they are different videos, not a duplicate).
+- Explore > Browse videos: the Mars, Kellogg's and WildBrain files are trimmed to their ink and every company mark on the cards is set by letter height (15px, one baseline) rather than by its file box, so no logo reads bigger because its artwork carries more air or ornament.

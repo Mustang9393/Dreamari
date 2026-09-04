@@ -397,9 +397,12 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Mars wordmark (one colour as published); Kellogg's script (one colour);
   // WildBrain: grey letters and pupils go white, the W creature keeps its
   // blue and its eye whites (Wikimedia Commons files, 4 Sept 2026).
-  Mars: { file: "mars", aspect: 3.39, height: 12 },
-  "Kellogg's": { file: "kelloggs", aspect: 2.86, height: 15 },
-  WildBrain: { file: "wildbrain-word", aspect: 7.81, height: 13, accent: { file: "wildbrain-w", color: "#43C5E4" } },
+  // Files trimmed to their ink (alpha scan, 4 Sept 2026) so the box is the
+  // letters and the shared height rule applies. Kellogg's is a script: its
+  // cap zone (K top to baseline) is the letters band, the g descenders hang.
+  Mars: { file: "mars", aspect: 3.54 },
+  "Kellogg's": { file: "kelloggs", aspect: 2.86, letters: { y: 0.1, h: 0.63 } },
+  WildBrain: { file: "wildbrain-word", aspect: 7.74, accent: { file: "wildbrain-w", color: "#43C5E4" } },
   // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
   // not the blue box: a filled square masks to a blank tile. Two lines need
   // more height than a one-line wordmark to stay legible.
