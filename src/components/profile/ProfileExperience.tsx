@@ -930,7 +930,7 @@ function Top3Tab({
       </div>
 
       {!focusId && (
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "transparent", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={INSET}>
           <span className="text-[14px] font-bold">Choose your #1 career to build your plan around it.</span>
           <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Choose my #1</button>
         </div>
@@ -1043,19 +1043,19 @@ function OverviewTab({
       </section>
 
       {/* The one thing to do next — a single action, nothing else in the box */}
-      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "transparent", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
         <span className="flex min-w-0 flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
-          <h3 id="next-title" className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 id="next-title" className="text-balance text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)" }}>
             {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
           </h3>
         </span>
         {next ? (
-          <Link href={next.href} className="dm-solid flex min-h-[44px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>
+          <Link href={next.href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
           </Link>
         ) : (
-          <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Open my plan</button>
+          <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>Open my plan</button>
         )}
       </section>
     </div>
