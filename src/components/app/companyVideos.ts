@@ -18,5 +18,6 @@ export const COMPANY_VIDEOS: CompanyVideo[] = [
   { company: "EY", title: "Senior Cyber Consultant, Part 2", video: "/videos/app/reel-ey-cyber-consultant-2.mp4", poster: "/images/videos/reel-ey-cyber-consultant-2.jpg" },
   { company: "AT&T", title: "Office Tour", video: "/videos/app/reel-att-office-tour.mp4", poster: "/images/videos/reel-att-office-tour.jpg" },
   { company: "WildBrain", title: "Office Tour", video: "/videos/app/reel-wildbrain-office-tour.mp4", poster: "/images/videos/reel-wildbrain-office-tour.jpg" },
-  { company: "Kellogg's", title: "Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4", poster: "/images/videos/reel-kelloggs-office-tour.jpg" },
+  // Filmed at Kellanova, now part of Mars (confirmed 4 Sept 2026), so the Mars mark.
+  { company: "Mars", title: "Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4", poster: "/images/videos/reel-kelloggs-office-tour.jpg" },
 ];

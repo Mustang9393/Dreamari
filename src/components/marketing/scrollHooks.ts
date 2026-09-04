@@ -100,6 +100,16 @@ export function advanceTo(id: string) {
   const done = () => {
     window.removeEventListener("scroll", onScroll);
     delete html.dataset.snapOff;
+    // The browser keeps the LAST snapped element as the one it re-snaps to
+    // when layout changes (a card growing after a tap). The ride happened
+    // with snap off, so that element is still the chapter we left; one
+    // instant scroll onto the target with snap back on makes the target the
+    // snapped element. Without this, tapping Enter Community after Play's
+    // advance snapped the page back to Play (seen on an iPhone).
+    requestAnimationFrame(() => {
+      const top = target.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: "instant" as ScrollBehavior });
+    });
   };
   const onScroll = () => {
     if (settled) clearTimeout(settled);

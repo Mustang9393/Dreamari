@@ -426,10 +426,11 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Microsoft: our file is the logotype alone and the brand requires symbol
   // plus logotype, never one colour. Set in type until the full logo file
   // arrives (see docs/BRAND_MARKS.md).
-  // Microsoft: { file: "microsoft", aspect: 4.69 },
+  // Cleared for demo use (4 Sept 2026); still to be licensed before launch.
+  Microsoft: { file: "microsoft", aspect: 4.69 },
   Meta: { file: "meta", aspect: 4.96 },
   // Apple: third parties may not use the Apple logo without a licence. Type only.
-  // Apple: { file: "apple", aspect: 0.81 },
+  Apple: { file: "apple", aspect: 0.81 },
   "CVS Health": { file: "cvs-health", aspect: 8.2 },
   "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
   Pfizer: { file: "pfizer", aspect: 2.44 },
@@ -439,7 +440,7 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   Spotify: { file: "spotify", aspect: 1.0 },
   // Netflix: the white logo is for video watermarks only. Type only until a
   // red-on-white use is cleared with brand@netflix.com.
-  // Netflix: { file: "netflix", aspect: 3.7 },
+  Netflix: { file: "netflix", aspect: 3.7 },
   Adobe: { file: "adobe", aspect: 3.8 },
 };
 

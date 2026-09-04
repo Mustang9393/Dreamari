@@ -222,6 +222,11 @@ const FOR_YOU_VIDEOS: VideoReel[] = [
   { title: "Kellogg's — Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4" },
   { title: "A Day at JPMorgan Chase, Ohio", video: "/videos/app/reel-povywa-jpmc-ohio.mp4" },
   { title: "AT&T — Office Tour", video: "/videos/app/reel-att-office-tour.mp4" },
+  // Aviation maintenance technician clips (the "DCAI - AMT" files). Real
+  // footage from a maintenance hangar; the company is not named in the
+  // clips, so they live here as career clips rather than in the company rail.
+  { title: "Aviation Maintenance Technician, Part 1", video: "/videos/app/reel-aviation-maintenance-1.mp4" },
+  { title: "Aviation Maintenance Technician, Part 2", video: "/videos/app/reel-aviation-maintenance-2.mp4" },
 ];
 
 // Pic, Pic, Video, repeating, until the videos run out. FOR_YOU_REEL only

@@ -24,9 +24,9 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | CVS Health | Single-colour white available | White | OK |
 | Deloitte | Wordmark white, Green Dot stays green | `deloitte-word` white + `deloitte-dot` #86BC24 | OK |
 | Google | Full colour by default; approved one-colour black or white where the context is one colour by design | White (the chip row and lockups are one colour by design) | OK on colour; Google requires formal approval for any third-party logo use |
-| Microsoft | Symbol + logotype together, never one colour | Type | Our file is the logotype alone. Needs the full logo file, then `fullColor` |
-| Apple | Third parties may not use the logo | Type | Do not use |
-| Netflix | White logo is for video watermarks only | Type | Ask brand@netflix.com before any use |
+| Microsoft | Symbol + logotype together, never one colour | White logotype | Cleared for demo use (4 Sept 2026); licence before launch |
+| Apple | Third parties may not use the logo | White symbol | Cleared for demo use (4 Sept 2026); licence before launch |
+| Netflix | White logo is for video watermarks only | White wordmark | Cleared for demo use (4 Sept 2026); ask brand@netflix.com before launch |
 | Mars | Not published for third parties (Kellanova is now part of Mars, so its clip carries the Mars mark) | White wordmark, `mars.svg` (Wikimedia Commons "Mars Incorporated 2019 logo.svg", public domain as a text logo) | To confirm with Mars |
 | Kellogg's | Script wordmark is red; a white reverse exists in Kellogg's own packaging and media | White script, `kelloggs.svg` (Wikimedia Commons "Kellogg's-Logo.svg") | To confirm with WK Kellogg Co |
 | WildBrain | Not published for third parties; the W creature is always blue with white eyes | `wildbrain-word` white (letters and pupils) + `wildbrain-w` #43C5E4; split from Wikimedia Commons "WildBrain logo.svg" (`wildbrain-eyes.svg` kept for a full-colour plate if needed) | To confirm with WildBrain |
@@ -34,4 +34,4 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Johnson & Johnson | Not found | White | To confirm |
 | Blackstone | Not checked | White | To confirm |
 
-Beyond colour: most of these brands require permission for a third party to show their logo at all. The prototype shows them as the partners and employers the product describes; before launch each needs a written OK or a text name instead.
+Beyond colour: most of these brands require permission for a third party to show their logo at all. Decision of 4 Sept 2026: every mark in this table is cleared for demo use. Before public launch each needs a written OK or a text name instead. The Kellogg's office tour was filmed at Kellanova, so it carries the Mars mark.
