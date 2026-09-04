@@ -368,6 +368,10 @@ export type MarkMeta = {
    *  flagged `fullColor`; it renders as shipped, on a light plate, never
    *  masked or recoloured by us. */
   fullColor?: true;
+  /** A part of the mark the brand requires in its own colour even on dark
+   *  (EY's yellow beam, Deloitte's green dot): a second file masked in that
+   *  colour over the one-colour letters. */
+  accent?: { file: string; color: string };
 };
 export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
@@ -385,13 +389,20 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // its black backing rectangle removed so only the letters mask
   Blackstone: { file: "blackstone", aspect: 6.27 },
   Amazon: { file: "amazon", aspect: 3.31 },
-  EY: { file: "ey", aspect: 0.99, letters: { y: 0.5, h: 0.5 } },
-  Google: { file: "google", aspect: 3.04 },
-  Deloitte: { file: "deloitte", aspect: 5.31 },
+  // EY on dark: white letters, beam in EY Yellow (EY brand guidelines)
+  EY: { file: "ey-letters", aspect: 0.99, letters: { y: 0.5, h: 0.5 }, accent: { file: "ey-beam", color: "#FFE600" } },
+  // Google asks for the full-colour logo; one-colour only under constraint
+  Google: { file: "google", aspect: 3.04, fullColor: true },
+  // Deloitte: wordmark white on dark, the Green Dot stays green
+  Deloitte: { file: "deloitte-word", aspect: 5.31, accent: { file: "deloitte-dot", color: "#86BC24" } },
   "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
-  Microsoft: { file: "microsoft", aspect: 4.69 },
+  // Microsoft: our file is the logotype alone and the brand requires symbol
+  // plus logotype, never one colour. Set in type until the full logo file
+  // arrives (see docs/BRAND_MARKS.md).
+  // Microsoft: { file: "microsoft", aspect: 4.69 },
   Meta: { file: "meta", aspect: 4.96 },
-  Apple: { file: "apple", aspect: 0.81 },
+  // Apple: third parties may not use the Apple logo without a licence. Type only.
+  // Apple: { file: "apple", aspect: 0.81 },
   "CVS Health": { file: "cvs-health", aspect: 8.2 },
   "Johnson & Johnson": { file: "johnson-johnson", aspect: 5.51 },
   Pfizer: { file: "pfizer", aspect: 2.44 },
@@ -399,7 +410,9 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   Disney: { file: "disney", aspect: 2.41 },
   Nike: { file: "nike", aspect: 2.82 },
   Spotify: { file: "spotify", aspect: 1.0 },
-  Netflix: { file: "netflix", aspect: 3.7 },
+  // Netflix: the white logo is for video watermarks only. Type only until a
+  // red-on-white use is cleared with brand@netflix.com.
+  // Netflix: { file: "netflix", aspect: 3.7 },
   Adobe: { file: "adobe", aspect: 3.8 },
 };
 
@@ -545,6 +558,24 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
           WebkitMaskRepeat: "no-repeat",
         }}
       />
+      {mark.accent && (
+        <span
+          aria-hidden
+          className="absolute left-0 block"
+          style={{
+            top: -letters.y * boxH,
+            width: Math.round(boxW),
+            height: Math.round(boxH),
+            background: mark.accent.color,
+            maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+            WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+            maskSize: "100% 100%",
+            WebkitMaskSize: "100% 100%",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+          }}
+        />
+      )}
       <span className="sr-only">{name}</span>
     </span>
   );
