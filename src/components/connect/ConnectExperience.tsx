@@ -8,6 +8,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Bookmark,
   Calendar,
   MapPin,
@@ -661,15 +662,16 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
             })}
           </div>
           {/* a button that reads as one (direct feedback), without the blue:
-             a frosted white pill with a hairline, the card's own light */}
+             the solid dark fill the stat boxes used to have, so it is the one
+             solid object on the card now that everything else is blur */}
           <button
             type="button"
             onClick={onOpen}
             aria-label={`Open ${community.name}`}
-            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13px] leading-[18px] font-bold whitespace-nowrap"
-            style={{ background: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.3)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", color: "#FFFFFF" }}
+            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[14px] text-[13px] leading-[18px] font-bold whitespace-nowrap"
+            style={{ background: "rgba(12,16,35,0.72)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)", color: "#FFFFFF" }}
           >
-            Open <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
+            Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[2px] group-hover/cta:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
           </button>
         </div>
       </div>
