@@ -62,6 +62,24 @@ function Portal({ children }: { children: React.ReactNode }) {
 
 // Colleges read as three even rows: reach, then target, then safety.
 const BAND_ORDER: Record<CollegeStatus, number> = { Reach: 0, Target: 1, Safety: 2 };
+// Where a school sits relative to the student (Westfield, New Jersey): home
+// state, the states a train ride away, everywhere else. Schools with no
+// fixed place ("Multiple locations", "Near you") count as near.
+const HOME_STATE = "NJ";
+const NEAR_STATES = new Set(["NY", "PA", "CT", "DE"]);
+const DISTANCE_GROUPS = ["In New Jersey", "A train ride away", "Further away"] as const;
+function distanceGroup(location: string): number {
+  const state = location.trim().slice(-2).toUpperCase();
+  if (state === HOME_STATE) return 0;
+  if (NEAR_STATES.has(state) || /multiple|near you/i.test(location)) return 1;
+  return 2;
+}
+function groupByDistance<T extends { status: CollegeStatus; location: string }>(colleges: T[]): { label: string; colleges: T[] }[] {
+  return DISTANCE_GROUPS.map((label, i) => ({
+    label,
+    colleges: colleges.filter((c) => distanceGroup(c.location) === i).sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]),
+  })).filter((g) => g.colleges.length > 0);
+}
 function ordinal(n: string): string {
   const value = Number(n);
   if (!Number.isFinite(value)) return n;
@@ -308,8 +326,9 @@ function ReportDocument({
            common path leads and carries a small tag; the rest follow. */}
         <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
           <div data-keep-together>
-            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Ways in, most common first</h4>
-            <ul className="mt-[10px] grid list-none gap-[10px] p-0 sm:grid-cols-2">
+            {/* no subhead: the section title says Education and the first card
+               says Most common (direct feedback: no copy that repeats the obvious) */}
+            <ul className="grid list-none gap-[10px] p-0 sm:grid-cols-2">
               {[...report.education].sort((a, b) => Number(!!b.common) - Number(!!a.common)).map((route) => (
                 <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
                   <span className="flex min-w-0 flex-col gap-[2px]">
@@ -329,11 +348,9 @@ function ReportDocument({
            a backend data-model note, not UI. */}
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
-            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Classes that support this route</h4>
-            {/* One line, per the Aug 29 doc ("Statistics - Economics"): the
-               classes read as a single statement under the subhead, not two
-               chips competing with it. Body-sized, below the 14px subhead. */}
-            <p className="mt-[8px] text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
+            {/* One line, per the Aug 29 doc ("Statistics - Economics"). The
+               subhead that used to sit above it repeated the section title. */}
+            <p className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
               {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => course.label).join(" · ")}
             </p>
           </div>
@@ -356,12 +373,17 @@ function ReportDocument({
             </Link>
           }
         >
-          {/* All six, reach to safety, each with its city. The selection
-             rule (how many per band, which states) is an open question for
-             Jenny and Odein (CEO, 4 Sept); until it is answered the report
-             shows the data and says nothing it cannot back. */}
-          <div className="grid gap-[14px] sm:grid-cols-2">
-            {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
+          {/* All six, grouped by where they are relative to the student
+             (CEO, 4 Sept: PA, NJ and NYC in one list read as random). A
+             short label per group, reach to safety inside each, no
+             sentence. How many per band and which states is still an open
+             question for Jenny and Odein. */}
+          <div className="flex flex-col gap-[18px]">
+            {groupByDistance(report.colleges).map((group) => (
+              <div key={group.label}>
+                <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>{group.label}</h4>
+                <div className="mt-[10px] grid gap-[14px] sm:grid-cols-2">
+            {group.colleges.map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
@@ -379,6 +401,9 @@ function ReportDocument({
                    so without a line to read (direct feedback) */}
                 <ArrowUpRight data-print-hide aria-hidden className="absolute top-[14px] right-[14px] h-4 w-4 transition-transform group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" style={{ color: "var(--ink-faint)" }} />
               </Link>
+            ))}
+                </div>
+              </div>
             ))}
           </div>
         </ReportSection>
