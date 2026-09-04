@@ -1142,6 +1142,54 @@ export const INSIGHTS: Insight[] = [
 ];
 
 export const OPPORTUNITIES: Opportunity[] = [
+  // Finance board updates: real early-career programmes at the firms whose
+  // pros answer here. Deadlines change every cycle, so each says to check the
+  // firm's page rather than carrying a date we would have to keep current.
+  {
+    id: "o-gs-possibilities",
+    boardId: "business-money",
+    type: "opportunity",
+    org: "Goldman Sachs",
+    kind: "Insight day",
+    title: "Goldman Sachs Possibilities Summit",
+    body: "A programme for first-year college students from underrepresented backgrounds: two days of speakers, skills sessions and networking at the firm.",
+    eligibility: "College first-years",
+    location: "New York, NY",
+    deadline: "Check the firm's page",
+    sourceLabel: "goldmansachs.com/careers",
+    verifiedDate: "Verified Aug 20, 2026",
+    cta: "View details",
+  },
+  {
+    id: "o-ms-early-insights",
+    boardId: "business-money",
+    type: "opportunity",
+    org: "Morgan Stanley",
+    kind: "Early insights",
+    title: "Morgan Stanley Early Insights Program",
+    body: "Early exposure to the firm for first- and second-year students: sessions on the business areas, interview prep, and a direct route into summer analyst recruiting.",
+    eligibility: "College first- and second-years",
+    location: "New York, NY",
+    deadline: "Check the firm's page",
+    sourceLabel: "morganstanley.com/careers",
+    verifiedDate: "Verified Aug 20, 2026",
+    cta: "View details",
+  },
+  {
+    id: "o-jpm-abp",
+    boardId: "business-money",
+    type: "opportunity",
+    org: "JPMorgan Chase",
+    kind: "Fellowship",
+    title: "Advancing Black Pathways Fellowship",
+    body: "A paid summer fellowship across the firm's business areas, with mentoring and a path to the summer analyst programme.",
+    eligibility: "College sophomores",
+    location: "New York, NY and other offices",
+    deadline: "Check the firm's page",
+    sourceLabel: "jpmorganchase.com/careers",
+    verifiedDate: "Verified Aug 20, 2026",
+    cta: "View details",
+  },
   {
     id: "o-amazon-fe",
     boardId: "tech-engineering",

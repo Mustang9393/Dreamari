@@ -13,6 +13,7 @@ import {
   MapPin,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   CornerDownRight,
   Clock,
   MessagesSquare,
@@ -54,8 +55,7 @@ import {
   type Community,
   type EventBoard,
   type Insight,
-  type Thread,
-} from "./data";
+  type Thread, OPPORTUNITIES , type Opportunity } from "./data";
 
 // Connect — moderated career Q&A + post-event continuation, built to the
 // implementation handoff (v1.0, 22 Aug 2026). This is the P1 FRONTEND surface
@@ -1854,7 +1854,12 @@ function BoardView({
 }) {
   const threads = THREADS.filter((t) => t.boardId === community.id);
   const insights = INSIGHTS.filter((i) => i.boardId === community.id);
+  const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
+  const firms = Array.from(new Set(updates.map((o) => o.org)));
+  const [firm, setFirm] = useState<string>("All");
+  const shownUpdates = firm === "All" ? updates : updates.filter((o) => o.org === firm);
   const about = filter === "about";
+  const tab = filter === "about" ? "about" : filter === "insights" ? "insights" : filter === "updates" ? "updates" : "questions";
   const bannerCover = PHOTO_COVER[community.id];
   const bannerInk = "#f6f5fb";
   const nav = useContext(ConnectNav);
@@ -1906,11 +1911,33 @@ function BoardView({
 
       {/* one row of tabs for the whole board (Questions, Insights, About); the
          feed cards sit straight on the page, no box around boxes */}
-      <Segmented ariaLabel="Board section" value={filter === "about" ? "about" : filter === "insights" ? "insights" : "questions"} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: `Questions · ${threads.length}` }, { key: "insights", label: `Posts · ${insights.length}` }, { key: "about", label: "About" }]} />
+      {/* The Replit v2-connect (source of truth for HOW information is
+         delivered, CEO 4 Sept): three feeds, each named with one line under
+         it, plus About. Student Questions, Professional Insights, Industry
+         Updates. Card designs and the header stay ours. */}
+      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "about", label: "About" }]} />
+      {tab !== "about" && (
+        <div className="-mt-[var(--space-2)]">
+          <h2 className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {tab === "questions" ? "Student Questions" : tab === "insights" ? "Professional Insights" : "Industry Updates"}
+          </h2>
+          <p className="mt-[2px] text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+            {tab === "questions" ? "Ask. Learn. Grow." : tab === "insights" ? "Read insights from professionals and join the conversation." : "Verified posts from the firms whose pros answer here."}
+          </p>
+        </div>
+      )}
 
       {about && (
         <Panel id="about-community-title" title="About this community">
           <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{community.purpose}</p>
+          <div className="grid grid-cols-3 gap-[8px]">
+            {[[community.students.toLocaleString("en-US"), "Students"], [String(community.activePros), "Professionals"], [community.posts.toLocaleString("en-US"), "Posts"]].map(([v, l]) => (
+              <div key={l} className="flex flex-col items-center rounded-[var(--radius-sm)] px-[6px] py-[10px]" style={{ background: "var(--glass-surface-1)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{v}</span>
+                <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
+              </div>
+            ))}
+          </div>
           <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
             <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Topics</span>
             <div className="flex flex-wrap gap-[6px]">
@@ -1929,19 +1956,34 @@ function BoardView({
             <ShieldCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: communityAccent(community) }} />
             {community.responseWindow}.
           </p>
+          <details className="group border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+            <summary className="flex cursor-pointer list-none items-center justify-between text-[15px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>Community rules <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden style={{ color: "var(--muted-foreground)" }} /></summary>
+            <ul className="mt-[var(--space-3)] flex flex-col gap-[6px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
+              <li>Ask about the work, the path and the people. Keep it on this community&apos;s topic.</li>
+              <li>First names only. No phone numbers, emails or social handles in posts.</li>
+              <li>Pros answer inside the scope they were verified for, and say so when a question is outside it.</li>
+              <li>Be kind. Every question here was once someone&apos;s first question.</li>
+            </ul>
+          </details>
+          <details className="group border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+            <summary className="flex cursor-pointer list-none items-center justify-between text-[15px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>Moderators <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden style={{ color: "var(--muted-foreground)" }} /></summary>
+            <p className="mt-[var(--space-3)] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>The Dreamari team reviews every post before it goes live, with verified pros from {community.professionalsFrom.slice(0, 2).join(" and ")} as topic moderators.</p>
+          </details>
         </Panel>
       )}
 
-      {filter === "questions" && (
+      {tab === "questions" && (
         <div className="flex flex-col gap-[var(--space-4)]">
+          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
+          {/* the composer closes the feed (reference order): read first, then ask */}
           <InlineAsk
             joined={joined}
             onRequireJoin={onJoin}
             accent={communityAccent(community)}
+            placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
-          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
           {threads.length === 0 && (
             <Card>
               <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
@@ -1954,7 +1996,7 @@ function BoardView({
           )}
         </div>
       )}
-      {filter === "insights" && (
+      {tab === "insights" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
           {insights.length === 0 && (
@@ -1962,7 +2004,46 @@ function BoardView({
           )}
         </div>
       )}
+      {tab === "updates" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          {firms.length > 1 && (
+            <div className="flex flex-wrap gap-[6px]">
+              {["All", ...firms].map((f) => (
+                <button key={f} type="button" aria-pressed={firm === f} onClick={() => setFirm(f)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center rounded-full border px-[12px] text-[13px] leading-[18px] font-semibold" style={firm === f ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{f}</button>
+              ))}
+            </div>
+          )}
+          {shownUpdates.map((o) => <UpdateCard key={o.id} update={o} accent={communityAccent(community)} />)}
+          {updates.length === 0 && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No firm posts here yet. Pros&apos; firms post internships, insight days and resources here.</p>
+          )}
+        </div>
+      )}
     </>
+  );
+}
+
+/** One verified firm post (Industry Updates): the firm and the kind of thing
+ *  it is, when it closes, what it is, who it is for and where, one action. */
+function UpdateCard({ update, accent }: { update: Opportunity; accent: string }) {
+  return (
+    <Card accent={accent}>
+      <div className="flex flex-wrap items-center gap-[8px]">
+        <CompanyChip name={update.org} tone="surface" />
+        <span className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>{update.kind}</span>
+        <span className="ml-auto text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{/^check/i.test(update.deadline) ? update.deadline : `Deadline ${update.deadline}`}</span>
+      </div>
+      <h3 className="mt-[10px] text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{update.title}</h3>
+      <p className="mt-[6px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{update.body}</p>
+      <div className="mt-[10px] flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span className="flex items-center gap-[5px]"><GraduationCap className="h-[14px] w-[14px]" aria-hidden /> {update.eligibility}</span>
+        <span className="flex items-center gap-[5px]"><MapPin className="h-[14px] w-[14px]" aria-hidden /> {update.location}</span>
+      </div>
+      <div className="mt-[12px] flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <span className="flex items-center gap-[5px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: accent }} /> {update.verifiedDate}</span>
+        <QuietCta onClick={() => dispatchAuroraPulse("cta")}>{update.cta} <ExternalLink className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
+      </div>
+    </Card>
   );
 }
 

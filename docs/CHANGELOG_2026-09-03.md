@@ -165,3 +165,10 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Play chapter: the preview is now the game's own screen. Same scene art, the game's header strip with level and role, its dialogue box, its numbered option buttons and its right and wrong feedback. All three answers are live. The series title sits above the card, outside the game. Names are gone from the scene line.
 - Build chapter: "Build your profile by taking a personality, skill, and academic assessment." The demo question reads 3 of 10.
 - Landing on phones: the How It Works chapters snap one by one while scrolling down. Scrolling back up is free, and desktop is unchanged.
+
+## Connect boards, 4 Sept (Replit v2-connect as the source of truth for how information is delivered)
+
+- Inside a community: four tabs, Questions, Insights, Updates, About. Each feed opens with its name and one line under it: Student Questions ("Ask. Learn. Grow."), Professional Insights, Industry Updates (verified posts from the firms whose pros answer here, filterable by firm). The question composer now closes the feed instead of opening it.
+- Industry Updates is new: firm posts with the kind of thing it is, the deadline, who it is for and where, and one action. The Finance board carries three real early-career programmes (Goldman Sachs, Morgan Stanley, JPMorgan Chase) with "check the firm's page" instead of dates that go stale.
+- About gained the three counts as tiles, Community rules and Moderators as disclosures.
+- Card designs and the board header are unchanged, as asked. Not adopted from the reference: the Dream Points read, reply, post ladder, and the "professional insights maps to volunteer influencers" idea, both flagged by the CEO as not thought through yet.
