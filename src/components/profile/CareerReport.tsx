@@ -348,11 +348,16 @@ function ReportDocument({
            a backend data-model note, not UI. */}
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
-            {/* One line, per the Aug 29 doc ("Statistics - Economics"). The
-               subhead that used to sit above it repeated the section title. */}
-            <p className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
-              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => course.label).join(" · ")}
-            </p>
+            {/* the classes as tiles, the same shape as the majors above (direct
+               feedback): the section title is the only label they need */}
+            <ul className="grid list-none grid-cols-2 gap-[10px] p-0 sm:gap-[14px]">
+              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
+                <li key={course.label} className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                  <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                  <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </ReportSection>
 
