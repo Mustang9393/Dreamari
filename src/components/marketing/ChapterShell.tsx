@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, type RefObject } from "react";
+import { ChevronDown } from "lucide-react";
 import { useRevealOnScroll } from "./scrollHooks";
 
 type ChapterShellProps = {
@@ -17,6 +18,9 @@ type ChapterShellProps = {
   // meant scrolling through mostly-empty space before the next chapter's snap point.
   // compact caps the frame at content-appropriate height instead.
   compact?: boolean;
+  /** The small "scroll on" chevron at the chapter's foot on phones. Off for
+   *  the last chapter, which has nothing to nudge toward. */
+  nudge?: boolean;
   // Explore's browse rail wants a WIDER window (more cards visible at once)
   // without growing the cards: raises the frame's width ceiling. Card-deck
   // chapters must NOT use this — their --mu-scaled chrome is tuned to 480px.
@@ -38,6 +42,7 @@ export function ChapterShell({
   oneliner,
   flip = false,
   compact = false,
+  nudge = true,
   wide = false,
   centered = false,
   graphicRef,
@@ -62,7 +67,22 @@ export function ChapterShell({
     // scroll-mt-24: JS chapter advances (scrollIntoView) land the section 96px
     // below the true top, clearing the floating nav island's zone so a chapter
     // title can't end up hidden underneath it (reported on mobile for PLAY).
-    <section id={id} className={`mkt-chapter relative flex scroll-mt-24 items-center ${compact ? "" : "min-h-dvh"}`}>
+    // On phones every chapter fills the screen (direct feedback: one
+    // chapter's contents on screen at a time, snapping one by one on the way
+    // down); compact chapters only shrink to their content from md up.
+    // Phones start the content 96px down (under the nav island's zone, the
+    // same offset the snap lands on) instead of centring it, so a short
+    // chapter does not open on a screen of empty space above its title.
+    <section id={id} className={`mkt-chapter relative flex scroll-mt-24 items-start pt-[96px] md:items-center md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
+      {/* the nudge sits 110px up: above the 96px strip of this chapter that
+         stays visible once the next one has snapped in, so it never appears
+         to belong to the chapter below */}
+      {nudge && (
+        <span aria-hidden className="mkt-scroll-nudge pointer-events-none absolute bottom-[110px] left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-[2px] text-[10.5px] font-semibold tracking-[0.08em] uppercase md:hidden" style={{ color: "var(--muted-foreground)" }}>
+          Scroll
+          <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
+        </span>
+      )}
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't

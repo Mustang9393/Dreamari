@@ -194,3 +194,12 @@
 @media (prefers-reduced-motion: reduce) {
   .mkt-stage, .mkt-offer { animation: none; }
 }
+
+/* ---------- Phone-only scroll nudge at the foot of each How It Works chapter: a
+   slow bob, small enough to be a hint and not a button. */
+@keyframes mkt-scroll-nudge {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+  50% { transform: translate(-50%, 5px); opacity: 0.95; }
+}
+.mkt-scroll-nudge { animation: mkt-scroll-nudge 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .mkt-scroll-nudge { animation: none; } }

@@ -54,6 +54,7 @@ export function GetHiredChapter() {
 
   return (
     <ChapterShell
+      nudge={false}
       id="get-hired"
       title="Get hired"
       color={WORLD_COLOR}

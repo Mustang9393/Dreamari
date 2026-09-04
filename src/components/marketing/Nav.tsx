@@ -55,20 +55,28 @@ export function Nav({ onSchoolsClick }: NavProps) {
   // toolbar settling) from toggling it. ChapterShell also sets scroll-mt on
   // sections so JS-driven chapter advances land titles below the island's zone
   // for the cases where it IS showing.
+  // The island stays put for the first 11 seconds (direct feedback: it was
+  // gone before a reader had taken it in), then hides on scroll-down and
+  // returns on any scroll-up as before.
   useEffect(() => {
     let lastY = window.scrollY;
+    let graceOver = false;
     function onScroll() {
       const y = window.scrollY;
       setScrolled(y > 24);
       const delta = y - lastY;
       if (Math.abs(delta) > 6) {
-        setHidden(delta > 0 && y > 160);
+        if (graceOver) setHidden(delta > 0 && y > 160);
         lastY = y;
       }
     }
+    const grace = window.setTimeout(() => {
+      graceOver = true;
+      if (window.scrollY > 160) setHidden(true);
+    }, 11000);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(grace); };
   }, []);
 
   return (
