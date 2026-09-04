@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, type RefObject } from "react";
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useRevealOnScroll } from "./scrollHooks";
 
@@ -51,6 +51,26 @@ export function ChapterShell({
   children,
 }: ChapterShellProps) {
   const [copyRef, copyRevealed] = useRevealOnScroll<HTMLDivElement>();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  // The nudge only makes sense when the whole chapter fits on the screen:
+  // it says "there is more below this". When a chapter is taller than the
+  // phone (Play's card and its answers), the person is already scrolling
+  // through it and the pinned nudge would sit on top of the content.
+  const [fits, setFits] = useState(true);
+  useEffect(() => {
+    if (!nudge) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    const check = () => setFits(el.scrollHeight <= window.innerHeight + 8);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    window.addEventListener("resize", check);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", check);
+    };
+  }, [nudge]);
 
   return (
     // compact sections don't claim a full min-h-dvh at all — Build/Connect's content
@@ -73,11 +93,11 @@ export function ChapterShell({
     // Phones start the content 96px down (under the nav island's zone, the
     // same offset the snap lands on) instead of centring it, so a short
     // chapter does not open on a screen of empty space above its title.
-    <section id={id} className={`mkt-chapter relative flex scroll-mt-24 items-start pt-[96px] md:items-center md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
+    <section id={id} ref={sectionRef} className={`mkt-chapter relative flex scroll-mt-24 items-start pt-[96px] md:items-center md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
       {/* the nudge sits 110px up: above the 96px strip of this chapter that
          stays visible once the next one has snapped in, so it never appears
          to belong to the chapter below */}
-      {nudge && (
+      {nudge && fits && (
         <span aria-hidden className="mkt-scroll-nudge pointer-events-none absolute bottom-[110px] left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-[2px] text-[10.5px] font-semibold tracking-[0.08em] uppercase md:hidden" style={{ color: "var(--muted-foreground)" }}>
           Scroll
           <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
