@@ -24,6 +24,10 @@
   --glass-surface-2: #ffffff17; /* white-alpha.9 */
   --glass-surface-3: #0c1023cc; /* dark-alpha.80 */
   --glass-border: #ffffff17; /* white-alpha.9 */
+  /* sunken groups inside a card (the profile tabs): a darker step on dark, a
+     lighter step on light, so the group reads as inset in both themes */
+  --inset-surface: rgba(30, 36, 49, 0.78);
+  --inset-border: rgba(255, 255, 255, 0.12);
 
   /* ---- Career "world" colors (Semantic.Dark, 13-world set) ---- */
   --world-business-money-office: #ffb81f; /* amber.500 */
@@ -261,6 +265,8 @@ html.light .marketing-v2.themeable {
   --secondary-foreground: #05070f; /* neutral.900 */
   --muted: #00000008; /* black-alpha.3 */
   --glass-border: #00000017; /* black-alpha.9 */
+  --inset-surface: rgba(255, 255, 255, 0.66);
+  --inset-border: rgba(0, 0, 0, 0.1);
   --accent: #1e4fcc; /* blue.700, follows primary */
   --accent-subtle: #1e4fcc; /* blue.700; dark's #3894ff fails contrast on neutral.50 */
   /* Wash accents: the dark values (#2e2466/#0f474d) are ink-dark and smear the

@@ -82,8 +82,8 @@ function careerById(id: string | null): ProfileCareer | null {
  *  layer of glass (direct feedback, 4 Sept: glass on glass read as disjointed). */
 // The fill is the career report's paper (#1e2431) at a little transparency so
 // it stays in the glass family: a darker, sunken step inside the tab card.
-const INSET = { background: "rgba(30,36,49,0.78)", borderColor: "rgba(255,255,255,0.12)" } as const;
-const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-border)" } as const;
+const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Covers a student can pick for their header: six rendered materials (fluted
 // glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
@@ -1465,7 +1465,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
 
   const allTasks = focus.plan.flatMap((horizon) => tasksFor(focus, horizon.id));
   const doneCount = allTasks.filter((task) => doneSet(focus.id).has(task.id)).length;
-  const RULE = "rgba(255,255,255,0.12)";
+  const RULE = "var(--inset-border)";
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
@@ -1983,7 +1983,7 @@ function ResumeView() {
       {/* rows on hairlines, not cards stacked on the card (CEO, 4 Sept) */}
       <ol className="flex flex-col">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
-          <li key={step} className="flex items-center gap-[var(--space-3)] border-t py-[11px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+          <li key={step} className="flex items-center gap-[var(--space-3)] border-t py-[11px]" style={{ borderColor: "var(--inset-border)" }}>
             <span className="flex size-7 flex-none items-center justify-center rounded-full text-[13px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{index + 1}</span>
             <span className="text-[15px] leading-[22px]">{step}</span>
           </li>
