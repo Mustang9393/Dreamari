@@ -8,9 +8,13 @@ export function ConfirmShimmer({ active }: { active: boolean }) {
   if (!active) return null;
   return (
     <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      {/* Direct feedback (4 Sept 2026): the band used to peak at 60% white and
+         its final frame still overlapped the right end of the row, so the
+         sweep left a stuck white slab. It now peaks at 26%, fades out through
+         the second half, and ends fully past the right edge. */}
       <span
-        className="absolute inset-y-0 left-0 w-1/3 motion-safe:animate-[confirm-shimmer-sweep_0.42s_ease-out_forwards]"
-        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.6) 45%, transparent 90%)" }}
+        className="absolute inset-y-0 left-0 w-[40%] motion-safe:animate-[confirm-shimmer-sweep_0.5s_ease-out_forwards]"
+        style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.26) 50%, transparent 100%)", opacity: 0 }}
       />
     </span>
   );

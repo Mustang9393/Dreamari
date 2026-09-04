@@ -203,3 +203,52 @@
 }
 .mkt-scroll-nudge { animation: mkt-scroll-nudge 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .mkt-scroll-nudge { animation: none; } }
+
+/* ---------- Play: console-store treatment (4 Sept 2026). The card is a game
+   tile: rim-lit frame, one specular sweep as it arrives, the art pushing in
+   slowly once play is pressed, a resting cursor on the best answer. */
+.mkt-console-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.42), rgba(255,255,255,0.10) 32%, rgba(255,255,255,0.05) 62%, color-mix(in srgb, var(--c) 60%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+@keyframes mkt-console-sheen { to { transform: translateX(130%) skewX(-12deg); } }
+.mkt-console-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(255,255,255,0.13) 50%, transparent 62%);
+  transform: translateX(-130%) skewX(-12deg);
+  animation: mkt-console-sheen 1.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s 1 forwards;
+}
+@keyframes mkt-console-push {
+  0% { transform: scale(1.0); }
+  100% { transform: scale(1.075) translate(-0.8%, -0.6%); }
+}
+.mkt-console-push { animation: mkt-console-push 9s ease-out 1 forwards; will-change: transform; }
+@keyframes mkt-console-cursor {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.mkt-console-cursor { animation: mkt-console-cursor 1.8s ease-in-out infinite; }
+@keyframes mkt-xp-pop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.9); }
+  20% { opacity: 1; transform: translateY(0) scale(1.05); }
+  70% { opacity: 1; transform: translateY(-6px) scale(1); }
+  100% { opacity: 0; transform: translateY(-16px) scale(1); }
+}
+.mkt-xp-pop { animation: mkt-xp-pop 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 1 forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .mkt-console-sheen, .mkt-console-push, .mkt-console-cursor { animation: none; }
+  .mkt-console-sheen { display: none; }
+}

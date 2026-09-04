@@ -593,6 +593,27 @@ body {
    each pass can have its own gap/peak -- reads as organic drift rather
    than a metronome. Matches the 2.6s window ProfileExperience clears
    `pings` on, so it finishes right as the cue itself disappears. */
+.profile-tab-ping-text {
+  background-image: linear-gradient(100deg, var(--ink) 0%, var(--ink) 42%, rgba(255, 255, 255, 0.95) 50%, var(--ink) 58%, var(--ink) 100%);
+  background-size: 320% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: profile-tab-ping-text 2.4s ease-in-out 1;
+}
+@keyframes profile-tab-ping-text {
+  0% { background-position: 100% 0; }
+  30% { background-position: 0% 0; }
+  30.01% { background-position: 100% 0; }
+  62% { background-position: 0% 0; }
+  62.01% { background-position: 100% 0; }
+  96%, 100% { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-tab-ping-text { animation: none; background-image: none; color: var(--ink); }
+}
+
 @keyframes profile-tab-ping-shimmer {
   0% {
     transform: translateX(-120%) skewX(-14deg);
@@ -653,11 +674,20 @@ body {
 }
 
 @keyframes confirm-shimmer-sweep {
-  from {
-    transform: translateX(-140%) skewX(-18deg);
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+    opacity: 0;
   }
-  to {
-    transform: translateX(240%) skewX(-18deg);
+  18% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    /* the band is 40% of the row wide: 300% clears the right edge fully */
+    transform: translateX(300%) skewX(-18deg);
+    opacity: 0;
   }
 }
 
