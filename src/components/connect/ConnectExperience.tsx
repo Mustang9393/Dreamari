@@ -138,7 +138,7 @@ function queryToView(search: string): View {
   if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
   if (q.get("insight")) return { kind: "insight", id: q.get("insight")! };
   if (q.get("thread")) return { kind: "thread", id: q.get("thread")! };
-  if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "all" };
+  if (q.get("event")) return { kind: "event", id: q.get("event")!, filter: q.get("filter") ?? "questions" };
   if (q.get("board")) return { kind: "board", id: q.get("board")!, filter: q.get("filter") ?? "questions" };
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
@@ -1219,7 +1219,7 @@ export function ConnectExperience() {
             onTab={(tab) => setView({ kind: "home", tab })}
             eventJoined={eventJoined}
             onOpenBoard={(id) => setView({ kind: "board", id, filter: "questions" })}
-            onOpenEvent={(id) => setView({ kind: "event", id, filter: "all" })}
+            onOpenEvent={(id) => setView({ kind: "event", id, filter: "questions" })}
             onEnterCode={(id) => setCodeOpenFor(id)}
             joined={joined}
             onJoinCommunity={(id) => setJoinFor(id)}
@@ -1341,7 +1341,7 @@ export function ConnectExperience() {
           <ThreadView
             thread={thread}
             onBack={() => {
-              setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "all" } : { kind: "board", id: thread.boardId, filter: "questions" });
+              setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "questions" } : { kind: "board", id: thread.boardId, filter: "questions" });
             }}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
@@ -1376,7 +1376,7 @@ export function ConnectExperience() {
             const id = codeOpenFor;
             setEventJoined((j) => ({ ...j, [id]: true }));
             setCodeOpenFor(null);
-            setView({ kind: "event", id, filter: "all" });
+            setView({ kind: "event", id, filter: "questions" });
             say("Event board unlocked. It stays under Your events. No code needed next time.");
           }}
         />
@@ -2270,11 +2270,21 @@ function EventView({
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
+  // Real professionals, not an invented roster: whoever in PROS works at one
+  // of this board's orgs is who showed up (same match the community cards
+  // use for their own "Professionals from" row). `host`/`partner` are
+  // included too: event-ey's own `orgs` spells the host out in full
+  // ("Ernst & Young") while every Pro record uses the short form its own
+  // partner-program name goes by ("EY").
+  const eventOrgNames = [...event.orgs, event.host, event.partner].filter((v): v is string => !!v);
+  const eventPros = PROS.filter((p) => eventOrgNames.includes(p.org));
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
   const [planAdded, setPlanAdded] = useState(false);
   const eventInk = "#f6f5fb";
   const pAccent = partnerAccent(event.host);
   const [qrOpen, setQrOpen] = useState(false);
+  // Falls back to Questions for any old/unrecognised ?filter= value.
+  const tab = filter === "posts" || filter === "insights" || filter === "resources" || filter === "people" || filter === "about" ? filter : "questions";
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -2326,106 +2336,190 @@ function EventView({
         </div>
       </section>
 
-      <InlineAsk
-        joined
-        accent={pAccent}
-        placeholder="Ask what you missed…"
-        onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
+      {/* Six clearly separated rooms instead of one long stacked scroll
+         (direct feedback, 5 Sept 2026): Questions is the tab a reader lands
+         on, with the ask composer at its very top. */}
+      <Segmented
+        ariaLabel="Event board section"
+        value={tab}
+        onChange={(key) => onFilter(key)}
+        options={[
+          { key: "questions", label: "Questions" },
+          { key: "posts", label: "Posts" },
+          { key: "insights", label: "Insights" },
+          { key: "resources", label: "Resources" },
+          { key: "people", label: "People" },
+          { key: "about", label: "About" },
+        ]}
       />
-      {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
 
-      {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
-         going after the day ends. Rows and short lists, no essay. */}
-      {event.official && (
-        <Card accent={pAccent}>
-          <div className="flex items-center gap-[10px]">
-            <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
-              <LetterMark name="Dream Opportunity" ink="#FFFFFF" letterHeight={14} />
-            </span>
-            <span className="flex min-w-0 flex-col">
-              <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Dream Opportunity <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
-              <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Official event account · {event.official.postedAgo}</span>
-            </span>
-          </div>
-          <p className="mt-[12px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
-          <p className="mt-[10px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.official.about}</p>
-          <p className="mt-[14px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What to do next</p>
-          <ul className="mt-[6px] flex flex-col gap-[6px]">
-            {event.official.next.map((line, i) => (
-              <li key={line} className="flex items-start gap-[10px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-                <span className="mt-[1px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${pAccent} 30%, transparent)`, color: "var(--foreground)" }}>{i + 1}</span>
-                {line}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-[14px] flex flex-wrap gap-[8px]">
-            <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
-            <QuietCta onClick={() => dispatchAuroraPulse("cta")}><Camera className="h-[14px] w-[14px]" aria-hidden /> {event.official.photosLabel}</QuietCta>
-          </div>
-        </Card>
+      {tab === "questions" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <InlineAsk
+            joined
+            accent={pAccent}
+            placeholder="Ask what you missed…"
+            onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
+          />
+          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={EVENT_ACCENT} {...cardProps(t.id)} />)}
+          {threads.length === 0 && postedQs.length === 0 && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
+          )}
+        </div>
       )}
 
-      {/* Pinned host recap with three takeaways (handoff 10.3) */}
-      {event.recap && (
-        <Card>
-          <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
-          </span>
-          <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
-          <p className="mt-[8px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Great meeting everyone. Three things I hope you remember:</p>
-          <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
-            {event.recap.takeaways.map((t) => (
-              <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
-            ))}
-          </ol>
-          <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
-            <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-            <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ArrowRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
-          </div>
-        </Card>
+      {tab === "posts" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          {/* The official Dream Opportunity post (CEO, 4 Sept): the event keeps
+             going after the day ends. Rows and short lists, no essay. */}
+          {event.official && (
+            <Card accent={pAccent}>
+              <div className="flex items-center gap-[10px]">
+                <span className="flex h-[36px] w-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+                  <LetterMark name="Dream Opportunity" ink="#FFFFFF" letterHeight={14} />
+                </span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="flex items-center gap-[5px] text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Dream Opportunity <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /></span>
+                  <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Official event account · {event.official.postedAgo}</span>
+                </span>
+              </div>
+              <p className="mt-[12px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{event.official.summary}</p>
+              <p className="mt-[10px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{event.official.about}</p>
+              <p className="mt-[14px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>What to do next</p>
+              <ul className="mt-[6px] flex flex-col gap-[6px]">
+                {event.official.next.map((line, i) => (
+                  <li key={line} className="flex items-start gap-[10px] text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>
+                    <span className="mt-[1px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${pAccent} 30%, transparent)`, color: "var(--foreground)" }}>{i + 1}</span>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-[14px] flex flex-wrap gap-[8px]">
+                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
+              </div>
+            </Card>
+          )}
+
+          {/* Pinned host recap with three takeaways (handoff 10.3) */}
+          {event.recap && (
+            <Card>
+              <span className="flex items-center gap-[6px] text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+                <Pin className="h-3.5 w-3.5" aria-hidden /> Pinned recap
+              </span>
+              <div className="mt-[8px]"><ProBadge proId={event.recap.proId} postedAgo={event.recap.postedAgo} /></div>
+              <p className="mt-[8px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Great meeting everyone. Three things I hope you remember:</p>
+              <ol className="mt-[6px] flex list-decimal flex-col gap-[6px] pl-5">
+                {event.recap.takeaways.map((t) => (
+                  <li key={t} className="text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>{t}</li>
+                ))}
+              </ol>
+              <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
+                <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
+                <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ArrowRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
+              </div>
+            </Card>
+          )}
+
+          {!event.official && !event.recap && (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No posts from the event account yet.</p>
+          )}
+        </div>
       )}
 
-      {/* Resources: View resource, never Apply now (handoff 10.3) */}
-      {event.resources && event.resources.length > 0 && (
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Event resources">
-          <SectionHead>Resources from the event</SectionHead>
-          {event.resources.map((r) => (
-            <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+      {tab === "insights" && (
+        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
+      )}
+
+      {tab === "resources" && (
+        <div className="flex flex-col gap-[var(--space-3)]">
+          {event.resources && event.resources.length > 0 ? (
+            event.resources.map((r) => (
+              <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+                <div className="min-w-0">
+                  <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
+                  <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
+                </div>
+                <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                  View resource <ExternalLink className="h-3 w-3" aria-hidden />
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No resources posted for this event yet.</p>
+          )}
+          {/* Photos: view-only, same as every other resource row here (never
+             a direct download of files this prototype doesn't have) */}
+          {event.official?.photosLabel && (
+            <button
+              type="button"
+              onClick={() => dispatchAuroraPulse("cta")}
+              className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
+              style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
+            >
               <div className="min-w-0">
-                <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
-                <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
+                <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Event photos</p>
+                <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>From the day itself.</p>
               </div>
               <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                View resource <ExternalLink className="h-3 w-3" aria-hidden />
+                <Camera className="h-3.5 w-3.5" aria-hidden /> {event.official.photosLabel}
               </span>
-            </div>
-          ))}
-        </section>
+            </button>
+          )}
+        </div>
       )}
 
-      <FilterRow
-        options={[
-          { key: "all", label: "All" },
-          { key: "questions", label: "Questions" },
-          { key: "insights", label: "Professional insights" },
-        ]}
-        active={filter}
-        onPick={onFilter}
-        accent={pAccent}
-      />
+      {tab === "people" && (
+        <div className="flex flex-col gap-[var(--space-5)]">
+          <div className="flex flex-col gap-[8px]">
+            <SectionHead>Professionals</SectionHead>
+            {eventPros.length > 0 ? (
+              <div className="flex flex-col gap-[var(--space-3)]">
+                {eventPros.map((p) => (
+                  <div key={p.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+                    <ProBadge proId={p.id} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No verified professionals listed for this event yet.</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <SectionHead>Students</SectionHead>
+            <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+              <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{event.students ?? 0}</strong> students attended. Names stay private here; you will meet people through the Questions and Posts tabs.
+            </p>
+          </div>
+        </div>
+      )}
 
-      <div className="flex flex-col gap-[var(--space-4)]">
-        {(filter === "all" || filter === "questions") &&
-          threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={EVENT_ACCENT} {...cardProps(t.id)} />)}
-        {filter === "insights" && (
-          <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
-        )}
-      </div>
+      {tab === "about" && (
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Hosted by</span>
+            <div className="flex flex-wrap gap-[6px]">
+              {event.orgs.map((name) => <CompanyChip key={name} name={name} tone="surface" />)}
+            </div>
+          </div>
+          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Topics</span>
+            <div className="flex flex-wrap gap-[6px]">
+              {event.topics.map((name) => (
+                <span key={name} className="rounded-[var(--radius-sm)] border px-[11px] py-[3px] text-[12px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{name}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)] text-[13px] leading-[19px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+            <span className="flex items-center gap-[6px]"><Calendar className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.nextDate ? `Next: ${event.nextDate} · Last: ${event.date}` : `Last: ${event.date}`}</span>
+            <span className="flex items-center gap-[6px]"><MapPin className="h-[13px] w-[13px] flex-none" aria-hidden /> {event.location}</span>
+            {event.closesOn && <span className="flex items-center gap-[6px]"><ShieldCheck className="h-[13px] w-[13px] flex-none" aria-hidden /> This board closes to new questions on {event.closesOn}.</span>}
+          </div>
+        </div>
+      )}
     </>
   );
-}
-
-// ——— thread (handoff 12) ———
+}// ——— thread (handoff 12) ———
 
 function ThreadView({
   thread,
