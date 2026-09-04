@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
+import { ChevronUp } from "lucide-react";
 import { GestureHint } from "@/components/flow/GestureHint";
 import { useRevealOnScroll } from "./scrollHooks";
 
@@ -101,8 +102,10 @@ export function ChapterShell({
          trail), centred with a full-width flex row rather than a translate so
          it cannot drift off centre (direct feedback, 4 Sept 2026) */}
       {nudge && fits && (
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[126px] z-[2] flex justify-center md:hidden">
-          <GestureHint direction="up" crisp size={12} distance={26} color="var(--muted-foreground)" />
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[112px] z-[2] flex flex-col items-center gap-[4px] md:hidden" style={{ color: "var(--muted-foreground)" }}>
+          <ChevronUp className="h-[14px] w-[14px]" strokeWidth={2.5} />
+          <GestureHint direction="up" crisp size={12} distance={24} color="var(--muted-foreground)" />
+          <span className="text-[10.5px] leading-[12px] font-semibold tracking-[0.1em] uppercase">Scroll</span>
         </span>
       )}
       {/* Reference is desktop-first here: .chapter-row is a row by default and only

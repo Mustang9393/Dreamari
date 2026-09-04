@@ -72,6 +72,28 @@ export function GestureHint({
           opacity: 0,
         }}
       />
+      {/* Crisp trail: two hollow-stroke copies of the dot on the same path,
+         each a beat behind, so the travel leaves an outlined wake instead
+         of a blurred glow (direct feedback, 4 Sept 2026). */}
+      {crisp &&
+        [0.1, 0.2].map((delay, i) => (
+          <span
+            key={delay}
+            className="motion-safe:animate-[gesture-hint-move_2.6s_ease-in-out_infinite]"
+            style={{
+              ...style,
+              position: "absolute",
+              left: restLeft + size * (0.1 + i * 0.1),
+              top: restTop + size * (0.1 + i * 0.1),
+              width: size * (0.8 - i * 0.2),
+              height: size * (0.8 - i * 0.2),
+              borderRadius: "999px",
+              border: `1.5px solid ${color}`,
+              opacity: 0.8 - i * 0.3,
+              animationDelay: `${delay}s`,
+            }}
+          />
+        ))}
       {/* Trailing echo: same path, offset start (smaller, delayed) so it
          reads as a soft comet tail instead of a second dot appearing. */}
       {!crisp && <span
