@@ -1042,3 +1042,20 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   from { width: 0; }
   to { width: 100%; }
 }
+
+/* Connect event boards as tickets (4 Sept 2026): two round notches cut into
+   the card's edges where the stub begins (--stub is the stub's height from
+   the bottom), so the body tears from the stub like a paper ticket. The
+   mask clips to the border box, so the card's shadow lives on the wrapper
+   as a drop-shadow that follows the notched outline. */
+.connect-ticket {
+  --notch: 11px;
+  -webkit-mask-image:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
+  mask-image:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}

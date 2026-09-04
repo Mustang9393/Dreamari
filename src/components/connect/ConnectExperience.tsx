@@ -1701,21 +1701,31 @@ function HomeView({
               // once confirmed, then where: the city lives here, not in the name
               const when = [event.nextDate ?? event.date, event.time].filter(Boolean).join(", ");
               return (
-                <div
-                  key={event.id}
-                  className="group relative flex min-h-[250px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-                  style={{ background: "#0e0c20", fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
-                >
-                  <EventSurface accent={pAccent} />
-                  <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]">
-                    <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
-                    {/* when, then where, one per line with its icon; the
-                       company is in the name so only the city appears */}
-                    <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
-                      <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
-                      <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
-                    </p>
-                    <div className="mt-auto pt-[var(--space-5)]">
+                /* Ticket shape (direct feedback, 4 Sept 2026): the event card
+                   is torn into a body and a stub. Round notches at both edges
+                   and a perforated line sit where the stub begins; the stub
+                   holds the counts and the lockup with the action, like the
+                   tear-off of a paper ticket. The shadow rides an outer
+                   wrapper as a drop-shadow so it follows the notched outline.
+                   Community cards keep their own shape. */
+                <div key={event.id} className="group relative" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
+                  <div
+                    className="connect-ticket relative flex min-h-[262px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+                    style={{ background: "#0e0c20", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "140px" }}
+                  >
+                    <EventSurface accent={pAccent} />
+                    <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)]">
+                      <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+                      {/* when, then where, one per line with its icon; the
+                         company is in the name so only the city appears */}
+                      <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
+                        <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
+                        <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
+                      </p>
+                    </div>
+                    {/* the stub: fixed height so the notches always land on its edge */}
+                    <div className="relative z-10 flex flex-none flex-col justify-between px-[var(--space-6)] pt-[var(--space-4)] pb-[var(--space-5)]" style={{ height: "var(--stub)" }}>
+                      <span aria-hidden className="pointer-events-none absolute inset-x-[16px] top-0 border-t-2 border-dashed" style={{ borderColor: "rgba(255,255,255,0.22)" }} />
                       {typeof event.students === "number" ? (
                         <div className="grid grid-cols-3 gap-[6px]">
                           <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
@@ -1725,14 +1735,14 @@ function HomeView({
                       ) : (
                         <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
                       )}
-                    </div>
-                    <div className="mt-[var(--space-4)] flex w-full flex-wrap items-center justify-between gap-[var(--space-3)]">
-                      <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
-                      {joined ? (
-                        <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
-                      ) : upcoming ? null : (
-                        <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
-                      )}
+                      <div className="flex w-full flex-wrap items-center justify-between gap-[var(--space-3)]">
+                        <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+                        {joined ? (
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                        ) : upcoming ? null : (
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
