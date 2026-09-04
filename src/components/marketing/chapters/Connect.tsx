@@ -11,7 +11,7 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // volunteer answer, one student following up) rather than an implied crowd. Maya is a
 // college sophomore (not a high schooler) per direct feedback — a college student
 // asking about landing a bank internship reads as more realistic than a Grade 10 one.
-const ASKER = { photo: "/images/avatar-maya.jpg", color: "#6366f1", name: "Maya", tag: "Howard University · Sophomore" };
+const ASKER = { photo: "/images/avatar-maya-howard.jpg", color: "#6366f1", name: "Maya", tag: "Howard University · Sophomore" };
 
 const REPLIES = [
   {

@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
+import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
@@ -207,6 +208,12 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
             <PosterRail careers={typicalPay} />
           </Rail>
         )}
+
+        {/* CEO (4 Sept 2026): real clips from inside partner companies,
+           under Typical Pay. All video; each card opens its clip. */}
+        <Rail title="Videos Inside Leading Companies">
+          <CompanyVideoCards />
+        </Rail>
       </div>
     </>
   );

@@ -389,7 +389,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const label = activity.kind === "sim" ? ib.label : activity.label;
   const verb = pct > 0 ? "Continue" : "Play";
   return (
-    <Link href={href} className="dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[212px] sm:w-[360px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+    <Link href={href} className="dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-0 md:flex-1 md:aspect-[360/212]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
       <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
       <span aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
