@@ -617,10 +617,12 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
 
         {/* three tiles fill the card's width, the same on every card; the
            marks sit centred under them */}
-        {/* two tiles (CEO, 4 Sept): who is here and which companies. Post
-           counts came off; they competed with the name for attention. */}
-        <div className="mt-auto grid grid-cols-2 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
+        {/* three tiles: who is here, who answers, and from how many
+           companies. Post counts came off (CEO, 4 Sept); companies stayed
+           because a partner nonprofit reads them as reach. */}
+        <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
           <StatTile value={community.students.toLocaleString("en-US")} label="Students" />
+          <StatTile value={community.activePros} label="Pros" />
           <StatTile value={community.professionalsFrom.length} label="Companies" />
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}

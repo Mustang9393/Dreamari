@@ -142,7 +142,7 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Event cards are no longer colour blocks: dark glass, the partner's colour as a corner glow, a fine ruled texture. Students, Pros and Posts are back on every card and in the board header, because partner nonprofits pay to see them. Open board and Enter code are solid buttons.
 - The Junior Achievement mark was JA Singapore's; it is set in type until a US mark arrives.
 - Ask a question is replaced by a search bar on the Connect landing (communities, topics, companies, events). Asking lives inside each board.
-- Community cards: name first, then two tiles, Students and Companies. Post counts are gone. "Suggest a Community" is now "What should we launch next?" with four candidate communities and one vote each.
+- Community cards: name first, then three tiles, Students, Pros and Companies. Post counts are gone. "Suggest a Community" is now "What should we launch next?" with four candidate communities and one vote each.
 - "People to Follow" is "Professionals to Follow".
 - Event boards carry an official Dream Opportunity post: what happened, about the company, what to do next, a link back to the matching community, and event photos.
 
