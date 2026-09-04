@@ -1,3 +1,4 @@
+import { REF_BASE, REF_DETAIL } from "./detail-ref";
 // College lookup data. PROTOTYPE: figures transcribed on 2026-09-03 from the
 // live Dreamari build (dreamonna.com/colleges), which reads IPEDS 2024-25 and
 // the federal College Scorecard. Production reads the same fields from the
@@ -459,7 +460,13 @@ export function synthDetail(c: College): CollegeDetail {
     pay6, debt, monthly: debt ? Math.round(debt * 0.0106) : undefined,
   };
 }
-for (const c of COLLEGES) if (!c.detail) c.detail = synthDetail(c);
+// Colleges transcribed by hand keep their detail. Everything else takes the
+// detail parsed from the reference pages (detail-ref.ts); synthDetail is the
+// last resort for a college with no reference file at all.
+for (const c of COLLEGES) {
+  if (REF_BASE[c.slug]) Object.assign(c, REF_BASE[c.slug]);
+  if (!c.detail) c.detail = REF_DETAIL[c.slug] ?? synthDetail(c);
+}
 
 export function collegeBySlug(slug: string): College | undefined {
   return COLLEGES.find((c) => c.slug === slug);

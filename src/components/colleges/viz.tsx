@@ -2,11 +2,11 @@
 
 import { ACCENT } from "./shared";
 
-// One data picture for the college page: who is there, as a ring. Cost by
-// income was bars, but a bar scaled to the biggest row read as "full", so the
-// numbers stand on their own as rows.
+// Pictures for the college page, each only where its shape answers something a
+// row cannot: who is there (ring, split bars), where a score sits on its scale
+// (range strip), and what families pay against the full price (ladder).
 // One hue, thin marks, values as text in text tokens. Everything else on
-// the page is a sentence, because a sentence is the cheapest thing on screen.
+// the page is a label and a value, the cheapest thing on screen.
 
 const MUTED = { color: "var(--muted-foreground)" } as const;
 const INK = { color: "var(--foreground)" } as const;
@@ -66,6 +66,55 @@ export function SplitBar({ title, a, b }: { title: string; a: { label: string; v
         <span className="flex items-center gap-[6px]"><span aria-hidden className="size-[9px] rounded-[2px]" style={{ background: ACCENT }} /><strong className="font-bold tabular-nums" style={INK}>{pa}%</strong> {a.label}, {a.value.toLocaleString("en-US")}</span>
         <span className="flex items-center gap-[6px]"><span aria-hidden className="size-[9px] rounded-[2px]" style={{ background: shade }} /><strong className="font-bold tabular-nums" style={INK}>{pb}%</strong> {b.label}, {b.value.toLocaleString("en-US")}</span>
       </div>
+    </div>
+  );
+}
+
+/** Where a score range sits on its scale. The numbers alone say "530 to 610";
+ *  the strip says how much of the 800 that is, which is the question an
+ *  eighth grader is really asking. Middle half of the students who sent one. */
+export function RangeBar({ label, lo, hi, max, note, last = false }: { label: string; lo: number; hi: number; max: number; note?: string; last?: boolean }) {
+  const l = (lo / max) * 100, w = ((hi - lo) / max) * 100;
+  return (
+    <div className={`flex flex-col gap-[6px] py-[10px] ${last ? "" : "border-b"}`} style={{ borderColor: "rgba(255,255,255,0.12)" }} role="img" aria-label={`${label}: ${lo} to ${hi} out of ${max}`}>
+      <div className="flex items-baseline justify-between gap-[var(--space-4)]">
+        <span className="flex min-w-0 flex-col">
+          <span className="text-[15px] leading-[22px]" style={INK}>{label}</span>
+          {note && <span className="text-[12.5px] leading-[16px]" style={MUTED}>{note}</span>}
+        </span>
+        <span className="shrink-0 text-[15px] leading-[22px] font-bold tabular-nums" style={INK}>{lo} to {hi}</span>
+      </div>
+      <div className="flex items-center gap-[8px] text-[11px] leading-[14px] tabular-nums" style={MUTED} aria-hidden>
+        <span>0</span>
+        <span className="relative h-[6px] flex-1 overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.1)" }}>
+          <span className="absolute inset-y-0 rounded-[3px]" style={{ left: `${l}%`, width: `${w}%`, background: ACCENT }} />
+        </span>
+        <span>{max}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Amounts against one fixed ceiling, so a bar's length always means the same
+ *  thing: the first row is the ceiling and every other row is a share of it. */
+export function Ladder({ rows, ceiling, format }: { rows: { label: string; value: number; note?: string; top?: boolean }[]; ceiling: number; format: (n: number) => string }) {
+  const max = Math.max(ceiling, ...rows.map((r) => r.value)) || 1;
+  return (
+    <div>
+      {rows.map((r, i) => (
+        <div key={r.label} className={`flex flex-col gap-[5px] py-[10px] ${i === rows.length - 1 ? "" : "border-b"}`} style={{ borderColor: "rgba(255,255,255,0.12)" }} role="img" aria-label={`${r.label}: ${format(r.value)}`}>
+          <div className="flex items-baseline justify-between gap-[var(--space-4)]">
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[15px] leading-[22px]" style={INK}>{r.label}</span>
+              {r.note && <span className="text-[12.5px] leading-[16px]" style={MUTED}>{r.note}</span>}
+            </span>
+            <span className="shrink-0 text-[15px] leading-[22px] font-bold tabular-nums" style={INK}>{format(r.value)}</span>
+          </div>
+          <span className="block h-[6px] w-full overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.1)" }} aria-hidden>
+            <span className="block h-full rounded-[3px]" style={{ width: `${(r.value / max) * 100}%`, background: r.top ? "rgba(255,255,255,0.35)" : ACCENT }} />
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

@@ -118,3 +118,13 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Start: the page mirrored the reference's sections but had dropped data (programme tables by degree level, the 5, 6 and 8 year finish rates, part-time retention, meal plans, SAT reading and maths, team sizes by gender, loan default, the aid, apply, calculator and map links).
 - End: all of it is on the page, from the reference's own numbers. What you can study has tabs by level with the five biggest programmes and a link for the rest. Academics shows the two headline finish rates with the others one tap away. Getting in shows SAT reading, SAT maths and ACT ranges with how many students sent scores. Header has Financial aid and How to apply links and the address opens a map.
 - Rule kept: rows, not sentences. Nothing on the page uses a typed dot or a dash as a separator.
+
+## College detail page and data, 4 Sept (second pass)
+
+- Start: 14 of 30 colleges showed made-up detail behind real headline figures; the page showed everything as rows of equal weight.
+- End: every college reads from its reference page. Getting in lists what they ask for with Required and Looked at, and shows score ranges on their scale. What it costs shows what families pay against the full price, so the size of the grant is visible. Who is there is three splits and the ring. Nothing is said twice on the page; setting, accreditation and the sticker price each appear once.
+
+## Play, 4 Sept
+
+- Start: on the data room question a drag that missed sprang back with no other way to answer, and the tiles did not move while dragging.
+- End: tiles follow the finger, the blank lights up when a tile is over it, and every drag screen also answers on a tap. Copy says "drag or tap".

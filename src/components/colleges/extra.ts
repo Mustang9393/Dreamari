@@ -431,6 +431,1112 @@ export const EXTRA: Record<string, CollegeExtra> = {
    ]
   }
  },
+ "black-hills-state-university": {
+  "links": {
+   "aid": "https://www.bhsu.edu/Admissions/Pay-for-College/Financial-Aid",
+   "apply": "https://www.bhsu.edu/admissions/apply/",
+   "calc": "https://form.bhsu.edu/BH_TuitionCalc/TuitionCalculator.aspx",
+   "site": "https://www.bhsu.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1200%20University%20St%2C%20Spearfish%2C%20South%20Dakota%2C%2057799-9500"
+  },
+  "finish5": 40,
+  "finish6b": 43,
+  "finish6ft": null,
+  "finish8": 43,
+  "retPart": 50,
+  "meal": "Yes",
+  "fallBehind": 0,
+  "satR": {
+   "lo": 465,
+   "hi": 565,
+   "sent": 6
+  },
+  "satM": {
+   "lo": 500,
+   "hi": 570,
+   "sent": 6
+  },
+  "act": {
+   "lo": 18,
+   "hi": 24,
+   "sent": 66
+  },
+  "teamMen": 271,
+  "teamWomen": 239,
+  "ways": [
+   {
+    "name": "Classes in the evening or at weekends",
+    "note": "You can study around a job"
+   },
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "ROTC: Army",
+    "note": "Military training alongside your degree"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 17,
+   "Associate degrees": 8,
+   "Bachelor's degrees": 56,
+   "Master's degrees": 8,
+   "Graduate certificates": 5
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Business/Commerce, General",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Sociology, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 5,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Graphic Design",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Human Resources Management/Personnel Administration, General",
+     "grads": 3,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Spanish Language and Literature",
+     "grads": 3,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "American Government and Politics (United States)",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Entrepreneurship/Entrepreneurial Studies",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mass Communication/Media Studies",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Photography",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Creative Writing",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Intercultural/Multicultural and Diversity Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "International/Globalization Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 19,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 19,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Tourism and Travel Services Management",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Community Organization and Advocacy",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Industrial Technology/Technician",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Manufacturing Engineering Technology/Technician",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Teacher Assistant/Aide",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 55,
+     "share": "12%",
+     "pay": "$36,641"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 35,
+     "share": "8%",
+     "pay": "$36,857"
+    },
+    {
+     "name": "Psychology, General",
+     "grads": 30,
+     "share": "7%",
+     "pay": "$28,162"
+    },
+    {
+     "name": "Sport and Fitness Administration/Management",
+     "grads": 25,
+     "share": "5%",
+     "pay": "$21,080"
+    },
+    {
+     "name": "Community Organization and Advocacy",
+     "grads": 20,
+     "share": "4%",
+     "pay": "$29,934"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 18,
+     "share": "4%",
+     "pay": "$25,935"
+    },
+    {
+     "name": "General Studies",
+     "grads": 14,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "English Language and Literature, General",
+     "grads": 9,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mathematics, General",
+     "grads": 9,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Sociology, General",
+     "grads": 9,
+     "share": "2%",
+     "pay": "$29,825"
+    },
+    {
+     "name": "Fine/Studio Arts, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Graphic Design",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "History, General",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Secondary Education and Teaching",
+     "grads": 10,
+     "share": "2%",
+     "pay": "$36,708"
+    },
+    {
+     "name": "Curriculum and Instruction",
+     "grads": 9,
+     "share": "2%",
+     "pay": "$46,294"
+    },
+    {
+     "name": "Organizational Behavior Studies",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$43,372"
+    },
+    {
+     "name": "Reading Teacher Education",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$45,515"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Sustainability Studies",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Molecular Genetics",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Special Education and Teaching, General",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Creative Writing",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Drafting and Design Technology/Technician, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Organizational Behavior Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Teacher Education, Multiple Levels",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "dakota-state-university": {
+  "links": {
+   "aid": "https://dsu.edu/admissions/financial-aid/index.html",
+   "apply": "https://dsu.edu/apply.html",
+   "calc": "https://dsu.edu/admissions/calculator.html",
+   "site": "https://dsu.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=820%20N%20Washington%20Ave%2C%20Madison%2C%20South%20Dakota%2C%2057042-1799"
+  },
+  "finish5": 47,
+  "finish6b": 49,
+  "finish6ft": 51,
+  "finish8": 47,
+  "retPart": 75,
+  "meal": "No",
+  "fallBehind": 0,
+  "satR": {
+   "lo": 570,
+   "hi": 680,
+   "sent": 16
+  },
+  "satM": {
+   "lo": 620,
+   "hi": 760,
+   "sent": 16
+  },
+  "act": {
+   "lo": 20,
+   "hi": 27,
+   "sent": 67
+  },
+  "teamMen": 444,
+  "teamWomen": 141,
+  "ways": [
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "ROTC: Air Force",
+    "note": "Military training alongside your degree"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 15,
+   "Associate degrees": 8,
+   "Bachelor's degrees": 30,
+   "Master's degrees": 7,
+   "Doctorates": 3,
+   "Graduate certificates": 6
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Computer and Information Systems Security/Auditing/Information Assurance Certificate, under a year",
+     "grads": 14,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Information Science/Studies Certificate, under a year",
+     "grads": 13,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Systems Networking and Telecommunications Certificate, under a year",
+     "grads": 12,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Network and System Administration/Administrator Certificate, under a year",
+     "grads": 12,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer and Information Sciences, General Certificate, under a year",
+     "grads": 7,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Information Technology Certificate, under a year",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Health Information/Medical Records Technology/Technician Certificate, under a year",
+     "grads": 3,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mathematics, General Certificate, under a year",
+     "grads": 3,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Web Page, Digital/Multimedia and Information Resources Design Certificate, under a year",
+     "grads": 3,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Medical Insurance Coding Specialist/Coder Certificate, 1-2 years",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Government and Politics (United States) Certificate, under a year",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Design and Visual Communications, General Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Education, General Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "System, Networking, and LAN/WAN Management/Manager",
+     "grads": 17,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 8,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Information Science/Studies",
+     "grads": 8,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Health Information/Medical Records Technology/Technician",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "$36,834"
+    },
+    {
+     "name": "Web Page, Digital/Multimedia and Information Resources Design",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Medical Informatics",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Computer and Information Systems Security/Auditing/Information Assurance",
+     "grads": 82,
+     "share": "12%",
+     "pay": "$49,983"
+    },
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 64,
+     "share": "10%",
+     "pay": "$50,973"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 36,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "System, Networking, and LAN/WAN Management/Manager",
+     "grads": 27,
+     "share": "4%",
+     "pay": "$49,983"
+    },
+    {
+     "name": "Computer Graphics",
+     "grads": 24,
+     "share": "4%",
+     "pay": "$25,986"
+    },
+    {
+     "name": "General Studies",
+     "grads": 16,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Information Science/Studies",
+     "grads": 15,
+     "share": "2%",
+     "pay": "$42,967"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 14,
+     "share": "2%",
+     "pay": "$37,841"
+    },
+    {
+     "name": "Special Education and Teaching, Other",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$38,694"
+    },
+    {
+     "name": "Exercise Science and Kinesiology",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Strategic Intelligence",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Software and Media Applications, Other",
+     "grads": 8,
+     "share": "1%",
+     "pay": "$25,986"
+    },
+    {
+     "name": "Physical Education Teaching and Coaching",
+     "grads": 8,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "English Language and Literature/Letters, Other",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 55,
+     "share": "8%",
+     "pay": "$91,122"
+    },
+    {
+     "name": "Information Science/Studies",
+     "grads": 46,
+     "share": "7%",
+     "pay": "$69,795"
+    },
+    {
+     "name": "Computer and Information Systems Security/Auditing/Information Assurance",
+     "grads": 32,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Medical Informatics",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Educational/Instructional Technology",
+     "grads": 3,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Artificial Intelligence",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "$91,122"
+    }
+   ],
+   "Doctorates": [
+    {
+     "name": "Computer and Information Systems Security/Auditing/Information Assurance",
+     "grads": 15,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Information Science/Studies",
+     "grads": 12,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Information Science/Studies",
+     "grads": 6,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Medical Informatics",
+     "grads": 3,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Computer and Information Systems Security/Auditing/Information Assurance",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Mathematics, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Physical Education Teaching and Coaching",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "dakota-wesleyan-university": {
+  "links": {
+   "aid": "https://www.dwu.edu/scholarships-and-financial-aid",
+   "apply": "https://www.dwu.edu/apply",
+   "calc": "https://www.dwu.edu/Net-Price-Calculator",
+   "site": "https://www.dwu.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1200%20W%20University%20Ave%2C%20Mitchell%2C%20South%20Dakota%2C%2057301-4398"
+  },
+  "finish5": 48,
+  "finish6b": null,
+  "finish6ft": null,
+  "finish8": 60,
+  "retPart": null,
+  "meal": "No",
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": 178,
+  "teamWomen": 114,
+  "ways": [
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "help finding a job when you finish",
+   "childcare on campus"
+  ],
+  "counts": {
+   "Associate degrees": 4,
+   "Bachelor's degrees": 53,
+   "Master's degrees": 8,
+   "Graduate certificates": 4
+  },
+  "programmes": {
+   "Associate degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Entrepreneurship/Entrepreneurial Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 42,
+     "share": "19%",
+     "pay": "$60,155"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 14,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 12,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biochemistry",
+     "grads": 10,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Entrepreneurship/Entrepreneurial Studies",
+     "grads": 10,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Digital Arts",
+     "grads": 9,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 8,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Exercise Science and Kinesiology",
+     "grads": 6,
+     "share": "3%",
+     "pay": "$29,046"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Education, General",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Organizational Leadership",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "History Teacher Education",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "English/Language Arts Teacher Education",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Business, Management, Marketing, and Related Support Services, Other",
+     "grads": 46,
+     "share": "20%",
+     "pay": "$61,623"
+    },
+    {
+     "name": "Athletic Training/Trainer",
+     "grads": 6,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Education, General",
+     "grads": 5,
+     "share": "2%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Curriculum and Instruction",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Higher Education/Higher Education Administration",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Educational Leadership and Administration, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Science Teacher Education/General Science Teacher Education",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Special Education and Teaching, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Curriculum and Instruction Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Financial Planning and Services Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Non-Profit/Public/Organizational Management Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Non-Profit/Public/Organizational Management Post-master's certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "kairos-university": {
+  "links": {
+   "aid": "https://www.kairos.edu/tuition/",
+   "apply": "https://www.kairos.edu/apply/kairos-university-application/",
+   "calc": null,
+   "site": "https://www.kairos.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=2100%20S%20Summit%20Ave%2C%20Sioux%20Falls%2C%20South%20Dakota%2C%2057105"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": null,
+  "finish8": null,
+  "retPart": 75,
+  "meal": null,
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": null,
+  "teamWomen": null,
+  "ways": [],
+  "notOffered": [
+   "help finding work while you study",
+   "help finding a job when you finish",
+   "childcare on campus"
+  ],
+  "counts": {
+   "Associate degrees": 2,
+   "Bachelor's degrees": 2,
+   "Master's degrees": 6,
+   "Doctorates": 3,
+   "Graduate certificates": 1
+  },
+  "programmes": {
+   "Associate degrees": [
+    {
+     "name": "Organizational Leadership",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Theology/Theological Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Organizational Leadership",
+     "grads": 14,
+     "share": "6%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Theology/Theological Studies",
+     "grads": 14,
+     "share": "6%",
+     "pay": "not reported"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Bible/Biblical Studies",
+     "grads": 74,
+     "share": "32%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Divinity/Ministry",
+     "grads": 58,
+     "share": "25%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Counseling Psychology",
+     "grads": 12,
+     "share": "5%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Marriage and Family Therapy/Counseling",
+     "grads": 10,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Lay Ministry",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Organizational Leadership",
+     "grads": 4,
+     "share": "2%",
+     "pay": "not reported"
+    }
+   ],
+   "Doctorates": [
+    {
+     "name": "Divinity/Ministry Doctorate (professional)",
+     "grads": 21,
+     "share": "9%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Theology/Theological Studies Doctorate",
+     "grads": 11,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Pastoral Counseling and Specialized Ministries, Other Doctorate (professional)",
+     "grads": 2,
+     "share": "1%",
+     "pay": "not reported"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Bible/Biblical Studies",
+     "grads": 5,
+     "share": "2%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
  "kean-university": {
   "links": {
    "aid": "https://www.kean.edu/offices/financial-aid",
@@ -777,6 +1883,212 @@ export const EXTRA: Record<string, CollegeExtra> = {
    ]
   }
  },
+ "lake-area-technical-college": {
+  "links": {
+   "aid": "https://www.lakeareatech.edu/getting-started/financial-aid/",
+   "apply": "https://www.lakeareatech.edu/getting-started/apply-now/",
+   "calc": "https://www.lakeareatech.edu/getting-started/financial-aid/net-price-calculator/",
+   "site": "https://www.lakeareatech.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1201%20Arrow%20Ave%2C%20Watertown%2C%20South%20Dakota%2C%2057201-0730"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 73,
+  "finish8": null,
+  "retPart": 78,
+  "meal": null,
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": 65,
+  "teamWomen": 5,
+  "ways": [
+   {
+    "name": "Classes in the evening or at weekends",
+    "note": "You can study around a job"
+   }
+  ],
+  "notOffered": [],
+  "counts": {
+   "Certificates": 18,
+   "Associate degrees": 27
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Licensed Practical/Vocational Nurse Training Certificate, 1-2 years",
+     "grads": 89,
+     "share": "11%",
+     "pay": "$35,901"
+    },
+    {
+     "name": "Cosmetology/Cosmetologist, General Certificate, 1-2 years",
+     "grads": 35,
+     "share": "4%",
+     "pay": "$18,226"
+    },
+    {
+     "name": "Welding Technology/Welder Certificate, 1-2 years",
+     "grads": 30,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Community Health Services/Liaison/Counseling Certificate, under a year",
+     "grads": 25,
+     "share": "3%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Dental Assisting/Assistant Certificate, 1-2 years",
+     "grads": 18,
+     "share": "2%",
+     "pay": "$32,684"
+    },
+    {
+     "name": "Construction/Heavy Equipment/Earthmoving Equipment Operation Certificate, 1-2 years",
+     "grads": 17,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Human Services, General Certificate, 1-2 years",
+     "grads": 16,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Aircraft Powerplant Technology/Technician Certificate, 2-4 years",
+     "grads": 8,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Autobody/Collision and Repair Technology/Technician Certificate, 1-2 years",
+     "grads": 8,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Environmental Science Certificate, 1-2 years",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Licensed Practical/Vocational Nurse Training Certificate, under 12 weeks",
+     "grads": 5,
+     "share": "1%",
+     "pay": "$35,901"
+    },
+    {
+     "name": "Emergency Medical Technology/Technician (EMT Paramedic) Certificate, under 12 weeks",
+     "grads": 4,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Emergency Medical Technology/Technician (EMT Paramedic) Certificate, 1-2 years",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Banking and Financial Support Services Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Diesel Mechanics Technology/Technician",
+     "grads": 92,
+     "share": "11%",
+     "pay": "$41,649"
+    },
+    {
+     "name": "Agricultural Business and Management, General",
+     "grads": 87,
+     "share": "10%",
+     "pay": "$36,747"
+    },
+    {
+     "name": "Marketing/Marketing Management, General",
+     "grads": 64,
+     "share": "8%",
+     "pay": "$29,474"
+    },
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 47,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Science",
+     "grads": 28,
+     "share": "3%",
+     "pay": "$41,208"
+    },
+    {
+     "name": "Welding Technology/Welder",
+     "grads": 25,
+     "share": "3%",
+     "pay": "$37,581"
+    },
+    {
+     "name": "Automobile/Automotive Mechanics Technology/Technician",
+     "grads": 24,
+     "share": "3%",
+     "pay": "$41,649"
+    },
+    {
+     "name": "Banking and Financial Support Services",
+     "grads": 19,
+     "share": "2%",
+     "pay": "$35,711"
+    },
+    {
+     "name": "Autobody/Collision and Repair Technology/Technician",
+     "grads": 18,
+     "share": "2%",
+     "pay": "$41,649"
+    },
+    {
+     "name": "Criminal Justice/Police Science",
+     "grads": 18,
+     "share": "2%",
+     "pay": "$36,699"
+    },
+    {
+     "name": "Physical Therapy Assistant",
+     "grads": 17,
+     "share": "2%",
+     "pay": "$32,677"
+    },
+    {
+     "name": "Robotics Technology/Technician",
+     "grads": 17,
+     "share": "2%",
+     "pay": "$45,799"
+    },
+    {
+     "name": "Clinical/Medical Laboratory Technician",
+     "grads": 13,
+     "share": "2%",
+     "pay": "$36,262"
+    },
+    {
+     "name": "Building Construction Technology/Technician",
+     "grads": 12,
+     "share": "1%",
+     "pay": "$31,150"
+    }
+   ]
+  }
+ },
  "middlesex-college": {
   "links": {
    "aid": "https://www.middlesexcollege.edu/funding-your-education/",
@@ -981,6 +2293,209 @@ export const EXTRA: Record<string, CollegeExtra> = {
      "grads": 16,
      "share": "1%",
      "pay": "too few graduates"
+    }
+   ]
+  }
+ },
+ "mitchell-technical-college": {
+  "links": {
+   "aid": "https://www.mitchelltech.edu/admissions/financial-aid/",
+   "apply": "https://www.mitchelltech.edu/apply",
+   "calc": "https://www.mitchelltech.edu/admissions/financial-aid/net-price-calculator/",
+   "site": "https://www.mitchelltech.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1800%20E.%20Spruce%20Street%2C%20Mitchell%2C%20South%20Dakota%2C%2057301"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 76,
+  "finish8": null,
+  "retPart": 80,
+  "meal": null,
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": null,
+  "teamWomen": null,
+  "ways": [],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 15,
+   "Associate degrees": 35
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Lineworker Certificate, 1-2 years",
+     "grads": 92,
+     "share": "18%",
+     "pay": "$48,338"
+    },
+    {
+     "name": "Licensed Practical/Vocational Nurse Training Certificate, 1-2 years",
+     "grads": 18,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Farm/Farm and Ranch Management Certificate, under a year",
+     "grads": 16,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Small Business Administration/Management Certificate, 1-2 years",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Geospatial Intelligence Certificate, 1-2 years",
+     "grads": 8,
+     "share": "2%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Heating, Air Conditioning, Ventilation and Refrigeration Maintenance Technology/Technician Certificate, 1-2 years",
+     "grads": 7,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Wind Energy System Installation and Repair Technology/Technician Certificate, 1-2 years",
+     "grads": 7,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Construction Trades, Other Certificate, 1-2 years",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Small Engine Mechanics and Repair Technology/Technician Certificate, 1-2 years",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Welding Engineering Technology/Technician Certificate, 1-2 years",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business/Office Automation/Technology/Data Entry Certificate, 1-2 years",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Culinary Arts/Chef Training Certificate, 1-2 years",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Health Information/Medical Records Technology/Technician Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Organizational Leadership Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Electrician",
+     "grads": 50,
+     "share": "10%",
+     "pay": "$42,848"
+    },
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 21,
+     "share": "4%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Agribusiness/Agricultural Business Operations",
+     "grads": 18,
+     "share": "3%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Electrical and Power Transmission Installation/Installer, General",
+     "grads": 18,
+     "share": "3%",
+     "pay": "$42,848"
+    },
+    {
+     "name": "Agricultural Mechanization, General",
+     "grads": 17,
+     "share": "3%",
+     "pay": "$40,163"
+    },
+    {
+     "name": "Radiologic Technology/Science - Radiographer",
+     "grads": 16,
+     "share": "3%",
+     "pay": "$51,161"
+    },
+    {
+     "name": "Building Construction Technology/Technician",
+     "grads": 14,
+     "share": "3%",
+     "pay": "$34,787"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 14,
+     "share": "3%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Heating, Air Conditioning, Ventilation and Refrigeration Maintenance Technology/Technician",
+     "grads": 14,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$32,229"
+    },
+    {
+     "name": "Animal/Livestock Husbandry and Production",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$36,181"
+    },
+    {
+     "name": "Medical/Clinical Assistant",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$25,339"
+    },
+    {
+     "name": "Welding Engineering Technology/Technician",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$47,113"
+    },
+    {
+     "name": "Agronomy and Crop Science",
+     "grads": 11,
+     "share": "2%",
+     "pay": "not reported"
     }
    ]
   }
@@ -1412,6 +2927,287 @@ export const EXTRA: Record<string, CollegeExtra> = {
    ]
   }
  },
+ "mount-marty-university": {
+  "links": {
+   "aid": "https://www.mountmarty.edu/tuition-and-aid",
+   "apply": "https://admission.mountmarty.edu/portal/ug_app",
+   "calc": "https://www.mountmarty.edu/tuition-and-aid/net-price-calculator/",
+   "site": "https://www.mountmarty.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1105%20W.%208th%20Street%2C%20Yankton%2C%20South%20Dakota%2C%2057078-3724"
+  },
+  "finish5": 50,
+  "finish6b": 52,
+  "finish6ft": null,
+  "finish8": 54,
+  "retPart": null,
+  "meal": "Yes",
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": {
+   "lo": 18,
+   "hi": 25,
+   "sent": 48
+  },
+  "teamMen": 342,
+  "teamWomen": 182,
+  "ways": [
+   {
+    "name": "ROTC: Army",
+    "note": "Military training alongside your degree"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 4,
+   "Associate degrees": 7,
+   "Bachelor's degrees": 33,
+   "Master's degrees": 6,
+   "Doctorates": 2,
+   "Graduate certificates": 4
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Accounting and Business/Management",
+     "grads": 7,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Applied Horticulture/Horticulture Operations, General",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Applied Horticulture/Horticulture Operations, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Multi-/Interdisciplinary Studies, Other",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Teacher Assistant/Aide",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Sports, Kinesiology, and Physical Education/Fitness, Other",
+     "grads": 25,
+     "share": "11%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 22,
+     "share": "9%",
+     "pay": "$61,763"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 17,
+     "share": "7%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 15,
+     "share": "6%",
+     "pay": "$38,340"
+    },
+    {
+     "name": "Secondary Education and Teaching",
+     "grads": 10,
+     "share": "4%",
+     "pay": "$38,340"
+    },
+    {
+     "name": "Accounting",
+     "grads": 6,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 6,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Parks, Recreation, and Leisure Facilities Management, General",
+     "grads": 6,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Radiologic Technology/Science - Radiographer",
+     "grads": 6,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Multi-/Interdisciplinary Studies, Other",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Social Sciences, General",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Health/Medical Preparatory Programs, Other",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Physical Education Teaching and Coaching",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Psychology, General",
+     "grads": 4,
+     "share": "2%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Biotechnology",
+     "grads": 12,
+     "share": "5%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Physical Education Teaching and Coaching",
+     "grads": 10,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Psychiatric/Mental Health Nurse/Nursing",
+     "grads": 5,
+     "share": "2%",
+     "pay": "$175,606"
+    },
+    {
+     "name": "Family Practice Nurse/Nursing",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "$175,606"
+    },
+    {
+     "name": "Curriculum and Instruction",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "$45,429"
+    },
+    {
+     "name": "Nurse Anesthetist",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "$175,606"
+    }
+   ],
+   "Doctorates": [
+    {
+     "name": "Nurse Anesthetist Doctorate (professional)",
+     "grads": 34,
+     "share": "14%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Registered Nursing, Nursing Administration, Nursing Research and Clinical Nursing, Other Doctorate",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Psychiatric/Mental Health Nurse/Nursing Post-master's certificate",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biotechnology Post-master's certificate",
+     "grads": 2,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Teacher Education and Professional Development, Specific Subject Areas, Other Postbaccalaureate certificate",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Family Practice Nurse/Nursing Post-master's certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ]
+  }
+ },
  "new-jersey-institute-of-technology": {
   "links": {
    "aid": "https://www.njit.edu/financialaid/",
@@ -1820,6 +3616,397 @@ export const EXTRA: Record<string, CollegeExtra> = {
    ]
   }
  },
+ "northern-state-university": {
+  "links": {
+   "aid": "https://northern.edu/financial-aid",
+   "apply": "https://apply.northern.edu/apply/",
+   "calc": "https://northern.edu/sites/default/files/net-price-calculator/index.html",
+   "site": "https://northern.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1200%20S%20Jay%20St%2C%20Aberdeen%2C%20South%20Dakota%2C%2057401-7198"
+  },
+  "finish5": 53,
+  "finish6b": 55,
+  "finish6ft": 49,
+  "finish8": 52,
+  "retPart": 63,
+  "meal": "No",
+  "fallBehind": 0,
+  "satR": {
+   "lo": 490,
+   "hi": 590,
+   "sent": 2
+  },
+  "satM": {
+   "lo": 490,
+   "hi": 570,
+   "sent": 2
+  },
+  "act": {
+   "lo": 18,
+   "hi": 24,
+   "sent": 74
+  },
+  "teamMen": 341,
+  "teamWomen": 181,
+  "ways": [
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "Undergraduate research",
+    "note": "Real research before you graduate"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 14,
+   "Associate degrees": 7,
+   "Bachelor's degrees": 44,
+   "Master's degrees": 11,
+   "Graduate certificates": 8
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 11,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Fine and Studio Arts Management",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "History, General",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Teaching English as a Second or Foreign Language/ESL Language Instructor",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biotechnology",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Government and Politics (United States)",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Banking and Financial Support Services",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Chinese Language and Literature",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Law Enforcement Administration",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Geography",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "German Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Jazz/Jazz Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Mathematics, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Music Pedagogy",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "General Studies",
+     "grads": 14,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 4,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Early Childhood Education and Teaching",
+     "grads": 2,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Graphic Design",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biotechnology",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 33,
+     "share": "9%",
+     "pay": "$39,033"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 25,
+     "share": "7%",
+     "pay": "$38,996"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 21,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Psychology, General",
+     "grads": 18,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Exercise Physiology and Kinesiology",
+     "grads": 17,
+     "share": "5%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 12,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Sport and Fitness Administration/Management",
+     "grads": 12,
+     "share": "3%",
+     "pay": "$32,526"
+    },
+    {
+     "name": "Accounting",
+     "grads": 10,
+     "share": "3%",
+     "pay": "$45,902"
+    },
+    {
+     "name": "English Language and Literature, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Marketing/Marketing Management, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Banking and Financial Support Services",
+     "grads": 7,
+     "share": "2%",
+     "pay": "$33,892"
+    },
+    {
+     "name": "Finance, General",
+     "grads": 6,
+     "share": "2%",
+     "pay": "$33,892"
+    },
+    {
+     "name": "Music Teacher Education",
+     "grads": 6,
+     "share": "2%",
+     "pay": "$39,862"
+    },
+    {
+     "name": "History, General",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Curriculum and Instruction",
+     "grads": 17,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Music Teacher Education",
+     "grads": 15,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Sports, Kinesiology, and Physical Education/Fitness, General",
+     "grads": 15,
+     "share": "4%",
+     "pay": "$38,740"
+    },
+    {
+     "name": "Educational Administration and Supervision, Other",
+     "grads": 10,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Financial Mathematics",
+     "grads": 10,
+     "share": "3%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Banking and Financial Support Services",
+     "grads": 6,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mental Health Counseling/Counselor",
+     "grads": 5,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Educational/Instructional Technology",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Special Education and Teaching, General",
+     "grads": 3,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Counselor Education/School Counseling and Guidance Services",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art Teacher Education",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Educational Leadership and Administration, General",
+     "grads": 2,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Banking and Financial Support Services",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Educational/Instructional Technology",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "German Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Mathematics, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Secondary School Administration/Principalship",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Teacher Education, Multiple Levels",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Teaching English as a Second or Foreign Language/ESL Language Instructor",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
  "oglala-lakota-college": {
   "links": {
    "aid": "https://www.olc.edu/cost-aid/financial-aid/",
@@ -2039,6 +4226,62 @@ export const EXTRA: Record<string, CollegeExtra> = {
      "name": "Educational Administration and Supervision, Other",
      "grads": 1,
      "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ]
+  }
+ },
+ "paul-mitchell-the-school-rapid-city": {
+  "links": {
+   "aid": "https://paulmitchell.edu/rapidcity/financial-aid",
+   "apply": "https://paulmitchell.edu/rapidcity/get-started",
+   "calc": "https://paulmitchell.edu/rapidcity/tuition-calculator",
+   "site": "https://paulmitchell.edu/rapidcity",
+   "map": "https://www.google.com/maps/search/?api=1&query=333%20Omaha%20St.%20Suite%206%20%26%207%2C%20Rapid%20City%2C%20South%20Dakota%2C%2057701"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 88,
+  "finish8": null,
+  "retPart": null,
+  "meal": null,
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": null,
+  "teamWomen": null,
+  "ways": [],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 4
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Aesthetician/Esthetician and Skin Care Specialist Certificate, under a year",
+     "grads": 20,
+     "share": "37%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Cosmetology/Cosmetologist, General Certificate, 1-2 years",
+     "grads": 17,
+     "share": "31%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Massage Therapy/Therapeutic Massage Certificate, under a year",
+     "grads": 11,
+     "share": "20%",
+     "pay": "$14,756"
+    },
+    {
+     "name": "Nail Technician/Specialist and Manicurist Certificate, under a year",
+     "grads": 6,
+     "share": "11%",
      "pay": "too few graduates"
     }
    ]
@@ -3604,6 +5847,882 @@ export const EXTRA: Record<string, CollegeExtra> = {
     },
     {
      "name": "Foreign Language Teacher Education Post-master's certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ]
+  }
+ },
+ "sinte-gleska-university": {
+  "links": {
+   "aid": "https://www.sintegleska.edu/financial-aid.html",
+   "apply": null,
+   "calc": "https://www.sintegleska.edu/student-netprice-calculator.html",
+   "site": "https://www.sintegleska.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=E.%20Highway%2018%2C%20%20101%20Antelope%20Lake%20Circle%2C%20Mission%2C%20South%20Dakota%2C%2057555-0105"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 15,
+  "finish8": 9,
+  "retPart": 78,
+  "meal": null,
+  "fallBehind": null,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": null,
+  "teamWomen": null,
+  "ways": [
+   {
+    "name": "Classes in the evening or at weekends",
+    "note": "You can study around a job"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "help finding work while you study",
+   "help finding a job when you finish"
+  ],
+  "counts": {
+   "Certificates": 17,
+   "Associate degrees": 34,
+   "Bachelor's degrees": 26,
+   "Master's degrees": 11,
+   "Graduate certificates": 2
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Accounting Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Indian/Native American Studies Certificate, under 12 weeks",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Business/Office Automation/Technology/Data Entry Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Carpentry/Carpenter Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer/Computer Systems Technology/Technician Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Installation and Repair Technology/Technician Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Construction Trades, Other Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Law Enforcement Administration Certificate, under a year",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Criminal Justice/Police Science Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Electrical/Electronic Engineering Technologies/Technicians, Other Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Electrician Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Entrepreneurial and Small Business Operations, Other Certificate, 1-2 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Environmental Science Certificate, 2-4 years",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Business Administration, Management and Operations, Other",
+     "grads": 11,
+     "share": "14%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Human Services, General",
+     "grads": 7,
+     "share": "9%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 6,
+     "share": "7%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 5,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Licensed Practical/Vocational Nurse Training",
+     "grads": 4,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Indian/Native American Studies",
+     "grads": 1,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Environmental Science",
+     "grads": 1,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Special Education and Teaching, General",
+     "grads": 1,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Administrative Assistant and Secretarial Science, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art/Art Studies, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biological and Biomedical Sciences, Other",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Mental Health Counseling/Counselor",
+     "grads": 10,
+     "share": "12%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Human Services, General",
+     "grads": 8,
+     "share": "10%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting and Business/Management",
+     "grads": 4,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Early Childhood Education and Teaching",
+     "grads": 3,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Teacher Education and Professional Development, Specific Levels and Methods, Other",
+     "grads": 3,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration, Management and Operations, Other",
+     "grads": 2,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Substance Abuse/Addiction Counseling",
+     "grads": 2,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Liberal Arts and Sciences/Liberal Studies",
+     "grads": 1,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Indian/Native American Languages, Literatures, and Linguistics",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Indian/Native American Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art/Art Studies, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art Teacher Education",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Science",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 10,
+     "share": "12%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mental and Social Health Services and Allied Professions, Other",
+     "grads": 2,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Counseling Psychology",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Counselor Education/School Counseling and Guidance Services",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Education, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Education/Teaching of Individuals in Early Childhood Special Education Programs",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Elementary and Middle School Administration/Principalship",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Human Services, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Junior High/Intermediate/Middle School Education and Teaching",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Reading Teacher Education",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Secondary School Administration/Principalship",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Education, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Teacher Education, Multiple Levels",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "sisseton-wahpeton-college": {
+  "links": {
+   "aid": "https://www.swcollege.edu/index.php/admin-aide-reg/app-process/easy-to-start",
+   "apply": "https://www.swcollege.edu/newswcollege/admissions/",
+   "calc": "https://www.swcollege.edu/Calc/npcalc.htm",
+   "site": "https://www.swcollege.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=12572%20BIA%20Rd%20700%2C%20Sisseton%2C%20South%20Dakota%2C%2057262"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 21,
+  "finish8": 18,
+  "retPart": null,
+  "meal": "No",
+  "fallBehind": null,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": 12,
+  "teamWomen": 22,
+  "ways": [],
+  "notOffered": [
+   "help finding a job when you finish",
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 5,
+   "Associate degrees": 11,
+   "Bachelor's degrees": 2
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "American Indian/Native American Languages, Literatures, and Linguistics Certificate, 1-2 years",
+     "grads": 3,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Construction Trades, Other Certificate, 1-2 years",
+     "grads": 3,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art/Art Studies, General Certificate, under a year",
+     "grads": 2,
+     "share": "4%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Cooking and Related Culinary Arts, General Certificate, 1-2 years",
+     "grads": 2,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Nursing Practice Certificate, 1-2 years",
+     "grads": 1,
+     "share": "2%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Behavioral Sciences",
+     "grads": 5,
+     "share": "10%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 5,
+     "share": "10%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "American Indian/Native American Studies",
+     "grads": 4,
+     "share": "8%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Graphics",
+     "grads": 3,
+     "share": "6%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Construction Trades, General",
+     "grads": 3,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 3,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Environmental Science",
+     "grads": 2,
+     "share": "4%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Child Development",
+     "grads": 1,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Substance Abuse/Addiction Counseling",
+     "grads": 1,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Business/Commerce, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer/Computer Systems Technology/Technician",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 10,
+     "share": "19%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Behavioral Sciences",
+     "grads": 4,
+     "share": "8%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "south-dakota-school-of-mines-and-technology": {
+  "links": {
+   "aid": "https://www.sdsmt.edu/FinAid/",
+   "apply": "https://www.sdsmt.edu/Admissions/Apply/",
+   "calc": "https://www.sdsmt.edu/Admissions/Financial-Aid-and-Scholarships/Financial-Aid/Net-Price-Calculator/",
+   "site": "https://www.sdsmt.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=501%20E%20Saint%20Joseph%20St%2C%20Rapid%20City%2C%20South%20Dakota%2C%2057701-3995"
+  },
+  "finish5": 50,
+  "finish6b": 52,
+  "finish6ft": 53,
+  "finish8": 60,
+  "retPart": 67,
+  "meal": "No",
+  "fallBehind": 0,
+  "satR": {
+   "lo": 560,
+   "hi": 660,
+   "sent": 25
+  },
+  "satM": {
+   "lo": 580,
+   "hi": 680,
+   "sent": 25
+  },
+  "act": {
+   "lo": 24,
+   "hi": 30,
+   "sent": 79
+  },
+  "teamMen": 335,
+  "teamWomen": 104,
+  "ways": [
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "ROTC: Army",
+    "note": "Military training alongside your degree"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Associate degrees": 1,
+   "Bachelor's degrees": 21,
+   "Master's degrees": 19,
+   "Doctorates": 10,
+   "Graduate certificates": 8
+  },
+  "programmes": {
+   "Associate degrees": [
+    {
+     "name": "General Studies",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Mechanical Engineering",
+     "grads": 84,
+     "share": "17%",
+     "pay": "$63,634"
+    },
+    {
+     "name": "Computer and Information Sciences, General",
+     "grads": 35,
+     "share": "7%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Civil Engineering, General",
+     "grads": 32,
+     "share": "6%",
+     "pay": "$62,408"
+    },
+    {
+     "name": "Metallurgical Engineering",
+     "grads": 29,
+     "share": "6%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Electrical and Electronics Engineering",
+     "grads": 26,
+     "share": "5%",
+     "pay": "$64,157"
+    },
+    {
+     "name": "Industrial Engineering",
+     "grads": 25,
+     "share": "5%",
+     "pay": "$64,319"
+    },
+    {
+     "name": "Chemical Engineering",
+     "grads": 23,
+     "share": "5%",
+     "pay": "$57,674"
+    },
+    {
+     "name": "Bioengineering and Biomedical Engineering",
+     "grads": 17,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mining and Mineral Engineering",
+     "grads": 12,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Multi-/Interdisciplinary Studies, Other",
+     "grads": 12,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 11,
+     "share": "2%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Computer Engineering, General",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Geology/Earth Science, General",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Engineering Technologies/Technicians, General",
+     "grads": 6,
+     "share": "1%",
+     "pay": "not reported"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Civil Engineering, General",
+     "grads": 15,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Engineering/Industrial Management",
+     "grads": 12,
+     "share": "2%",
+     "pay": "$86,985"
+    },
+    {
+     "name": "Mining and Mineral Engineering",
+     "grads": 11,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Chemical Engineering",
+     "grads": 9,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mechanical Engineering",
+     "grads": 9,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Geological/Geophysical Engineering",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Artificial Intelligence",
+     "grads": 7,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Construction Engineering",
+     "grads": 7,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Electrical and Electronics Engineering",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Bioengineering and Biomedical Engineering",
+     "grads": 5,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Materials Engineering",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Paleontology",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Physics, General",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Atmospheric Sciences and Meteorology, General",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Doctorates": [
+    {
+     "name": "Chemical Engineering",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Atmospheric Sciences and Meteorology, General",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Geological/Geophysical Engineering",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Nanotechnology",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Civil Engineering, General",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Data Science, General",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Bioengineering and Biomedical Engineering",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Materials Engineering",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Mechanical Engineering",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Physics, General",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Graduate certificates": [
+    {
+     "name": "Industrial Engineering Postbaccalaureate certificate",
+     "grads": 16,
+     "share": "3%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Occupational Health and Industrial Hygiene Post-master's certificate",
+     "grads": 7,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Construction Engineering Post-master's certificate",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Engineering, General Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Engineering, Other Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Geological/Geophysical Engineering Postbaccalaureate certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Geological/Geophysical Engineering Post-master's certificate",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Industrial Engineering Post-master's certificate",
      "grads": 0,
      "share": "<1%",
      "pay": "too few graduates"
@@ -5604,6 +8723,248 @@ export const EXTRA: Record<string, CollegeExtra> = {
    ]
   }
  },
+ "university-of-sioux-falls": {
+  "links": {
+   "aid": "https://www.usiouxfalls.edu/index.php?option=com_content&task=view&id=19&Itemid=162",
+   "apply": "https://my.usiouxfalls.edu/ICS/Admissions/Admissions_Home.jnz?portlet=Apply_Online_2.0&formname=Undergraduate+Application+Form",
+   "calc": "https://apps.usiouxfalls.edu/npc?ref=fa",
+   "site": "https://www.usiouxfalls.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=1101%20W%2022nd%20St%2C%20Sioux%20Falls%2C%20South%20Dakota%2C%2057105-1699"
+  },
+  "finish5": 61,
+  "finish6b": 62,
+  "finish6ft": 63,
+  "finish8": null,
+  "retPart": null,
+  "meal": "Yes",
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": 333,
+  "teamWomen": 283,
+  "ways": [
+   {
+    "name": "Classes in the evening or at weekends",
+    "note": "You can study around a job"
+   },
+   {
+    "name": "Study abroad"
+   },
+   {
+    "name": "ROTC: Air Force",
+    "note": "Military training alongside your degree"
+   },
+   {
+    "name": "Teacher training: approved by the state"
+   }
+  ],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Associate degrees": 9,
+   "Bachelor's degrees": 49,
+   "Master's degrees": 7,
+   "Doctorates": 1
+  },
+  "programmes": {
+   "Associate degrees": [
+    {
+     "name": "Medical Radiologic Technology/Science - Radiation Therapist",
+     "grads": 10,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "General Studies",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Graphic Design",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Mass Communication/Media Studies",
+     "grads": 2,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Digital Communication and Media/Multimedia",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Social Sciences, General",
+     "grads": 1,
+     "share": "<1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Liberal Arts and Sciences/Liberal Studies",
+     "grads": 0,
+     "share": "<1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Bachelor's degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 56,
+     "share": "13%",
+     "pay": "$41,830"
+    },
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 38,
+     "share": "9%",
+     "pay": "$60,096"
+    },
+    {
+     "name": "Psychology, General",
+     "grads": 33,
+     "share": "8%",
+     "pay": "$28,556"
+    },
+    {
+     "name": "Exercise Science and Kinesiology",
+     "grads": 21,
+     "share": "5%",
+     "pay": "$30,066"
+    },
+    {
+     "name": "Elementary Education and Teaching",
+     "grads": 19,
+     "share": "4%",
+     "pay": "$35,814"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 18,
+     "share": "4%",
+     "pay": "$32,984"
+    },
+    {
+     "name": "Mass Communication/Media Studies",
+     "grads": 15,
+     "share": "4%",
+     "pay": "$32,022"
+    },
+    {
+     "name": "Accounting and Business/Management",
+     "grads": 13,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Biology/Biological Sciences, General",
+     "grads": 11,
+     "share": "3%",
+     "pay": "$28,092"
+    },
+    {
+     "name": "Social Work",
+     "grads": 10,
+     "share": "2%",
+     "pay": "$32,686"
+    },
+    {
+     "name": "Medical Radiologic Technology/Science - Radiation Therapist",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Art/Art Studies, General",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Bible/Biblical Studies",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Social Sciences, General",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Master's degrees": [
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 52,
+     "share": "12%",
+     "pay": "$59,303"
+    },
+    {
+     "name": "Secondary Education and Teaching",
+     "grads": 14,
+     "share": "3%",
+     "pay": "$39,392"
+    },
+    {
+     "name": "Educational/Instructional Technology",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Educational Leadership and Administration, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$57,567"
+    },
+    {
+     "name": "Higher Education/Higher Education Administration",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$57,567"
+    },
+    {
+     "name": "Reading Teacher Education",
+     "grads": 6,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Superintendency and Educational System Administration",
+     "grads": 6,
+     "share": "1%",
+     "pay": "$57,567"
+    }
+   ],
+   "Doctorates": [
+    {
+     "name": "Organizational Leadership",
+     "grads": 3,
+     "share": "1%",
+     "pay": "not reported"
+    }
+   ]
+  }
+ },
  "university-of-south-dakota": {
   "links": {
    "aid": "https://www.usd.edu/financial-aid",
@@ -6108,6 +9469,209 @@ export const EXTRA: Record<string, CollegeExtra> = {
      "grads": 0,
      "share": "<1%",
      "pay": "not reported"
+    }
+   ]
+  }
+ },
+ "western-dakota-technical-college": {
+  "links": {
+   "aid": "https://www.wdt.edu/financial-aid/",
+   "apply": "https://www.wdt.edu/future-students/apply-today/",
+   "calc": "https://www.wdt.edu/NetPriceCalculator/npcalc.htm",
+   "site": "https://www.wdt.edu/",
+   "map": "https://www.google.com/maps/search/?api=1&query=800%20Mickelson%20Dr%2C%20Rapid%20City%2C%20South%20Dakota%2C%2057703-4018"
+  },
+  "finish5": null,
+  "finish6b": null,
+  "finish6ft": 54,
+  "finish8": 47,
+  "retPart": 49,
+  "meal": null,
+  "fallBehind": 0,
+  "satR": null,
+  "satM": null,
+  "act": null,
+  "teamMen": null,
+  "teamWomen": null,
+  "ways": [],
+  "notOffered": [
+   "childcare on campus"
+  ],
+  "counts": {
+   "Certificates": 21,
+   "Associate degrees": 25
+  },
+  "programmes": {
+   "Certificates": [
+    {
+     "name": "Licensed Practical/Vocational Nurse Training Certificate, 1-2 years",
+     "grads": 54,
+     "share": "17%",
+     "pay": "$40,832"
+    },
+    {
+     "name": "Welding Technology/Welder Certificate, 1-2 years",
+     "grads": 15,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Dental Assisting/Assistant Certificate, 1-2 years",
+     "grads": 11,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Computer Systems Networking and Telecommunications Certificate, 1-2 years",
+     "grads": 10,
+     "share": "3%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Accounting Technology/Technician and Bookkeeping Certificate, 1-2 years",
+     "grads": 8,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Phlebotomy Technician/Phlebotomist Certificate, under a year",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Entrepreneurship/Entrepreneurial Studies Certificate, under a year",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Hotel, Motel, and Restaurant Management Certificate, 1-2 years",
+     "grads": 4,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Medical Reception/Receptionist Certificate, 1-2 years",
+     "grads": 4,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Automation Engineer Technology/Technician Certificate, under a year",
+     "grads": 3,
+     "share": "1%",
+     "pay": "not reported"
+    },
+    {
+     "name": "Digital Marketing Certificate, under a year",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Machine Tool Technology/Machinist Certificate, 1-2 years",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Plumbing Technology/Plumber Certificate, 1-2 years",
+     "grads": 3,
+     "share": "1%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Administrative Assistant and Secretarial Science, General Certificate, 1-2 years",
+     "grads": 2,
+     "share": "1%",
+     "pay": "too few graduates"
+    }
+   ],
+   "Associate degrees": [
+    {
+     "name": "Registered Nursing/Registered Nurse",
+     "grads": 34,
+     "share": "10%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Electrician",
+     "grads": 19,
+     "share": "6%",
+     "pay": "$37,211"
+    },
+    {
+     "name": "Computer Systems Networking and Telecommunications",
+     "grads": 15,
+     "share": "5%",
+     "pay": "$34,470"
+    },
+    {
+     "name": "Health Services/Allied Health/Health Sciences, General",
+     "grads": 15,
+     "share": "5%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Diesel Mechanics Technology/Technician",
+     "grads": 12,
+     "share": "4%",
+     "pay": "$38,609"
+    },
+    {
+     "name": "Drafting and Design Technology/Technician, General",
+     "grads": 10,
+     "share": "3%",
+     "pay": "$37,098"
+    },
+    {
+     "name": "Welding Technology/Welder",
+     "grads": 10,
+     "share": "3%",
+     "pay": "$38,018"
+    },
+    {
+     "name": "Automobile/Automotive Mechanics Technology/Technician",
+     "grads": 9,
+     "share": "3%",
+     "pay": "$38,609"
+    },
+    {
+     "name": "Business Administration and Management, General",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$27,875"
+    },
+    {
+     "name": "Surgical Technology/Technologist",
+     "grads": 8,
+     "share": "2%",
+     "pay": "$43,713"
+    },
+    {
+     "name": "Accounting",
+     "grads": 7,
+     "share": "2%",
+     "pay": "too few graduates"
+    },
+    {
+     "name": "Clinical/Medical Laboratory Technician",
+     "grads": 7,
+     "share": "2%",
+     "pay": "$40,177"
+    },
+    {
+     "name": "Criminal Justice/Safety Studies",
+     "grads": 5,
+     "share": "2%",
+     "pay": "$37,382"
+    },
+    {
+     "name": "Heating, Air Conditioning, Ventilation and Refrigeration Maintenance Technology/Technician",
+     "grads": 5,
+     "share": "2%",
+     "pay": "too few graduates"
     }
    ]
   }

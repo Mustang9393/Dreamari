@@ -43,3 +43,113 @@ export const EXTRA: Record<string, CollegeExtra> = ${JSON.stringify(out, null, 1
 `;
 writeFileSync("src/components/colleges/extra.ts", ts);
 console.log(Object.keys(out).length, "colleges;", Object.entries(out).map(([k, v]) => `${k}: ${Object.keys(v.programmes).length} levels`).join("; "));
+
+// ---------------------------------------------------------------------------
+// Second output: for colleges whose reference file carries the page text,
+// a full CollegeDetail (and the card-level base figures) parsed from that
+// text, so no college on the site shows synthesised numbers. Written to
+// src/components/colleges/detail-ref.ts; data.ts prefers it over synthDetail.
+const money = (s) => (s === undefined || s === null ? null : s === "Free" ? 0 : Number(String(s).replace(/[^0-9]/g, "")));
+const num = (s) => Number(String(s).replace(/,/g, ""));
+const BAND_LABEL = { "Under $30,000": "Under $30,000", "$30,000-$48,000": "$30,000 to $48,000", "$48,000-$75,000": "$48,000 to $75,000", "$75,000-$110,000": "$75,000 to $110,000", "Over $110,000": "Over $110,000" };
+const LEVEL_SHORT = { Certificates: "Certificates", "Associate degrees": "Associate", "Bachelor's degrees": "Bachelor's", "Master's degrees": "Master's", Doctorates: "Doctorates", "Graduate certificates": "Graduate certificates" };
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const detail = {};
+const base = {};
+for (const f of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+  const j = JSON.parse(readFileSync(`${dir}/${f}`, "utf8"));
+  const t = j.text;
+  if (!t) continue;
+  const g = (re) => { const m = t.match(re); return m ? m[1].trim() : null; };
+  const block = (start, ends) => {
+    const i = t.indexOf(start);
+    if (i === -1) return [];
+    const rest = t.slice(i + start.length);
+    let end = rest.length;
+    for (const e of ends) { const k = rest.indexOf(e); if (k !== -1 && k < end) end = k; }
+    return rest.slice(0, end).split("\n").map((l) => l.trim()).filter(Boolean);
+  };
+  const lines = t.split("\n");
+  const address = lines[2]?.trim() || null;
+  const partOf = g(/\nPart of ([^\n]+)\./);
+  const sameTuition = money(g(/\nTuition\nThe same wherever you live\n(\$[\d,]+)/));
+  const tuitionIn = sameTuition ?? money(g(/\nTuition, in state\n(\$[\d,]+)/));
+  const tuitionOut = sameTuition ?? money(g(/\nTuition, out of state\n(\$[\d,]+)/));
+  const fees = money(g(/\nRequired fees\n(\$[\d,]+|Free)/));
+  const housingLine = g(/\nHousing on campus\n([^\n]+)/);
+  const housing = housingLine ? /^Yes/.test(housingLine) : false;
+  const housingTogether = money(g(/\nHousing and food together\n(\$[\d,]+)/));
+  const housingCost = housingTogether ?? money(g(/\nHousing for a year\n(\$[\d,]+)/));
+  const foodCost = housingTogether ? null : money(g(/\nFood for a year\n(\$[\d,]+)/));
+  const bands = [...t.matchAll(/\n(Under \$30,000|\$30,000-\$48,000|\$48,000-\$75,000|\$75,000-\$110,000|Over \$110,000)\n(\$[\d,]+)\/yr/g)].map((m) => ({ label: BAND_LABEL[m[1]], pay: money(m[2]) }));
+  const netPrice = money(g(/\nAverage across those bands\n(\$[\d,]+)/));
+  const schol = g(/\nGot a scholarship from the college\nFirst-year students, the college's own money\n([^\n]+)/);
+  const scholarshipShare = schol ? Number(schol.match(/^(\d+)%/)?.[1]) : undefined;
+  const scholarshipAvg = schol ? money(schol.match(/\$([\d,]+) average/)?.[1] ?? null) : null;
+  const pell = g(/\nGot a federal Pell grant\n(\d+)%/);
+  const admit = t.match(/\nGetting in\n(\d+)%\nof applicants are admitted · ([\d,]+) applied/);
+  const open = /Everyone who applies is admitted/.test(t) || (!admit && !/What they require/.test(t));
+  const require = block("What they require\n\n", ["\n\nWhat they look at", "\n\nScores of students", "\nWhat the college charges"]);
+  const consider = block("What they look atbut do not require\n\n", ["\n\nScores of students", "\nWhat the college charges"]);
+  const satR = scoreW(j.satR, 3), satM = scoreW(j.satM, 3), act = scoreW(j.act, 2);
+  const scores = satR && satM ? { sat: `${satR.lo + satM.lo} to ${satR.hi + satM.hi}`, sentSat: satR.sent, ...(act ? { act: `${act.lo} to ${act.hi}`, sentAct: act.sent } : {}) } : act ? { sat: "Not published", sentSat: 0, act: `${act.lo} to ${act.hi}`, sentAct: act.sent } : undefined;
+  const finish6 = g(/\nFinish within 6 years\n(\d+)%/);
+  const finish4 = g(/\nFinish in 4 years\n(\d+)%/);
+  const retention = g(/\nCome back for year 2\n(\d+)%/);
+  const ratio = g(/\nStudents per teacher\n([^\n]+)/);
+  const programmeCount = Number(g(/\n(\d+) programmes/) ?? 0);
+  const counts = j.counts ?? {};
+  const levels = Object.entries(counts).map(([label, n]) => ({ label: LEVEL_SHORT[label] ?? label, n }));
+  const P = j.P ?? {};
+  const mainLevel = P["Bachelor's degrees"] ? "Bachelor's degrees" : Object.keys(P).sort((a, b) => (counts[b] ?? 0) - (counts[a] ?? 0))[0];
+  const programmes = (P[mainLevel] ?? "").split("\n").filter(Boolean).slice(0, 6).map((r) => { const [name, grads, share, pay] = r.split("|"); return { name, grads: num(grads), share: share === "<1%" ? 0 : Number(share.replace("%", "")), pay: pay.startsWith("$") ? pay : "not published" }; });
+  const undergrads = num(g(/\nUndergraduates\n([\d,]+)\n(?:Graduate students|Everyone)/) ?? g(/\nUndergraduates\n([\d,]+)/) ?? "0");
+  const gradStudents = g(/\nGraduate students\n([\d,]+)/);
+  const fullTime = num(g(/\nStudying full time\n([\d,]+)/) ?? "0");
+  const partTime = num(g(/\nStudying part time\n([\d,]+)/) ?? "0");
+  const women = Number(g(/\nWomen\n[\d,]+ · (\d+)%/) ?? 50);
+  const menStart = t.indexOf("\nMen\n");
+  const makeup = menStart === -1 ? [] : [...t.slice(menStart + 5).split("\n\n")[0].matchAll(/^([^\n]+)\n([\d,]+) · (\d+)%$/gm)].slice(1 - 1).map((m) => ({ label: m[1] === "U.S. nonresident" ? "International" : m[1], n: num(m[2]), pct: Number(m[3]) })).filter((m) => !/^Men$/.test(m.label));
+  // the first match inside that block is Men's own count line; drop it
+  const makeupClean = makeup.filter((m, i) => !(i === 0 && /^\d/.test(m.label)));
+  const ways = (j.ways ?? "").split("\n").filter(Boolean).filter((l) => !DESC.has(l) && !/^They told/.test(l)).map((l) => l.replace(/\s*—\s*/g, ": "));
+  const helps = block("What the college helps with\n\n", ["\n\n"]);
+  const notOffered = (j.notes ?? []).map((n) => n.match(/do not offer: (.*)\.$/)?.[1]).filter(Boolean).flatMap((s) => s.split(", ")).map(cap);
+  const sportM = t.match(/\nSport([^\n]+)\n\nStudents on a team\n([\d,]+)\n((?:Men\n[\d,]+\nWomen\n[\d,]+\n)?)([\s\S]*?)\n\n/);
+  const sport = sportM ? { league: sportM[1].trim(), students: num(sportM[2]), teams: sportM[4].split("\n").map((s) => s.trim()).filter((s) => s && s !== "Other Sports") } : undefined;
+  const pay6 = money(g(/\nTypical pay 6 years after starting\n(\$[\d,]+)/));
+  const debt = money(g(/\nOwe when they finish\n(\$[\d,]+)/));
+  const monthly = money(g(/\nLoan payment each month\n(\$[\d,]+)\/month/));
+  const repay = g(/\nPaying back their loans\n(\d+)%/);
+  detail[j.slug] = {
+    address, ...(partOf ? { partOf } : {}),
+    tuitionInState: tuitionIn, tuitionOutState: tuitionOut, fees,
+    housing, ...(housingCost !== null ? { housingCost } : {}), ...(foodCost ? { foodCost } : {}),
+    bands,
+    ...(scholarshipShare !== undefined && !Number.isNaN(scholarshipShare) ? { scholarshipShare } : {}), ...(scholarshipAvg ? { scholarshipAvg } : {}), ...(pell ? { pell: Number(pell) } : {}),
+    require: open ? [] : require, consider: open ? [] : consider, ...(scores ? { scores } : {}),
+    ...(finish4 ? { finish4: Number(finish4) } : {}),
+    ratio: ratio ?? "Not published", programmeCount, levels, programmes,
+    ...(gradStudents ? { gradStudents: num(gradStudents) } : {}),
+    fullTime, partTime, women, men: 100 - women, makeup: makeupClean,
+    ways, helps, ...(notOffered.length ? { notOffered } : {}), ...(sport ? { sport } : {}),
+    pay6, debt, ...(monthly ? { monthly } : {}),
+  };
+  base[j.slug] = {
+    undergrads, netPrice, finish: finish6 ? Number(finish6) : null, retention: retention ? Number(retention) : null, repay: repay ? Number(repay) : null,
+    admitRate: admit ? Number(admit[1]) : null, ...(admit ? { applied: num(admit[2]) } : {}), ...(j.site ? { website: j.site } : {}),
+  };
+}
+const ts2 = `// Generated by scripts/colleges/build-extra.mjs from the page text saved in
+// scripts/colleges/reference/*.json (the live reference, read logged in on
+// 2026-09-04). Do not edit by hand. data.ts prefers these over synthDetail.
+import type { College, CollegeDetail } from "./data";
+
+export const REF_DETAIL: Record<string, CollegeDetail> = ${JSON.stringify(detail, null, 1)};
+
+/** Card-level figures from the same pages, applied over the hand-typed
+ *  entries in data.ts so the card and the page never disagree. */
+export const REF_BASE: Record<string, Partial<College>> = ${JSON.stringify(base, null, 1)};
+`;
+writeFileSync("src/components/colleges/detail-ref.ts", ts2);
+console.log(`detail for ${Object.keys(detail).length} colleges`);

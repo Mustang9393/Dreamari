@@ -151,14 +151,14 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
 }
 
 /** A label on the left, a figure on the right, one hairline under. */
-export function Row({ label, value, note, last = false }: { label: string; value: React.ReactNode; note?: string; last?: boolean }) {
+export function Row({ label, value, note, last = false, tone = "ink" }: { label: string; value: React.ReactNode; note?: string; last?: boolean; tone?: "ink" | "muted" }) {
   return (
     <div className={`flex items-baseline justify-between gap-[var(--space-4)] py-[10px] ${last ? "" : "border-b"}`} style={{ borderColor: RULE }}>
       <span className="flex min-w-0 flex-col">
         <span className={SMALL} style={{ color: "var(--foreground)" }}>{label}</span>
         {note && <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
       </span>
-      <span className={`${SMALL} max-w-[48%] shrink-0 font-bold tabular-nums text-right`} style={{ color: "var(--foreground)" }}>{value}</span>
+      <span className={`${SMALL} max-w-[48%] shrink-0 tabular-nums text-right ${tone === "ink" ? "font-bold" : "font-semibold"}`} style={{ color: tone === "ink" ? "var(--foreground)" : "var(--muted-foreground)" }}>{value}</span>
     </div>
   );
 }
