@@ -443,6 +443,34 @@ const PHOTO_COVER: Record<string, string> = {
 /** The event surface, everywhere an event is shown (direct feedback: no
  *  photos on event cards or boards): dark glass, the partner's colour as one
  *  glow rising from the top-right corner, a fine ruled pattern, grain. */
+/** A QR-shaped code for the ticket stub: three finder squares and a module
+ *  field seeded from the event id, so every event's code is stable and
+ *  distinct. A picture of a QR for the prototype, not a scannable one; the
+ *  real code comes with the QR onboarding work. */
+function MockQr({ seed, size = 84, ink = "#0e0c20", paper = "#ffffff" }: { seed: string; size?: number; ink?: string; paper?: string }) {
+  const n = 21;
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  const rnd = () => { h = (Math.imul(h, 1664525) + 1013904223) >>> 0; return h / 4294967296; };
+  const finder = (x: number, y: number) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+  const inFinder = (x: number, y: number) => {
+    const fx = x < 7 ? x : x - (n - 7); const fy = y < 7 ? y : y - (n - 7);
+    const ring = fx === 0 || fy === 0 || fx === 6 || fy === 6; const core = fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4;
+    return ring || core;
+  };
+  const cells: string[] = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const on = finder(x, y) ? inFinder(x, y) : (x === 6 || y === 6) ? (x + y) % 2 === 0 : rnd() < 0.46;
+    if (on) cells.push(`M${x} ${y}h1v1h-1z`);
+  }
+  const pad = 2;
+  return (
+    <svg aria-hidden viewBox={`${-pad} ${-pad} ${n + pad * 2} ${n + pad * 2}`} width={size} height={size} className="block rounded-[6px]" style={{ background: paper }} shapeRendering="crispEdges">
+      <path d={cells.join("")} fill={ink} />
+    </svg>
+  );
+}
+
 function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean }) {
   // Brand colours run from EY yellow to Morgan Stanley's near-black navy. A
   // dark one vanished against the card (no glow, no visible edge: direct
@@ -1711,42 +1739,57 @@ function HomeView({
                    wrapper as a drop-shadow so it follows the notched outline.
                    Community cards keep their own shape. */
                 <div key={event.id} className="group relative" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
-                  {/* the outer box is the ticket's EDGE: its background shows as
-                     a one-pixel ring around the masked outline, notches included;
-                     the inner box, inset by that pixel and masked to match, holds
-                     the surface. Content sits in the outer box so the same mask
-                     tears it. */}
+                  {/* Ticket (direct feedback, 4 Sept 2026): body and stub torn
+                     apart by two notches and a perforation. On phones the stub
+                     is the foot of the ticket and holds the QR beside the
+                     lockup and the action; from sm up it is a side stub on the
+                     right holding the QR alone, like a cinema ticket. The outer
+                     box is masked and its background is the ticket's edge; the
+                     inner box, one pixel inside with the same notches, holds
+                     the surface. Same words and elements as before, plus the
+                     QR; nothing else added. */}
                   <div
-                    className="connect-ticket relative flex min-h-[262px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "140px" }}
+                    className="connect-ticket relative flex min-h-[262px] flex-col overflow-hidden rounded-[var(--radius-lg)] sm:flex-row"
+                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "124px", ["--stubw" as string]: "148px" }}
                   >
                     <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20" }}>
                       <EventSurface accent={pAccent} edge={false} />
-                      {/* the stub's own paper: a lighter, tinted band under the tear line */}
-                      <span className="absolute inset-x-0 bottom-0" style={{ height: "calc(var(--stub) - 1px)", background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
+                      {/* the stub's own paper: a lighter, tinted band past the tear line */}
+                      <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
                     </div>
-                    <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)]">
+                    {/* body */}
+                    <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)] sm:pb-[var(--space-5)]">
                       <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
-                      {/* when, then where, one per line with its icon; the
-                         company is in the name so only the city appears */}
                       <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
                         <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
                         <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
                       </p>
+                      <div className="mt-auto pt-[var(--space-4)]">
+                        {typeof event.students === "number" ? (
+                          <div className="grid grid-cols-3 gap-[6px]">
+                            <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
+                            <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
+                            <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
+                          </div>
+                        ) : (
+                          <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
+                        )}
+                      </div>
+                      {/* from sm up the lockup and action stay in the body; on phones they move to the stub */}
+                      <div className="mt-[var(--space-4)] hidden w-full flex-wrap items-center justify-between gap-[var(--space-3)] sm:flex">
+                        <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+                        {joined ? (
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                        ) : upcoming ? null : (
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+                        )}
+                      </div>
                     </div>
-                    {/* the stub: fixed height so the notches always land on its edge */}
-                    <div className="relative z-10 flex flex-none flex-col justify-between px-[var(--space-6)] pt-[var(--space-4)] pb-[var(--space-5)]" style={{ height: "var(--stub)" }}>
-                      <span aria-hidden className="pointer-events-none absolute inset-x-[18px] top-0 border-t-2 border-dashed" style={{ borderColor: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.18))` }} />
-                      {typeof event.students === "number" ? (
-                        <div className="grid grid-cols-3 gap-[6px]">
-                          <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
-                          <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
-                          <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
-                        </div>
-                      ) : (
-                        <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
-                      )}
-                      <div className="flex w-full flex-wrap items-center justify-between gap-[var(--space-3)]">
+                    {/* stub */}
+                    <div className="relative z-10 flex flex-none items-center gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)] sm:w-[var(--stubw)] sm:flex-col sm:justify-center sm:px-[var(--space-4)]" style={{ minHeight: "var(--stub)" }}>
+                      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.18))` }} />
+                      <MockQr seed={event.id} size={84} />
+                      <div className="flex min-w-0 flex-1 flex-col items-start gap-[var(--space-3)] sm:hidden">
                         <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
                         {joined ? (
                           <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>

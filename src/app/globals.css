@@ -1043,22 +1043,27 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   to { width: 100%; }
 }
 
-/* Connect event boards as tickets (4 Sept 2026): two round notches cut into
-   the card's edges where the stub begins (--stub is the stub's height from
-   the bottom). The outer box is masked and its background shows as the
-   ticket's one-pixel edge; the inner box sits one pixel inside with the
-   same notches shifted by that pixel, so the edge follows the outline
-   through the notches. The shadow rides the wrapper as a drop-shadow. */
+/* Connect event boards as tickets (4 Sept 2026). Two round notches cut into
+   the card where the stub begins, and a perforation between them. On phones
+   the stub is the ticket's foot (--stub tall); from 640px it is a side stub
+   on the right (--stubw wide). The outer box is masked and its background
+   shows as the ticket's one-pixel edge; the inner box sits one pixel inside
+   with the same notches shifted by that pixel, so the edge follows the
+   outline through the notches. The shadow rides the wrapper as a
+   drop-shadow so it follows the notched shape too. */
+.connect-ticket { --notch: 12px; }
+.connect-ticket,
+.connect-ticket-inner {
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
 .connect-ticket {
-  --notch: 12px;
   -webkit-mask-image:
     radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
     radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
   mask-image:
     radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
     radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
 }
 .connect-ticket-inner {
   -webkit-mask-image:
@@ -1067,6 +1072,26 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   mask-image:
     radial-gradient(circle calc(var(--notch) + 1px) at -1px calc(100% - var(--stub) + 1px), transparent 98%, #000 100%),
     radial-gradient(circle calc(var(--notch) + 1px) at calc(100% + 1px) calc(100% - var(--stub) + 1px), transparent 98%, #000 100%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
+}
+.connect-ticket-paper { left: 0; right: 0; bottom: 0; height: calc(var(--stub) - 1px); }
+.connect-ticket-tear { left: 18px; right: 18px; top: 0; border-top-width: 2px; }
+@media (min-width: 640px) {
+  .connect-ticket {
+    -webkit-mask-image:
+      radial-gradient(circle var(--notch) at calc(100% - var(--stubw)) 0, transparent 98%, #000 100%),
+      radial-gradient(circle var(--notch) at calc(100% - var(--stubw)) 100%, transparent 98%, #000 100%);
+    mask-image:
+      radial-gradient(circle var(--notch) at calc(100% - var(--stubw)) 0, transparent 98%, #000 100%),
+      radial-gradient(circle var(--notch) at calc(100% - var(--stubw)) 100%, transparent 98%, #000 100%);
+  }
+  .connect-ticket-inner {
+    -webkit-mask-image:
+      radial-gradient(circle calc(var(--notch) + 1px) at calc(100% - var(--stubw) + 1px) -1px, transparent 98%, #000 100%),
+      radial-gradient(circle calc(var(--notch) + 1px) at calc(100% - var(--stubw) + 1px) calc(100% + 1px), transparent 98%, #000 100%);
+    mask-image:
+      radial-gradient(circle calc(var(--notch) + 1px) at calc(100% - var(--stubw) + 1px) -1px, transparent 98%, #000 100%),
+      radial-gradient(circle calc(var(--notch) + 1px) at calc(100% - var(--stubw) + 1px) calc(100% + 1px), transparent 98%, #000 100%);
+  }
+  .connect-ticket-paper { left: auto; top: 0; right: 0; bottom: 0; height: auto; width: calc(var(--stubw) - 1px); }
+  .connect-ticket-tear { left: 0; right: auto; top: 18px; bottom: 18px; border-top-width: 0; border-left-width: 2px; }
 }
