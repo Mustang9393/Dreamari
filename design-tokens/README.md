@@ -1,6 +1,8 @@
 # Dreamari design-token handoff
 
-This directory is the portable token source for the Dreamari coded design reference. The production application's `packages/ui/tokens` remains the final source of truth; compare these files there before production adoption.
+**Do not import this directory into the production app.** Production tokens are the certified Figma export in the app repo (`packages/ui/tokens`): flat shadcn names (`background`, `foreground`, `card`, `primary`), two layers, single-mode primitives. This directory is the prototype's own vocabulary (nested `color.text.primary`, three layers, split light/dark) and is not a version of that system. Take design decisions from the prototype (layout, copy, behaviour); take tokens from Figma. Token-level decisions made in the prototype are listed in `docs/TOKEN_DECISIONS.md` so they can be made in Figma and re-exported.
+
+This directory is the portable token source for the Dreamari coded design reference only. The production application's `packages/ui/tokens` remains the final source of truth.
 
 ## Files
 
