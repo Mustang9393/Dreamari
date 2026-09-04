@@ -1912,26 +1912,15 @@ function BoardView({
       {/* one row of tabs for the whole board (Questions, Insights, About); the
          feed cards sit straight on the page, no box around boxes */}
       {/* The Replit v2-connect (source of truth for HOW information is
-         delivered, CEO 4 Sept): three feeds, each named with one line under
-         it, plus About. Student Questions, Professional Insights, Industry
-         Updates. Card designs and the header stay ours. */}
+         delivered, CEO 4 Sept): three feeds plus About: Student Questions,
+         Professional Insights, Industry Updates. The board header, the tabs
+         row and the card designs stay exactly as they were (direct
+         instruction); only what each feed carries changed. */}
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "about", label: "About" }]} />
-      {tab !== "about" && (
-        <div className="-mt-[var(--space-2)]">
-          <h2 className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            {tab === "questions" ? "Student Questions" : tab === "insights" ? "Professional Insights" : "Industry Updates"}
-          </h2>
-          <p className="mt-[2px] text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
-            {tab === "questions" ? "Ask. Learn. Grow." : tab === "insights" ? "Read insights from professionals and join the conversation." : "Verified posts from the firms whose pros answer here."}
-          </p>
-        </div>
-      )}
 
       {about && (
         <Panel id="about-community-title" title="About this community">
           <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{community.purpose}</p>
-            ))}
-          </div>
           <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
             <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Topics</span>
             <div className="flex flex-wrap gap-[6px]">
