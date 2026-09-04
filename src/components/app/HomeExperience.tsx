@@ -1,6 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -8,7 +7,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, Users } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -18,6 +17,7 @@ import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
 import { WORLD_COLORS, posterTitleFont } from "./worlds";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "./cardChrome";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Daily Drop / Continue / Trending), Continue rail of
@@ -44,55 +44,96 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
   );
 }
 
-function PanelShell({ from, children }: { from: string; children: React.ReactNode }) {
+/** One highlight panel: a feature card, not a banner (direct feedback,
+ *  4 Sept 2026). The photo fills the whole card and pushes in slowly while
+ *  the panel is showing; a progressive blur and a left-to-right dark ramp
+ *  carry the type; the text block rises in with a stagger each time the
+ *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
+ *  one tight block at the foot. */
+function HeroPanel({
+  active,
+  photo,
+  focus = "50% 20%",
+  art,
+  eyebrow,
+  eyebrowColor,
+  title,
+  meta,
+  children,
+}: {
+  active: boolean;
+  photo?: string;
+  focus?: string;
+  /** a non-photo hero (Dreamy's flight) drawn behind the text */
+  art?: React.ReactNode;
+  eyebrow: string;
+  eyebrowColor: string;
+  title: string;
+  meta?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const rise = (i: number) => ({ className: "motion-safe:animate-[fade-slide-up_0.55s_cubic-bezier(0.16,1,0.3,1)_both]", style: { animationDelay: `${120 + i * 90}ms` } });
   return (
-    <div
-      className="relative h-full w-full flex-none overflow-hidden"
-      style={{ background: `linear-gradient(90deg, ${from} 0%, var(--hero-mid) 65%, var(--background) 100%)` }}
-    >
+    <div className="relative h-full w-full flex-none overflow-hidden" style={{ background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+      <div aria-hidden className="absolute inset-0">
+        {photo && (
+          <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_14s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
+            <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus }} priority={active} />
+          </span>
+        )}
+        {art}
+        {/* Phones: the text spans the card, so the frost ramps up from the
+           foot. From sm up the text sits left, so the frost ramps in from
+           the LEFT edge and the photo stays sharp on the right (direct
+           feedback: let the image shine). */}
+        {/* both wrappers overhang the foot by 3px: a hairline of raw photo was
+           showing along the bottom border where the blur band ended on the
+           rounded edge */}
+        <span className="absolute inset-0 -bottom-[3px] sm:hidden">
+          <CardProgressiveBlur size="56%" />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 34%, rgba(12,16,35,0.08) 62%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.4) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)" }} />
+        </span>
+        <span className="absolute inset-0 -bottom-[3px] hidden sm:block">
+          <CardProgressiveBlur direction="left" size="60%" />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%)" }} />
+        </span>
+        {/* rim light along the top edge, the console-tile cue */}
+        <span className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06) 60%, transparent)" }} />
+      </div>
+      <div key={active ? "on" : "off"} className="relative z-[2] flex h-full flex-col justify-end gap-[var(--space-2)] p-[var(--space-5)] sm:max-w-[64%] sm:p-[var(--space-8)]">
+        <span {...rise(0)}><CaptionLabel color={eyebrowColor}>{eyebrow}</CaptionLabel></span>
+        <p {...rise(1)} className={`${rise(1).className} text-[30px] leading-[1.04] font-extrabold text-balance sm:text-[42px]`} style={{ ...rise(1).style, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
+          {title}
+        </p>
+        {meta && <div {...rise(2)} className={`${rise(2).className} text-[14px] leading-[19px] font-medium`} style={{ ...rise(2).style, fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.86)" }}>{meta}</div>}
+        <div {...rise(3)} className={`${rise(3).className} mt-[var(--space-3)] flex flex-wrap items-center gap-[var(--space-4)]`} style={{ ...rise(3).style, textShadow: "none" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A small HUD chip on the photo: the Play tile's level chip, reused for
+ *  the streak and the trend so every panel carries one live-looking mark. */
+function HeroChip({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
       {children}
-    </div>
+    </span>
   );
 }
 
-function PanelPhoto({ photo, fadeRight = false, focus = "50% 0%" }: { photo: string; fadeRight?: boolean; focus?: string }) {
-  // Browse-card photo treatment for the hero panels: the full-bleed image
-  // feathers into the panel via mask (left always; right on fadeRight
-  // panels; soft top/bottom). The retired glow/symbol icon layers are gone.
-  // Multi-stop ramps, not a 1-2 stop cutoff: a mask that jumps straight
-  // from transparent to opaque at one point reads as a visible seam where
-  // the fade "starts," even though the pixels either side are still soft.
-  const horizontal = fadeRight
-    ? "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.4) 28%, #000 48%, #000 68%, rgba(0,0,0,0.4) 86%, transparent 100%)"
-    : "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.35) 26%, rgba(0,0,0,0.8) 42%, #000 60%)";
-  const vertical = "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 9%, #000 20%, #000 84%, rgba(0,0,0,0.7) 92%, transparent 100%)";
-  const mask = `${horizontal}, ${vertical}`;
-  return (
-    <div
-      className="absolute right-0 bottom-0 h-[320px] w-[260px] overflow-hidden opacity-70 lg:top-0 lg:bottom-auto lg:h-[360px] lg:w-[400px] lg:opacity-100"
-      style={{ maskImage: mask, WebkitMaskImage: mask, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
-    >
-      <img alt="" src={photo} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: focus }} />
-    </div>
-  );
-}
-
-function HeroCta({ children, display = false, fullOnMobile = false, onClick }: { children: React.ReactNode; display?: boolean; fullOnMobile?: boolean; onClick?: () => void }) {
+/** The panel action, the same button the career detail header uses. */
+function HeroAction({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid cursor-pointer px-[var(--space-6)] py-[var(--space-4)] active:scale-[0.97] ${
-        fullOnMobile ? "w-full rounded-[var(--radius-md)] sm:w-auto" : "rounded-[var(--radius-md)]"
-      }`}
-      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+      className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontFamily: "var(--font-body)" }}
     >
-      <span
-        className={display ? "text-[16px] leading-[22px] font-semibold" : "text-[13px] leading-[18px] font-semibold"}
-        style={{ fontFamily: display ? "var(--font-display)" : "var(--font-body)" }}
-      >
-        {children}
-      </span>
+      {children}
     </button>
   );
 }
@@ -116,14 +157,14 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
   // the free zone RIGHT of the text column (never over it), scaling up
   // with the panel; the trail fades off toward the right edge.
   const phone = w > 0 && w < 480;
-  const dreamy = phone ? Math.max(96, Math.min(140, w * 0.3)) : Math.max(120, Math.min(240, w * 0.24));
+  const dreamy = phone ? Math.max(96, Math.min(150, w * 0.32)) : Math.max(140, Math.min(280, w * 0.28));
   const textEdge = Math.min(520, w * 0.55);
   const freeCenter = textEdge + (w - textEdge) * 0.42;
   const rightOffset = phone ? (w - dreamy) / 2 : Math.max(14, w - (freeCenter + dreamy / 2));
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        className="absolute top-[50.5%] -translate-y-1/2 sm:top-[53%]"
+        className="absolute top-[36%] -translate-y-1/2 sm:top-[46%]"
         style={{ right: rightOffset }}
       >
         {w > 0 && (
@@ -161,7 +202,7 @@ function HeroBanner() {
   return (
     <section
       aria-label="Highlights"
-      className="relative h-[380px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[320px] sm:rounded-[var(--radius-lg)]"
+      className="relative h-[400px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:h-[360px]"
       style={{ borderColor: "var(--glass-border)" }}
       onTouchStart={(event) => {
         touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -189,133 +230,107 @@ function HeroBanner() {
       )}
 
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
-        {/* Panel 1 — Daily Drop */}
-        <PanelShell from="var(--hero-accent-purple)">
-          {/* Stays on justify-between (unlike panels 2/3): Dreamy's flight
-             band crosses the panel's vertical middle here, so that gap is
-             his flight room, not dead space -- tightening it the same way
-             would run the streak/stats row straight through his trail. */}
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--chart-3)">DAILY DROP</CaptionLabel>
-              <p className="max-w-[420px] text-[26px] leading-[1.2] font-extrabold text-balance sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Discover a new career in 30 seconds
-              </p>
-              <p className="max-w-[400px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Keep your daily streak alive.
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
-              <HeroCta display fullOnMobile onClick={() => setDropOpen(true)}>
-                <span className="inline-flex items-center gap-[6px]">
-                  Catch the Drop
-                  <ArrowRight size={16} strokeWidth={3} aria-hidden />
+        {/* Panel 1 — Daily Drop: Dreamy's flight is the art, on the dark
+           base with one soft violet glow behind him. */}
+        <HeroPanel
+          active={panel === 0}
+          eyebrow="DAILY DROP"
+          eyebrowColor="var(--chart-3)"
+          title="Discover a new career in 30 seconds"
+          meta={
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              <HeroChip color="var(--chart-3)"><Flame className="h-[12px] w-[12px]" aria-hidden /> 12-day streak</HeroChip>
+              <span>Keep it alive today.</span>
+            </span>
+          }
+          art={
+            <>
+              <span className="absolute inset-0" style={{ background: "radial-gradient(70% 90% at 72% 38%, color-mix(in srgb, var(--hero-accent-purple) 85%, transparent) 0%, transparent 70%)" }} />
+              <ResponsiveFlight onOpen={() => setDropOpen(true)} />
+            </>
+          }
+        >
+          {/* The streak is the one reward signal here (CEO note, 4 Sept);
+             it lives in the chip above, so the action stands alone. */}
+          <HeroAction onClick={() => setDropOpen(true)}>
+            <Sparkle className="h-4 w-4" aria-hidden /> Catch the Drop
+          </HeroAction>
+        </HeroPanel>
+
+        {/* Panel 2 — Continue Learning & Playing. Same words and the same
+           cover as the Play tab and the Continue card below: one game, one
+           name, one picture. */}
+        <HeroPanel
+          active={panel === 1}
+          photo={INVESTMENT_BANKING.cover}
+          focus="50% 18%"
+          eyebrow="CAREER SIMULATION"
+          eyebrowColor="var(--world-business-money-office)"
+          title="Day in the Life: Investment Banker"
+          meta={
+            <span className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px]">
+              <HeroChip color="var(--world-business-money-office)">Level {INVESTMENT_BANKING.levels[0].n} · {INVESTMENT_BANKING.levels[0].role}</HeroChip>
+              {ibRun.pct > 0 && (
+                <span className="flex items-center gap-[8px]">
+                  <span className="block w-[96px]"><SparkBar percent={ibRun.pct} height={4} track="rgba(255,255,255,0.22)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" /></span>
+                  <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{ibRun.pct}% done</span>
                 </span>
-              </HeroCta>
-              {/* The streak is the one reward signal here; the saved-careers
-                 count came off (CEO note, 4 Sept) so the panel says one thing. */}
-              <span className="flex items-center gap-[6px] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)", color: "var(--chart-3)" }}>
-                <Flame className="h-4 w-4" aria-hidden /> 12-day streak
-              </span>
-            </div>
-          </div>
-          {/* Dreamy descending from the top right, sized to the panel
-             (cloud fully visible, trail streaming off the corner); the
-             cloud itself is clickable */}
-          <ResponsiveFlight onOpen={() => setDropOpen(true)} />
-        </PanelShell>
+              )}
+            </span>
+          }
+        >
+          <HeroAction onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
+            <Play className="h-4 w-4" fill="currentColor" aria-hidden /> {ibRun.pct > 0 ? "Continue" : "Play"}
+          </HeroAction>
+        </HeroPanel>
 
-        {/* Panel 2 — Continue Learning & Playing */}
-        {/* A gold wash (Business & Money's world color) fought the cool
-           purple-navy hero-mid it fades into -- swapped to the same cool
-           hero-accent family as the other two panels. The dossier art
-           itself stays: it's this specific game's own illustrated style,
-           not stock photography, so it's correct here even though it reads
-           differently from Panel 3's photo. */}
-        <PanelShell from="var(--hero-accent-pink)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-start gap-[var(--space-5)] p-[var(--space-5)] pb-[30px] sm:gap-[var(--space-6)] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
-            <div className="flex flex-col gap-[var(--space-3)]">
-              {/* Same words and the same cover as the Play tab and the
-                 Continue card below: one game, one name, one picture, so a
-                 first-time user recognises it wherever it appears. The old
-                 "$30B Deal" plot subtitle is gone for the same reason. */}
-              <CaptionLabel color="var(--world-business-money-office)">CAREER SIMULATION</CaptionLabel>
-              <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[30px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Day in the Life: Investment Banker
-              </p>
-              <p className="text-[15px] leading-[20px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Level {INVESTMENT_BANKING.levels[0].n} · {INVESTMENT_BANKING.levels[0].role}
-              </p>
-            </div>
-            {ibRun.pct > 0 && (
-              <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
-                <div className="flex items-center justify-between text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                  <span style={{ color: "var(--muted-foreground)" }}>{ibRun.pct}% DONE</span>
-                </div>
-                <div className="relative h-[6px] w-full rounded-[var(--radius-full,999px)]" style={{ background: "var(--glass-surface-2)" }}>
-                  <div className="absolute inset-y-0 left-0 rounded-[999px]" style={{ width: `${ibRun.pct}%`, background: "var(--world-business-money-office)", boxShadow: "0 0 9px color-mix(in srgb, var(--world-business-money-office) 50%, transparent)" }} />
-                </div>
-              </div>
-            )}
-            <div>
-              <HeroCta onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
-                <span className="inline-flex items-center gap-[6px]">{ibRun.pct > 0 ? "Continue" : "Play"}<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
-              </HeroCta>
-            </div>
-          </div>
-          <PanelPhoto photo={INVESTMENT_BANKING.cover} />
-        </PanelShell>
-
-        {/* Panel 3 — Trending Now */}
-        <PanelShell from="var(--hero-accent-teal)">
-          <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-start gap-[var(--space-5)] p-[var(--space-5)] pb-[30px] sm:gap-[var(--space-6)] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--accent-subtle)">TRENDING NOW</CaptionLabel>
-              <p className="text-[26px] leading-[1.2] font-extrabold sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                UX Researcher is on the rise.
-              </p>
-              <p className="max-w-[480px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                One of the fastest-growing roles, blending empathy, data, and design.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-8)]">
-              {/* Copy says "UX Researcher" but the photo/asset used below is
-                 UI/UX Designer's, and there's no "UX Researcher" entry in
-                 the catalog to route to -- points at the real career the
-                 panel is actually showing. */}
-              <HeroCta onClick={() => router.push(`/career/${careerSlug("UI/UX Designer")}`)}>
-                <span className="inline-flex items-center gap-[6px]">Explore this career<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
-              </HeroCta>
-            </div>
-          </div>
-          <PanelPhoto photo="/images/app/poster-uiux-designer.png" fadeRight />
-        </PanelShell>
+        {/* Panel 3 — Trending Now. Nurse Anesthetist replaced UX Researcher
+           (direct feedback): that poster's subject sat under the text side
+           of the frame; this one stands on the right where the photo is
+           clear. */}
+        <HeroPanel
+          active={panel === 2}
+          photo="/images/app/poster-nurse-anesthetist.png"
+          focus="50% 22%"
+          eyebrow="TRENDING NOW"
+          eyebrowColor="var(--accent-subtle)"
+          title="Nurse Anesthetist is on the rise."
+          meta={
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              <HeroChip color="var(--accent-subtle)"><TrendingUp className="h-[12px] w-[12px]" aria-hidden /> Fast-growing role</HeroChip>
+              <span>Advanced nursing, in demand, well paid.</span>
+            </span>
+          }
+        >
+          <HeroAction onClick={() => router.push(`/career/${careerSlug("Nurse Anesthetist")}`)}>
+            Explore this career <ArrowRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          </HeroAction>
+        </HeroPanel>
       </div>
 
-      {/* Desktop prev/next — skip without waiting for the timer */}
-      <button
-        type="button"
-        aria-label="Previous highlight"
-        onClick={() => step(-1)}
-        className="dm-quiet absolute top-1/2 left-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
-        style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Next highlight"
-        onClick={() => step(1)}
-        className="dm-quiet absolute top-1/2 right-3 z-[3] hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] transition-opacity hover:opacity-100 sm:flex sm:opacity-60"
-        style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
+      {/* Desktop prev/next: a pair in the bottom-right corner, out of the
+         title's way (they used to sit mid-height and cut across the type) */}
+      <div className="absolute right-[22px] bottom-[26px] z-[3] hidden items-center gap-[6px] sm:flex">
+        {([["Previous highlight", -1, ChevronLeft], ["Next highlight", 1, ChevronRight]] as const).map(([label, delta, Icon]) => (
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            onClick={() => step(delta)}
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+            style={{ background: "rgba(12,16,35,0.5)", borderColor: "rgba(255,255,255,0.22)", color: "#fff" }}
+          >
+            <Icon className="h-[18px] w-[18px]" />
+          </button>
+        ))}
+      </div>
 
-      {/* Carousel dots + pause — right-anchored on desktop, centered on the
-         mobile frame */}
-      <div className="absolute inset-x-0 bottom-[11px] z-[3] flex items-center justify-center gap-[var(--space-3)] sm:inset-x-auto sm:right-[39px] sm:bottom-[23px] sm:justify-start">
-        <div className="flex items-center gap-[var(--space-2)]">
+      {/* Carousel dots + pause: top-right on every screen, clear of the
+         actions at the foot */}
+      <div className="absolute top-[16px] right-[16px] z-[3] flex items-center gap-[var(--space-3)] sm:top-[22px] sm:right-[22px]">
+        {/* story-style segments: the live one fills over the 13s the panel
+           holds, so the timing is visible instead of a guess */}
+        <div className="flex items-center gap-[5px]">
           {[0, 1, 2].map((index) => (
             <button
               key={index}
@@ -323,9 +338,15 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="dm-quiet h-[7px] cursor-pointer rounded-[3.5px] transition-all duration-300"
-              style={{ width: panel === index ? 24 : 7, background: panel === index ? "var(--foreground)" : "var(--muted-foreground)" }}
-            />
+              className="dm-quiet relative h-[14px] w-[26px] cursor-pointer"
+            >
+              <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
+                {panel === index && (
+                  <span key={`${panel}-${paused}`} className={`absolute inset-y-0 left-0 rounded-full ${paused ? "" : "motion-safe:animate-[home-hero-seg_13s_linear_forwards]"}`} style={{ background: "#fff", width: paused ? "100%" : undefined }} />
+                )}
+                {panel > index && <span className="absolute inset-0 rounded-full" style={{ background: "#fff" }} />}
+              </span>
+            </button>
           ))}
         </div>
         <button

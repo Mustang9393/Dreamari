@@ -1028,3 +1028,14 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @media (min-width: 768px) {
   body .md\:h-\[calc\(100dvh-62px\)\] { height: calc((100dvh / var(--vz)) - 62px); }
 }
+
+/* Home highlights (4 Sept 2026): the showing panel's photo pushes in slowly
+   over its 13s hold; the live timing segment fills over the same window. */
+@keyframes home-hero-push {
+  from { transform: scale(1); }
+  to { transform: scale(1.07); }
+}
+@keyframes home-hero-seg {
+  from { width: 0; }
+  to { width: 100%; }
+}
