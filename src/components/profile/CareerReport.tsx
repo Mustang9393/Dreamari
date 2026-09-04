@@ -33,7 +33,7 @@ export const REPORT_SECTIONS = [
   { id: "glance", n: 1, label: "Overview" },
   { id: "majors", n: 2, label: "Three Majors" },
   { id: "education", n: 3, label: "Education" },
-  { id: "courses", n: 4, label: "Courses to Consider" },
+  { id: "courses", n: 4, label: "High School Classes" },
   { id: "colleges", n: 5, label: "Colleges" },
 ] as const;
 
@@ -130,10 +130,14 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
            heading on this surface (Reflection, Share, Counselor Review,
            Sources) matches this exact size -- one heading tier, not several
            near-misses that compete with each other while scrolling. */}
-        <h3 id={`${id}-title`} className="text-[18px] leading-[23px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
+        <h3 id={`${id}-title`} className="min-w-0 flex-1 text-[18px] leading-[23px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           {title}
         </h3>
-        {action && <span className="ml-auto">{action}</span>}
+        {/* the number and the title always share the first row. The action
+           sits at the row's end from md up; below md it takes its own row,
+           left aligned with the title's text (direct feedback: it used to
+           wrap to an odd spot on phones and tablets). */}
+        {action && <span className="basis-full pl-[46px] md:ml-[12px] md:basis-auto md:pl-0">{action}</span>}
       </div>
       <div className="p-[18px] sm:p-[24px]">
         {children}
@@ -342,23 +346,25 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 04 — Courses to Consider. The first two suggestions per career are
+        {/* 04 — High school classes. The first two suggestions per career are
            the actual classes (the third is an experience, which stays on My
            Plan). Mapping subjects to O*NET knowledge areas and SCED codes is
            a backend data-model note, not UI. */}
-        <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
-          <div data-keep-together>
-            {/* the classes as tiles, the same shape as the majors above (direct
-               feedback): the section title is the only label they need */}
-            <ul className="grid list-none grid-cols-2 gap-[10px] p-0 sm:gap-[14px]">
-              {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
-                <li key={course.label} className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+        {/* High school classes, as distinct from the college majors above
+           (direct feedback: "Courses to Consider" read as the same thing).
+           Each tile names the class and says why it helps this route. */}
+        <ReportSection id={`${idPrefix}courses`} n={4} title="High School Classes to Take" icon={ListChecks}>
+          <ul className="grid list-none gap-[10px] p-0 sm:grid-cols-2 sm:gap-[14px]" data-keep-together>
+            {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
+              <li key={course.label} className="flex flex-col gap-[4px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                <span className="flex items-center gap-[9px] text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
                   <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                  <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{course.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+                  {course.label}
+                </span>
+                {course.why && <span className="pl-[15px] text-[12.5px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>{course.why}</span>}
+              </li>
+            ))}
+          </ul>
         </ReportSection>
 
         {/* 05 — Colleges */}
