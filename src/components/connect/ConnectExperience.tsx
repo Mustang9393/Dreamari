@@ -471,6 +471,56 @@ function MockQr({ seed, size = 84, ink = "#0e0c20", paper = "#ffffff" }: { seed:
   );
 }
 
+/** The three counts in small circles (direct feedback: circle outlines, not
+ *  full-width boxes and not graphs). Just the figure inside a thin ring of
+ *  the partner's colour, the label under it. */
+function RingStats({ items, accent }: { items: [number, string][]; accent: string }) {
+  return (
+    <div className="flex items-start gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+      {items.map(([value, label]) => (
+        <span key={label} className="flex flex-col items-center gap-[4px]">
+          <span className="flex size-[54px] items-center justify-center rounded-full border-[1.5px]" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, rgba(255,255,255,0.2))` }}>
+            <span className="text-[13px] leading-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{value.toLocaleString("en-US")}</span>
+          </span>
+          <span className="text-[10.5px] leading-[13px] font-semibold tracking-[0.04em] uppercase" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.7)" }}>{label}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** The ticket's side stub. Front: the lockup turned on its side, the way a
+ *  stub carries its printing along the tear. Tap: the branded QR for this
+ *  event (the partner's colour in the modules, the lead mark in the centre)
+ *  until tapped again. */
+function TicketStub({ lead, partner, accent, seed }: { lead: string; partner?: string; accent: string; seed: string }) {
+  const [qr, setQr] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => setQr((v) => !v)}
+      aria-pressed={qr}
+      aria-label={qr ? "Hide event QR code" : "Show event QR code"}
+      className="dm-quiet relative z-10 flex w-[var(--stubw)] flex-none cursor-pointer items-center justify-center overflow-hidden"
+      style={{ textShadow: "none" }}
+    >
+      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, rgba(255,255,255,0.18))` }} />
+      {qr ? (
+        <span className="relative block motion-safe:animate-[fade-slide-up_0.3s_ease_both]">
+          <MockQr seed={seed} size={82} ink="#0e0c20" paper="#ffffff" />
+          <span className="absolute top-1/2 left-1/2 flex size-[24px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[5px]" style={{ background: "#ffffff" }}>
+            <span className="block size-[16px] rounded-[3px]" style={{ background: accent }} />
+          </span>
+        </span>
+      ) : (
+        <span className="flex h-full w-full items-center justify-center motion-safe:animate-[fade-slide-up_0.3s_ease_both]">
+          <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} /></span>
+        </span>
+      )}
+    </button>
+  );
+}
+
 function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean }) {
   // Brand colours run from EY yellow to Morgan Stanley's near-black navy. A
   // dark one vanished against the card (no glow, no visible edge: direct
@@ -483,7 +533,7 @@ function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean 
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit }} />
+      <span aria-hidden className="absolute top-0 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit, left: "var(--tab-x, 50%)" }} />
       {/* the card's edge, drawn here so every event surface gets the same one
          (the ticket card draws its own edge so it can follow the notches) */}
       {edge && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${lit} 45%, transparent)` }} />}
@@ -1738,66 +1788,50 @@ function HomeView({
                    tear-off of a paper ticket. The shadow rides an outer
                    wrapper as a drop-shadow so it follows the notched outline.
                    Community cards keep their own shape. */
-                <div key={event.id} className="group relative" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
-                  {/* Ticket (direct feedback, 4 Sept 2026): body and stub torn
-                     apart by two notches and a perforation. On phones the stub
-                     is the foot of the ticket and holds the QR beside the
-                     lockup and the action; from sm up it is a side stub on the
-                     right holding the QR alone, like a cinema ticket. The outer
-                     box is masked and its background is the ticket's edge; the
-                     inner box, one pixel inside with the same notches, holds
-                     the surface. Same words and elements as before, plus the
-                     QR; nothing else added. */}
+                <div key={event.id} className="group relative h-full" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
+                  {/* Ticket (direct feedback, 4 Sept 2026): body on the left, a
+                     side stub on the right at every width, torn apart by two
+                     notches and a perforation. The stub carries the lockup,
+                     turned on its side like a stub's printed edge; tapping the
+                     stub flips it to the event's branded QR. The counts sit in
+                     three small rings, not full-width boxes. The outer box is
+                     masked and its background is the ticket's edge; the inner
+                     box, one pixel inside with the same notches, holds the
+                     surface. */}
                   <div
-                    className="connect-ticket relative flex min-h-[262px] flex-col overflow-hidden rounded-[var(--radius-lg)] sm:flex-row"
-                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "124px", ["--stubw" as string]: "148px" }}
+                    className="connect-ticket relative flex h-[316px] overflow-hidden rounded-[var(--radius-lg)]"
+                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
                   >
-                    <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20" }}>
+                    <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
                       <EventSurface accent={pAccent} edge={false} />
-                      {/* the stub's own paper: a lighter, tinted band past the tear line */}
                       <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
                     </div>
                     {/* body */}
-                    <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)] sm:pb-[var(--space-5)]">
-                      <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+                    <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
+                      <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
                         <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
                         <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
                       </p>
-                      <div className="mt-auto pt-[var(--space-4)]">
+                      {/* fixed zones so every ticket is the same height: the
+                         counts row, then the action on its own line */}
+                      <div className="mt-auto flex min-h-[71px] items-end pt-[var(--space-4)]">
                         {typeof event.students === "number" ? (
-                          <div className="grid grid-cols-3 gap-[6px]">
-                            <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
-                            <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
-                            <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
-                          </div>
+                          <RingStats accent={lit} items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
                         ) : (
                           <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
                         )}
                       </div>
-                      {/* from sm up the lockup and action stay in the body; on phones they move to the stub */}
-                      <div className="mt-[var(--space-4)] hidden w-full flex-wrap items-center justify-between gap-[var(--space-3)] sm:flex">
-                        <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+                      <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
                         {joined ? (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
                         ) : upcoming ? null : (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
                         )}
                       </div>
                     </div>
-                    {/* stub */}
-                    <div className="relative z-10 flex flex-none items-center gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)] sm:w-[var(--stubw)] sm:flex-col sm:justify-center sm:px-[var(--space-4)]" style={{ minHeight: "var(--stub)" }}>
-                      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.18))` }} />
-                      <MockQr seed={event.id} size={84} />
-                      <div className="flex min-w-0 flex-1 flex-col items-start gap-[var(--space-3)] sm:hidden">
-                        <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
-                        {joined ? (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
-                        ) : upcoming ? null : (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)]" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
-                        )}
-                      </div>
-                    </div>
+                    {/* stub: the lockup on its side; tap for the branded QR */}
+                    <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} seed={event.id} />
                   </div>
                 </div>
               );
