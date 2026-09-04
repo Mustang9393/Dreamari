@@ -8,7 +8,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
+import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -173,17 +173,23 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
       <SectionHead>Professionals to Follow</SectionHead>
       <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
-          const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
+          // the ring is the firm's colour (what the person represents here),
+          // lifted toward white so a navy like Morgan Stanley's still shows;
+          // a firm with no brand entry falls back to the career world's colour
+          const brand = COMPANY_BRAND[pro.org]?.bg;
+          const accent = brand && !/^#(000000|111111|141414)$/i.test(brand) ? `color-mix(in srgb, ${brand} 65%, #ffffff)` : (WORLD_COLORS[pro.world] ?? "var(--primary)");
           const following = !!follows[pro.id];
           return (
             <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
-              <span className="relative">
+              <span className="relative block h-[88px] w-[88px]">
+                {/* a fixed 88px circle with the border ON it and the 80px
+                   portrait centred inside: two circles that share one centre */}
                 <button
                   type="button"
                   onClick={() => nav?.openPro(pro.id)}
                   aria-label={`Open ${pro.name}'s profile`}
-                  className="dm-tap block cursor-pointer rounded-full p-[3px]"
-                  style={{ boxShadow: `0 0 0 2px color-mix(in srgb, ${accent} 70%, transparent)` }}
+                  className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full border-2 leading-none"
+                  style={{ borderColor: accent }}
                 >
                   {/* no verified shield here: it shares the corner with the follow badge, and every pro in this rail is verified anyway */}
                   <Avatar name={pro.name} size={80} />
@@ -193,7 +199,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
                   onClick={() => { dispatchAuroraPulse(following ? "select" : "cta"); onFollow(pro.id); }}
                   aria-pressed={following}
                   aria-label={following ? `Unfollow ${pro.name}` : `Follow ${pro.name}`}
-                  className="dm-quiet absolute right-[-2px] bottom-[2px] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-2"
+                  className="dm-quiet absolute right-[-1px] bottom-[-1px] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-2"
                   style={{ background: following ? "var(--color-feedback-success, #33c78c)" : "var(--primary)", borderColor: "var(--background)", color: following ? "#05070f" : "#FFFFFF" }}
                 >
                   {following ? <Check className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} /> : <Plus className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} />}
@@ -201,8 +207,12 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
               </span>
               <span className="flex w-full min-w-0 flex-col items-center gap-[1px]">
                 <span className="block w-full truncate text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
-                <span className="block w-full truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                <span className="block w-full truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
+                <span className="line-clamp-2 block min-h-[30px] w-full text-[12px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+                {/* the firm as its mark, bare (no chip frame): the logo is the
+                   third line, in the same muted ink as the role */}
+                <span className="mt-[4px] flex h-[16px] items-center justify-center" style={{ color: "rgba(255,255,255,0.78)" }}>
+                  <CompanyMark name={pro.org} height={11} className="text-[12px] leading-[16px] font-semibold" />
+                </span>
               </span>
             </li>
           );
