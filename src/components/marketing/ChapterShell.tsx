@@ -1,12 +1,14 @@
 "use client";
 
-import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
-import { ChevronUp } from "lucide-react";
+import { type ReactNode, type RefObject } from "react";
 import { GestureHint } from "@/components/flow/GestureHint";
 import { useRevealOnScroll } from "./scrollHooks";
 
 type ChapterShellProps = {
   id: string;
+  /** Phones only: the small line above the title on the first chapter, standing
+   *  in for the "How Dreamari works" header the phone pager has no page for. */
+  eyebrow?: string;
   title: string;
   color: string;
   oneliner: string;
@@ -38,6 +40,7 @@ type ChapterShellProps = {
 
 export function ChapterShell({
   id,
+  eyebrow,
   title,
   color,
   oneliner,
@@ -52,26 +55,6 @@ export function ChapterShell({
   children,
 }: ChapterShellProps) {
   const [copyRef, copyRevealed] = useRevealOnScroll<HTMLDivElement>();
-  const sectionRef = useRef<HTMLElement | null>(null);
-  // The nudge only makes sense when the whole chapter fits on the screen:
-  // it says "there is more below this". When a chapter is taller than the
-  // phone (Play's card and its answers), the person is already scrolling
-  // through it and the pinned nudge would sit on top of the content.
-  const [fits, setFits] = useState(true);
-  useEffect(() => {
-    if (!nudge) return;
-    const el = sectionRef.current;
-    if (!el) return;
-    const check = () => setFits(el.scrollHeight <= window.innerHeight + 8);
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    window.addEventListener("resize", check);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", check);
-    };
-  }, [nudge]);
 
   return (
     // compact sections don't claim a full min-h-dvh at all — Build/Connect's content
@@ -94,20 +77,10 @@ export function ChapterShell({
     // Phones start the content 96px down (under the nav island's zone, the
     // same offset the snap lands on) instead of centring it, so a short
     // chapter does not open on a screen of empty space above its title.
-    <section id={id} ref={sectionRef} className={`mkt-chapter relative flex scroll-mt-24 items-start pt-[96px] md:items-center md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
-      {/* the nudge sits 110px up: above the 96px strip of this chapter that
-         stays visible once the next one has snapped in, so it never appears
-         to belong to the chapter below */}
-      {/* the nudge is the app's own swipe-up gesture mark, crisp (no glow, no
-         trail), centred with a full-width flex row rather than a translate so
-         it cannot drift off centre (direct feedback, 4 Sept 2026) */}
-      {nudge && fits && (
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[112px] z-[2] flex flex-col items-center gap-[4px] md:hidden" style={{ color: "var(--muted-foreground)" }}>
-          <ChevronUp className="h-[14px] w-[14px]" strokeWidth={2.5} />
-          <GestureHint direction="up" crisp size={12} distance={24} color="var(--muted-foreground)" />
-          <span className="text-[10.5px] leading-[12px] font-semibold tracking-[0.1em] uppercase">Scroll</span>
-        </span>
-      )}
+    // Phones: every chapter is one screen (min-h-dvh, snap start), the copy and
+    // graphic centred in it as a block, the scroll cue at the foot. The nav
+    // island floats over the top 72px. Desktop keeps its row layout.
+    <section id={id} className={`mkt-chapter relative flex flex-col pt-[72px] pb-0 md:flex-row md:items-center md:scroll-mt-24 md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
@@ -127,14 +100,17 @@ export function ChapterShell({
          bleed); text starts on its column's start rail and wraps at its end
          rail. A flip swaps columns, never the geometry. */}
       <div
-        className={`mx-auto w-full max-w-[1200px] items-center px-6 pt-6 pb-6 max-[640px]:pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
+        // Phones: three rows, 1fr / graphic / 1fr, so the GRAPHIC sits at the
+          // centre of the screen and the copy hangs directly above it (the cue
+          // is the last row, at the foot). md and up keep the desktop grid.
+          className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-md:grid max-md:grid-cols-1 max-md:grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] max-md:gap-0 sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
           centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
         }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
-          className={`text-center transition-all duration-700 ease-out ${
+          className={`text-center transition-all duration-700 ease-out max-md:self-end max-md:pb-5 ${
             centered ? "max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
           }`}
           style={{
@@ -142,6 +118,9 @@ export function ChapterShell({
             transform: copyRevealed ? "translate(0)" : centered ? "translateY(28px)" : `translateX(${flip ? "42px" : "-42px"})`,
           }}
         >
+          {eyebrow && (
+            <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] uppercase md:hidden" style={{ color: "var(--primary-tint)" }}>{eyebrow}</p>
+          )}
           <h2
             className="font-extrabold uppercase"
             style={{
@@ -173,7 +152,7 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className={`mkt-graphic relative flex min-h-[clamp(240px,40cqw,440px)] min-w-0 w-full items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${
+          className={`mkt-graphic relative flex min-h-0 min-w-0 w-full items-center justify-center md:min-h-[clamp(240px,40cqw,440px)] transition-all delay-[120ms] duration-700 ease-out ${
             centered ? "" : flip ? "min-[901px]:order-1" : ""
           }`}
           style={{
@@ -235,17 +214,33 @@ export function ChapterShell({
             // the card (which should be the dominant, most prominent element in every
             // chapter) ended up looking small relative to its own UI chrome. Back to
             // the original values, which keep that proportion correct.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center ${wide ? "mkt-wide" : ""}`}
+            // Phones (the pager): the frame is sized to what is left of the
+            // screen under the nav, the copy and the scroll cue, so a chapter
+            // is exactly one screen. md and up keep the original ceilings.
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:calc(100dvh_-_380px)] md:[--frame-h:min(74dvh,680px)] md:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
-              height: compact ? "auto" : "min(74dvh, 680px)",
-              maxHeight: compact ? "min(72dvh, 620px)" : undefined,
+              height: compact ? "auto" : "var(--frame-h)",
+              maxHeight: compact ? "var(--frame-max)" : undefined,
             }}
           >
             {children}
           </div>
         </div>
+        {nudge && <ScrollCue className="w-full self-end pb-[18px]" />}
       </div>
     </section>
+  );
+}
+
+/** The phone scroll cue: the swipe-up dot with its hollow-stroke trail and
+ *  the word SCROLL, centred at the foot of the screen. No arrow: an up
+ *  chevron beside a dot already travelling up read as "go back up". */
+function ScrollCue({ className }: { className: string }) {
+  return (
+    <span aria-hidden className={`pointer-events-none flex flex-col items-center gap-[4px] md:hidden ${className}`} style={{ color: "var(--muted-foreground)" }}>
+      <GestureHint direction="up" crisp size={12} distance={24} color="var(--muted-foreground)" />
+      <span className="text-[10.5px] leading-[12px] font-semibold tracking-[0.1em] uppercase">Scroll</span>
+    </span>
   );
 }

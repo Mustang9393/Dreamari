@@ -27,9 +27,9 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Microsoft | Symbol + logotype together, never one colour | Type | Our file is the logotype alone. Needs the full logo file, then `fullColor` |
 | Apple | Third parties may not use the logo | Type | Do not use |
 | Netflix | White logo is for video watermarks only | Type | Ask brand@netflix.com before any use |
-| Mars | Not published for third parties (Kellanova is now part of Mars, so its clip carries the Mars mark) | Type until an approved one-colour file arrives | To confirm with Mars; candidate file Wikimedia Commons "Mars Incorporated 2019 logo.svg" |
-| Kellogg's | Script wordmark is red; a white reverse exists in Kellogg's own packaging and media | Type until an approved one-colour file arrives | To confirm with WK Kellogg Co; candidate file Wikimedia Commons "Kellogg's-Logo.svg" |
-| WildBrain | Not published for third parties | Type until an approved one-colour file arrives | To confirm with WildBrain; candidate file Wikimedia Commons "WildBrain logo.svg" |
+| Mars | Not published for third parties (Kellanova is now part of Mars, so its clip carries the Mars mark) | White wordmark, `mars.svg` (Wikimedia Commons "Mars Incorporated 2019 logo.svg", public domain as a text logo) | To confirm with Mars |
+| Kellogg's | Script wordmark is red; a white reverse exists in Kellogg's own packaging and media | White script, `kelloggs.svg` (Wikimedia Commons "Kellogg's-Logo.svg") | To confirm with WK Kellogg Co |
+| WildBrain | Not published for third parties; the W creature is always blue with white eyes | `wildbrain-word` white (letters and pupils) + `wildbrain-w` #43C5E4; split from Wikimedia Commons "WildBrain logo.svg" (`wildbrain-eyes.svg` kept for a full-colour plate if needed) | To confirm with WildBrain |
 | Mayo Clinic | Not found | White | To confirm |
 | Johnson & Johnson | Not found | White | To confirm |
 | Blackstone | Not checked | White | To confirm |

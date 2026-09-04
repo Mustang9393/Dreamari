@@ -41,6 +41,7 @@ export function BuildChapter() {
   return (
     <ChapterShell
       id="build"
+      eyebrow="How Dreamari works"
       title="Build"
       color="#6366f1"
       oneliner="your profile by taking a personality, skill, and academic assessment."

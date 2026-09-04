@@ -1,19 +1,14 @@
 @import "tailwindcss";
 @import "./design-tokens.generated.css";
 
-/* Each How It Works chapter supplies its own snap target while the section is active.
-   Keeping the snap behavior on the document scroller preserves the real, overlapping
-   movement between stages while guaranteeing a stable focused state after each
-   wheel, trackpad or touch gesture. */
-/* Scroll snap, third pass (4 Sept 2026, direct feedback): on PHONES ONLY, and only
-   while the reader scrolls DOWN through How It Works, the chapters snap one by one
-   (y mandatory). Scrolling back up is free, and desktop is untouched. HowItWorks.tsx
-   sets html[data-how-snap="on"] from a scroll-direction listener while its wrapper
-   is on screen, and removes it otherwise. Earlier proximity snap grabbed every
-   fling; mandatory plus one direction is the intent now, not a side effect. */
+/* Phone pager (4 Sept 2026, direct feedback: "each scroll, the next section
+   fills the whole screen, centred, immersive"). On phones the document snaps
+   y-mandatory the whole way down: the hero, each How It Works chapter and the
+   footer are the pages. Snap is never toggled from JS any more; toggling
+   scroll-snap-type mid-gesture was the jank. Desktop and tablets are untouched. */
 @media (max-width: 767px) and (pointer: coarse) {
-  html[data-how-snap="on"] { scroll-snap-type: y mandatory; }
-  html[data-how-snap="on"] .mkt-chapter { scroll-snap-align: start; scroll-snap-stop: always; }
+  html { scroll-snap-type: y mandatory; }
+  .mkt-snap, .mkt-chapter { scroll-snap-align: start; scroll-snap-stop: always; }
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

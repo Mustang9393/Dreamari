@@ -16,7 +16,6 @@ export const COMPANY_VIDEOS: CompanyVideo[] = [
   { company: "JPMorgan Chase", title: "Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4", poster: "/images/videos/reel-jpmc-london-office-tour-odein.jpg" },
   { company: "EY", title: "Senior Cyber Consultant", video: "/videos/app/reel-ey-cyber-consultant-1.mp4", poster: "/images/videos/reel-ey-cyber-consultant-1.jpg" },
   { company: "AT&T", title: "Office Tour", video: "/videos/app/reel-att-office-tour.mp4", poster: "/images/videos/reel-att-office-tour.jpg" },
-  // WildBrain "Office Tour": on the CEO's list, but no clip has been
-  // supplied yet. Add the file to public/videos/app and register it here.
+  { company: "WildBrain", title: "Office Tour", video: "/videos/app/reel-wildbrain-office-tour.mp4", poster: "/images/videos/reel-wildbrain-office-tour.jpg" },
   { company: "Kellogg's", title: "Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4", poster: "/images/videos/reel-kelloggs-office-tour.jpg" },
 ];

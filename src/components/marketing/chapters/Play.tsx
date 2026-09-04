@@ -15,10 +15,9 @@ import { SparkBar } from "@/components/flow/SparkBar";
 // XP bar across the top, the level chip, a dialogue box with the speaker's
 // face, the choices as a console menu. It is a taste, not the game: it runs
 // on its own the moment the chapter arrives, Christina speaks, the choices
-// rise, the cursor settles on the right one and confirms it. Nothing here
-// can be got wrong; most readers will watch and scroll on.
+// rise and the cursor settles on the right one. Nothing here can be got
+// wrong; most readers will watch and scroll on.
 const SCENARIO = {
-  scene: "Deal Team Kickoff",
   speaker: { name: "Christina", role: "Associate", face: "/images/play/ib/face-christina-serious.webp" },
   line: "This is Marcus, our Vice President. We have a big pitch tomorrow, so I need you on it.",
   question: "What should you do first?",
@@ -66,8 +65,9 @@ function PlayDemo() {
   const xp = answered ? XP_AFTER_BEST : XP_START;
 
   // On arrival: a beat of just the scene, Christina's line types itself in,
-  // the choices come up, the cursor rests on the right one, then it confirms
-  // on its own. Tapping the right answer confirms it early.
+  // then the choices come up with the cursor resting on the right one. Only
+  // that one is a button; tapping it is the confirm (no auto-answer, direct
+  // feedback).
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let i = 0;
@@ -81,7 +81,6 @@ function PlayDemo() {
           if (i >= SCENARIO.line.length) {
             clearInterval(tick);
             timers.push(setTimeout(() => setPhase("ready"), reduce ? 120 : 380));
-            timers.push(setTimeout(() => setPhase("answered"), reduce ? 900 : 2600));
           }
         }, reduce ? 0 : 17);
       }, reduce ? 0 : 500),
@@ -188,20 +187,16 @@ function PlayDemo() {
             </div>
           </div>
 
-          {/* below the art: the scene name while she talks, then the console menu */}
+          {/* below the art: the question, then the console menu once she has spoken */}
           {/* the menu is always in the layout (hidden while she talks) so the
              card never changes height; tight to the dialogue above and to the
              bottom edge (direct feedback: no wasted space) */}
           <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 8px)", background: "#0b0e1c" }}>
-            {phase === "typing" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-[6px] px-[12px] text-center" style={{ opacity: 0.5 }}>
-                <p className="font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(18px, calc(var(--mu) * 15px), 22px)", lineHeight: 1.1, letterSpacing: "0.01em", color: "#fff" }}>{SCENARIO.scene}</p>
-                <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Scene 1</p>
-              </div>
-            )}
-            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 4px)", visibility: phase === "typing" ? "hidden" : "visible" }}>
-                <p className="px-[12px] font-extrabold" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(14px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.25, color: "var(--foreground)" }}>{SCENARIO.question}</p>
-                <div className="flex flex-col gap-[2px]">
+            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 4px)" }}>
+                {/* the question is there from the start, dimmed while she is
+                   still talking, so the frame never shows invented filler */}
+                <p className="px-[12px] font-extrabold transition-opacity duration-500" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(14px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.25, color: "var(--foreground)", opacity: phase === "typing" ? 0.4 : 1 }}>{SCENARIO.question}</p>
+                <div className="flex flex-col gap-[2px]" style={{ visibility: phase === "typing" ? "hidden" : "visible" }}>
                   {phase !== "typing" && SCENARIO.choices.map((c, index) => (
                     <ConsoleOption
                       key={c.id}

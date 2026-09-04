@@ -34,7 +34,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
     // The result keeps the headline block in the upper third (where a hero headline
     // reads as a headline) while the toggle sits in the quiet zone between nav and
     // headline rather than glued to either.
-    <section ref={heroRef} className="relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[clamp(120px,15vh,176px)]">
+    <section ref={heroRef} className="mkt-snap relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[clamp(120px,15vh,176px)]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height

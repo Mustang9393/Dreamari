@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ChapterRail } from "./ChapterRail";
 import { BuildChapter } from "./chapters/Build";
 import { ConnectChapter } from "./chapters/Connect";
@@ -17,35 +17,12 @@ export function HowItWorks() {
   // depended on it — every guided chapter advance is JS scrollIntoView).
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
-  // Phones only: snap chapter by chapter while scrolling DOWN through this
-  // block; free scroll back up (direct feedback, 4 Sept). The flag lives on
-  // <html> because the document is the scroller; CSS in globals.css does the
-  // rest, scoped to coarse pointers under 768px.
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
-    if (!media.matches) return;
-    const html = document.documentElement;
-    let lastY = window.scrollY;
-    let inside = false;
-    const apply = (down: boolean) => {
-      if (inside && down) html.dataset.howSnap = "on";
-      else delete html.dataset.howSnap;
-    };
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (Math.abs(y - lastY) < 2) return;
-      apply(y > lastY);
-      lastY = y;
-    };
-    const io = new IntersectionObserver(([entry]) => { inside = entry.isIntersecting; if (!inside) delete html.dataset.howSnap; }, { rootMargin: "-20% 0px -20% 0px" });
-    if (wrapRef.current) io.observe(wrapRef.current);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); io.disconnect(); delete html.dataset.howSnap; };
-  }, []);
+  // Phones snap page by page through the whole document now (globals.css);
+  // nothing is toggled from here any more.
 
   return (
     <>
-      <section id="how-it-works" className="pb-0">
+      <section id="how-it-works" className="hidden pb-0 md:block">
         {/* Tighter than it was (pt-6/pb-4 -> pt-3/pb-2 on mobile, similar shaves
            up the tiers): this block sits inside the quiet stretch between the
            hero's scroll hint and Build's title that was called out as a long
@@ -69,7 +46,7 @@ export function HowItWorks() {
          Match/Explore/Play's full-viewport ones — so without a little extra room here
          the CTA block right after Connect started immediately below it with almost no
          separation, reading as one run-on block instead of the end of the storyboard. */}
-      <div ref={wrapRef} className="pb-8 sm:pb-12">
+      <div ref={wrapRef} className="pb-0 md:pb-12">
         <BuildChapter />
         <MatchChapter />
         <ExploreChapter />

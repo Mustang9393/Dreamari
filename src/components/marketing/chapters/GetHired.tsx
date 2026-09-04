@@ -64,7 +64,7 @@ export function GetHiredChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="w-full max-w-[480px] rounded-[24px] border p-6 sm:p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="w-full max-w-[480px] rounded-[24px] border p-5 sm:p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         {/* Stage header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -88,7 +88,7 @@ export function GetHiredChapter() {
         <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{current.line}</p>
 
         {/* The stage window: fixed height, content swaps in place */}
-        <div key={current.id} className="mkt-stage mt-5 flex h-[280px] flex-col justify-center sm:h-[300px]">
+        <div key={current.id} className="mkt-stage mt-4 flex h-[248px] flex-col justify-center sm:mt-5 sm:h-[300px]">
           {stage === 0 && (
             <div className="relative flex h-full items-center justify-center">
               {/* Same stack the photo cards had — focus pick BIG and front,

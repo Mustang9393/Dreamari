@@ -31,7 +31,7 @@ const COLUMNS = [
 // correctly ends up on top.
 export function Footer() {
   return (
-    <footer className="relative mt-10 border-t px-6 py-10 sm:mt-16 sm:py-14" style={{ borderColor: "var(--border)" }}>
+    <footer className="mkt-snap relative mt-10 border-t px-6 py-10 sm:mt-16 sm:py-14" style={{ borderColor: "var(--border)" }}>
       <div className="mx-auto flex max-w-[1200px] flex-col gap-10 sm:flex-row sm:justify-between">
         <div className="flex items-center gap-2 font-extrabold" style={{ color: "var(--foreground)", fontSize: 19 }}>
           <span className="h-[9px] w-[9px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 12px 2px var(--primary)" }} />

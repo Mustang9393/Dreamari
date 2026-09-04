@@ -394,6 +394,12 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // publishes it for dark backgrounds. A tall mark: letters take the full box.
   "Junior Achievement": { file: "junior-achievement", aspect: 0.832, height: 16, ext: "png" },
   "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93, letters: { y: 0, h: 0.72 } },
+  // Mars wordmark (one colour as published); Kellogg's script (one colour);
+  // WildBrain: grey letters and pupils go white, the W creature keeps its
+  // blue and its eye whites (Wikimedia Commons files, 4 Sept 2026).
+  Mars: { file: "mars", aspect: 3.39, height: 12 },
+  "Kellogg's": { file: "kelloggs", aspect: 2.86, height: 15 },
+  WildBrain: { file: "wildbrain-word", aspect: 7.81, height: 13, accent: { file: "wildbrain-w", color: "#43C5E4" } },
   // the two-line serif wordmark (Wikimedia Commons "Goldman Sachs logo.svg"),
   // not the blue box: a filled square masks to a blank tile. Two lines need
   // more height than a one-line wordmark to stay legible.
