@@ -489,10 +489,42 @@ function RingStats({ items, accent }: { items: [number, string][]; accent: strin
   );
 }
 
-/** The ticket's side stub. Front: the lockup turned on its side, the way a
- *  stub carries its printing along the tear. Tap: the branded QR for this
- *  event (the partner's colour in the modules, the lead mark in the centre)
- *  until tapped again. */
+/** The lockup stacked upright for a narrow side stub: lead mark over the
+ *  collab cross over the partner mark, every mark horizontal. Brand rules
+ *  forbid rotating a partner's logo, so the stub never turns them. */
+function StackedMarks({ lead, partner, maxW }: { lead: string; partner?: string; maxW: number }) {
+  const markOf = (name: string) => (NO_MARK.has(name) ? undefined : COMPANY_MARKS[name]);
+  const fit = (name: string) => {
+    const m = markOf(name);
+    let L = name === "Junior Achievement" ? 22 : name === "Goldman Sachs" ? 16 : 12;
+    if (m) {
+      const w = (L / (m.letters?.h ?? 1)) * m.aspect;
+      if (w > maxW) L = Math.max(9, Math.floor(L * (maxW / w)));
+    }
+    return L;
+  };
+  const base = "rgba(255,255,255,0.94)";
+  const tint = "rgba(255,255,255,0.7)";
+  const ink = `linear-gradient(110deg, ${base} 0%, ${base} 38%, ${tint} 50%, ${base} 62%, ${base} 100%)`;
+  const one = (name: string) => (markOf(name) ? <LetterMark name={name} ink={ink} letterHeight={fit(name)} markClassName="dm-logo-shimmer" /> : <MarkWord name={name} max={maxW} L={11} color={base} />);
+  return (
+    <span className="flex flex-col items-center gap-[10px]" style={{ width: maxW, textShadow: "none" }}>
+      <span className="flex items-center justify-center">{one(lead)}</span>
+      {partner && (
+        <>
+          <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark flex-none" style={{ width: 9, height: 9, color: tint }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+            <path d="M6 6 L18 18 M18 6 L6 18" />
+          </svg>
+          <span className="flex items-center justify-center">{one(partner)}</span>
+        </>
+      )}
+    </span>
+  );
+}
+
+/** The ticket's side stub. Front: the lockup stacked upright (no partner
+ *  logo is ever rotated). Tap: the event's QR, with the partner's colour on
+ *  the centre plate, until tapped again. */
 function TicketStub({ lead, partner, accent, seed }: { lead: string; partner?: string; accent: string; seed: string }) {
   const [qr, setQr] = useState(false);
   return (
@@ -514,7 +546,7 @@ function TicketStub({ lead, partner, accent, seed }: { lead: string; partner?: s
         </span>
       ) : (
         <span className="flex h-full w-full items-center justify-center motion-safe:animate-[fade-slide-up_0.3s_ease_both]">
-          <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} /></span>
+          <StackedMarks lead={lead} partner={partner} maxW={64} />
         </span>
       )}
     </button>
@@ -1816,16 +1848,18 @@ function HomeView({
                       {/* fixed zones so every ticket is the same height: the
                          counts row, then the action on its own line */}
                       <div className="mt-auto flex min-h-[71px] items-end pt-[var(--space-4)]">
-                        {typeof event.students === "number" ? (
+                        {typeof event.students === "number" && (
                           <RingStats accent={lit} items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
-                        ) : (
-                          <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
                         )}
                       </div>
+                      {/* the action row: a button, or for an unopened event the one
+                         line that says why there is none, in the same place */}
                       <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
                         {joined ? (
                           <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
-                        ) : upcoming ? null : (
+                        ) : upcoming ? (
+                          <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
+                        ) : (
                           <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
                         )}
                       </div>
