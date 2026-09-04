@@ -23,7 +23,7 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Pfizer | White version for dark applications | White | OK |
 | CVS Health | Single-colour white available | White | OK |
 | Deloitte | Wordmark white, Green Dot stays green | `deloitte-word` white + `deloitte-dot` #86BC24 | OK |
-| Google | Full colour preferred; one colour only under constraint | Full colour on white plate | Google requires formal approval for any logo use |
+| Google | Full colour by default; approved one-colour black or white where the context is one colour by design | White (the chip row and lockups are one colour by design) | OK on colour; Google requires formal approval for any third-party logo use |
 | Microsoft | Symbol + logotype together, never one colour | Type | Our file is the logotype alone. Needs the full logo file, then `fullColor` |
 | Apple | Third parties may not use the logo | Type | Do not use |
 | Netflix | White logo is for video watermarks only | Type | Ask brand@netflix.com before any use |

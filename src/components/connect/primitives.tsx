@@ -393,8 +393,10 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   Amazon: { file: "amazon", aspect: 3.31 },
   // EY on dark: white letters, beam in EY Yellow (EY brand guidelines)
   EY: { file: "ey-letters", aspect: 0.99, letters: { y: 0.5, h: 0.5 }, accent: { file: "ey-beam", color: "#FFE600" } },
-  // Google asks for the full-colour logo; one-colour only under constraint
-  Google: { file: "google", aspect: 3.04, fullColor: true },
+  // Google: full colour is the default; the approved one-colour version
+  // (black or white) is for contexts that are one colour by design. Our
+  // chip row is one colour by design, so white is the approved form here.
+  Google: { file: "google", aspect: 3.04 },
   // Deloitte: wordmark white on dark, the Green Dot stays green
   Deloitte: { file: "deloitte-word", aspect: 5.31, accent: { file: "deloitte-dot", color: "#86BC24" } },
   "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
