@@ -439,18 +439,19 @@ const PHOTO_COVER: Record<string, string> = {
 // Events are Dream Opportunity branded in the photo lane -- one DO cover
 // for all events, with the partner's own logo as the identity mark.
 // Internal demo; we work with these partners, so their logos are cleared.
-// Real photography per board. The do-event-*.webp files that sat here are
-// flat colour gradients, which is exactly what read as "large colour blobs"
-// (CEO, 4 Sept); a board now gets a photo and its partner's colour as a glow.
-const EVENT_COVER: Record<string, { src: string; focus: string }> = {
-  "event-ey": { src: "/images/connect/covers/poster7-business-money.webp", focus: "50% 30%" },
-  "event-do-morgan-stanley-nyc": { src: "/images/connect/covers/finance.webp", focus: "70% 50%" },
-  "event-ja-goldman-sachs-nyc": { src: "/images/connect/covers/people-teaching-education.webp", focus: "50% 30%" },
-  "event-seo-scholars-nyc": { src: "/images/connect/covers/photo4-event-door.webp", focus: "68% 45%" },
-  "event-jpmc-brooklyn": { src: "/images/connect/covers/people-business-money.webp", focus: "50% 30%" },
-};
-function eventCover(id: string): { src: string; focus: string } {
-  return EVENT_COVER[id] ?? { src: "/images/connect/covers/photo4-event-door.webp", focus: "68% 45%" };
+/** The event surface, everywhere an event is shown (direct feedback: no
+ *  photos on event cards or boards): dark glass, the partner's colour as one
+ *  glow rising from the top-right corner, a fine ruled pattern, grain. */
+function EventSurface({ accent }: { accent: string }) {
+  return (
+    <>
+      <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${accent} 58%, transparent) 0%, color-mix(in srgb, ${accent} 18%, transparent) 42%, transparent 72%)` }} />
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
+      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
+    </>
+  );
 }
 
 // Each event wears its partner's brand accent (EY yellow, Chase blue,
@@ -1680,14 +1681,7 @@ function HomeView({
                   className="group relative flex min-h-[250px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
                   style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
-                  {/* no photo and no flat colour block (direct feedback, both): a
-                     dark glass card, the partner's colour as one glow rising from
-                     the top-right corner, and a fine ruled pattern for texture */}
-                  <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${pAccent} 58%, transparent) 0%, color-mix(in srgb, ${pAccent} 18%, transparent) 42%, transparent 72%)` }} />
-                  <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
-                  <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
-                  <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
-                  <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: pAccent }} />
+                  <EventSurface accent={pAccent} />
                   <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]">
                     <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                     {/* when, then where, one per line with its icon; the
@@ -1998,10 +1992,7 @@ function EventView({
         className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
-        <Image src={eventCover(event.id).src} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: eventCover(event.id).focus, filter: "brightness(0.8)" }} />
-        <CardProgressiveBlur />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(14,12,32,0.55) 0%, rgba(14,12,32,0.28) 40%, rgba(14,12,32,0.08) 70%, transparent 100%)" }} />
-        <span aria-hidden className="absolute top-[10px] left-1/2 h-[5px] w-[48px] -translate-x-1/2 rounded-full" style={{ background: `color-mix(in srgb, ${eventInk} 18%, transparent)` }} />
+        <EventSurface accent={pAccent} />
         <div className="relative z-10 flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[12px]">
           <div className="min-w-[220px] flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
