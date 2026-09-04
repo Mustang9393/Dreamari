@@ -155,6 +155,6 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Header: the A/B cover switch and "Upload your own" are gone. Students pick from the curated backgrounds only. The real app should carry about 40.
 - My Plan: rebuilt in the career page's shape. One glass surface per level, rows on hairlines inside, no cards stacked on cards. Only the level title is bold; steps, times and actions are body weight. Every level starts closed.
 - Overview tiles: titles in ink, one regular line beneath, so the three doorways read at the same weight without shouting.
-- Career Report: subheadings (What You Do, Potential Employers, and the rest) are in the accent so the eye finds them. Education is one even list with the most common path first and tagged. Colleges follow a stated rule: one reach, one target, one safety, closest to home first, with each school's city shown. My Reflection is collapsed until tapped.
+- Career Report: subheadings (What You Do, Potential Employers, and the rest) are in the accent so the eye finds them. Education is one even list with the most common path first and tagged. Colleges show all six schools, reach to safety, each with its city; which schools and how many per band is an open question for Jenny and Odein. My Reflection is collapsed until tapped.
 - Resume: labelled "Coming soon" with a line on what it will do; the button is disabled.
 - Home carousel holds each panel for 13 seconds.

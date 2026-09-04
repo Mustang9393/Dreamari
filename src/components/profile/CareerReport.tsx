@@ -62,26 +62,6 @@ function Portal({ children }: { children: React.ReactNode }) {
 
 // Colleges read as three even rows: reach, then target, then safety.
 const BAND_ORDER: Record<CollegeStatus, number> = { Reach: 0, Target: 1, Safety: 2 };
-// The student's state, then the states a day trip away, then anywhere.
-const HOME_STATE = "NJ";
-const NEAR_STATES = ["NY", "PA", "CT", "DE"];
-function distanceRank(location: string): number {
-  const state = location.trim().slice(-2).toUpperCase();
-  if (state === HOME_STATE) return 0;
-  if (NEAR_STATES.includes(state)) return 1;
-  return 2;
-}
-/** One school per band, the closest to home in each, in Reach, Target,
- *  Safety order. Deterministic, so the same career always shows the same
- *  three and the rule can be said in one line above them. */
-function pickColleges<T extends { status: CollegeStatus; location: string }>(colleges: T[]): T[] {
-  return (["Reach", "Target", "Safety"] as CollegeStatus[])
-    .map((band) => colleges.filter((c) => c.status === band).sort((a, b) => distanceRank(a.location) - distanceRank(b.location))[0])
-    .filter((c): c is T => !!c)
-    .sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]);
-}
-
-// 11 -> "11th". Grades only, so the teen rules are all that matter.
 function ordinal(n: string): string {
   const value = Number(n);
   if (!Number.isFinite(value)) return n;
@@ -376,13 +356,12 @@ function ReportDocument({
             </Link>
           }
         >
-          {/* The rule, stated (CEO, 4 Sept: schools from three states read as
-             random in a demo): one reach, one target, one safety, and within
-             each band the school closest to home wins. Home is the student's
-             state; the next ring is the states around it. */}
-          <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>One reach, one target, one safety, closest to home first</h4>
-          <div className="mt-[10px] grid gap-[14px] sm:grid-cols-3">
-            {pickColleges(report.colleges).map((college) => (
+          {/* All six, reach to safety, each with its city. The selection
+             rule (how many per band, which states) is an open question for
+             Jenny and Odein (CEO, 4 Sept); until it is answered the report
+             shows the data and says nothing it cannot back. */}
+          <div className="grid gap-[14px] sm:grid-cols-2">
+            {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
