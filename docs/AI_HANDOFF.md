@@ -5532,3 +5532,8 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 
 - "2026 Impact Summary" is now "My 2026 Impact Summary" so the volunteer's own numbers read apart from the company block beneath them.
 - Volunteers and students share the same community boards. Today the volunteer dashboard lists "My communities" (the boards for the pro's world plus General Professional Development) as rows that open the same board screen a student sees. A volunteer does not yet get the student-style browse-and-join grid; joining is assumed from their verified scope. Whether volunteers should also browse and join other boards is open with the CEO.
+
+### 4 Sep, latest batch (committed locally, NOT pushed until the user says "push")
+- Play landing preview: immersion-first card (career named once above, uncropped 4:3 scene, Level chip, dialogue box, numberless compact options; no ring, no progress bar).
+- Connect landing chapter: Jordan and Priya both #6366f1 with school tags; Maya tagged Howard University. Open: Maya's portrait should be a Black woman. No such photo exists in public/images; needs a supplied or licensed photo before swapping avatar-maya.jpg.
+- Home: "Your Next Moves" replaces the signal banner; links to /profile?tab=plan and /profile?tab=resume, which ProfileExperience now honours via initialTab.

@@ -151,6 +151,7 @@ export function OptionButton({
   dimmed,
   revealed,
   numbered = true,
+  compact = false,
   onClick,
 }: {
   label: string;
@@ -165,6 +166,8 @@ export function OptionButton({
   revealed?: boolean;
   /** Hide the 1, 2, 3 badge until there is a result to show in its place. */
   numbered?: boolean;
+  /** Tighter row for a preview that has to leave the scene most of the room. */
+  compact?: boolean;
   onClick: () => void;
 }) {
   const bad = Boolean(picked) && (tier === "wrong" || tier === "risky");
@@ -178,7 +181,7 @@ export function OptionButton({
       // A right pick previously just recolored; a wrong one shook and the revealed
       // answer popped, so getting it right was the least-marked outcome. It now
       // gets the Build flow's confirm moment: a lift plus one light sweep.
-      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border px-[18px] py-[16px] text-left text-[16px] leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px] ${
+      className={`group relative flex w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border text-left leading-snug font-semibold transition-[transform,border-color,background,opacity] duration-200 disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none ${compact ? "px-[14px] py-[10px] text-[14px]" : "px-[18px] py-[16px] text-[16px] sm:text-[17px]"} ${
         bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
       } ${mark === "answer" ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""} ${
         mark === "right" ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""
@@ -194,7 +197,7 @@ export function OptionButton({
       <ConfirmShimmer active={mark === "right"} />
       {(numbered || mark) && <span
         aria-hidden
-        className="flex h-[29px] w-[29px] flex-none items-center justify-center rounded-full border text-[13px] font-extrabold"
+        className={`flex flex-none items-center justify-center rounded-full border font-extrabold ${compact ? "h-[24px] w-[24px] text-[12px]" : "h-[29px] w-[29px] text-[13px]"}`}
         style={{
           borderColor: mark ? paint : "var(--color-glass-border-raised)",
           background: mark ? paint : "transparent",

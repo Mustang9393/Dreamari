@@ -8,7 +8,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, Flame, Play, Sparkle } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, Users } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -479,67 +479,33 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* Career Signal Banner — the loop-closer: evidence from the user's
-           own activity (Locker saves, streak) -> the pattern it forms ->
-           the action (their plan). Chips are the app's own worlds with real
-           counts, so the claim is checkable, and the CTA goes somewhere. */}
-        <section
-          aria-label="Your signal"
-          className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border p-[27px] sm:min-h-[216px]"
-          style={{ borderColor: "var(--glass-border)" }}
-        >
-          {/* screen-blend purple is night-tuned; light mode swaps it via the
-             data-signal-wash rule in tokens.css (turns muddy violet otherwise) */}
-          <div aria-hidden data-signal-wash className="pointer-events-none absolute inset-0 mix-blend-screen" style={{ background: "linear-gradient(90deg, rgba(59,46,158,0.42) 0%, rgba(10,13,33,0.1) 46%, var(--background) 100%)" }} />
-          <div className="relative flex h-full flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-8)]">
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <span
-                className="w-fit rounded-[var(--radius-sm)] border px-[var(--space-3)] py-[var(--space-1)] text-[10px] leading-[14px] font-semibold"
-                /* white on primary measures 4.8:1; the ghost tint failed at 2.56 */
-                style={{ fontFamily: "var(--font-body)", background: "var(--primary)", borderColor: "var(--primary)", color: "#FFFFFF" }}
-              >
-                YOUR SIGNAL
-              </span>
-              <p className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                27 cards in, a pattern is forming.
-              </p>
-              <p className="max-w-[520px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                Your saves cluster in three worlds that mix analysis with building things.
-              </p>
-              <div className="flex flex-wrap gap-[var(--space-2)]">
-                {[
-                  { tag: "Business & Money", count: 11, color: "var(--world-business-money-office)" },
-                  { tag: "Tech & Engineering", count: 9, color: "var(--world-tech-engineering-design)" },
-                  { tag: "Health & Medicine", count: 4, color: "var(--world-health-medicine)" },
-                ].map(({ tag, count, color }) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] leading-[20px] font-semibold backdrop-blur-[10px]"
-                    style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                  >
-                    <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
-                    {tag}
-                    <span style={{ color: "var(--muted-foreground)" }}>{count}</span>
+        {/* Your Next Moves (CEO, 4 Sept): three static actions in place of the
+           personalised "27 cards, a pattern is forming" banner, which needed
+           tracking the backend does not have. The three change whenever a
+           feature needs attention. */}
+        <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-5)]">
+          <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            Your Next Moves
+          </h2>
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+            {[
+              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
+              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
+              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
+            ].map(({ title, body, href, Icon }) => (
+              <Link key={title} href={href} className="dm-tap group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+                <span className="flex items-center justify-between">
+                  <span className="flex h-[36px] w-[36px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
+                    <Icon className="h-[18px] w-[18px]" aria-hidden />
                   </span>
-                ))}
-              </div>
-            </div>
-            <a
-              href="/career-report"
-              className="dm-quiet flex h-[42px] w-full flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-center text-[13px] leading-[18px] font-semibold sm:w-[198px]"
-              style={{
-                fontFamily: "var(--font-body)",
-                borderColor: "var(--glass-border)",
-                background: "linear-gradient(90deg, var(--accent), var(--primary))",
-                /* white in BOTH themes: --foreground flips to ink in light,
-                   which is unreadable on the blue gradient */
-                color: "#FFFFFF",
-                filter: "drop-shadow(0px 8px 9px rgba(31,82,255,0.32))",
-              }}
-            >
-              View My Plan
-              <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
-            </a>
+                  <ArrowRight size={16} strokeWidth={2.5} aria-hidden className="transition-transform duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
+                </span>
+                <span className="flex flex-col gap-[4px]">
+                  <span className="text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>
+                  <span className="text-[14px] leading-[20px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>{body}</span>
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
       </main>

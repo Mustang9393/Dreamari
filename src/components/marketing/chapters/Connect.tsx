@@ -24,14 +24,16 @@ const REPLIES = [
   },
   {
     photo: "/images/avatar-jordan.jpg",
-    color: "#ffb81f",
+    // both students wear Maya's purple (direct feedback: three colours read
+    // as noise during a pitch); only the verified pro keeps his own
+    color: "#6366f1",
     // College class years (not high-school grades) for the student repliers, per
     // direct request — Maya the asker is a Sophomore, so the thread reads
     // logically as peers-and-younger learning from her question: Jordan, a
     // Freshman, is the one who "just applied" (early explorer acting on the tip),
     // and Priya, a Sophomore like Maya, bookmarks it for this cycle.
     name: "Jordan",
-    tag: "Freshman",
+    tag: "NYU · Freshman",
     text: "Just applied, thanks for the tip!",
     verified: false,
   },
@@ -40,9 +42,9 @@ const REPLIES = [
     // on hand, and it's now otherwise unused since Explore's Food Scientist card moved
     // to a real supplied photo.
     photo: "/images/career-neurosurgeon.jpg",
-    color: "#ec4899",
+    color: "#6366f1",
     name: "Priya",
-    tag: "Sophomore",
+    tag: "Pace University · Sophomore",
     text: "Same here, bookmarking this!",
     verified: false,
   },

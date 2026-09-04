@@ -98,8 +98,10 @@ const COVER_CAREER = "career";
 // /profile still stands up on its own with nothing saved.
 const DEMO_TOP3 = ["investment-banking", "airline-pilot"];
 
-export function ProfileExperience({ initialPicks = [], initialFocus = null }: { initialPicks?: string[]; initialFocus?: string | null } = {}) {
-  const [tab, setTab] = useState<TabId>("overview");
+const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "settings"];
+export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string } = {}) {
+  // ?tab= from Home's Your Next Moves opens straight onto that tab
+  const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");

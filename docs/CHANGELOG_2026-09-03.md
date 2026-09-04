@@ -183,3 +183,8 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Landing on phones: every chapter fills the screen (the short ones too), content starts under the nav's zone instead of floating mid-screen, and a small "Scroll" chevron bobs at each chapter's foot except the last. Scrolling down snaps chapter by chapter; scrolling up is free. The nav island stays put for the first 11 seconds, then hides on scroll-down as before.
 - Landing Play preview: the career is named once, above the card; the header strip keeps Level 1 · Intern and the reputation ring. The ring and the progress bar draw themselves in on load. More of the scene shows, the dialogue box hugs its bottom edge, and the options carry no numbers until a result replaces them.
 - Volunteer dashboard: "2026 Impact Summary" is "My 2026 Impact Summary".
+
+## Later, 4 Sep (local only, not pushed)
+- Landing Play preview rebuilt for immersion: the career is named once in a caption above the card, the 4:3 scene shows the full image with no crop, "Level 1 · Intern" chip stays, the reputation ring and progress bar are gone, options carry no numbers.
+- Landing Connect chapter: Jordan and Priya share the same purple; Jordan reads "NYU · Freshman", Priya "Pace University · Sophomore"; Maya is tagged "Howard University · Sophomore". Maya's portrait still needs a photo of a Black woman (no suitable asset exists in the repo yet).
+- Home: the "27 cards, a pattern is forming" signal banner is replaced by a static "Your Next Moves" row with My Plan, Community Boards and Resume Builder, using the CEO's exact copy. My Plan and Resume Builder deep-link into the matching profile tab via ?tab=.
