@@ -276,25 +276,25 @@ function HeroBanner() {
           </HeroAction>
         </HeroPanel>
 
-        {/* Panel 3 — Trending Now. Nurse Anesthetist replaced UX Researcher
-           (direct feedback): that poster's subject sat under the text side
-           of the frame; this one stands on the right where the photo is
-           clear. */}
+        {/* Panel 3 — Trending Now. Drone Pilot: a real growth field (commercial
+           drone licences keep climbing) outside Health, which panel 2 already
+           covers, and a poster whose subject stands on the right where the
+           photo is clear. */}
         <HeroPanel
           active={panel === 2}
-          photo="/images/app/poster-nurse-anesthetist.png"
-          focus="50% 22%"
+          photo="/images/app/poster-drone-pilot.png"
+          focus="50% 20%"
           eyebrow="TRENDING NOW"
           eyebrowColor="var(--accent-subtle)"
-          title="Nurse Anesthetist is on the rise."
+          title="Drone Pilot is on the rise."
           meta={
             <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color="var(--accent-subtle)"><TrendingUp className="h-[12px] w-[12px]" aria-hidden /> Fast-growing role</HeroChip>
-              <span>Advanced nursing, in demand, well paid.</span>
+              <HeroChip color="var(--accent-subtle)"><TrendingUp className="h-[12px] w-[12px]" aria-hidden /> Fast-growing field</HeroChip>
+              <span>Film sets, farms, inspections, deliveries.</span>
             </span>
           }
         >
-          <HeroAction onClick={() => router.push(`/career/${careerSlug("Nurse Anesthetist")}`)}>
+          <HeroAction onClick={() => router.push(`/career/${careerSlug("Drone Pilot")}`)}>
             Explore this career <ArrowRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>

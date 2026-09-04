@@ -246,3 +246,16 @@
   .mkt-console-sheen, .mkt-console-push, .mkt-console-cursor { animation: none; }
   .mkt-console-sheen { display: none; }
 }
+
+/* Play tile win: the thumbs-up scene fades in with a slight settle; a white
+   flash pops and clears over the whole card. */
+@keyframes mkt-win-in {
+  0% { opacity: 0; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes mkt-win-flash {
+  0% { opacity: 0; }
+  18% { opacity: 0.22; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .mkt-console-card [class*="mkt-win-flash"] { display: none; } }

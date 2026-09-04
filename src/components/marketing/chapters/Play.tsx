@@ -29,6 +29,7 @@ const SCENARIO = {
 };
 
 const ART = "/images/sim-deal-kickoff.jpg";
+const WIN_ART = "/images/play/ib/l3-20.webp";
 const XP_START = 18;
 const XP_AFTER_BEST = 46;
 
@@ -140,6 +141,19 @@ function PlayDemo() {
         >
           <span aria-hidden className="mkt-console-sheen" />
 
+          {/* The win: Christina's thumbs-up hallway scene (the game's own L3
+             art) fades in over the WHOLE card, art and menu, with a quick
+             flash, the moment the answer lands (direct feedback, 4 Sept). */}
+          {answered && (
+            <>
+              <span aria-hidden className="absolute inset-0 z-[1] motion-safe:animate-[mkt-win-in_0.9s_ease-out_both]">
+                <Image src={WIN_ART} alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
+                <span className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(11,14,28,0.05) 0%, rgba(11,14,28,0.15) 40%, rgba(11,14,28,0.86) 68%, #0b0e1c 100%)" }} />
+              </span>
+              <span aria-hidden className="pointer-events-none absolute inset-0 z-[4] motion-safe:animate-[mkt-win-flash_0.6s_ease-out_both]" style={{ background: "#fff" }} />
+            </>
+          )}
+
           {/* XP: one gold bar the full width of the card, sparking when the answer lands */}
           <div aria-hidden className="absolute inset-x-0 top-0 z-[3]">
             <SparkBar percent={xp} height={4} track="rgba(255,255,255,0.14)" fill={GOLD} glow={GOLD} />
@@ -147,7 +161,7 @@ function PlayDemo() {
 
           {/* the scene, whole: the frame is the picture's own shape */}
           <div className="relative w-full flex-none overflow-hidden" style={{ aspectRatio: "4 / 3" }}>
-            <div className="mkt-console-push absolute inset-0" style={{ translate: "var(--tx, 0px) var(--ty, 0px)", transition: "translate var(--tilt-ease, 400ms) ease-out" }}>
+            <div className="mkt-console-push absolute inset-0" style={{ translate: "var(--tx, 0px) var(--ty, 0px)", transition: "translate var(--tilt-ease, 400ms) ease-out, opacity 700ms ease", opacity: answered ? 0 : 1 }}>
               <Image src={ART} alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="object-cover" />
             </div>
 
@@ -160,12 +174,12 @@ function PlayDemo() {
             </div>
 
             {/* the art fades into the frame's own dark, so scene and menu are one surface */}
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" style={{ height: "52%", background: "linear-gradient(180deg, transparent, rgba(11,14,28,0.6) 55%, #0b0e1c 100%)" }} />
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" style={{ height: "52%", background: "linear-gradient(180deg, transparent, rgba(11,14,28,0.6) 55%, #0b0e1c 100%)", opacity: answered ? 0 : 1, transition: "opacity 700ms ease" }} />
 
             {/* the conversation: who is talking, then what they say */}
-            <div className="absolute inset-x-[10px] bottom-[6px] z-[2] flex gap-[10px] rounded-[var(--radius-md-alt)] border p-[10px]" style={{ background: "rgba(8,10,22,0.8)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <div className="absolute inset-x-[10px] bottom-[6px] z-[3] flex gap-[10px] rounded-[var(--radius-md-alt)] border p-[10px]" style={{ background: "rgba(8,10,22,0.8)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
               <span className="relative block flex-none overflow-hidden rounded-[10px] border" style={{ width: "calc(var(--mu) * 40px)", height: "calc(var(--mu) * 40px)", borderColor: "rgba(255,255,255,0.18)", background: "#151a2e" }}>
-                <Image src={SCENARIO.speaker.face} alt="" fill sizes="80px" className="object-cover" />
+                <Image src={answered ? "/images/play/ib/face-christina.webp" : SCENARIO.speaker.face} alt="" fill sizes="80px" className="object-cover" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                 <span className="flex items-baseline gap-[6px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase">
@@ -186,7 +200,7 @@ function PlayDemo() {
           {/* the menu is always in the layout (hidden while she talks) so the
              card never changes height; tight to the dialogue above and to the
              bottom edge (direct feedback: no wasted space) */}
-          <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 8px)", background: "#0b0e1c" }}>
+          <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 8px)", background: answered ? "transparent" : "#0b0e1c", transition: "background 700ms ease" }}>
             <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 4px)" }}>
                 {/* the question is there from the start, dimmed while she is
                    still talking, so the frame never shows invented filler */}
@@ -214,6 +228,20 @@ function PlayDemo() {
   );
 }
 
+// Ten confetti flecks fanning up and out from the check, the Build flow's
+// own burst (dreamy-burst in globals.css), deterministic so SSR matches.
+const BURST = Array.from({ length: 10 }, (_, i) => {
+  const angle = (-150 + i * 20) * (Math.PI / 180);
+  const distance = 40 + (i % 3) * 16;
+  return {
+    bx: `${Math.round(Math.cos(angle) * distance)}px`,
+    by: `${Math.round(Math.sin(angle) * distance)}px`,
+    br: `${i % 2 === 0 ? 200 : -160}deg`,
+    delay: `${(i % 4) * 0.03}s`,
+    color: ["var(--color-feedback-success)", "var(--world-business-money-office, #f5c04e)", "#fff", "var(--primary)"][i % 4],
+  };
+});
+
 /** A console menu row: no box, a thin bar on the left, the row itself only a
  *  faint wash. The cursor rests on the right answer with the bar half lit and
  *  a slow breath; when the answer lands the row confirms with the Build
@@ -238,10 +266,22 @@ function ConsoleOption({ label, index, best, answered, onConfirm }: { label: str
       }}
     >
       <ConfirmShimmer active={done} />
+      {done && (
+        <span aria-hidden className="pointer-events-none absolute inset-0 overflow-visible">
+          {BURST.map((p, i) => (
+            <span
+              key={i}
+              className="absolute top-1/2 right-[20px] h-[6px] w-[6px] rounded-[2px] motion-safe:animate-[dreamy-burst_0.75s_ease-out_forwards]"
+              style={{ background: p.color, ["--bx" as string]: p.bx, ["--by" as string]: p.by, ["--br" as string]: p.br, animationDelay: p.delay }}
+            />
+          ))}
+        </span>
+      )}
       <span aria-hidden className={`absolute top-[7px] bottom-[7px] left-0 w-[3px] rounded-full transition-[background] duration-200 ${best && !done ? "mkt-console-cursor" : ""}`} style={{ background: done ? paint : best ? "color-mix(in srgb, var(--c) 75%, #fff 10%)" : "transparent" }} />
       <span className="min-w-0 flex-1">{label}</span>
       {done && (
-        <span aria-hidden className="flex size-[20px] flex-none items-center justify-center rounded-full" style={{ background: paint, color: "#05070f" }}>
+        <span aria-hidden className="mkt-burst relative flex size-[20px] flex-none items-center justify-center rounded-full" style={{ background: paint, color: "#05070f", ["--c" as string]: paint }}>
+          <span className="mkt-burst-ring absolute inset-0 rounded-full" />
           <Check className="h-[12px] w-[12px]" strokeWidth={3} />
         </span>
       )}
