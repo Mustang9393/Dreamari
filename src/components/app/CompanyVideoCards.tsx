@@ -8,11 +8,12 @@ import { LetterMark } from "@/components/connect/primitives";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 
 /** "Videos Inside Leading Companies" (Explore > Browse, under Typical Pay):
- *  the same 210 x 297 poster shape as every other Browse rail card, with
- *  the clip's first frame as the cover, the company's mark top-left, the
- *  play badge in the middle and the title on the poster scrim. Tapping a
- *  card opens the clip full screen with sound; nothing plays in the rail.
- *  Rendered inside Browse's Rail, which owns the horizontal scroller. */
+ *  the same 210 x 297 poster shape as every other Browse rail card, with a
+ *  designed cover (title baked into the image itself) as the poster, the
+ *  company's mark on the scrim and a small play badge in the top-right
+ *  corner. Tapping a card opens the clip full screen with sound; nothing
+ *  plays in the rail. Rendered inside Browse's Rail, which owns the
+ *  horizontal scroller. */
 export function CompanyVideoCards() {
   const [open, setOpen] = useState<CompanyVideo | null>(null);
   return (
@@ -39,10 +40,12 @@ export function CompanyVideoCards() {
           >
             <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
           </span>
-          {/* the company mark sits on the dark scrim right above the title,
-             white and at a readable size (direct feedback: the frosted chip up
-             top vanished against bright footage) */}
-          <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[7px] px-[14px] pt-[44px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+          {/* Every cover now bakes its own title in (direct feedback, 5 Sept
+             2026: "the text is in the thumbnail... just have the logo and no
+             title"), so the scrim only carries the company mark, sized down
+             to match — a full title-height scrim under just a logo read as
+             too much dead dark space. */}
+          <span aria-hidden className="absolute inset-x-0 bottom-0 flex px-[14px] pt-[26px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
             {/* LetterMark: every brand's LETTERS are exactly 15px tall and share
                a baseline; flourishes (EY's beam, Kellogg's descenders, the
                AT&T globe) hang outside that box, so no mark reads bigger
@@ -50,7 +53,6 @@ export function CompanyVideoCards() {
                the scrim's own title colour (light mode's scrim goes near-
                white, so a hardcoded white mark disappeared into it). */}
             <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
-            <span className="block text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
           </span>
         </button>
       ))}
