@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "./chrome";
+import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
@@ -429,7 +429,6 @@ export function HomeExperience() {
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
 
-      <h1 className="sr-only">Home</h1>
       <DesktopNavigation active="Home" />
 
       {/* Mobile header (logo + streak/XP, per the mobile frame) */}
@@ -447,6 +446,7 @@ export function HomeExperience() {
       </header>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
+        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
         <HeroBanner />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-5)]">

@@ -12,6 +12,12 @@ const AVATAR_SRC = "/images/avatar-jordan.jpg";
 // Brand wordmark (Figma "Logo Identity": 21x12 mark + DREAMARI in
 // UI/Dreamari Logo). The mark renders via CSS mask so it follows
 // currentColor instead of the asset's baked-in near-white fill.
+/** The one page title for every top-level tab (Home, Explore, Play, Connect,
+ *  Profile, Colleges): all caps, the display face, one size. Direct feedback,
+ *  4 Sept 2026: uniform across screens. */
+export const PAGE_TITLE_CLASS = "text-[32px] leading-[1.05] font-extrabold uppercase sm:text-[44px]";
+export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var(--foreground)" } as const;
+
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
     <Link href={href} aria-label="Dreamari" className="dm-link flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>

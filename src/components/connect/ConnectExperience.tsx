@@ -38,7 +38,7 @@ import {
   Camera,
   QrCode,
 } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
@@ -1144,8 +1144,12 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <main
         style={{ fontFamily: FEED_FONT }}
-        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-8 md:pt-[var(--space-10)] ${
-          view.kind === "home" ? "max-w-[1100px]" : "max-w-[880px]"
+        // Same left edge as every other tab (px-5, then the 56px rail from sm):
+        // the home view fills the shared 1440 column; reading views (a board,
+        // a thread, a profile) keep an 880px column but stay on the left rail
+        // instead of centring, so the margin never jumps within Connect.
+        className={`relative z-10 flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+          view.kind === "home" ? "mx-auto max-w-[1440px]" : "mr-auto max-w-[992px]"
         }`}
       >
         <RoleTabs
@@ -1740,7 +1744,7 @@ function HomeView({
          their own line on phones where there isn't room. */}
       <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
         <div className="min-w-0">
-          <h1 className="text-[26px] leading-[32px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Find your community</h1>
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>
         <TopTabs tab={tab} onTab={onTab} />
       </div>

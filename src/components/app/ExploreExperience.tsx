@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu } from "./chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
@@ -730,7 +730,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       {/* One standard gap between the navbar and page content everywhere
          (space-10); For You fits the viewport with the card centered. */}
       <main
-        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 md:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
           tab === "browse"
             ? "gap-[var(--space-10)] pt-[72px] pb-[120px]"
             : "gap-[var(--space-6)] pt-[64px] pb-0 md:h-[calc(100dvh-62px)] md:overflow-hidden md:pb-[var(--space-6)]"
@@ -739,7 +739,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
-            <h1 className="text-[32px] leading-[38px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
               Explore
             </h1>
             <div className="flex min-w-0 items-center gap-[var(--space-6)]">

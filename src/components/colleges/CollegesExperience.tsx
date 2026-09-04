@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
@@ -121,11 +121,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1120px] flex-col gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[140px] md:pt-[96px]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[140px] sm:px-[var(--space-14)] md:pt-[96px]">
         <div className="hidden md:block"><BackButton fallback="/explore" /></div>
 
         <div className="flex flex-col gap-[var(--space-2)]">
-          <h1 className="text-[34px] leading-[38px] font-extrabold uppercase sm:text-[44px] sm:leading-[48px]" style={DISPLAY}>Find a college</h1>
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a college</h1>
           <p className={SMALL} style={{ color: "var(--muted-foreground)" }} aria-live="polite">
             {results.length} {results.length === 1 ? "college" : "colleges"}{activeCount ? " match" : ""}. New Jersey first. We do not rank colleges.
           </p>

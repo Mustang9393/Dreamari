@@ -36,7 +36,7 @@ import {
   X,
   ImagePlus,
 } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -327,7 +327,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <DesktopNavigation active="Profile" />
       </div>
 
-      <h1 className="sr-only">My Profile</h1>
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[15px] font-bold">
@@ -338,7 +337,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         </span>
       </header>
 
-      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] md:px-[var(--space-14)] md:pt-[var(--space-10)]">
+      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
         {/* ---- Identity: an editorial masthead. Name and school read as a
              byline; the numeric facts sit in their own strip so they line up
              at every width instead of forming a ragged grid on phones. Its
