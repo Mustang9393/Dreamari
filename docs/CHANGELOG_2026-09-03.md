@@ -172,3 +172,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Industry Updates is new: firm posts with the kind of thing it is, the deadline, who it is for and where, and one action. The Finance board carries three real early-career programmes (Goldman Sachs, Morgan Stanley, JPMorgan Chase) with "check the firm's page" instead of dates that go stale.
 - About gained Community rules and Moderators as disclosures.
 - Card designs and the board header are unchanged, as asked. Not adopted from the reference: the Dream Points read, reply, post ladder, and the "professional insights maps to volunteer influencers" idea, both flagged by the CEO as not thought through yet.
+- Profile, later: the card that used to wrap the tab bar and every tab panel is gone. Overview tiles, Plan sections, the report and the resume panel now sit straight on the page, one layer of glass each, like the career page.

@@ -469,9 +469,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
         {(tab === "locker" || tab === "settings") ? null : (
-          /* One surface for every tab (direct feedback): the tab bar and the
-             active panel share the same card, whichever tab is open. */
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
+          /* No card around the tab panels (CEO, 4 Sept: translucent cards on
+             translucent cards hurt readability). The tab bar and each panel's
+             own sections sit straight on the page, like the career page. */
+          <div className="flex flex-col gap-[var(--space-5)]">
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
            feedback, but redundant with the new side-by-side Top 3 (which
