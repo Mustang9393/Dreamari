@@ -816,19 +816,28 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
   // touch, so the first encounter gets a spotlight (see useFirstUseHint),
   // dismissed the moment a drag or tap happens.
   const [hintOn, dismissHint] = useFirstUseHint("blank-drag");
+  // Which tile is in the air, and whether it is over the slot right now, so
+  // the slot can light up before the drop and the tile can lift visibly.
+  const [held, setHeld] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const overSlot = (x: number, y: number) => {
+    const rect = slotRef.current?.getBoundingClientRect();
+    if (!rect) return false;
+    // A forgiving halo around the slot -- a drop just shy of a small inline
+    // target should not read as a miss (a real miss springs the tile back).
+    const pad = 26;
+    return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
+  };
   const commit = (choice: ChoiceBeat["choices"][number]) => {
     if (locked !== null) return;
     tierSound(choice.tier);
     onResolve(choice.tier, choice.why, choice.id);
   };
   const dropTile = (choice: ChoiceBeat["choices"][number], x: number, y: number) => {
+    setHeld(null);
+    setOver(false);
     if (locked !== null) return;
-    const rect = slotRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    // A forgiving halo around the slot -- a drop just shy of a small inline
-    // target should not read as a miss (a real miss springs the tile back).
-    const pad = 26;
-    if (x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad) commit(choice);
+    if (overSlot(x, y)) commit(choice);
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
@@ -836,11 +845,14 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
         {before}
         <span
           ref={slotRef}
-          className="mx-[3px] inline-block min-w-[104px] rounded-[8px] border-2 border-dashed px-[9px] text-center align-baseline transition-colors duration-200"
+          className="mx-[3px] inline-block min-w-[104px] rounded-[8px] border-2 border-dashed px-[9px] text-center align-baseline"
           style={{
-            borderColor: chosen ? TIER_COLOR[chosen.tier] : "var(--color-glass-border-raised)",
+            borderColor: chosen ? TIER_COLOR[chosen.tier] : over ? "var(--primary)" : held ? "rgba(255,255,255,0.55)" : "var(--color-glass-border-raised)",
+            background: over && !chosen ? "color-mix(in srgb, var(--primary) 22%, transparent)" : "transparent",
             color: chosen ? "var(--foreground)" : "transparent",
             borderStyle: chosen ? "solid" : "dashed",
+            transform: over && !chosen ? "scale(1.06)" : "none",
+            transition: "border-color 160ms, background-color 160ms, transform 160ms",
           }}
         >
           {chosen ? chosen.label : " "}
@@ -849,45 +861,60 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
       </Question>
       <div className={beat.layout === "tiles" ? "grid grid-cols-2 gap-[8px]" : "flex flex-wrap gap-[8px]"}>
         {choices.map((choice, index) => (
-          <motion.button
-            key={choice.id}
-            ref={index === 0 ? firstTileRef : undefined}
-            type="button"
-            disabled={locked !== null}
-            drag={locked === null}
-            dragSnapToOrigin
-            dragMomentum={false}
-            whileDrag={{ scale: 1.08, zIndex: 30 }}
-            onDragStart={dismissHint}
-            onDragEnd={(event) => {
-              const pointer = event as PointerEvent;
-              dropTile(choice, pointer.clientX, pointer.clientY);
-            }}
-            // A press with no drag: framer fires onTap only when the
-            // pointer did not move past the drag threshold, so a drag
-            // that misses never double-commits through this path.
-            onTap={() => { dismissHint(); commit(choice); }}
-            className="relative cursor-grab touch-none rounded-[var(--radius-md)] border px-[18px] py-[15px] text-[15px] font-semibold transition-[border-color,opacity] duration-200 select-none active:cursor-grabbing disabled:cursor-default motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:transition-none sm:text-[17px]"
-            style={{
-              animationDelay: `${index * 55}ms`,
-              background:
-                locked === choice.id
-                  ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 20%, var(--glass-surface-1))`
-                  : locked !== null && choice.tier === "best"
-                    ? "color-mix(in srgb, var(--color-feedback-success) 20%, var(--glass-surface-1))"
-                    : "var(--glass-surface-1)",
-              borderColor:
-                locked === choice.id
-                  ? TIER_COLOR[choice.tier]
-                  : locked !== null && choice.tier === "best"
-                    ? "var(--color-feedback-success)"
-                    : "var(--color-glass-border-raised)",
-              color: "var(--foreground)",
-              opacity: locked !== null && locked !== choice.id && choice.tier !== "best" ? 0.4 : 1,
-            }}
-          >
-            {choice.label}
-          </motion.button>
+          // The entrance animation lives on this wrapper. A CSS keyframe with
+          // fill-mode "both" leaves its final transform on the element, which
+          // silently overrode framer's drag transform when both sat on the
+          // button: the tile then never moved under the finger.
+          <div key={choice.id} className="motion-safe:animate-[fade-slide-up_0.34s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ animationDelay: `${index * 55}ms` }}>
+            <motion.button
+              ref={index === 0 ? firstTileRef : undefined}
+              type="button"
+              disabled={locked !== null}
+              drag={locked === null}
+              dragSnapToOrigin
+              dragMomentum={false}
+              dragElastic={1}
+              whileDrag={{ scale: 1.1, zIndex: 40, boxShadow: "0 18px 36px -12px rgba(0,0,0,0.6)" }}
+              whileTap={locked === null ? { scale: 0.97 } : undefined}
+              onDragStart={() => { dismissHint(); setHeld(choice.id); }}
+              onDrag={(event) => {
+                const pointer = event as PointerEvent;
+                setOver(overSlot(pointer.clientX, pointer.clientY));
+              }}
+              onDragEnd={(event) => {
+                const pointer = event as PointerEvent;
+                dropTile(choice, pointer.clientX, pointer.clientY);
+              }}
+              // A press with no drag: framer fires onTap only when the
+              // pointer did not move past the drag threshold, so a drag
+              // that misses never double-commits through this path.
+              onTap={() => { dismissHint(); commit(choice); }}
+              className="relative w-full cursor-grab touch-none rounded-[var(--radius-md)] border px-[18px] py-[15px] text-[15px] font-semibold select-none active:cursor-grabbing disabled:cursor-default sm:text-[17px]"
+              style={{
+                background:
+                  locked === choice.id
+                    ? `color-mix(in srgb, ${TIER_COLOR[choice.tier]} 20%, var(--glass-surface-1))`
+                    : locked !== null && choice.tier === "best"
+                      ? "color-mix(in srgb, var(--color-feedback-success) 20%, var(--glass-surface-1))"
+                      : held === choice.id
+                        ? "color-mix(in srgb, var(--primary) 18%, var(--glass-surface-2))"
+                        : "var(--glass-surface-1)",
+                borderColor:
+                  locked === choice.id
+                    ? TIER_COLOR[choice.tier]
+                    : locked !== null && choice.tier === "best"
+                      ? "var(--color-feedback-success)"
+                      : held === choice.id
+                        ? "var(--primary)"
+                        : "var(--color-glass-border-raised)",
+                color: "var(--foreground)",
+                opacity: locked !== null && locked !== choice.id && choice.tier !== "best" ? 0.4 : 1,
+                transition: "border-color 200ms, background-color 200ms, opacity 200ms",
+              }}
+            >
+              {choice.label}
+            </motion.button>
+          </div>
         ))}
       </div>
       <GestureSpotlight active={hintOn && locked === null} targetRef={firstTileRef} direction="up" label="Drag or tap into the blank" hintSize={22} hintDistance={28} />
