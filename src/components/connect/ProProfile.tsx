@@ -1,14 +1,14 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, Check, Download, Eye, Plus, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
+import { ArrowLeft, Award, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
+import { Avatar, COMPANY_BRAND, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -160,10 +160,11 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 // ——— People to Follow (below the communities) ———
 
 /** A row of faces, no frames (direct feedback): the portrait is the card.
- *  Big avatar with a world-colour ring, a follow badge on its corner, the
- *  name, then what they do and where. The rail scrolls sideways on phones
- *  and shows everyone at once on wider screens. Tapping the face opens the
- *  profile; the badge follows. */
+ *  Big avatar ringed in the firm's colour, ONE badge on its corner (the
+ *  volunteer tier they have earned, or the verified shield when they have no
+ *  tier), the first name, the role, the firm as text, and a small Follow
+ *  button. One badge only: a student needs to read "trusted and active" at
+ *  a glance, not a trophy case. Tapping the face opens the profile. */
 export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
@@ -173,17 +174,13 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
       <SectionHead>Professionals to Follow</SectionHead>
       <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
-          // the ring is the firm's colour (what the person represents here),
-          // lifted toward white so a navy like Morgan Stanley's still shows;
-          // a firm with no brand entry falls back to the career world's colour
           const brand = COMPANY_BRAND[pro.org]?.bg;
           const accent = brand && !/^#(000000|111111|141414)$/i.test(brand) ? `color-mix(in srgb, ${brand} 65%, #ffffff)` : (WORLD_COLORS[pro.world] ?? "var(--primary)");
+          const tier = volunteerTier(pro);
           const following = !!follows[pro.id];
           return (
             <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
               <span className="relative block h-[88px] w-[88px]">
-                {/* a fixed 88px circle with the border ON it and the 80px
-                   portrait centred inside: two circles that share one centre */}
                 <button
                   type="button"
                   onClick={() => nav?.openPro(pro.id)}
@@ -191,29 +188,27 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
                   className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full border-2 leading-none"
                   style={{ borderColor: accent }}
                 >
-                  {/* no verified shield here: it shares the corner with the follow badge, and every pro in this rail is verified anyway */}
                   <Avatar name={pro.name} size={80} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { dispatchAuroraPulse(following ? "select" : "cta"); onFollow(pro.id); }}
-                  aria-pressed={following}
-                  aria-label={following ? `Unfollow ${pro.name}` : `Follow ${pro.name}`}
-                  className="dm-quiet absolute right-[-1px] bottom-[-1px] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-2"
-                  style={{ background: following ? "var(--color-feedback-success, #33c78c)" : "var(--primary)", borderColor: "var(--background)", color: following ? "#05070f" : "#FFFFFF" }}
+                {/* the one badge: earned tier, else verified */}
+                <span
+                  role="img"
+                  aria-label={tier ? `${tier.name} volunteer, ${tier.note.toLowerCase()}` : "Verified professional"}
+                  title={tier ? `${tier.name} volunteer. ${tier.note}.` : "Verified professional"}
+                  className="absolute right-[-1px] bottom-[-1px] flex h-[28px] w-[28px] items-center justify-center rounded-full border-2"
+                  style={{ background: "var(--color-glass-surface-3, #1c1a2e)", borderColor: "var(--background)" }}
                 >
-                  {following ? <Check className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} /> : <Plus className="h-[14px] w-[14px]" aria-hidden strokeWidth={3} />}
-                </button>
-              </span>
-              <span className="flex w-full min-w-0 flex-col items-center gap-[1px]">
-                <span className="block w-full truncate text-[14px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
-                <span className="line-clamp-2 block min-h-[30px] w-full text-[12px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                {/* the firm as its mark, bare (no chip frame): the logo is the
-                   third line, in the same muted ink as the role */}
-                <span className="mt-[4px] flex h-[16px] items-center justify-center" style={{ color: "rgba(255,255,255,0.78)" }}>
-                  <CompanyMark name={pro.org} height={11} className="text-[12px] leading-[16px] font-semibold" />
+                  {tier ? <Award className="h-[15px] w-[15px]" aria-hidden style={{ color: tier.color }} /> : <ShieldCheck className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />}
                 </span>
               </span>
+              <span className="flex w-full min-w-0 flex-col items-center gap-[1px]">
+                {/* three tiers, top down: the name (heading), what they do
+                   (subheading, in ink), where (body, muted) */}
+                <span className="block w-full truncate text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
+                <span className="line-clamp-2 block min-h-[32px] w-full text-[13px] leading-[16px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</span>
+                <span className="block w-full truncate text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
+              </span>
+              <FollowButton compact following={following} onToggle={() => onFollow(pro.id)} />
             </li>
           );
         })}

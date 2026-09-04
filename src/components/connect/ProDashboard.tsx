@@ -6,7 +6,7 @@ import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
-import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount } from "./primitives";
+import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount, volunteerTier } from "./primitives";
 import { Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
@@ -320,15 +320,21 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
 
           {/* activity status: private, encouraging, never a public badge (brief) */}
           <Panel id="status-title" title="Activity status">
-            <div className="flex flex-wrap items-center gap-[var(--space-5)]">
-              <Ring pct={100} accent="#f5c04e" size={84}>
-                <Award className="h-7 w-7" aria-hidden style={{ color: "#f5c04e" }} />
-              </Ring>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Gold volunteer</h3>
-                <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>You helped this week. No penalty for a break.</p>
-              </div>
-            </div>
+            {(() => {
+              const tier = volunteerTier(pro);
+              const color = tier?.color ?? "var(--muted-foreground)";
+              return (
+                <div className="flex flex-wrap items-center gap-[var(--space-5)]">
+                  <Ring pct={tier ? (tier.name === "Diamond" ? 100 : tier.name === "Gold" ? 70 : 40) : 10} accent={color} size={84}>
+                    <Award className="h-7 w-7" aria-hidden style={{ color }} />
+                  </Ring>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{tier ? `${tier.name} volunteer` : "Taking a break"}</h3>
+                    <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{tier ? `${tier.note}. No penalty for a break.` : "One answer brings you back to Silver. No penalty for a break."}</p>
+                  </div>
+                </div>
+              );
+            })()}
           </Panel>
 
           {/* company-level impact, in the company's own colours: the one place

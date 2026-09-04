@@ -1802,7 +1802,6 @@ function LaunchVoteCard() {
       </span>
       <div className="relative z-10 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]">
         <h3 className="text-[24px] leading-[28px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>What should we launch next?</h3>
-        <p className="mt-[4px] text-[13px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "var(--font-body)" }}>{picked ? "Your vote is in. We launch the winner." : "One vote. The winner opens first."}</p>
         <ul className="mt-auto flex flex-col gap-[6px] pt-[var(--space-4)]" style={{ textShadow: "none" }}>
           {LAUNCH_CANDIDATES.map((c) => {
             const votes = c.votes + (picked === c.id ? 1 : 0);

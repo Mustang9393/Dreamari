@@ -151,6 +151,17 @@ export function Avatar({ name, size = 34, verified }: { name: string; size?: num
 /** A professional's portrait that opens their profile: tap the face, get
  *  the person, from anywhere in Connect. Stops the tap from also firing
  *  whatever card it sits on. */
+/** How recently a professional has helped, in the tiers the admin dashboard
+ *  already reports (daily, weekly, monthly). Earned, not given: a pro who has
+ *  gone quiet has no tier, so not everyone wears gold. */
+export type VolunteerTier = { name: "Diamond" | "Gold" | "Silver"; color: string; note: string };
+export function volunteerTier(pro: { activeDaysAgo: number }): VolunteerTier | null {
+  if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: "#7dd3fc", note: "Helps every day" };
+  if (pro.activeDaysAgo <= 7) return { name: "Gold", color: "#f5c04e", note: "Helps every week" };
+  if (pro.activeDaysAgo <= 30) return { name: "Silver", color: "#c0c4cc", note: "Helps every month" };
+  return null;
+}
+
 export function ProAvatar({ proId, name, size = 34, className = "" }: { proId: string; name: string; size?: number; className?: string }) {
   const nav = useContext(ConnectNav);
   return (
