@@ -159,3 +159,8 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Resume: labelled "Coming soon" with a line on what it will do; the button is disabled.
 - Home carousel holds each panel for 13 seconds.
 - Career Report, later: "Courses to Consider" is now "High School Classes to Take", each class named with the reason it helps, so it no longer reads as a repeat of the majors. Section header actions (Career details, College Lookup) sit on the title row where there is room and drop left-aligned under the title on phones and tablets. College cards open the lookup from one corner arrow.
+
+## Landing, 4 Sept (CEO notes)
+
+- Play chapter: the preview is now the game's own screen. Same scene art, the game's header strip with level and role, its dialogue box, its numbered option buttons and its right and wrong feedback. All three answers are live. The series title sits above the card, outside the game. Names are gone from the scene line.
+- Build chapter: "Build your profile by taking a personality, skill, and academic assessment." The demo question reads 3 of 10.

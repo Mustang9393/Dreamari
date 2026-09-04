@@ -142,7 +142,7 @@ function tierSound(tier: Tier) {
   else playSelect();
 }
 
-function OptionButton({
+export function OptionButton({
   label,
   index,
   disabled,
@@ -209,7 +209,7 @@ function OptionButton({
  *  is now bold itself. */
 // Subheading tier: what the speaker says (DialogueBox's own text) is the
 // title, sized above this; the answers below are body text, sized under it.
-function Question({ children }: { children: React.ReactNode }) {
+export function Question({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}

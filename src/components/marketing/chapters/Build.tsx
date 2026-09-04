@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
-// Real question from the actual 7-question assessment (question 3 of 7): "Choose Your
+// Real question from the assessment (question 3 of 10): "Choose Your
 // Interests." Business & Money is the demo's example path, since that's this whole
 // storyboard's fixed destination (Investment Banking) — nudged to invite the tap, not
 // pre-selected, so nothing reads as "already chosen" before the reader acts. Per direct
@@ -43,7 +43,7 @@ export function BuildChapter() {
       id="build"
       title="Build"
       color="#6366f1"
-      oneliner="by taking a 7-question personality, skill, and academic assessment."
+      oneliner="your profile by taking a personality, skill, and academic assessment."
       compact
       graphicRef={graphicRef}
       playing={playing}
@@ -112,7 +112,7 @@ function BuildDemo() {
 
         <div className="text-center">
           <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--muted-foreground)", fontWeight: 600 }}>
-            Question 3 of 7
+            Question 3 of 10
           </p>
           <p className="mt-2 font-bold" style={{ fontSize: "calc(var(--mu) * 19px)", lineHeight: 1.25, color: "var(--foreground)" }}>
             Choose your interests

@@ -4,32 +4,25 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
+import { OptionButton, Question } from "@/components/play/interactions";
+import { TIER_COLOR } from "@/components/play/scoring";
+import type { Tier } from "@/components/play/types";
 
-// A single day-in-the-life situational moment replacing the earlier glossary quiz and
-// the earlier 3-scenario auto-advancing cycle: one scene, a real "Try again" replay
-// instead of auto-advancing to a next question. The point is the immediate hit of
-// positive feedback on tap, not a quiz result or a queue of scenes.
-//
-// Per direct feedback, only the genuinely right answer is clickable — same locked-path
-// pattern as Build's interest picker — rather than three equally-valid options; the
-// other two are shown but inert, so the demo reads as "this is the right move," not an
-// open multiple-choice with no wrong branch.
-const SCENARIO = {
-  scene: "Christina (VP) introduces you to Marcus, the Managing Director. The team pitches to a big company tomorrow.",
-  prompt: "What should you do first?",
-  options: [
-    { label: "Ask for your role and deadline", response: "Smart, clarify scope first." },
-    { label: "Start changing slides", response: "" },
-    { label: "Wait for Jordan (Fellow Analyst)", response: "" },
+// The landing's Play preview is the real game's screen (CEO, 4 Sept: it read
+// like a quiz while the game itself is cinematic). Same scene art, the same
+// dialogue box, the same numbered option buttons the simulation uses, the same
+// right/wrong feedback. All three answers are live: the point is that the
+// student is making a decision, not watching. The series title sits above the
+// card, outside the game, so the card carries only the game.
+const SCENARIO: { setup: string; question: string; choices: { id: string; label: string; tier: Tier; why: string }[] } = {
+  setup: "An Associate introduces you to the Managing Director. Your team has a big pitch tomorrow.",
+  question: "What should you do first?",
+  choices: [
+    { id: "a", label: "Ask for your role and deadline", tier: "best", why: "Right. Clarify scope before you touch a slide." },
+    { id: "b", label: "Start changing slides", tier: "risky", why: "Not yet. You do not know what the team needs from you." },
+    { id: "c", label: "Wait for another analyst", tier: "wrong", why: "Waiting reads as passive on day one. Ask." },
   ],
 };
-const CORRECT_INDEX = 0;
-
-const CHECK = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
-    <path d="M20 6 9 17l-5-5" />
-  </svg>
-);
 
 export function PlayChapter() {
   const [graphicRef, , graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
@@ -56,205 +49,80 @@ export function PlayChapter() {
 }
 
 function PlayDemo() {
-  const [pickedIndex, setPickedIndex] = useState<number | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const choice = SCENARIO.choices.find((c) => c.id === picked) ?? null;
 
-  // Same act-then-advance rhythm as Build and Match: advance the moment the burst/glow
-  // feedback (longest piece is the 0.8s whole-card glow) actually finishes, not on a
-  // separate multi-second timer stacked on top of it. Hitting "Try again" resets
-  // pickedIndex to null before this fires, which clears the effect and cancels the
-  // scroll.
+  // Same act-then-advance rhythm as Build and Match: a right answer moves the
+  // reader on once the feedback has landed; a wrong one waits for Try again.
   useEffect(() => {
-    if (pickedIndex === null) return;
+    if (!choice || choice.tier !== "best") return;
     const timeout = setTimeout(() => {
       document.getElementById("connect")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 950);
+    }, 1400);
     return () => clearTimeout(timeout);
-  }, [pickedIndex]);
+  }, [choice]);
 
-  // Redesigned per direct feedback ("the image is the least visible part, it's
-  // supposed to be an immersive simulation experience like an RPG") — the scene
-  // used to be a full-bleed background buried under a heavy dark gradient PLUS a
-  // translucent blurred panel laid directly over most of it, leaving only a
-  // washed-out sliver actually visible. Now it's two genuinely separate regions
-  // stacked in a flex column: a real, unobscured art panel on top (just enough of
-  // a bottom fade to blend the seam, not to darken the scene itself), and an
-  // opaque dialogue/choice panel below it — closer to a visual-novel's "scene +
-  // choice box" composition than a photo card with text laid over it.
   return (
-      <div
-        className={`mkt-play-card relative z-[1] flex h-full max-w-full flex-col overflow-hidden ${pickedIndex !== null ? "mkt-play-feedback" : ""}`}
-        // Standard 480 lane (Build's width is the reference for every boxed
-        // graphic; only Explore's fading scroll rail gets the wide frame).
-        // The old aspect lock stays dropped — h-full + the lane govern both
-        // dimensions, so this card fills the frame exactly like Build's box.
-        style={{ width: "clamp(300px, 100cqw, 480px)", borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6" }}
-      >
-        {/* The art itself — full color, uncovered, the dominant element. flex-1
-           (not a fixed percentage): the choice panel below sizes to its own
-           content instead, so it can never get clipped/cut off if its content
-           needs more room on a shorter frame — this just absorbs whatever's left,
-           which is still the clear majority of the card once the panel below is
-           kept compact. */}
-        <div className="relative min-h-0 flex-1">
-          {/* sizes mirrors this card's own width clamp below (90cqw capped at 560px) —
-             without it next/image assumes 100vw and serves a w=3840 file.
-             objectPosition centers on the two presenting characters + the kickoff
-             screen (the new scene's subject band sits in the upper-middle of a
-             landscape frame; the POV hand at the bottom can crop freely). 35% cut
-             Marcus's head off entirely at this panel's real rendered aspect ratio
-             (~2.8:1, measured live — much wider/shorter than the source photo's
-             4:3) — 8% clears both characters' heads with room to spare and still
-             shows the "DEAL TEAM KICKOFF" screen behind them.
-             mkt-sim-drift is the slow ambient Ken Burns zoom — see animations.css. */}
-          {/* sim-deal-kickoff.jpg is the same asset formerly saved over
-             play-illustration.jpg — renamed because same-name image swaps kept
-             serving stale cached copies (browser HTTP cache and the optimizer both
-             key on the URL; this bit three times this session, including the user
-             seeing an old Investment Banking photo on their own machine). Any future
-             image REPLACEMENT here should get a fresh filename, not overwrite. */}
-          <Image src="/images/sim-deal-kickoff.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="mkt-sim-drift object-cover" style={{ objectPosition: "center 8%" }} />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0"
-            style={{ height: "22%", background: "linear-gradient(180deg, transparent, var(--card) 100%)" }}
-          />
+    <div className="flex h-full max-w-full flex-col" style={{ width: "clamp(300px, 100cqw, 480px)", gap: "calc(var(--mu) * 8px)" }}>
+      {/* the series name, outside the game (CEO: it does not need to be in the card) */}
+      <p className="text-[12px] leading-[16px] font-bold tracking-[0.1em] uppercase" style={{ color: "#5b9bff" }}>Day in the Life: Investment Banker</p>
 
-          {/* The dopamine hit: a big checkmark burst with a radiating ring, right
-             over the scene itself, the instant an option is tapped. Keyed by pick
-             so it restarts clean on every tap, including replays after "Try
-             again." */}
-          {pickedIndex !== null && (
-            <div
-              key={pickedIndex}
-              aria-hidden
-              className="pointer-events-none absolute z-[3] flex items-center justify-center"
-              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="mkt-burst-ring absolute rounded-full" style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)" }} />
-              <div
-                className="mkt-burst flex items-center justify-center rounded-full text-white"
-                style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", padding: "calc(var(--mu) * 15px)", background: "#3b82f6", boxShadow: "0 8px 24px -6px rgba(59,130,246,0.7)" }}
-              >
-                {CHECK}
-              </div>
-            </div>
-          )}
+      <div
+        className={`mkt-play-card relative z-[1] flex min-h-0 flex-1 flex-col overflow-hidden ${choice ? "mkt-play-feedback" : ""}`}
+        style={{ borderRadius: "var(--radius-md-alt)", ["--c" as string]: "#3b82f6", background: "#0b0e1c" }}
+      >
+        {/* the game's own header strip: title, level and role, the progress bar */}
+        <div className="relative z-[2] flex flex-none items-center justify-between gap-[10px] px-[14px] pt-[11px] pb-[9px]" style={{ background: "rgba(8,10,22,0.92)" }}>
+          <span className="min-w-0">
+            <span className="block truncate text-[12px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>Investment Banker</span>
+            <span className="block truncate text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--world-business-money-office, #f5c04e)" }}>Level 1 · Intern</span>
+          </span>
+          <span className="flex h-[28px] w-[28px] flex-none items-center justify-center rounded-full border text-[11px] font-extrabold tabular-nums" style={{ borderColor: "var(--world-business-money-office, #f5c04e)", color: "#fff" }}>50</span>
+        </div>
+        <div className="relative z-[2] h-[3px] w-full flex-none" style={{ background: "rgba(255,255,255,0.1)" }}>
+          <span className="absolute inset-y-0 left-0 w-[38%] rounded-r-full" style={{ background: "var(--world-business-money-office, #f5c04e)" }} />
         </div>
 
-        {/* The dialogue/choice panel — a real opaque surface, not glass laid over
-           the art, so it stays fully legible without needing to dim the scene
-           behind it (there's nothing behind it to dim). flex-none (sizes to its
-           own content, doesn't get squeezed by the image above it) — per direct
-           feedback that all three options need to be visible without any
-           scrolling. Font sizes use clamp() (not pure calc(var(--mu)*Npx)) with a
-           real minimum, not just a scaled-down one — --mu is a container-query
-           value off the frame's own width, which shrinks toward its 1.0 floor on
-           a narrow phone, and pure mu-scaled text got uncomfortably small there
-           per direct feedback. The floor guarantees readable text on mobile; the
-           panel (being flex-none, content-sized) grows a bit to fit that bigger
-           text, which is exactly why the image above it — flex-1, absorbing
-           whatever's left — ends up proportionally smaller on mobile too, which
-           was called out as an acceptable trade explicitly. */}
-        <div
-          className="relative z-[1] flex flex-none flex-col"
-          // Padding/gap shaved slightly (12/13/10/6 -> 10/12/8/5): the panel is
-          // flex-none content-sized and the art above absorbs whatever's left, so
-          // every pixel trimmed here goes straight to the scene — part of the "image
-          // should be immersive and prominent" pass, without dropping any content.
-          // One type scale, one reading order (per direct feedback: too many
-          // competing sizes/weights read as separate visual systems). Four
-          // styles only: H1 title, body scenario, a smaller sentence-case
-          // question heading (no all-caps -- called out as aggressive), and
-          // one answer style. Section rhythm is a single even gap so the eye
-          // walks scene -> context -> question -> choices.
-          style={{ padding: "calc(var(--mu) * 11px) calc(var(--mu) * 13px) calc(var(--mu) * 9px)", gap: "calc(var(--mu) * 9px)", background: "var(--card)" }}
-        >
-          {/* The scenario is ONE block: the blue bar spans the title and the
-             scene copy together, so line, title and text read as a unit
-             instead of three stacked elements competing for attention. */}
-          <div
-            style={{
-              paddingLeft: "calc(var(--mu) * 11px)",
-              borderLeft: "3px solid color-mix(in srgb, #3b82f6 65%, transparent)",
-            }}
-          >
-            <p className="font-extrabold" style={{ fontSize: "clamp(16px, calc(var(--mu) * 13px), 20px)", lineHeight: 1.2, letterSpacing: "-0.012em", color: "#5b9bff" }}>
-              Day In The Life of An Investment Banker
-            </p>
-            <p style={{ marginTop: "calc(var(--mu) * 6px)", fontSize: "clamp(14px, calc(var(--mu) * 11px), 16px)", lineHeight: 1.5, fontWeight: 500, color: "color-mix(in srgb, var(--foreground) 94%, transparent)" }}>
-              {SCENARIO.scene}
-            </p>
+        {/* the scene, uncovered, the biggest thing on the card */}
+        <div className="relative min-h-0 flex-1" style={{ minHeight: "calc(var(--mu) * 120px)" }}>
+          <Image src="/images/sim-deal-kickoff.jpg" alt="" fill sizes="(max-width: 900px) 90vw, 560px" className="mkt-sim-drift object-cover" style={{ objectPosition: "center 8%" }} />
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0" style={{ height: "40%", background: "linear-gradient(180deg, transparent, rgba(11,14,28,0.95) 100%)" }} />
+          {/* the dialogue box, sitting on the scene the way the game's does */}
+          <div className="absolute inset-x-[12px] bottom-[10px] rounded-[var(--radius-md-alt)] border px-[14px] py-[11px]" style={{ background: "rgba(8,10,22,0.86)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <p className="font-bold" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(14.5px, calc(var(--mu) * 12px), 18px)", lineHeight: 1.3, color: "#fff" }}>{SCENARIO.setup}</p>
           </div>
+        </div>
 
-          <p style={{ fontSize: "clamp(14.5px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.3, fontWeight: 700, color: "var(--foreground)" }}>
-            {SCENARIO.prompt}
-          </p>
-
-          {/* Choice rows — a leading arrow signals "tap to choose," the
-             RPG-dialogue-choice shape, without a lettered badge per direct
-             feedback. */}
-          <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 6px)" }}>
-            {SCENARIO.options.map((option, i) => {
-              const isCorrect = i === CORRECT_INDEX;
-              const isPicked = pickedIndex === i;
-              const isNudge = pickedIndex === null && isCorrect;
-              return (
-                <button
-                  key={option.label}
-                  type="button"
-                  disabled={pickedIndex !== null || !isCorrect}
-                  aria-disabled={!isCorrect}
-                  onClick={() => {
-                    if (isCorrect) setPickedIndex(i);
-                  }}
-                  className={`flex items-center rounded-[var(--radius-md-alt)] border text-left transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""} ${isCorrect ? "cursor-pointer" : "cursor-default"}`}
-                  style={{
-                    padding: "calc(var(--mu) * 7px) calc(var(--mu) * 10px)",
-                    gap: "calc(var(--mu) * 8px)",
-                    background: isPicked ? "color-mix(in srgb, #3b82f6 30%, var(--glass-surface-2))" : "var(--glass-surface-2)",
-                    borderColor: isPicked ? "#3b82f6" : "var(--glass-border)",
-                    opacity: pickedIndex === null ? (isCorrect ? 1 : 0.5) : isPicked ? 1 : 0.5,
-                  }}
-                >
-                  <span className="flex-1" style={{ fontSize: "clamp(14px, calc(var(--mu) * 11px), 16px)", fontWeight: 500, color: "#fff" }}>
-                    {option.label}
-                  </span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={isPicked ? "#3b82f6" : "var(--muted-foreground)"}
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ width: "calc(var(--mu) * 13px)", height: "calc(var(--mu) * 13px)", flex: "none", opacity: isCorrect ? 1 : 0.35 }}
-                  >
-                    <path d="M5 12h14" />
-                    <path d="m13 6 6 6-6 6" />
-                  </svg>
-                </button>
-              );
-            })}
+        {/* the question and the game's own option buttons */}
+        <div className="relative z-[1] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 10px) calc(var(--mu) * 12px) calc(var(--mu) * 10px)", gap: "calc(var(--mu) * 8px)", background: "#0b0e1c" }}>
+          <Question>{SCENARIO.question}</Question>
+          <div className="flex flex-col gap-[6px]">
+            {SCENARIO.choices.map((c, index) => (
+              <OptionButton
+                key={c.id}
+                index={index}
+                label={c.label}
+                disabled={picked !== null}
+                picked={picked === c.id}
+                tier={c.tier}
+                dimmed={picked !== null && picked !== c.id}
+                revealed={picked !== null && picked !== c.id && c.tier === "best"}
+                onClick={() => setPicked(c.id)}
+              />
+            ))}
           </div>
-
-          <div className="flex items-center justify-between" style={{ minHeight: "calc(var(--mu) * 16px)" }}>
-            <p style={{ fontSize: "clamp(11.5px, calc(var(--mu) * 9px), 13px)", fontWeight: 600, color: "#7aa4ff" }}>
-              {pickedIndex !== null ? SCENARIO.options[pickedIndex].response : ""}
+          <div className="flex items-center justify-between gap-[10px]" style={{ minHeight: "calc(var(--mu) * 16px)" }}>
+            <p aria-live="polite" className="text-[13px] leading-[17px] font-semibold" style={{ color: choice ? (choice.tier === "best" ? "var(--color-feedback-success, #33c78c)" : TIER_COLOR[choice.tier]) : "transparent" }}>
+              {choice ? choice.why : " "}
             </p>
-            {pickedIndex !== null && (
+            {choice && choice.tier !== "best" && (
               <button
                 type="button"
-                onClick={() => setPickedIndex(null)}
-                className="flex flex-none items-center rounded-full border font-semibold"
-                style={{
-                  gap: "calc(var(--mu) * 4px)",
-                  padding: "calc(var(--mu) * 5px) calc(var(--mu) * 10px)",
-                  fontSize: "clamp(11px, calc(var(--mu) * 9px), 13px)",
-                  background: "var(--glass-surface-2)",
-                  borderColor: "var(--glass-border)",
-                  color: "#fff",
-                }}
+                onClick={() => setPicked(null)}
+                className="flex flex-none items-center gap-[5px] rounded-full border px-[11px] py-[5px] text-[12px] font-semibold"
+                style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "#fff" }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 10px)", height: "calc(var(--mu) * 10px)" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: 11, height: 11 }}>
                   <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" />
                 </svg>
                 Try again
@@ -263,5 +131,6 @@ function PlayDemo() {
           </div>
         </div>
       </div>
+    </div>
   );
 }
