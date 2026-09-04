@@ -86,29 +86,37 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
       style={{ background: "rgba(5,8,20,0.94)" }}
       onClick={onClose}
     >
-      <button
-        type="button"
-        aria-label="Close video"
-        onClick={onClose}
-        className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] z-[1] flex size-10 cursor-pointer items-center justify-center rounded-full border"
-        style={{ background: "rgba(255,255,255,0.10)", borderColor: "rgba(255,255,255,0.24)", color: "#FFFFFF" }}
-      >
-        <X className="h-5 w-5" />
-      </button>
       <div className="flex max-h-full w-full max-w-[420px] flex-col gap-[var(--space-3)]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-[var(--space-3)] px-[2px]">
           <LetterMark name={item.company} ink="#FFFFFF" letterHeight={13} />
           <span className="text-[15px] leading-[20px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{item.title}</span>
         </div>
-        <video
-          src={item.video}
-          poster={item.poster}
-          autoPlay
-          controls
-          playsInline
-          className="aspect-[9/16] max-h-[calc(100dvh-120px)] w-full rounded-[var(--radius-lg)] border object-contain"
-          style={{ background: "#000", borderColor: "rgba(255,255,255,0.14)" }}
-        />
+        <div className="relative">
+          {/* pinned to the card's own top-right corner, not the screen's —
+             on a wide desktop viewport the card sits far from the actual
+             viewport edge, and the close control should sit exactly where
+             the eye already is (direct feedback, 5 Sept 2026: "easily
+             closeable... on the top right of the card"). Backdrop click
+             and Escape still close it too. */}
+          <button
+            type="button"
+            aria-label="Close video"
+            onClick={onClose}
+            className="dm-quiet absolute top-[10px] right-[10px] z-[1] flex size-10 cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.3)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <video
+            src={item.video}
+            poster={item.poster}
+            autoPlay
+            controls
+            playsInline
+            className="aspect-[9/16] max-h-[calc(100dvh-160px)] w-full rounded-[var(--radius-lg)] border object-contain"
+            style={{ background: "#000", borderColor: "rgba(255,255,255,0.14)" }}
+          />
+        </div>
       </div>
     </div>,
     document.body,
