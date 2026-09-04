@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ChapterRail } from "./ChapterRail";
 import { BuildChapter } from "./chapters/Build";
 import { ConnectChapter } from "./chapters/Connect";
@@ -16,6 +16,32 @@ export function HowItWorks() {
   // globals.css for the full why: snap kept grabbing phone flings and nothing
   // depended on it — every guided chapter advance is JS scrollIntoView).
   const wrapRef = useRef<HTMLDivElement | null>(null);
+
+  // Phones only: snap chapter by chapter while scrolling DOWN through this
+  // block; free scroll back up (direct feedback, 4 Sept). The flag lives on
+  // <html> because the document is the scroller; CSS in globals.css does the
+  // rest, scoped to coarse pointers under 768px.
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px) and (pointer: coarse)");
+    if (!media.matches) return;
+    const html = document.documentElement;
+    let lastY = window.scrollY;
+    let inside = false;
+    const apply = (down: boolean) => {
+      if (inside && down) html.dataset.howSnap = "on";
+      else delete html.dataset.howSnap;
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) < 2) return;
+      apply(y > lastY);
+      lastY = y;
+    };
+    const io = new IntersectionObserver(([entry]) => { inside = entry.isIntersecting; if (!inside) delete html.dataset.howSnap; }, { rootMargin: "-20% 0px -20% 0px" });
+    if (wrapRef.current) io.observe(wrapRef.current);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); io.disconnect(); delete html.dataset.howSnap; };
+  }, []);
 
   return (
     <>

@@ -5,13 +5,16 @@
    Keeping the snap behavior on the document scroller preserves the real, overlapping
    movement between stages while guaranteeing a stable focused state after each
    wheel, trackpad or touch gesture. */
-/* Scroll snap is fully REMOVED (was: y mandatory, then y proximity, then gone) —
-   per direct feedback it kept commandeering touch flings on phones: proximity grabs
-   any fling that decelerates near a section boundary, and with five near-full-screen
-   chapters, "near a boundary" is most of the page. Nothing needed it: every guided
-   chapter advance (Build->Match->Explore->Play->Connect) is JS scrollIntoView and
-   Explore's card paging is its own system — snap only added fighting. If a future
-   pass wants snap back, scope it to fine-pointer devices only. */
+/* Scroll snap, third pass (4 Sept 2026, direct feedback): on PHONES ONLY, and only
+   while the reader scrolls DOWN through How It Works, the chapters snap one by one
+   (y mandatory). Scrolling back up is free, and desktop is untouched. HowItWorks.tsx
+   sets html[data-how-snap="on"] from a scroll-direction listener while its wrapper
+   is on screen, and removes it otherwise. Earlier proximity snap grabbed every
+   fling; mandatory plus one direction is the intent now, not a side effect. */
+@media (max-width: 767px) and (pointer: coarse) {
+  html[data-how-snap="on"] { scroll-snap-type: y mandatory; }
+  html[data-how-snap="on"] .mkt-chapter { scroll-snap-align: start; scroll-snap-stop: always; }
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
 

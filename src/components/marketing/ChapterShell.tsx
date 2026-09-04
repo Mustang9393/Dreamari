@@ -62,7 +62,7 @@ export function ChapterShell({
     // scroll-mt-24: JS chapter advances (scrollIntoView) land the section 96px
     // below the true top, clearing the floating nav island's zone so a chapter
     // title can't end up hidden underneath it (reported on mobile for PLAY).
-    <section id={id} className={`relative flex scroll-mt-24 items-center ${compact ? "" : "min-h-dvh"}`}>
+    <section id={id} className={`mkt-chapter relative flex scroll-mt-24 items-center ${compact ? "" : "min-h-dvh"}`}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't

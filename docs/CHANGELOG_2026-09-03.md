@@ -164,3 +164,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 
 - Play chapter: the preview is now the game's own screen. Same scene art, the game's header strip with level and role, its dialogue box, its numbered option buttons and its right and wrong feedback. All three answers are live. The series title sits above the card, outside the game. Names are gone from the scene line.
 - Build chapter: "Build your profile by taking a personality, skill, and academic assessment." The demo question reads 3 of 10.
+- Landing on phones: the How It Works chapters snap one by one while scrolling down. Scrolling back up is free, and desktop is unchanged.
