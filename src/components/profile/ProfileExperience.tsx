@@ -337,7 +337,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         </span>
       </header>
 
-      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
         {/* ---- Identity: an editorial masthead. Name and school read as a
              byline; the numeric facts sit in their own strip so they line up

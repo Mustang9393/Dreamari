@@ -1144,12 +1144,13 @@ export function ConnectExperience() {
           column than a thread or a board, which are reading surfaces. */}
       <main
         style={{ fontFamily: FEED_FONT }}
-        // Same left edge as every other tab (px-5, then the 56px rail from sm):
-        // the home view fills the shared 1440 column; reading views (a board,
-        // a thread, a profile) keep an 880px column but stay on the left rail
-        // instead of centring, so the margin never jumps within Connect.
-        className={`relative z-10 flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
-          view.kind === "home" ? "mx-auto max-w-[1440px]" : "mr-auto max-w-[992px]"
+        // Same side padding as every other tab (px-5, then the 56px rail from
+        // sm). The home view fills the shared 1440 column; reading views (a
+        // board, a thread, a profile) keep a centred 880px column, because a
+        // reading column pinned to the left rail sat awkwardly on wide
+        // screens (direct feedback, 4 Sept 2026).
+        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+          view.kind === "home" ? "max-w-[1440px]" : "max-w-[992px]"
         }`}
       >
         <RoleTabs
