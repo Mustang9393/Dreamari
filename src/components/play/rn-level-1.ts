@@ -101,7 +101,7 @@ export const RN_LEVEL_1: Level = {
       speaker: "System",
       setup: "Quick check before you start.",
       question: "A patient starts breathing badly at 2 AM. Who notices first?",
-      prompt: "Press and hold the blue dot. Drag it to the answer.",
+      prompt: "Drag the blue dot to the answer, or tap the answer.",
       options: [
         { label: "The nurse at the bedside", correct: true, why: "Right. The nurse is the one in the room." },
         { label: "The head of the hospital", correct: false, why: "Not this one. Try again." },

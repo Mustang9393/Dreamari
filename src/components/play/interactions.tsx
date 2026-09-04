@@ -376,7 +376,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
    *  the target lights up BEFORE the drop -- the reach is part of the fun. */
   const [over, setOver] = useState<number | null>(null);
   const [dragging, setDragging] = useState(false);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const options = beat.options ?? [];
   const rightIndex = options.findIndex((option) => option.correct);
   const whyRight = beat.method === "type" ? (beat.whyRight ?? "") : (options[rightIndex]?.why ?? "");
@@ -526,18 +526,24 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
                     ? "0 0 0 6px color-mix(in srgb, var(--primary) 30%, transparent), 0 14px 34px -8px color-mix(in srgb, var(--primary) 85%, transparent)"
                     : "0 6px 18px -6px color-mix(in srgb, var(--primary) 70%, transparent)",
                 }}
-                aria-label="Drag this token onto an answer"
+                aria-label="Drag this token onto an answer, or tap an answer"
               >
                 Drag
               </motion.button>
             )}
           </div>
           <div className="flex flex-col gap-[8px] sm:grid sm:grid-cols-3">
+            {/* Each card is also a button: a tap answers exactly like a drop,
+               so a player whose drag misses (or who never sees the token as
+               draggable) is never stranded on the screen. */}
             {options.map((option, index) => (
-              <div
+              <button
                 key={option.label}
+                type="button"
+                disabled={solved}
+                onClick={() => { if (solved) return; if (option.correct) solve(); else miss(index); }}
                 ref={(el) => { cardRefs.current[index] = el; }}
-                className={`flex flex-col gap-[4px] rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-[15.5px] font-semibold transition-[border-color,background,transform,opacity] duration-150 sm:text-[16px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""} ${solved && option.correct ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
+                className={`flex cursor-pointer flex-col gap-[4px] rounded-[var(--radius-lg)] border px-[16px] py-[13px] text-left text-[15.5px] font-semibold transition-[border-color,background,transform,opacity] duration-150 disabled:cursor-default sm:text-[16px] ${missed.has(index) ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""} ${solved && option.correct ? "motion-safe:animate-[play-pop_0.44s_cubic-bezier(0.34,1.56,0.64,1)]" : ""}`}
                 style={{
                   background:
                     solved && option.correct
@@ -556,7 +562,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
                   Answer {index + 1}
                 </span>
                 {option.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>

@@ -97,7 +97,7 @@ export const IB_LEVEL_1: Level = {
       speaker: "System",
       setup: "Quick check before you start.",
       question: "A shoe company wants to buy a smaller shoe company. Who helps them do it?",
-      prompt: "Press and hold the blue dot. Drag it to the answer.",
+      prompt: "Drag the blue dot to the answer, or tap the answer.",
       options: [
         { label: "An investment bank", correct: true, why: "Right. Buying and selling companies is the job." },
         { label: "A shoe designer", correct: false, why: "Not this one. Try again." },
