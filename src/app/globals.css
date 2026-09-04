@@ -1075,3 +1075,24 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 }
 .connect-ticket-paper { top: 0; right: 0; bottom: 0; width: calc(var(--stubw) - 1px); }
 .connect-ticket-tear { left: 0; top: 18px; bottom: 18px; border-left-width: 2px; }
+
+/* Locker event stubs (4 Sept 2026): a vertical ticket stub. The top edge is
+   torn (a row of small scallops) and two notches sit at the tear above the
+   foot (--stub). All layers intersect into one silhouette. */
+.event-stub {
+  --tooth: 7px;
+  -webkit-mask-image:
+    radial-gradient(circle var(--tooth) at 50% 0, transparent 98%, #000 100%),
+    radial-gradient(circle 10px at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
+    radial-gradient(circle 10px at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
+  mask-image:
+    radial-gradient(circle var(--tooth) at 50% 0, transparent 98%, #000 100%),
+    radial-gradient(circle 10px at 0 calc(100% - var(--stub)), transparent 98%, #000 100%),
+    radial-gradient(circle 10px at 100% calc(100% - var(--stub)), transparent 98%, #000 100%);
+  -webkit-mask-size: 16px 100%, 100% 100%, 100% 100%;
+  mask-size: 16px 100%, 100% 100%, 100% 100%;
+  -webkit-mask-repeat: repeat-x, no-repeat, no-repeat;
+  mask-repeat: repeat-x, no-repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}

@@ -5,6 +5,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 
 import Image from "next/image";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -35,6 +36,7 @@ import {
   Bell,
   Search,
   Camera,
+  QrCode,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -447,7 +449,7 @@ const PHOTO_COVER: Record<string, string> = {
  *  field seeded from the event id, so every event's code is stable and
  *  distinct. A picture of a QR for the prototype, not a scannable one; the
  *  real code comes with the QR onboarding work. */
-function MockQr({ seed, size = 84, ink = "#0e0c20", paper = "#ffffff" }: { seed: string; size?: number; ink?: string; paper?: string }) {
+export function MockQr({ seed, size = 84, ink = "#0e0c20", paper = "#ffffff" }: { seed: string; size?: number; ink?: string; paper?: string }) {
   const n = 21;
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
@@ -492,42 +494,71 @@ function RingStats({ items }: { items: [number, string][] }) {
   );
 }
 
-/** The ticket's side stub. Front: the lockup turned on its side, the way a
- *  stub carries its printing along the tear (to be replaced by an upright
- *  stack before shipping: brands forbid rotated logos). Tap: the event's QR,
- *  with the partner's colour on the centre plate, until tapped again. */
-function TicketStub({ lead, partner, accent, seed }: { lead: string; partner?: string; accent: string; seed: string }) {
-  const [qr, setQr] = useState(false);
+/** The ticket's side stub: the lockup turned on its side, the way a stub
+ *  carries its printing along the tear (an upright stack may replace this
+ *  before shipping, brands forbid rotated logos), and one small QR badge in
+ *  the corner that opens the branded code. */
+function TicketStub({ lead, partner, accent, onQr }: { lead: string; partner?: string; accent: string; onQr: () => void }) {
+  return (
+    <div className="relative z-10 flex w-[var(--stubw)] flex-none items-center justify-center overflow-hidden" style={{ textShadow: "none" }}>
+      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, rgba(255,255,255,0.18))` }} />
+      <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} /></span>
+      <QrBadge onClick={onQr} className="absolute top-[10px] right-[10px]" />
+    </div>
+  );
+}
+
+/** The QR entry point: one small ghost icon in a corner, quiet until hovered
+ *  (direct feedback: tasteful, never distracting). Opens the branded sheet. */
+export function QrBadge({ onClick, className = "", label = "Show event QR code" }: { onClick: () => void; className?: string; label?: string }) {
   return (
     <button
       type="button"
-      onClick={() => setQr((v) => !v)}
-      aria-pressed={qr}
-      aria-label={qr ? "Hide event QR code" : "Show event QR code"}
-      className="dm-quiet relative z-10 flex w-[var(--stubw)] flex-none cursor-pointer items-center justify-center overflow-hidden"
-      style={{ textShadow: "none" }}
+      aria-label={label}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
+      className={`dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[8px] border opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 ${className}`}
+      style={{ background: "rgba(8,10,22,0.55)", borderColor: "rgba(255,255,255,0.16)", color: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none" }}
     >
-      <span aria-hidden className="connect-ticket-tear pointer-events-none absolute border-dashed" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, rgba(255,255,255,0.18))` }} />
-      {qr ? (
-        <span className="relative block motion-safe:animate-[fade-slide-up_0.3s_ease_both]">
-          <MockQr seed={seed} size={82} ink="#0e0c20" paper="#ffffff" />
-          <span className="absolute top-1/2 left-1/2 flex size-[24px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[5px]" style={{ background: "#ffffff" }}>
-            <span className="block size-[16px] rounded-[3px]" style={{ background: accent }} />
-          </span>
-        </span>
-      ) : (
-        <span className="flex h-full w-full items-center justify-center motion-safe:animate-[fade-slide-up_0.3s_ease_both]">
-          {/* turned on its side for now (direct decision, 4 Sept 2026). Brand
-             guidelines forbid rotating partner logos, so this will need to
-             become an upright stack before anything ships. */}
-          <span className="block -rotate-90 whitespace-nowrap"><EventMarks lead={lead} partner={partner} /></span>
-        </span>
-      )}
+      <QrCode className="h-[15px] w-[15px]" aria-hidden />
     </button>
   );
 }
 
-function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean }) {
+/** The branded QR, full size, over a scrim: the code on a white plate with
+ *  the partner's colour on its centre tile, the lockup and the event name
+ *  under it. Prototype pattern, not a scannable code. */
+export function QrSheet({ name, seed, accent, lead, partner, onClose }: { name: string; seed: string; accent: string; lead: string; partner?: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow; document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+  const lit = `color-mix(in srgb, ${accent} 62%, #ffffff)`;
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)]" style={{ background: "rgba(5,8,20,0.9)" }} onClick={onClose}>
+      <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
+        <X className="h-5 w-5" />
+      </button>
+      <div className="relative w-full max-w-[320px] overflow-hidden rounded-[var(--radius-lg)] motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "#0e0c20", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }} onClick={(e) => e.stopPropagation()}>
+        <EventSurface accent={accent} />
+        <div className="relative z-10 flex flex-col items-center gap-[var(--space-4)] p-[var(--space-6)]">
+          <span className="relative block rounded-[12px] p-[10px]" style={{ background: "#ffffff" }}>
+            <MockQr seed={seed} size={196} ink="#0e0c20" paper="#ffffff" />
+            <span className="absolute top-1/2 left-1/2 flex size-[44px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[8px]" style={{ background: "#ffffff" }}>
+              <span className="block size-[30px] rounded-[6px]" style={{ background: lit }} />
+            </span>
+          </span>
+          <EventMarks lead={lead} partner={partner} />
+          <p className="text-center text-[15px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{name}</p>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function EventSurface({ accent, edge = true, tab = true }: { accent: string; edge?: boolean; tab?: boolean }) {
   // Brand colours run from EY yellow to Morgan Stanley's near-black navy. A
   // dark one vanished against the card (no glow, no visible edge: direct
   // feedback), so every accent is lifted toward white by the same amount
@@ -539,7 +570,7 @@ function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean 
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
-      <span aria-hidden className="absolute top-0 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit, left: "var(--tab-x, 50%)" }} />
+      {tab && <span aria-hidden className="absolute top-0 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit, left: "var(--tab-x, 50%)" }} />}
       {/* the card's edge, drawn here so every event surface gets the same one
          (the ticket card draws its own edge so it can follow the notches) */}
       {edge && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${lit} 45%, transparent)` }} />}
@@ -549,7 +580,7 @@ function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean 
 
 // Each event wears its partner's brand accent (EY yellow, Chase blue,
 // AT&T blue) across surface, CTA, and filters.
-function partnerAccent(host: string): string {
+export function partnerAccent(host: string): string {
   const brand = COMPANY_BRAND[partnerCompany(host)];
   if (brand && !/^#(000000|111111|141414)$/i.test(brand.bg)) return brand.bg;
   if (/jpmorgan|chase/i.test(host)) return "#117aca";
@@ -603,7 +634,7 @@ const NO_MARK = new Set<string>([]);
 function MarkWord({ name, max, L, color }: { name: string; max: number; L: number; color: string }) {
   return <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: L, maxWidth: max, fontSize: L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color }}>{name}</span>;
 }
-function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: string; partner?: string; size?: "md" | "lg"; ink?: string }) {
+export function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: string; partner?: string; size?: "md" | "lg"; ink?: string }) {
   const box = LOCKUP[size];
   const gap = Math.round(box.L * 0.6);
   const cross = Math.round(box.L * 0.62);
@@ -1679,6 +1710,7 @@ function HomeView({
   onDeleteAsked: (id: string) => void;
 }) {
   const eventInk = "#f6f5fb";
+  const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
   void onAsk; void onOpenAll;
   // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
   // to find the right room, and asking lives inside each room. Typing
@@ -1839,12 +1871,22 @@ function HomeView({
                       </div>
                     </div>
                     {/* stub: the lockup on its side; tap for the branded QR */}
-                    <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} seed={event.id} />
+                    <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} onQr={() => setQrEvent(event)} />
                   </div>
                 </div>
               );
             })}
           </div>
+          {qrEvent && (
+            <QrSheet
+              name={qrEvent.name}
+              seed={qrEvent.id}
+              accent={partnerAccent(qrEvent.host)}
+              lead={qrEvent.partner === "Dream Opportunity" ? qrEvent.partner : qrEvent.lead}
+              partner={qrEvent.partner === "Dream Opportunity" ? qrEvent.lead : qrEvent.partner}
+              onClose={() => setQrEvent(null)}
+            />
+          )}
         </section>
       )}
     </>
@@ -2175,11 +2217,15 @@ function EventView({
   const [planAdded, setPlanAdded] = useState(false);
   const eventInk = "#f6f5fb";
   const pAccent = partnerAccent(event.host);
+  const [qrOpen, setQrOpen] = useState(false);
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ArrowLeft className="h-4 w-4" aria-hidden /> Connect
       </button>
+      {qrOpen && (
+        <QrSheet name={event.name} seed={event.id} accent={pAccent} lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} onClose={() => setQrOpen(false)} />
+      )}
 
       <section
         aria-label="Event context"
@@ -2190,8 +2236,9 @@ function EventView({
         {/* the lockup sits in the header's top-right corner, on the header's own
            padding, at card size: a fixed anchor rather than a flex item that
            drifted with the title's line count (direct feedback) */}
-        <div className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10">
+        <div className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10 flex items-center gap-[10px]">
           <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+          <QrBadge onClick={() => setQrOpen(true)} />
         </div>
         <div className="relative z-10 flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[12px]">
           {/* on phones the corner lockup owns the first row, so the text starts
@@ -2207,12 +2254,11 @@ function EventView({
             </p>
           </div>
         </div>
-        {/* who is inside: the numbers a partner nonprofit is paying for */}
+        {/* who is inside: the numbers a partner nonprofit is paying for, on the
+           same frosted discs as the ticket cards */}
         {typeof event.students === "number" && (
-          <div className="relative z-10 mt-[var(--space-4)] grid max-w-[420px] grid-cols-3 gap-[6px]">
-            <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
-            <StatTile value={(event.pros ?? 0).toLocaleString("en-US")} label="Pros" />
-            <StatTile value={(event.postCount ?? 0).toLocaleString("en-US")} label="Posts" />
+          <div className="relative z-10 mt-[var(--space-4)]">
+            <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
           </div>
         )}
         <div className="relative z-10 mt-[var(--space-4)] flex w-full items-center justify-between border-t pt-[10px]" style={{ borderColor: `color-mix(in srgb, ${eventInk} 18%, transparent)` }}>
