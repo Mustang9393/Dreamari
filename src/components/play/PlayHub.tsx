@@ -45,7 +45,7 @@ export function PlayHub() {
 
   return (
     <div
-      className="marketing-v2 themeable relative min-h-dvh w-full"
+      className="marketing-v2 themeable relative min-h-dvh w-full overflow-x-clip"
       style={{
         background: "transparent",
         color: "var(--foreground)",
@@ -178,15 +178,16 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
          feedback. Every card shares one fixed ROW_HEIGHT (see above), so
          the featured card is wider than its neighbors, never taller. */}
       {/* Full-bleed rail: negative margins let the row run to the viewport
-         edge (matching main's own padding), so the next card is always
-         visibly PEEKING at the screen edge instead of clipping exactly at
-         the content column -- without the peek, nothing said there were
-         more cards to the right (direct feedback). */}
+         edge, so the next card is always visibly PEEKING at the screen edge
+         instead of clipping exactly at the content column (direct feedback).
+         From lg up main is capped at 1200px and centred, so the bleed is
+         computed against the viewport (50% - 50vw) rather than main's own
+         padding; the root wrapper clips the scrollbar-width overhang. */}
       {/* Expand IN PLACE: cards keep their positions and the clicked one
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)]">
+      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
         {candidates.map((c) => (
           <RowCard
             key={c.id}

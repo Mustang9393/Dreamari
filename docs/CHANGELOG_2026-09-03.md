@@ -226,3 +226,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Figma v2.0 brought level with the prototype: 15 text styles retyped (Montserrat labels, captions and body to Inter; Section Heading and the stat numerals to Bricolage Grotesque), CTA Default and Disabled variants now brand blue with white text. Card fill and display face were already right. A fresh export is the remaining step for the app.
 - Docs rewritten for the post-Figma state: alignment doc, token decisions log and the tokens README now say Figma matches the prototype and the app needs one fresh export.
 - Explore videos: the Kellogg's office tour carries the Kellogg's mark again. Only the Kellanova talent director clip carries Mars.
+- Play tab: the Career Simulations rail runs to the right edge of the screen on desktop instead of clipping at the content column, so the next card peeks in. No sideways page scroll.
