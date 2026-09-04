@@ -17,7 +17,7 @@ import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
 import type { Simulation } from "@/components/play/types";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "@/components/play/progress";
 import { WORLD_COLORS, posterTitleFont } from "./worlds";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "./cardChrome";
+import { CARD_TEXT_SHADOW } from "./cardChrome";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
 // (3-panel carousel: Daily Drop / Continue / Trending), Continue rail of
@@ -79,26 +79,24 @@ function HeroPanel({
         {photo && (
           <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_14s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
             <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus }} priority={active} />
+            {/* The frost is a blurred copy of the same photo, masked in: on
+               phones it ramps up from the foot, from sm up it ramps in from
+               the left so the photo stays sharp on the right. A blurred copy
+               (not backdrop-filter) because the photo pushes in while the
+               panel shows, and backdrop layers re-rasterising over a moving
+               image flickered along the card edges. */}
+            <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
+              <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
+            </span>
+            <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)", WebkitMaskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)" }}>
+              <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
+            </span>
           </span>
         )}
         {art}
-        {/* Phones: the text spans the card, so the frost ramps up from the
-           foot. From sm up the text sits left, so the frost ramps in from
-           the LEFT edge and the photo stays sharp on the right (direct
-           feedback: let the image shine). */}
-        {/* both wrappers overhang the foot by 3px: a hairline of raw photo was
-           showing along the bottom border where the blur band ended on the
-           rounded edge */}
-        <span className="absolute inset-0 -bottom-[3px] sm:hidden">
-          <CardProgressiveBlur size="56%" />
-          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 34%, rgba(12,16,35,0.08) 62%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.4) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)" }} />
-        </span>
-        <span className="absolute inset-0 -bottom-[3px] hidden sm:block">
-          <CardProgressiveBlur direction="left" size="60%" />
-          <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%)" }} />
-        </span>
-        {/* rim light along the top edge, the console-tile cue */}
-        <span className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06) 60%, transparent)" }} />
+        {/* scrims: phones dim the foot, desktop dims the text side and a little of the foot */}
+        <span className="absolute inset-0 sm:hidden" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.5) 34%, rgba(12,16,35,0.08) 62%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.4) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)" }} />
+        <span className="absolute inset-0 hidden sm:block" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%)" }} />
       </div>
       <div key={active ? "on" : "off"} className="relative z-[2] flex h-full flex-col justify-end gap-[var(--space-2)] p-[var(--space-5)] sm:max-w-[64%] sm:p-[var(--space-8)]">
         <span {...rise(0)}><CaptionLabel color={eyebrowColor}>{eyebrow}</CaptionLabel></span>
@@ -182,7 +180,6 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 }
 
 function HeroBanner() {
-  const ibRun = useSimRun(INVESTMENT_BANKING);
   const router = useRouter();
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -257,30 +254,25 @@ function HeroBanner() {
           </HeroAction>
         </HeroPanel>
 
-        {/* Panel 2 — Continue Learning & Playing. Same words and the same
-           cover as the Play tab and the Continue card below: one game, one
-           name, one picture. */}
+        {/* Panel 2 — New game unlocked. Investment Banker already lives in
+           the Continue rail below, so the feature slot announces the next
+           game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
           active={panel === 1}
-          photo={INVESTMENT_BANKING.cover}
-          focus="50% 18%"
-          eyebrow="CAREER SIMULATION"
-          eyebrowColor="var(--world-business-money-office)"
-          title="Day in the Life: Investment Banker"
+          photo={REGISTERED_NURSE.cover}
+          focus="50% 30%"
+          eyebrow="NEW GAME UNLOCKED"
+          eyebrowColor={WORLD_COLORS[REGISTERED_NURSE.world]}
+          title={`Day in the Life: ${REGISTERED_NURSE.title}`}
           meta={
-            <span className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px]">
-              <HeroChip color="var(--world-business-money-office)">Level {INVESTMENT_BANKING.levels[0].n} · {INVESTMENT_BANKING.levels[0].role}</HeroChip>
-              {ibRun.pct > 0 && (
-                <span className="flex items-center gap-[8px]">
-                  <span className="block w-[96px]"><SparkBar percent={ibRun.pct} height={4} track="rgba(255,255,255,0.22)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" /></span>
-                  <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{ibRun.pct}% done</span>
-                </span>
-              )}
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              <HeroChip color={WORLD_COLORS[REGISTERED_NURSE.world]}>Level {REGISTERED_NURSE.levels[0].n} · {REGISTERED_NURSE.levels[0].role}</HeroChip>
+              <span>Your first shift is ready.</span>
             </span>
           }
         >
-          <HeroAction onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
-            <Play className="h-4 w-4" fill="currentColor" aria-hidden /> {ibRun.pct > 0 ? "Continue" : "Play"}
+          <HeroAction onClick={() => router.push(`/play/${REGISTERED_NURSE.id}`)}>
+            <Play className="h-4 w-4" fill="currentColor" aria-hidden /> Play
           </HeroAction>
         </HeroPanel>
 
