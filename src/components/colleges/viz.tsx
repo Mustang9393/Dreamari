@@ -76,7 +76,7 @@ export function SplitBar({ title, a, b }: { title: string; a: { label: string; v
 export function RangeBar({ label, lo, hi, max, note, last = false }: { label: string; lo: number; hi: number; max: number; note?: string; last?: boolean }) {
   const l = (lo / max) * 100, w = ((hi - lo) / max) * 100;
   return (
-    <div className={`flex flex-col gap-[6px] py-[10px] ${last ? "" : "border-b"}`} style={{ borderColor: "rgba(255,255,255,0.12)" }} role="img" aria-label={`${label}: ${lo} to ${hi} out of ${max}`}>
+    <div className={`flex flex-col gap-[6px] py-[10px] ${last ? "" : "border-b"}`} style={{ borderColor: "var(--glass-border)" }} role="img" aria-label={`${label}: ${lo} to ${hi} out of ${max}`}>
       <div className="flex items-baseline justify-between gap-[var(--space-4)]">
         <span className="flex min-w-0 flex-col">
           <span className="text-[15px] leading-[22px]" style={INK}>{label}</span>
@@ -102,7 +102,7 @@ export function Ladder({ rows, ceiling, format }: { rows: { label: string; value
   return (
     <div>
       {rows.map((r, i) => (
-        <div key={r.label} className={`flex flex-col gap-[5px] py-[10px] ${i === rows.length - 1 ? "" : "border-b"}`} style={{ borderColor: "rgba(255,255,255,0.12)" }} role="img" aria-label={`${r.label}: ${format(r.value)}`}>
+        <div key={r.label} className={`flex flex-col gap-[5px] py-[10px] ${i === rows.length - 1 ? "" : "border-b"}`} style={{ borderColor: "var(--glass-border)" }} role="img" aria-label={`${r.label}: ${format(r.value)}`}>
           <div className="flex items-baseline justify-between gap-[var(--space-4)]">
             <span className="flex min-w-0 flex-col">
               <span className="text-[15px] leading-[22px]" style={INK}>{r.label}</span>

@@ -465,7 +465,7 @@ function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; number
         <span className="font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontSize: 64, lineHeight: "64px" }}>{formatCount(numbers.year)}</span>
         <span className="text-[18px] leading-[24px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>students reached</span>
       </div>
-      <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "rgba(255,255,255,0.22)" }}>
+      <dl className="relative mt-[var(--space-5)] grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
         {[[String(pro.questionsAnswered), "questions answered"], [String(numbers.hours), "volunteer hours"], [String(numbers.schools), "schools"]].map(([value, label]) => (
           <div key={label} className="flex flex-col">
             <dd className="order-1 text-[24px] leading-[28px] font-extrabold tabular-nums">{value}</dd>

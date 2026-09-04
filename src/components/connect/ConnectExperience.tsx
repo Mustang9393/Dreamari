@@ -2481,7 +2481,7 @@ function ThreadView({
           }
           if (r.kind === "followup") {
             return (
-              <div key={thread.id + "-f" + index} className="ml-[var(--space-6)] flex flex-col gap-[3px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "rgba(255,255,255,0.16)" }}>
+              <div key={thread.id + "-f" + index} className="ml-[var(--space-6)] flex flex-col gap-[3px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
                 <span className="flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                   <CornerDownRight className="h-3 w-3" aria-hidden /> Follow-up · {r.postedAgo}
                 </span>
@@ -2491,7 +2491,7 @@ function ThreadView({
           }
           const pid = thread.id + "-p" + index;
           return (
-            <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "rgba(255,255,255,0.16)" }}>
+            <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
               <CommentRow id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
             </div>
           );
@@ -2505,7 +2505,7 @@ function ThreadView({
         )}
 
         {posted.map((reply) => (
-          <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "rgba(255,255,255,0.16)" }}>
+          <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
             <CommentRow id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
           </div>
         ))}

@@ -140,7 +140,7 @@ export function FollowButton({ following, onToggle, compact = false, className =
 }
 
 // ——— the career page's section shell: frosted panel, title ruled edge to edge ———
-export const PANEL = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+export const PANEL = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 export const RULE = "rgba(255,255,255,0.12)";
 
 export function Panel({ id, title, aside, children, className = "" }: { id: string; title: string; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {

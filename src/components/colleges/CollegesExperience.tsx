@@ -265,7 +265,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
     <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the results stay visible behind: dimmed and softened, never black */}
       <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)" }} />
-      <div className="relative z-[1] flex max-h-[86dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
+      <div className="relative z-[1] flex max-h-[86dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: RULE }}>
           <h2 className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>Filters</h2>
           <span className="flex items-center gap-[var(--space-2)]">
@@ -338,7 +338,7 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="college-compare-title" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }} />
-      <div className="relative mx-auto mt-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)" }}>
+      <div className="relative mx-auto mt-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: SOFT }}>Side by side</span>
@@ -350,9 +350,9 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>
             <thead>
               <tr>
-                <th scope="col" className="sticky left-0 z-[1] w-[120px] min-w-[120px] border-b px-[12px] py-[10px] text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={{ ...head, borderColor: "rgba(255,255,255,0.22)", color: "var(--muted-foreground)" }}>Factor</th>
+                <th scope="col" className="sticky left-0 z-[1] w-[120px] min-w-[120px] border-b px-[12px] py-[10px] text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={{ ...head, borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Factor</th>
                 {colleges.map((c) => (
-                  <th key={c.slug} scope="col" className="min-w-[190px] border-b px-[14px] py-[10px] align-bottom text-[15px] leading-[19px] font-extrabold" style={{ borderColor: "rgba(255,255,255,0.22)", fontFamily: "var(--font-display)" }}>
+                  <th key={c.slug} scope="col" className="min-w-[190px] border-b px-[14px] py-[10px] align-bottom text-[15px] leading-[19px] font-extrabold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-display)" }}>
                     <Link href={`/colleges/${c.slug}`} className="dm-link">{c.name}</Link>
                     <span className="block text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{c.city}, {c.state}</span>
                   </th>

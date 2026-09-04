@@ -80,7 +80,7 @@ export function ChapterShell({
     // Phones: every chapter is one screen (min-h-dvh, snap start), the copy and
     // graphic centred in it as a block, the scroll cue at the foot. The nav
     // island floats over the top 72px. Desktop keeps its row layout.
-    <section id={id} className={`mkt-chapter relative flex flex-col pt-[72px] pb-0 md:flex-row md:items-center md:scroll-mt-24 md:pt-0 ${compact ? "min-h-dvh md:min-h-0" : "min-h-dvh"}`}>
+    <section id={id} className={`mkt-chapter relative flex flex-col pt-[72px] pb-0 min-[901px]:flex-row min-[901px]:items-center min-[901px]:scroll-mt-24 min-[901px]:pt-0 ${compact ? "min-h-dvh min-[901px]:min-h-0" : "min-h-dvh"}`}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
@@ -100,17 +100,21 @@ export function ChapterShell({
          bleed); text starts on its column's start rail and wraps at its end
          rail. A flip swaps columns, never the geometry. */}
       <div
-        // Phones: three rows, 1fr / graphic / 1fr, so the GRAPHIC sits at the
+        // Phones AND tablets (every width where the chapter stacks, below
+          // 901px): three rows, 1fr / graphic / 1fr, so the GRAPHIC sits at the
           // centre of the screen and the copy hangs directly above it (the cue
-          // is the last row, at the foot). md and up keep the desktop grid.
-          className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-md:grid max-md:grid-cols-1 max-md:grid-rows-[minmax(min-content,1fr)_auto_minmax(0,1fr)] max-md:gap-0 sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
+          // is the last row, at the foot). Tablets used to take the desktop
+          // "centre the whole row" rule, which parked the BUILD and MATCH
+          // titles mid-screen with a void above them (reported 5 Sept 2026).
+          // 901px and up keep the desktop grid.
+          className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-[900px]:grid max-[900px]:grid-cols-1 max-[900px]:grid-rows-[minmax(min-content,1fr)_auto_minmax(0,1fr)] max-[900px]:gap-0 min-[901px]:pt-10 min-[901px]:pb-10 lg:pt-14 lg:pb-14 ${
           centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
         }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
-          className={`text-center transition-all duration-700 ease-out max-md:self-end max-md:pb-7 ${
+          className={`text-center transition-all duration-700 ease-out max-[900px]:self-end max-[900px]:pb-7 ${
             centered ? "max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
           }`}
           style={{
@@ -152,7 +156,7 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className={`mkt-graphic relative flex min-h-0 min-w-0 w-full items-center justify-center md:min-h-[clamp(240px,40cqw,440px)] transition-all delay-[120ms] duration-700 ease-out ${
+          className={`mkt-graphic relative flex min-h-0 min-w-0 w-full items-center justify-center min-[901px]:min-h-[clamp(240px,40cqw,440px)] transition-all delay-[120ms] duration-700 ease-out ${
             centered ? "" : flip ? "min-[901px]:order-1" : ""
           }`}
           style={{
@@ -221,7 +225,7 @@ export function ChapterShell({
             // spill upward into the copy (seen on an iPhone, Get Hired and
             // Connect). The first grid row also never shrinks below the copy,
             // so on a short phone the section grows instead of overlapping.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-md:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] md:[--frame-h:min(74dvh,680px)] md:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(74dvh,680px)] min-[901px]:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               height: compact ? "auto" : "var(--frame-h)",

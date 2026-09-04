@@ -116,15 +116,15 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       {/* the page stays visible behind, dimmed and softened */}
       <button type="button" aria-label="Close search" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[720px] flex-col px-5 pt-[var(--space-4)] pb-[var(--space-6)] md:pt-[72px]">
-        <div className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", maxHeight: "calc(100dvh - 40px)" }}>
-          <label className="flex min-h-[60px] items-center gap-[var(--space-3)] border-b px-[var(--space-5)]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+        <div className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", maxHeight: "calc(100dvh - 40px)" }}>
+          <label className="flex min-h-[60px] items-center gap-[var(--space-3)] border-b px-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
             <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? "var(--accent-subtle)" : "var(--muted-foreground)" }} />
             <span className="sr-only">Search careers, colleges, people, companies and communities</span>
             <input ref={inputRef} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search Dreamari" autoComplete="off" enterKeyHint="search" className="min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] font-semibold outline-none" style={{ color: "var(--foreground)" }} />
             <button type="button" onClick={q ? () => { setQ(""); inputRef.current?.focus(); } : onClose} aria-label={q ? "Clear" : "Close"} className="dm-quiet flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
           </label>
 
-          <div className="flex items-center gap-[8px] overflow-x-auto border-b px-[var(--space-4)] py-[10px] [scrollbar-width:none]" role="tablist" aria-label="Search in" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+          <div className="flex items-center gap-[8px] overflow-x-auto border-b px-[var(--space-4)] py-[10px] [scrollbar-width:none]" role="tablist" aria-label="Search in" style={{ borderColor: "var(--glass-border)" }}>
             {SCOPES.map((s) => (
               <button key={s.key} type="button" role="tab" aria-selected={scope === s.key} onClick={() => setScope(s.key)} className="dm-quiet flex min-h-[34px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={scope === s.key ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                 {s.label}

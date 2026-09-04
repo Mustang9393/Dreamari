@@ -288,23 +288,23 @@ html.light .marketing-v2.themeable {
      earlier edit here assumed). Author real light rungs in Figma when the
      ramp exists. Poster cards are unaffected — their labels sit on the
      theme-independent dark scrim. */
-  --world-business-money-office: color-mix(in srgb, #ffb81f 47%, black);
-  --amber-400: color-mix(in srgb, #ffc94d 45%, black);
-  --world-health-medicine: color-mix(in srgb, #14b8a6 57%, black);
-  --world-tech-engineering-design: color-mix(in srgb, #6366f1 79%, black);
-  --world-building-construction: color-mix(in srgb, #ff9640 53%, black);
-  --world-arts-media-sport: color-mix(in srgb, #ff4585 66%, black);
-  --world-food-farming-nature: color-mix(in srgb, #1fc76e 54%, black);
-  --world-farming-animals-nature: color-mix(in srgb, #1fc76e 54%, black);
-  --world-science-research: color-mix(in srgb, #00c8dc 52%, black);
-  --world-law-safety-government: color-mix(in srgb, #e5484d 73%, black);
-  --world-driving-flying-shipping: color-mix(in srgb, #3b82f6 70%, black);
-  --world-factories-making-things: color-mix(in srgb, #c2703d 70%, black);
-  --world-fixing-machines-engines: color-mix(in srgb, #64748b 81%, black);
-  --world-helping-human-services: color-mix(in srgb, #c05fa6 72%, black);
-  --world-teaching-learning: color-mix(in srgb, #8b5cf6 76%, black);
-  --world-personal-care-community-services: color-mix(in srgb, #e8a0bf 52%, black);
-  --chart-3: color-mix(in srgb, #ff9640 50%, black);
+  --world-business-money-office: #825900; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --amber-400: #805900; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-health-medicine: #046c61; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-tech-engineering-design: #3d41fb; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-building-construction: #9e4700; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-arts-media-sport: #c20043; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-food-farming-nature: #0a6f39; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-farming-animals-nature: #0a6f39; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-science-research: #006b76; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-law-safety-government: #c10e14; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-driving-flying-shipping: #0055df; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-factories-making-things: #914e24; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-fixing-machines-engines: #526177; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-helping-human-services: #a03583; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-teaching-learning: #6928ff; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --world-personal-care-community-services: #b62060; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
+  --chart-3: #9e4700; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
   --glass-surface-1: #00000008; /* black-alpha.3 */
   --glass-surface-2: #00000017; /* black-alpha.9 */
   --glass-surface-3: #05081466; /* black-alpha.40 */

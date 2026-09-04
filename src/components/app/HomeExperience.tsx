@@ -99,7 +99,10 @@ function HeroPanel({
         <span className="absolute inset-0 hidden sm:block" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.9) 0%, rgba(14,12,32,0.72) 26%, rgba(14,12,32,0.3) 48%, transparent 64%), linear-gradient(to top, rgba(12,16,35,0.55) 0%, rgba(12,16,35,0.15) 30%, transparent 55%)" }} />
       </div>
       <div key={active ? "on" : "off"} className="relative z-[2] flex h-full flex-col justify-end gap-[var(--space-2)] p-[var(--space-5)] sm:max-w-[64%] sm:p-[var(--space-8)]">
-        <span {...rise(0)}><CaptionLabel color={eyebrowColor}>{eyebrow}</CaptionLabel></span>
+        {/* the eyebrow sits on the dark photo in both themes, so its colour is
+           lifted toward white rather than taken from the theme's light-mode
+           value, which went dark and failed contrast on the card */}
+        <span {...rise(0)}><CaptionLabel color={`color-mix(in srgb, ${eyebrowColor} 55%, #ffffff)`}>{eyebrow}</CaptionLabel></span>
         <p {...rise(1)} className={`${rise(1).className} text-[30px] leading-[1.04] font-extrabold text-balance sm:text-[42px]`} style={{ ...rise(1).style, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
           {title}
         </p>
@@ -116,7 +119,7 @@ function HeroPanel({
  *  the streak and the trend so every panel carries one live-looking mark. */
 function HeroChip({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
+    <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color: `color-mix(in srgb, ${color} 55%, #ffffff)`, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
       {children}
     </span>
   );

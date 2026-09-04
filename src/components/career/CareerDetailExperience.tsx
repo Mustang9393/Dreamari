@@ -53,7 +53,7 @@ const TINY = "text-[14px] leading-[20px]";
 // The frosted panel every info box on this page sits in (direct feedback:
 // more contrast, frostier): a stronger glass fill, a real backdrop blur and a
 // brighter hairline than the page's default glass-surface-1.
-export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
@@ -114,7 +114,7 @@ export function Section({ title, action, children }: { title: string; action?: R
     <section className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
       {/* the title row is ruled off edge to edge (direct feedback): the line
          runs through the panel's padding to touch both borders */}
-      <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+      <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
         <h2 className={BIG} style={DISPLAY}>{title}</h2>
         {action}
       </div>
@@ -134,7 +134,7 @@ export function Folded({ id, title, open, onToggle, children }: { id: string; ti
         aria-controls={`${id}-panel`}
         onClick={onToggle}
         className={`dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] p-[var(--space-5)] text-left sm:px-[var(--space-6)] ${open ? "rounded-t-[inherit] border-b" : "rounded-[inherit]"}`}
-        style={{ borderColor: "rgba(255,255,255,0.12)" }}
+        style={{ borderColor: "var(--glass-border)" }}
       >
         <h2 className={`${BIG} min-w-0`} style={DISPLAY}>{title}</h2>
         <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
@@ -169,7 +169,7 @@ export function DotList({ items, accent, leading }: { items: string[]; accent: s
 function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
   const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
   return (
-    <li className="border-t first:border-t-0" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
       <button
         type="button"
         onClick={hasDetail ? onToggle : undefined}
@@ -200,7 +200,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
                   <h4 className={`${SMALL} font-semibold`} style={{ color: accent }}>{label as string}</h4>
                   <ul className="m-0 flex list-none flex-col gap-[4px] p-0">
                     {(items as string[]).map((item) => (
-                      <li key={item} className={`${SMALL} flex gap-[8px]`} style={{ color: "rgba(255,255,255,0.86)" }}>
+                      <li key={item} className={`${SMALL} flex gap-[8px]`} style={{ color: "var(--foreground)" }}>
                         <span aria-hidden className="mt-[9px] size-[5px] flex-none rounded-full" style={{ background: accent }} />
                         <span className="min-w-0">{item}</span>
                       </li>
@@ -226,8 +226,8 @@ function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; acc
       {rows.map((row) => {
         const isFigure = /\d/.test(row.pay);
         return (
-          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-            <span className={`${SMALL} min-w-0 truncate`} style={{ color: "rgba(255,255,255,0.86)" }}>{row.state}</span>
+          <li key={row.state} className="flex min-w-0 items-center justify-between gap-[var(--space-3)] border-t py-[10px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+            <span className={`${SMALL} min-w-0 truncate`} style={{ color: "var(--foreground)" }}>{row.state}</span>
             {isFigure ? <Figure accent={accent}>{row.pay}</Figure> : <span className={`${SMALL} flex-none`} style={{ color: "var(--muted-foreground)" }}>{row.pay}</span>}
           </li>
         );
@@ -278,7 +278,7 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
       <div
         role="dialog"
         className="marketing-v2 themeable fixed z-[81] rounded-[var(--radius-md)] border p-[var(--space-4)]"
-        style={{ top: pos.top, left: pos.left, width: pos.width, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+        style={{ top: pos.top, left: pos.left, width: pos.width, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
       >
         {children}
       </div>
@@ -303,14 +303,14 @@ function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonN
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
       <div
         className="relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
-        style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
+        style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
       >
         <div className="flex items-start justify-between gap-[var(--space-4)]">
           <div className="flex flex-col gap-[2px]">
             <h2 id="degree-sheet-title" className={BIG} style={DISPLAY}>What you need to get in</h2>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{career}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.16)" }}>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
@@ -493,7 +493,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   type="button"
                   onClick={() => router.push(`/play/glossary/${career.slug}`)}
                   className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.4)", color: "#fff" }}
+                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
                 >
                   <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
                 </button>
@@ -527,7 +527,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 key={fact.label}
                 data-fact-cell
                 className={`relative flex flex-col gap-[6px] p-[var(--space-4)] sm:px-[var(--space-5)] sm:py-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t" : ""} ${vm.facts.length === 3 ? "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l" : "sm:border-t-0 sm:[&:nth-child(n+2)]:border-l"}`}
-                style={{ borderColor: "rgba(255,255,255,0.12)" }}
+                style={{ borderColor: "var(--glass-border)" }}
               >
                 {/* the (i) always sits top-right of the cell, on the label's
                    first line, whether the label wraps or not; the figure
@@ -578,7 +578,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <Section
             title={vm.payByState.title ?? "Pay by state"}
             action={
-              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "rgba(255,255,255,0.16)", background: "var(--glass-surface-1)" }}>
+              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
                   <button
                     key={id}
