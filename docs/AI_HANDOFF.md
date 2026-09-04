@@ -5509,3 +5509,8 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 - Connect data: `EventBoard` gained `lead`, `partner`, `nextDate`, `official`. Boards renamed "Nonprofit & Company City"; AT&T Dallas and the duplicate EY NJ upcoming board removed (the Nov 4 event is the EY NJ board's `nextDate`). SEO Scholars board added with no invented figures.
 - Connect UI: event cards are glass with a brand glow and ruled texture (the old `do-event-*.webp` covers were flat gradients, the source of the "colour blob" note; `EVENT_COVER` still maps real photos for the board header). `EventMarks` takes `lead`/`partner`; Dream Opportunity always leads; `NO_MARK` holds names whose only file is wrong (JA Singapore). Landing search filters communities and events. `LaunchVoteCard` replaces `ComingSoonCard`. Community cards show Students and Companies. Event board header shows counts and dates only; `official` post renders above the pinned recap.
 - Not done, not mine: QR event-to-community onboarding (Usman) and the volunteer activity formats (CEO building in Replit).
+
+## Brand marks: the rule (4 Sept 2026)
+
+- A partner's mark is set in one colour (our white ink) only when the brand publishes a one-colour or reversed version itself and the file in `public/images/logos/companies/` is that version. We never invert or recolour a full-colour logo. A brand that allows full colour only gets `fullColor: true` in `COMPANY_MARKS` and renders as shipped on a white plate (`LetterMark`).
+- Junior Achievement: the JA Worldwide Brand Center (jaworldwide.org/brand) offers a monochrome symbol, so the plain JA symbol in one colour is on-brand once the file is in the repo. Until then the name is set in type (`NO_MARK`).

@@ -356,7 +356,19 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
  *  the letters: EY's beam sits above, AT&T's globe is taller than its text,
  *  J.P.Morgan's J descends. Lockups scale every mark so its LETTERS share one
  *  height and one baseline; marks without `letters` are all letters. */
-export type MarkMeta = { file: string; aspect: number; height?: number; ext?: "svg" | "png"; letters?: { y: number; h: number } };
+export type MarkMeta = {
+  file: string;
+  aspect: number;
+  height?: number;
+  ext?: "svg" | "png";
+  letters?: { y: number; h: number };
+  /** Brand rule (direct feedback): a mark is only ever set in one colour when
+   *  the brand publishes a one-colour or reversed version itself, and the
+   *  file here IS that version. A brand that allows full colour only is
+   *  flagged `fullColor`; it renders as shipped, on a light plate, never
+   *  masked or recoloured by us. */
+  fullColor?: true;
+};
 export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
   // the full lockup with the wordmark is dream-opportunity-full.svg)
@@ -503,6 +515,18 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
   const letters = mark.letters ?? { y: 0, h: 1 };
   const boxH = letterHeight / letters.h;
   const boxW = boxH * mark.aspect;
+  if (mark.fullColor) {
+    // the brand's own full-colour artwork, untouched, on a white plate with
+    // clear space around it (the usual minimum for a colour mark on dark)
+    const pad = Math.round(letterHeight * 0.35);
+    return (
+      <span className={`relative flex flex-none items-center rounded-[6px] ${className}`} style={{ height: Math.round(boxH) + pad * 2, padding: pad, background: "#FFFFFF" }} title={name}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img alt="" src={`/images/logos/companies/${mark.file}.${mark.ext ?? "svg"}`} style={{ width: Math.round(boxW), height: Math.round(boxH), display: "block" }} />
+        <span className="sr-only">{name}</span>
+      </span>
+    );
+  }
   return (
     <span className={`relative block flex-none ${className}`} style={{ height: letterHeight, width: Math.round(boxW) }} title={name}>
       <span

@@ -532,13 +532,18 @@ function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: strin
   // the display face at 0.9 L; a touch of room so it never truncates
   const leadSlot = lm ? Math.round((leadL / (lm.letters?.h ?? 1)) * lm.aspect) : Math.round(box.L * 0.52 * lead.length) + 8;
   const partnerL = partner ? fit(partner, partner === "Goldman Sachs", box.slot) : 0;
-  const width = partner ? leadSlot + gap + cross + gap + box.slot : leadSlot;
+  // the partner slot hugs its mark, so the lockup's visible right edge IS its
+  // box edge: a lockup pinned to a corner then sits on the padding exactly,
+  // with no invisible slack after a narrow mark like EY (direct feedback)
+  const pm = partner ? markOf(partner) : undefined;
+  const partnerSlot = pm ? Math.min(box.slot, Math.round((partnerL / (pm.letters?.h ?? 1)) * pm.aspect)) : undefined;
+  const width = partner && partnerSlot !== undefined ? leadSlot + gap + cross + gap + partnerSlot : undefined;
   const dark = !!inkColor && !/^#f/i.test(inkColor);
   const base = dark ? inkColor! : "rgba(255,255,255,0.94)";
   const tint = dark ? `color-mix(in srgb, ${inkColor} 70%, #ffffff)` : "rgba(255,255,255,0.7)";
   const ink = `linear-gradient(110deg, ${base} 0%, ${base} 38%, ${tint} 50%, ${base} 62%, ${base} 100%)`;
   return (
-    <span className="relative flex flex-none items-center" style={{ width: lm ? width : undefined, height: box.h, gap, textShadow: "none" }}>
+    <span className="relative flex flex-none items-center" style={{ width: lm && width !== undefined ? width : undefined, height: box.h, gap, textShadow: "none" }}>
       <span className="relative flex flex-none items-center justify-end" style={{ width: lm ? leadSlot : undefined, height: box.h }}>
         {lm ? <LetterMark name={lead} ink={ink} letterHeight={leadL} markClassName="dm-logo-shimmer" /> : <MarkWord name={lead} max={leadSlot} L={box.L} color={base} />}
       </span>
@@ -548,7 +553,7 @@ function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: strin
           <svg aria-hidden viewBox="0 0 24 24" className="dm-collab-mark relative flex-none" style={{ width: cross, height: cross, color: dark ? inkColor : tint }} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
             <path d="M6 6 L18 18 M18 6 L6 18" />
           </svg>
-          <span className="relative flex flex-none items-center" style={{ width: box.slot, height: box.h }}>
+          <span className="relative flex flex-none items-center" style={{ width: partnerSlot, height: box.h }}>
             {markOf(partner) ? <LetterMark name={partner} ink={ink} letterHeight={partnerL} markClassName="dm-logo-shimmer" /> : <MarkWord name={partner} max={box.slot} L={box.L} color={base} />}
           </span>
         </>
