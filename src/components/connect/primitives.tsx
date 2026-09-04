@@ -403,7 +403,12 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // (jaworldwide.org/brand, "JA MONOCHROME SYMBOLS"), which is how JA itself
   // publishes it for dark backgrounds. A tall mark: letters take the full box.
   "Junior Achievement": { file: "junior-achievement", aspect: 0.832, height: 16, ext: "png" },
-  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 4.93, letters: { y: 0, h: 0.72 } },
+  // The current 2024 wordmark ("JPMorganChase", one word — Wikimedia
+  // Commons "Logo of JPMorganChase 2024.svg"), replacing an old asset that
+  // was actually "J.P.Morgan" alone (that division's own mark, missing
+  // "Chase" entirely — flagged 5 Sept 2026). Glyphs fill the full box, no
+  // crop needed.
+  "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 7.05 },
   // Mars wordmark (one colour as published); Kellogg's script (one colour);
   // WildBrain: grey letters and pupils go white, the W creature keeps its
   // blue and its eye whites (Wikimedia Commons files, 4 Sept 2026).

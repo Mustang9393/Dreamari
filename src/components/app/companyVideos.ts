@@ -17,7 +17,7 @@ export type CompanyVideo = {
 // meaningless "Part 1" suffix. Neither video file was deleted.
 export const COMPANY_VIDEOS: CompanyVideo[] = [
   // Kellanova was acquired by Mars, so the clip carries the Mars mark.
-  { company: "Mars", title: "Meet a Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4", poster: "/images/videos/reel-kellanova-talent-director.jpg" },
+  { company: "Mars", title: "Meet a Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4", poster: "/images/videos/reel-kellanova-talent-director-v2.jpg" },
   { company: "JPMorgan Chase", title: "Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4", poster: "/images/videos/reel-jpmc-london-office-tour-odein.jpg" },
   { company: "EY", title: "Senior Cyber Consultant", video: "/videos/app/reel-ey-cyber-consultant-1.mp4", poster: "/images/videos/reel-ey-cyber-consultant-1.jpg" },
   { company: "AT&T", title: "Office Tour", video: "/videos/app/reel-att-office-tour.mp4", poster: "/images/videos/reel-att-office-tour.jpg" },

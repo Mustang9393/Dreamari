@@ -41,8 +41,10 @@ export function CompanyVideoCards() {
             {/* LetterMark: every brand's LETTERS are exactly 15px tall and share
                a baseline; flourishes (EY's beam, Kellogg's descenders, the
                AT&T globe) hang outside that box, so no mark reads bigger
-               because its file has more air or ornament in it */}
-            <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="#FFFFFF" letterHeight={15} /></span>
+               because its file has more air or ornament in it. Ink follows
+               the scrim's own title colour (light mode's scrim goes near-
+               white, so a hardcoded white mark disappeared into it). */}
+            <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
             <span className="block text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
           </span>
         </button>
