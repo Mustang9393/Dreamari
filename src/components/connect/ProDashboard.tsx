@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useMemo, useState } from "react";
-import { ArrowLeft, Award, Bookmark, CheckCircle2, ChevronRight, Clock, Download, Eye, MessagesSquare, PenLine, ThumbsUp, Undo2, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
@@ -370,19 +370,24 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
             <AreaChart points={series} accent={accent} labels={RANGE[range].labels} />
           </Panel>
 
-          {/* activity status: private, encouraging, never a public badge (brief) */}
+          {/* activity status: private, encouraging, never a public badge (brief).
+             Varies per professional (direct feedback): the icon follows the
+             tier, the ring shows how much of the tier's window is left, and
+             the copy names their last answer and exactly what keeps or lifts
+             the tier. */}
           <Panel id="status-title" title="Activity status">
             {(() => {
-              const tier = volunteerTier(pro);
-              const color = tier?.color ?? "var(--muted-foreground)";
+              const status = activityStatus(pro);
+              const Icon = status.Icon;
               return (
                 <div className="flex flex-wrap items-center gap-[var(--space-5)]">
-                  <Ring pct={tier ? (tier.name === "Diamond" ? 100 : tier.name === "Gold" ? 70 : 40) : 10} accent={color} size={84}>
-                    <Award className="h-7 w-7" aria-hidden style={{ color }} />
+                  <Ring pct={status.pct} accent={status.color} size={84}>
+                    <Icon className="h-7 w-7" aria-hidden style={{ color: status.color }} />
                   </Ring>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{tier ? `${tier.name} volunteer` : "Taking a break"}</h3>
-                    <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{tier ? `${tier.note}. No penalty for a break.` : "One answer brings you back to Silver. No penalty for a break."}</p>
+                    <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{status.title}</h3>
+                    <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{status.line}</p>
+                    <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: status.color }}>{status.next}</p>
                   </div>
                 </div>
               );
@@ -420,6 +425,30 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
 
 /** The Wrapped-style card: one gradient in the person's world accent, one
  *  hero number, three supporting ones, who it is about. Sized to post. */
+/** The volunteer's activity status, fleshed out per person: which tier they
+ *  hold, how much of that tier's window is left, when they last answered,
+ *  and the one concrete thing that keeps or lifts the tier. Diamond holds
+ *  for a day, Gold for a week, Silver for a month; a longer gap is a break,
+ *  never a penalty. */
+function activityStatus(pro: Pro) {
+  const tier = volunteerTier(pro);
+  const d = pro.activeDaysAgo;
+  const last = d === 0 ? "Your last answer was today" : d === 1 ? "Your last answer was yesterday" : `Your last answer was ${d} days ago`;
+  const pace = pro.questionsAnswered >= 100 ? `${pro.questionsAnswered} answers so far, among the most on Dreamari.` : pro.questionsAnswered >= 60 ? `${pro.questionsAnswered} answers so far.` : `${pro.questionsAnswered} answers so far; every one reaches a student who asked.`;
+  if (!tier) {
+    return { Icon: Coffee, color: "var(--muted-foreground)", pct: 8, title: "Taking a break", line: `${last}. ${pace}`, next: "One answer brings you back to Silver. No penalty for a break." };
+  }
+  if (tier.name === "Diamond") {
+    return { Icon: Gem, color: tier.color, pct: d === 0 ? 100 : 55, title: "Diamond volunteer", line: `${last}. ${pace}`, next: d === 0 ? "Diamond holds while you answer daily. You are on pace." : "Answer today to keep Diamond." };
+  }
+  if (tier.name === "Gold") {
+    const left = 7 - d;
+    return { Icon: Trophy, color: tier.color, pct: Math.round((left / 7) * 100), title: "Gold volunteer", line: `${last}. ${pace}`, next: `Gold holds for ${left} more ${left === 1 ? "day" : "days"}. One answer today lifts you to Diamond.` };
+  }
+  const left = 30 - d;
+  return { Icon: Medal, color: tier.color, pct: Math.round((left / 30) * 100), title: "Silver volunteer", line: `${last}. ${pace}`, next: `Silver holds for ${left} more days. One answer this week lifts you to Gold.` };
+}
+
 function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; numbers: { year: number; hours: number; schools: number } }) {
   return (
     <section

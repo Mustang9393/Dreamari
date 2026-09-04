@@ -90,6 +90,16 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Leo Fontaine": `${AV}/m77.jpg`,
   "Omar Haddad": `${AV}/m68.jpg`,
   "Camille Vega": `${AV}/w52.jpg`,
+  // second voices per company (Unsplash, free licence, 4 Sept 2026)
+  "Samuel Adler": `${AV}/p1.jpg`,
+  "Isabella Rossi": `${AV}/p2.jpg`,
+  "Arjun Nair": `${AV}/p3.jpg`,
+  "Marisol Ortega": `${AV}/p4.jpg`,
+  "Erik Lindqvist": `${AV}/p5.jpg`,
+  "Simone Bell": `${AV}/p6.jpg`,
+  "Hannah Weiss": `${AV}/p7.jpg`,
+  "Daniel Kim": `${AV}/p8.jpg`,
+  "Lena Novak": `${AV}/p9.jpg`,
   // Students wear friendly illustrated avatars (micah, generated per
   // handle), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:
