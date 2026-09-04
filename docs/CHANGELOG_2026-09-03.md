@@ -202,3 +202,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Explore > Browse videos: WildBrain office tour added (encoded from the 4K clip the CEO dropped in). Mars, Kellogg's and WildBrain now carry real marks: Mars and Kellogg's as one-colour white wordmarks, WildBrain with white letters and its blue W creature kept blue. All three registered in docs/BRAND_MARKS.md as "to confirm with the brand".
 - Phones: the graphic sits at the centre of every chapter screen with the heading and caption directly above it; Get Hired's card is a touch shorter on phones so its copy clears it.
 - Landing Play: no auto-answer. The cursor rests on the right choice and only a tap confirms it. The "Deal Team Kickoff / Scene 1" filler is gone; the question is visible from the start, dimmed while Christina is still talking.
+- Landing Play: the blurred colour halo behind the card is removed; the card sits on the page with just its rim-lit edge.

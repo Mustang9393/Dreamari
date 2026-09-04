@@ -125,11 +125,6 @@ function PlayDemo() {
       <p className="text-[14px] leading-[18px] font-bold tracking-[0.1em] uppercase" style={{ color: "#5b9bff" }}>Day in the Life: Investment Banker</p>
 
       <div className="relative" style={{ perspective: 1100 }} onMouseMove={onMove} onMouseLeave={onLeave}>
-        {/* the art lights the page behind it, the way a console tile does */}
-        <div aria-hidden className="pointer-events-none absolute -inset-[7%] z-0 overflow-hidden rounded-[40px] opacity-60" style={{ filter: "blur(44px) saturate(1.4)" }}>
-          <Image src={ART} alt="" fill sizes="600px" className="object-cover" />
-        </div>
-
         <div
           ref={cardRef}
           className={`mkt-console-card relative z-[1] flex flex-col overflow-hidden ${answered ? "mkt-play-feedback" : ""}`}
