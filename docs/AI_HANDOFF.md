@@ -5514,3 +5514,10 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 
 - A partner's mark is set in one colour (our white ink) only when the brand publishes a one-colour or reversed version itself and the file in `public/images/logos/companies/` is that version. We never invert or recolour a full-colour logo. A brand that allows full colour only gets `fullColor: true` in `COMPANY_MARKS` and renders as shipped on a white plate (`LetterMark`).
 - Junior Achievement: the JA Worldwide Brand Center (jaworldwide.org/brand) offers a monochrome symbol, so the plain JA symbol in one colour is on-brand once the file is in the repo. Until then the name is set in type (`NO_MARK`).
+
+## 4 Sept 2026, night: Profile per the CEO's notes, and open items
+
+- `ProfileExperience`: cover is curated only (`COVERS`, six today; real app about 40), `COVER_CAREER` is dead. `PlanTab` rebuilt as single-layer glass sections with hairline rows; `openHorizon` starts null so nothing auto-expands. Overview bento titles in ink. `ResumeView` says Coming soon.
+- `CareerReport`: `pickColleges()` picks one school per band, closest to home (`HOME_STATE = "NJ"`, `NEAR_STATES`), and the rule is printed above the cards. Confirm the real rule with Jenny and Odein; the data still holds six schools per career so the picker can change. `ReflectionCard` is collapsed by default. Fact labels and h4 subheads use `--primary`.
+- Connect, from the CEO (4 Sept): dceeai.replit.app/v2-connect is the source of truth for HOW information is delivered in Connect, not for which boards exist. Card designs and headers stay as they are; only the information delivery should follow it. "Professional insights" may map to a volunteer influencer concept that is not designed yet. Not started.
+- Brand marks: SEO Scholars lockup found at seo-usa.org (red SEO, black Scholars, opaque background); needs download approval and a two-colour split before use. Register: docs/BRAND_MARKS.md.

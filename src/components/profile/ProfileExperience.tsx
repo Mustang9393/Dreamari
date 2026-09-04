@@ -66,7 +66,6 @@ function careerById(id: string | null): ProfileCareer | null {
 }
 
 
-const CAPTION = "text-[12px] leading-[14px] font-bold tracking-[0.6px] uppercase";
 // SOLID section surface (direct feedback): key containers stopped being
 // translucent -- page gradient -> solid card -> lighter nested rows is the
 // hierarchy, with glass kept for atmosphere rather than reading surfaces.
@@ -182,7 +181,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
   const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
-  const [coverUrl, setCoverUrl] = useState<string>(COVER_CAREER);
+  // Covers are curated backgrounds only (CEO, 4 Sept): no career-poster
+  // switch, no uploads (inappropriate-content risk). The real app should
+  // carry about 40 strong options; the prototype ships six.
+  const [coverUrl, setCoverUrl] = useState<string>(COVERS[0]);
   // the last background picked, kept so both cover layers stay mounted and
   // the A/B switch is a crossfade, never a half-decoded swap
   const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
@@ -193,8 +195,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
     try {
       const saved = window.localStorage.getItem(COVER_KEY);
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved) setCoverUrl(saved);
-      if (saved && saved !== COVER_CAREER) setBgUrl(saved);
+      if (saved && saved !== COVER_CAREER && !saved.startsWith("blob:")) { setCoverUrl(saved); setBgUrl(saved); }
     } catch {}
   }, []);
   const pickCover = (url: string) => {
@@ -335,7 +336,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
              own card, separate from the tabs/dashboard surface below. ---- */}
         {/* ---- Header in the career page's language: the cover photo runs
              behind the card and dissolves upward through the progressive blur;
-             the name sits on the photo; the student picks or uploads the cover. ---- */}
+             the name sits on the photo; the student picks a cover from the set. ---- */}
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
             {/* both layers stay mounted; A/B crossfades between them */}
@@ -346,17 +347,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
           </div>
           <div className="relative flex min-h-[280px] flex-col justify-end gap-[var(--space-5)] p-[var(--space-5)] pt-[96px] sm:min-h-[312px] sm:p-[var(--space-6)]">
             <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
-              {/* A/B for the demo: the cover is your #1 career's poster, or a background */}
-              <div role="tablist" aria-label="Cover version" className="flex gap-[2px] rounded-[var(--radius-sm)] p-[2px]" style={{ background: "rgba(255,255,255,0.08)" }}>
-                {[{ key: "career", label: "Career", letter: "A" }, { key: "picked", label: "Background", letter: "B" }].map((o) => {
-                  const on = o.key === "career" ? coverIsCareer : !coverIsCareer;
-                  return (
-                    <button key={o.key} type="button" role="tab" aria-selected={on} onClick={() => { if (o.key === "career") pickCover(COVER_CAREER); else if (coverIsCareer) pickCover(bgUrl); }} className="dm-quiet flex min-h-[30px] cursor-pointer items-center rounded-[6px] px-[10px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "rgba(255,255,255,0.8)" }}>
-                      {o.letter}<span className="hidden sm:inline"> · {o.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
               <span className="relative">
                 <button
                   type="button"
@@ -389,10 +379,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null }: { 
                           </button>
                         ))}
                       </div>
-                      <label className="dm-quiet flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[15px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--glass-surface-1)" }}>
-                        <ImagePlus className="h-4 w-4" aria-hidden /> Upload your own
-                        <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) pickCover(URL.createObjectURL(file)); }} />
-                      </label>
                     </div>
                   </div>
                   </Portal>
@@ -1023,29 +1009,29 @@ function OverviewTab({
 
         <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Top Three</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Top Three</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
+          <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
         </button>
 
         <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>My Plan</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Plan</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps done</span>
+            <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps done</span>
             <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
           </span>
         </button>
 
         <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={GLASS}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>Career Report</span>
+            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report</span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-[13.5px] font-bold sm:text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections ready</span>
+          <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections ready</span>
         </button>
       </section>
 
@@ -1459,6 +1445,8 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
   onGoPath: () => void;
 }) {
   const [draftTask, setDraftTask] = useState("");
+  // Every level starts closed (CEO, 4 Sept): opening into all the steps at
+  // once was overwhelming. The student taps the level they want.
   const [openHorizon, setOpenHorizon] = useState<string | null>(null);
 
   if (!focus) {
@@ -1470,127 +1458,106 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
     );
   }
 
-  const currentHorizonId = (career: ProfileCareer) => {
-    for (let index = 0; index < career.plan.length; index++) {
-      if (!horizonUnlocked(career, index)) break;
-      if (tasksFor(career, career.plan[index].id).some((task) => !doneSet(career.id).has(task.id))) return career.plan[index].id;
-    }
-    return career.plan[0].id;
-  };
   const allTasks = focus.plan.flatMap((horizon) => tasksFor(focus, horizon.id));
   const doneCount = allTasks.filter((task) => doneSet(focus.id).has(task.id)).length;
+  const RULE = "rgba(255,255,255,0.12)";
 
   return (
-    <div className="flex flex-col gap-[var(--space-3)]">
-      <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
-        <div>
-          <h2 key={focus.id} className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan · ${focus.title}`} /></h2>
+    <div className="flex flex-col gap-[var(--space-5)]">
+      {/* One header surface: title, the change-route link, and the whole-plan
+         progress as a single line. Built like the career page's panels: one
+         layer of glass, hairlines inside, nothing stacked on top. */}
+      <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={GLASS}>
+        <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+          <h2 key={focus.id} className="text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan for ${focus.title}`} /></h2>
+          <button type="button" onClick={onGoPath} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route <ArrowRight size={14} strokeWidth={2.75} aria-hidden /></button>
         </div>
-        <button type="button" onClick={onGoPath} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}><span className="inline-flex items-center gap-[4px]">Change route <ArrowRight size={12} strokeWidth={2.75} aria-hidden /></span></button>
-      </div>
-
-      {/* Your roadmap: overall progress across every step */}
-      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-8)] gap-y-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={GLASS}>
-        <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
-          <span className={CAPTION} style={{ color: "var(--muted-foreground)" }}>Your roadmap</span>
-          <span className="text-[19px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", backgroundImage: "linear-gradient(100deg, var(--foreground) 8%, var(--accent-subtle) 92%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{doneCount}/{allTasks.length} steps done</span>
-          <SparkBar
-            className="w-full max-w-[420px]"
-            percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)}
-            min={2}
-            height={6}
-            track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)"
-            fill="var(--accent-subtle)"
-            glow="var(--accent-subtle)"
-          />
-        </span>
+        <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+          <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
+          <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allTasks.length}</span>
+        </div>
+        <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
       </section>
-      <div className="flex flex-col gap-[var(--space-3)]">
-        {focus.plan.map((horizon, index) => {
-          const unlocked = horizonUnlocked(focus, index);
-          const stats = horizonProgress(focus, index);
-          // Visibility is never gated (report handoff 11.2): every level opens;
-          // only CHECKING OFF waits for the earlier steps.
-          const isOpen = openHorizon ? openHorizon === horizon.id : currentHorizonId(focus) === horizon.id;
-          return (
-            <div key={horizon.id} className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.8 }}>
-              <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? "none" : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[inherit] p-[var(--space-4)] text-left">
-                <span className="flex min-w-0 items-center gap-[var(--space-3)]">
-                  <span className="flex size-8 flex-none items-center justify-center rounded-full text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", background: unlocked ? "var(--primary)" : "var(--glass-surface-2)", color: unlocked ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className={CAPTION} style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
-                    <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
-                    <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>
-                  </span>
-                </span>
-                <span className="flex flex-none items-center gap-[var(--space-3)]">
-                  {unlocked ? (
-                    <span className="text-[14px] font-bold" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total} done</span>
-                  ) : (
-                    <span className="text-[12px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}</span>
-                  )}
-                  <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
-                </span>
-              </button>
-              {isOpen && (
-                <div className="filters-reveal flex flex-col gap-[var(--space-2)] border-t p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                  {tasksFor(focus, horizon.id).map((task) => {
-                    const complete = doneSet(focus.id).has(task.id);
-                    const TaskIcon = ACTION_ICON[task.action];
-                    return (
-                      <div key={task.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)", opacity: complete ? 0.6 : 1 }}>
-                        <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-5 flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "var(--glass-stroke, rgba(255,255,255,0.3))" }}>
-                          {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+
+      {focus.plan.map((horizon, index) => {
+        const unlocked = horizonUnlocked(focus, index);
+        const stats = horizonProgress(focus, index);
+        // Visibility is never gated (report handoff 11.2): every level opens;
+        // only CHECKING OFF waits for the earlier steps.
+        const isOpen = openHorizon === horizon.id;
+        const tasks = tasksFor(focus, horizon.id);
+        return (
+          <section key={horizon.id} className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={{ ...GLASS, opacity: unlocked ? 1 : 0.85 }}>
+            <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? null : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
+                <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
+                <span className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>
+              </span>
+              <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
+                <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total}</span>
+                <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+              </span>
+            </button>
+            {isOpen && (
+              <div className="filters-reveal flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
+                {!unlocked && (
+                  <p className="mb-[var(--space-2)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}. You can read ahead; checking off waits.</p>
+                )}
+                {/* rows on hairlines, like every row on the career page: the
+                   check, the step in body weight, the time, the one action */}
+                {tasks.map((task, i) => {
+                  const complete = doneSet(focus.id).has(task.id);
+                  const TaskIcon = ACTION_ICON[task.action];
+                  return (
+                    <div key={task.id} className={`flex items-center gap-[12px] py-[11px] ${i === 0 ? "border-t" : "border-t"}`} style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
+                      <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                        {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                      </button>
+                      <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
+                        {task.label}
+                        {task.custom && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Yours</span>}
+                      </span>
+                      <span className="flex-none text-[13px] leading-[17px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
+                      {!complete && !task.custom && (
+                        <Link href={task.href} aria-label={`${task.action}: ${task.label}`} title={task.action} className="dm-quiet flex h-[32px] flex-none items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                          <TaskIcon className="h-3.5 w-3.5" aria-hidden /> {task.action}
+                        </Link>
+                      )}
+                      {task.custom && (
+                        <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[6px]" style={{ color: "var(--muted-foreground)" }}>
+                          <X className="h-3.5 w-3.5" />
                         </button>
-                        <span className={`min-w-0 flex-1 text-[15px] leading-[17px] font-bold ${complete ? "line-through" : ""}`}>{task.label}</span>
-                        {task.custom && (
-                          <span className="flex-none rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[8.5px] font-bold tracking-[0.4px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Yours</span>
-                        )}
-                        <span className="flex-none text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
-                        {!complete && !task.custom && (
-                          <Link href={task.href} aria-label={`${task.action}: ${task.label}`} title={task.action} className="flex flex-none items-center rounded-full border p-[6px]" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
-                            <TaskIcon className="h-3.5 w-3.5" />
-                          </Link>
-                        )}
-                        {task.custom && (
-                          <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[4px]" style={{ color: "var(--muted-foreground)" }}>
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Add your own step */}
-                  <form
-                    className="flex items-center gap-[8px] rounded-[var(--radius-md)] border border-dashed px-[var(--space-3)] py-[var(--space-2)]"
-                    style={{ borderColor: "var(--glass-border)" }}
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      addCustomTask(focus.id, horizon.id, draftTask);
-                      setDraftTask("");
-                    }}
-                  >
-                    <Plus className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
-                    <input
-                      value={draftTask}
-                      onChange={(event) => setDraftTask(event.target.value)}
-                      placeholder="Add your own step"
-                      className="min-w-0 flex-1 bg-transparent text-[15px] font-bold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-                      style={{ color: "var(--foreground)" }}
-                    />
-                    <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-md)] border px-[12px] py-[4px] text-[15px] font-semibold disabled:opacity-35" style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}>
-                      Add
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <p className="pt-[var(--space-2)] text-center text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        You&apos;re building something real. <span style={{ color: "var(--accent-subtle)" }}>Every step brings your future closer.</span>
-      </p>
+                      )}
+                    </div>
+                  );
+                })}
+                <form
+                  className="flex items-center gap-[12px] border-t pt-[11px]"
+                  style={{ borderColor: RULE }}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    addCustomTask(focus.id, horizon.id, draftTask);
+                    setDraftTask("");
+                  }}
+                >
+                  <Plus className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                  <input
+                    value={draftTask}
+                    onChange={(event) => setDraftTask(event.target.value)}
+                    placeholder="Add your own step"
+                    className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+                    style={{ color: "var(--foreground)" }}
+                  />
+                  <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex h-[32px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] text-[13px] font-bold disabled:opacity-35" style={{ color: "var(--accent-subtle)" }}>
+                    Add
+                  </button>
+                </form>
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -1988,18 +1955,25 @@ function SettingsView({ onClose }: { onClose: () => void }) {
 function ResumeView() {
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-8)]" style={GLASS}>
-      <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
-      <ol className="flex flex-col gap-[var(--space-3)]">
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
+        {/* Said plainly (CEO, 4 Sept): a partner was told this exists, opened
+           it, and found nothing that said it was still being built. */}
+        <span className="rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[12px] leading-[16px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>Coming soon</span>
+      </div>
+      <p className="max-w-[56ch] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>The resume builder is being designed now. When it opens, it will build a first draft from your plan and your saved careers, then tailor it to a job and get volunteer feedback.</p>
+      {/* rows on hairlines, not cards stacked on the card (CEO, 4 Sept) */}
+      <ol className="flex flex-col">
         {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
-          <li key={step} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-3)]" style={GLASS}>
-            <span className="flex size-7 flex-none items-center justify-center rounded-full text-[15px] font-bold" style={{ background: index === 0 ? "var(--primary)" : "var(--glass-surface-2)", color: index === 0 ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{index + 1}</span>
-            <span className="text-[14px] font-bold">{step}</span>
+          <li key={step} className="flex items-center gap-[var(--space-3)] border-t py-[11px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+            <span className="flex size-7 flex-none items-center justify-center rounded-full text-[13px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{index + 1}</span>
+            <span className="text-[15px] leading-[22px]">{step}</span>
           </li>
         ))}
       </ol>
       <div className="flex items-center gap-[var(--space-3)]">
-        <button type="button" className="dm-quiet w-fit cursor-pointer rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-          Continue
+        <button type="button" disabled className="w-fit rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-bold opacity-50" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+          Opens soon
         </button>
       </div>
     </section>

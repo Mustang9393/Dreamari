@@ -62,6 +62,24 @@ function Portal({ children }: { children: React.ReactNode }) {
 
 // Colleges read as three even rows: reach, then target, then safety.
 const BAND_ORDER: Record<CollegeStatus, number> = { Reach: 0, Target: 1, Safety: 2 };
+// The student's state, then the states a day trip away, then anywhere.
+const HOME_STATE = "NJ";
+const NEAR_STATES = ["NY", "PA", "CT", "DE"];
+function distanceRank(location: string): number {
+  const state = location.trim().slice(-2).toUpperCase();
+  if (state === HOME_STATE) return 0;
+  if (NEAR_STATES.includes(state)) return 1;
+  return 2;
+}
+/** One school per band, the closest to home in each, in Reach, Target,
+ *  Safety order. Deterministic, so the same career always shows the same
+ *  three and the rule can be said in one line above them. */
+function pickColleges<T extends { status: CollegeStatus; location: string }>(colleges: T[]): T[] {
+  return (["Reach", "Target", "Safety"] as CollegeStatus[])
+    .map((band) => colleges.filter((c) => c.status === band).sort((a, b) => distanceRank(a.location) - distanceRank(b.location))[0])
+    .filter((c): c is T => !!c)
+    .sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]);
+}
 
 // 11 -> "11th". Grades only, so the teen rules are all that matter.
 function ordinal(n: string): string {
@@ -132,7 +150,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
 function Fact({ label, value, icon: Icon, className }: { label: string; value: React.ReactNode; icon?: typeof Check; className?: string }) {
   return (
     <div className={`rounded-[var(--radius-sm)] border px-[16px] py-[14px] ${className ?? ""}`} style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-      <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>
+      <dt className="flex items-center gap-[6px] text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>
         {Icon && <Icon className="h-[13px] w-[13px] flex-none" aria-hidden />}
         {label}
       </dt>
@@ -305,27 +323,23 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 03 — Education. The common path gets the one accented tile on the
-           page; the alternatives are even rows under a caps label. */}
+        {/* 03 — Education. Every route gets the same row (CEO, 4 Sept: the
+           lone accented tile had no reason a student could see). The most
+           common path leads and carries a small tag; the rest follow. */}
         <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
-          <div className="flex flex-col gap-[20px]" data-keep-together>
-            <div className="rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 38%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))" }}>
-              <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most Common Path</h4>
-              <p className="mt-[7px] max-w-[50ch] text-[13px] leading-[19px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
-                {report.education.find((route) => route.common)?.name}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Other Viable Pathways</h4>
-              <ul className="mt-[10px] grid list-none gap-[10px] p-0 sm:grid-cols-2">
-                {report.education.filter((route) => !route.common).map((route) => (
-                  <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+          <div data-keep-together>
+            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Ways in, most common first</h4>
+            <ul className="mt-[10px] grid list-none gap-[10px] p-0 sm:grid-cols-2">
+              {[...report.education].sort((a, b) => Number(!!b.common) - Number(!!a.common)).map((route) => (
+                <li key={route.name} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] border px-[16px] py-[13px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                  <span className="flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{route.name}</span>
-                    <span className="flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    {route.common && <span className="text-[11.5px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Most common</span>}
+                  </span>
+                  <span className="flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold tabular-nums" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>{route.time}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </ReportSection>
 
@@ -335,7 +349,7 @@ function ReportDocument({
            a backend data-model note, not UI. */}
         <ReportSection id={`${idPrefix}courses`} n={4} title="Courses to Consider" icon={ListChecks}>
           <div data-keep-together>
-            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--ink-faint)" }}>Classes that support this route</h4>
+            <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>Classes that support this route</h4>
             {/* One line, per the Aug 29 doc ("Statistics - Economics"): the
                classes read as a single statement under the subhead, not two
                chips competing with it. Body-sized, below the 14px subhead. */}
@@ -362,8 +376,13 @@ function ReportDocument({
             </Link>
           }
         >
-          <div className="grid gap-[14px] sm:grid-cols-2">
-            {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
+          {/* The rule, stated (CEO, 4 Sept: schools from three states read as
+             random in a demo): one reach, one target, one safety, and within
+             each band the school closest to home wins. Home is the student's
+             state; the next ring is the states around it. */}
+          <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>One reach, one target, one safety, closest to home first</h4>
+          <div className="mt-[10px] grid gap-[14px] sm:grid-cols-3">
+            {pickColleges(report.colleges).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
@@ -375,6 +394,7 @@ function ReportDocument({
                   {college.status}
                 </span>
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
+                <span className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>{college.location}</span>
                 <span data-print-hide className="mt-[7px] inline-flex items-center gap-[4px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
                   Look this up <ArrowRight className="h-3 w-3" aria-hidden />
                 </span>
@@ -613,15 +633,25 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
       color: active ? "var(--paper)" : "var(--ink-soft)",
     }) as const;
 
+  // Closed until the student opens it (CEO, 4 Sept): open, it made the
+  // report read longer and pulled attention off the report itself.
+  const [open, setOpen] = useState(false);
   return (
     <section aria-labelledby="reflection-title" className="dm-report rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-6)]">
       <div className="w-full">
-        <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
-          <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
-            <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
+        <button type="button" aria-expanded={open} aria-controls="reflection-body" onClick={() => setOpen((o) => !o)} className="dm-link flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] text-left">
+          <h3 id="reflection-title" className="flex items-center gap-[12px] text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
+            <span aria-hidden className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}>
+              <PenLine className="h-[16px] w-[16px]" style={{ color: "var(--primary)" }} aria-hidden />
+            </span>
+            My Reflection
+          </h3>
+          <span className="flex flex-none items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--ink-faint)" }}>
+            {saved ? "Saved" : open ? "" : "Tap to open"}
+            <ChevronDown className="h-4 w-4 transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} aria-hidden />
           </span>
-          My Reflection
-        </h3>
+        </button>
+        <div id="reflection-body" hidden={!open}>
 
         {/* Each question reads as its own loose group (generous gap between
            question label and its chips, generous gap between chips
@@ -678,6 +708,7 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
               {saved ? "Reflection saved" : "Not saved yet"}
             </span>
           </div>
+        </div>
         </div>
       </div>
     </section>
