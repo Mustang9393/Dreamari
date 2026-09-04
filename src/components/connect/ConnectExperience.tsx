@@ -443,13 +443,20 @@ const PHOTO_COVER: Record<string, string> = {
  *  photos on event cards or boards): dark glass, the partner's colour as one
  *  glow rising from the top-right corner, a fine ruled pattern, grain. */
 function EventSurface({ accent }: { accent: string }) {
+  // Brand colours run from EY yellow to Morgan Stanley's near-black navy. A
+  // dark one vanished against the card (no glow, no visible edge: direct
+  // feedback), so every accent is lifted toward white by the same amount
+  // before it is used for the glow, the edge and the tab.
+  const lit = `color-mix(in srgb, ${accent} 62%, #ffffff)`;
   return (
     <>
-      <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${accent} 58%, transparent) 0%, color-mix(in srgb, ${accent} 18%, transparent) 42%, transparent 72%)` }} />
+      <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 70% at 100% 0%, color-mix(in srgb, ${lit} 58%, transparent) 0%, color-mix(in srgb, ${lit} 18%, transparent) 42%, transparent 72%)` }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 14px)" }} />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
+      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit }} />
+      {/* the card's edge, drawn here so every event surface gets the same one */}
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${lit} 45%, transparent)` }} />
     </>
   );
 }
@@ -1687,7 +1694,7 @@ function HomeView({
                 <div
                   key={event.id}
                   className="group relative flex min-h-[250px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-                  style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+                  style={{ background: "#0e0c20", fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
                 >
                   <EventSurface accent={pAccent} />
                   <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]">
@@ -1998,7 +2005,7 @@ function EventView({
       <section
         aria-label="Event context"
         className="group relative overflow-hidden rounded-[var(--radius-lg)] px-[var(--space-6)] py-[var(--space-5)]"
-        style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+        style={{ background: "#0e0c20", fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         <EventSurface accent={pAccent} />
         {/* the lockup sits in the header's top-right corner, on the header's own
