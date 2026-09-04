@@ -585,7 +585,7 @@ const PHOTO_FOCUS: Record<string, string> = {
 // category, four stat tiles, then one action at the right. Ours puts the
 function StatTile({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+    <div className="flex min-w-0 flex-col items-center gap-[1px] rounded-[var(--radius-sm)] px-[2px] py-[9px]" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
       <span className="text-[17px] leading-[21px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{value}</span>
       <span className="max-w-full truncate text-[10.5px] leading-[14px] font-semibold tracking-[-0.01em]" style={{ color: "rgba(255,255,255,0.7)" }}>{label}</span>
     </div>
@@ -649,23 +649,25 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
              always says how many are missing, so Open never gets crowded. */}
           <div className="flex min-w-0 items-center gap-[6px]">
             {community.professionalsFrom.slice(0, 3).map((name, index) => (
-              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[360px]:flex" : "hidden @[460px]:flex"}><CompanyChip name={name} /></span>
+              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[360px]:flex" : "hidden @[460px]:flex"}><CompanyChip name={name} tone="frost" /></span>
             ))}
             {[1, 2, 3].map((shown) => {
               const missing = community.professionalsFrom.length - shown;
               if (missing <= 0) return null;
               const vis = shown === 1 ? "flex @[360px]:hidden" : shown === 2 ? "hidden @[360px]:flex @[460px]:hidden" : "hidden @[460px]:flex";
               return (
-                <span key={shown} className={`${vis} h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold`} style={{ background: "rgba(12,16,35,0.58)", color: "#FFFFFF", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>+{missing}{shown === 3 ? " more" : ""}</span>
+                <span key={shown} className={`${vis} h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold`} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}>+{missing}{shown === 3 ? " more" : ""}</span>
               );
             })}
           </div>
+          {/* a button that reads as one (direct feedback), without the blue:
+             a frosted white pill with a hairline, the card's own light */}
           <button
             type="button"
             onClick={onOpen}
             aria-label={`Open ${community.name}`}
-            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[13px] leading-[18px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase"
-            style={{ color: `color-mix(in srgb, ${accent} 45%, #FFFFFF)` }}
+            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13px] leading-[18px] font-bold whitespace-nowrap"
+            style={{ background: "rgba(255,255,255,0.16)", borderColor: "rgba(255,255,255,0.3)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", color: "#FFFFFF" }}
           >
             Open <ArrowRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[3px]" aria-hidden strokeWidth={2.75} />
           </button>

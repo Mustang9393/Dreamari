@@ -83,9 +83,10 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   const openCount = ROUTED.filter((q) => (routed[q.id] ?? "open") === "open" || routed[q.id] === "answering").length;
   const words = ["No", "One", "Two", "Three"][openCount] ?? String(openCount);
   const answeredThreads = THREADS.filter((t) => t.responses.some((r) => r.kind === "answer" && r.proId === pro.id));
-  // "87 answered" needs somewhere to go (direct feedback): one answered
-  // question shows by default, View all opens the rest.
-  const [allAnswered, setAllAnswered] = useState(false);
+  // "87 answered" needs somewhere to go (direct feedback): View all opens a
+  // full screen of answered questions, its own page, since this list will
+  // run to hundreds. One recent answer stays on the dashboard as a preview.
+  const [showAnswered, setShowAnswered] = useState(false);
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
@@ -111,6 +112,49 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
     { icon: MessagesSquare, value: formatCount(pro.questionsAnswered + answeredNow), label: "Questions answered", delta: 7 },
   ];
   const company = { pros: 8 + (pro.org.length * 7) % 40, get students() { return this.pros * 330; }, get answers() { return this.pros * 55; } };
+
+  if (showAnswered) {
+    const total = pro.questionsAnswered + answeredNow;
+    return (
+      <>
+        <button type="button" onClick={() => setShowAnswered(false)} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+          <ArrowLeft className="h-4 w-4" aria-hidden /> My profile
+        </button>
+        <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
+          <h1 className="text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Questions you answered</h1>
+          <span className="text-[14px] leading-[19px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{total} answered</span>
+        </div>
+        <Panel id="answered-all-title" title="Newest first">
+          <ul className="-mt-[var(--space-2)] flex flex-col">
+            {answeredThreads.map((t) => {
+              const s = signals(t.views, t.helpful, undefined);
+              return (
+                <li key={t.id} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+                  <div className="flex items-center justify-between gap-[var(--space-3)]">
+                    <span className="flex min-w-0 items-center gap-[8px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      <Avatar name={t.handle} size={26} />
+                      <strong className="font-bold" style={{ color: "var(--foreground)" }}>{t.handle}</strong> · {t.grade} · {t.postedAgo}
+                    </span>
+                    <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: "var(--world-food-farming-nature)" }}><CheckCircle2 className="h-3 w-3" aria-hidden /> Answered</span>
+                  </div>
+                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+                  <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+                    <SignalRow {...s} accent={accent} />
+                    <button type="button" onClick={() => nav?.openThread(t.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>View response <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {total > answeredThreads.length && (
+            <p className="border-t pt-[var(--space-4)] text-[13px] leading-[18px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+              {`${answeredThreads.length} of the ${total} are in`} this prototype&apos;s data. The real feed pages through all of them.
+            </p>
+          )}
+        </Panel>
+      </>
+    );
+  }
 
   return (
     <>
@@ -203,7 +247,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                 );
               })}
               {/* one already-answered question, with what it did; View all opens the rest */}
-              {answeredThreads.slice(0, allAnswered ? undefined : 1).map((t) => {
+              {answeredThreads.slice(0, 1).map((t) => {
                 const s = signals(t.views, t.helpful, undefined);
                 return (
                   <li key={t.id} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] last:pb-0" style={{ borderColor: RULE }}>
@@ -222,16 +266,11 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                   </li>
                 );
               })}
-              {(answeredThreads.length > 1 || pro.questionsAnswered + answeredNow > answeredThreads.length) && (
-                <li className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-                  <button type="button" aria-expanded={allAnswered} onClick={() => setAllAnswered((v) => !v)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                    {allAnswered ? "Show less" : `View all ${pro.questionsAnswered + answeredNow} answered`} <ChevronRight className="h-3.5 w-3.5 transition-transform" style={{ transform: allAnswered ? "rotate(90deg)" : "none" }} aria-hidden />
-                  </button>
-                  {allAnswered && pro.questionsAnswered + answeredNow > answeredThreads.length && (
-                    <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{answeredThreads.length} of them are in this prototype&apos;s data.</span>
-                  )}
-                </li>
-              )}
+              <li className="flex items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+                <button type="button" onClick={() => setShowAnswered(true)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                  View all {pro.questionsAnswered + answeredNow} answered <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              </li>
             </ul>
           </Panel>
 

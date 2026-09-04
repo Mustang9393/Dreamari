@@ -450,9 +450,12 @@ const CHIP_SIZE = { sm: { h: 22, px: 8, scale: 0.82, text: "text-[11px] leading-
  *  three sizes: sm beside small meta text, md in rows, lg in headings.
  *  Direct feedback: bare marks sat off the text line; the chip gives them a
  *  box to sit in wherever a company is named. */
-export function CompanyChip({ name, tone = "photo", size = "md" }: { name: string; tone?: "photo" | "surface"; size?: keyof typeof CHIP_SIZE }) {
+export function CompanyChip({ name, tone = "photo", size = "md" }: { name: string; tone?: "photo" | "surface" | "frost"; size?: keyof typeof CHIP_SIZE }) {
   const mark = COMPANY_MARKS[name];
-  const onPhoto = tone === "photo";
+  const onPhoto = tone === "photo" || tone === "frost";
+  // frost (direct feedback): on a photo card the mark sits on a light blur,
+  // no dark fill and no hairline, so it reads as a logo rather than a chip
+  const frost = tone === "frost";
   const ink = onPhoto ? "#FFFFFF" : "var(--foreground)";
   const dims = CHIP_SIZE[size];
   const box = mark ? markBox(mark.aspect, mark.height) : { width: 0, height: 0 };
@@ -467,8 +470,10 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
       style={{
         height: dims.h,
         paddingInline: dims.px,
-        background: onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
-        borderColor: onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
+        background: frost ? "rgba(255,255,255,0.12)" : onPhoto ? "rgba(12,16,35,0.55)" : "var(--glass-surface-1)",
+        borderColor: frost ? "transparent" : onPhoto ? "rgba(255,255,255,0.16)" : "var(--glass-border)",
+        backdropFilter: frost ? "blur(10px)" : undefined,
+        WebkitBackdropFilter: frost ? "blur(10px)" : undefined,
         color: ink,
         textShadow: "none",
       }}
