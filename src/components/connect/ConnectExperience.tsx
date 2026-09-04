@@ -1670,7 +1670,9 @@ function HomeView({
               const upcoming = event.lifecycle === "Upcoming";
               const pAccent = partnerAccent(event.host);
               const joined = eventJoined[event.id];
-              const when = upcoming ? (/^[A-Z][a-z]+ \d/.test(event.date) ? `Next event ${event.date}` : event.date) : event.nextDate ? `Next event ${event.nextDate}` : `Last event ${event.date}`;
+              // the date the card is about (the next one when booked), its time
+              // once confirmed, then where: the city lives here, not in the name
+              const when = [event.nextDate ?? event.date, event.time, event.location].filter(Boolean).join(", ");
               return (
                 <div
                   key={event.id}
@@ -1998,11 +2000,10 @@ function EventView({
           <div className="min-w-[220px] flex-1 self-start pt-[8px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
-            {/* the name already carries the company and the city; the line
-               under it says only when (CEO, 4 Sept) */}
-            <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
-              <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> Last event {event.date}</span>
-              {event.nextDate && <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5" aria-hidden /> Next event {event.nextDate}</span>}
+            {/* the name carries the partnership; the line under it says when
+               and where (the company is not repeated) */}
+            <p className="mt-[6px] flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
+              <Calendar className="h-3.5 w-3.5 flex-none" aria-hidden /> {[event.nextDate ?? event.date, event.time, event.location].filter(Boolean).join(", ")}
             </p>
           </div>
           <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} size="lg" />
@@ -2619,7 +2620,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>
             <h2 className="mt-[4px] text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{event.name}</h2>
-            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Last event {event.date}</p>
+            <p className="mt-[4px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{[event.nextDate ?? event.date, event.time, event.location].filter(Boolean).join(", ")}</p>
             <p className="mt-[10px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}>
               This private board is limited to verified attendees and event professionals. Joining adds it to Your events. You won&apos;t need the code again, and access can be managed by the host.
             </p>

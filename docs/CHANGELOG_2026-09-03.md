@@ -138,7 +138,7 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 
 ## Connect, 4 Sept (CEO notes)
 
-- Event boards are named "Nonprofit & Company City" and are ongoing channels, not one day's event: Dream Opportunity & EY NJ, Dream Opportunity & Morgan Stanley NYC, Junior Achievement & Goldman Sachs NYC, Dream Opportunity & SEO Scholars NYC (new, partner and date to confirm), Dream Opportunity & JPMorgan Chase Brooklyn. AT&T Dallas is out: the boards follow one New Jersey student. The card shows the last or next event date only, since the name already says company and city.
+- Event boards are named "Nonprofit & Company" and are ongoing channels, not one day's event: Dream Opportunity & EY, Dream Opportunity & Morgan Stanley, Junior Achievement & Goldman Sachs, Dream Opportunity & SEO Scholars (new, partner and date to confirm), Dream Opportunity & JPMorgan Chase. The city sits with the date under the name. AT&T Dallas is out: the boards follow one New Jersey student. The line under the name is the date (the next one when booked), the time once confirmed, and the city.
 - Event cards are no longer colour blocks: dark glass, the partner's colour as a corner glow, a fine ruled texture. Students, Pros and Posts are back on every card and in the board header, because partner nonprofits pay to see them. Open board and Enter code are solid buttons.
 - The Junior Achievement mark was JA Singapore's; it is set in type until a US mark arrives.
 - Ask a question is replaced by a search bar on the Connect landing (communities, topics, companies, events). Asking lives inside each board.

@@ -1193,8 +1193,9 @@ export const OPPORTUNITIES: Opportunity[] = [
 
 export type EventBoard = {
   id: string;
-  /** "Nonprofit & Company City" (CEO, 4 Sept): a board is an ongoing channel
-   *  for a partnership, not one day's event, so no "Student Impact Day". */
+  /** "Nonprofit & Company" (CEO, 4 Sept): a board is an ongoing channel for
+   *  a partnership, not one day's event, so no "Student Impact Day". The
+   *  city rides with the date, not in the name. */
   name: string;
   host: string;
   /** The two marks in the lockup: the nonprofit that brings the students and
@@ -1206,6 +1207,9 @@ export type EventBoard = {
   date: string;
   /** The next event on this board's calendar, when one is booked. */
   nextDate?: string;
+  /** Start time of the event the card shows, once the host confirms it.
+   *  None are confirmed yet, so none are shown; nothing is invented. */
+  time?: string;
   location: string;
   // Lifecycle per handoff 9.4 (Draft/Scheduled/Live collapsed for this
   // prototype into the two states the UI actually distinguishes): a
@@ -1238,13 +1242,13 @@ export const EVENTS: EventBoard[] = [
   // City"; dates are the last event and, where booked, the next one.
   {
     id: "event-ey",
-    name: "Dream Opportunity & EY NJ",
+    name: "Dream Opportunity & EY",
     host: "Ernst & Young",
     lead: "Dream Opportunity",
     partner: "EY",
     date: "August 14, 2026",
     nextDate: "November 4, 2026",
-    location: "EY, Hoboken",
+    location: "Hoboken, NJ",
     lifecycle: "Active follow-up",
     closesOn: "September 5, 2026",
     students: 142,
@@ -1286,12 +1290,12 @@ export const EVENTS: EventBoard[] = [
   // with its code.
   {
     id: "event-do-morgan-stanley-nyc",
-    name: "Dream Opportunity & Morgan Stanley NYC",
+    name: "Dream Opportunity & Morgan Stanley",
     host: "Morgan Stanley",
     lead: "Dream Opportunity",
     partner: "Morgan Stanley",
     date: "March 12, 2026",
-    location: "Morgan Stanley, New York City",
+    location: "New York, NY",
     lifecycle: "Active follow-up",
     closesOn: "September 30, 2026",
     students: 312,
@@ -1303,12 +1307,12 @@ export const EVENTS: EventBoard[] = [
   },
   {
     id: "event-ja-goldman-sachs-nyc",
-    name: "Junior Achievement & Goldman Sachs NYC",
+    name: "Junior Achievement & Goldman Sachs",
     host: "Junior Achievement",
     lead: "Junior Achievement",
     partner: "Goldman Sachs",
     date: "April 16, 2026",
-    location: "Goldman Sachs, New York City",
+    location: "New York, NY",
     lifecycle: "Active follow-up",
     closesOn: "October 15, 2026",
     students: 236,
@@ -1324,12 +1328,12 @@ export const EVENTS: EventBoard[] = [
   // its first event.
   {
     id: "event-seo-scholars-nyc",
-    name: "Dream Opportunity & SEO Scholars NYC",
+    name: "Dream Opportunity & SEO Scholars",
     host: "SEO Scholars",
     lead: "Dream Opportunity",
     partner: "SEO Scholars",
     date: "First event to be announced",
-    location: "New York City",
+    location: "New York, NY",
     lifecycle: "Upcoming",
     orgs: ["SEO Scholars", "Dream Opportunity", "Dreamari"],
     topics: ["College", "Careers", "Networking"],
@@ -1340,12 +1344,12 @@ export const EVENTS: EventBoard[] = [
   // event, same lifecycle rule as always. No invented stats.
   {
     id: "event-jpmc-brooklyn",
-    name: "Dream Opportunity & JPMorgan Chase Brooklyn",
+    name: "Dream Opportunity & JPMorgan Chase",
     host: "JPMorgan Chase",
     lead: "Dream Opportunity",
     partner: "JPMorgan Chase",
     date: "October 23, 2026",
-    location: "Brooklyn, New York",
+    location: "Brooklyn, NY",
     lifecycle: "Upcoming",
     orgs: ["Dream Opportunity", "JPMorgan Chase", "Dreamari"],
     topics: ["Finance", "Networking"],
