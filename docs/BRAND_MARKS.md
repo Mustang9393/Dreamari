@@ -34,4 +34,4 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Johnson & Johnson | Not found | White | To confirm |
 | Blackstone | Not checked | White | To confirm |
 
-Beyond colour: most of these brands require permission for a third party to show their logo at all. Decision of 4 Sept 2026: every mark in this table is cleared for demo use. Before public launch each needs a written OK or a text name instead. The Kellogg's office tour was filmed at Kellanova, so it carries the Mars mark.
+Beyond colour: most of these brands require permission for a third party to show their logo at all. Decision of 4 Sept 2026: every mark in this table is cleared for demo use. Before public launch each needs a written OK or a text name instead. The Kellogg's office tour is a Kellogg's office and carries the Kellogg's mark; only the Kellanova talent director clip carries Mars.
