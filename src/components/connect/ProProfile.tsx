@@ -160,8 +160,7 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 // ——— People to Follow (below the communities) ———
 
 /** A row of faces, no frames (direct feedback): the portrait is the card.
- *  Big avatar with a quiet hairline, the verified shield on its corner and
- *  nothing else, the first name, the role, the firm as text, and
+ *  Big avatar, no ring, the verified shield on its corner and nothing else, the first name, the role, the firm as text, and
  *  a small Follow button. Tapping the face opens the profile. */
 export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
@@ -172,8 +171,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
       <SectionHead>Professionals to Follow</SectionHead>
       <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
-          // no coloured ring (direct feedback: it read as unseen stories); a
-          // quiet hairline keeps the portrait's edge on dark photos
+          // no ring of any kind (direct feedback: a ring reads as a story)
           const following = !!follows[pro.id];
           return (
             <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
@@ -182,8 +180,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
                   type="button"
                   onClick={() => nav?.openPro(pro.id)}
                   aria-label={`Open ${pro.name}'s profile`}
-                  className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full border leading-none"
-                  style={{ borderColor: "rgba(255,255,255,0.14)" }}
+                  className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full leading-none"
                 >
                   <Avatar name={pro.name} size={80} />
                 </button>
