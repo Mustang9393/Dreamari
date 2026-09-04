@@ -221,3 +221,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Explore videos: the Kellogg's office tour carries the Mars mark (filmed at Kellanova, now Mars). The two aviation maintenance technician clips are in the Explore For You reel as Part 1 and Part 2; no company is named in them so they sit with the career clips.
 - Brand marks: every mark is cleared for demo use. Microsoft, Apple and Netflix show their marks again instead of type. Register updated.
 - Landing on phones: after a scripted advance (Play to Connect), the browser now treats the new chapter as the snapped one, so tapping Enter Community no longer snaps the page back to Play.
+- Landing: Get Hired has its own scroll cue again (there is more below it), so on tablets the only cue in view is no longer the previous chapter's.

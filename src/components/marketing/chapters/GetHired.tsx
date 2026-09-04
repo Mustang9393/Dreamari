@@ -54,7 +54,9 @@ export function GetHiredChapter() {
 
   return (
     <ChapterShell
-      nudge={false}
+      // Get Hired keeps its cue: "You're ready" and the footer sit below it,
+      // and without one the previous chapter's cue was the only one in sight
+      // on tablets (direct feedback, 4 Sept 2026).
       id="get-hired"
       title="Get hired"
       color={WORLD_COLOR}
