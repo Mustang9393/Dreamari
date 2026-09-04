@@ -150,6 +150,7 @@ export function OptionButton({
   tier,
   dimmed,
   revealed,
+  numbered = true,
   onClick,
 }: {
   label: string;
@@ -162,6 +163,8 @@ export function OptionButton({
    *  chose something else. Being told WHICH one was right, at the moment you get
    *  it wrong, is most of what instant feedback is for. */
   revealed?: boolean;
+  /** Hide the 1, 2, 3 badge until there is a result to show in its place. */
+  numbered?: boolean;
   onClick: () => void;
 }) {
   const bad = Boolean(picked) && (tier === "wrong" || tier === "risky");
@@ -189,7 +192,7 @@ export function OptionButton({
       }}
     >
       <ConfirmShimmer active={mark === "right"} />
-      <span
+      {(numbered || mark) && <span
         aria-hidden
         className="flex h-[29px] w-[29px] flex-none items-center justify-center rounded-full border text-[13px] font-extrabold"
         style={{
@@ -199,7 +202,7 @@ export function OptionButton({
         }}
       >
         {mark === "wrong" ? <X className="h-[15px] w-[15px]" /> : mark ? <Check className="h-[15px] w-[15px]" /> : index + 1}
-      </span>
+      </span>}
       {label}
     </button>
   );
