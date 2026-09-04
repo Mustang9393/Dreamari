@@ -24,7 +24,9 @@ Audited 4 September 2026 against the Figma file "Dreamari Design System v2.0" (s
 | `--space-*` | 4px scale with the 6px half step (`--space-1h`) | both |
 | Display face | Bricolage Grotesque (UI/H2 19/24 Bold, UI/Body 16/22 SemiBold, logo ExtraBold) | both, as of 4 Sept |
 
-## Stale in Figma, correct in the prototype
+## Was stale in Figma, fixed 4 September 2026
+
+The four items below were found stale in the audit and corrected in the Figma file the same day (text styles retyped, CTA Default made blue; card and Favorit turned out to be already right). What remains is a fresh export from Figma into the app.
 
 | Item | Figma today | Prototype and intended state | Figma change needed |
 |---|---|---|---|
@@ -51,7 +53,7 @@ Figma Env Card v2 (like/dislike/save stack, white "More Info" CTA) and the Figma
 
 ## Instructions for the production app (Usman)
 
-1. Tokens: keep the certified Figma export as the source of names and values. Apply the four changes in the "Stale in Figma" table in Figma, re-export, and the app follows. Until that export exists, treat `src/components/marketing/tokens.css` in this repo as the authority for those four values only.
+1. Tokens: keep the certified Figma export as the source of names and values. The Figma file was corrected on 4 September 2026 (see the table above); re-export it and the app follows. Until that export lands, `src/components/marketing/tokens.css` in this repo carries the same values.
 2. Do not import `design-tokens/` from this repo. It is a different vocabulary. Its README says so.
 3. Components and screens: implement from the prototype. Variable names in the prototype's CSS match the Figma names one to one (`--primary`, `--glass-surface-2`, `--radius-md`), so a value in the prototype maps straight onto the app's token of the same name. Where the prototype uses a literal (an rgba or a px), it is a design decision, not a token; express it with the nearest app token or a component-local value.
 4. Order of trust when two sources disagree: this document, then the running prototype, then Figma. Figma is updated last because designs are no longer drawn there first.
