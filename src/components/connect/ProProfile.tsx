@@ -174,7 +174,7 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
           // no ring of any kind (direct feedback: a ring reads as a story)
           const following = !!follows[pro.id];
           return (
-            <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
+            <li key={pro.id} className="flex w-[124px] flex-none flex-col items-center gap-[8px] text-center">
               <span className="relative block h-[88px] w-[88px]">
                 <button
                   type="button"
@@ -201,8 +201,11 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
                 {/* three tiers, top down: the name (heading), what they do
                    (subheading, in ink), where (body, muted) */}
                 <span className="block w-full truncate text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
-                <span className="line-clamp-2 block min-h-[32px] w-full text-[13px] leading-[16px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</span>
-                <span className="block w-full truncate text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
+                {/* one line each, like Instagram's suggestions: every column is the
+                   same height, so Follow sits the same distance from every face.
+                   A long role truncates and the full text shows on hover. */}
+                <span className="block w-full truncate text-[13px] leading-[16px] font-semibold" title={pro.role} style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</span>
+                <span className="block w-full truncate text-[11.5px] leading-[15px]" title={pro.org} style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
               </span>
               <FollowButton compact following={following} onToggle={() => onFollow(pro.id)} />
             </li>

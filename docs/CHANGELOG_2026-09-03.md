@@ -179,3 +179,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Volunteer dashboard: "View all N answered" opens its own screen, Questions you answered, newest first, with a response link on each. Built to page through hundreds later; the prototype notes how many it holds.
 - Community cards: hovering or focusing "+N more" shows the remaining companies in a small tooltip.
 - Professionals to Follow: the only badge is the verified shield; the tier medals are gone (one icon in three tints that everyone wore said nothing). No ring of any kind around the portraits, so the row stops reading like story bubbles.
+- Professionals to Follow: name, role and firm are one line each, so every column is the same height and Follow sits the same distance from every face. Long roles truncate and show in full on hover.
