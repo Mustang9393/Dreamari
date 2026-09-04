@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
-import { usePlayingOnScroll } from "../scrollHooks";
+import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
 // Real question from the assessment (question 3 of 10): "Choose Your
 // Interests." Business & Money is the demo's example path, since that's this whole
@@ -74,7 +74,7 @@ function BuildDemo() {
     // straight into Match — advance the moment the feedback finishes, not after a
     // separate "linger and admire it" pause on top of that.
     setTimeout(() => {
-      document.getElementById("match")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      advanceTo("match");
     }, 400);
   }
 

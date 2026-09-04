@@ -1,5 +1,7 @@
 "use client";
 
+import { advanceTo } from "./scrollHooks";
+
 import { type RefObject, useEffect, useRef, useState } from "react";
 
 const CHAPTERS = [
@@ -81,7 +83,7 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
             key={chapter.id}
             type="button"
             aria-label={chapter.label}
-            onClick={() => document.getElementById(chapter.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            onClick={() => advanceTo(chapter.id)}
             className="group relative z-[2] flex h-3.5 w-3.5 items-center justify-center p-1"
           >
             <span

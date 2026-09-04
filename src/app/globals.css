@@ -8,6 +8,8 @@
    scroll-snap-type mid-gesture was the jank. Desktop and tablets are untouched. */
 @media (max-width: 767px) and (pointer: coarse) {
   html { scroll-snap-type: y mandatory; }
+  /* off for the length of a scripted advance (scrollHooks.advanceTo) */
+  html[data-snap-off="1"] { scroll-snap-type: none; }
   .mkt-snap, .mkt-chapter { scroll-snap-align: start; scroll-snap-stop: always; }
 }
 

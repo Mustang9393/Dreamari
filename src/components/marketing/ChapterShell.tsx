@@ -103,7 +103,7 @@ export function ChapterShell({
         // Phones: three rows, 1fr / graphic / 1fr, so the GRAPHIC sits at the
           // centre of the screen and the copy hangs directly above it (the cue
           // is the last row, at the foot). md and up keep the desktop grid.
-          className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-md:grid max-md:grid-cols-1 max-md:grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] max-md:gap-0 sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
+          className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-md:grid max-md:grid-cols-1 max-md:grid-rows-[minmax(min-content,1fr)_auto_minmax(0,1fr)] max-md:gap-0 sm:pt-10 sm:pb-10 lg:pt-14 lg:pb-14 ${
           centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
         }`}
         style={{ ["--c" as string]: color }}
@@ -216,8 +216,12 @@ export function ChapterShell({
             // the original values, which keep that proportion correct.
             // Phones (the pager): the frame is sized to what is left of the
             // screen under the nav, the copy and the scroll cue, so a chapter
-            // is exactly one screen. md and up keep the original ceilings.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:calc(100dvh_-_380px)] md:[--frame-h:min(74dvh,680px)] md:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
+            // is one screen where it fits. Compact chapters are NOT capped on
+            // phones: a max-height on a centred flex frame made a taller card
+            // spill upward into the copy (seen on an iPhone, Get Hired and
+            // Connect). The first grid row also never shrinks below the copy,
+            // so on a short phone the section grows instead of overlapping.
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-md:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] md:[--frame-h:min(74dvh,680px)] md:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               height: compact ? "auto" : "var(--frame-h)",

@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
-import { usePlayingOnScroll } from "../scrollHooks";
+import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
 
 // Reads as a real social post + comment thread (Facebook/Twitter shape: post, engagement
 // row, linear comments) done in this site's own glassmorphic surfaces — not a pinned
@@ -316,6 +316,13 @@ export function ConnectChapter() {
 
 function ConnectDemo() {
   const [screen, setScreen] = useState<"overview" | "post">("overview");
+  // Once the thread has been read, on to Get Hired (a finished interaction
+  // brings the next chapter in, same as Build, Match and Play).
+  useEffect(() => {
+    if (screen !== "post") return;
+    const t = setTimeout(() => advanceTo("get-hired"), 5200);
+    return () => clearTimeout(t);
+  }, [screen]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">

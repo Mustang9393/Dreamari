@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { ChapterShell } from "../ChapterShell";
-import { usePlayingOnScroll } from "../scrollHooks";
+import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import type { Tier } from "@/components/play/types";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -64,6 +64,20 @@ function PlayDemo() {
   const [typed, setTyped] = useState(0);
   const answered = phase === "answered";
   const xp = answered ? XP_AFTER_BEST : XP_START;
+  // A beat after the check lands, the conversation and the menu fade away and
+  // the card is only Christina's thumbs-up with "Correct!" over it.
+  const [celebrate, setCelebrate] = useState(false);
+  useEffect(() => {
+    if (!answered) return;
+    const t = setTimeout(() => setCelebrate(true), 900);
+    // and once the win has been seen, on to Connect (direct feedback: a
+    // finished interaction brings the next chapter in)
+    const next = setTimeout(() => advanceTo("connect"), 3200);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(next);
+    };
+  }, [answered]);
 
   // On arrival: a beat of just the scene, Christina's line types itself in,
   // then the choices come up with the cursor resting on the right one. Only
@@ -153,6 +167,17 @@ function PlayDemo() {
               <span aria-hidden className="pointer-events-none absolute inset-0 z-[4] motion-safe:animate-[mkt-win-flash_0.6s_ease-out_both]" style={{ background: "#fff" }} />
             </>
           )}
+          {celebrate && (
+            <div className="pointer-events-none absolute inset-0 z-[4] flex items-end justify-center pb-[14%]" aria-live="polite">
+              <span
+                className="mkt-burst flex flex-col items-center gap-[6px] rounded-[var(--radius-md-alt)] border px-[22px] py-[12px] text-center"
+                style={{ background: "rgba(8,10,22,0.72)", borderColor: "color-mix(in srgb, var(--color-feedback-success) 55%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "0 0 0 1px color-mix(in srgb, var(--color-feedback-success) 30%, transparent), 0 18px 40px -20px rgba(0,0,0,0.8)" }}
+              >
+                <span className="font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(26px, calc(var(--mu) * 22px), 34px)", lineHeight: 1, letterSpacing: "0.02em", color: "var(--color-feedback-success)", textShadow: "0 0 18px color-mix(in srgb, var(--color-feedback-success) 60%, transparent)" }}>Correct!</span>
+                <span className="text-[12.5px] leading-[16px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.85)" }}>Scope first, then slides.</span>
+              </span>
+            </div>
+          )}
 
           {/* XP: one gold bar the full width of the card, sparking when the answer lands */}
           <div aria-hidden className="absolute inset-x-0 top-0 z-[3]">
@@ -177,7 +202,7 @@ function PlayDemo() {
             <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" style={{ height: "52%", background: "linear-gradient(180deg, transparent, rgba(11,14,28,0.6) 55%, #0b0e1c 100%)", opacity: answered ? 0 : 1, transition: "opacity 700ms ease" }} />
 
             {/* the conversation: who is talking, then what they say */}
-            <div className="absolute inset-x-[10px] bottom-[6px] z-[3] flex gap-[10px] rounded-[var(--radius-md-alt)] border p-[10px]" style={{ background: "rgba(8,10,22,0.8)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <div className="absolute inset-x-[10px] bottom-[6px] z-[3] flex gap-[10px] rounded-[var(--radius-md-alt)] border p-[10px]" style={{ background: "rgba(8,10,22,0.8)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", opacity: celebrate ? 0 : 1, transition: "opacity 450ms ease" }}>
               <span className="relative block flex-none overflow-hidden rounded-[10px] border" style={{ width: "calc(var(--mu) * 40px)", height: "calc(var(--mu) * 40px)", borderColor: "rgba(255,255,255,0.18)", background: "#151a2e" }}>
                 <Image src={answered ? "/images/play/ib/face-christina.webp" : SCENARIO.speaker.face} alt="" fill sizes="80px" className="object-cover" />
               </span>
@@ -201,7 +226,7 @@ function PlayDemo() {
              card never changes height; tight to the dialogue above and to the
              bottom edge (direct feedback: no wasted space) */}
           <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 8px)", background: answered ? "transparent" : "#0b0e1c", transition: "background 700ms ease" }}>
-            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 4px)" }}>
+            <div className="flex flex-col" style={{ gap: "calc(var(--mu) * 4px)", opacity: celebrate ? 0 : 1, transition: "opacity 450ms ease", pointerEvents: celebrate ? "none" : undefined }}>
                 {/* the question is there from the start, dimmed while she is
                    still talking, so the frame never shows invented filler */}
                 <p className="px-[12px] font-extrabold transition-opacity duration-500" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(14px, calc(var(--mu) * 11.5px), 17px)", lineHeight: 1.25, color: "var(--foreground)", opacity: phase === "typing" ? 0.4 : 1 }}>{SCENARIO.question}</p>

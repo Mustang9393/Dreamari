@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ChapterShell } from "../ChapterShell";
-import { usePlayingOnScroll } from "../scrollHooks";
+import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
 // All three cards are real Business/Money/Office-world careers with real copy pulled
 // from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
@@ -120,7 +120,7 @@ function MatchDemo() {
   useEffect(() => {
     if (!matched) return;
     const timeout = setTimeout(() => {
-      document.getElementById("explore")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      advanceTo("explore");
     }, 950);
     return () => clearTimeout(timeout);
   }, [matched]);

@@ -85,3 +85,26 @@ export function useRevealOnScroll<T extends HTMLElement>() {
   }, []);
   return [ref, revealed] as const;
 }
+
+/** Scroll to a chapter from code (a finished interaction, the side rail).
+ *  On phones the document snaps y-mandatory; a smooth scroll fights that and
+ *  gets pulled back to the chapter it started in (seen on an iPhone). So the
+ *  snap is switched off for the ride and restored once the scroll settles. */
+export function advanceTo(id: string) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  const html = document.documentElement;
+  html.dataset.snapOff = "1";
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  let settled: ReturnType<typeof setTimeout> | undefined;
+  const done = () => {
+    window.removeEventListener("scroll", onScroll);
+    delete html.dataset.snapOff;
+  };
+  const onScroll = () => {
+    if (settled) clearTimeout(settled);
+    settled = setTimeout(done, 140);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  settled = setTimeout(done, 1200);
+}
