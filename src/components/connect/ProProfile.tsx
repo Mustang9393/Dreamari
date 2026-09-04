@@ -1,14 +1,14 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
+import { ArrowLeft, Bookmark, Download, Eye, Gem, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
+import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -293,42 +293,68 @@ export function ProProfileView({
       </button>
 
       {/* Identity: name > the doc's three numbers > role line and story >
-         verification. The company is its logo, once. */}
-      <section aria-label="Profile" className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ ...PANEL, background: `color-mix(in srgb, ${accent} 8%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${accent} 30%, rgba(255,255,255,0.16))` }}>
-        <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-          <Avatar name={pro.name} verified size={64} />
-          <div className="min-w-0 flex-1">
-            <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
-            <p className="mt-[6px] text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <RoleLine pro={pro} size="md" />
-            </p>
-          </div>
-          {/* full width under the identity on phones, beside it from sm */}
-          <div className="basis-full sm:basis-auto">
-            <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" />
-          </div>
-        </div>
-
-        <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          {[
-            { value: pro.studentsReached + (following ? 1 : 0), label: "Students Reached" },
-            { value: pro.followers + (following ? 1 : 0), label: "Followers" },
-            { value: pro.totalLikes, label: "Total Likes" },
-          ].map((stat) => (
-            <div key={stat.label} className="flex min-w-0 flex-col gap-[2px]">
-              <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(stat.value)}</dd>
-              <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
+         verification. The card wears the company's own colours, the same
+         treatment as the company card on the volunteer dashboard, and the
+         professional's activity badge sits by their name (direct feedback,
+         4 Sept 2026). */}
+      {(() => {
+        const brand = COMPANY_BRAND[pro.org] ?? { bg: "#1c1a2e", ink: "#FFFFFF" };
+        const ink = brand.ink;
+        const soft = `color-mix(in srgb, ${ink} 74%, transparent)`;
+        const rule = `color-mix(in srgb, ${ink} 22%, transparent)`;
+        const tier = volunteerTier(pro);
+        const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
+        return (
+          <section
+            aria-label="Profile"
+            className="relative flex flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]"
+            style={{ background: `linear-gradient(135deg, ${brand.bg} 0%, color-mix(in srgb, ${brand.bg} 78%, #000000) 100%)`, borderColor: rule, color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}
+          >
+            <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-25 blur-[60px]" style={{ background: ink }} />
+            <div className="relative flex flex-wrap items-center gap-[var(--space-4)]">
+              <Avatar name={pro.name} verified size={64} />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
+                  <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+                  {tier && (
+                    <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: `color-mix(in srgb, ${ink} 14%, transparent)`, color: ink, border: `1px solid ${rule}` }} title={tier.note}>
+                      <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: tier.color }} /> {tier.name} volunteer
+                    </span>
+                  )}
+                </div>
+                <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
+                  <span>{pro.role}</span>
+                  <span aria-hidden style={{ color: rule }}>·</span>
+                  <CompanyMark name={pro.org} ink={ink} height={13} />
+                </p>
+              </div>
+              <div className="basis-full sm:basis-auto">
+                <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" />
+              </div>
             </div>
-          ))}
-        </dl>
 
-        <div className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.story}</p>
-          <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {pro.verifiedBy}
-          </span>
-        </div>
-      </section>
+            <dl className="relative grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
+              {[
+                { value: pro.studentsReached + (following ? 1 : 0), label: "Students Reached" },
+                { value: pro.followers + (following ? 1 : 0), label: "Followers" },
+                { value: pro.totalLikes, label: "Total Likes" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex min-w-0 flex-col gap-[2px]">
+                  <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: ink }}>{formatCount(stat.value)}</dd>
+                  <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>{stat.label}</dt>
+                </div>
+              ))}
+            </dl>
+
+            <div className="relative flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
+              <p className="text-[15px] leading-[22px]" style={{ color: ink }}>{pro.story}</p>
+              <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>
+                <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: ink }} /> {pro.verifiedBy}
+              </span>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Ask Me Anything is the primary engagement mechanism (doc). The
          composer, and one plain line about where the answer goes. No private
