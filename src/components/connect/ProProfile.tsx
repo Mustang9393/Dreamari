@@ -59,6 +59,16 @@ export function rankPros(pros: Pro[], worlds: string[]): Pro[] {
   return [...pros].sort((a, b) => score(b) - score(a));
 }
 
+/** Relative luminance of a hex colour, for choosing type and button colours
+ *  on a brand wash. Non-hex input counts as dark. */
+function luminance(hex: string): number {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return 0;
+  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const n = parseInt(m[1], 16);
+  return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+}
+
 function firstName(name: string) {
   return name.split(" ")[0];
 }
@@ -109,7 +119,7 @@ export type Follows = Record<string, boolean>;
 /** The one Follow control, in both of its states. Same label family
  *  everywhere (Follow -> Following), a check when done, the tick as it flips.
  *  aria-pressed drives the shared data-connect lift rule. */
-export function FollowButton({ following, onToggle, compact = false, className = "" }: { following: boolean; onToggle: () => void; compact?: boolean; className?: string }) {
+export function FollowButton({ following, onToggle, compact = false, className = "", tone }: { following: boolean; onToggle: () => void; compact?: boolean; className?: string; /** the company's colours on a branded card, instead of the app's blue */ tone?: { background: string; color: string; border?: string } }) {
   const press = () => {
     dispatchAuroraPulse(following ? "select" : "cta");
     onToggle();
@@ -123,7 +133,7 @@ export function FollowButton({ following, onToggle, compact = false, className =
     );
   }
   return (
-    <PrimaryCta onClick={press} size={size} className={className}>
+    <PrimaryCta onClick={press} size={size} className={className} style={tone}>
       Follow
     </PrimaryCta>
   );
@@ -299,18 +309,28 @@ export function ProProfileView({
          4 Sept 2026). */}
       {(() => {
         const brand = COMPANY_BRAND[pro.org] ?? { bg: "#1c1a2e", ink: "#FFFFFF" };
-        const ink = brand.ink;
-        const soft = `color-mix(in srgb, ${ink} 74%, transparent)`;
-        const rule = `color-mix(in srgb, ${ink} 22%, transparent)`;
+        // the brand colour as a wash over the app's dark, not at full strength
+        // (direct feedback: EY yellow at full was too bright and fought the
+        // blue button), so the type can stay white on every company
+        const wash = `color-mix(in srgb, ${brand.bg} 46%, #14121f)`;
+        const washDeep = `color-mix(in srgb, ${brand.bg} 30%, #0e0c20)`;
+        const ink = "#FFFFFF";
+        const soft = "rgba(255,255,255,0.74)";
+        const rule = "rgba(255,255,255,0.2)";
+        // the follow button in the brand's colour, unless the brand is dark
+        // (Nike black, JPMorgan brown) and would sink into the wash: then a
+        // white button with dark type, which still reads as the brand's card
+        const followTone = luminance(brand.bg) < 0.15 ? { background: "#FFFFFF", color: "#0e0c20", border: "1px solid rgba(255,255,255,0.2)" } : { background: brand.bg, color: brand.ink, border: "1px solid rgba(255,255,255,0.22)" };
         const tier = volunteerTier(pro);
         const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
         return (
           <section
             aria-label="Profile"
             className="relative flex flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]"
-            style={{ background: `linear-gradient(135deg, ${brand.bg} 0%, color-mix(in srgb, ${brand.bg} 78%, #000000) 100%)`, borderColor: rule, color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}
+            style={{ background: `linear-gradient(135deg, ${wash} 0%, ${washDeep} 100%)`, borderColor: rule, color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}
           >
-            <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-25 blur-[60px]" style={{ background: ink }} />
+            {/* the brand at full strength only as a soft glow in the corner */}
+            <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-35 blur-[60px]" style={{ background: brand.bg }} />
             <div className="relative flex flex-wrap items-center gap-[var(--space-4)]">
               <Avatar name={pro.name} verified size={64} />
               <div className="min-w-0 flex-1">
@@ -329,7 +349,9 @@ export function ProProfileView({
                 </p>
               </div>
               <div className="basis-full sm:basis-auto">
-                <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" />
+                {/* the one button on the card takes the company's own colours
+                   so nothing on it is the app's blue (direct feedback) */}
+                <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" tone={followTone} />
               </div>
             </div>
 
