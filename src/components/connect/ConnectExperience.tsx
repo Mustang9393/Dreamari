@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Bookmark,
   Calendar,
+  MapPin,
   CheckCircle2,
   ChevronRight,
   CornerDownRight,
@@ -1672,7 +1673,7 @@ function HomeView({
               const joined = eventJoined[event.id];
               // the date the card is about (the next one when booked), its time
               // once confirmed, then where: the city lives here, not in the name
-              const when = [event.nextDate ?? event.date, event.time, event.location].filter(Boolean).join(", ");
+              const when = [event.nextDate ?? event.date, event.time].filter(Boolean).join(", ");
               return (
                 <div
                   key={event.id}
@@ -1689,7 +1690,12 @@ function HomeView({
                   <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: pAccent }} />
                   <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-5)]">
                     <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
-                    <p className="mt-[6px] text-[14px] leading-[19px] font-semibold" style={{ color: "rgba(255,255,255,0.78)", fontFamily: "var(--font-body)" }}>{when}</p>
+                    {/* when, then where, one per line with its icon; the
+                       company is in the name so only the city appears */}
+                    <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
+                      <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
+                      <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
+                    </p>
                     <div className="mt-auto pt-[var(--space-5)]">
                       {typeof event.students === "number" ? (
                         <div className="grid grid-cols-3 gap-[6px]">
@@ -2002,8 +2008,9 @@ function EventView({
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             {/* the name carries the partnership; the line under it says when
                and where (the company is not repeated) */}
-            <p className="mt-[6px] flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
-              <Calendar className="h-3.5 w-3.5 flex-none" aria-hidden /> {[event.nextDate ?? event.date, event.time, event.location].filter(Boolean).join(", ")}
+            <p className="mt-[6px] flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[2px] text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${eventInk} 74%, transparent)` }}>
+              <span className="flex items-center gap-[5px]"><Calendar className="h-3.5 w-3.5 flex-none" aria-hidden /> {[event.nextDate ?? event.date, event.time].filter(Boolean).join(", ")}</span>
+              <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5 flex-none" aria-hidden /> {event.location}</span>
             </p>
           </div>
           <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} size="lg" />
