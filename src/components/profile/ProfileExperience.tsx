@@ -78,7 +78,9 @@ function careerById(id: string | null): ProfileCareer | null {
 // The career page's frosted panel: one recipe for every section here too.
 /** A group inside the tab card: a border on the shared surface, no second
  *  layer of glass (direct feedback, 4 Sept: glass on glass read as disjointed). */
-const INSET = { background: "transparent", borderColor: "rgba(255,255,255,0.14)" } as const;
+// The fill is the career report's paper (#1e2431) at a little transparency so
+// it stays in the glass family: a darker, sunken step inside the tab card.
+const INSET = { background: "rgba(30,36,49,0.78)", borderColor: "rgba(255,255,255,0.12)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Covers a student can pick for their header: six rendered materials (fluted
@@ -1009,34 +1011,34 @@ function OverviewTab({
       {/* Bento: three equal doorways, same shape each time (caption, one
           number, one line) — matches how the reference architecture weighs
           Top Three / Plan / Report the same, instead of one dominant tile. */}
-      <section aria-labelledby="bento-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+      <section aria-labelledby="bento-title" className="grid grid-cols-3 gap-[var(--space-2)] sm:gap-[var(--space-3)]">
         <h3 id="bento-title" className="sr-only">Your top three, plan and report at a glance</h3>
 
-        <button type="button" onClick={onGoTop3} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
+        <button type="button" onClick={onGoTop3} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Top Three</span>
+            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Top Three</span><span className="hidden sm:inline">My Top Three</span></span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 careers chosen</span>
+          <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 chosen</span>
         </button>
 
-        <button type="button" onClick={onGoPlan} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
+        <button type="button" onClick={onGoPlan} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Plan</span>
+            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Plan</span><span className="hidden sm:inline">My Plan</span></span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
           <span className="flex flex-col gap-[6px]">
-            <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps done</span>
+            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps</span>
             <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
           </span>
         </button>
 
-        <button type="button" onClick={onGoReport} className="dm-tap flex cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={INSET}>
+        <button type="button" onClick={onGoReport} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
           <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[17px] font-extrabold sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report</span>
+            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Report</span><span className="hidden sm:inline">Career Report</span></span>
             <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           </span>
-          <span className="text-[14px] font-medium sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections ready</span>
+          <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections</span>
         </button>
       </section>
 
