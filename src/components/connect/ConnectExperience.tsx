@@ -502,10 +502,10 @@ function partnerCompany(host: string): string {
  *  begins at the same pixels. Letters are sized to the lead's letter
  *  height; a wordmark wider than its slot scales down to fit. */
 const LOCKUP = { md: { L: 16, slot: 118, h: 36 }, lg: { L: 21, slot: 160, h: 48 } } as const;
-// Marks we hold that are WRONG for the board they would sit on. The only
-// Junior Achievement file is JA Singapore's lockup, and the board is New
-// York (CEO caught it, 4 Sept), so JA is set in type until a US mark arrives.
-const NO_MARK = new Set(["Junior Achievement"]);
+// Marks we hold that are wrong for the board they would sit on are set in
+// type instead (the JA Singapore lockup lived here until the plain JA
+// symbol arrived, 4 Sept). Empty today; the mechanism stays.
+const NO_MARK = new Set<string>([]);
 /** A partner with no mark file yet, set in the display face at letter height. */
 function MarkWord({ name, max, L, color }: { name: string; max: number; L: number; color: string }) {
   return <span className="flex items-center truncate font-extrabold tracking-[-0.01em]" style={{ height: L, maxWidth: max, fontSize: L * 0.9, lineHeight: 1, fontFamily: "var(--font-display)", color }}>{name}</span>;
@@ -515,9 +515,12 @@ function EventMarks({ lead, partner, size = "md", ink: inkColor }: { lead: strin
   const gap = Math.round(box.L * 0.6);
   const cross = Math.round(box.L * 0.62);
   const markOf = (name: string) => (NO_MARK.has(name) ? undefined : COMPANY_MARKS[name]);
+  // a symbol with no letters (the JA triangles) reads at nearly the full box
+  // height; a two-line wordmark (Goldman Sachs) at 1.4 letter heights
+  const SYMBOL = new Set(["Junior Achievement"]);
   const fit = (name: string, tall: boolean, max: number) => {
     const m = markOf(name);
-    let L = tall ? Math.round(box.L * 1.4) : box.L;
+    let L = SYMBOL.has(name) ? Math.round(box.h * 0.82) : tall ? Math.round(box.L * 1.4) : box.L;
     if (m) {
       const w = (L / (m.letters?.h ?? 1)) * m.aspect;
       if (w > max) L = Math.max(10, Math.floor(L * (max / w)));

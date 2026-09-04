@@ -12,7 +12,7 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | AT&T | One-colour reverse permitted | White | OK (AT&T brand guidelines) |
 | Goldman Sachs | White version for dark backgrounds | White | OK (brand portal summary; confirm on goldmansachs.papirfly.com) |
 | JPMorgan Chase | Not published for third parties | White | To confirm with JPMC relationship contact |
-| Junior Achievement | Monochrome white symbol published | Type until file arrives | Needs `JA Symbol-Monochrome-White.png` from the JA Worldwide Brand Center (Dropbox, 700.8 KB) |
+| Junior Achievement | Monochrome white symbol published | White symbol, `junior-achievement.png` (JA Symbol-Monochrome-White from the JA Worldwide Brand Center, resized to 480px) | OK |
 | SEO Scholars | Not checked | Type | Needs file and guideline check |
 | Amazon | Entire logo solid white allowed | White | OK (Amazon brand usage guidelines) |
 | Meta | Monochrome white on dark | White | OK, but Meta requires approval for any use |
