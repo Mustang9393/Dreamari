@@ -195,7 +195,7 @@
           "letterSpacing": "{dimension.letter-spacing.tight}",
           "lineHeight": "{number.line-height.tight}"
         },
-        "$description": "Large Dreamari display heading using the licensed Favorit display face."
+        "$description": "Large Dreamari display heading in Bricolage Grotesque, the one display face across landing and app."
       }
     },
     "heading": {

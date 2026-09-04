@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import localFont from "next/font/local";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ThemeBoot } from "@/components/app/theme";
+import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
 
 // Replaces Montserrat app-wide: Inter is built specifically for UI legibility
@@ -17,13 +17,10 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const favoritDisplay = localFont({
-  src: "../../public/fonts/FavoritExtraBoldC.woff2",
-  variable: "--font-favorit-display",
-  display: "swap",
-  weight: "800",
-  style: "normal",
-});
+// Display face is Bricolage Grotesque everywhere (direct feedback, 4 Sept
+// 2026: Favorit retired). Loaded with the rest of the Google Fonts set through
+// one <link> here, so every route has it; see marketing/fonts.ts for why a
+// <link> rather than next/font/google.
 
 export const metadata: Metadata = {
   title: "Dreamari: Discover your dream career.",
@@ -37,8 +34,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${favoritDisplay.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
         <script
           dangerouslySetInnerHTML={{
             // Defaults to dark everywhere except the build flow ("/flow"), which defaults

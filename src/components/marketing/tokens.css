@@ -188,7 +188,7 @@
 }
 
 /* This app's shared Tailwind theme (globals.css) binds the `font-display` and
-   `font-mono` utility classes to ITS OWN global fonts (Favorit, the DREAMARI wordmark
+   `font-mono` utility classes to ITS OWN global fonts (the display face, also the DREAMARI wordmark
    face; and Tailwind's generic system-mono stack) at the CSS-utility-generation layer,
    which a scoped custom property override can't intercept. These rules force this
    scope's own fonts back for any element still using those utility classNames. */

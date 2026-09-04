@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { ConnectExperience } from "@/components/connect/ConnectExperience";
 import "@/components/marketing/tokens.css";
 
@@ -17,7 +16,6 @@ export default function ConnectPage() {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       <ConnectExperience />
     </>
   );

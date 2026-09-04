@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { SignupExperience } from "@/components/signup/SignupExperience";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
@@ -14,7 +13,6 @@ export default function SignupPage() {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       <SignupExperience />
     </>
   );

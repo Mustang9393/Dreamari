@@ -110,7 +110,7 @@ export function ChapterShell({
       >
         <div
           ref={copyRef}
-          className={`text-center transition-all duration-700 ease-out max-md:self-end max-md:pb-5 ${
+          className={`text-center transition-all duration-700 ease-out max-md:self-end max-md:pb-7 ${
             centered ? "max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
           }`}
           style={{

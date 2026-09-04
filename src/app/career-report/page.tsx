@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { ReportChooser } from "@/components/report/ReportChooser";
 import { parsePicksParam } from "@/lib/picks";
 import "@/components/marketing/tokens.css";
@@ -19,7 +18,6 @@ export default async function CareerReportPage({ searchParams }: { searchParams:
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       <ReportChooser initialPicks={parsePicksParam(query.picks)} />
     </>
   );

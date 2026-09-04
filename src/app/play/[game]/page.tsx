@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
 import "@/components/marketing/tokens.css";
@@ -38,7 +37,6 @@ export default async function GamePage({
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       {/* Keyed on the level: without this, navigating Level 2 -> Level 3 reuses
          the same component instance, so its internal phase/run/result state
          (still "ending", still the OLD level's reputation) survives into the

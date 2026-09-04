@@ -141,8 +141,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  /* Licensed Dreamari display face, bundled locally through next/font/local. */
-  --font-display: var(--font-favorit-display);
+  /* Display face: Bricolage Grotesque, the same face the landing page uses
+     (Favorit retired, 4 Sept 2026). Loaded by the root layout's font <link>. */
+  --font-display: "Bricolage Grotesque", sans-serif;
 
   --color-brand-950: var(--color-brand-950);
   --color-brand-900: var(--color-brand-900);

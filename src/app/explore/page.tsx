@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { ExploreExperience } from "@/components/app/ExploreExperience";
 import "@/components/marketing/tokens.css";
 
@@ -20,7 +19,6 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       <ExploreExperience initialTab={q ? "browse" : initialTab} initialQuery={q ?? ""} />
     </>
   );

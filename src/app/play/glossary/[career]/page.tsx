@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { glossaryFor } from "@/components/glossary/data";
 import { GlossaryGameExperience } from "@/components/glossary/GlossaryGameExperience";
 import "@/components/marketing/tokens.css";
@@ -27,7 +26,6 @@ export default async function GlossaryGamePage({ params }: { params: Promise<{ c
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
       <GlossaryGameExperience key={lesson.id} career={career} lesson={lesson} />
     </>
   );
