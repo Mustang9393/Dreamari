@@ -657,7 +657,13 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
               if (missing <= 0) return null;
               const vis = shown === 1 ? "flex @[360px]:hidden" : shown === 2 ? "hidden @[360px]:flex @[460px]:hidden" : "hidden @[460px]:flex";
               return (
-                <span key={shown} className={`${vis} h-[28px] flex-none items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold`} style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}>+{missing}{shown === 3 ? " more" : ""}</span>
+                <span key={shown} className={`${vis} group/more relative flex-none`}>
+                  {/* hover or focus shows who the rest are (direct feedback) */}
+                  <button type="button" aria-label={`${missing} more: ${community.professionalsFrom.slice(shown).join(", ")}`} className="dm-quiet flex h-[28px] cursor-default items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}>+{missing}{shown === 3 ? " more" : ""}</button>
+                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+8px)] left-0 z-30 hidden flex-wrap gap-[6px] rounded-[var(--radius-md)] border p-[8px] group-hover/more:flex group-focus-within/more:flex" style={{ background: "rgba(12,16,35,0.94)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.7)", minWidth: 120 }}>
+                    {community.professionalsFrom.slice(shown).map((name) => <CompanyChip key={name} name={name} tone="frost" />)}
+                  </span>
+                </span>
               );
             })}
           </div>

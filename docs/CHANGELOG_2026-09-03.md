@@ -177,3 +177,5 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Volunteer dashboard: "View all N answered" under Ask Me Anything opens every answered question with its response link; Show less closes it. Where the count is larger than the prototype's data, the panel says how many are on file.
 - Community cards: the stat boxes and company marks sit on a light blur instead of a dark fill, so they read as part of the photo rather than chips; Open is a solid rounded button tinted with the card's own accent, an outward arrow, the one solid object on the card, no blue.
 - Volunteer dashboard: "View all N answered" opens its own screen, Questions you answered, newest first, with a response link on each. Built to page through hundreds later; the prototype notes how many it holds.
+- Community cards: hovering or focusing "+N more" shows the remaining companies in a small tooltip.
+- Professionals to Follow: the only badge is the verified shield; the tier medals are gone (one icon in three tints that everyone wore said nothing). No coloured rings around the portraits, just a quiet hairline, so the row stops reading like story bubbles.

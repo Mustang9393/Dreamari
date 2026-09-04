@@ -1,14 +1,14 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Award, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
+import { ArrowLeft, Bookmark, Download, Eye, ShieldCheck, ThumbsUp, TrendingUp } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, COMPANY_BRAND, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -160,11 +160,9 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 // ——— People to Follow (below the communities) ———
 
 /** A row of faces, no frames (direct feedback): the portrait is the card.
- *  Big avatar ringed in the firm's colour, ONE badge on its corner (the
- *  volunteer tier they have earned, or the verified shield when they have no
- *  tier), the first name, the role, the firm as text, and a small Follow
- *  button. One badge only: a student needs to read "trusted and active" at
- *  a glance, not a trophy case. Tapping the face opens the profile. */
+ *  Big avatar with a quiet hairline, the verified shield on its corner and
+ *  nothing else, the first name, the role, the firm as text, and
+ *  a small Follow button. Tapping the face opens the profile. */
 export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
@@ -174,9 +172,8 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
       <SectionHead>Professionals to Follow</SectionHead>
       <ul className="-mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 pt-1 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-[var(--space-8)] sm:px-0" style={{ touchAction: "pan-x pan-y" }}>
         {ranked.map((pro) => {
-          const brand = COMPANY_BRAND[pro.org]?.bg;
-          const accent = brand && !/^#(000000|111111|141414)$/i.test(brand) ? `color-mix(in srgb, ${brand} 65%, #ffffff)` : (WORLD_COLORS[pro.world] ?? "var(--primary)");
-          const tier = volunteerTier(pro);
+          // no coloured ring (direct feedback: it read as unseen stories); a
+          // quiet hairline keeps the portrait's edge on dark photos
           const following = !!follows[pro.id];
           return (
             <li key={pro.id} className="flex w-[118px] flex-none flex-col items-center gap-[8px] text-center">
@@ -185,20 +182,22 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
                   type="button"
                   onClick={() => nav?.openPro(pro.id)}
                   aria-label={`Open ${pro.name}'s profile`}
-                  className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full border-2 leading-none"
-                  style={{ borderColor: accent }}
+                  className="dm-tap flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full border leading-none"
+                  style={{ borderColor: "rgba(255,255,255,0.14)" }}
                 >
                   <Avatar name={pro.name} size={80} />
                 </button>
-                {/* the one badge: earned tier, else verified */}
+                {/* the one badge: verified. Tier medals came off (direct
+                   feedback): one icon in three tints that everyone wore said
+                   nothing a student could use. */}
                 <span
                   role="img"
-                  aria-label={tier ? `${tier.name} volunteer, ${tier.note.toLowerCase()}` : "Verified professional"}
-                  title={tier ? `${tier.name} volunteer. ${tier.note}.` : "Verified professional"}
+                  aria-label="Verified professional"
+                  title="Verified professional"
                   className="absolute right-[-1px] bottom-[-1px] flex h-[28px] w-[28px] items-center justify-center rounded-full border-2"
                   style={{ background: "var(--color-glass-surface-3, #1c1a2e)", borderColor: "var(--background)" }}
                 >
-                  {tier ? <Award className="h-[15px] w-[15px]" aria-hidden style={{ color: tier.color }} /> : <ShieldCheck className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />}
+                  <ShieldCheck className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
                 </span>
               </span>
               <span className="flex w-full min-w-0 flex-col items-center gap-[1px]">
