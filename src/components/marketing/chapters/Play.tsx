@@ -27,7 +27,6 @@ const SCENARIO = {
     { id: "b", label: "Start changing slides", tier: "risky" as Tier },
     { id: "c", label: "Wait for another analyst", tier: "wrong" as Tier },
   ],
-  why: "Right. Clarify scope before you touch a slide.",
 };
 
 const ART = "/images/sim-deal-kickoff.jpg";
@@ -179,9 +178,11 @@ function PlayDemo() {
                   <span style={{ color: GOLD }}>{SCENARIO.speaker.name}</span>
                   <span style={{ color: "rgba(255,255,255,0.55)" }}>{SCENARIO.speaker.role}</span>
                 </span>
-                <p className="font-semibold" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(13.5px, calc(var(--mu) * 10.5px), 15.5px)", lineHeight: 1.35, color: "#fff", minHeight: "2.7em" }}>
-                  {SCENARIO.line.slice(0, typed)}
-                  {phase === "typing" && <span aria-hidden className="ml-[1px] inline-block h-[0.95em] w-[2px] translate-y-[2px] bg-white motion-safe:animate-pulse" />}
+                {/* speech, not UI: quoted, in the body face at medium weight,
+                   so it reads apart from the bold display question below */}
+                <p className="font-medium" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(13.5px, calc(var(--mu) * 10.5px), 15.5px)", lineHeight: 1.4, color: "rgba(255,255,255,0.94)", minHeight: "2.8em" }}>
+                  {"\u201C"}{SCENARIO.line.slice(0, typed)}
+                  {phase === "typing" ? <span aria-hidden className="ml-[1px] inline-block h-[0.95em] w-[2px] translate-y-[2px] bg-white motion-safe:animate-pulse" /> : "\u201D"}
                 </p>
               </span>
             </div>
@@ -191,7 +192,7 @@ function PlayDemo() {
           {/* the menu is always in the layout (hidden while she talks) so the
              card never changes height; tight to the dialogue above and to the
              bottom edge (direct feedback: no wasted space) */}
-          <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 7px)", background: "#0b0e1c" }}>
+          <div className="relative z-[2] flex flex-none flex-col" style={{ padding: "calc(var(--mu) * 2px) calc(var(--mu) * 8px) calc(var(--mu) * 8px)", background: "#0b0e1c" }}>
             {phase === "typing" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-[6px] px-[12px] text-center" style={{ opacity: 0.5 }}>
                 <p className="font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(18px, calc(var(--mu) * 15px), 22px)", lineHeight: 1.1, letterSpacing: "0.01em", color: "#fff" }}>{SCENARIO.scene}</p>
@@ -215,9 +216,6 @@ function PlayDemo() {
                     <div key={c.id} aria-hidden className="px-[12px] py-[8px] text-[14px] leading-snug font-semibold">{c.label}</div>
                   ))}
                 </div>
-                <p aria-live="polite" className="px-[12px] text-[12.5px] leading-[16px] font-semibold" style={{ minHeight: 16, color: answered ? "var(--color-feedback-success, #33c78c)" : "transparent" }}>
-                  {answered ? SCENARIO.why : " "}
-                </p>
             </div>
           </div>
         </div>

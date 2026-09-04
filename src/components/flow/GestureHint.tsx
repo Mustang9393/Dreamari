@@ -31,12 +31,17 @@ export function GestureHint({
   color = "var(--foreground)",
   size = 18,
   distance = 30,
+  crisp = false,
   className = "",
 }: {
   direction: "left" | "right" | "up";
   color?: string;
   size?: number;
   distance?: number;
+  /** Ring and dot only, no glow and no trailing echo: a crisp vector mark
+   *  for chrome that sits on the page rather than inside a game (the
+   *  landing's scroll nudge, direct feedback 4 Sept 2026). */
+  crisp?: boolean;
   className?: string;
 }) {
   const w = direction === "up" ? size : size + distance;
@@ -69,7 +74,7 @@ export function GestureHint({
       />
       {/* Trailing echo: same path, offset start (smaller, delayed) so it
          reads as a soft comet tail instead of a second dot appearing. */}
-      <span
+      {!crisp && <span
         className="motion-safe:animate-[gesture-hint-move_2.6s_ease-in-out_infinite]"
         style={{
           ...style,
@@ -84,7 +89,7 @@ export function GestureHint({
           filter: "blur(2px)",
           animationDelay: "0.12s",
         }}
-      />
+      />}
       <span
         className="motion-safe:animate-[gesture-hint-move_2.6s_ease-in-out_infinite]"
         style={{
@@ -96,7 +101,7 @@ export function GestureHint({
           height: size,
           borderRadius: "999px",
           background: color,
-          boxShadow: `0 0 ${size * 0.7}px 0 color-mix(in srgb, ${color} 70%, transparent)`,
+          boxShadow: crisp ? "none" : `0 0 ${size * 0.7}px 0 color-mix(in srgb, ${color} 70%, transparent)`,
         }}
       />
     </span>

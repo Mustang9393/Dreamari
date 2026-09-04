@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { GestureHint } from "@/components/flow/GestureHint";
 import { useRevealOnScroll } from "./scrollHooks";
 
 type ChapterShellProps = {
@@ -97,10 +97,12 @@ export function ChapterShell({
       {/* the nudge sits 110px up: above the 96px strip of this chapter that
          stays visible once the next one has snapped in, so it never appears
          to belong to the chapter below */}
+      {/* the nudge is the app's own swipe-up gesture mark, crisp (no glow, no
+         trail), centred with a full-width flex row rather than a translate so
+         it cannot drift off centre (direct feedback, 4 Sept 2026) */}
       {nudge && fits && (
-        <span aria-hidden className="mkt-scroll-nudge pointer-events-none absolute bottom-[110px] left-1/2 z-[2] flex -translate-x-1/2 flex-col items-center gap-[2px] text-[10.5px] font-semibold tracking-[0.08em] uppercase md:hidden" style={{ color: "var(--muted-foreground)" }}>
-          Scroll
-          <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[126px] z-[2] flex justify-center md:hidden">
+          <GestureHint direction="up" crisp size={12} distance={26} color="var(--muted-foreground)" />
         </span>
       )}
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
