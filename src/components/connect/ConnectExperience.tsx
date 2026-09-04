@@ -1993,8 +1993,16 @@ function EventView({
         style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${pAccent} 45%, transparent)`, fontFamily: "var(--font-display)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
       >
         <EventSurface accent={pAccent} />
+        {/* the lockup sits in the header's top-right corner, on the header's own
+           padding, at card size: a fixed anchor rather than a flex item that
+           drifted with the title's line count (direct feedback) */}
+        <div className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10">
+          <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} />
+        </div>
         <div className="relative z-10 flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[12px]">
-          <div className="min-w-[220px] flex-1 self-start pt-[8px]">
+          {/* on phones the corner lockup owns the first row, so the text starts
+             under it; from sm the text clears it on the right instead */}
+          <div className="min-w-[220px] flex-1 self-start pt-[48px] sm:pt-[8px] sm:pr-[240px]">
             <p className="text-[11px] leading-[15px] font-medium tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${pAccent} 45%, ${eventInk})` }}>{event.lifecycle}</p>
             <h1 className="mt-[6px] text-[24px] leading-[29px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h1>
             {/* the name carries the partnership; the line under it says when
@@ -2004,7 +2012,6 @@ function EventView({
               <span className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5 flex-none" aria-hidden /> {event.location}</span>
             </p>
           </div>
-          <EventMarks lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} size="lg" />
         </div>
         {/* who is inside: the numbers a partner nonprofit is paying for */}
         {typeof event.students === "number" && (
