@@ -105,7 +105,7 @@ export function simulationFor(id: string): Simulation | undefined {
  *  "these careers don't have a simulation yet" list, and the hub gives it
  *  its own labeled section. */
 export const GLOSSARY_GAMES: { careerSlug: string; title: string; sub: string; cover?: string }[] = [
-  { careerSlug: "investment-banking", title: "Finance Essentials", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb.png" },
+  { careerSlug: "investment-banking", title: "Finance Glossary Game", sub: "Learn key finance terms", cover: "/images/app/glossary-finance-thumb.png" },
   // No content authored yet (hasGlossary() gates these into the locked "Soon"
   // row) -- listed anyway so that row isn't just one lonely card next to
   // empty space. Reuses each career's own existing Play-tab "Soon" cover art

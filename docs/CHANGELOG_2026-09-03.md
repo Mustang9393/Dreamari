@@ -128,3 +128,10 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 
 - Start: on the data room question a drag that missed sprang back with no other way to answer, and the tiles did not move while dragging.
 - End: tiles follow the finger, the blank lights up when a tile is over it, and every drag screen also answers on a tap. Copy says "drag or tap".
+
+## Home, 4 Sept (CEO notes)
+
+- Daily Drop panel: label is "DAILY DROP", headline "Discover a new career in 30 seconds", line "Keep your daily streak alive.", button "Catch the Drop". The 12-day streak stays; the saved-careers count is gone.
+- Trending panel: "Featured in 3 career worlds" removed.
+- Career simulation panel: same cover as the Play tab, button says "Play", the "$30B Deal" subtitle is replaced by the level name.
+- Continue Learning & Playing: the investment banker card is "Day in the Life: Investment Banker" with the Play tab cover; "Finance Essentials" is "Finance Glossary Game" on Home and in Play; "Deal Team Kickoff" is removed and the Registered Nurse simulation card takes its place.

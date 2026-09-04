@@ -15,10 +15,10 @@ import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
 import { DailyDropFlight, DailyDropTakeover } from "@/components/motion-lab/DailyDropDemo";
-import { INVESTMENT_BANKING } from "@/components/play/games";
+import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
 
 // Home — v2.1 (Figma 2099:3423), ported section by section: Hero Banner
-// (3-panel carousel: Today's Drop / Continue / Trending), Continue rail of
+// (3-panel carousel: Daily Drop / Continue / Trending), Continue rail of
 // Active Activity Cards, Careers Picked for You poster rail, Career Signal
 // Banner, Glossary Challenge Banner. All colors/spacing/radii/type through
 // the .marketing-v2 token scope; art assets are the frame's own exports.
@@ -184,7 +184,7 @@ function HeroBanner() {
       )}
 
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
-        {/* Panel 1 — Today's Drop */}
+        {/* Panel 1 — Daily Drop */}
         <PanelShell from="var(--hero-accent-purple)">
           {/* Stays on justify-between (unlike panels 2/3): Dreamy's flight
              band crosses the panel's vertical middle here, so that gap is
@@ -192,26 +192,25 @@ function HeroBanner() {
              would run the streak/stats row straight through his trail. */}
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-between p-[var(--space-5)] pb-[30px] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
-              <CaptionLabel color="var(--chart-3)">TODAY&apos;S DROP</CaptionLabel>
+              <CaptionLabel color="var(--chart-3)">DAILY DROP</CaptionLabel>
               <p className="max-w-[420px] text-[26px] leading-[1.2] font-extrabold text-balance sm:text-[32px] sm:leading-[38px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Today&apos;s card is dropping in.
+                Discover a new career in 30 seconds
               </p>
               <p className="max-w-[400px] text-[13px] leading-[18px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                One question, 20 seconds. Keep your streak.
+                Keep your daily streak alive.
               </p>
             </div>
             <div className="flex flex-col items-center gap-[var(--space-3)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-[var(--space-8)]">
               <HeroCta display fullOnMobile onClick={() => setDropOpen(true)}>
                 <span className="inline-flex items-center gap-[6px]">
-                  Catch the drop
+                  Catch the Drop
                   <ArrowRight size={16} strokeWidth={3} aria-hidden />
                 </span>
               </HeroCta>
-              <span className="flex items-center gap-[var(--space-3)] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)" }}>
-                <span style={{ color: "var(--chart-3)" }}>12-day streak</span>
-                <span aria-hidden className="h-1 w-1 rounded-[2px]" style={{ background: "var(--muted-foreground)" }} />
-                <span className="sm:hidden" style={{ color: "var(--foreground)" }}>27 cards collected</span>
-                <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>27 careers saved</span>
+              {/* The streak is the one reward signal here; the saved-careers
+                 count came off (CEO note, 4 Sept) so the panel says one thing. */}
+              <span className="flex items-center gap-[6px] pb-[18px] text-[13px] leading-[18px] font-semibold sm:pb-0" style={{ fontFamily: "var(--font-body)", color: "var(--chart-3)" }}>
+                <Flame className="h-4 w-4" aria-hidden /> 12-day streak
               </span>
             </div>
           </div>
@@ -231,14 +230,16 @@ function HeroBanner() {
         <PanelShell from="var(--hero-accent-pink)">
           <div className="relative z-[2] flex h-full max-w-[620px] flex-col justify-start gap-[var(--space-5)] p-[var(--space-5)] pb-[30px] sm:gap-[var(--space-6)] sm:p-[var(--space-10)] sm:pb-[var(--space-10)]">
             <div className="flex flex-col gap-[var(--space-3)]">
-              {/* Same copy as the Continue Learning & Playing card below —
-                 one activity, one set of words, hero-sized */}
+              {/* Same words and the same cover as the Play tab and the
+                 Continue card below: one game, one name, one picture, so a
+                 first-time user recognises it wherever it appears. The old
+                 "$30B Deal" plot subtitle is gone for the same reason. */}
               <CaptionLabel color="var(--world-business-money-office)">CAREER SIMULATION</CaptionLabel>
               <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[30px] sm:leading-[36px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 Day in the Life: Investment Banker
               </p>
-              <p className="text-[15px] leading-[20px] font-medium italic" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-                The $30B Deal
+              <p className="text-[15px] leading-[20px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+                Level 1 · Intern
               </p>
             </div>
             <div className="flex w-full max-w-[420px] flex-col gap-[var(--space-2)]">
@@ -252,11 +253,11 @@ function HeroBanner() {
             </div>
             <div>
               <HeroCta onClick={() => router.push(`/play/${INVESTMENT_BANKING.id}`)}>
-                <span className="inline-flex items-center gap-[6px]">Resume Simulation<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
+                <span className="inline-flex items-center gap-[6px]">Play<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
               </HeroCta>
             </div>
           </div>
-          <PanelPhoto photo="/images/app/activity-ib-dossier-hero.png" />
+          <PanelPhoto photo={INVESTMENT_BANKING.cover} />
         </PanelShell>
 
         {/* Panel 3 — Trending Now */}
@@ -279,9 +280,6 @@ function HeroBanner() {
               <HeroCta onClick={() => router.push(`/career/${careerSlug("UI/UX Designer")}`)}>
                 <span className="inline-flex items-center gap-[6px]">Explore this career<ArrowRight size={14} strokeWidth={2.75} aria-hidden /></span>
               </HeroCta>
-              <span className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>
-                Featured in 3 Career Worlds
-              </span>
             </div>
           </div>
           <PanelPhoto photo="/images/app/poster-uiux-designer.png" fadeRight />
@@ -364,46 +362,49 @@ type Activity = {
       portrait crop (real desk photography, not a mockup), so it needs its
       own focus point rather than the landscape shots' default. */
   photoFocus?: string;
-  /** Where the card's own CTA actually goes. Omitted on Deal Team Kickoff --
-      it has no built page to send someone to yet, so it stays display-only
-      rather than linking to a guess. */
+  /** Where the card's own CTA goes. Every card links to a page that exists;
+      the rail only shows games the app actually has. */
   href?: string;
 };
 
-// Active Activity Cards (Figma 2537:4570/4587/4603) — copy, colors, progress
-// widths straight from the frame.
+// Continue Learning & Playing cards. Names and covers are the Play tab's own
+// (CEO note, 4 Sept): the same game must look and read the same everywhere,
+// so nobody has to learn a plot name like "The $30B Deal" or wonder whether
+// "Deal Team Kickoff" was a second game. Only games that exist are listed.
 const ACTIVITIES: Activity[] = [
   {
     badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "The $30B Deal",
+    title: "Day in the Life: Investment Banker",
     chapter: "Level 1 · Intern",
     sub: "",
     fill: 62,
     stat: "62% · 18 min left",
-    cta: "Resume Simulation",
-    photo: "/images/app/activity-ib-dossier.png",
+    cta: "Play",
+    photo: INVESTMENT_BANKING.cover,
     href: `/play/${INVESTMENT_BANKING.id}`,
   },
   {
     badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "Finance Essentials",
+    title: "Finance Glossary Game",
     chapter: "Learn key finance terms",
     sub: "",
     fill: 60,
     stat: "6 of 10 terms mastered",
-    cta: "Continue Glossary Game",
+    cta: "Play",
     photo: "/images/app/glossary-finance-thumb.png",
     photoFocus: "50% 38%",
     href: "/play/glossary/investment-banking",
   },
   {
     badgeColor: "#ffb81f", // bright gold literal: progress bar/stat accent
-    title: "Deal Team Kickoff",
-    sub: "Draft the squad, win the pitch",
-    fill: 48,
-    stat: "Round 3 of 5",
-    cta: "Keep playing",
-    photo: "/images/app/activity-ib-kickoff.png",
+    title: "Day in the Life: Registered Nurse",
+    chapter: "Level 1 · New Grad RN",
+    sub: "",
+    fill: 0,
+    stat: "Not started",
+    cta: "Play",
+    photo: REGISTERED_NURSE.cover,
+    href: `/play/${REGISTERED_NURSE.id}`,
   },
 ];
 

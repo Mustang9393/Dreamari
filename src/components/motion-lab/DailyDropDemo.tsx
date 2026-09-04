@@ -946,24 +946,23 @@ export function DailyDropDemo() {
         <AuroraHorizon />
         <div className="relative z-[2] flex h-full min-h-[236px] max-w-[50%] flex-col justify-center gap-2 p-7">
           <span className="text-[11px] font-extrabold uppercase" style={{ letterSpacing: "0.16em", color: V.gold }}>
-            Today&apos;s Drop
+            Daily Drop
           </span>
           <span
             className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]"
             style={{ fontFamily: "var(--font-display)", color: V.fg }}
           >
-            Today&apos;s card is dropping in.
+            Discover a new career in 30 seconds
           </span>
           <span
             className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide"
             style={{ background: V.primary, color: V.primaryFg }}
           >
-            Catch the drop
+            Catch the Drop
             <ArrowRight size={14} strokeWidth={3} aria-hidden />
           </span>
           <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: V.gold }}>
             <Flame size={13} strokeWidth={2.5} aria-hidden /> 12-day streak
-            <span style={{ color: V.muted }}>· 27 careers saved</span>
           </span>
         </div>
 
