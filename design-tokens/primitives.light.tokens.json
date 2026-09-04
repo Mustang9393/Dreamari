@@ -179,19 +179,6 @@
           "hex": "#7d5cff"
         },
         "$description": "Figma var(--accent)."
-      },
-      "subtle": {
-        "$type": "color",
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.2196078431372549,
-            0.5803921568627451,
-            1.0
-          ],
-          "hex": "#3894ff"
-        },
-        "$description": "accent-subtle — brand-aligned blue (was #8b7bff purple; accent family moved to blue 2026-08-19; purple identity lives in accent.purple)"
       }
     },
     "ink": {
@@ -206,18 +193,6 @@
           "hex": "#edeff3"
         },
         "$description": "Primary text on branded dark landing surfaces."
-      },
-      "150": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.917647,
-            0.945098,
-            1
-          ],
-          "hex": "#eaf1ff"
-        },
-        "$description": "Outlined landing CTA text."
       },
       "200": {
         "$value": {
@@ -269,18 +244,6 @@
           "hex": "#f5f6f8"
         },
         "$description": "Subtle neutral border."
-      },
-      "100": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.945098,
-            0.960784,
-            0.976471
-          ],
-          "hex": "#f1f5f9"
-        },
-        "$description": "Tailwind slate 100 compatibility value."
       },
       "200": {
         "$value": {
@@ -451,18 +414,6 @@
           "hex": "#f37c11"
         },
         "$description": "Orange-gold gradient end."
-      },
-      "675": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.952941,
-            0.478431,
-            0.062745
-          ],
-          "hex": "#f37a10"
-        },
-        "$description": "Progress gradient end used by the Future Values step."
       }
     },
     "green": {
@@ -478,30 +429,6 @@
         },
         "$description": "Match Future Fit category green."
       },
-      "500": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.062745,
-            0.72549,
-            0.505882
-          ],
-          "hex": "#10b981"
-        },
-        "$description": "Build-step green accent."
-      },
-      "600": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0,
-            0.6,
-            0.4
-          ],
-          "hex": "#009966"
-        },
-        "$description": "Accessible green."
-      },
       "700": {
         "$value": {
           "colorSpace": "srgb",
@@ -513,46 +440,6 @@
           "hex": "#007a55"
         },
         "$description": "Accessible light-mode success text."
-      }
-    },
-    "teal": {
-      "600": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.05098,
-            0.580392,
-            0.533333
-          ],
-          "hex": "#0d9488"
-        },
-        "$description": "Build-step teal accent."
-      },
-      "700": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.058824,
-            0.462745,
-            0.431373
-          ],
-          "hex": "#0f766e"
-        },
-        "$description": "Build-step deep teal accent."
-      }
-    },
-    "orange": {
-      "600": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.917647,
-            0.345098,
-            0.047059
-          ],
-          "hex": "#ea580c"
-        },
-        "$description": "Build-step orange accent."
       }
     },
     "red": {
@@ -582,18 +469,6 @@
       }
     },
     "purple": {
-      "400": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.717647,
-            0.611765,
-            1
-          ],
-          "hex": "#b79cff"
-        },
-        "$description": "Landing chapter purple."
-      },
       "500": {
         "$value": {
           "colorSpace": "srgb",
@@ -605,48 +480,6 @@
           "hex": "#9a39fb"
         },
         "$description": "Match category purple."
-      }
-    },
-    "cyan": {
-      "500": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0,
-            0.752941,
-            0.909804
-          ],
-          "hex": "#00c0e8"
-        },
-        "$description": "Landing chapter cyan."
-      }
-    },
-    "yellow": {
-      "500": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            1,
-            0.8,
-            0
-          ],
-          "hex": "#ffcc00"
-        },
-        "$description": "Landing chapter yellow."
-      }
-    },
-    "coral": {
-      "500": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            1,
-            0.376471,
-            0.345098
-          ],
-          "hex": "#ff6058"
-        },
-        "$description": "Landing chapter coral."
       }
     },
     "navy": {
@@ -676,18 +509,6 @@
       }
     },
     "match": {
-      "card-top": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.007843,
-            0.015686,
-            0.035294
-          ],
-          "hex": "#020409"
-        },
-        "$description": "Shared near-black Match card gradient start."
-      },
       "card-background": {
         "$value": {
           "colorSpace": "srgb",
@@ -783,80 +604,6 @@
           "hex": "#0b1230"
         },
         "$description": "Dark Match modal surface."
-      },
-      "backdrop-1": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.015686,
-            0.043137,
-            0.129412
-          ],
-          "hex": "#040b21"
-        },
-        "$description": "Match backdrop start."
-      },
-      "backdrop-2": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.031373,
-            0.082353,
-            0.25098
-          ],
-          "hex": "#081540"
-        },
-        "$description": "Match backdrop midpoint."
-      },
-      "backdrop-3": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.007843,
-            0.027451,
-            0.078431
-          ],
-          "hex": "#020714"
-        },
-        "$description": "Match backdrop end."
-      }
-    },
-    "path-accent": {
-      "high-school": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.376471,
-            0.647059,
-            0.980392
-          ],
-          "hex": "#60a5fa"
-        },
-        "$description": "High School path accent."
-      },
-      "university": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.203922,
-            0.827451,
-            0.6
-          ],
-          "hex": "#34d399"
-        },
-        "$description": "University path accent."
-      },
-      "job-seeker": {
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.654902,
-            0.545098,
-            0.980392
-          ],
-          "hex": "#a78bfa"
-        },
-        "$description": "Job Seeker path accent."
       }
     },
     "aurora": {
@@ -1256,19 +1003,6 @@
           "alpha": 0.28
         },
         "$description": "Light-mode stronger hairline."
-      },
-      "hover": {
-        "$type": "color",
-        "$value": {
-          "colorSpace": "srgb",
-          "components": [
-            0.0,
-            0.0,
-            0.0
-          ],
-          "alpha": 0.14
-        },
-        "$description": "Light-mode glass hover."
       }
     },
     "night": {

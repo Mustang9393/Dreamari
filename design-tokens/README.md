@@ -57,3 +57,16 @@ If one of these becomes a reusable product decision rather than implementation m
 Use one light primitive + light semantic + components set for light mode, and the corresponding dark files for dark mode. Preserve aliases when importing or exporting. Do not flatten semantic or component values into resolved hex, pixel, typography, or shadow strings.
 
 Before production use, compare paths and values against the production repository's `packages/ui/tokens` and run its dependency-free `packages/ui/scripts/validate-tokens.mjs`. Production wins if the two sources disagree.
+
+## Purge of 4 September 2026
+
+Unused tokens were removed so the set Usman pulls is the set the product uses. Rules applied:
+
+- A token stays if the prototype references it (`var(--…)` or a Tailwind utility mapped in `globals.css`), or if a kept token aliases it.
+- Foundations always stay: `dimension.*`, `duration.*`, `fontFamily.*`, `fontWeight.*`, `number.*`, `typography.*`, `shadow.*`. These are the scales a shadcn theme maps onto.
+- Semantic roles that mirror shadcn roles always stay: `color.action.*`, `color.text.*`, `color.feedback.*`, `color.elevation.*`, `color.border.strong`, `color.surface.brand|navigation|feature*`.
+- Component groups that mirror shadcn components stay: `component.cta`, `component.input`, `component.progress`, `component.toast`, plus `component.home-card`, which the app uses.
+- Removed: prototype-only colour primitives (match backdrops, path accents, unused palette steps), the `path`, `category` and `match` semantics, and the component groups that described retired screens (`home-hero`, `home-feature`, `home-navigation`, `home-quick-action`, `home-rail`, `home-shell`, `match-card`, `match-progress`, `flow-card`, `selection-item`, `speech-bubble`, `step-header`).
+- Display face is Bricolage Grotesque; Favorit is gone from `fontFamily.display`.
+
+Count: 587 tokens before, 464 after, light and dark still at path parity. Rebuild and validate with `npm run tokens:check`.
