@@ -443,7 +443,7 @@ const PHOTO_COVER: Record<string, string> = {
 /** The event surface, everywhere an event is shown (direct feedback: no
  *  photos on event cards or boards): dark glass, the partner's colour as one
  *  glow rising from the top-right corner, a fine ruled pattern, grain. */
-function EventSurface({ accent }: { accent: string }) {
+function EventSurface({ accent, edge = true }: { accent: string; edge?: boolean }) {
   // Brand colours run from EY yellow to Morgan Stanley's near-black navy. A
   // dark one vanished against the card (no glow, no visible edge: direct
   // feedback), so every accent is lifted toward white by the same amount
@@ -456,8 +456,9 @@ function EventSurface({ accent }: { accent: string }) {
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.35) 45%, transparent 100%)" }} />
       <span aria-hidden className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.18 }} />
       <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: lit }} />
-      {/* the card's edge, drawn here so every event surface gets the same one */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${lit} 45%, transparent)` }} />
+      {/* the card's edge, drawn here so every event surface gets the same one
+         (the ticket card draws its own edge so it can follow the notches) */}
+      {edge && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${lit} 45%, transparent)` }} />}
     </>
   );
 }
@@ -1696,6 +1697,7 @@ function HomeView({
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
               const pAccent = partnerAccent(event.host);
+              const lit = `color-mix(in srgb, ${pAccent} 62%, #ffffff)`;
               const joined = eventJoined[event.id];
               // the date the card is about (the next one when booked), its time
               // once confirmed, then where: the city lives here, not in the name
@@ -1709,11 +1711,20 @@ function HomeView({
                    wrapper as a drop-shadow so it follows the notched outline.
                    Community cards keep their own shape. */
                 <div key={event.id} className="group relative" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
+                  {/* the outer box is the ticket's EDGE: its background shows as
+                     a one-pixel ring around the masked outline, notches included;
+                     the inner box, inset by that pixel and masked to match, holds
+                     the surface. Content sits in the outer box so the same mask
+                     tears it. */}
                   <div
                     className="connect-ticket relative flex min-h-[262px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-                    style={{ background: "#0e0c20", fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "140px" }}
+                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW, ["--stub" as string]: "140px" }}
                   >
-                    <EventSurface accent={pAccent} />
+                    <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20" }}>
+                      <EventSurface accent={pAccent} edge={false} />
+                      {/* the stub's own paper: a lighter, tinted band under the tear line */}
+                      <span className="absolute inset-x-0 bottom-0" style={{ height: "calc(var(--stub) - 1px)", background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
+                    </div>
                     <div className="relative z-10 flex flex-1 flex-col px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)]">
                       <h3 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
                       {/* when, then where, one per line with its icon; the
@@ -1725,7 +1736,7 @@ function HomeView({
                     </div>
                     {/* the stub: fixed height so the notches always land on its edge */}
                     <div className="relative z-10 flex flex-none flex-col justify-between px-[var(--space-6)] pt-[var(--space-4)] pb-[var(--space-5)]" style={{ height: "var(--stub)" }}>
-                      <span aria-hidden className="pointer-events-none absolute inset-x-[16px] top-0 border-t-2 border-dashed" style={{ borderColor: "rgba(255,255,255,0.22)" }} />
+                      <span aria-hidden className="pointer-events-none absolute inset-x-[18px] top-0 border-t-2 border-dashed" style={{ borderColor: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.18))` }} />
                       {typeof event.students === "number" ? (
                         <div className="grid grid-cols-3 gap-[6px]">
                           <StatTile value={event.students.toLocaleString("en-US")} label="Students" />
