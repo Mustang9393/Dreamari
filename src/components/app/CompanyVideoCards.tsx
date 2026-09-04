@@ -27,12 +27,17 @@ export function CompanyVideoCards() {
         >
           <span className="sr-only">Play {item.company} {item.title}</span>
           <Image src={item.poster} alt="" fill sizes="210px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+          {/* A big center badge sat right over the subject's face on nearly
+             every cover (direct feedback, 5 Sept 2026: "especially the
+             people"). Docked top-right instead, small, the way a duration
+             badge sits on a video thumbnail elsewhere — every cover's top
+             corners are clear, and the frame's actual subject stays visible. */}
           <span
             aria-hidden
-            className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
+            className="pointer-events-none absolute top-[10px] right-[10px] flex size-[34px] items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
             style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
           >
-            <Play className="ml-[3px] h-[22px] w-[22px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
+            <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
           </span>
           {/* the company mark sits on the dark scrim right above the title,
              white and at a readable size (direct feedback: the frosted chip up
