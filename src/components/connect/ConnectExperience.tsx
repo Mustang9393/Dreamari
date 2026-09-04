@@ -669,7 +669,7 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
             onClick={onOpen}
             aria-label={`Open ${community.name}`}
             className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[14px] text-[13px] leading-[18px] font-bold whitespace-nowrap"
-            style={{ background: "rgba(12,16,35,0.72)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)", color: "#FFFFFF" }}
+            style={{ background: `color-mix(in srgb, ${accent} 26%, rgba(12,16,35,0.78))`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.18))`, color: "#FFFFFF" }}
           >
             Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[2px] group-hover/cta:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
           </button>
