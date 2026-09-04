@@ -366,6 +366,13 @@ function viewModel(career: ResolvedCareer) {
 export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
+  // Open at the top. Arriving from a rail deep in Explore or Home kept the
+  // previous page's scroll position, so the page opened mid-way (direct
+  // feedback, 4 Sept 2026). A hash link to a section is left alone.
+  useEffect(() => {
+    if (window.location.hash) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [slug]);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
   // Pay by state: the list of your states and the best states, or the whole
