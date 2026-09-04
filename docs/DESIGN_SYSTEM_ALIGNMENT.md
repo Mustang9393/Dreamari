@@ -1,66 +1,73 @@
-# Design system alignment: Figma v2.0, prototype, production app
+# Design system alignment: Figma v2.0, this prototype, the production app
 
-Audited 4 September 2026 against the Figma file "Dreamari Design System v2.0" (sV90J9zEKarhCYJMQKbYxx): the Components section, the CTA, Desktop Navigation, FormInput and Env Card v2 components, and the Screens sections. Read this before importing anything from this repo into the production app.
+Last checked 4 September 2026. Figma file: "Dreamari Design System v2.0" (sV90J9zEKarhCYJMQKbYxx). Production app: dreamonna, tokens in `packages/ui/tokens`, imported from the certified Figma export.
 
-## The short version
+## State today
 
-- The Figma file and this prototype share ONE token vocabulary at runtime: flat shadcn-style names (`--primary`, `--background`, `--foreground`, `--border`, `--glass-surface-1`, `--radius-md`, `--space-4`). The prototype's runtime values live in `src/components/marketing/tokens.css`. The `design-tokens/` DTCG folder is a separate experiment with its own nested names and is NOT for import (see its README).
-- Colour roles, glass surfaces, radius and spacing are aligned between Figma and the prototype. Nothing to change there.
-- Four values in Figma are stale. The prototype is ahead and is the intended state. Update Figma, then re-export.
-- Figma has no designs for most of what the prototype now contains. The prototype is the reference for those screens. Nobody is asked to draw them in Figma first.
+Figma and this prototype agree. On 4 September the Figma file was corrected so that its text styles and CTA match what the product ships. The production app is one export behind.
 
-## Aligned (Figma = prototype = production names)
-
-| Token | Value | Where |
+| Layer | Source of truth | Status |
 |---|---|---|
-| `--background` | #05070f | page |
-| `--foreground` | #f4f7ff | text |
-| `--primary`, `--accent` | #2f6bf2 (light theme #1e4fcc) | brand blue |
-| `--primary-foreground` | #ffffff | text on blue |
-| `--border`, `--glass-border`, `--secondary` | white 9% | hairlines, secondary fills |
-| `--muted-foreground` | white 62% | secondary text |
-| `--glass-surface-1` / `-2` / `-3` | white 3% / white 9% / #0c1023 at 80% | glass fills |
-| `--radius-md` / `-md-alt` / `-lg` / `-xl` / `-2xl` / `-full` | 12 / 14 / 16 / 20 / 24 / 999 | prototype adds `-xs` 4, `-sm-alt` 5, `-sm` 8 |
-| `--space-*` | 4px scale with the 6px half step (`--space-1h`) | both |
-| Display face | Bricolage Grotesque (UI/H2 19/24 Bold, UI/Body 16/22 SemiBold, logo ExtraBold) | both, as of 4 Sept |
+| Token names and values | Figma variables, exported to the app | Figma corrected 4 Sept. App needs a fresh export. |
+| Text styles | Figma text styles | Corrected 4 Sept (see below). App needs a fresh export. |
+| Components and screens | This prototype (`src/`) | Figma is not kept current for screens. Build from the prototype. |
+| Brand marks | `docs/BRAND_MARKS.md` and `src/components/connect/primitives.tsx` | Cleared for demo use; licences before launch. |
 
-## Was stale in Figma, fixed 4 September 2026
+## What the app gets from the next Figma export
 
-The four items below were found stale in the audit and corrected in the Figma file the same day (text styles retyped, CTA Default made blue; card and Favorit turned out to be already right). What remains is a fresh export from Figma into the app.
+Nothing in the export needs hand editing. Import it as usual and these land:
 
-| Item | Figma today | Prototype and intended state | Figma change needed |
-|---|---|---|---|
-| Body, label and caption face | Montserrat (UI/Label 13/18 SemiBold, Label Bold, Label Small 10/14, FormInput 13) | Inter, since 2 Sept 2026 (thin Montserrat read weak on dark) | Text styles UI/Label, Label Bold, Label Small, Form text to Inter. Montserrat may remain only as a fallback name. |
-| Primary CTA | Default = white fill (#f4f7ff) with dark text; Hover = glass dark; Pressed = blue | Primary buttons are brand blue with white text, radius `--radius-md` 12, min height 44, no pill shapes. Secondary = glass with hairline border, white text. | CTA component: Default fill `--primary`, text `--primary-foreground`; keep Secondary as is; retire the white Default. |
-| Card fill | `--card` = neutral.800 (#0e0f18) | `--card` = #151829, lightened 20 Aug 2026 after theme review | Re-point the `card` variable to #151829. |
-| Display face | Correct (Bricolage) but the app side also carried Favorit until today | Bricolage Grotesque only, caps included; Favorit retired | Remove any remaining Favorit text style; `font-family.display` and `font-family.cta` = Bricolage Grotesque. |
+- Body, label, caption and nav text styles in Inter (Semi Bold, Bold, Regular, Black as before). Montserrat is gone from every UI style.
+- Section Heading, Display Stat and Stat Large in Bricolage Grotesque. Display, H1, H2, Body and the logo were already Bricolage.
+- CTA Default and Disabled variants filled with `primary` and text in `primary-foreground`. The white default button is retired. Secondary is unchanged: glass fill, hairline border, white text.
+- `card` is #151829 in dark and neutral/100 (#d8dbe8) in light. It was already set; confirm it survives the export.
 
-## In the prototype, not in Figma
+## Shared vocabulary
 
-Figma is no longer where new screens are drawn. The prototype is the reference for all of the following; take layout, copy and behaviour from the running app and the component files listed.
+Figma, the prototype's runtime CSS and the app use the same flat names. A value in the prototype maps straight onto the app token of the same name.
 
-- Landing page: hero, Build, Match, Explore, Play, Connect, Get Hired chapters; phone pager; scroll cue; console-tile Play preview. `src/components/marketing/`
-- Home: feature carousel (full-bleed photo, left frost, chips, timing segments), Continue Learning & Playing rail, Your Next Moves, Explore Recommended. `src/components/app/HomeExperience.tsx`
-- Explore: For You reel with video cards; Browse rails including Videos Inside Leading Companies. `src/components/app/ExploreExperience.tsx`, `CompanyVideoCards.tsx`
-- Connect: event boards (glass surface, brand glow, ruled pattern, lockups), community cards, board view with four tabs, Professionals to Follow rail, volunteer dashboard. `src/components/connect/`
-- Profile: tabbed card, Overview doorways, My Plan, Career Report, Resume coming soon. `src/components/profile/`
-- Colleges: search and detail. `src/components/colleges/`
-- Career detail header with progressive blur. `src/components/career/`
-- Brand mark system: one-colour marks, split accent files, register in `docs/BRAND_MARKS.md`. `src/components/connect/primitives.tsx`
-- Motion: confirm shimmer, spark bar, burst, gesture hint. `src/components/flow/`, `src/app/globals.css`
+| Name | Value (dark) | Value (light) |
+|---|---|---|
+| `--background` | #05070f | #f4f7ff |
+| `--foreground` | #f4f7ff | #05070f |
+| `--card` | #151829 | #d8dbe8 |
+| `--primary`, `--accent` | #2f6bf2 | #1e4fcc |
+| `--primary-foreground` | #ffffff | #ffffff |
+| `--border`, `--glass-border`, `--secondary` | white 9% | black 9% |
+| `--muted-foreground` | white 62% | #4a4f6d |
+| `--glass-surface-1` / `-2` / `-3` | white 3% / white 9% / #0c1023 80% | black 3% / black 9% / #050814 40% |
+| `--radius-xs` / `-sm-alt` / `-sm` / `-md` / `-md-alt` / `-lg` / `-xl` / `-2xl` / `-full` | 4 / 5 / 8 / 12 / 14 / 16 / 20 / 24 / 999 | same |
+| `--space-*` | 4px scale with `--space-1h` = 6 | same |
+| Display face | Bricolage Grotesque | same |
+| Body face | Inter | same |
 
-Figma Env Card v2 (like/dislike/save stack, white "More Info" CTA) and the Figma Home screens (star Dreamy, "Continue Where You Left Off", "Careers Picked for You") are superseded by the prototype.
+The prototype's copy of these values is `src/components/marketing/tokens.css`.
 
-## Instructions for the production app (Usman)
+## What lives only in the prototype
 
-1. Tokens: keep the certified Figma export as the source of names and values. The Figma file was corrected on 4 September 2026 (see the table above); re-export it and the app follows. Until that export lands, `src/components/marketing/tokens.css` in this repo carries the same values.
-2. Do not import `design-tokens/` from this repo. It is a different vocabulary. Its README says so.
-3. Components and screens: implement from the prototype. Variable names in the prototype's CSS match the Figma names one to one (`--primary`, `--glass-surface-2`, `--radius-md`), so a value in the prototype maps straight onto the app's token of the same name. Where the prototype uses a literal (an rgba or a px), it is a design decision, not a token; express it with the nearest app token or a component-local value.
-4. Order of trust when two sources disagree: this document, then the running prototype, then Figma. Figma is updated last because designs are no longer drawn there first.
-5. Record any new token-level decision in `docs/TOKEN_DECISIONS.md` so it reaches Figma and the export.
+Figma is no longer where screens are drawn first. Take layout, copy, behaviour and motion for these from the running app and the files named.
+
+- Landing page and its chapters, the phone pager and scroll cue, the Play console tile: `src/components/marketing/`
+- Home: feature carousel, Continue Learning & Playing rail, Your Next Moves: `src/components/app/HomeExperience.tsx`
+- Explore: For You reel with video cards, Browse rails, Videos Inside Leading Companies: `src/components/app/ExploreExperience.tsx`, `CompanyVideoCards.tsx`
+- Connect: event boards, community cards, board view, Professionals to Follow, volunteer dashboard: `src/components/connect/`
+- Profile: tabbed card, Overview, My Plan, Career Report, Resume: `src/components/profile/`
+- Colleges search and detail: `src/components/colleges/`
+- Career detail header: `src/components/career/`
+- Motion: confirm shimmer, spark bar, burst, gesture hint: `src/components/flow/`, `src/app/globals.css`
+
+Figma's Home screens and Env Card v2 are older than the prototype and are superseded.
+
+## Instructions for the production app
+
+1. Re-export tokens and text styles from Figma v2.0 and import them the normal way. That brings Inter, the Bricolage headings, the blue CTA default and the card fill into the app. Do not hand edit the token JSON.
+2. Do not import `design-tokens/` from this repo. It is a prototype-only experiment with different names. Its README says so.
+3. Build screens and components from the prototype. Where the prototype uses a token name, use the app token of the same name. Where it uses a literal, that is a component-level design decision; express it with the nearest app token or a local value, and do not create a new token for it.
+4. If the prototype and Figma disagree on a screen, the prototype wins. If they disagree on a token value after the export, tell design; it means Figma slipped again.
+5. New token-level decisions are logged in `docs/TOKEN_DECISIONS.md`. Design makes them in Figma; the app picks them up at the next export.
 
 ## For an agent reading this repo
 
 - Read this file, `docs/TOKEN_DECISIONS.md` and `docs/BRAND_MARKS.md` before proposing an import.
-- Take design decisions (layout, copy, behaviour, motion) from `src/`. Take token names from Figma. Never copy `design-tokens/*.json` or `src/app/design-tokens.generated.css` into the production app.
-- The prototype's runtime tokens are in `src/components/marketing/tokens.css` (dark and light blocks). Those names are the shared vocabulary.
+- Take design decisions from `src/`. Take token names and values from the Figma export. Never copy `design-tokens/*.json` or `src/app/design-tokens.generated.css` into the production app.
+- The prototype's runtime tokens are in `src/components/marketing/tokens.css`. Those names are the shared vocabulary.

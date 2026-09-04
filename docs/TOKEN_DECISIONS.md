@@ -1,10 +1,12 @@
-# Token-level decisions made in the prototype
+# Token-level decisions
 
-Decisions here change a token in the production system. They must be made in the certified Figma file and re-exported; the prototype's `design-tokens/` directory is not the vehicle. Everything not listed here is layout, copy or behaviour and needs no token.
+Decisions that change a token or text style in the production system. Design makes them in Figma v2.0; the app receives them at the next export. The prototype's `design-tokens/` directory is not the vehicle.
 
-| Date | Decision | Figma change | Status |
+| Date decided | Decision | Figma | App |
 |---|---|---|---|
-| 2 Sept 2026 | Body face is Inter, replacing Montserrat (thin weights read weak on dark). | Text styles: body, label, caption families to Inter. | Done in Figma 4 Sept 2026: 13 Montserrat styles retyped to Inter (Label, Label Bold, Label Small, Label Micro, Body Secondary, Caption, Caption SemiBold, Nav Label, Nav Bold, Button Black, Bold Small, Browse Cards/World Label); Section Heading, Display Stat and Stat Large to Bricolage Grotesque. Re-export pending |
-| 4 Sept 2026 | Display face is Bricolage Grotesque everywhere, including all-caps headings and the wordmark. Favorit retired. | `font-family.display` and `font-family.cta` to Bricolage Grotesque; remove Favorit from any text style. | Checked 4 Sept 2026: no Favorit style exists in Figma; display styles are already Bricolage. Nothing to change |
-| 20 Aug 2026 | Card fill lightened to #151829 (theme review). | `card` variable from neutral.800 to #151829. | Checked 4 Sept 2026: Figma `card` is already #151829 (dark) and neutral/100 #d8dbe8 (light). Aligned |
-| Aug to Sept 2026 | Primary buttons are brand blue with white text, radius 12, no pills. Secondary is glass with a hairline. | CTA component Default fill `primary`, text `primary-foreground`; retire the white Default. | Done in Figma 4 Sept 2026 on Default and Disabled, both sizes. Hover and Pressed unchanged. Re-export pending |
+| 20 Aug 2026 | Card fill lightened to #151829 (dark), neutral/100 (light) | Already set | Confirm after next export |
+| 2 Sept 2026 | Body, label, caption and nav text in Inter, replacing Montserrat | Done 4 Sept 2026, 12 styles retyped | Next export |
+| Aug to Sept 2026 | Primary button is brand blue with white text, radius 12, never a pill. Secondary is glass with a hairline | Done 4 Sept 2026, CTA Default and Disabled variants | Next export |
+| 4 Sept 2026 | Bricolage Grotesque is the only display face, including all caps and display numerals; Favorit retired | Done 4 Sept 2026: Section Heading, Display Stat and Stat Large retyped; no Favorit existed in the file | Next export |
+
+Not token decisions, no action: layout, copy, motion and content changes. Those live in the prototype and are built from it.

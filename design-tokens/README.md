@@ -1,6 +1,6 @@
 # Dreamari design-token handoff
 
-**Do not import this directory into the production app.** Production tokens are the certified Figma export in the app repo (`packages/ui/tokens`): flat shadcn names (`background`, `foreground`, `card`, `primary`), two layers, single-mode primitives. This directory is the prototype's own vocabulary (nested `color.text.primary`, three layers, split light/dark) and is not a version of that system. Take design decisions from the prototype (layout, copy, behaviour); take tokens from Figma. Token-level decisions made in the prototype are listed in `docs/TOKEN_DECISIONS.md` so they can be made in Figma and re-exported.
+**Do not import this directory into the production app.** Production tokens are the certified Figma export in the app repo (`packages/ui/tokens`), with flat shadcn names. This directory is the prototype's own nested vocabulary and is not a version of that system. Figma v2.0 was brought level with the prototype on 4 September 2026; the app only needs a fresh export. Read `docs/DESIGN_SYSTEM_ALIGNMENT.md` for the full picture and `docs/TOKEN_DECISIONS.md` for the log.
 
 This directory is the portable token source for the Dreamari coded design reference only. The production application's `packages/ui/tokens` remains the final source of truth.
 
