@@ -13,7 +13,7 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Goldman Sachs | White version for dark backgrounds | White | OK (brand portal summary; confirm on goldmansachs.papirfly.com) |
 | JPMorgan Chase | Not published for third parties | White | To confirm with JPMC relationship contact |
 | Junior Achievement | Monochrome white symbol published | White symbol, `junior-achievement.png` (JA Symbol-Monochrome-White from the JA Worldwide Brand Center, resized to 480px) | OK |
-| SEO Scholars | Not checked | Type | Needs file and guideline check |
+| SEO Scholars | No published guidelines; on its own dark footer SEO keeps "SEO" red beside white text | `seo-scholars-word` white + `seo-scholars-seo` #EA0029, split from the seo-usa.org lockup PNG | OK on colour; confirm use with SEO |
 | Amazon | Entire logo solid white allowed | White | OK (Amazon brand usage guidelines) |
 | Meta | Monochrome white on dark | White | OK, but Meta requires approval for any use |
 | Nike | Black or white swoosh | White | OK |

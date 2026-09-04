@@ -62,24 +62,11 @@ function Portal({ children }: { children: React.ReactNode }) {
 
 // Colleges read as three even rows: reach, then target, then safety.
 const BAND_ORDER: Record<CollegeStatus, number> = { Reach: 0, Target: 1, Safety: 2 };
-// Where a school sits relative to the student (Westfield, New Jersey): home
-// state, the states a train ride away, everywhere else. Schools with no
-// fixed place ("Multiple locations", "Near you") count as near.
+// The student's state (Westfield, New Jersey). A school there gets a small
+// "In state" note inside its card; nothing else changes.
 const HOME_STATE = "NJ";
-const NEAR_STATES = new Set(["NY", "PA", "CT", "DE"]);
-const DISTANCE_GROUPS = ["In New Jersey", "A train ride away", "Further away"] as const;
-function distanceGroup(location: string): number {
-  const state = location.trim().slice(-2).toUpperCase();
-  if (state === HOME_STATE) return 0;
-  if (NEAR_STATES.has(state) || /multiple|near you/i.test(location)) return 1;
-  return 2;
-}
-function groupByDistance<T extends { status: CollegeStatus; location: string }>(colleges: T[]): { label: string; colleges: T[] }[] {
-  return DISTANCE_GROUPS.map((label, i) => ({
-    label,
-    colleges: colleges.filter((c) => distanceGroup(c.location) === i).sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]),
-  })).filter((g) => g.colleges.length > 0);
-}
+const inHomeState = (location: string) => location.trim().slice(-2).toUpperCase() === HOME_STATE;
+
 function ordinal(n: string): string {
   const value = Number(n);
   if (!Number.isFinite(value)) return n;
@@ -116,7 +103,7 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
       className="scroll-mt-[84px] overflow-hidden rounded-[var(--radius-sm)] border"
       style={{ borderColor: "var(--rule)", background: "var(--paper-raised)", boxShadow: "0 16px 32px -24px rgba(0,0,0,0.65)" }}
     >
-      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] border-b px-[18px] py-[15px] sm:px-[24px] sm:py-[17px]" style={{ borderColor: "var(--rule)" }}>
+      <div className="flex items-center gap-x-[12px] border-b px-[18px] py-[15px] sm:px-[24px] sm:py-[17px]" style={{ borderColor: "var(--rule)" }}>
         {/* Per direct feedback: the section's number, not a pictogram, leads
            the header -- one shape, one weight, every section. The icon prop
            stays accepted so call sites don't change; it just isn't drawn. */}
@@ -133,11 +120,9 @@ function ReportSection({ id, n, title, icon: Icon, action, children }: { id: str
         <h3 id={`${id}-title`} className="min-w-0 flex-1 text-[18px] leading-[23px] font-extrabold text-balance uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--ink)", letterSpacing: "0.05em" }}>
           {title}
         </h3>
-        {/* the number and the title always share the first row. The action
-           sits at the row's end from md up; below md it takes its own row,
-           left aligned with the title's text (direct feedback: it used to
-           wrap to an odd spot on phones and tablets). */}
-        {action && <span className="basis-full pl-[46px] md:ml-[12px] md:basis-auto md:pl-0">{action}</span>}
+        {/* one row, always: number, title (wraps if it must), action at the
+           right edge, centred on the title */}
+        {action && <span className="ml-auto flex-none">{action}</span>}
       </div>
       <div className="p-[18px] sm:p-[24px]">
         {children}
@@ -299,10 +284,13 @@ function ReportDocument({
             <Link
               href="/explore?tab=browse"
               data-print-hide
-              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[11px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em]"
+              aria-label="Career details"
+              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[9px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em] sm:px-[11px]"
               style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
             >
-              Career details <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              {/* the words from sm up; on a phone the title needs the room, so
+                 the action is its icon alone, still on the title row */}
+              <span className="hidden sm:inline">Career details</span> <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           }
         >
@@ -377,24 +365,21 @@ function ReportDocument({
             <Link
               href="/colleges"
               data-print-hide
-              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[11px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em]"
+              aria-label="College Lookup"
+              className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[9px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em] sm:px-[11px]"
               style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
             >
-              <Search className="h-3.5 w-3.5" aria-hidden /> College Lookup
+              <Search className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">College Lookup</span>
             </Link>
           }
         >
-          {/* All six, grouped by where they are relative to the student
-             (CEO, 4 Sept: PA, NJ and NYC in one list read as random). A
-             short label per group, reach to safety inside each, no
-             sentence. How many per band and which states is still an open
-             question for Jenny and Odein. */}
-          <div className="flex flex-col gap-[18px]">
-            {groupByDistance(report.colleges).map((group) => (
-              <div key={group.label}>
-                <h4 className="text-[14px] leading-[18px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--primary)" }}>{group.label}</h4>
-                <div className="mt-[10px] grid gap-[14px] sm:grid-cols-2">
-            {group.colleges.map((college) => (
+          {/* All six, reach to safety. No grouping and no highlight (direct
+             feedback); a school in the student's own state gets a small
+             "In state" note beside its city, inside the card, so every card
+             keeps the same layout. Which schools and how many per band is
+             still an open question for Jenny and Odein. */}
+          <div className="grid gap-[14px] sm:grid-cols-2">
+            {[...report.colleges].sort((a, b) => BAND_ORDER[a.status] - BAND_ORDER[b.status]).map((college) => (
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
@@ -407,14 +392,12 @@ function ReportDocument({
                   {college.status}
                 </span>
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
-                <span className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>{college.location}</span>
-                {/* the whole card opens the lookup; one arrow in the corner says
-                   so without a line to read (direct feedback) */}
+                <span className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>
+                  {college.location}
+                  {inHomeState(college.location) && <span className="ml-[8px] font-bold" style={{ color: "var(--ink-faint)" }}>In state</span>}
+                </span>
                 <ArrowUpRight data-print-hide aria-hidden className="absolute top-[14px] right-[14px] h-4 w-4 transition-transform group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" style={{ color: "var(--ink-faint)" }} />
               </Link>
-            ))}
-                </div>
-              </div>
             ))}
           </div>
         </ReportSection>

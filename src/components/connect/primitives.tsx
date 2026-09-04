@@ -371,7 +371,7 @@ export type MarkMeta = {
   /** A part of the mark the brand requires in its own colour even on dark
    *  (EY's yellow beam, Deloitte's green dot): a second file masked in that
    *  colour over the one-colour letters. */
-  accent?: { file: string; color: string };
+  accent?: { file: string; color: string; ext?: "svg" | "png" };
 };
 export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Dream Opportunity's own mark (the CEO's vectorised logo, letters only;
@@ -400,6 +400,9 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Deloitte: wordmark white on dark, the Green Dot stays green
   Deloitte: { file: "deloitte-word", aspect: 5.31, accent: { file: "deloitte-dot", color: "#86BC24" } },
   "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
+  // SEO Scholars (seo-usa.org lockup, split by colour): "SEO" stays SEO red,
+  // "Scholars" takes the ink, which is how SEO sets it on its own dark footer.
+  "SEO Scholars": { file: "seo-scholars-word", aspect: 7.613, ext: "png", accent: { file: "seo-scholars-seo", color: "#EA0029", ext: "png" } },
   // Microsoft: our file is the logotype alone and the brand requires symbol
   // plus logotype, never one colour. Set in type until the full logo file
   // arrives (see docs/BRAND_MARKS.md).
@@ -483,8 +486,8 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
                 className="absolute inset-0 block"
                 style={{
                   background: mark.accent.color,
-                  maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
-                  WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+                  maskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
+                  WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
                   maskSize: "contain",
                   WebkitMaskSize: "contain",
                   maskRepeat: "no-repeat",
@@ -589,8 +592,8 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
             width: Math.round(boxW),
             height: Math.round(boxH),
             background: mark.accent.color,
-            maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
-            WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+            maskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
+            WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
             maskSize: "100% 100%",
             WebkitMaskSize: "100% 100%",
             maskRepeat: "no-repeat",
@@ -635,8 +638,8 @@ export function CompanyMark({ name, ink = "currentColor", className = "", height
             className="absolute inset-0 block"
             style={{
               background: mark.accent.color,
-              maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
-              WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+              maskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
+              WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.${mark.accent.ext ?? "svg"})`,
               maskSize: "contain",
               WebkitMaskSize: "contain",
               maskRepeat: "no-repeat",
