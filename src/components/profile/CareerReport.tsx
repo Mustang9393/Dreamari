@@ -4,7 +4,7 @@ import Link from "next/link";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -386,18 +386,19 @@ function ReportDocument({
               <Link
                 key={college.name}
                 href={`/colleges?school=${encodeURIComponent(college.name)}`}
-                className="dm-tap flex flex-col rounded-[var(--radius-sm)] border px-[18px] py-[16px]"
+                className="dm-tap group relative flex flex-col rounded-[var(--radius-sm)] border px-[18px] py-[16px] pr-[44px]"
                 style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}
                 data-keep-together
+                aria-label={`${college.name}, ${college.status}. Open in the college lookup`}
               >
                 <span className="mb-[10px] inline-flex w-fit items-center rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[10.5px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ borderColor: "var(--rule-strong)", color: "var(--ink-faint)", background: "var(--paper-raised)" }}>
                   {college.status}
                 </span>
                 <h4 className="text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>{college.name}</h4>
                 <span className="mt-[3px] text-[12px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>{college.location}</span>
-                <span data-print-hide className="mt-[7px] inline-flex items-center gap-[4px] text-[12px] leading-[17px]" style={{ color: "var(--ink-faint)" }}>
-                  Look this up <ArrowRight className="h-3 w-3" aria-hidden />
-                </span>
+                {/* the whole card opens the lookup; one arrow in the corner says
+                   so without a line to read (direct feedback) */}
+                <ArrowUpRight data-print-hide aria-hidden className="absolute top-[14px] right-[14px] h-4 w-4 transition-transform group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" style={{ color: "var(--ink-faint)" }} />
               </Link>
             ))}
           </div>
