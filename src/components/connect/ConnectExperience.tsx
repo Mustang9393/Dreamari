@@ -4,7 +4,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 
 import Image from "next/image";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowLeft,
@@ -720,7 +720,52 @@ function StatTile({ value, label }: { value: number | string; label: string }) {
   );
 }
 
+/** The "+N" chip on a community card. Hover previews the remaining
+ *  companies; a tap opens the same list as a small sheet with a close, and it
+ *  also closes on a tap outside, on Escape, or when the page scrolls away. */
+function MoreMarks({ className, missing, names, open, onToggle, onClose }: { className: string; missing: number; names: string[]; open: boolean; onToggle: () => void; onClose: () => void }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: PointerEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("pointerdown", down);
+    document.addEventListener("keydown", key);
+    window.addEventListener("scroll", onClose, { passive: true, once: true });
+    return () => { document.removeEventListener("pointerdown", down); document.removeEventListener("keydown", key); window.removeEventListener("scroll", onClose); };
+  }, [open, onClose]);
+  return (
+    <span ref={ref} className={`${className} group/more relative flex-none`} onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        aria-label={`${missing} more: ${names.join(", ")}`}
+        aria-expanded={open}
+        onClick={onToggle}
+        className="dm-quiet flex h-[28px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold"
+        style={{ background: open ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}
+      >
+        +{missing}{missing === 1 || className.includes("460px]:flex") ? " more" : ""}
+      </button>
+      <span
+        role={open ? "dialog" : "tooltip"}
+        aria-label="More companies"
+        className={`absolute bottom-[calc(100%+8px)] left-0 z-30 flex-wrap items-center gap-[6px] rounded-[var(--radius-md)] border p-[8px] ${open ? "flex pr-[34px]" : "pointer-events-none hidden group-hover/more:flex group-focus-within/more:flex"}`}
+        style={{ background: "rgba(12,16,35,0.96)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.7)", minWidth: 120 }}
+      >
+        {names.map((name) => <CompanyChip key={name} name={name} tone="frost" />)}
+        {open && (
+          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[6px] right-[6px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>
+            <X className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        )}
+      </span>
+    </span>
+  );
+}
+
 function CommunityCard({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean }) {
+  // which "+N" chip is open (2 or 3, by how many marks precede it); 0 = none
+  const [moreOpen, setMoreOpen] = useState(0);
   const accent = communityAccent(community);
   return (
     <div
@@ -772,26 +817,19 @@ function CommunityCard({ community, joined, onOpen, onJoin, featured }: { commun
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
-          {/* marks step down with the card's own width (container query):
-             one under 360px, two under 460px, three above. The count chip
-             always says how many are missing, so Open never gets crowded. */}
+          {/* two marks always (phones included), a third once the card is
+             460px wide. The count chip says how many are missing; on hover it
+             previews them, on tap it opens a small sheet with the rest that
+             stays until closed (direct feedback, 5 Sept 2026). */}
           <div className="flex min-w-0 items-center gap-[6px]">
             {community.professionalsFrom.slice(0, 3).map((name, index) => (
-              <span key={name} className={index === 0 ? "flex" : index === 1 ? "hidden @[360px]:flex" : "hidden @[460px]:flex"}><CompanyChip name={name} tone="frost" /></span>
+              <span key={name} className={index < 2 ? "flex" : "hidden @[460px]:flex"}><CompanyChip name={name} tone="frost" /></span>
             ))}
-            {[1, 2, 3].map((shown) => {
+            {[2, 3].map((shown) => {
               const missing = community.professionalsFrom.length - shown;
               if (missing <= 0) return null;
-              const vis = shown === 1 ? "flex @[360px]:hidden" : shown === 2 ? "hidden @[360px]:flex @[460px]:hidden" : "hidden @[460px]:flex";
-              return (
-                <span key={shown} className={`${vis} group/more relative flex-none`}>
-                  {/* hover or focus shows who the rest are (direct feedback) */}
-                  <button type="button" aria-label={`${missing} more: ${community.professionalsFrom.slice(shown).join(", ")}`} className="dm-quiet flex h-[28px] cursor-default items-center rounded-[var(--radius-sm)] px-[9px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", color: "#FFFFFF" }}>+{missing}{shown === 3 ? " more" : ""}</button>
-                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+8px)] left-0 z-30 hidden flex-wrap gap-[6px] rounded-[var(--radius-md)] border p-[8px] group-hover/more:flex group-focus-within/more:flex" style={{ background: "rgba(12,16,35,0.94)", borderColor: "rgba(255,255,255,0.16)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.7)", minWidth: 120 }}>
-                    {community.professionalsFrom.slice(shown).map((name) => <CompanyChip key={name} name={name} tone="frost" />)}
-                  </span>
-                </span>
-              );
+              const vis = shown === 2 ? "flex @[460px]:hidden" : "hidden @[460px]:flex";
+              return <MoreMarks key={shown} className={vis} missing={missing} names={community.professionalsFrom.slice(shown)} open={moreOpen === shown} onToggle={() => setMoreOpen((v) => (v === shown ? 0 : shown))} onClose={() => setMoreOpen(0)} />;
             })}
           </div>
           {/* a button that reads as one (direct feedback), without the blue:
@@ -2130,9 +2168,10 @@ function BoardView({
 
       {tab === "questions" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
-          {/* the composer closes the feed (reference order): read first, then ask */}
+          {/* the composer sits at the top of the feed, right under the board's
+             header, so asking is the first thing on offer rather than a
+             reward for scrolling past every existing thread (direct
+             feedback, 5 Sept 2026) */}
           <InlineAsk
             joined={joined}
             onRequireJoin={onJoin}
@@ -2140,6 +2179,8 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
+          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
           {threads.length === 0 && (
             <Card>
               <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>

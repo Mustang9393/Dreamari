@@ -325,8 +325,19 @@ function ConnectDemo() {
   }, [screen]);
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      {screen === "overview" ? <CommunityOverviewCard onEnter={() => setScreen("post")} /> : <PostCard />}
+    // Both screens are always mounted, stacked in the same grid cell, so the
+    // wrapper is sized to the taller one from the very first paint. Toggling
+    // `screen` only crossfades opacity - it used to swap which card was
+    // rendered, which changed this section's height at the moment of the tap
+    // and (on a phone, mid scroll-snap) sent the whole page snapping back to
+    // Play (reported 5 Sept 2026).
+    <div className="grid h-full w-full place-items-center">
+      <div className="[grid-area:1/1] transition-opacity duration-300" style={{ opacity: screen === "overview" ? 1 : 0, pointerEvents: screen === "overview" ? "auto" : "none", visibility: screen === "overview" ? "visible" : "hidden" }}>
+        <CommunityOverviewCard onEnter={() => setScreen("post")} />
+      </div>
+      <div className="[grid-area:1/1] transition-opacity duration-300" style={{ opacity: screen === "post" ? 1 : 0, pointerEvents: screen === "post" ? "auto" : "none", visibility: screen === "post" ? "visible" : "hidden" }}>
+        <PostCard />
+      </div>
     </div>
   );
 }

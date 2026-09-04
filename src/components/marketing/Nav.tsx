@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 type NavProps = {
   onSchoolsClick: () => void;
@@ -45,6 +45,20 @@ export function Nav({ onSchoolsClick }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // The open menu closes on a tap outside the island, on Escape, or as soon as
+  // the page scrolls (it used to ride along, open, until closed by hand).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    const down = (e: PointerEvent) => { if (headerRef.current && !headerRef.current.contains(e.target as Node)) close(); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    document.addEventListener("pointerdown", down);
+    document.addEventListener("keydown", key);
+    window.addEventListener("scroll", close, { passive: true, once: true });
+    return () => { document.removeEventListener("pointerdown", down); document.removeEventListener("keydown", key); window.removeEventListener("scroll", close); };
+  }, [menuOpen]);
 
   // Hide-on-scroll-down / reveal-on-scroll-up — added after the floating island
   // was reported covering chapter titles (PLAY especially) on mobile: the chapters
@@ -81,6 +95,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
 
   return (
     <header
+      ref={headerRef}
       className="fixed inset-x-3 top-3 z-50 flex justify-center transition-transform duration-300 sm:inset-x-6 sm:top-4"
       style={{ transform: hidden ? "translateY(calc(-100% - 16px))" : "translateY(0)" }}
     >

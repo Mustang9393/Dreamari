@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
 import { useGlobalTheme } from "./theme";
 
@@ -97,6 +97,15 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useGlobalTheme();
+  // the backdrop handles taps outside; scrolling away or Escape closes it too
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("scroll", close, { passive: true, once: true });
+    document.addEventListener("keydown", key);
+    return () => { window.removeEventListener("scroll", close); document.removeEventListener("keydown", key); };
+  }, [open]);
   return (
     <div className={className ?? "relative"}>
       <button
