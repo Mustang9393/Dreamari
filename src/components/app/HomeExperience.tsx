@@ -150,7 +150,9 @@ function HeroBanner() {
 
   useEffect(() => {
     if (paused || dropOpen) return;
-    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 7000);
+    // 13 seconds a panel (CEO, 4 Sept): a phone recording showed the old
+    // interval left no time to read the headline against everything below.
+    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 13000);
     return () => clearInterval(timer);
   }, [paused, dropOpen]);
 

@@ -461,22 +461,40 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
     >
       {mark ? (
         <>
-          <span
-            aria-hidden
-            className="block flex-none"
-            style={{
-              ...scaled,
-              background: ink,
-              maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-              WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
+          <span aria-hidden className="relative block flex-none" style={{ ...scaled }}>
+            <span
+              aria-hidden
+              className="absolute inset-0 block"
+              style={{
+                background: ink,
+                maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+                WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+              }}
+            />
+            {mark.accent && (
+              <span
+                aria-hidden
+                className="absolute inset-0 block"
+                style={{
+                  background: mark.accent.color,
+                  maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+                  WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                }}
+              />
+            )}
+          </span>
           <span className="sr-only">{name}</span>
           {/* the name, on hover or keyboard focus, for anyone unsure of a mark */}
           <span
@@ -595,22 +613,40 @@ export function CompanyMark({ name, ink = "currentColor", className = "", height
   const box = markBox(mark.aspect, height ?? mark.height);
   return (
     <span className={`inline-flex items-center ${className}`} title={name}>
-      <span
-        aria-hidden
-        className={`block flex-none ${markClassName}`}
-        style={{
-          width: Math.round(box.width * scale), height: Math.round(box.height * scale),
-          background: ink,
-          maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-          WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
-          maskSize: "contain",
-          WebkitMaskSize: "contain",
-          maskRepeat: "no-repeat",
-          WebkitMaskRepeat: "no-repeat",
-          maskPosition: "center",
-          WebkitMaskPosition: "center",
-        }}
-      />
+      <span aria-hidden className={`relative block flex-none ${markClassName}`} style={{ width: Math.round(box.width * scale), height: Math.round(box.height * scale) }}>
+        <span
+          aria-hidden
+          className="absolute inset-0 block"
+          style={{
+            background: ink,
+            maskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+            WebkitMaskImage: `url(/images/logos/companies/${mark.file}.${mark.ext ?? "svg"})`,
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+          }}
+        />
+        {mark.accent && (
+          <span
+            aria-hidden
+            className="absolute inset-0 block"
+            style={{
+              background: mark.accent.color,
+              maskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+              WebkitMaskImage: `url(/images/logos/companies/${mark.accent.file}.svg)`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+        )}
+      </span>
       <span className="sr-only">{name}</span>
     </span>
   );
