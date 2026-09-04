@@ -77,7 +77,7 @@ function HeroPanel({
     <div className="relative h-full w-full flex-none overflow-hidden" style={{ background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
       <div aria-hidden className="absolute inset-0">
         {photo && (
-          <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_14s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
+          <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_8s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
             <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus }} priority={active} />
             {/* The frost is a blurred copy of the same photo, masked in: on
                phones it ramps up from the foot, from sm up it ramps in from
@@ -188,9 +188,13 @@ function HeroBanner() {
 
   useEffect(() => {
     if (paused || dropOpen) return;
-    // 13 seconds a panel (CEO, 4 Sept): a phone recording showed the old
-    // interval left no time to read the headline against everything below.
-    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 13000);
+    // 7 seconds a panel: the feature cards now carry one headline, one chip
+    // line and one button, which reads in about four seconds; 7s sits in the
+    // 5 to 8 second band the large streaming and store homepages use for
+    // auto-advancing billboards, long enough to read, short enough that
+    // the third panel is seen. The timing segment and the photo push run on
+    // the same clock (home-hero-seg, home-hero-push).
+    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 7000);
     return () => clearInterval(timer);
   }, [paused, dropOpen]);
 
@@ -254,14 +258,14 @@ function HeroBanner() {
           </HeroAction>
         </HeroPanel>
 
-        {/* Panel 2 — New game unlocked. Investment Banker already lives in
+        {/* Panel 2 — New game launched. Investment Banker already lives in
            the Continue rail below, so the feature slot announces the next
            game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
           active={panel === 1}
           photo={REGISTERED_NURSE.cover}
           focus="50% 30%"
-          eyebrow="NEW GAME UNLOCKED"
+          eyebrow="NEW GAME LAUNCHED"
           eyebrowColor={WORLD_COLORS[REGISTERED_NURSE.world]}
           title={`Day in the Life: ${REGISTERED_NURSE.title}`}
           meta={
@@ -320,7 +324,7 @@ function HeroBanner() {
       {/* Carousel dots + pause: top-right on every screen, clear of the
          actions at the foot */}
       <div className="absolute top-[16px] right-[16px] z-[3] flex items-center gap-[var(--space-3)] sm:top-[22px] sm:right-[22px]">
-        {/* story-style segments: the live one fills over the 13s the panel
+        {/* story-style segments: the live one fills over the 7s the panel
            holds, so the timing is visible instead of a guess */}
         <div className="flex items-center gap-[5px]">
           {[0, 1, 2].map((index) => (
@@ -334,7 +338,7 @@ function HeroBanner() {
             >
               <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
                 {panel === index && (
-                  <span key={`${panel}-${paused}`} className={`absolute inset-y-0 left-0 rounded-full ${paused ? "" : "motion-safe:animate-[home-hero-seg_13s_linear_forwards]"}`} style={{ background: "#fff", width: paused ? "100%" : undefined }} />
+                  <span key={`${panel}-${paused}`} className={`absolute inset-y-0 left-0 rounded-full ${paused ? "" : "motion-safe:animate-[home-hero-seg_7s_linear_forwards]"}`} style={{ background: "#fff", width: paused ? "100%" : undefined }} />
                 )}
                 {panel > index && <span className="absolute inset-0 rounded-full" style={{ background: "#fff" }} />}
               </span>

@@ -1033,7 +1033,7 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 }
 
 /* Home highlights (4 Sept 2026): the showing panel's photo pushes in slowly
-   over its 13s hold; the live timing segment fills over the same window. */
+   over its 7s hold; the live timing segment fills over the same window. */
 @keyframes home-hero-push {
   from { transform: scale(1); }
   to { transform: scale(1.07); }
