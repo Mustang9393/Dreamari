@@ -83,6 +83,9 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   const openCount = ROUTED.filter((q) => (routed[q.id] ?? "open") === "open" || routed[q.id] === "answering").length;
   const words = ["No", "One", "Two", "Three"][openCount] ?? String(openCount);
   const answeredThreads = THREADS.filter((t) => t.responses.some((r) => r.kind === "answer" && r.proId === pro.id));
+  // "87 answered" needs somewhere to go (direct feedback): one answered
+  // question shows by default, View all opens the rest.
+  const [allAnswered, setAllAnswered] = useState(false);
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
@@ -199,8 +202,8 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                   </li>
                 );
               })}
-              {/* one already-answered question, with what it did */}
-              {answeredThreads.slice(0, 1).map((t) => {
+              {/* one already-answered question, with what it did; View all opens the rest */}
+              {answeredThreads.slice(0, allAnswered ? undefined : 1).map((t) => {
                 const s = signals(t.views, t.helpful, undefined);
                 return (
                   <li key={t.id} className="flex flex-col gap-[8px] border-t py-[var(--space-4)] last:pb-0" style={{ borderColor: RULE }}>
@@ -219,6 +222,16 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                   </li>
                 );
               })}
+              {(answeredThreads.length > 1 || pro.questionsAnswered + answeredNow > answeredThreads.length) && (
+                <li className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+                  <button type="button" aria-expanded={allAnswered} onClick={() => setAllAnswered((v) => !v)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                    {allAnswered ? "Show less" : `View all ${pro.questionsAnswered + answeredNow} answered`} <ChevronRight className="h-3.5 w-3.5 transition-transform" style={{ transform: allAnswered ? "rotate(90deg)" : "none" }} aria-hidden />
+                  </button>
+                  {allAnswered && pro.questionsAnswered + answeredNow > answeredThreads.length && (
+                    <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{answeredThreads.length} of them are in this prototype&apos;s data.</span>
+                  )}
+                </li>
+              )}
             </ul>
           </Panel>
 
