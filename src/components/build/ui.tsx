@@ -291,7 +291,7 @@ export function StepFooter({
         <button
           type="button"
           onClick={onSkip}
-          className="dm-link cursor-pointer text-[13px] font-semibold text-[var(--color-night-muted-foreground)] opacity-60 underline underline-offset-2 transition-opacity hover:opacity-90"
+          className="dm-link cursor-pointer text-[13px] font-semibold text-[var(--color-night-muted-foreground)] opacity-60 transition-opacity hover:opacity-90"
         >
           Skip
         </button>

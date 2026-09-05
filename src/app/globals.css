@@ -424,6 +424,20 @@ body {
   0% { opacity: 0; transform: translateY(18px) scale(0.97); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* Match results (Your Top 3): each card turns in from a slight angle and
+   lands, then a band of light passes over it once — a reveal, not a fade.
+   Every transform stays inside the card's own box, so the grid never shifts
+   and nothing leaves the screen at any width. */
+@keyframes card-reveal-3d {
+  0% { opacity: 0; transform: perspective(900px) rotateY(-16deg) translateY(28px) scale(0.94); filter: brightness(1.6); }
+  70% { opacity: 1; filter: brightness(1.15); }
+  100% { opacity: 1; transform: perspective(900px) rotateY(0) translateY(0) scale(1); filter: brightness(1); }
+}
+@keyframes card-sheen {
+  0% { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateX(130%) skewX(-18deg); opacity: 0; }
+}
 /* The #1 pick's ring on the Match results screen: a slow breathing glow so
    the selection reads as alive, not a static outline. */
 @keyframes card-glow-pulse {

@@ -15,6 +15,7 @@ import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { InkText } from "@/components/build/ui";
 import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
@@ -115,6 +116,8 @@ export function MatchLab() {
     };
   });
   const [decisionOpen, setDecisionOpen] = useState(false);
+  // confetti from the top of the Top 3 sheet the moment it opens
+  const [decisionBurst, setDecisionBurst] = useState(0);
   // Set the moment Match hands off to Profile (any of the "finish" buttons):
   // holds the destination URL while the welcome popup shows, rather than
   // navigating straight there.
@@ -189,6 +192,7 @@ export function MatchLab() {
         playMilestoneChime();
         setChosenId(null);
         setDecisionOpen(true);
+        setDecisionBurst((n) => n + 1);
       }, 820);
     }
   }
@@ -450,8 +454,15 @@ export function MatchLab() {
       <AuroraBackground accent={top?.color?.startsWith("var") ? "#2f6bf2" : "#2f6bf2"} visitedAccents={[]} finale={liked.length >= MAX_SLOTS} lightning={false} />
       <FlowChrome />
 
-      <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-5 sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
-        <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
+      <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-[72px] sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
+        {/* Phones: the column fills the screen and the deck takes whatever
+           height is left (flex-1). From tablet up the deck is bounded to the
+           card's own proportions at the column width (capped by the
+           viewport), and the whole group — header, slots, deck, actions —
+           centers vertically as one unit. Before this the deck stretched to
+           any height, so on a tall tablet everything hugged the top edge and
+           the CTAs sat alone at the bottom (direct feedback, 5 Sept 2026). */}
+        <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col sm:justify-center">
           {/* ---- header: back to Build (a mistake in Build shouldn't mean
              restarting Match from scratch to fix it — direct feedback, 5
              Sept 2026) + title + live counter ---- */}
@@ -534,7 +545,7 @@ export function MatchLab() {
           )}
 
           {/* ---- deck ---- */}
-          <div className="relative min-h-0 w-full flex-1">
+          <div className="relative min-h-0 w-full flex-1 sm:h-[min(600px,calc(100dvh-280px))] sm:flex-none">
             {deckDone ? (
               <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={() => finishMatching()} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
             ) : (
@@ -642,28 +653,36 @@ export function MatchLab() {
       {decisionOpen && (
         <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
           <div className="relative flex flex-col items-center gap-5 text-center">
-            {/* the glow lives behind everything, clipped to the sheet's own
-               corners so it never bleeds past the card */}
+            {/* Two glows drift slowly behind everything (brand blue, accent
+               purple) so the sheet breathes instead of sitting flat; both
+               are clipped by the sheet's own corners and never leave it. */}
             <span
               aria-hidden
-              className="pointer-events-none absolute -top-16 left-1/2 -z-[1] h-[220px] w-[80%] -translate-x-1/2 rounded-full blur-[70px]"
-              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 38%, transparent), transparent 70%)" }}
+              className="pointer-events-none absolute -top-24 left-[10%] -z-[1] h-[260px] w-[60%] rounded-full blur-[70px] motion-safe:animate-[play-ambient-drift-a_9s_ease-in-out_infinite]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 40%, transparent), transparent 70%)" }}
             />
             <span
-              className="motion-safe:animate-[fade-slide-up_0.5s_ease-out_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+              aria-hidden
+              className="pointer-events-none absolute -top-10 right-[8%] -z-[1] h-[220px] w-[50%] rounded-full blur-[70px] motion-safe:animate-[play-ambient-drift-b_11s_ease-in-out_infinite]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 34%, transparent), transparent 70%)" }}
+            />
+            {/* confetti launches from the top center as the sheet lands */}
+            <span aria-hidden className="pointer-events-none absolute -top-6 left-1/2 h-24 w-24 -translate-x-1/2"><LocalBurst nonce={decisionBurst} /></span>
+            <span
+              className="motion-safe:animate-[dreamy-pop_0.45s_0.1s_cubic-bezier(0.34,1.56,0.64,1)_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
               style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
             >
               <Sparkles className="h-3 w-3" aria-hidden /> Match complete
             </span>
             <div className="flex flex-col gap-1.5">
-              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                Your Top 3 Matches
+              <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                <InkText text="Your Top 3 Matches" delay={0.25} />
               </h2>
-              <p className="motion-safe:animate-[fade-slide-up_0.5s_0.1s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
                 Tap a card to lead with it.
               </p>
             </div>
-            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
               {liked
                 .map((c, i) => ({ c, i }))
                 .sort((a, b) => (a.c.id === (chosenId ?? liked[0]?.id) ? -1 : b.c.id === (chosenId ?? liked[0]?.id) ? 1 : a.i - b.i))
@@ -671,7 +690,7 @@ export function MatchLab() {
                   <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} index={rank} />
                 ))}
             </div>
-            <div className="flex w-full flex-col gap-2.5">
+            <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]">
               <Button variant="primary" size="large" onClick={saveTop3} type="button">
                 Save My Top 3 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -977,9 +996,9 @@ function TopThreeCard({ career, rank, chosen, onChoose, index = 0 }: { career: C
       type="button"
       onClick={onChoose}
       aria-pressed={chosen}
-      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200 motion-safe:animate-[card-cascade_0.5s_cubic-bezier(0.16,1,0.3,1)_both] hover:-translate-y-[3px]"
+      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200 motion-safe:animate-[card-reveal-3d_0.8s_cubic-bezier(0.16,1,0.3,1)_both] hover:-translate-y-[3px]"
       style={{
-        animationDelay: `${index * 90}ms`,
+        animationDelay: `${350 + index * 140}ms`,
         borderColor: chosen ? gold : "var(--color-glass-border-raised)",
         boxShadow: chosen
           ? `0 0 0 2px ${gold}, 0 0 32px -6px color-mix(in srgb, ${gold} 70%, transparent), 0 20px 40px -20px color-mix(in srgb, ${gold} 60%, transparent)`
@@ -1000,17 +1019,27 @@ function TopThreeCard({ career, rank, chosen, onChoose, index = 0 }: { career: C
         className="absolute inset-0"
         style={{ background: "linear-gradient(180deg, rgba(5,7,15,0.05) 0%, rgba(5,7,15,0.35) 55%, rgba(5,7,15,0.88) 100%)" }}
       />
+      {/* one pass of light over the card just after it lands (clipped by the
+         card's own overflow-hidden, so it never spills into the grid) */}
       <span
         aria-hidden
-        className="absolute top-2.5 left-2.5 flex size-7 items-center justify-center rounded-full text-white transition-opacity duration-150"
-        style={{ background: gold, opacity: chosen ? 1 : 0 }}
+        className="pointer-events-none absolute inset-y-0 left-0 w-[45%] motion-safe:animate-[card-sheen_1.1s_ease-out_both]"
+        style={{ animationDelay: `${950 + index * 140}ms`, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)" }}
+      />
+      {/* the check only exists on the #1 card (the pop animation ends at
+         opacity 1, so it must not be applied to a hidden badge — that put a
+         check on every card); it pops in when a card becomes #1 */}
+      <span
+        aria-hidden
+        className={`absolute top-2.5 left-2.5 flex size-7 items-center justify-center rounded-full text-white ${chosen ? "motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]" : "opacity-0"}`}
+        style={{ background: gold, animationDelay: `${1000 + index * 140}ms` }}
       >
         <Check className="h-4 w-4" strokeWidth={3} />
       </span>
       <span
         aria-hidden
-        className="absolute top-2.5 right-2.5 rounded-[var(--radius-sm)] border px-2 py-0.5 text-[12px] font-extrabold backdrop-blur-md"
-        style={{ color: chosen ? gold : "var(--color-night-foreground)", borderColor: chosen ? gold : "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)" }}
+        className="absolute top-2.5 right-2.5 rounded-[var(--radius-sm)] border px-2 py-0.5 text-[12px] font-extrabold backdrop-blur-md motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]"
+        style={{ color: chosen ? gold : "var(--color-night-foreground)", borderColor: chosen ? gold : "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", animationDelay: `${1000 + index * 140}ms` }}
       >
         #{rank}
       </span>

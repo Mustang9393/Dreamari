@@ -869,7 +869,7 @@ function Top3Tab({
         )}
       </div>
 
-      {/* Side by side from lg: up (stacked on phones, where three columns
+      {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --
          side-by-side comparison per direct feedback ("much easier and
          faster to skim, analyze and process"). Each card carries its own
@@ -877,7 +877,7 @@ function Top3Tab({
          three read as three different Career Worlds -- accent as glow and
          tint per the design language, never a solid color block. Copy is
          unchanged from the stacked version. */}
-      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] md:grid-cols-3">
       {top3.map((id, index) => {
         const career = careerById(id)!;
         const report = reportV2(id);
@@ -890,9 +890,9 @@ function Top3Tab({
         // align 1:1 whatever wraps; employers + schools fold into a
         // collapsed-by-default accordion below them.
         const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1 lg:min-h-[18px]" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2 lg:min-h-[36px]" },
-          { label: "Years in school", value: route.duration, lines: "line-clamp-1 lg:min-h-[18px]" },
+          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1 md:min-h-[18px]" },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2 md:min-h-[36px]" },
+          { label: "Years in school", value: route.duration, lines: "line-clamp-1 md:min-h-[18px]" },
         ];
         const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
@@ -970,7 +970,7 @@ function Top3Tab({
                 <span className="flex min-w-0 flex-col gap-[1px]">
                   {/* World name carries the accent, never the career title. */}
                   <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] lg:line-clamp-2 lg:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                  <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2 md:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
                 {isFocus ? (
                   <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
@@ -981,7 +981,7 @@ function Top3Tab({
                 )}
               </div>
 
-              <p className="text-[14px] leading-[19px] font-medium lg:line-clamp-2 lg:min-h-[38px]" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+              <p className="text-[14px] leading-[19px] font-medium md:line-clamp-2 md:min-h-[38px]" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
 
               <dl className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
                 {facts.map((fact) => (
