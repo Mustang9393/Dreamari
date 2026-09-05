@@ -119,27 +119,21 @@ export function MatchLab() {
   // Set the moment Match hands off to Profile (any of the "finish" buttons):
   // holds the destination URL while the welcome popup shows, rather than
   // navigating straight there.
-  // Set the moment Match is finished: the Top 3 sheet stops being a choice
-  // and becomes the stage for one continuous shot (direct feedback, 5 Sept
-  // 2026: "cut the popups' friction, not their drama") — the cards gather
-  // into a stack, Dreamy bursts in with the milestone chime, the heading
-  // turns into the handoff line, and the page itself carries on to Profile.
-  // No Continue to tap. Profile sets the scene on arrival (?welcome=1).
-  const [handoffUrl, setHandoffUrl] = useState<string | null>(null);
-  const [handoffBurst, setHandoffBurst] = useState(0);
+  // Set the moment Match is finished (from any finish button): the URL the
+  // "Welcome to Your Profile" popup hands off to when Continue is tapped
+  // (direct feedback, 5 Sept 2026: popup -> Continue -> Top Three, exactly).
+  const [welcomeUrl, setWelcomeUrl] = useState<string | null>(null);
+  // Dreamy's confetti burst and the milestone chime, once each time it opens.
+  const [welcomeBurst, setWelcomeBurst] = useState(0);
   useEffect(() => {
-    if (!handoffUrl) return;
+    if (!welcomeUrl) return;
     const chime = setTimeout(() => playMilestoneChime(), 120);
-    const kick = setTimeout(() => setHandoffBurst((n) => n + 1), 60);
-    // Long enough to read one line and watch the stack settle; short enough
-    // that nobody feels held at a door.
-    const go = setTimeout(() => router.push(handoffUrl), 2100);
+    const kick = setTimeout(() => setWelcomeBurst((n) => n + 1), 60);
     return () => {
       clearTimeout(chime);
       clearTimeout(kick);
-      clearTimeout(go);
     };
-  }, [handoffUrl, router]);
+  }, [welcomeUrl]);
   // Which liked career is "#1" on the consolidated results screen — starts
   // as whichever they liked first, but tapping any of the three reassigns it.
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -276,11 +270,8 @@ export function MatchLab() {
     const ordered = [focusId2, ...ids.filter((id) => id !== focusId2)];
     writePicks({ ids: ordered, focus: focusId2 });
     dispatchAuroraPulse("cta");
-    // Every finish path plays the same shot on the same stage, so the sheet
-    // opens here too if a shortcut button (not the sheet itself) finished it.
-    setChosenId(focusId2);
-    setDecisionOpen(true);
-    setHandoffUrl(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3&welcome=1`);
+    setDecisionOpen(false);
+    setWelcomeUrl(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3&welcome=1`);
   }
 
   function saveTop3() {
@@ -662,94 +653,38 @@ export function MatchLab() {
          screens with overlapping copy). Tapping a card makes it #1; Save
          My Top 3 sends that ranking straight to Profile's Top Three tab. ---- */}
       {decisionOpen && (
-        <Sheet onClose={() => { if (!handoffUrl) setDecisionOpen(false); }} maxWidth="720px">
+        <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
           <div className="relative flex flex-col items-center gap-5 text-center">
             {/* the glow lives behind everything, clipped to the sheet's own
-               corners so it never bleeds past the card like the deck's own
-               world-glow doesn't; it warms toward the accent as the handoff plays */}
+               corners so it never bleeds past the card */}
             <span
               aria-hidden
-              className="pointer-events-none absolute -top-16 left-1/2 -z-[1] h-[220px] w-[80%] -translate-x-1/2 rounded-full blur-[70px] transition-[background,transform] duration-1000"
-              style={{
-                background: handoffUrl
-                  ? "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 48%, transparent), transparent 70%)"
-                  : "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 38%, transparent), transparent 70%)",
-                transform: handoffUrl ? "translateX(-50%) scale(1.25)" : "translateX(-50%)",
-              }}
+              className="pointer-events-none absolute -top-16 left-1/2 -z-[1] h-[220px] w-[80%] -translate-x-1/2 rounded-full blur-[70px]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 38%, transparent), transparent 70%)" }}
             />
-
-            {/* Dreamy arrives only for the handoff, popping in where the
-               eyebrow was, so the same spot on screen changes meaning */}
-            {handoffUrl ? (
-              <div className="relative h-24 w-24 motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)_both] sm:h-28 sm:w-28">
-                <span className="absolute inset-0 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-                  <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="112px" className="object-contain" />
-                </span>
-                <LocalBurst nonce={handoffBurst} />
-              </div>
-            ) : (
-              <span
-                className="motion-safe:animate-[fade-slide-up_0.5s_ease-out_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
-                style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
-              >
-                <Sparkles className="h-3 w-3" aria-hidden /> Match complete
-              </span>
-            )}
-
+            <span
+              className="motion-safe:animate-[fade-slide-up_0.5s_ease-out_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+              style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
+            >
+              <Sparkles className="h-3 w-3" aria-hidden /> Match complete
+            </span>
             <div className="flex flex-col gap-1.5">
-              {handoffUrl ? (
-                <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                  <InkText text="Building your profile" delay={0.2} />
-                </h2>
-              ) : (
-                <>
-                  <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                    Your Top 3 Matches
-                  </h2>
-                  <p className="motion-safe:animate-[fade-slide-up_0.5s_0.1s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-                    Tap a card to lead with it.
-                  </p>
-                </>
-              )}
+              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                Your Top 3 Matches
+              </h2>
+              <p className="motion-safe:animate-[fade-slide-up_0.5s_0.1s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+                Tap a card to lead with it.
+              </p>
             </div>
-
-            {/* The three cards. During the handoff they gather into a fanned
-               stack behind the #1 (the thing being carried to Profile), so
-               "your three are going with you" is shown, not said. */}
-            <div className="relative grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
+            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
               {liked
                 .map((c, i) => ({ c, i }))
                 .sort((a, b) => (a.c.id === (chosenId ?? liked[0]?.id) ? -1 : b.c.id === (chosenId ?? liked[0]?.id) ? 1 : a.i - b.i))
                 .map(({ c }, rank) => (
-                  <div
-                    key={c.id}
-                    className="transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                    style={
-                      handoffUrl
-                        ? {
-                            // rank 0 stays; 1 and 2 slide in behind it, rotated the way a hand fans cards
-                            transform: rank === 0 ? "translateX(0) scale(1.02)" : `translateX(${rank === 1 ? "-100%" : "-200%"}) translateX(${rank === 1 ? "14px" : "28px"}) rotate(${rank === 1 ? 5 : 10}deg) scale(${1 - rank * 0.06})`,
-                            transitionDelay: `${rank * 90}ms`,
-                            zIndex: 3 - rank,
-                            opacity: rank === 0 ? 1 : 0.9 - rank * 0.15,
-                            transformOrigin: "bottom center",
-                          }
-                        : undefined
-                    }
-                  >
-                    <TopThreeCard career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => { if (!handoffUrl) setChosenId(c.id); }} index={rank} />
-                  </div>
+                  <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} index={rank} />
                 ))}
             </div>
-
-            {/* Actions fade out the moment the handoff starts: there is
-               nothing left to decide, and a button that still looks live
-               would invite a tap that does nothing. */}
-            <div
-              className="flex w-full flex-col gap-2.5 transition-opacity duration-500"
-              style={{ opacity: handoffUrl ? 0 : 1, pointerEvents: handoffUrl ? "none" : undefined }}
-              aria-hidden={!!handoffUrl}
-            >
+            <div className="flex w-full flex-col gap-2.5">
               <Button variant="primary" size="large" onClick={saveTop3} type="button">
                 Save My Top 3 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -757,6 +692,41 @@ export function MatchLab() {
                 Keep Swiping
               </Button>
             </div>
+          </div>
+        </Sheet>
+      )}
+
+      {/* ---- welcome to Profile: exactly the flow from the notes (5 Sept
+         2026) — a popup with Dreamy that says "Welcome to Your Profile", then
+         Continue maps to Profile's Top Three. Reached from every way of
+         finishing Match. Only the visuals were worked: Dreamy's celebration
+         bounce and confetti with the milestone chime, the heading revealing
+         word by word (Build's ink reveal), one caption, the standard CTA. ---- */}
+      {welcomeUrl && (
+        <Sheet onClose={() => router.push(welcomeUrl)}>
+          <div className="relative flex flex-col items-center gap-4 text-center">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 left-1/2 -z-[1] h-[240px] w-[90%] -translate-x-1/2 rounded-full blur-[70px]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 40%, transparent), transparent 70%)" }}
+            />
+            <div className="relative h-28 w-28 motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)_both] sm:h-32 sm:w-32">
+              <span className="absolute inset-0 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
+                <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
+              </span>
+              <LocalBurst nonce={welcomeBurst} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                <InkText text="Welcome to Your Profile" delay={0.3} />
+              </h2>
+              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.9s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+                Your Top 3 is saved.
+              </p>
+            </div>
+            <Button variant="primary" size="large" className="motion-safe:animate-[fade-slide-up_0.6s_1.1s_ease-out_both]" onClick={() => { dispatchAuroraPulse("select"); router.push(welcomeUrl); }} type="button">
+              Continue <ArrowRight className="h-4 w-4" aria-hidden />
+            </Button>
           </div>
         </Sheet>
       )}
