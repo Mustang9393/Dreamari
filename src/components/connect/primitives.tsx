@@ -427,7 +427,7 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   Blackstone: { file: "blackstone", aspect: 6.27 },
   Amazon: { file: "amazon", aspect: 3.31 },
   // EY on dark: white letters, beam in EY Yellow (EY brand guidelines)
-  EY: { file: "ey-letters", aspect: 0.99, letters: { y: 0.5, h: 0.5 }, accent: { file: "ey-beam", color: "#FFE600" } },
+  EY: { file: "ey-letters", aspect: 0.99, height: 16, letters: { y: 0.5, h: 0.5 }, accent: { file: "ey-beam", color: "#FFE600" } },
   // Google: full colour is the default; the approved one-colour version
   // (black or white) is for contexts that are one colour by design. Our
   // chip row is one colour by design, so white is the approved form here.
@@ -435,6 +435,18 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // Deloitte: wordmark white on dark, the Green Dot stays green
   Deloitte: { file: "deloitte-word", aspect: 5.31, accent: { file: "deloitte-dot", color: "#86BC24" } },
   "Morgan Stanley": { file: "morgan-stanley", aspect: 6.74 },
+  // HSBC: the full red-hexagon lockup on its own white plate (Wikimedia
+  // Commons "HSBC logo (2018).svg") — the mark is red-on-white by definition,
+  // not a shape that recolors cleanly as a single-colour mask.
+  // CompanyChip masks every mark to one ink colour — HSBC's source file
+  // carried its own white background plate (needed for the real red-on-
+  // white lockup), which masked as a solid white block instead of the
+  // hexagon (direct feedback, 5 Sept 2026: "is that really the HSBC logo?
+  // it's a white block"). hsbc-mask.svg is the same file with that
+  // background rect stripped, so only the hexagon + wordmark shape masks.
+  // Height tuned down from an earlier pass (was reading larger than every
+  // other mark beside it) to match EY/Morgan Stanley's weight.
+  HSBC: { file: "hsbc-mask", aspect: 315.9 / 85, height: 15 },
   // SEO Scholars (seo-usa.org lockup, split by colour): "SEO" stays SEO red,
   // "Scholars" takes the ink, which is how SEO sets it on its own dark footer.
   "SEO Scholars": { file: "seo-scholars-word", aspect: 7.613, ext: "png", accent: { file: "seo-scholars-seo", color: "#EA0029", ext: "png" } },

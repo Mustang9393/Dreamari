@@ -4,11 +4,14 @@ import { advanceTo } from "./scrollHooks";
 
 import { type RefObject, useEffect, useRef, useState } from "react";
 
+// Order per Joshua Pierce, Slack, 5 Sept 2026: once a student is matched with
+// a career, Play is the more intuitive next step (try it out) before Explore
+// (look at other careers if it's not a fit) -- confirmed live in a pitch demo.
 const CHAPTERS = [
   { id: "build", label: "Build", color: "#6366f1" },
   { id: "match", label: "Match", color: "#ffb81f" },
-  { id: "explore", label: "Explore", color: "#1fc76e" },
   { id: "play", label: "Play", color: "#3b82f6" },
+  { id: "explore", label: "Explore", color: "#1fc76e" },
   { id: "connect", label: "Connect", color: "#00c8dc" },
   { id: "get-hired", label: "Get Hired", color: "#ff9640" },
 ];

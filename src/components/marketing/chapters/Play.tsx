@@ -7,13 +7,12 @@ import { ChapterShell } from "../ChapterShell";
 import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import type { Tier } from "@/components/play/types";
-import { SparkBar } from "@/components/flow/SparkBar";
 
 // The landing's Play preview is a game tile, the way a console store shows a
 // game (direct feedback, 4 Sept 2026: "Xbox/PlayStation, immersion is king").
-// The art is the hero and everything else is a thin HUD on top of it: a gold
-// XP bar across the top, the level chip, a dialogue box with the speaker's
-// face, the choices as a console menu. It is a taste, not the game: it runs
+// The art is the hero and everything else is a thin HUD on top of it: the
+// level chip, a dialogue box, the choices as a console menu. It is a taste,
+// not the game: it runs
 // on its own the moment the chapter arrives, Christina speaks, the choices
 // rise and the cursor settles on the right one. Nothing here can be got
 // wrong; most readers will watch and scroll on.
@@ -30,8 +29,6 @@ const SCENARIO = {
 
 const ART = "/images/sim-deal-kickoff.jpg";
 const WIN_ART = "/images/play/ib/l3-20.webp";
-const XP_START = 18;
-const XP_AFTER_BEST = 46;
 
 export function PlayChapter() {
   const [graphicRef, , graphicRevealed, visitId] = usePlayingOnScroll<HTMLDivElement>();
@@ -63,7 +60,6 @@ function PlayDemo() {
   const [phase, setPhase] = useState<Phase>("typing");
   const [typed, setTyped] = useState(0);
   const answered = phase === "answered";
-  const xp = answered ? XP_AFTER_BEST : XP_START;
   // A beat after the check lands, the conversation and the menu fade away and
   // the card is only Christina's thumbs-up with "Correct!" over it.
   const [celebrate, setCelebrate] = useState(false);
@@ -179,11 +175,6 @@ function PlayDemo() {
             </div>
           )}
 
-          {/* XP: one gold bar the full width of the card, sparking when the answer lands */}
-          <div aria-hidden className="absolute inset-x-0 top-0 z-[3]">
-            <SparkBar percent={xp} height={4} track="rgba(255,255,255,0.14)" fill={GOLD} glow={GOLD} />
-          </div>
-
           {/* the scene, whole: the frame is the picture's own shape */}
           <div className="relative w-full flex-none overflow-hidden" style={{ aspectRatio: "4 / 3" }}>
             <div className="mkt-console-push absolute inset-0" style={{ translate: "var(--tx, 0px) var(--ty, 0px)", transition: "translate var(--tilt-ease, 400ms) ease-out, opacity 700ms ease", opacity: answered ? 0 : 1 }}>
@@ -201,11 +192,12 @@ function PlayDemo() {
             {/* the art fades into the frame's own dark, so scene and menu are one surface */}
             <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" style={{ height: "52%", background: "linear-gradient(180deg, transparent, rgba(11,14,28,0.6) 55%, #0b0e1c 100%)", opacity: answered ? 0 : 1, transition: "opacity 700ms ease" }} />
 
-            {/* the conversation: who is talking, then what they say */}
+            {/* the conversation: who is talking, then what they say. No
+               small avatar inset here any more (direct feedback, 5 Sept
+               2026): the scene above already shows Christina speaking,
+               through her own expression and open hand, so a second
+               thumbnail of her face was redundant. */}
             <div className="absolute inset-x-[10px] bottom-[6px] z-[3] flex gap-[10px] rounded-[var(--radius-md-alt)] border p-[10px]" style={{ background: "rgba(8,10,22,0.8)", borderColor: "rgba(255,255,255,0.14)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", opacity: celebrate ? 0 : 1, transition: "opacity 450ms ease" }}>
-              <span className="relative block flex-none overflow-hidden rounded-[10px] border" style={{ width: "calc(var(--mu) * 40px)", height: "calc(var(--mu) * 40px)", borderColor: "rgba(255,255,255,0.18)", background: "#151a2e" }}>
-                <Image src={answered ? "/images/play/ib/face-christina.webp" : SCENARIO.speaker.face} alt="" fill sizes="80px" className="object-cover" />
-              </span>
               <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
                 <span className="flex items-baseline gap-[6px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase">
                   <span style={{ color: GOLD }}>{SCENARIO.speaker.name}</span>

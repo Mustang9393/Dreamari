@@ -398,6 +398,66 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       h("fs-12", "Next 12 Months", "Find programs", [t("fs-12-1", "Shortlist 3 food science schools", 15, "Explore", "/explore?tab=browse")]),
     ],
   },
+  {
+    id: "data-scientist",
+    title: "Data Scientist",
+    world: "Tech & Engineering",
+    photo: "/images/app/poster-data-scientist.png",
+    match: 80,
+    receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
+    routes: [
+      { id: "ds-uni", short: "Stats/CS degree", type: "University", program: "Statistics, CS, or Data Science", location: "In-state", duration: "4 yrs", cost: "$45K–90K", credential: "BS + a portfolio of projects", salary: "$95K–130K first year", loanPayoff: "~1–2 yrs", nextStep: "Try a beginner data project",   costMidK: 68,
+        years: 4,
+        payMidK: 112,
+        payoffYears: 1.5,
+      },
+    ],
+    plan: [
+      h("ds-3", "Next 3 Months", "See the shape of data", [t("ds-3-1", "Play the data-viz mini game", 10, "Play", "/match-lab")]),
+      h("ds-6", "Next 6 Months", "Learn the tools", [t("ds-6-1", "Learn 10 statistics glossary terms", 10, "Play", "/match-lab")]),
+      h("ds-12", "Next 12 Months", "Find programs", [t("ds-12-1", "Shortlist 3 data science programs", 15, "Explore", "/explore?tab=browse")]),
+    ],
+  },
+  {
+    id: "fashion-buyer",
+    title: "Fashion Buyer",
+    world: "Business & Money",
+    photo: "/images/app/poster-fashion-buyer.png",
+    match: 75,
+    receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
+    routes: [
+      { id: "fb-uni", short: "Merchandising degree", type: "University", program: "Fashion Merchandising or Business", location: "In-state", duration: "4 yrs", cost: "$45K–90K", credential: "BS + a retail internship", salary: "$50K–78K first few years", loanPayoff: "~2 yrs", nextStep: "Explore what a buyer's week looks like",   costMidK: 68,
+        years: 4,
+        payMidK: 64,
+        payoffYears: 2,
+      },
+    ],
+    plan: [
+      h("fb-3", "Next 3 Months", "Read the racks", [t("fb-3-1", "Play the trend-forecasting mini game", 10, "Play", "/match-lab")]),
+      h("fb-6", "Next 6 Months", "Learn the numbers", [t("fb-6-1", "Learn 10 retail math glossary terms", 10, "Play", "/match-lab")]),
+      h("fb-12", "Next 12 Months", "Find programs", [t("fb-12-1", "Shortlist 3 merchandising programs", 15, "Explore", "/explore?tab=browse")]),
+    ],
+  },
+  {
+    id: "game-designer",
+    title: "Game Designer",
+    world: "Tech & Engineering",
+    photo: "/images/app/poster-game-designer.png",
+    match: 78,
+    receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
+    routes: [
+      { id: "gd-uni", short: "Game design degree", type: "University", program: "Game Design or Computer Science", location: "In-state", duration: "4 yrs", cost: "$45K–90K", credential: "BS + a shipped portfolio project", salary: "$70K–98K first few years", loanPayoff: "~1–2 yrs", nextStep: "Prototype one tiny game",   costMidK: 68,
+        years: 4,
+        payMidK: 84,
+        payoffYears: 1.5,
+      },
+    ],
+    plan: [
+      h("gd-3", "Next 3 Months", "Make something small", [t("gd-3-1", "Play the level-design mini game", 10, "Play", "/match-lab")]),
+      h("gd-6", "Next 6 Months", "Learn the tools", [t("gd-6-1", "Learn 10 game-design glossary terms", 10, "Play", "/match-lab")]),
+      h("gd-12", "Next 12 Months", "Find programs", [t("gd-12-1", "Shortlist 3 game design programs", 15, "Explore", "/explore?tab=browse")]),
+    ],
+  },
 ];
 
 export const ALL_PROFILE_CAREERS: ProfileCareer[] = [...PROFILE_CAREERS, ...LOCKER_EXTRAS];

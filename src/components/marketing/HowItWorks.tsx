@@ -49,8 +49,8 @@ export function HowItWorks() {
       <div ref={wrapRef} className="pb-0 md:pb-12">
         <BuildChapter />
         <MatchChapter />
-        <ExploreChapter />
         <PlayChapter />
+        <ExploreChapter />
         <ConnectChapter />
         <GetHiredChapter />
       </div>

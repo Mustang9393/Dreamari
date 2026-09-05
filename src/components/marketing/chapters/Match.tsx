@@ -113,14 +113,16 @@ function MatchDemo() {
   // somewhere, so it falls back to matching with whichever card was last on screen.
   const matched = matchedCard !== null;
 
-  // The emotional payoff of the whole deck, then straight into Explore — advance the
-  // moment the celebration's own animation actually finishes (bounce-in 0.7s, text
-  // fade-in starting at 0.3s and running 0.5s more = settled by ~0.8s), not on a
-  // separate multi-second "linger" timer stacked on top of it.
+  // The emotional payoff of the whole deck, then straight into Play — matched with a
+  // career, so trying it out is the more intuitive next step than Explore (order per
+  // Joshua Pierce, Slack, 5 Sept 2026). Advance the moment the celebration's own
+  // animation actually finishes (bounce-in 0.7s, text fade-in starting at 0.3s and
+  // running 0.5s more = settled by ~0.8s), not on a separate multi-second "linger"
+  // timer stacked on top of it.
   useEffect(() => {
     if (!matched) return;
     const timeout = setTimeout(() => {
-      advanceTo("explore");
+      advanceTo("play");
     }, 950);
     return () => clearTimeout(timeout);
   }, [matched]);

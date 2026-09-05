@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
-import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
+import { usePlayingOnScroll } from "../scrollHooks";
+import { CompanyChip } from "@/components/connect/primitives";
 
 // Reads as a real social post + comment thread (Facebook/Twitter shape: post, engagement
 // row, linear comments) done in this site's own glassmorphic surfaces — not a pinned
@@ -173,6 +174,16 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
           ))}
         </div>
 
+        {/* Real logos, not a claim in words (direct feedback, 5 Sept 2026):
+           whoever is about to scroll past this should recognize a name and
+           know real professionals from real companies are in there. */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-[8px]">
+          <CompanyChip name="Morgan Stanley" tone="surface" />
+          <CompanyChip name="EY" tone="surface" />
+          <CompanyChip name="HSBC" tone="surface" />
+          <span className="text-[11px] font-semibold uppercase" style={{ letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>+ more</span>
+        </div>
+
         <button
           type="button"
           onClick={onEnter}
@@ -316,13 +327,11 @@ export function ConnectChapter() {
 
 function ConnectDemo() {
   const [screen, setScreen] = useState<"overview" | "post">("overview");
-  // Once the thread has been read, on to Get Hired (a finished interaction
-  // brings the next chapter in, same as Build, Match and Play).
-  useEffect(() => {
-    if (screen !== "post") return;
-    const t = setTimeout(() => advanceTo("get-hired"), 5200);
-    return () => clearTimeout(t);
-  }, [screen]);
+  // Used to auto-advance to Get Hired 5.2s after the thread appeared, but
+  // that fired mid-explanation during a live demo and yanked the page away
+  // on its own (direct feedback, 5 Sept 2026 — "a real big issue", desktop
+  // and mobile). Connect no longer moves on its own; scrolling to Get Hired
+  // is now entirely the reader's own call, same as arriving at Connect was.
 
   return (
     // Both screens are always mounted, stacked in the same grid cell, so the
