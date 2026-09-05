@@ -47,17 +47,21 @@ export function NextStepBanner({
     <aside aria-label={ariaLabel} className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--inset-surface)", borderColor: "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" }}>
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] motion-safe:animate-[next-step-glow_3.2s_ease-in-out_infinite]" style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent), 0 0 44px -12px var(--primary)" }} />
       <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 42%, color-mix(in srgb, #7c5cff 14%, transparent) 72%, transparent 100%)" }} />
-      <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow}`} className="dm-quiet absolute top-[8px] left-[8px] z-[1] flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-        <X className="h-3.5 w-3.5" aria-hidden />
-      </button>
-      <div className="relative flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-4)] pl-[40px] sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pl-[44px]">
-        <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+      {/* one row: the words, the button, then the X at the far end, all on
+         the same centre line (the X used to float in the top-left corner) */}
+      <div className="relative flex flex-wrap items-center justify-end gap-[var(--space-3)] p-[var(--space-4)] sm:flex-nowrap sm:gap-[var(--space-4)] sm:p-[var(--space-5)]">
+        {/* phones: the sentence takes the full width, the button and X drop
+           to a line beneath it; from 640px everything sits on one line */}
+        <span className="flex min-w-0 basis-full flex-col gap-[3px] sm:flex-1 sm:basis-auto">
           <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>
           <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{text}</span>
         </span>
-        <Link href={href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+        <Link href={href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
           {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
         </Link>
+        <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow}`} className="dm-quiet -mr-[6px] flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <X className="h-4 w-4" aria-hidden />
+        </button>
       </div>
     </aside>
   );

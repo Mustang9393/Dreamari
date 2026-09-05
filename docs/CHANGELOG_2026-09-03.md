@@ -316,3 +316,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Salaries, one figure everywhere: the Explore For You reel shows "Median salary" with each career's median (IB $361K, PE $250K, Software Engineer $136K, Airline Pilot $227K, Registered Nurse $94K, Food Scientist $76K) instead of ranges; the Airline Pilot browse poster reads $227K; the Get Hired mock's Video Game Designer reads $98K/year to match its report.
 - The next-step banner is one shared component (NextStepBanner) used by Profile and Play.
 - Profile arrival: when the Welcome popup is dismissed, the page scrolls so the tabs and the Top Three cards sit just under the nav, instead of leaving the header on screen.
+- Next-step banners (Top Three and Play): the dismiss X moved out of the top-left corner into the row itself, after the button, on the same centre line. On phones the sentence runs full width with the button and X on the line beneath.
