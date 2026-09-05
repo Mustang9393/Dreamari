@@ -36,11 +36,10 @@ import { DECK, MAX_SLOTS, type Career } from "./data";
 
 const SWIPE_COMMIT_PX = 100;
 
-// TEMP for the demo, per direct request: show the gesture guide every
-// reload, not gated by "seen once ever". Flip back to false (the mount
-// effect below falls back to checking guideSeenKey) once this settles and
-// the hint should go back to first-visit-only.
-const DEMO_ALWAYS_SHOW_GUIDE = true;
+// Gesture guide is first-visit-only (progress kept in localStorage under
+// guideProgressKey). Set to true only for a live demo where the hint must
+// replay on every reload; flipped back to false 5 Sept 2026 per direct request.
+const DEMO_ALWAYS_SHOW_GUIDE = false;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
 type GestureKind = (typeof GUIDE_ORDER)[number];
