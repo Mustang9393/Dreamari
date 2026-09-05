@@ -35,6 +35,11 @@ export type StepProps = {
   percent: number;
   almostDone?: boolean;
   sprite?: string;
+  /** Jumps straight to the Match deck, bypassing the rest of Build (direct
+      feedback, 5 Sept 2026: a fast path for running demos without taking
+      someone through every question). Absent on the milestone/completion
+      screens, which have nothing left to skip past. */
+  onSkip?: () => void;
 };
 
 const EDUCATION_ICONS = [Rocket, Wrench, GraduationCap, BookOpen, Sparkles];
@@ -57,7 +62,7 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(
   INTEREST_WORLDS.map((world) => [world.label, `var(--color-world-${world.slug})`]),
 );
 
-export function InterestsStep({ state, patch, onNext, react, reactionNonce, percent, sprite }: StepProps) {
+export function InterestsStep({ state, patch, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
@@ -105,12 +110,12 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
         <Citation>Harvard FAS Mignone + O*NET Interest Profiler</Citation>
       </GlassCard>
       </div>
-      <StepFooter onNext={onNext} nextDisabled={state.interests.length === 0} />
+      <StepFooter onNext={onNext} nextDisabled={state.interests.length === 0} onSkip={onSkip} />
     </div>
   );
 }
 
-export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
+export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
@@ -128,7 +133,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
         />
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.subjects.length === 0} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.subjects.length === 0} onSkip={onSkip} />
     </div>
   );
 }
@@ -194,7 +199,7 @@ function SetupValue({ value, placeholder }: { value: string | null; placeholder:
   );
 }
 
-export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite }: StepProps) {
+export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonce, percent, sprite, onSkip }: StepProps) {
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
@@ -227,12 +232,12 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
         <Citation>MIT CAPD Self Assessment + O*NET Work Styles</Citation>
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.energy || !state.teamStyle} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.energy || !state.teamStyle} onSkip={onSkip} />
     </div>
   );
 }
 
-export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
+export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
   const confirming = useConfirmGlow(!!state.education);
   return (
     <div className="flex h-full w-full flex-col">
@@ -278,7 +283,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
         </div>
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.education} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.education} onSkip={onSkip} />
     </div>
   );
 }
@@ -335,7 +340,7 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
 // grade/GPA. Fields are labelled, not asked — "Full Name" beats "What is your
 // full name?" on a form where the answer is obvious, and four questions in a
 // row was the flow's densest block of reading.
-export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
+export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
   const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
   return (
     <div className="flex h-full w-full flex-col">
@@ -396,7 +401,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
         </div>
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
     </div>
   );
 }

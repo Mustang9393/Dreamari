@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BookOpen, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ArrowRight, BookOpen, Check, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
@@ -114,6 +115,9 @@ export function MatchLab() {
     };
   });
   const [decisionOpen, setDecisionOpen] = useState(false);
+  // Which liked career is "#1" on the consolidated results screen — starts
+  // as whichever they liked first, but tapping any of the three reassigns it.
+  const [chosenId, setChosenId] = useState<string | null>(null);
   const [swapFor, setSwapFor] = useState<Career | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const [ghost, setGhost] = useState<{ career: Career; from: DOMRect; to: DOMRect } | null>(null);
@@ -180,6 +184,7 @@ export function MatchLab() {
       decisionShown.current = true;
       setTimeout(() => {
         playMilestoneChime();
+        setChosenId(null);
         setDecisionOpen(true);
       }, 820);
     }
@@ -232,13 +237,27 @@ export function MatchLab() {
     setExiting(null);
   }
 
-  function toReport() {
-    // Their ranking travels with them: the chooser and the profile read this
-    // order as the Top 3, and storage keeps it after a refresh. Deck ids ARE
-    // catalogue ids, so each one resolves to a real report on the far side.
-    const ids = liked.map((career) => career.id);
-    writePicks({ ids, focus: null });
-    router.push(`/career-report?picks=${picksParam(ids)}`);
+  // Consolidated results screen (direct feedback, 5 Sept 2026): "Top 3
+  // Matches Found!" and the separate "Choose where to start" page used to
+  // be two screens doing the same job. One screen now does both — whichever
+  // career is tapped as #1 is the one Profile opens focused on, and every
+  // way of finishing Match (this screen, the always-on shortcut once 3 are
+  // saved, the manage sheet, running out of cards) lands straight on
+  // Profile's Top Three tab instead of the old separate chooser page.
+  function finishMatching(explicitFocusId?: string) {
+    const ids = liked.map((c) => c.id);
+    if (ids.length === 0) return;
+    const focusId2 = explicitFocusId ?? ids[0];
+    const ordered = [focusId2, ...ids.filter((id) => id !== focusId2)];
+    writePicks({ ids: ordered, focus: focusId2 });
+    dispatchAuroraPulse("cta");
+    setTimeout(() => router.push(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3`), 260);
+  }
+
+  function saveTop3() {
+    const focusCareer = liked.find((c) => c.id === chosenId) ?? liked[0];
+    if (!focusCareer) return;
+    finishMatching(focusCareer.id);
   }
 
   function reorder(slot: number, dir: -1 | 1) {
@@ -426,9 +445,14 @@ export function MatchLab() {
 
       <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-5 sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
         <div className="flex min-h-0 w-full max-w-[440px] flex-1 flex-col">
-          {/* ---- header: title + live counter ---- */}
+          {/* ---- header: back to Build (a mistake in Build shouldn't mean
+             restarting Match from scratch to fix it — direct feedback, 5
+             Sept 2026) + title + live counter ---- */}
           <div className="mb-2 flex flex-none items-center justify-between gap-3 px-1">
-            <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
+            <span className="flex flex-none items-center gap-2">
+              <BackButton fallback="/flow" />
+              <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
+            </span>
             <span
               className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
               style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
@@ -497,7 +521,7 @@ export function MatchLab() {
           {/* Three saved and cards still left: the way forward is always on
              screen (direct feedback), not only in the once-only sheet. */}
           {!deckDone && liked.length === MAX_SLOTS && (
-            <Button variant="primary" size="compact" onClick={() => toReport()} type="button" className="mb-3 w-full">
+            <Button variant="primary" size="compact" onClick={() => finishMatching()} type="button" className="mb-3 w-full">
               Continue with your 3 <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           )}
@@ -505,7 +529,7 @@ export function MatchLab() {
           {/* ---- deck ---- */}
           <div className="relative min-h-0 w-full flex-1">
             {deckDone ? (
-              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={toReport} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
+              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={() => finishMatching()} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
             ) : (
               roundDeck.slice(deckIndex, deckIndex + 3).map((career, depth) => {
                 const isTop = depth === 0;
@@ -603,18 +627,32 @@ export function MatchLab() {
         <GestureSpotlight active targetRef={cardRef} direction={guideGesture} label={GUIDE_LABEL[guideGesture]} remeasureKey={`${topId}:${guideGesture}`} />
       )}
 
-      {/* ---- decision sheet at 3 matches ---- */}
+      {/* ---- decision sheet at 3 matches: one consolidated screen for both
+         "you're done, lock these in" and "which do you want to start with"
+         (direct feedback, 5 Sept 2026 — these used to be two separate
+         screens with overlapping copy). Tapping a card makes it #1; Save
+         My Top 3 sends that ranking straight to Profile's Top Three tab. ---- */}
       {decisionOpen && (
-        <Sheet onClose={() => setDecisionOpen(false)}>
-          <div className="flex flex-col items-center gap-4 text-center">
-            <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>Top 3 Matches Found!</h2>
-            <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-              Lock these in and choose where to start, or keep swiping. New likes will ask to swap in.
-            </p>
-            <MiniRanking liked={liked} />
+        <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="flex flex-col gap-1.5">
+              <h2 className={`${bricolage.className} text-[24px] font-extrabold sm:text-[28px]`}>
+                <span style={{ backgroundImage: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Your</span>{" "}
+                <span className="text-[var(--color-night-foreground)]">Top 3 Matches</span>
+              </h2>
+              <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">Save these or keep swiping.</p>
+            </div>
+            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
+              {liked
+                .map((c, i) => ({ c, i }))
+                .sort((a, b) => (a.c.id === (chosenId ?? liked[0]?.id) ? -1 : b.c.id === (chosenId ?? liked[0]?.id) ? 1 : a.i - b.i))
+                .map(({ c }, rank) => (
+                  <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} />
+                ))}
+            </div>
             <div className="flex w-full flex-col gap-2.5">
-              <Button variant="primary" size="large" onClick={() => toReport()} type="button">
-                Save these 3 & continue
+              <Button variant="primary" size="large" onClick={saveTop3} type="button">
+                Save My Top 3
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
@@ -690,7 +728,7 @@ export function MatchLab() {
             </div>
             <div className="flex w-full flex-col gap-2.5">
               {liked.length > 0 && (
-                <Button variant="primary" onClick={() => toReport()} type="button">
+                <Button variant="primary" onClick={() => finishMatching()} type="button">
                   {liked.length === MAX_SLOTS ? "Lock in & continue" : `Continue with ${liked.length}`}
                 </Button>
               )}
@@ -715,10 +753,10 @@ function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dr
       {isTop && (
         <>
           <Stamp side="right" color={SUCCESS} opacity={dragX > 30 ? Math.min(1, (dragX - 30) / 70) : 0}>
-            Match
+            <ThumbsUp className="h-[18px] w-[18px]" strokeWidth={3} aria-hidden /> Match
           </Stamp>
           <Stamp side="left" color={PASS_COLOR} opacity={dragX < -30 ? Math.min(1, (-dragX - 30) / 70) : 0}>
-            Pass
+            <X className="h-[20px] w-[20px]" strokeWidth={3} aria-hidden /> Pass
           </Stamp>
         </>
       )}
@@ -837,7 +875,7 @@ function Stamp({ side, color, opacity, children }: { side: "left" | "right"; col
       // THIS stamp partway in while its swipe is being taught -- previewing what the
       // gesture does, not just where it goes.
       data-stamp={side}
-      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 rounded-[var(--radius-md)] border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
+      className={`${bricolage.className} pointer-events-none absolute top-6 z-20 flex items-center gap-1.5 rounded-[var(--radius-md)] border-4 px-4 py-1 text-[22px] font-extrabold tracking-[0.1em] uppercase`}
       style={{
         [side]: 24,
         color,
@@ -908,7 +946,56 @@ function MiniRanking({ liked }: { liked: Career[] }) {
   );
 }
 
-function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+// One card on the consolidated Top 3 results screen: the same poster face
+// as the deck itself, a rank badge, and (on whichever is #1) a checkmark
+// plus a glowing gold ring — tapping any card makes IT #1 instead.
+function TopThreeCard({ career, rank, chosen, onChoose }: { career: Career; rank: number; chosen: boolean; onChoose: () => void }) {
+  const gold = "var(--color-world-business-money-office)";
+  return (
+    <button
+      type="button"
+      onClick={onChoose}
+      aria-pressed={chosen}
+      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200"
+      style={{
+        borderColor: chosen ? gold : "var(--color-glass-border-raised)",
+        boxShadow: chosen ? `0 0 0 2px ${gold}, 0 20px 40px -20px color-mix(in srgb, ${gold} 60%, transparent)` : "0 12px 30px -18px rgba(0,0,0,0.6)",
+      }}
+    >
+      <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 90vw, 220px" className="object-cover" draggable={false} />
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(180deg, rgba(5,7,15,0.05) 0%, rgba(5,7,15,0.35) 55%, rgba(5,7,15,0.88) 100%)" }}
+      />
+      <span
+        aria-hidden
+        className="absolute top-2.5 left-2.5 flex size-7 items-center justify-center rounded-full text-white transition-opacity duration-150"
+        style={{ background: gold, opacity: chosen ? 1 : 0 }}
+      >
+        <Check className="h-4 w-4" strokeWidth={3} />
+      </span>
+      <span
+        aria-hidden
+        className="absolute top-2.5 right-2.5 rounded-[var(--radius-sm)] border px-2 py-0.5 text-[12px] font-extrabold backdrop-blur-md"
+        style={{ color: chosen ? gold : "var(--color-night-foreground)", borderColor: chosen ? gold : "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)" }}
+      >
+        #{rank}
+      </span>
+      <div className="relative z-[1] flex flex-col gap-1.5 p-3">
+        <p className="text-[15px] leading-[19px] font-extrabold text-white">{career.title}</p>
+        <p className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: career.color }}>{career.world}</p>
+        <span
+          className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-extrabold"
+          style={{ color: SUCCESS, borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)" }}
+        >
+          {career.salary}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function Sheet({ children, onClose, maxWidth = "440px" }: { children: React.ReactNode; onClose: () => void; maxWidth?: string }) {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-5 backdrop-blur-xl select-none"
@@ -923,8 +1010,8 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
       aria-modal="true"
     >
       <div
-        className="w-full max-w-[440px] rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
-        style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
+        className="w-full rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
+        style={{ maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}
       </div>
@@ -980,7 +1067,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       </h2>
       <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
-          ? "Lock them in and choose where to start."
+          ? "Save them to your profile."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
             : "Knowing what's NOT for you is real progress. Wander through Explore — hundreds of paths, no pressure — and come back when one sparks."}

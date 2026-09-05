@@ -8,6 +8,7 @@ import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
+import { MatchReadyScreen } from "@/components/flow/match/MatchReadyScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { CostStep } from "./CostStep";
@@ -26,9 +27,11 @@ import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildSta
 const MATCH_LOADING_MS = 1800;
 const MATCH_ACCENT = "#2f6bf2";
 
-// After the loading beat, Build hands off to the real match flow at
-// /match-lab (the old in-page MatchExperience is deleted).
-type Phase = "build" | "loading";
+// After the loading beat, a deliberate "reveal" screen (direct feedback, 5
+// Sept 2026: matches should be presented, not auto-navigated to) sits
+// before Build hands off to the real match flow at /match-lab (the old
+// in-page MatchExperience is deleted).
+type Phase = "build" | "loading" | "ready";
 
 export function BuildFlowExperience() {
   const router = useRouter();
@@ -54,9 +57,9 @@ export function BuildFlowExperience() {
 
   useEffect(() => {
     if (phase !== "loading") return;
-    const timer = setTimeout(() => router.push("/match-lab"), MATCH_LOADING_MS);
+    const timer = setTimeout(() => setPhase("ready"), MATCH_LOADING_MS);
     return () => clearTimeout(timer);
-  }, [phase, router]);
+  }, [phase]);
 
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
   // ringer switch until an <audio> element has played; see feedback.ts).
@@ -91,7 +94,8 @@ export function BuildFlowExperience() {
   }, [phase, stageIndex]);
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
-  const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite };
+  const skipToMatch = () => router.push("/match-lab");
+  const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite, onSkip: skipToMatch };
 
   let content: ReactNode = null;
   if (stageId === "interests") content = <InterestsStep {...stepProps} />;
@@ -146,6 +150,11 @@ export function BuildFlowExperience() {
               {phase === "loading" && (
                 <StepTransition key="match-loading">
                   <MatchLoadingScreen />
+                </StepTransition>
+              )}
+              {phase === "ready" && (
+                <StepTransition key="match-ready">
+                  <MatchReadyScreen onReveal={() => router.push("/match-lab")} />
                 </StepTransition>
               )}
             </div>

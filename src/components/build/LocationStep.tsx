@@ -48,7 +48,7 @@ const STATE_CODES: Record<string, string> = {
 
 const GREEN = "var(--color-world-food-farming-nature)";
 
-export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite }: StepProps) {
+export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
   const [view, setView] = useState<"map" | "list">("map");
   const selected = state.state;
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -246,7 +246,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
       <Citation>MIT CAPD Job Search + BLS OEWS</Citation>
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!selected} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!selected} onSkip={onSkip} />
     </div>
   );
 }

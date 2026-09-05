@@ -241,6 +241,7 @@ export function StepFooter({
   nextDisabled,
   nextLabel = "Next Step",
   pulseFromDreamy = false,
+  onSkip,
 }: {
   onBack?: () => void;
   onNext: () => void;
@@ -249,6 +250,11 @@ export function StepFooter({
   /** Milestone/completion screens: the CTA pulse launches from Dreamy, who IS
       that screen, instead of the usual one-in-three coin flip. */
   pulseFromDreamy?: boolean;
+  /** A quiet way out for running demos, not a real button — plain
+      underlined text, same weight as Citation (direct feedback, 5 Sept
+      2026: "very transparent... does not need to be an actual button").
+      Jumps straight to the Match deck. */
+  onSkip?: () => void;
 }) {
   const [holding, setHolding] = useState(false);
   return (
@@ -280,6 +286,15 @@ export function StepFooter({
             Back
           </Button>
         </span>
+      )}
+      {onSkip && (
+        <button
+          type="button"
+          onClick={onSkip}
+          className="dm-link cursor-pointer text-[13px] font-semibold text-[var(--color-night-muted-foreground)] opacity-60 underline underline-offset-2 transition-opacity hover:opacity-90"
+        >
+          Skip
+        </button>
       )}
       <Button
         variant="primary"

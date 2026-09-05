@@ -211,6 +211,14 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
 
   useEffect(() => {
     return onAuroraPulse(({ kind, x, forceDreamyOrigin }) => {
+      // The full-screen ripple used to fire on every single tap throughout Build
+      // and Match -- every card pick, every Back, every Next -- which read as
+      // "this circle thing... every time... anticlimactic and distracting"
+      // (direct feedback, 5 Sept 2026). It's kept for exactly the one moment it
+      // was designed for: the milestone screen's own CTA, which always sets
+      // forceDreamyOrigin. Sound/haptic feedback (dispatchAuroraPulse's other
+      // job) is untouched and still plays on every tap.
+      if (!forceDreamyOrigin) return;
       const isCta = kind === "cta";
       const now = performance.now();
       // The aurora usually reacts from the bottom edge -- a glow of its own, not a ripple

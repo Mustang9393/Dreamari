@@ -12,7 +12,7 @@ import type { StepProps } from "./steps";
 
 const AMBER = "var(--color-world-business-money-office)";
 
-export function CostStep({ state, patch, onBack, onNext, react, percent, sprite }: StepProps) {
+export function CostStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
   const index = state.costIndex;
   const touched = index >= 0;
   const value = touched ? index : 0;
@@ -144,7 +144,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite 
 
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!touched} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!touched} onSkip={onSkip} />
     </div>
   );
 }
