@@ -339,7 +339,9 @@ function ReportDocument({
            a backend data-model note, not UI. */}
         {/* High school classes, as distinct from the college majors above
            (direct feedback: "Courses to Consider" read as the same thing).
-           Each tile names the class and says why it helps this route. */}
+           Class names only — the one-line "why" under each was cut (Joshua
+           Pierce, Slack, 5 Sept 2026): those sentences can't be written
+           accurately at scale, and the name is what the student needs. */}
         <ReportSection id={`${idPrefix}courses`} n={4} title="High School Classes to Take" icon={ListChecks}>
           <ul className="grid list-none gap-[10px] p-0 sm:grid-cols-2 sm:gap-[14px]" data-keep-together>
             {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
@@ -348,7 +350,6 @@ function ReportDocument({
                   <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
                   {course.label}
                 </span>
-                {course.why && <span className="pl-[15px] text-[12.5px] leading-[17px]" style={{ color: "var(--ink-soft)" }}>{course.why}</span>}
               </li>
             ))}
           </ul>

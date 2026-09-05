@@ -137,7 +137,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
         t("ib-3-1", "Complete the Investment Banking career simulation", 20, "Play", "/play/investment-banking"),
         t("ib-3-2", "Explore 5 finance careers", 10, "Explore", "/explore?tab=browse"),
         t("ib-3-3", "Continue playing the Investment Banking Simulation", 15, "Play", "/match-lab"),
-        t("ib-3-4", "Start your resume draft", 15, "Build", "#resume"),
+        t("ib-3-4", "Create your resume", 15, "Build", "#resume"),
       ]),
       h("ib-6", "Next 6 Months", "Skills + people", [
         t("ib-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
@@ -223,7 +223,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       h("pl-6", "Next 6 Months", "Real world", [
         t("pl-6-1", "Book a discovery flight near you", 20, "Explore", "/explore"),
         t("pl-6-2", "Compare flight school vs aviation university", 10, "Explore", "/explore?tab=browse"),
-        t("pl-6-3", "Start your resume draft", 15, "Build", "#resume"),
+        t("pl-6-3", "Create your resume", 15, "Build", "#resume"),
         t("pl-6-4", "Join Aviation Community Board", 5, "Join", "/explore"),
       ]),
       h("pl-12", "Next 12 Months", "Commit", [
@@ -287,7 +287,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       h("pe-6", "Next 6 Months", "Analyst mindset", [
         t("pe-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
         t("pe-6-2", "Complete the valuation scenario", 20, "Play", "/match-lab"),
-        t("pe-6-3", "Start your resume draft", 15, "Build", "#resume"),
+        t("pe-6-3", "Create your resume", 15, "Build", "#resume"),
         t("pe-6-4", "Join Finance East Coast Community Board", 5, "Join", "/explore"),
       ]),
       h("pe-12", "Next 12 Months", "Aim the funnel", [

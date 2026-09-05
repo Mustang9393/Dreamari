@@ -101,7 +101,15 @@ const COVER_CAREER = "career";
 const DEMO_TOP3 = ["investment-banking", "airline-pilot"];
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "settings"];
-export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string } = {}) {
+export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
+  // Arriving from Match (?welcome=1): the page is assembled in front of the
+  // student — title, then the identity card, then the tab card — with one
+  // welcome line, instead of everything simply being there. Only for that
+  // arrival; a normal visit renders at rest.
+  const buildIn = (order: number) =>
+    initialWelcome
+      ? { className: "motion-safe:animate-[card-cascade_0.7s_cubic-bezier(0.16,1,0.3,1)_both]", style: { animationDelay: `${180 + order * 220}ms` } as React.CSSProperties }
+      : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
@@ -338,7 +346,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       </header>
 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
+        <div className={buildIn(0).className} style={buildIn(0).style}>
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
+          {initialWelcome && (
+            <p className="mt-[6px] flex items-center gap-[8px] text-[15px] leading-[22px] font-medium" style={{ color: "var(--muted-foreground)" }}>
+              <span className="relative inline-block size-[26px] flex-none motion-safe:animate-[dreamy-pop_0.45s_0.5s_cubic-bezier(0.34,1.56,0.64,1)_both]">
+                <Image src="/images/dreamy/v2/dreamy-happy.png" alt="" fill sizes="26px" className="object-contain" />
+              </span>
+              <InkText text={`Welcome to your profile, ${STUDENT.name.split(" ")[0]}.`} delay={0.6} />
+            </p>
+          )}
+        </div>
         {/* ---- Identity: an editorial masthead. Name and school read as a
              byline; the numeric facts sit in their own strip so they line up
              at every width instead of forming a ragged grid on phones. Its
@@ -346,7 +364,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* ---- Header in the career page's language: the cover photo runs
              behind the card and dissolves upward through the progressive blur;
              the name sits on the photo; the student picks a cover from the set. ---- */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        <section className={`relative overflow-hidden rounded-[var(--radius-lg)] border ${buildIn(1).className}`} style={{ ...buildIn(1).style, borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
             {/* both layers stay mounted; A/B crossfades between them */}
             <img src={careerSrc} alt="" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ objectPosition: careerPosition, opacity: coverIsCareer ? 1 : 0 }} />
@@ -482,7 +500,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
              this card. Inside it nothing is a card again (direct feedback,
              4 Sept): groups are drawn with borders on the shared surface,
              the way the career report keeps one sheet of paper. */
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={GLASS}>
+          <div className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)] ${buildIn(2).className}`} style={{ ...GLASS, ...buildIn(2).style }}>
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
            feedback, but redundant with the new side-by-side Top 3 (which
@@ -519,7 +537,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             [
               { id: "overview", label: "Overview" },
               { id: "top3", label: "Top Three" },
-              { id: "plan", label: "Plan" },
+              { id: "plan", label: "My Plan" },
               { id: "report", label: "Report" },
               { id: "resume", label: "Resume" },
             ] as const
@@ -2018,7 +2036,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
             [
               { key: "receipts", label: "Engagement" },
               { key: "route", label: "Pathway" },
-              { key: "plan", label: "Plan" },
+              { key: "plan", label: "My Plan" },
             ] as const
           ).map((section) => (
             <button
