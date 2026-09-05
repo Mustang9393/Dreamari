@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { MatchRing } from "@/components/app/MatchRing";
-import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { posterTitleFont } from "@/components/app/worlds";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 
@@ -21,7 +21,7 @@ const WORLD_COLOR = "var(--world-building-construction)";
 // Each stage: clear title + one-sentence explanation with a visible
 // outcome (per direct feedback — the story, not just product pieces).
 const STAGES = [
-  { id: "top3", label: "My Top 3", line: "Save your top 3 career paths to compare your best-fit options." },
+  { id: "top3", label: "My Top 3", line: "Save your top 3 career paths and compare which one fits you best." },
   { id: "plan", label: "My Plan", line: "Choose one path and get a step-by-step plan with actions, milestones, and experiences to build toward it." },
   { id: "resume", label: "Resume Builder", line: "Turn your experiences, skills, and activities into a polished resume you can share with employers." },
   { id: "hired", label: "Hire-Ready", line: "Use your plan and resume to become opportunity-ready for internships, mentors, and future employers." },
@@ -96,7 +96,7 @@ export function GetHiredChapter() {
               {/* Same stack the photo cards had — focus pick BIG and front,
                  2 and 3 straight behind peeking from the sides (allowed to
                  overflow the panel edges a little) — but the photo area now
-                 holds the comparison: University -> Duration / Cost / Median
+                 holds the comparison: University duration / Cost / Median
                  Salary, identical row structure on every card. */}
               {TOP3.map((card, index) => {
                 /* side offset is min(160px, 30vw): full spread on desktop
@@ -124,12 +124,14 @@ export function GetHiredChapter() {
                     }}
                   >
                     <div className={`flex w-full items-center ${index === 2 ? "justify-end" : "justify-between"}`}>
-                      <span className="flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: "var(--glass-surface-3)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
-                      {index === 0 && <span className="rounded-full px-[7px] py-[2px] text-[7.5px] font-bold tracking-[0.5px]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>FOCUS</span>}
+                      {/* No FOCUS pill and no industry line (per notes, 5 Sept):
+                         the lead card reads as chosen by its blue border and
+                         blue rank badge alone */}
+                      <span className="flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold" style={{ background: index === 0 ? "var(--primary)" : "var(--glass-surface-3)", color: index === 0 ? "var(--primary-foreground)" : "var(--foreground)", fontFamily: "var(--font-display)" }}>{index + 1}</span>
                     </div>
                     {/* Fixed-height title zone so every card's rows start on
                        the same line no matter how the title wraps */}
-                    <div className="mt-2 flex h-[68px] w-full flex-col gap-[3px] uppercase">
+                    <div className="mt-2 flex h-[60px] w-full flex-col uppercase">
                       <span
                         /* focus title enlarged; side titles a step smaller.
                            The right card breaks one word per line, since line
@@ -146,11 +148,14 @@ export function GetHiredChapter() {
                       >
                         {index === 2 ? card.title.replace(/ /g, "\n") : card.title}
                       </span>
-                      <span className="w-full text-[8px] leading-[11px] font-semibold tracking-[0.5px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[card.world] }}>{card.world}</span>
                     </div>
-                    <div className="border-t pt-[7px] text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: WORLD_COLORS[card.world] }}>University</div>
+                    {/* "University" used to sit above the rows as a yellow
+                       subheading, which read as if the whole card were about
+                       university. It is now part of the first row's label,
+                       one line, same color and weight as the other labels. */}
+                    <div className="border-t" style={{ borderColor: "var(--glass-border)" }} />
                     {[
-                      { label: "Duration", value: card.duration },
+                      { label: "University duration", value: card.duration },
                       { label: "Cost", value: card.cost },
                       { label: "Median salary", value: card.salary },
                     ].map((row) => (
