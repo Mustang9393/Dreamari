@@ -15,6 +15,7 @@ import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { InkText } from "@/components/build/ui";
 import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
@@ -115,6 +116,22 @@ export function MatchLab() {
     };
   });
   const [decisionOpen, setDecisionOpen] = useState(false);
+  // Set the moment Match hands off to Profile (any of the "finish" buttons):
+  // holds the destination URL while the welcome popup shows, rather than
+  // navigating straight there.
+  const [welcomeUrl, setWelcomeUrl] = useState<string | null>(null);
+  // Dreamy's confetti burst on the welcome popup, plus the same chime the
+  // Build milestones ring: fires once each time the popup opens.
+  const [welcomeBurst, setWelcomeBurst] = useState(0);
+  useEffect(() => {
+    if (!welcomeUrl) return;
+    const chime = setTimeout(() => playMilestoneChime(), 150);
+    const kick = setTimeout(() => setWelcomeBurst((n) => n + 1), 60);
+    return () => {
+      clearTimeout(chime);
+      clearTimeout(kick);
+    };
+  }, [welcomeUrl]);
   // Which liked career is "#1" on the consolidated results screen — starts
   // as whichever they liked first, but tapping any of the three reassigns it.
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -251,7 +268,9 @@ export function MatchLab() {
     const ordered = [focusId2, ...ids.filter((id) => id !== focusId2)];
     writePicks({ ids: ordered, focus: focusId2 });
     dispatchAuroraPulse("cta");
-    setTimeout(() => router.push(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3`), 260);
+    // A welcome beat before the handoff (direct feedback, 5 Sept 2026),
+    // instead of navigating straight to Profile the instant Match is done.
+    setWelcomeUrl(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3`);
   }
 
   function saveTop3() {
@@ -634,30 +653,86 @@ export function MatchLab() {
          My Top 3 sends that ranking straight to Profile's Top Three tab. ---- */}
       {decisionOpen && (
         <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
-          <div className="flex flex-col items-center gap-5 text-center">
+          <div className="relative flex flex-col items-center gap-5 text-center">
+            {/* the glow lives behind everything, clipped to the sheet's own
+               corners so it never bleeds past the card like the deck's own
+               world-glow doesn't */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-16 left-1/2 -z-[1] h-[220px] w-[80%] -translate-x-1/2 rounded-full blur-[70px]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 38%, transparent), transparent 70%)" }}
+            />
+            <span
+              className="motion-safe:animate-[fade-slide-up_0.5s_ease-out_both] inline-flex items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+              style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
+            >
+              <Sparkles className="h-3 w-3" aria-hidden /> Match complete
+            </span>
             <div className="flex flex-col gap-1.5">
-              <h2 className={`${bricolage.className} text-[24px] font-extrabold sm:text-[28px]`}>
-                <span style={{ backgroundImage: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Your</span>{" "}
-                <span className="text-[var(--color-night-foreground)]">Top 3 Matches</span>
+              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                Your Top 3 Matches
               </h2>
-              <p className="text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">Save these or keep swiping.</p>
+              <p className="motion-safe:animate-[fade-slide-up_0.5s_0.1s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+                Tap a card to lead with it. Save these, or keep swiping.
+              </p>
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
               {liked
                 .map((c, i) => ({ c, i }))
                 .sort((a, b) => (a.c.id === (chosenId ?? liked[0]?.id) ? -1 : b.c.id === (chosenId ?? liked[0]?.id) ? 1 : a.i - b.i))
                 .map(({ c }, rank) => (
-                  <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} />
+                  <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} index={rank} />
                 ))}
             </div>
             <div className="flex w-full flex-col gap-2.5">
-              <Button variant="primary" size="large" onClick={saveTop3} type="button">
-                Save My Top 3
-              </Button>
+              <GradientCta onClick={saveTop3}>
+                Save My Top 3 <ArrowRight className="h-4 w-4" aria-hidden />
+              </GradientCta>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping
               </Button>
             </div>
+          </div>
+        </Sheet>
+      )}
+
+      {/* ---- welcome to Profile: the beat between finishing Match and
+         landing on Top Three (direct feedback, 5 Sept 2026). Fires from
+         every way of finishing Match (Save My Top 3, the always-on
+         shortcut, the manage sheet, running out of cards), since Profile
+         is the destination either way. Dreamy gets the same celebration
+         treatment as Build's own milestone/completion screens: the
+         bouncing float, a confetti burst on arrival, and the heading
+         reveals word by word (Build's InkText) instead of just appearing. ---- */}
+      {welcomeUrl && (
+        <Sheet onClose={() => router.push(welcomeUrl)}>
+          <div className="relative flex flex-col items-center gap-4 text-center">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 left-1/2 -z-[1] h-[240px] w-[90%] -translate-x-1/2 rounded-full blur-[70px]"
+              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 40%, transparent), transparent 70%)" }}
+            />
+            <div className="relative h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
+              <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
+              <LocalBurst nonce={welcomeBurst} />
+            </div>
+            <span
+              className="motion-safe:animate-[fade-slide-up_0.5s_0.15s_ease-out_both] inline-flex items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+              style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-accent-purple)" }}
+            >
+              <Sparkles className="h-3 w-3" aria-hidden /> Top 3 saved
+            </span>
+            <div className="flex flex-col gap-1.5">
+              <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                <InkText text="Welcome to Your Profile" delay={0.3} />
+              </h2>
+              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.9s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
+                Your Top 3 is waiting. Let's take a look.
+              </p>
+            </div>
+            <GradientCta onClick={() => { dispatchAuroraPulse("select"); router.push(welcomeUrl); }}>
+              Continue <ArrowRight className="h-4 w-4" aria-hidden />
+            </GradientCta>
           </div>
         </Sheet>
       )}
@@ -949,19 +1024,55 @@ function MiniRanking({ liked }: { liked: Career[] }) {
 // One card on the consolidated Top 3 results screen: the same poster face
 // as the deck itself, a rank badge, and (on whichever is #1) a checkmark
 // plus a glowing gold ring — tapping any card makes IT #1 instead.
-function TopThreeCard({ career, rank, chosen, onChoose }: { career: Career; rank: number; chosen: boolean; onChoose: () => void }) {
+/** The shared "big moment" CTA for the Match->Profile handoff screens. Same
+ *  shape and label typography as ui/Button's `large` (var(--radius-md), 52px,
+ *  body face at semibold -- one CTA shape everywhere, never a pill, per the
+ *  Button component's own rule and direct feedback, 5 Sept 2026); what's
+ *  custom here is only the fill: the brand gradient, a hover shimmer sweep
+ *  and a press-down, since these two screens are the flow's celebration. */
+function GradientCta({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="dm-tap group relative flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-6)] text-[16px] leading-[22px] font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-[0.98]"
+      style={{ fontFamily: "var(--font-body)", backgroundImage: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))", boxShadow: "0 16px 36px -14px color-mix(in srgb, var(--color-brand-500) 70%, transparent)" }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -translate-x-full transition-transform duration-700 ease-out group-hover:translate-x-full"
+        style={{ background: "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%)" }}
+      />
+      <span className="relative z-[1] flex items-center gap-[8px]">{children}</span>
+    </button>
+  );
+}
+
+function TopThreeCard({ career, rank, chosen, onChoose, index = 0 }: { career: Career; rank: number; chosen: boolean; onChoose: () => void; index?: number }) {
   const gold = "var(--color-world-business-money-office)";
   return (
     <button
       type="button"
       onClick={onChoose}
       aria-pressed={chosen}
-      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200"
+      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200 motion-safe:animate-[card-cascade_0.5s_cubic-bezier(0.16,1,0.3,1)_both] hover:-translate-y-[3px]"
       style={{
+        animationDelay: `${index * 90}ms`,
         borderColor: chosen ? gold : "var(--color-glass-border-raised)",
-        boxShadow: chosen ? `0 0 0 2px ${gold}, 0 20px 40px -20px color-mix(in srgb, ${gold} 60%, transparent)` : "0 12px 30px -18px rgba(0,0,0,0.6)",
+        boxShadow: chosen
+          ? `0 0 0 2px ${gold}, 0 0 32px -6px color-mix(in srgb, ${gold} 70%, transparent), 0 20px 40px -20px color-mix(in srgb, ${gold} 60%, transparent)`
+          : "0 12px 30px -18px rgba(0,0,0,0.6)",
       }}
     >
+      {/* a slow pulse behind the #1 card only — the gold ring should read as
+         alive, not a static selection state */}
+      {chosen && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 motion-safe:animate-[card-glow-pulse_2.4s_ease-in-out_infinite]"
+          style={{ boxShadow: `0 0 0 2px ${gold}` }}
+        />
+      )}
       <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 90vw, 220px" className="object-cover" draggable={false} />
       <div
         className="absolute inset-0"
@@ -982,7 +1093,7 @@ function TopThreeCard({ career, rank, chosen, onChoose }: { career: Career; rank
         #{rank}
       </span>
       <div className="relative z-[1] flex flex-col gap-1.5 p-3">
-        <p className="text-[15px] leading-[19px] font-extrabold text-white">{career.title}</p>
+        <p className="text-[15px] leading-[19px] font-extrabold text-white" style={{ fontFamily: career.font, fontWeight: career.fontWeight, letterSpacing: career.letterSpacing }}>{career.title}</p>
         <p className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: career.color }}>{career.world}</p>
         <span
           className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-extrabold"
@@ -1010,7 +1121,7 @@ function Sheet({ children, onClose, maxWidth = "440px" }: { children: React.Reac
       aria-modal="true"
     >
       <div
-        className="w-full rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="w-full max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] [scrollbar-width:none]"
         style={{ maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}

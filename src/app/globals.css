@@ -424,6 +424,12 @@ body {
   0% { opacity: 0; transform: translateY(18px) scale(0.97); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* The #1 pick's ring on the Match results screen: a slow breathing glow so
+   the selection reads as alive, not a static outline. */
+@keyframes card-glow-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
 @keyframes fade-slide-up {
   0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
