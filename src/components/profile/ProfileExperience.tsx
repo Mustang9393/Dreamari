@@ -659,7 +659,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           >
             <div
               className="relative w-full max-w-[440px] overflow-hidden rounded-[var(--radius-lg)] border p-6 text-center motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]"
-              style={{ ...GLASS, boxShadow: "0 24px 60px -20px rgba(0,0,0,0.55)" }}
+              /* near-solid, not glass: on glass the profile bled through the
+                 card and the text sat on it (direct feedback, 5 Sept 2026) —
+                 the same surface the quick-links menu and search sheet use */
+              style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.55)" }}
             >
               <span
                 aria-hidden
