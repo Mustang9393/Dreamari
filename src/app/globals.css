@@ -1123,12 +1123,13 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   50% { opacity: 1; }
 }
 
-/* Desktop: every chapter hugs its content (Explore and Connect always did).
-   Viewport-height chapters centred their row below the visible centre, ran
-   off the bottom on short windows, and doubled the gap wherever two of them
-   met (Match to Play measured 112px against 56px elsewhere, 5 Sept 2026).
-   Phones keep their one-chapter-per-screen snap (max-width rules above).
-   Two classes so it outranks the min-h-dvh utility on the same element. */
+/* Desktop: every chapter, compact ones included, is exactly the visible
+   height under the nav (a chapter lands 96px down via scroll-mt-24), with
+   its row centred in that space. One size for all six sections, so each
+   has the same room to itself and none sits low or runs off the bottom
+   (direct feedback, 5 Sept 2026). Phones keep their one-chapter-per-screen
+   snap (max-width rules above). Two classes so it outranks the min-h-dvh
+   utility on the same element. */
 @media (min-width: 901px) {
-  .mkt-chapter.mkt-chapter { min-height: 0; }
+  .mkt-chapter.mkt-chapter { min-height: calc(100dvh - 96px); }
 }

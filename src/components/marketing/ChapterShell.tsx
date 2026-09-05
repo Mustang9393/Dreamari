@@ -230,7 +230,7 @@ export function ChapterShell({
             // spill upward into the copy (seen on an iPhone, Get Hired and
             // Connect). The first grid row also never shrinks below the copy,
             // so on a short phone the section grows instead of overlapping.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_320px),680px)] min-[901px]:[--frame-max:min(calc(100dvh_-_360px),620px)] ${wide ? "mkt-wide" : ""}`}
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_250px),680px)] min-[901px]:[--frame-max:min(calc(100dvh_-_290px),620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               height: compact ? "auto" : "var(--frame-h)",
