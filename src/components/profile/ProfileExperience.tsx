@@ -1136,7 +1136,7 @@ function OverviewTab({
           </span>
           <span className="flex flex-col gap-[6px]">
             <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps</span>
-            <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
+            <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
           </span>
         </button>
 
@@ -1597,7 +1597,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
           <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
           <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allTasks.length}</span>
         </div>
-        <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" />
+        <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </section>
 
       {focus.plan.map((horizon, index) => {

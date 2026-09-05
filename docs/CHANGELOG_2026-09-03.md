@@ -306,3 +306,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Profile header tiles, revised: Grade, GPA and Streak are compact tiles that hug their content and sit left (icon, label, value on one line) instead of three wide columns; on phones they still sit three across, with smaller type and the streak's "142/190" and "days" hidden so nothing wraps.
 - Community cards on phones: the two company marks step down a size and the Open button tightens below 400px of card width, so the "+N" chip no longer runs into the button (same fix on the Connect home and the professional profile, one component).
 - My Plan: the glossary task links to the Investment Banking glossary game itself (the bare /play/glossary address was a 404).
+- My Plan progress bars (the plan header and the Overview tile): the electricity spark now also fires on its own every 7 to 15 seconds, not only when a step is checked off, so it is seen even on a plan with nothing done yet.
