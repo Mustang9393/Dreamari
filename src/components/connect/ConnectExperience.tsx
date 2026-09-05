@@ -6,8 +6,16 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Image from "next/image";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { type LucideIcon as ResourceIcon } from "lucide-react";
 import {
   ArrowLeft,
+  BookOpen,
+  ChevronLeft,
+  FileText,
+  FolderOpen,
+  Images,
+  Link2,
+  Presentation,
   ArrowRight,
   Bookmark,
   Calendar,
@@ -33,7 +41,6 @@ import {
   X,
   Bell,
   Search,
-  Camera,
   QrCode,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
@@ -44,6 +51,15 @@ import { FollowButton } from "./ProProfile";
 import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
+
+// Resource cards on an event board: one icon and one chip per file kind.
+const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
+  slides: { Icon: Presentation, label: "Slides" },
+  pdf: { Icon: FileText, label: "PDF" },
+  reading: { Icon: BookOpen, label: "Reading list" },
+  link: { Icon: Link2, label: "Link" },
+  folder: { Icon: FolderOpen, label: "Folder" },
+};
 import { AdminDashboardView } from "./AdminDashboard";
 import {
   COMMUNITIES,
@@ -55,6 +71,7 @@ import {
   THREADS,
   type Community,
   type EventBoard,
+  type EventResource,
   type Insight,
   type Thread, OPPORTUNITIES , type Opportunity } from "./data";
 
@@ -1739,8 +1756,17 @@ function HomeView({
                      masked and its background is the ticket's edge; the inner
                      box, one pixel inside with the same notches, holds the
                      surface. */}
+                  {/* the whole ticket is the tap target (direct feedback, 5 Sept
+                     2026): tapping anywhere opens the board (or the code sheet
+                     when not yet joined); the stub's own flip and the buttons
+                     keep their own behaviour */}
                   <div
-                    className="connect-ticket relative flex h-[316px] overflow-hidden rounded-[var(--radius-lg)]"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${joined ? "Open" : "Join"} ${event.name}`}
+                    onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined) onOpenEvent(event.id); else onEnterCode(event.id); }}
+                    onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined) onOpenEvent(event.id); else onEnterCode(event.id); } }}
+                    className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
                     style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
                   >
                     <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
@@ -2134,6 +2160,15 @@ function EventView({
   const [qrOpen, setQrOpen] = useState(false);
   // Falls back to Questions for any old/unrecognised ?filter= value.
   const tab = filter === "posts" || filter === "insights" || filter === "resources" || filter === "people" || filter === "about" ? filter : "questions";
+  // the Resources tab's photo viewer: which frame is open, if any
+  const [photoOpen, setPhotoOpen] = useState<number | null>(null);
+  const [openFolder, setOpenFolder] = useState<string | null>(null);
+  useEffect(() => {
+    if (photoOpen === null) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setPhotoOpen(null); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [photoOpen]);
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -2281,39 +2316,122 @@ function EventView({
       )}
 
       {tab === "resources" && (
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {event.resources && event.resources.length > 0 ? (
-            event.resources.map((r) => (
-              <div key={r.title} className="flex items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}>
-                <div className="min-w-0">
-                  <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</p>
-                  <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description} · {r.sourceLabel}</p>
-                </div>
-                <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                  View resource <ExternalLink className="h-3 w-3" aria-hidden />
-                </span>
+        <div className="flex flex-col gap-[var(--space-6)]">
+          {/* Photos first: a gallery of the day, not a text link (direct
+             feedback, 5 Sept 2026). One big frame, four small, the last one
+             carries the rest of the count. Tap opens a viewer; view-only. */}
+          {event.photos && (
+            <section aria-label="Event photos" className="flex flex-col gap-[var(--space-3)]">
+              <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+                <SectionHead>Photos</SectionHead>
+                <span className="flex items-center gap-[5px] text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><Images className="h-3.5 w-3.5" aria-hidden /> {event.photos.count} photos</span>
               </div>
-            ))
-          ) : (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No resources posted for this event yet.</p>
+              {/* four columns, two rows: the first frame takes the left half, four more fill the right */}
+              <ul className="grid grid-cols-4 grid-rows-2 gap-[6px] sm:gap-[8px]" style={{ aspectRatio: "2 / 1" }}>
+                {event.photos.images.slice(0, 5).map((src, index) => {
+                  const last = index === 4;
+                  const more = event.photos!.count - 5;
+                  return (
+                    <li key={src} className={`relative min-h-0 ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
+                      <button type="button" onClick={() => setPhotoOpen(index)} aria-label={`Open photo ${index + 1} of ${event.photos!.count}`} className="dm-tap group relative block h-full w-full cursor-pointer overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+                        <Image src={src} alt="" fill sizes={index === 0 ? "(max-width: 992px) 66vw, 640px" : "(max-width: 992px) 33vw, 320px"} className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                        {last && more > 0 && (
+                          <span className="absolute inset-0 flex items-center justify-center text-[18px] font-extrabold" style={{ background: "rgba(9,10,20,0.58)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>+{more}</span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
           )}
-          {/* Photos: view-only, same as every other resource row here (never
-             a direct download of files this prototype doesn't have) */}
-          {event.official?.photosLabel && (
-            <button
-              type="button"
-              onClick={() => dispatchAuroraPulse("cta")}
-              className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
-              style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
-            >
-              <div className="min-w-0">
-                <p className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Event photos</p>
-                <p className="mt-[2px] text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>From the day itself.</p>
+
+          {/* Files: the icon says what it is, the title says which, one small
+             line says how much. Nothing else until you tap: a folder opens
+             to list what it holds (progressive disclosure, 5 Sept 2026). */}
+          <section aria-label="Event files" className="flex flex-col gap-[var(--space-3)]">
+            <SectionHead>Files</SectionHead>
+            {event.resources && event.resources.length > 0 ? (
+              <ul className="grid gap-[var(--space-3)] sm:grid-cols-2">
+                {event.resources.map((r) => {
+                  const Icon = RESOURCE_LOOK[r.kind].Icon;
+                  const isFolder = r.kind === "folder" && !!r.items;
+                  const open = openFolder === r.title;
+                  return (
+                    <li key={r.title} className="min-w-0">
+                      <button
+                        type="button"
+                        aria-expanded={isFolder ? open : undefined}
+                        onClick={() => { if (isFolder) setOpenFolder(open ? null : r.title); else dispatchAuroraPulse("select"); }}
+                        className="dm-tap group flex h-full w-full cursor-pointer flex-col rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
+                        style={{ background: "var(--color-glass-surface-3)", borderColor: "var(--glass-border)" }}
+                      >
+                        <span className="flex items-center gap-[12px]">
+                          <span className="relative flex size-[44px] flex-none items-center justify-center rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-1))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent)" }}>
+                            {r.kind === "folder" && <span aria-hidden className="absolute top-[-4px] right-[6px] h-[6px] w-[22px] rounded-t-[3px]" style={{ background: "color-mix(in srgb, var(--primary) 55%, var(--glass-surface-1))" }} />}
+                            <Icon className="h-[22px] w-[22px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
+                            <span className="block text-[12.5px] leading-[17px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{r.meta}</span>
+                          </span>
+                          {isFolder ? (
+                            <ChevronDown className="h-4 w-4 flex-none transition-transform duration-200" aria-hidden style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "none" }} />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 flex-none transition-transform duration-200 group-hover:translate-x-[2px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                          )}
+                        </span>
+                        {isFolder && open && (
+                          <ul className="filters-reveal mt-[var(--space-3)] flex flex-col border-t pt-[var(--space-2)]" style={{ borderColor: RULE }}>
+                            {r.items!.map((item) => (
+                              <li key={item} className="flex items-center gap-[8px] py-[7px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                                <FileText className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {item}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing posted yet.</p>
+            )}
+          </section>
+
+          {/* the viewer: one photo large, the count, previous and next; Escape or the X closes */}
+          {photoOpen !== null && event.photos && typeof document !== "undefined" && createPortal(
+            <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.9)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+              <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default" />
+              <div className="relative z-[1] flex w-full max-w-[1100px] flex-col gap-[var(--space-3)]">
+                <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  <span>{event.name} · Photo {photoOpen + 1} of {event.photos.count}</span>
+                  <button type="button" onClick={() => setPhotoOpen(null)} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}>
+                    <X className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
+                <div className="relative w-full overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
+                  <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
+                  <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet absolute top-1/2 left-3 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                    <ChevronLeft className="h-5 w-5" aria-hidden />
+                  </button>
+                  <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet absolute top-1/2 right-3 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                    <ChevronRight className="h-5 w-5" aria-hidden />
+                  </button>
+                </div>
+                <ul className="flex justify-center gap-[6px]">
+                  {event.photos.images.map((src, i) => (
+                    <li key={src}>
+                      <button type="button" aria-label={`Photo ${i + 1}`} onClick={() => setPhotoOpen(i)} className="relative block h-[44px] w-[64px] cursor-pointer overflow-hidden rounded-[6px]" style={{ boxShadow: i === photoOpen ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.15)", opacity: i === photoOpen ? 1 : 0.6 }}>
+                        <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <span className="flex flex-none items-center gap-[4px] text-[12px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                <Camera className="h-3.5 w-3.5" aria-hidden /> {event.official.photosLabel}
-              </span>
-            </button>
+            </div>,
+            document.body,
           )}
         </div>
       )}

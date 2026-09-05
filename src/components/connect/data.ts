@@ -1287,11 +1287,36 @@ export type EventBoard = {
   // Upcoming events have neither yet, there's nothing to recap or share
   // until the event itself has happened.
   recap?: { proId: string; takeaways: string[]; postedAgo: string };
-  resources?: { title: string; description: string; sourceLabel: string }[];
+  resources?: EventResource[];
+  /** The day's photo set: a handful of real frames for the gallery mockup
+   *  and the full count the album holds. View-only in the prototype. */
+  photos?: { count: number; images: string[] };
   /** The official Dream Opportunity post that keeps the event going after
    *  the day itself (CEO, 4 Sept): what happened, who you visited, what to
    *  do next, where to keep talking to the people you met, the photos. */
   official?: { postedAgo: string; summary: string; about: string; next: string[]; communityId: string; communityName: string; photosLabel: string };
+};
+
+/** One item on an event board's Resources tab. `kind` picks the icon and
+ *  the file chip; a folder lists what it holds. Nothing is downloadable in
+ *  the prototype, every card opens a view. */
+export type EventResource = {
+  title: string;
+  description: string;
+  sourceLabel: string;
+  kind: "slides" | "pdf" | "reading" | "link" | "folder";
+  /** e.g. "18 slides", "PDF · 6 pages", "6 links" */
+  meta: string;
+  items?: string[];
+};
+
+// Gallery frames: licensed event photography (Wikimedia Commons, see
+// public/images/connect/events/ATTRIBUTION.md), panels, office tours,
+// career fairs, audiences. Never the app's own career art.
+const EVENT_PHOTO = (n: string) => `/images/connect/events/${n}.jpg`;
+const EVENT_FRAMES = {
+  ey: ["panel-1", "office-tour-1", "career-fair-1", "audience-1", "workshop-1", "panel-3", "office-tour-2", "career-fair-2", "panel-2"].map(EVENT_PHOTO),
+  finance: ["panel-3", "office-tour-2", "audience-1", "career-fair-2", "workshop-1", "panel-2", "office-tour-1", "panel-1", "career-fair-1"].map(EVENT_PHOTO),
 };
 
 export const EVENTS: EventBoard[] = [
@@ -1327,9 +1352,13 @@ export const EVENTS: EventBoard[] = [
       postedAgo: "10h ago",
     },
     resources: [
-      { title: "Panel slides & career overviews", description: "Everything shown on stage, plus the career one-pagers each speaker recommended.", sourceLabel: "dreamari.co/resources" },
-      { title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources" },
+      { kind: "slides", title: "Panel slides", description: "Everything shown on stage, in order, with the speakers' notes.", sourceLabel: "dreamari.co/resources", meta: "18 slides" },
+      { kind: "folder", title: "Career one-pagers", description: "The one-page overview each speaker recommended for their career.", sourceLabel: "dreamari.co/resources", meta: "5 files", items: ["Consulting.pdf", "Audit & Assurance.pdf", "Tax.pdf", "Technology Consulting.pdf", "Strategy.pdf"] },
+      { kind: "reading", title: "Speaker-recommended reading list", description: "Six short reads the panel mentioned, organized by career area.", sourceLabel: "dreamari.co/resources", meta: "6 links" },
+      { kind: "pdf", title: "How to follow up after an event", description: "The two-line thank-you note, when to send it, and what to ask next.", sourceLabel: "Dream Opportunity", meta: "PDF · 2 pages" },
+      { kind: "link", title: "EY Launch internship program", description: "The early-careers page the recruiters pointed everyone to.", sourceLabel: "ey.com", meta: "Website" },
     ],
+    photos: { count: 24, images: EVENT_FRAMES.ey },
     official: {
       postedAgo: "1d ago",
       summary: "142 students spent the day at EY in Hoboken: a panel with five EY professionals, small-group career conversations, and a tour of the floor.",
@@ -1351,6 +1380,12 @@ export const EVENTS: EventBoard[] = [
   {
     id: "event-do-morgan-stanley-nyc",
     name: "Dream Opportunity & Morgan Stanley",
+    resources: [
+      { kind: "slides", title: "Trading floor tour deck", description: "The slides from the morning session on how a trading floor works.", sourceLabel: "dreamari.co/resources", meta: "14 slides" },
+      { kind: "folder", title: "Markets 101 handouts", description: "The three handouts from the small-group tables.", sourceLabel: "dreamari.co/resources", meta: "3 files", items: ["What a Markets Analyst does.pdf", "Reading a stock chart.pdf", "Glossary of trading terms.pdf"] },
+      { kind: "link", title: "Morgan Stanley early insights programs", description: "The programs the recruiters mentioned for high school and first-year students.", sourceLabel: "morganstanley.com", meta: "Website" },
+    ],
+    photos: { count: 31, images: EVENT_FRAMES.finance },
     host: "Morgan Stanley",
     lead: "Dream Opportunity",
     partner: "Morgan Stanley",
@@ -1368,6 +1403,11 @@ export const EVENTS: EventBoard[] = [
   {
     id: "event-ja-goldman-sachs-nyc",
     name: "Junior Achievement & Goldman Sachs",
+    resources: [
+      { kind: "pdf", title: "Personal finance workbook", description: "The workbook from the Junior Achievement session, with the answer key.", sourceLabel: "Junior Achievement", meta: "PDF · 12 pages" },
+      { kind: "reading", title: "Recommended reading on investing", description: "Four short pieces the volunteers pointed to for a first look at investing.", sourceLabel: "dreamari.co/resources", meta: "4 links" },
+    ],
+    photos: { count: 19, images: EVENT_FRAMES.finance },
     host: "Junior Achievement",
     lead: "Junior Achievement",
     partner: "Goldman Sachs",
