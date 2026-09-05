@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, ChevronRight, Download, Eye, Gem, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronRight, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -322,6 +322,25 @@ export function ProProfileView({
   const ink = "#FFFFFF";
   const soft = "rgba(255,255,255,0.78)";
   const rule = "rgba(255,255,255,0.18)";
+  // The professional's own cover choice (their page, their identity). Kept
+  // per person in the browser until profiles carry it server-side.
+  const coverKey = `dreamari:pro-cover:${pro.id}`;
+  const [cover, setCover] = useState(coverFor(pro.id));
+  const [coverOpen, setCoverOpen] = useState(false);
+  useEffect(() => {
+    // syncing with the browser's storage (an external system), which is what
+    // the set-state-in-effect rule exists to allow
+    try {
+      const saved = window.localStorage.getItem(coverKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved && PRO_COVERS.includes(saved)) setCover(saved);
+    } catch {}
+  }, [coverKey]);
+  const pickCover = (url: string) => {
+    setCover(url);
+    setCoverOpen(false);
+    try { window.localStorage.setItem(coverKey, url); } catch {}
+  };
 
   return (
     <>
@@ -342,9 +361,38 @@ export function ProProfileView({
          the story, then what was verified. */}
       <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
         <div className="absolute inset-0" aria-hidden>
-          <Image src={coverFor(pro.id)} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover" style={{ objectPosition: "50% 40%" }} priority />
+          <Image src={cover} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority />
           <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
         </div>
+        {/* the professional's own controls, the student header's Cover button
+           in the same corner; students see no controls here */}
+        {onOpenDashboard && (
+          <div className="absolute top-[var(--space-4)] right-[var(--space-4)] z-10 flex items-center rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+            <button type="button" aria-label="Change cover photo" aria-expanded={coverOpen} onClick={() => setCoverOpen((o) => !o)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: coverOpen ? PRO_ACCENT : "rgba(255,255,255,0.86)" }}>
+              <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Cover
+            </button>
+          </div>
+        )}
+        {coverOpen && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ fontFamily: "var(--font-body)" }}>
+            <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+            <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+              <div className="flex items-center justify-between gap-[var(--space-3)]">
+                <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
+                <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-[8px]">
+                {PRO_COVERS.map((url) => (
+                  <button key={url} type="button" aria-label="Use this cover" aria-pressed={cover === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: cover === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                    <Image src={url} alt="" fill sizes="160px" className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[84px] sm:p-[var(--space-6)] sm:pt-[104px]">
           <div className="flex flex-wrap items-center gap-[var(--space-4)]">
             <Avatar name={pro.name} verified size={64} />

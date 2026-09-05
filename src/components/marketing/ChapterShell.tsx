@@ -80,7 +80,12 @@ export function ChapterShell({
     // Phones: every chapter is one screen (min-h-dvh, snap start), the copy and
     // graphic centred in it as a block, the scroll cue at the foot. The nav
     // island floats over the top 72px. Desktop keeps its row layout.
-    <section id={id} className={`mkt-chapter relative flex flex-col pt-[72px] pb-0 min-[901px]:flex-row min-[901px]:items-center min-[901px]:scroll-mt-24 min-[901px]:pt-0 ${compact ? "min-h-dvh min-[901px]:min-h-0" : "min-h-dvh"}`}>
+    // Desktop: a chapter lands 96px below the top (scroll-mt-24, under the
+    // nav island), so a full-viewport section centred its content 48px below
+    // the visible centre and read as sitting low (reported 5 Sept 2026).
+    // The section is now viewport height minus that offset, so its centred
+    // row sits at the true centre of what is on screen.
+    <section id={id} className={`mkt-chapter relative flex flex-col pt-[72px] pb-0 min-[901px]:flex-row min-[901px]:items-center min-[901px]:scroll-mt-24 min-[901px]:pt-0 ${compact ? "min-h-dvh mkt-compact" : "min-h-dvh"}`}>
       {/* Reference is desktop-first here: .chapter-row is a row by default and only
           switches to a stacked column below 900px (not Tailwind's 768px md: tier,
           which left a 768-899px gap where content was force-fit into a row it didn't
@@ -225,7 +230,7 @@ export function ChapterShell({
             // spill upward into the copy (seen on an iPhone, Get Hired and
             // Connect). The first grid row also never shrinks below the copy,
             // so on a short phone the section grows instead of overlapping.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(74dvh,680px)] min-[901px]:[--frame-max:min(72dvh,620px)] ${wide ? "mkt-wide" : ""}`}
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_320px),680px)] min-[901px]:[--frame-max:min(calc(100dvh_-_360px),620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               height: compact ? "auto" : "var(--frame-h)",

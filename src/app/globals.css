@@ -1122,3 +1122,13 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
+
+/* Desktop: every chapter hugs its content (Explore and Connect always did).
+   Viewport-height chapters centred their row below the visible centre, ran
+   off the bottom on short windows, and doubled the gap wherever two of them
+   met (Match to Play measured 112px against 56px elsewhere, 5 Sept 2026).
+   Phones keep their one-chapter-per-screen snap (max-width rules above).
+   Two classes so it outranks the min-h-dvh utility on the same element. */
+@media (min-width: 901px) {
+  .mkt-chapter.mkt-chapter { min-height: 0; }
+}

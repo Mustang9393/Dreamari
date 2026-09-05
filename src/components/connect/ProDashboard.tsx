@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
 import { PANEL, Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
+import { CommunityCard } from "./CommunityCard";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
@@ -328,24 +328,18 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
             </ul>
           </Panel>
 
-          <Panel id="my-communities-title" title="My communities">
-            <ul className="-mt-[var(--space-2)] flex flex-col">
+          {/* the same community card as everywhere else (direct feedback,
+             5 Sept 2026: one card, current photos, no old thumbnails) */}
+          <section aria-labelledby="my-communities-title" className="flex flex-col gap-[var(--space-3)]">
+            <SectionHead id="my-communities-title">My communities</SectionHead>
+            <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
               {myCommunities.map((c) => (
-                <PanelRow key={c.id} onClick={() => nav?.openBoard(c.id)}>
-                  <span className="flex w-full items-center gap-[12px]">
-                    <span className="relative block size-[44px] flex-none overflow-hidden rounded-[var(--radius-sm)]">
-                      <Image src={c.photo} alt="" fill sizes="44px" className="object-cover" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
-                      <span className="block text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{formatCount(c.students)} students · {c.activePros} pros · {c.posts} posts</span>
-                    </span>
-                    <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                  </span>
-                </PanelRow>
+                <li key={c.id} className="min-w-0">
+                  <CommunityCard community={c} joined onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
+                </li>
               ))}
             </ul>
-          </Panel>
+          </section>
         </>
       )}
 
