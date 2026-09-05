@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { SparkBar } from "@/components/flow/SparkBar";
+import { NextStepBanner } from "@/components/app/NextStepBanner";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { BookOpen, Film, Lock, Play, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
@@ -68,6 +69,18 @@ export function PlayHub() {
         </h1>
 
         <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} />
+
+        {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
+           Play is for experiencing careers, Explore for discovering them.
+           Same banner as Profile's Top Three next step. */}
+        <NextStepBanner
+          eyebrow="Looking for another career to play?"
+          text="Explore more careers and find another simulation to play."
+          ctaLabel="Explore"
+          href="/explore"
+          Icon={ArrowRight}
+          storageKey="dreamari:play-explore-bridge-dismissed"
+        />
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,

@@ -33,7 +33,7 @@ const STAGES = [
 const TOP3 = [
   { title: "Investment Banking", world: "Business & Money", duration: "4 yrs", cost: "$150K+", salary: "$361K/year" },
   { title: "Accountant", world: "Business & Money", duration: "4 yrs", cost: "$55K+", salary: "$81K/year" },
-  { title: "Video Game Designer", world: "Tech & Engineering", duration: "4 yrs", cost: "$130K+", salary: "$104K/year" },
+  { title: "Video Game Designer", world: "Tech & Engineering", duration: "4 yrs", cost: "$130K+", salary: "$98K/year" },
 ];
 
 // Founder-simplified plan copy, verbatim. Mixed like the product's real

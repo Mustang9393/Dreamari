@@ -90,7 +90,7 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
 
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
   C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.png", "$559K"),
-  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.png", "$232K"),
+  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.png", "$227K"),
   C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png", "$148K"),
   C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png", "$496K"),
   C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png", "$146K"),
@@ -132,14 +132,15 @@ export type ReelCareer = {
 // ...) had no browse art and no sourced copy, so those careers left the reel
 // rather than shipping mismatched photos. Every description, salary range,
 // major and skill below is lifted from that career's own Career Report data
-// (report-data.ts, BLS-sourced) -- nothing here is invented.
+// (report-data.ts). Salaries are the report's U.S. medians (the Dreamari brief
+// for IB, PE, SWE; BLS for the rest), one figure, the same everywhere in the app.
 export const FOR_YOU_REEL: ReelCareer[] = [
   {
     title: "Investment Banking",
     world: "Business & Money",
     matchLabel: "STRONG MATCH",
     description: "Investment bankers help companies raise money and buy or sell businesses.",
-    salary: "$85K - $250K+",
+    salary: "$361K",
     // The BROWSE Images-2 IB files are 198x297 thumbnails -- too small for a
     // full-screen reel card. This poster IS the unified IB browse-card art
     // (the hi-res founder image), so the reel uses it instead.
@@ -152,7 +153,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     world: "Health & Medicine",
     matchLabel: "STRONG MATCH",
     description: "Registered nurses keep patients safe and are the person actually at the bedside all shift.",
-    salary: "$65K - $130K+",
+    salary: "$94K",
     photo: "/images/app/poster-registered-nurse.png",
     major: "Nursing, Biology, or Public Health",
     mainSkills: "Calm Under Pressure · Noticing Small Changes · Explaining Simply · Stamina",
@@ -162,7 +163,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     world: "Tech & Engineering",
     matchLabel: "STRONG MATCH",
     description: "Software engineers build and improve the apps and systems people use every day.",
-    salary: "$75K - $200K+",
+    salary: "$136K",
     photo: "/images/app/browse-software-engineer.png",
     major: "Computer Science or Software Engineering",
     mainSkills: "Problem Solving · Logical Thinking · Reading Code · Explaining Simply",
@@ -172,7 +173,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     world: "Driving, Flying & Shipping",
     matchLabel: "STRONG MATCH",
     description: "Airline pilots fly passengers and cargo safely from one airport to another.",
-    salary: "$60K - $250K+",
+    salary: "$227K",
     photo: "/images/app/browse-airline-pilot.png",
     major: "Aeronautical Science or Aviation Management",
     mainSkills: "Calm Under Pressure · Following Procedure · Quick Decisions · Clear Communication",
@@ -182,7 +183,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     world: "Business & Money",
     matchLabel: "STRONG MATCH",
     description: "Private equity firms buy companies, try to make them better, and sell them later for more.",
-    salary: "$100K - $300K+",
+    salary: "$250K",
     photo: "/images/app/browse-private-equity.png",
     major: "Finance, Economics, or Business Administration",
     mainSkills: "Business Judgment · Modeling & Analysis · Asking Good Questions · Patience",
@@ -192,7 +193,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     world: "Farming, Animals & Nature",
     matchLabel: "STRONG MATCH",
     description: "Food scientists develop and test food products in a lab and a pilot kitchen.",
-    salary: "$55K - $125K+",
+    salary: "$76K",
     photo: "/images/app/browse-food-scientist.png",
     major: "Food Science, Chemistry, or Nutrition",
     mainSkills: "Careful Measurement · Chemistry · Patience · Writing Up Findings",

@@ -347,7 +347,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                       {career.description}
                     </p>
                     <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                      <span style={{ color: "rgba(255,255,255,0.92)" }}>SALARY</span>
+                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MEDIAN SALARY</span>
                       <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
                     </div>
                   </div>
