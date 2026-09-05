@@ -15,7 +15,6 @@ import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
-import { InkText } from "@/components/build/ui";
 import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
@@ -119,21 +118,6 @@ export function MatchLab() {
   // Set the moment Match hands off to Profile (any of the "finish" buttons):
   // holds the destination URL while the welcome popup shows, rather than
   // navigating straight there.
-  // Set the moment Match is finished (from any finish button): the URL the
-  // "Welcome to Your Profile" popup hands off to when Continue is tapped
-  // (direct feedback, 5 Sept 2026: popup -> Continue -> Top Three, exactly).
-  const [welcomeUrl, setWelcomeUrl] = useState<string | null>(null);
-  // Dreamy's confetti burst and the milestone chime, once each time it opens.
-  const [welcomeBurst, setWelcomeBurst] = useState(0);
-  useEffect(() => {
-    if (!welcomeUrl) return;
-    const chime = setTimeout(() => playMilestoneChime(), 120);
-    const kick = setTimeout(() => setWelcomeBurst((n) => n + 1), 60);
-    return () => {
-      clearTimeout(chime);
-      clearTimeout(kick);
-    };
-  }, [welcomeUrl]);
   // Which liked career is "#1" on the consolidated results screen — starts
   // as whichever they liked first, but tapping any of the three reassigns it.
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -270,8 +254,11 @@ export function MatchLab() {
     const ordered = [focusId2, ...ids.filter((id) => id !== focusId2)];
     writePicks({ ids: ordered, focus: focusId2 });
     dispatchAuroraPulse("cta");
-    setDecisionOpen(false);
-    setWelcomeUrl(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3&welcome=1`);
+    // Straight to Profile: the "Welcome to Your Profile" popup lives there
+    // now, over the page as it assembles (direct feedback, 5 Sept 2026 — the
+    // story is "see the profile load, then the popup introduces it"), not
+    // over a dark screen here. ?welcome=1 is what tells Profile to play it.
+    setTimeout(() => router.push(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3&welcome=1`), 260);
   }
 
   function saveTop3() {
@@ -692,41 +679,6 @@ export function MatchLab() {
                 Keep Swiping
               </Button>
             </div>
-          </div>
-        </Sheet>
-      )}
-
-      {/* ---- welcome to Profile: exactly the flow from the notes (5 Sept
-         2026) — a popup with Dreamy that says "Welcome to Your Profile", then
-         Continue maps to Profile's Top Three. Reached from every way of
-         finishing Match. Only the visuals were worked: Dreamy's celebration
-         bounce and confetti with the milestone chime, the heading revealing
-         word by word (Build's ink reveal), one caption, the standard CTA. ---- */}
-      {welcomeUrl && (
-        <Sheet onClose={() => router.push(welcomeUrl)}>
-          <div className="relative flex flex-col items-center gap-4 text-center">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-20 left-1/2 -z-[1] h-[240px] w-[90%] -translate-x-1/2 rounded-full blur-[70px]"
-              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 40%, transparent), transparent 70%)" }}
-            />
-            <div className="relative h-28 w-28 motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)_both] sm:h-32 sm:w-32">
-              <span className="absolute inset-0 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-                <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
-              </span>
-              <LocalBurst nonce={welcomeBurst} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                <InkText text="Welcome to Your Profile" delay={0.3} />
-              </h2>
-              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.9s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-                Your Top 3 is saved.
-              </p>
-            </div>
-            <Button variant="primary" size="large" className="motion-safe:animate-[fade-slide-up_0.6s_1.1s_ease-out_both]" onClick={() => { dispatchAuroraPulse("select"); router.push(welcomeUrl); }} type="button">
-              Continue <ArrowRight className="h-4 w-4" aria-hidden />
-            </Button>
           </div>
         </Sheet>
       )}
