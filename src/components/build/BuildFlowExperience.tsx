@@ -7,8 +7,6 @@ import { FlowChrome } from "@/components/app/FlowChrome";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
-import { MatchLoadingScreen } from "@/components/flow/match/MatchLoadingScreen";
-import { MatchReadyScreen } from "@/components/flow/match/MatchReadyScreen";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { CostStep } from "./CostStep";
@@ -24,20 +22,15 @@ import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildSta
 // test is settled: the cinematic (boxless) treatment is THE flow; the boxed
 // glass variant was removed with its plumbing (see variant.tsx).
 
-const MATCH_LOADING_MS = 1800;
-const MATCH_ACCENT = "#2f6bf2";
-
-// After the loading beat, a deliberate "reveal" screen (direct feedback, 5
-// Sept 2026: matches should be presented, not auto-navigated to) sits
-// before Build hands off to the real match flow at /match-lab (the old
-// in-page MatchExperience is deleted).
-type Phase = "build" | "loading" | "ready";
+// One Congratulations screen, then straight to the Match deck (direct
+// feedback, 5 Sept 2026): the loading beat with the hard-hat Dreamy and the
+// second "matches are ready" screen are gone. The final Build step carries
+// the copy, the confetti and the Reveal My Matches CTA itself.
 
 export function BuildFlowExperience() {
   const router = useRouter();
   const [stageIndex, setStageIndex] = useState(0);
   const [state, setState] = useState<BuildState>(INITIAL_BUILD_STATE);
-  const [phase, setPhase] = useState<Phase>("build");
   // Dreamy's heart-burst reaction, restored -- but only rendered on the
   // identity steps (Interests/Subjects/Work Vibe) that pass reactionNonce
   // into their own QuestionHeading call. Every step still calls react() on
@@ -53,13 +46,7 @@ export function BuildFlowExperience() {
   const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
   const back = () => setStageIndex((current) => Math.max(current - 1, 0));
   const react = () => setReactionNonce((n) => n + 1);
-  const seeMatches = () => setPhase("loading");
-
-  useEffect(() => {
-    if (phase !== "loading") return;
-    const timer = setTimeout(() => setPhase("ready"), MATCH_LOADING_MS);
-    return () => clearTimeout(timer);
-  }, [phase]);
+  const seeMatches = () => router.push("/match-lab");
 
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
   // ringer switch until an <audio> element has played; see feedback.ts).
@@ -69,8 +56,8 @@ export function BuildFlowExperience() {
     setState((current) => ({ ...current, ...update }));
   }
 
-  const accent = phase === "build" ? STAGE_ACCENTS[stageId] : MATCH_ACCENT;
-  const isComplete = stageId === "complete" && phase === "build";
+  const accent = STAGE_ACCENTS[stageId];
+  const isComplete = stageId === "complete";
 
   // A trailing glow of the last few steps, not every step ever visited.
   // AuroraBackground has always supported accumulating one persistent blob
@@ -86,12 +73,7 @@ export function BuildFlowExperience() {
   // of building indefinitely -- newer territory for this component, not a
   // straight revert to how it worked before.
   const TRAIL_LENGTH = 3;
-  const visitedAccents = useMemo(() => {
-    if (phase !== "build") return [];
-    return STAGES.slice(0, stageIndex)
-      .map((s) => STAGE_ACCENTS[s.id])
-      .slice(-TRAIL_LENGTH);
-  }, [phase, stageIndex]);
+  const visitedAccents = useMemo(() => STAGES.slice(0, stageIndex).map((s) => STAGE_ACCENTS[s.id]).slice(-TRAIL_LENGTH), [stageIndex]);
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
   const skipToMatch = () => router.push("/match-lab");
@@ -146,17 +128,7 @@ export function BuildFlowExperience() {
                mt-auto (see StepFooter), so the footer always reaches the
                real edge regardless of content height or viewport size. */}
             <div className="flow-scroll-fade flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
-              {phase === "build" && <StepTransition key={stageId}>{content}</StepTransition>}
-              {phase === "loading" && (
-                <StepTransition key="match-loading">
-                  <MatchLoadingScreen />
-                </StepTransition>
-              )}
-              {phase === "ready" && (
-                <StepTransition key="match-ready">
-                  <MatchReadyScreen onReveal={() => router.push("/match-lab")} />
-                </StepTransition>
-              )}
+              <StepTransition key={stageId}>{content}</StepTransition>
             </div>
           </div>
         </section>

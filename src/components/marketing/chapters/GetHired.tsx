@@ -31,7 +31,7 @@ const STAGES = [
 // scores — the valuable stuff, side by side. Figures are the founder-supplied
 // card content, verbatim. Titles still wear each world's approved poster face.
 const TOP3 = [
-  { title: "Investment Banking", world: "Business & Money", duration: "4 yrs", cost: "$150K+", salary: "$285K/year" },
+  { title: "Investment Banking", world: "Business & Money", duration: "4 yrs", cost: "$150K+", salary: "$361K/year" },
   { title: "Accountant", world: "Business & Money", duration: "4 yrs", cost: "$55K+", salary: "$81K/year" },
   { title: "Video Game Designer", world: "Tech & Engineering", duration: "4 yrs", cost: "$130K+", salary: "$104K/year" },
 ];

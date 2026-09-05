@@ -95,7 +95,7 @@ const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
   ]),
   h(`${prefix}-3`, "Professional Readiness", undefined, [
     t(`${prefix}-3-1`, "Complete your Resume for your #1 Career", "Build", "/profile?tab=resume"),
-    t(`${prefix}-3-2`, "Complete 3 Glossary Games for your #1 Career", "Play", "/play/glossary"),
+    t(`${prefix}-3-2`, "Complete 3 Glossary Games for your #1 Career", "Play", "/play/glossary/investment-banking"),
     t(`${prefix}-3-3`, "Ask 3 Professionals in your #1 Career for advice", "Connect", "/connect"),
     o(`${prefix}-3-4`, "Apply to 5 Internships, Programs, or Job Shadows", "Apply"),
   ]),

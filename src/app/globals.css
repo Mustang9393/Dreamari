@@ -1116,3 +1116,9 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
+
+/* Top Three next-step banner: a slow breath on the glow, never a flash */
+@keyframes next-step-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}

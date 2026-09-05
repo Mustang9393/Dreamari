@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Confetti } from "@/components/flow/aurora/Confetti";
 import { useEffect, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
@@ -448,15 +449,26 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
   );
 }
 
+// The one Congratulations screen (direct feedback, 5 Sept 2026): the
+// climactic moment. Screen-wide confetti falls for the first seconds, Dreamy
+// parties with local bursts, the chime plays, and the copy says what comes
+// next. Its CTA goes straight to the Match deck.
+const CONFETTI_COLORS = ["#2f6bf2", "#7c5cff", "#ff5fa2", "#ffd166", "#33c78c", "#ffffff"];
+
 export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () => void; onBack: () => void }) {
   const [burstNonce, setBurstNonce] = useState(0);
+  const [confetti, setConfetti] = useState(false);
   useEffect(() => {
     const chime = setTimeout(() => playMilestoneChime(), 200);
     const kick = setTimeout(() => setBurstNonce(1), 60);
+    const rain = setTimeout(() => setConfetti(true), 120);
+    const stop = setTimeout(() => setConfetti(false), 3600);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
     return () => {
       clearTimeout(chime);
       clearTimeout(kick);
+      clearTimeout(rain);
+      clearTimeout(stop);
       clearInterval(interval);
     };
   }, []);
@@ -483,10 +495,19 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
           </span>
         </div>
         <h1 className={`${bricolage.className} text-[32px] font-extrabold text-[var(--color-night-foreground)] sm:text-[38px]`}><InkText text="Congratulations!" /></h1>
+        <p className="mt-3 text-[18px] leading-[24px] font-bold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_0.5s_both] sm:text-[20px] sm:leading-[26px]">Your matches are ready.</p>
+        <p className="mt-1 text-[15px] leading-[22px] font-medium text-[var(--color-night-muted-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_0.7s_both] sm:text-[16px]">See the careers that fit you.</p>
       </GlassCard>
       </div>
       </div>
-      <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">See matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
+      {/* a stacking context of its own, so the canvas (which paints at z -10
+         inside it) lands above the page instead of behind the background */}
+      {confetti && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-[60]">
+          <Confetti colors={CONFETTI_COLORS} active />
+        </div>
+      )}
+      <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }

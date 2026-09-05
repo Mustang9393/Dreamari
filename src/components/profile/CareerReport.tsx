@@ -29,10 +29,11 @@ import {
 // Scoped to what the report has to say. The action plan lives in My Plan,
 // where a student works; the report is the document they hand over.
 export const REPORT_SECTIONS = [
+  // Order and names per direct feedback, 5 Sept 2026.
   { id: "glance", n: 1, label: "Overview" },
-  { id: "majors", n: 2, label: "Three Majors" },
-  { id: "education", n: 3, label: "Education" },
-  { id: "courses", n: 4, label: "High School Classes" },
+  { id: "courses", n: 2, label: "High School Classes" },
+  { id: "majors", n: 3, label: "College Majors" },
+  { id: "education", n: 4, label: "College Pathways" },
   { id: "colleges", n: 5, label: "Colleges" },
 ] as const;
 
@@ -300,8 +301,30 @@ function ReportDocument({
           </dl>
         </ReportSection>
 
-        {/* 02 — Three Majors to Explore */}
-        <ReportSection id={`${idPrefix}majors`} n={2} title="Three Majors to Explore" icon={BookOpen}>
+        {/* 02 — High school classes. The first two suggestions per career are
+           the actual classes (the third is an experience, which stays on My
+           Plan). Mapping subjects to O*NET knowledge areas and SCED codes is
+           a backend data-model note, not UI. */}
+        {/* High school classes, as distinct from the college majors above
+           (direct feedback: "Courses to Consider" read as the same thing).
+           Class names only — the one-line "why" under each was cut (Joshua
+           Pierce, Slack, 5 Sept 2026): those sentences can't be written
+           accurately at scale, and the name is what the student needs. */}
+        <ReportSection id={`${idPrefix}courses`} n={2} title="High School Classes to Take" icon={ListChecks}>
+          <ul className="grid list-none gap-[10px] p-0 sm:grid-cols-2 sm:gap-[14px]" data-keep-together>
+            {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
+              <li key={course.label} className="flex flex-col gap-[4px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
+                <span className="flex items-center gap-[9px] text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
+                  <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                  {course.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </ReportSection>
+
+        {/* 03 — 3 College Majors to Consider */}
+        <ReportSection id={`${idPrefix}majors`} n={3} title="3 College Majors to Consider" icon={BookOpen}>
           <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3 sm:gap-[14px]" data-keep-together>
             {report.majors.map((major) => (
               <div key={major.name} className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
@@ -312,10 +335,10 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 03 — Education. Every route gets the same row (CEO, 4 Sept: the
+        {/* 04 — College Pathways. Every route gets the same row (CEO, 4 Sept: the
            lone accented tile had no reason a student could see). The most
            common path leads and carries a small tag; the rest follow. */}
-        <ReportSection id={`${idPrefix}education`} n={3} title="Education" icon={GraduationCap}>
+        <ReportSection id={`${idPrefix}education`} n={4} title="College Pathways" icon={GraduationCap}>
           <div data-keep-together>
             {/* no subhead: the section title says Education and the first card
                says Most common (direct feedback: no copy that repeats the obvious) */}
@@ -331,28 +354,6 @@ function ReportDocument({
               ))}
             </ul>
           </div>
-        </ReportSection>
-
-        {/* 04 — High school classes. The first two suggestions per career are
-           the actual classes (the third is an experience, which stays on My
-           Plan). Mapping subjects to O*NET knowledge areas and SCED codes is
-           a backend data-model note, not UI. */}
-        {/* High school classes, as distinct from the college majors above
-           (direct feedback: "Courses to Consider" read as the same thing).
-           Class names only — the one-line "why" under each was cut (Joshua
-           Pierce, Slack, 5 Sept 2026): those sentences can't be written
-           accurately at scale, and the name is what the student needs. */}
-        <ReportSection id={`${idPrefix}courses`} n={4} title="High School Classes to Take" icon={ListChecks}>
-          <ul className="grid list-none gap-[10px] p-0 sm:grid-cols-2 sm:gap-[14px]" data-keep-together>
-            {(COURSE_SUGGESTIONS[career.id]?.slice(0, 2) ?? [{ label: "Statistics", why: "" }, { label: "Economics", why: "" }]).map((course) => (
-              <li key={course.label} className="flex flex-col gap-[4px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
-                <span className="flex items-center gap-[9px] text-[13px] leading-[18px] font-bold tracking-[-0.008em]" style={{ color: "var(--ink)" }}>
-                  <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                  {course.label}
-                </span>
-              </li>
-            ))}
-          </ul>
         </ReportSection>
 
         {/* 05 — Colleges */}

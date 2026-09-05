@@ -497,22 +497,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             </div>
             {/* the three facts as the community cards' tiles: icon in the
                #1 career's accent, the figure, then the label */}
-            <dl className="grid grid-cols-3 gap-[8px]" style={{ textShadow: "none" }}>
+            {/* the three facts as compact tiles that hug their content and sit
+               left, on one row at every width: icon, label, value. On phones
+               the type steps down and the streak's extras drop so all three
+               still fit side by side (direct feedback, 5 Sept 2026). */}
+            <dl className="flex flex-wrap gap-[6px] sm:gap-[8px]" style={{ textShadow: "none" }}>
               {[
                 { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), note: null as string | null, label: "Grade", verified: false, sub: null as string | null },
                 { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, note: null as string | null, label: "GPA", verified: ACADEMIC_RECORD.verified, sub: null as string | null },
                 { Icon: Flame, value: `${STUDENT.streakDays}`, note: "days" as string | null, label: "Streak", verified: false, sub: "142/190" as string | null },
               ].map((fact) => (
-                <div key={fact.label} className="flex min-w-0 flex-col items-center gap-[2px] rounded-[var(--radius-sm)] px-[6px] py-[10px] text-center" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
-                  <fact.Icon className="h-[16px] w-[16px]" aria-hidden style={{ color: heroAccent }} />
-                  <dd className="order-2 flex items-baseline gap-[4px] text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
-                    {fact.value}
-                    {fact.note && <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{fact.note}</span>}
-                  </dd>
-                  <dt className="order-3 flex items-center gap-[4px] text-[11.5px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
-                    {fact.label}{fact.sub ? ` · ${fact.sub}` : ""}
+                <div key={fact.label} className="flex min-w-0 flex-1 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                  <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
+                  <dt className="flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px]" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    {fact.label}{fact.sub && <span className="hidden sm:inline"> · {fact.sub}</span>}
                     {fact.verified && <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>}
                   </dt>
+                  <dd className="ml-auto flex flex-none items-baseline gap-[3px] text-[14px] leading-[18px] font-extrabold tabular-nums sm:text-[18px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                    {fact.value}
+                    {fact.note && <span className="hidden text-[11.5px] font-semibold sm:inline" style={{ color: "rgba(255,255,255,0.7)" }}>{fact.note}</span>}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -596,7 +600,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             {tab === "overview" && (
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
               <OverviewTab
-                focus={focus} nextTask={nextTask} planProgress={planProgress} top3Count={top3.length}
+                focus={focus} planProgress={planProgress} top3Count={top3.length}
                 onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
                 onGoLocker={() => setTab("locker")}
               />
@@ -1029,6 +1033,12 @@ function Top3Tab({
       )}
       </div>
 
+      {/* The obvious next action after saving a Top 3 (Joshua Pierce, Slack,
+         5 Sept 2026): play the #1 career's simulation. Build > Match > Play,
+         the landing page's own order. Routes to the Investment Banking
+         simulation for now; the dynamic #1 routing is a later step. */}
+      {top3.length > 0 && <NextStepCta />}
+
       {!focusId && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={INSET}>
           <span className="text-[14px] font-bold">Choose your #1 career to build your plan around it.</span>
@@ -1077,11 +1087,10 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
 function OverviewTab({
-  focus, nextTask, planProgress, top3Count,
+  focus, planProgress, top3Count,
   onGoTop3, onGoPlan, onGoReport, onGoLocker,
 }: {
   focus: ProfileCareer | null;
-  nextTask: (career: ProfileCareer) => PlanTask | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
   top3Count: number;
   onGoTop3: () => void;
@@ -1102,8 +1111,6 @@ function OverviewTab({
     );
   }
 
-  const next = nextTask(focus);
-  const NextIcon = next ? ACTION_ICON[next.action] : Compass;
   const progress = planProgress(focus);
 
   return (
@@ -1142,21 +1149,28 @@ function OverviewTab({
         </button>
       </section>
 
-      {/* The one thing to do next — a single action, nothing else in the box */}
-      <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-        <span className="flex min-w-0 flex-col gap-[3px]">
-          <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</span>
-          <h3 id="next-title" className="text-balance text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)" }}>
-            {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
-          </h3>
-        </span>
-        {next?.href ? (
-          <Link href={next.href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
-          </Link>
-        ) : (
-          <button type="button" onClick={onGoPlan} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>Open my plan</button>
-        )}
+      {/* Do this next (official copy, 5 Sept 2026): two sentences, and the
+         button IS the verb of each sentence, so reading the line is
+         reading the action. Explore leads (it is where a new student
+         starts); Play is the alternative for someone with a #1 already. */}
+      <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
+        <h3 id="next-title" className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
+        <div className="flex flex-col gap-[10px]">
+          {[
+            { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
+            { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Your #1: Day in the Life of an Investment Banker Simulation" },
+          ].map((line, index) => (
+            <Fragment key={line.verb}>
+              {index > 0 && <span className="pl-[2px] text-[12px] leading-[16px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>or</span>}
+              <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[15px] leading-[22px] font-semibold sm:text-[16px]" style={{ color: "var(--foreground)" }}>
+                <Link href={line.href} className="dm-solid inline-flex min-h-[36px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                  <line.Icon className="h-4 w-4" aria-hidden /> {line.verb}
+                </Link>
+                <span className="min-w-0">{line.rest}</span>
+              </p>
+            </Fragment>
+          ))}
+        </div>
       </section>
     </div>
   );
@@ -1688,6 +1702,45 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         );
       })}
     </div>
+  );
+}
+
+const NEXT_STEP_KEY = "dreamari:top3-next-step-dismissed";
+
+/** Compact banner under the Top Three cards: a slow glow so the eye lands on
+ *  it, a small X to dismiss (remembered), and one button. */
+function NextStepCta() {
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    // syncing with the browser's storage (an external system), which is what
+    // the set-state-in-effect rule exists to allow
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (window.localStorage.getItem(NEXT_STEP_KEY) === "1") setHidden(true);
+    } catch {}
+  }, []);
+  if (hidden) return null;
+  const dismiss = () => {
+    setHidden(true);
+    try { window.localStorage.setItem(NEXT_STEP_KEY, "1"); } catch {}
+  };
+  return (
+    <aside aria-label="Next step" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...INSET, borderColor: "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" }}>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] motion-safe:animate-[next-step-glow_3.2s_ease-in-out_infinite]" style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent), 0 0 44px -12px var(--primary)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 42%, color-mix(in srgb, #7c5cff 14%, transparent) 72%, transparent 100%)" }} />
+      <button type="button" onClick={dismiss} aria-label="Dismiss next step" className="dm-quiet absolute top-[8px] left-[8px] z-[1] flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <X className="h-3.5 w-3.5" aria-hidden />
+      </button>
+      <div className="relative flex flex-wrap items-center gap-[var(--space-3)] p-[var(--space-4)] pl-[40px] sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pl-[44px]">
+        <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+          <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--accent-subtle)" }}>Next step</span>
+          <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>Play your #1 Career Simulation to see if it’s really your #1.</span>
+        </span>
+        <Link href="/play/investment-banking" className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <Gamepad2 className="h-4 w-4" aria-hidden /> Play
+        </Link>
+      </div>
+    </aside>
   );
 }
 

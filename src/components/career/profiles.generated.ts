@@ -415,7 +415,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       },
       {
         "label": "Typical pay",
-        "value": "$155,000/year"
+        "value": "$250,000/year"
       },
       {
         "label": "People doing it",
@@ -607,7 +607,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       },
       {
         "label": "Typical pay",
-        "value": "$101,910/year"
+        "value": "$361,000/year"
       },
       {
         "label": "People doing it",

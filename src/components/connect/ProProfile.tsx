@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, Download, Eye, Gem, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronRight, Download, Eye, Gem, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
-import { EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
+import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
+import { CommunityCard } from "./CommunityCard";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -57,16 +59,6 @@ export function rankPros(pros: Pro[], worlds: string[]): Pro[] {
     return relevance * 1000 + quality + activity;
   };
   return [...pros].sort((a, b) => score(b) - score(a));
-}
-
-/** Relative luminance of a hex colour, for choosing type and button colours
- *  on a brand wash. Non-hex input counts as dark. */
-function luminance(hex: string): number {
-  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) return 0;
-  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-  const n = parseInt(m[1], 16);
-  return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
 }
 
 function firstName(name: string) {
@@ -274,175 +266,223 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
 
 // ——— the profile ———
 
+// Covers: the same set the student's My Profile offers, so a professional's
+// header is their own identity, never their employer's colours (direct
+// feedback, 5 Sept 2026). Picked per person from their id until profiles
+// carry a real cover choice.
+const PRO_COVERS = ["streaks", "fluted", "smoke", "molten", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
+function coverFor(id: string) {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return PRO_COVERS[h % PRO_COVERS.length];
+}
+
+/** 48.1K, 1.9K, 6.8K: the shortened counts students know from Instagram and TikTok. */
+export function shortCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(n);
+}
+
+// One accent for every professional profile, whatever the industry (direct
+// feedback, 5 Sept 2026): likes, saves, chips and buttons are Dreamari blue,
+// the way LinkedIn's profile chrome never changes with the job.
+const PRO_ACCENT = "var(--accent-subtle)";
+
 export function ProProfileView({
   pro,
   follows,
   onFollow,
   onBack,
   onAsked,
+  onOpenDashboard,
 }: {
   pro: Pro;
   follows: Follows;
   onFollow: (id: string) => void;
   onBack: () => void;
   onAsked?: (title: string) => void;
+  /** Volunteer demo only: the professional looking at their own page can step into the private dashboard. */
+  onOpenDashboard?: () => void;
 }) {
   const nav = useContext(ConnectNav);
-  const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
   const answers = answersBy(pro.id);
   const posts = postsBy(pro.id);
+  // the boards they answer in: their world's board plus the shared one
+  const communities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const [asked, setAsked] = useState<{ id: string; title: string }[]>([]);
   const [allAnswers, setAllAnswers] = useState(false);
   const [allPosts, setAllPosts] = useState(false);
   const following = !!follows[pro.id];
+  const tier = volunteerTier(pro);
+  const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
+  // views of the profile and its answers, the public number IG and TikTok lead with
+  const views = Math.round(pro.studentsReached * 3.8);
+  const askedCount = pro.questionsAnswered + 6 + asked.length;
+  const ink = "#FFFFFF";
+  const soft = "rgba(255,255,255,0.78)";
+  const rule = "rgba(255,255,255,0.18)";
 
   return (
     <>
-      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        </button>
+        {onOpenDashboard && (
+          <QuietCta size="sm" onClick={onOpenDashboard}>
+            My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+          </QuietCta>
+        )}
+      </div>
 
-      {/* Identity: name > the doc's three numbers > role line and story >
-         verification. The card wears the company's own colours, the same
-         treatment as the company card on the volunteer dashboard, and the
-         professional's activity badge sits by their name (direct feedback,
-         4 Sept 2026). */}
-      {(() => {
-        const brand = COMPANY_BRAND[pro.org] ?? { bg: "#1c1a2e", ink: "#FFFFFF" };
-        // the brand colour as a wash over the app's dark, not at full strength
-        // (direct feedback: EY yellow at full was too bright and fought the
-        // blue button), so the type can stay white on every company
-        const wash = `color-mix(in srgb, ${brand.bg} 46%, #14121f)`;
-        const washDeep = `color-mix(in srgb, ${brand.bg} 30%, #0e0c20)`;
-        const ink = "#FFFFFF";
-        const soft = "rgba(255,255,255,0.74)";
-        const rule = "rgba(255,255,255,0.2)";
-        // the follow button in the brand's colour, unless the brand is dark
-        // (Nike black, JPMorgan brown) and would sink into the wash: then a
-        // white button with dark type, which still reads as the brand's card
-        const followTone = luminance(brand.bg) < 0.15 ? { background: "#FFFFFF", color: "#0e0c20", border: "1px solid rgba(255,255,255,0.2)" } : { background: brand.bg, color: brand.ink, border: "1px solid rgba(255,255,255,0.22)" };
-        const tier = volunteerTier(pro);
-        const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
-        return (
-          <section
-            aria-label="Profile"
-            className="relative flex flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]"
-            style={{ background: `linear-gradient(135deg, ${wash} 0%, ${washDeep} 100%)`, borderColor: rule, color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}
-          >
-            {/* the brand at full strength only as a soft glow in the corner */}
-            <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-35 blur-[60px]" style={{ background: brand.bg }} />
-            <div className="relative flex flex-wrap items-center gap-[var(--space-4)]">
-              <Avatar name={pro.name} verified size={64} />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
-                  <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
-                  {tier && (
-                    <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: `color-mix(in srgb, ${ink} 14%, transparent)`, color: ink, border: `1px solid ${rule}` }} title={tier.note}>
-                      <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: tier.color }} /> {tier.name} volunteer
-                    </span>
-                  )}
-                </div>
-                <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
-                  <span>{pro.role}</span>
-                  <span aria-hidden style={{ color: rule }}>·</span>
-                  <CompanyMark name={pro.org} ink={ink} height={13} />
-                </p>
+      {/* Identity, in the student profile's own language: a personal cover
+         photo with the name on it (never the company's colours), the tier by
+         the name, role and company mark, Follow, three shortened numbers,
+         the story, then what was verified. */}
+      <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
+        <div className="absolute inset-0" aria-hidden>
+          <Image src={coverFor(pro.id)} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover" style={{ objectPosition: "50% 40%" }} priority />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
+        </div>
+        <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[84px] sm:p-[var(--space-6)] sm:pt-[104px]">
+          <div className="flex flex-wrap items-center gap-[var(--space-4)]">
+            <Avatar name={pro.name} verified size={64} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
+                <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+                {tier && (
+                  <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "rgba(255,255,255,0.12)", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
+                    <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: PRO_ACCENT }} /> {tier.name} volunteer
+                  </span>
+                )}
               </div>
-              <div className="basis-full sm:basis-auto">
-                {/* the one button on the card takes the company's own colours
-                   so nothing on it is the app's blue (direct feedback) */}
-                <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" tone={followTone} />
+              <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
+                <span>{pro.role}</span>
+                <span aria-hidden style={{ color: rule }}>·</span>
+                <CompanyMark name={pro.org} ink={ink} height={13} />
+              </p>
+            </div>
+            <div className="basis-full sm:basis-auto">
+              <FollowButton following={following} onToggle={() => onFollow(pro.id)} className="w-full sm:w-auto" />
+            </div>
+          </div>
+
+          <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
+            {[
+              { value: views, label: "Views" },
+              { value: pro.followers + (following ? 1 : 0), label: "Followers" },
+              { value: pro.totalLikes, label: "Likes" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex min-w-0 flex-col gap-[2px]">
+                <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: ink }}>{shortCount(stat.value)}</dd>
+                <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>{stat.label}</dt>
               </div>
-            </div>
+            ))}
+          </dl>
 
-            <dl className="relative grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
-              {[
-                { value: pro.studentsReached + (following ? 1 : 0), label: "Students Reached" },
-                { value: pro.followers + (following ? 1 : 0), label: "Followers" },
-                { value: pro.totalLikes, label: "Total Likes" },
-              ].map((stat) => (
-                <div key={stat.label} className="flex min-w-0 flex-col gap-[2px]">
-                  <dd className="order-1 text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: ink }}>{formatCount(stat.value)}</dd>
-                  <dt className="order-2 text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>{stat.label}</dt>
-                </div>
-              ))}
-            </dl>
+          <div className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
+            <p className="text-[15px] leading-[22px]" style={{ color: ink }}>{pro.story}</p>
+            <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>
+              <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: PRO_ACCENT }} /> {pro.verifiedBy}
+            </span>
+          </div>
+        </div>
+      </section>
 
-            <div className="relative flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: rule }}>
-              <p className="text-[15px] leading-[22px]" style={{ color: ink }}>{pro.story}</p>
-              <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>
-                <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: ink }} /> {pro.verifiedBy}
-              </span>
-            </div>
-          </section>
-        );
-      })()}
-
-      {/* Ask Me Anything is the primary engagement mechanism (doc). The
-         composer, and one plain line about where the answer goes. No private
-         messages exist, by design. */}
-      <Panel id="ama-title" title="Ask Me Anything">
+      {/* Ask Me (not "anything": careers, school and work). The composer
+         first, then the questions already asked and answered right under it,
+         one card (direct feedback, 5 Sept 2026). No private messages exist. */}
+      <Panel
+        id="ask-title"
+        title="Ask Me"
+        aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{askedCount}</strong> questions asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered}</strong> answered</span>}
+      >
         <InlineAsk
           joined
-          accent={accent}
-          placeholder={`Ask ${firstName(pro.name)} a question…`}
+          accent="var(--primary)"
+          placeholder={`Ask ${firstName(pro.name)} about their career…`}
           onPost={(text) => {
             setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
             onAsked?.(text);
           }}
         />
         {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-      </Panel>
-
-      {answers.length > 0 && (
-        <Panel id="answers-title" title="Answers" aside={<MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />}>
-          <ul className="-mt-[var(--space-2)] flex flex-col">
+        {answers.length > 0 && (
+          <ul className="flex flex-col border-t" style={{ borderColor: RULE }}>
             {(allAnswers ? answers : answers.slice(0, 3)).map((thread) => {
               const s = signals(thread.views, thread.helpful, undefined);
               return (
                 <PanelRow key={thread.id} onClick={() => nav?.openThread(thread.id)}>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</span>
-                  <SignalRow {...s} accent={accent} />
+                  <span className="flex flex-wrap items-center justify-between gap-x-[10px] gap-y-[4px]">
+                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</span>
+                    <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: PRO_ACCENT }}>Answered <ChevronRight className="h-3 w-3" aria-hidden /></span>
+                  </span>
+                  <SignalRow {...s} accent={PRO_ACCENT} />
                 </PanelRow>
               );
             })}
           </ul>
-        </Panel>
-      )}
+        )}
+        {answers.length > 3 && (
+          <div className="-mt-[var(--space-2)] flex justify-end">
+            <MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />
+          </div>
+        )}
+      </Panel>
 
+      {/* My Posts: career lessons or wider life at work (leave, balance,
+         leadership, switching), so the title is theirs, not "career posts" */}
       {posts.length > 0 && (
-        <Panel id="posts-title" title="Career posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
+        <Panel id="posts-title" title="My Posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
           <ul className="-mt-[var(--space-2)] flex flex-col">
             {(allPosts ? posts : posts.slice(0, 3)).map((insight) => {
               const s = signals(insight.views, insight.helpful, insight.saves);
               return (
                 <PanelRow key={insight.id} onClick={() => nav?.openInsight(insight.id)}>
+                  <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: PRO_ACCENT }}>Pro tip</span>
                   <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
-                  <SignalRow {...s} accent={accent} />
+                  <SignalRow {...s} accent={PRO_ACCENT} />
                 </PanelRow>
               );
             })}
           </ul>
         </Panel>
       )}
-      {(pro.education || pro.journey || pro.topics) && (
-        <Panel id="about-title" title={`About ${firstName(pro.name)}`}>
-          <dl className="-mt-[var(--space-2)] flex flex-col">
-            {[
-              ["Education", pro.education],
-              ["Career journey", pro.journey],
-            ].filter(([, v]) => v).map(([k, v]) => (
-              <div key={k} className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
-                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
-                <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{v}</dd>
-              </div>
+
+      {/* The boards this person answers in, the same community cards as the
+         Connect home (one component), laid out the way the home lays them
+         out: heading, then the cards on the page column itself, never inside
+         a panel (a card inside a panel is a different, narrower card). */}
+      {communities.length > 0 && (
+        <section aria-labelledby="communities-title" className="flex flex-col gap-[var(--space-3)]">
+          <SectionHead id="communities-title">Communities</SectionHead>
+          <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
+            {communities.map((c) => (
+              <li key={c.id} className="min-w-0">
+                <CommunityCard community={c} joined onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
+              </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* About Me: only what the header has not already said */}
+      {(pro.education || pro.topics) && (
+        <Panel id="about-title" title="About Me">
+          <dl className="-mt-[var(--space-2)] flex flex-col">
+            {pro.education && (
+              <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
+                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</dt>
+                <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.education}</dd>
+              </div>
+            )}
             {pro.topics && (
-              <div className="flex flex-col gap-[8px] border-t py-[var(--space-3)]" style={{ borderColor: RULE }}>
+              <div className="flex flex-col gap-[8px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
                 <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Can help with</dt>
                 <dd className="flex flex-wrap gap-[6px]">
                   {pro.topics.map((t) => (
-                    <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}>{t}</span>
+                    <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${PRO_ACCENT} 45%, var(--glass-border))`, color: PRO_ACCENT, background: `color-mix(in srgb, ${PRO_ACCENT} 12%, transparent)` }}>{t}</span>
                   ))}
                 </dd>
               </div>

@@ -6,7 +6,9 @@ import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
 // All three cards are real Business/Money/Office-world careers with real copy pulled
-// from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salary bands are
+// from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salaries are the
+// U.S. medians the rest of the app shows (Career Report, career details, Get Hired):
+// IB $361K and PE $250K from the Dreamari brief, Management Analyst from BLS. Bands were
 // standard entry-level ranges for these roles (not in the taxonomy source, which has no
 // salary column filled in yet). All three now use real per-career photos pulled from
 // the design system's Figma file: Investment Banking and Project Manager from node
@@ -26,7 +28,7 @@ const CARDS = [
     photo: "/images/app/poster-management-analyst.png",
     title: "Management Analyst",
     blurb: "Figures out how a business can run better, then makes it happen.",
-    salary: "$75K-125K",
+    salary: "$99K",
     major: "Business & Management",
   },
   {
@@ -38,7 +40,7 @@ const CARDS = [
     photo: "/images/app/poster-investment-banking-v3.png",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
-    salary: "$85K-150K",
+    salary: "$361K",
     major: "Business & Management",
   },
   {
@@ -49,7 +51,7 @@ const CARDS = [
     photo: "/images/app/poster-private-equity.png",
     title: "Private Equity",
     blurb: "Helps investors buy, improve, and sell companies for long-term returns.",
-    salary: "$95K-250K+",
+    salary: "$250K",
     major: "Finance or Economics",
   },
 ];
@@ -75,7 +77,7 @@ export function MatchChapter() {
       id="match"
       title="Match"
       color={WORLD_COLOR}
-      oneliner="with the right college major, schools and career."
+      oneliner="with careers and schools that fit who you are."
       flip
       graphicRef={graphicRef}
       playing={playing}
@@ -431,7 +433,7 @@ function MatchDemo() {
 
                         <div className="mt-1 flex flex-col self-stretch" style={{ gap: "calc(var(--mu) * 6px)" }}>
                           {[
-                            { label: "Salary", value: card.salary },
+                            { label: "Median salary", value: card.salary },
                             { label: "College major", value: card.major },
                           ].map((row) => (
                             <div

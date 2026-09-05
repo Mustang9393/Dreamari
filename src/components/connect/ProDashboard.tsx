@@ -4,10 +4,9 @@ import Image from "next/image";
 import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
-import { Avatar, COMPANY_BRAND, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount, volunteerTier } from "./primitives";
-import { Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, formatCount, volunteerTier } from "./primitives";
+import { PANEL, Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
@@ -66,7 +65,8 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   const pro = given ?? PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
   const ROUTED = ROUTED_BY_WORLD[pro.world] ?? ROUTED_BY_WORLD["Teaching & Education"];
   const nav = useContext(ConnectNav);
-  const accent = WORLD_COLORS[pro.world] ?? "var(--primary)";
+  // Dreamari blue for every volunteer's numbers, whatever their industry (direct feedback, 5 Sept 2026)
+  const accent = "var(--accent-subtle)";
   const [tab, setTab] = useState<Tab>("profile");
   const [routed, setRouted] = useState<Record<string, RoutedState>>({});
   const [draft, setDraft] = useState("");
@@ -177,11 +177,11 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
 
       {tab === "profile" && (
         <>
-          {/* Ask Me Anything: the primary engagement mechanism. A direct student
+          {/* Ask Me: the primary engagement mechanism. A direct student
              question is a far stronger reason to respond than a blank page. */}
           <Panel
             id="ama-routed-title"
-            title="Ask Me Anything"
+            title="Ask Me"
             aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{m.asked}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered + answeredNow}</strong> answered</span>}
           >
             <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
@@ -379,28 +379,30 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
             {(() => {
               const status = activityStatus(pro);
               const Icon = status.Icon;
+              const statusColor = status.Icon === Coffee ? "var(--muted-foreground)" : accent;
               return (
                 <div className="flex flex-wrap items-center gap-[var(--space-5)]">
-                  <Ring pct={status.pct} accent={status.color} size={84}>
-                    <Icon className="h-7 w-7" aria-hidden style={{ color: status.color }} />
+                  <Ring pct={status.pct} accent={statusColor} size={84}>
+                    <Icon className="h-7 w-7" aria-hidden style={{ color: statusColor }} />
                   </Ring>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-[18px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{status.title}</h3>
                     <p className="mt-[4px] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{status.line}</p>
-                    <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: status.color }}>{status.next}</p>
+                    <p className="mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: statusColor }}>{status.next}</p>
                   </div>
                 </div>
               );
             })()}
           </Panel>
 
-          {/* company-level impact, in the company's own colours: the one place
-             the employer is the subject rather than a tag */}
+          {/* company-level impact on the same glass as every other panel:
+             one design system across industries and employers (direct
+             feedback, 5 Sept 2026), the company present as its mark only */}
           {(() => {
-            const brand = COMPANY_BRAND[pro.org] ?? { bg: "#1c1a2e", ink: "#FFFFFF" };
+            const brand = { ink: "var(--foreground)" };
             return (
-              <section aria-label={`${pro.org} on Dreamari`} className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: `linear-gradient(135deg, ${brand.bg} 0%, color-mix(in srgb, ${brand.bg} 78%, #000000) 100%)`, borderColor: `color-mix(in srgb, ${brand.ink} 22%, transparent)`, color: brand.ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
-                <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-25 blur-[60px]" style={{ background: brand.ink }} />
+              <section aria-label={`${pro.org} on Dreamari`} className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ ...PANEL, color: brand.ink }}>
+                <span aria-hidden className="absolute top-[-70px] right-[-50px] size-[240px] rounded-full opacity-20 blur-[60px]" style={{ background: accent }} />
                 <div className="relative flex flex-wrap items-center justify-between gap-[var(--space-4)]">
                   <CompanyMark name={pro.org} ink={brand.ink} height={26} />
                   <span className="text-[13px] leading-[18px] font-semibold" style={{ color: `color-mix(in srgb, ${brand.ink} 78%, transparent)` }}>on Dreamari · 2026</span>
