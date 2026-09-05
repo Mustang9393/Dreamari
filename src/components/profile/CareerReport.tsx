@@ -484,10 +484,13 @@ export function CareerReportView(props: ReportViewProps) {
   const [tab, setTab] = useState<ReportTabId>("report");
   // The report used to accent itself with the career's own world colour,
   // which put amber/olive tones on the Business & Money reports — "just not
-  // easy on the eyes" (direct feedback, 5 Sept 2026). One accent now, for
-  // every report regardless of industry: the app's own Dreamari blue.
-  const accent = "var(--primary)";
-  const accentVars = { "--primary": accent, "--accent-subtle": accent, "--primary-foreground": "#ffffff" } as React.CSSProperties;
+  // easy on the eyes" (direct feedback, 5 Sept 2026). Every --primary/
+  // --accent-subtle reference below now resolves to the app's own ambient
+  // Dreamari blue with no local override, since that's already what those
+  // tokens are at the root in both themes — a local override here used to
+  // redeclare --primary in terms of itself ({ "--primary": "var(--primary)" }),
+  // which is a cyclic custom-property reference and computes as invalid,
+  // silently falling back to inherited (dark) text instead of blue.
 
   if (!report) {
     return (
@@ -499,7 +502,7 @@ export function CareerReportView(props: ReportViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]" style={accentVars}>
+    <div className="flex flex-col gap-[var(--space-4)]">
       {/* App chrome, never printed */}
       <div data-print-hide className="no-print flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
         <div
