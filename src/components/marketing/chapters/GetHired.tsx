@@ -40,7 +40,7 @@ const TOP3 = [
 // plans: in-app reps AND real-world moves (the DECA step completed here is
 // the DECA line on the resume one stage later — the loop inside the loop).
 const PLAN_TASKS = [
-  { label: "Complete Finance Glossary Game", meta: "10 min · In app", done: true },
+  { label: "Complete Finance Glossary Game", meta: "In app", done: true },
   { label: "Join your school's DECA chapter", meta: "Real world", done: true },
   { label: "Contact a local bank about job shadowing", meta: "Real world", done: false },
   { label: "Connect with an investment banker", meta: "Dreamari Connect", done: false },

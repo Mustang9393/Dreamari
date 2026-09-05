@@ -154,6 +154,7 @@ export function ExploreChapter() {
   return (
     <ChapterShell
       id="explore"
+      flip
       title="Explore"
       color="#1fc76e"
       oneliner="Scroll through careers you never knew existed. Open one and see the pay, the path, and the real work."

@@ -10,6 +10,10 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
+  Briefcase,
+  CalendarCheck,
+  CheckCircle2,
+  Send,
   ArrowRight,
   ArrowUpRight,
   Bookmark,
@@ -64,7 +68,7 @@ import {
 
 type TabId = "overview" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "settings";
 
-const ACTION_ICON = { Play: Gamepad2, Explore: Compass, Join: Users, Build: BookOpen } as const;
+const ACTION_ICON = { Explore: Compass, Play: Gamepad2, Connect: Users, Decide: CheckCircle2, Build: BookOpen, Plan: CalendarCheck, Experience: Briefcase, Apply: Send } as const;
 
 function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
@@ -140,6 +144,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  // Roadmap tasks link to /profile?tab=... from inside the profile itself;
+  // follow the new tab when the URL changes under us (state adjusted during
+  // render, the React-recommended shape, so no effect is needed).
+  const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
+  if (initialTab !== seenInitialTab) {
+    setSeenInitialTab(initialTab);
+    if (initialTab && (TAB_IDS as string[]).includes(initialTab)) setTab(initialTab as TabId);
+  }
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");
@@ -308,7 +320,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   function addCustomTask(careerId: string, horizonId: string, label: string) {
     const trimmed = label.trim();
     if (!trimmed) return;
-    const task: PlanTask = { id: `custom-${Date.now()}`, label: trimmed, minutes: 10, action: "Build", href: "#", custom: true };
+    const task: PlanTask = { id: `custom-${Date.now()}`, label: trimmed, action: "Plan", outOfApp: true, custom: true };
     setCustomTasks((current) => ({ ...current, [`${careerId}:${horizonId}`]: [...(current[`${careerId}:${horizonId}`] ?? []), task] }));
   }
 
@@ -1133,12 +1145,12 @@ function OverviewTab({
       {/* The one thing to do next — a single action, nothing else in the box */}
       <section aria-labelledby="next-title" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
         <span className="flex min-w-0 flex-col gap-[3px]">
-          <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next{next ? ` · ${next.minutes} min` : ""}</span>
+          <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</span>
           <h3 id="next-title" className="text-balance text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)" }}>
             {next ? next.label : "Every step on your plan is done. Add one, or book the counselor meeting."}
           </h3>
         </span>
-        {next ? (
+        {next?.href ? (
           <Link href={next.href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             <NextIcon className="h-4 w-4" aria-hidden /> {next.action}
           </Link>
@@ -1587,7 +1599,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
                 <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
-                <span className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>
+                {horizon.subtitle && <span className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>}
               </span>
               <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
                 <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total}</span>
@@ -1599,32 +1611,54 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                 {!unlocked && (
                   <p className="mb-[var(--space-2)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}. You can read ahead; checking off waits.</p>
                 )}
-                {/* rows on hairlines, like every row on the career page: the
-                   check, the step in body weight, the time, the one action */}
-                {tasks.map((task, i) => {
-                  const complete = doneSet(focus.id).has(task.id);
-                  const TaskIcon = ACTION_ICON[task.action];
+                {/* Rows on hairlines, grouped In app / Out of app (Joshua
+                   Pierce, Slack, 5 Sept 2026): the action label leads each
+                   task, no minutes, and an in-app row is itself the link to
+                   its feature. Out-of-app rows stay visible and only link
+                   when a supporting page exists. */}
+                {(["app", "out"] as const).map((group) => {
+                  const rows = tasks.filter((task) => (group === "out") === Boolean(task.outOfApp));
+                  if (rows.length === 0) return null;
                   return (
-                    <div key={task.id} className={`flex items-center gap-[12px] py-[11px] ${i === 0 ? "border-t" : "border-t"}`} style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
-                      <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
-                        {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
-                      </button>
-                      <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
-                        {task.label}
-                        {task.custom && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Yours</span>}
-                      </span>
-                      <span className="flex-none text-[13px] leading-[17px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{task.minutes} min</span>
-                      {!complete && !task.custom && (
-                        <Link href={task.href} aria-label={`${task.action}: ${task.label}`} title={task.action} className="dm-quiet flex h-[32px] flex-none items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                          <TaskIcon className="h-3.5 w-3.5" aria-hidden /> {task.action}
-                        </Link>
-                      )}
-                      {task.custom && (
-                        <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[6px]" style={{ color: "var(--muted-foreground)" }}>
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
+                    <Fragment key={group}>
+                      <span className="pt-[var(--space-3)] pb-[6px] text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
+                      {rows.map((task) => {
+                        const complete = doneSet(focus.id).has(task.id);
+                        const TaskIcon = ACTION_ICON[task.action];
+                        /* phone: label stacked over the task so the task keeps
+                           the full width; from 640px the label is a fixed
+                           column so every task starts on the same line */
+                        const body = (
+                          <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
+                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[92px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{task.action}</span>
+                            <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
+                              {task.label}
+                              {task.custom && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Yours</span>}
+                            </span>
+                          </span>
+                        );
+                        return (
+                          <div key={task.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
+                            <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                              {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                            </button>
+                            {task.href && !complete ? (
+                              <Link href={task.href} aria-label={`${task.action}: ${task.label}`} className="dm-quiet flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)]">
+                                {body}
+                                <TaskIcon className="h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+                              </Link>
+                            ) : (
+                              body
+                            )}
+                            {task.custom && (
+                              <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[6px]" style={{ color: "var(--muted-foreground)" }}>
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </Fragment>
                   );
                 })}
                 <form
@@ -2200,15 +2234,15 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         <ReportSection title="Action plan">
           {career.plan.map((horizon) => (
             <div key={horizon.id} className="mb-3">
-              <p className="text-[14px] font-bold">{horizon.title} <span className="font-normal text-[#6b7280]">· {horizon.subtitle}</span></p>
+              <p className="text-[14px] font-bold">{horizon.title}{horizon.subtitle && <span className="font-normal text-[#6b7280]"> · {horizon.subtitle}</span>}</p>
               <ul className="mt-1 list-disc pl-5 text-[15px] leading-[19px]">
                 {tasksFor(career, horizon.id).map((task) => (
-                  <li key={task.id}>{task.label} · {task.minutes} min{task.custom ? " (added by student)" : ""}</li>
+                  <li key={task.id}>{task.action}: {task.label}{task.outOfApp ? " (out of app)" : ""}{task.custom ? " (added by student)" : ""}</li>
                 ))}
               </ul>
             </div>
           ))}
-          {next && <p className="mt-2 text-[15px] font-bold">Immediate next step: {next.label} ({next.minutes} min)</p>}
+          {next && <p className="mt-2 text-[15px] font-bold">Immediate next step: {next.action}: {next.label}</p>}
         </ReportSection>
         )}
 

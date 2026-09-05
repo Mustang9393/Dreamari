@@ -27,19 +27,26 @@ export type PathwayRoute = {
   payoffYears: number;
 };
 
+// Roadmap actions (Joshua Pierce, Slack, 5 Sept 2026): the action label leads
+// every task and maps in-app ones to the Dreamari feature. No minutes anywhere.
+export type PlanAction = "Explore" | "Play" | "Connect" | "Decide" | "Build" | "Plan" | "Experience" | "Apply";
+
 export type PlanTask = {
   id: string;
   label: string;
-  minutes: number;
-  action: "Play" | "Explore" | "Join" | "Build";
-  href: string;
+  action: PlanAction;
+  /** In-app tasks link straight to the feature. Out-of-app tasks have no
+   *  href unless a supporting page genuinely exists (e.g. the counselor
+   *  meeting links to the Career Report the student brings along). */
+  href?: string;
+  outOfApp?: boolean;
   custom?: boolean; // student-added step
 };
 
 export type PlanHorizon = {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   tasks: PlanTask[];
 };
 
@@ -65,8 +72,34 @@ export type ProfileCareer = {
   plan: PlanHorizon[];
 };
 
-const h = (id: string, title: string, subtitle: string, tasks: PlanTask[]): PlanHorizon => ({ id, title, subtitle, tasks });
-const t = (id: string, label: string, minutes: number, action: PlanTask["action"], href: string): PlanTask => ({ id, label, minutes, action, href });
+const h = (id: string, title: string, subtitle: string | undefined, tasks: PlanTask[]): PlanHorizon => ({ id, title, subtitle, tasks });
+const t = (id: string, label: string, action: PlanAction, href: string): PlanTask => ({ id, label, action, href });
+/** Out-of-app step: stays on the roadmap, links only when a supporting page exists. */
+const o = (id: string, label: string, action: PlanAction, href?: string): PlanTask => ({ id, label, action, href, outOfApp: true });
+
+// The finance roadmap, verbatim from Joshua Pierce (Slack, 5 Sept 2026).
+// Shared by every Business & Money finance career (IB and PE); the copy
+// speaks of "your #1 Career" so it reads right from either.
+const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
+  h(`${prefix}-1`, "Next 3 Months", "Foundation", [
+    t(`${prefix}-1-1`, "10 Finance Careers and save your Top 3", "Explore", "/explore?tab=browse"),
+    t(`${prefix}-1-2`, "3 Career Simulations from your Top 3", "Play", "/play"),
+    t(`${prefix}-1-3`, "Ask 2 Finance Professionals one career question each", "Connect", "/connect"),
+    o(`${prefix}-1-4`, "Meet your counselor to align next year's classes", "Plan", "/profile?tab=report"),
+  ]),
+  h(`${prefix}-2`, "Next 6 Months", "Skills + People", [
+    t(`${prefix}-2-1`, "Choose your #1 Career from your Top 3", "Decide", "/profile?tab=top3"),
+    t(`${prefix}-2-2`, "Complete 3 Skill Games for your #1 Career", "Play", "/play"),
+    t(`${prefix}-2-3`, "Ask 3 Professionals in your #1 Career about starting", "Connect", "/connect"),
+    o(`${prefix}-2-4`, "Complete 1 Club, Project, or Job Shadow", "Experience"),
+  ]),
+  h(`${prefix}-3`, "Professional Readiness", undefined, [
+    t(`${prefix}-3-1`, "Complete your Resume for your #1 Career", "Build", "/profile?tab=resume"),
+    t(`${prefix}-3-2`, "Complete 3 Glossary Games for your #1 Career", "Play", "/play/glossary"),
+    t(`${prefix}-3-3`, "Ask 3 Professionals in your #1 Career for advice", "Connect", "/connect"),
+    o(`${prefix}-3-4`, "Apply to 5 Internships, Programs, or Job Shadows", "Apply"),
+  ]),
+];
 
 export const PROFILE_CAREERS: ProfileCareer[] = [
   {
@@ -133,23 +166,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("ib-3", "Next 3 Months", "Foundation", [
-        t("ib-3-1", "Complete the Investment Banking career simulation", 20, "Play", "/play/investment-banking"),
-        t("ib-3-2", "Explore 5 finance careers", 10, "Explore", "/explore?tab=browse"),
-        t("ib-3-3", "Continue playing the Investment Banking Simulation", 15, "Play", "/match-lab"),
-        t("ib-3-4", "Create your resume", 15, "Build", "#resume"),
-      ]),
-      h("ib-6", "Next 6 Months", "Skills + people", [
-        t("ib-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
-        t("ib-6-2", "Try the Freshman Finance simulator", 20, "Play", "/match-lab"),
-        t("ib-6-3", "Compare 3 finance programs side by side", 10, "Explore", "/explore?tab=browse"),
-        t("ib-6-4", "Join Finance East Coast Community Board", 5, "Join", "/explore"),
-      ]),
-      h("ib-12", "Next 12 Months", "Apply it", [
-        t("ib-12-1", "Complete the Freshman Year Finance sim", 30, "Play", "/match-lab"),
-        t("ib-12-2", "Tailor your resume to a finance internship", 20, "Build", "#resume"),
-        t("ib-12-3", "Ask Dreamy how juniors prep for IB", 5, "Explore", "/explore"),
-      ]),
+      ...FINANCE_PLAN("ib"),
     ],
   },
   {
@@ -216,20 +233,20 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     ],
     plan: [
       h("pl-3", "Next 3 Months", "First taste", [
-        t("pl-3-1", "Play the Aviation Maintenance mini game", 10, "Play", "/match-lab"),
-        t("pl-3-2", "Explore 5 aviation careers", 10, "Explore", "/explore?tab=browse"),
-        t("pl-3-3", "Learn 10 aviation glossary terms", 10, "Play", "/match-lab"),
+        t("pl-3-1", "Play the Aviation Maintenance mini game", "Play", "/match-lab"),
+        t("pl-3-2", "Explore 5 aviation careers", "Explore", "/explore?tab=browse"),
+        t("pl-3-3", "Learn 10 aviation glossary terms", "Play", "/match-lab"),
       ]),
       h("pl-6", "Next 6 Months", "Real world", [
-        t("pl-6-1", "Book a discovery flight near you", 20, "Explore", "/explore"),
-        t("pl-6-2", "Compare flight school vs aviation university", 10, "Explore", "/explore?tab=browse"),
-        t("pl-6-3", "Create your resume", 15, "Build", "#resume"),
-        t("pl-6-4", "Join Aviation Community Board", 5, "Join", "/explore"),
+        t("pl-6-1", "Book a discovery flight near you", "Explore", "/explore"),
+        t("pl-6-2", "Compare flight school vs aviation university", "Explore", "/explore?tab=browse"),
+        t("pl-6-3", "Create your resume", "Build", "/profile?tab=resume"),
+        t("pl-6-4", "Join Aviation Community Board", "Connect", "/explore"),
       ]),
       h("pl-12", "Next 12 Months", "Commit", [
-        t("pl-12-1", "Complete the Airline Pilot Simulation", 30, "Play", "/match-lab"),
-        t("pl-12-2", "Shortlist 3 flight programs", 15, "Explore", "/explore?tab=browse"),
-        t("pl-12-3", "Ask Dreamy about FAFSA for flight school", 5, "Explore", "/explore"),
+        t("pl-12-1", "Complete the Airline Pilot Simulation", "Play", "/match-lab"),
+        t("pl-12-2", "Shortlist 3 flight programs", "Explore", "/explore?tab=browse"),
+        t("pl-12-3", "Ask Dreamy about FAFSA for flight school", "Explore", "/explore"),
       ]),
     ],
   },
@@ -279,22 +296,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("pe-3", "Next 3 Months", "Learn the language", [
-        t("pe-3-1", "Complete the finance glossary game", 10, "Play", "/match-lab"),
-        t("pe-3-2", "Continue playing the Private Equity Simulation", 15, "Play", "/match-lab"),
-        t("pe-3-3", "Explore how PE differs from IB", 10, "Explore", "/explore?tab=browse"),
-      ]),
-      h("pe-6", "Next 6 Months", "Analyst mindset", [
-        t("pe-6-1", "Reach Finance Glossary Level 7", 15, "Play", "/match-lab"),
-        t("pe-6-2", "Complete the valuation scenario", 20, "Play", "/match-lab"),
-        t("pe-6-3", "Create your resume", 15, "Build", "#resume"),
-        t("pe-6-4", "Join Finance East Coast Community Board", 5, "Join", "/explore"),
-      ]),
-      h("pe-12", "Next 12 Months", "Aim the funnel", [
-        t("pe-12-1", "Complete 3 finance simulations", 30, "Play", "/match-lab"),
-        t("pe-12-2", "Compare 3 target finance programs", 15, "Explore", "/explore?tab=browse"),
-        t("pe-12-3", "Ask Dreamy about summer finance programs", 5, "Explore", "/explore"),
-      ]),
+      ...FINANCE_PLAN("pe"),
     ],
   },
 ];
@@ -323,11 +325,11 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     ],
     plan: [
       h("se-3", "Next 3 Months", "First code", [
-        t("se-3-1", "Continue playing the Software Engineer Simulation", 10, "Play", "/match-lab"),
-        t("se-3-2", "Explore 5 tech careers", 10, "Explore", "/explore?tab=browse"),
+        t("se-3-1", "Continue playing the Software Engineer Simulation", "Play", "/match-lab"),
+        t("se-3-2", "Explore 5 tech careers", "Explore", "/explore?tab=browse"),
       ]),
-      h("se-6", "Next 6 Months", "Build real", [t("se-6-1", "Finish a small project", 30, "Build", "#resume"), t("se-6-2", "Join Engineering East Coast Community Board", 5, "Join", "/explore")]),
-      h("se-12", "Next 12 Months", "Show it", [t("se-12-1", "Publish your portfolio", 30, "Build", "#resume")]),
+      h("se-6", "Next 6 Months", "Build real", [t("se-6-1", "Finish a small project", "Build", "/profile?tab=resume"), t("se-6-2", "Join Engineering East Coast Community Board", "Connect", "/explore")]),
+      h("se-12", "Next 12 Months", "Show it", [t("se-12-1", "Publish your portfolio", "Build", "/profile?tab=resume")]),
     ],
   },
   {
@@ -351,11 +353,11 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     ],
     plan: [
       h("rn-3", "Next 3 Months", "Test the fit", [
-        t("rn-3-1", "Play the triage mini game", 10, "Play", "/match-lab"),
-        t("rn-3-2", "Learn 10 medical glossary terms", 10, "Play", "/match-lab"),
+        t("rn-3-1", "Play the triage mini game", "Play", "/match-lab"),
+        t("rn-3-2", "Learn 10 medical glossary terms", "Play", "/match-lab"),
       ]),
-      h("rn-6", "Next 6 Months", "Get close", [t("rn-6-1", "Explore hospital volunteering near you", 15, "Explore", "/explore")]),
-      h("rn-12", "Next 12 Months", "Line it up", [t("rn-12-1", "Map your junior-year science classes", 15, "Build", "#resume")]),
+      h("rn-6", "Next 6 Months", "Get close", [t("rn-6-1", "Explore hospital volunteering near you", "Explore", "/explore")]),
+      h("rn-12", "Next 12 Months", "Line it up", [t("rn-12-1", "Map your junior-year science classes", "Build", "/profile?tab=resume")]),
     ],
   },
   {
@@ -373,9 +375,9 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("am-3", "Next 3 Months", "Basics", [t("am-3-1", "Complete the finance glossary game", 10, "Play", "/match-lab")]),
-      h("am-6", "Next 6 Months", "Deeper", [t("am-6-1", "Play the markets simulator", 20, "Play", "/match-lab")]),
-      h("am-12", "Next 12 Months", "Compare", [t("am-12-1", "Compare finance programs", 15, "Explore", "/explore?tab=browse")]),
+      h("am-3", "Next 3 Months", "Basics", [t("am-3-1", "Complete the finance glossary game", "Play", "/match-lab")]),
+      h("am-6", "Next 6 Months", "Deeper", [t("am-6-1", "Play the markets simulator", "Play", "/match-lab")]),
+      h("am-12", "Next 12 Months", "Compare", [t("am-12-1", "Compare finance programs", "Explore", "/explore?tab=browse")]),
     ],
   },
   {
@@ -393,9 +395,9 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("fs-3", "Next 3 Months", "Taste it", [t("fs-3-1", "Play the flavor lab mini game", 10, "Play", "/match-lab")]),
-      h("fs-6", "Next 6 Months", "Technical", [t("fs-6-1", "Learn 10 chemistry glossary terms", 10, "Play", "/match-lab")]),
-      h("fs-12", "Next 12 Months", "Find programs", [t("fs-12-1", "Shortlist 3 food science schools", 15, "Explore", "/explore?tab=browse")]),
+      h("fs-3", "Next 3 Months", "Taste it", [t("fs-3-1", "Play the flavor lab mini game", "Play", "/match-lab")]),
+      h("fs-6", "Next 6 Months", "Technical", [t("fs-6-1", "Learn 10 chemistry glossary terms", "Play", "/match-lab")]),
+      h("fs-12", "Next 12 Months", "Find programs", [t("fs-12-1", "Shortlist 3 food science schools", "Explore", "/explore?tab=browse")]),
     ],
   },
   {
@@ -413,9 +415,9 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("ds-3", "Next 3 Months", "See the shape of data", [t("ds-3-1", "Play the data-viz mini game", 10, "Play", "/match-lab")]),
-      h("ds-6", "Next 6 Months", "Learn the tools", [t("ds-6-1", "Learn 10 statistics glossary terms", 10, "Play", "/match-lab")]),
-      h("ds-12", "Next 12 Months", "Find programs", [t("ds-12-1", "Shortlist 3 data science programs", 15, "Explore", "/explore?tab=browse")]),
+      h("ds-3", "Next 3 Months", "See the shape of data", [t("ds-3-1", "Play the data-viz mini game", "Play", "/match-lab")]),
+      h("ds-6", "Next 6 Months", "Learn the tools", [t("ds-6-1", "Learn 10 statistics glossary terms", "Play", "/match-lab")]),
+      h("ds-12", "Next 12 Months", "Find programs", [t("ds-12-1", "Shortlist 3 data science programs", "Explore", "/explore?tab=browse")]),
     ],
   },
   {
@@ -433,9 +435,9 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("fb-3", "Next 3 Months", "Read the racks", [t("fb-3-1", "Play the trend-forecasting mini game", 10, "Play", "/match-lab")]),
-      h("fb-6", "Next 6 Months", "Learn the numbers", [t("fb-6-1", "Learn 10 retail math glossary terms", 10, "Play", "/match-lab")]),
-      h("fb-12", "Next 12 Months", "Find programs", [t("fb-12-1", "Shortlist 3 merchandising programs", 15, "Explore", "/explore?tab=browse")]),
+      h("fb-3", "Next 3 Months", "Read the racks", [t("fb-3-1", "Play the trend-forecasting mini game", "Play", "/match-lab")]),
+      h("fb-6", "Next 6 Months", "Learn the numbers", [t("fb-6-1", "Learn 10 retail math glossary terms", "Play", "/match-lab")]),
+      h("fb-12", "Next 12 Months", "Find programs", [t("fb-12-1", "Shortlist 3 merchandising programs", "Explore", "/explore?tab=browse")]),
     ],
   },
   {
@@ -453,9 +455,9 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
       },
     ],
     plan: [
-      h("gd-3", "Next 3 Months", "Make something small", [t("gd-3-1", "Play the level-design mini game", 10, "Play", "/match-lab")]),
-      h("gd-6", "Next 6 Months", "Learn the tools", [t("gd-6-1", "Learn 10 game-design glossary terms", 10, "Play", "/match-lab")]),
-      h("gd-12", "Next 12 Months", "Find programs", [t("gd-12-1", "Shortlist 3 game design programs", 15, "Explore", "/explore?tab=browse")]),
+      h("gd-3", "Next 3 Months", "Make something small", [t("gd-3-1", "Play the level-design mini game", "Play", "/match-lab")]),
+      h("gd-6", "Next 6 Months", "Learn the tools", [t("gd-6-1", "Learn 10 game-design glossary terms", "Play", "/match-lab")]),
+      h("gd-12", "Next 12 Months", "Find programs", [t("gd-12-1", "Shortlist 3 game design programs", "Explore", "/explore?tab=browse")]),
     ],
   },
 ];
