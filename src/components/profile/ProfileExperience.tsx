@@ -138,6 +138,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     } catch {
       // nothing to tidy
     }
+    // Then bring the Top Three itself into view (direct feedback, 5 Sept
+    // 2026): the popup sat over the header, so on Continue the tabs and the
+    // three cards scroll up to sit just under the fixed nav.
+    window.requestAnimationFrame(() => {
+      const tabs = tablistRef.current;
+      if (!tabs) return;
+      const top = tabs.getBoundingClientRect().top + window.scrollY - 84;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    });
   };
   const buildIn = (order: number) =>
     initialWelcome
