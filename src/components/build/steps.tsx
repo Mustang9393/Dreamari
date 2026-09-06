@@ -453,39 +453,48 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
 // climactic moment. Screen-wide confetti falls for the first seconds, Dreamy
 // parties with local bursts, the chime plays, and the copy says what comes
 // next. Its CTA goes straight to the Match deck.
-const SPARK_COLORS = ["#ffffff", "#ffd166", "#c4b5fd", "var(--accent-subtle)", "#fbcfe8"];
+// Soft, atmospheric palette: whites, lavender, blush, warm ivory. No blue
+// and no yellow (direct feedback, 5 Sept 2026).
+const SPARK_COLORS = ["#ffffff", "#e9d5ff", "#fbcfe8", "#fff4e0", "#f5e9ff", "#ffe4ec"];
 
-/** A bloom of four-point stars from the middle of the screen: each one pops
- *  in, drifts outward and upward, twinkles and fades. Sizes, angles, delays
- *  and colours are seeded from the index so a wave is the same each render. */
+/** Particle VFX for the landing: a bloom of light swells and fades at the
+ *  centre while fine glowing dust drifts outward and upward, twinkling, with
+ *  a few thin light streaks among the dots. Everything is seeded from the
+ *  index so a wave renders the same every time. */
 function MagicSparkles({ count }: { count: number }) {
-  const stars = Array.from({ length: count }, (_, i) => {
-    const a = (i / count) * Math.PI * 2 + ((i * 7919) % 100) / 100;
-    const dist = 110 + ((i * 104729) % 100) * 2.4;
-    const size = 12 + ((i * 1301) % 100) / 100 * 26;
+  const rnd = (i: number, k: number) => ((i * k) % 100) / 100;
+  const dots = Array.from({ length: count }, (_, i) => {
+    const a = rnd(i, 7919) * Math.PI * 2;
+    const dist = 60 + rnd(i, 104729) * 300;
+    const streak = i % 7 === 0;
     return {
       x: Math.cos(a) * dist,
-      y: Math.sin(a) * dist * 0.72 - 90,
-      size,
-      delay: ((i * 613) % 100) / 100 * 0.5,
-      dur: 1.7 + ((i * 419) % 100) / 100 * 1.1,
+      y: Math.sin(a) * dist * 0.7 - 70 - rnd(i, 331) * 60,
+      size: streak ? 2 : 2 + rnd(i, 1301) * 5,
+      len: streak ? 14 + rnd(i, 977) * 16 : 0,
+      angle: (a * 180) / Math.PI + 90,
+      delay: rnd(i, 613) * 0.6,
+      dur: 1.6 + rnd(i, 419) * 1.4,
       color: SPARK_COLORS[i % SPARK_COLORS.length],
+      streak,
     };
   });
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
-      {stars.map((st, i) => (
+      <span className="magic-bloom absolute" />
+      {dots.map((d, i) => (
         <span
           key={i}
-          className="magic-spark absolute"
+          className={`${d.streak ? "magic-streak" : "magic-dust"} absolute`}
           style={{
-            width: st.size,
-            height: st.size,
-            ["--sx" as string]: `${st.x}px`,
-            ["--sy" as string]: `${st.y}px`,
-            ["--spark" as string]: st.color,
-            animationDelay: `${st.delay}s`,
-            animationDuration: `${st.dur}s`,
+            width: d.size,
+            height: d.streak ? d.len : d.size,
+            ["--sx" as string]: `${d.x}px`,
+            ["--sy" as string]: `${d.y}px`,
+            ["--rot" as string]: `${d.angle}deg`,
+            ["--spark" as string]: d.color,
+            animationDelay: `${d.delay}s`,
+            animationDuration: `${d.dur}s`,
           }}
         />
       ))}
@@ -571,7 +580,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
         const r = clone.getBoundingClientRect();
         const spark = document.createElement("span");
         spark.className = "xp-trail-spark";
-        const size = 6 + Math.random() * 8;
+        const size = 3 + Math.random() * 5;
         Object.assign(spark.style, {
           left: `${r.left + r.width * (0.35 + Math.random() * 0.3)}px`,
           top: `${r.top + r.height * (0.3 + Math.random() * 0.4)}px`,
@@ -579,7 +588,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
           height: `${size}px`,
           ["--tx" as string]: `${(Math.random() - 0.5) * 70}px`,
           ["--ty" as string]: `${20 + Math.random() * 60}px`,
-          ["--spark" as string]: ["#ffffff", "#ffd166", "#c4b5fd", "var(--accent-subtle)"][Math.floor(Math.random() * 4)],
+          ["--spark" as string]: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
         });
         host.appendChild(spark);
         setTimeout(() => spark.remove(), 900);
@@ -643,7 +652,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       </div>
       {/* the success is sparkles, not confetti (direct feedback, 5 Sept 2026):
          two waves of stars bloom out from the centre and drift up */}
-      {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 46 : 28} />}
+      {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 84 : 48} />}
       <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
