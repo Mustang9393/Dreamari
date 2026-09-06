@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BuiltByStamp } from "./DreamOpportunity";
 import { Footer } from "./Footer";
 import { Hero } from "./Hero";
 import { HowItWorks } from "./HowItWorks";
@@ -10,6 +11,22 @@ import { StudentFinalCTA } from "./FinalCTAs";
 
 export function MarketingApp() {
   const [view, setView] = useState<"student" | "schools">("student");
+
+  // The phone pager (globals.css: html { scroll-snap-type: y mandatory } under
+  // 768px) is built for the student landing, whose hero, chapters and footer
+  // are the pages. The Schools view is a long-form page with no snap points of
+  // its own, so with the snap left on, a phone can only ever rest on the one
+  // remaining page, the footer. Reuse the pager's existing off switch (the
+  // same data attribute scrollHooks.advanceTo flips during a scripted advance)
+  // for as long as the Schools view is showing.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (view === "schools") html.dataset.snapOff = "1";
+    else delete html.dataset.snapOff;
+    return () => {
+      delete html.dataset.snapOff;
+    };
+  }, [view]);
 
   return (
     <div className={`relative ${view === "schools" ? "theme-light" : ""}`}>
@@ -57,7 +74,7 @@ export function MarketingApp() {
         />
       )}
 
-      <Nav onSchoolsClick={() => setView("schools")} />
+      <Nav view={view} onSchoolsClick={() => setView("schools")} />
 
       {/* Both views stay mounted (toggled with `hidden`, not conditionally rendered) so
           the mascot's rAF loop, IntersectionObservers, and scroll listeners don't tear
@@ -66,6 +83,9 @@ export function MarketingApp() {
         <Hero view={view} onChangeView={setView} />
         <HowItWorks />
         <StudentFinalCTA />
+        {/* Quiet "created by Dream Opportunity" stamp; Footer itself is
+           spec-locked (landing.md) so this lives beside it, not in it. */}
+        <BuiltByStamp />
       </main>
 
       <main hidden={view !== "schools"}>

@@ -38,6 +38,97 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 Schools landing (branch `schools-landing`): audience-aware nav, real-screenshot Schools view, demo form, Dream Opportunity stamp
+
+Resumed from an uncommitted working tree (the previous run was cut off by a
+rate limit); nothing was discarded. Student landing untouched: Hero, the six
+How-it-works chapters, the closing CTA and Footer are byte-identical to
+`main` (`specs/landing.md` is locked).
+
+- **Nav** (`Nav.tsx`) takes `view`. Schools: "Why Dreamari" (#why),
+  "Student Experience" (#student-experience), "For Your Organization"
+  (#organization), CTA "Request a demo" (#demo); the "For schools" switch and
+  the student QUICK_LINKS drop out of both the desktop row and the phone menu.
+  Island chrome, frost, hide-on-scroll and the 11 s grace are unchanged.
+- **SchoolsView** sections in order: hero (#why; no audience chip; real
+  Career Detail crop in a dark `Screen` frame) > audience strip (Schools,
+  School Districts, Nonprofits, Educational Institutions) > "Five steps"
+  (#student-experience; Build, Match, Explore, Immerse, Connect, each with a
+  STAGE 0n eyebrow, one real crop, and a "What students do" Disclosure) >
+  "Everything counselors need." (four bullets; the preview is the student's
+  own Profile overview, captioned as such, with the educator dashboard
+  called out as in development) > data credibility (BLS, O*NET, Harvard FAS
+  Mignone / O*NET Interest Profiler, plus the Career Report's own "supports a
+  conversation with a counselor; it is not a decision or a prediction" line)
+  > "Dreamari is created by Dream Opportunity" (#organization; DO mark, the
+  real partner logo wall, the contractual copy) > FAQ (six Disclosures, one
+  open at a time: rollout, minors' data with a FERPA/COPPA line, quiz vs
+  Dreamari, staff onboarding, launch timeline, pricing as "talk to us") >
+  "Results from partner schools." shell ("Case studies coming soon.", no
+  invented quotes) > "Request a demo." (#demo).
+- **DemoRequestForm**: organization, name, work email, role, organization
+  type select, students served select; submit composes a `mailto:` to
+  `DEMO_REQUEST_TO` (`hello@dreamopportunity.org`, a PLACEHOLDER flagged in
+  the file) and swaps to an inline "Thanks, {first name}." state with a
+  "Send another request" reset. No fake persistence.
+- **Disclosure**: marketing twin of the app's Folded section (heading is the
+  control, aria-expanded/aria-controls, chevron). `md` = FAQ row, `sm` =
+  inside a card.
+- **DreamOpportunity.tsx**: `DO_COPY` (verbatim: "Dreamari is created by
+  Dream Opportunity." / "Dream Opportunity works with more than 100 schools
+  across eight countries and partners with the following brands:" / "After
+  12 years of impact, we will scale our reach by providing students of all
+  backgrounds with insights gained from our corporate partnerships and deep
+  industry expertise, empowering them to explore and achieve their dream
+  careers."), `PartnerLogoWall` (full / compact), `DOMark`, and
+  `BuiltByStamp`, the student-site strip between the closing CTA and Footer
+  (15 px heading, 13 px body, compact wall). It is `mkt-snap` with 72 px of
+  phone-only top padding so the phone pager can rest on it with the heading
+  clear of the nav island.
+- **MarketingApp**: renders `BuiltByStamp` in the student main; while the
+  Schools view is showing it sets `html[data-snap-off="1"]` (the pager's
+  existing off switch). Before this, a phone in the Schools view could only
+  rest on the footer, the one remaining snap point. That bug predates this
+  branch (the old SchoolsView had no snap points either).
+- **FinalCTAs**: `SchoolsFinalCTA` and the `secondary` prop removed; the
+  Schools view's closing section is the form.
+- **Assets** (`public/images/marketing/`): eight real app crops as .webp
+  (hero career detail, five stage crops, educators student plan, data career
+  ladder), `partner-logos.webp` (1100x520 crop of the supplied
+  `IMG_8794.png`; the raw phone screenshot it was cut from, `partner-logo-wall.png`, is left on disk untracked and is not shipped),
+  and `dream-opportunity-mark.svg` (the supplied black vector with its
+  full-bleed ground removed and the counters set to white; it always sits on a
+  white tile). `public/images/logos/companies/*` are NOT used: in-app example
+  logos only.
+- Hierarchy audit: the only uppercase/tracked labels in the Schools view are
+  the five STAGE 0n numbers (checked in the DOM). No other eyebrows.
+
+Validation (7 Sept): `npx tsc --noEmit` clean; `npx eslint` clean on all
+seven marketing files; `npm run tokens:check` passes (464 tokens, artifacts
+current). Live, in a detached worktree on :3105, driven by headless Chrome
+and the Browser pane: toggling to Schools flips the theme and swaps the nav;
+all four anchors land their section 96 px under the top (scroll-mt-24); the
+FAQ opens one answer at a time with correct aria state; the demo form,
+filled with test values, produced
+`mailto:hello@dreamopportunity.org?subject=Dreamari demo request: Northside High School&body=Organization: ... Students served: 500 to 2,000 ... Work email: ...`
+(captured from the CDP navigation event) and showed the success state; the
+student landing's nav, hero H1, chapters, CTA and Footer wordmark/copyright
+are unchanged; the stamp renders at 15/13 px with the exact copy; at 390 px
+neither view overflows horizontally, the Schools phone menu lists only the
+three schools links, the Schools view scrolls freely (snap type "none"), and
+the stamp page puts its heading at y=72 under the island.
+
+Unverified: the mailto in a real mail client (headless Chrome only records
+the navigation; the OS handler was not exercised). `DEMO_REQUEST_TO` is a
+placeholder inbox. The Browser pane was hidden for most of the session, so
+screenshots came from headless Chrome rather than the pane.
+
+Recommended next: confirm the demo inbox address (or swap the mailto for a
+form endpoint), decide whether "Educational Institutions" is the wording the
+team wants for the fourth audience, and have Joshua read the FAQ privacy
+answer before it goes public.
+
+
 - Date: 2026-09-02
 
 ### 2026-09-02 (later still) Career Detail: drop inconsistent software logos, organic hero scrim
