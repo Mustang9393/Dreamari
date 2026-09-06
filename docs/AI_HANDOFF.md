@@ -38,6 +38,178 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 Schools landing, visuals pass (branch `schools-landing`): composed product visuals replace every screenshot crop
+
+Rule for this project from today: marketing imagery is never a cropped
+screenshot. Every visual is a composed piece with its own frame, deliberate
+padding and one focal component. The eight `.webp` crops the user rejected
+(hero career detail, five stage crops, educators student plan, data career
+ladder) are deleted; nothing references them.
+
+- **`SchoolsVisuals.tsx`** (new) holds every composition. `Tile` is the light
+  frame (hero-mid fading to the page, a faint wash of the stage's world
+  colour, hairline, `p-6 sm:p-10`). `Screen` is the focal card: a dark
+  product surface that re-enters the app's Semantic.Dark token scope by
+  carrying the `marketing-v2` class (tokens.css defines the dark set on that
+  class; the product is dark, the Schools page is light, and a device screen
+  shows the product). It is a container; `--mu` = width over a design width
+  (`clamp(floor, 100cqw / base, 1.25)`), so type and spacing scale with the
+  card the way the chapter graphics do. No new colours: every value is a
+  token from that scope or the light page's.
+- **Hero**: `HeroLaptop`, a CSS laptop (ink lid, camera dot, wider base with
+  a lighter lip) whose 16:10 screen is a recreation of the Career Detail
+  header for Investment Banking: the poster photo on the right fading into
+  the card (CardProgressiveBlur, the header's own scrims), the title in the
+  Business & Money poster face, world label, summary, Play Game / Glossary
+  Game and the four icon buttons, the scenario line, and the Typical degree /
+  Typical pay facts with the accent-gradient figures.
+- **Five stages**, one 5:4 card each at the same size, same tile, same
+  padding: Build (question 3 of 10 with the flow's aurora glow, Business &
+  Money checked, progress bar), Match (Find your Top 3 slots, the IB poster
+  card sized from the card's height, a peeking card behind, Pass / Like),
+  Explore (world chips, "Recommended because you liked Business & Money",
+  three whole poster cards: Asset Manager, Quant, Accountant; long single
+  words step the title down as PosterCard does), Immerse (the Play console
+  tile at rest: scene, Level 1 chip, Christina's line, the question and three
+  console rows with the cursor on the best), Connect (the Finance community
+  with 312 / 61 / 5, JPMorgan Chase / Goldman Sachs / EY via `CompanyChip`,
+  Maya's question and Marcus's verified answer).
+- **Counselors**: `ProgressScreen`, the Profile overview (name row with
+  `MatchRing`, the My Top Three / My Plan / Career Report bento with the plan
+  bar, Do this next with the Explore and Play verbs). Aspect 4:3 on phones,
+  16:10 from `sm`. The "educator dashboard is in development" caption stays.
+- **Data credibility**: `LadderScreen`, the Investment Banking career ladder
+  from `career/data.ts` (`CAREER_EXTRAS`, the four rungs with a figure) and
+  the profile's source sentence. No chart.
+- **Logo wall**: `partner-logos.webp` re-cut from `partner-logo-wall.png` to
+  the logos' bounding box (826x455, was 1100x520 with 135 px of baked-in side
+  margin), so the white card's own padding (`p-6 sm:p-10 lg:p-12` full,
+  `p-4 sm:p-6` compact) is the frame. Same file for the student `BuiltByStamp`.
+- `SchoolsView.tsx`: `Shot`/`Screen`/`next/image` gone; each stage carries
+  `accent` and `graphic`; copy, order, nav, form and mailto untouched.
+  Another session's `TrustLine` import/usage in this file was left in place
+  and not staged here.
+- Chrome note: backdrop-filter layers inside a rounded, overflow-hidden card
+  escape the corner (a square photo corner shows at the header's bottom
+  right; the app's own Career Detail header has the same artifact). The
+  composition cards clip with `clip-path: inset(0 round var(--radius-lg))`,
+  which Chrome honours; `isolation` / `translateZ(0)` did not help. Worth
+  applying to `CareerDetailExperience`'s header too.
+
+Validation (7 Sept): `npx tsc --noEmit` clean; `npx eslint` clean on
+SchoolsVisuals, SchoolsView, DreamOpportunity; `npm run tokens:check`
+passes (464 tokens, artifacts current). Locked landing files byte-identical
+to `main` (Hero, HowItWorks, ChapterShell, Footer, chapters/). Live in a
+detached worktree on :3106 driven by headless Chrome (Playwright) at 1440
+and 390: no horizontal overflow at either width; every composition sits
+inside its tile with 41 px (desktop) / 25 px (phone) of padding on all
+sides; the five stage cards measure 420x336 each on desktop; no `role="img"`
+element scrolls its own content; the logo wall image sits 49 px (desktop) /
+25 px (phone) inside its card; no console errors; the student landing's hero
+and stamp render as before. Screenshots of every tile were inspected at both
+widths.
+
+Unverified: the compositions on a real phone (touch, Safari); the Browser
+pane was not used. The corner-clipping fix was checked at 1440 in headless
+Chrome only.
+
+Recommended next: have the user look at the hero laptop and the five stage
+tiles at their own screen size; consider whether the Match card wants its
+JPMorgan Chase / Goldman Sachs employer marks back (the app card carries
+them; the composition shows the median only).
+
+
+### 2026-09-07 Schools landing (branch `schools-landing`): audience-aware nav, real-screenshot Schools view, demo form, Dream Opportunity stamp
+
+Resumed from an uncommitted working tree (the previous run was cut off by a
+rate limit); nothing was discarded. Student landing untouched: Hero, the six
+How-it-works chapters, the closing CTA and Footer are byte-identical to
+`main` (`specs/landing.md` is locked).
+
+- **Nav** (`Nav.tsx`) takes `view`. Schools: "Why Dreamari" (#why),
+  "Student Experience" (#student-experience), "For Your Organization"
+  (#organization), CTA "Request a demo" (#demo); the "For schools" switch and
+  the student QUICK_LINKS drop out of both the desktop row and the phone menu.
+  Island chrome, frost, hide-on-scroll and the 11 s grace are unchanged.
+- **SchoolsView** sections in order: hero (#why; no audience chip; real
+  Career Detail crop in a dark `Screen` frame) > audience strip (Schools,
+  School Districts, Nonprofits, Educational Institutions) > "Five steps"
+  (#student-experience; Build, Match, Explore, Immerse, Connect, each with a
+  STAGE 0n eyebrow, one real crop, and a "What students do" Disclosure) >
+  "Everything counselors need." (four bullets; the preview is the student's
+  own Profile overview, captioned as such, with the educator dashboard
+  called out as in development) > data credibility (BLS, O*NET, Harvard FAS
+  Mignone / O*NET Interest Profiler, plus the Career Report's own "supports a
+  conversation with a counselor; it is not a decision or a prediction" line)
+  > "Dreamari is created by Dream Opportunity" (#organization; DO mark, the
+  real partner logo wall, the contractual copy) > FAQ (six Disclosures, one
+  open at a time: rollout, minors' data with a FERPA/COPPA line, quiz vs
+  Dreamari, staff onboarding, launch timeline, pricing as "talk to us") >
+  "Results from partner schools." shell ("Case studies coming soon.", no
+  invented quotes) > "Request a demo." (#demo).
+- **DemoRequestForm**: organization, name, work email, role, organization
+  type select, students served select; submit composes a `mailto:` to
+  `DEMO_REQUEST_TO` (`hello@dreamopportunity.org`, a PLACEHOLDER flagged in
+  the file) and swaps to an inline "Thanks, {first name}." state with a
+  "Send another request" reset. No fake persistence.
+- **Disclosure**: marketing twin of the app's Folded section (heading is the
+  control, aria-expanded/aria-controls, chevron). `md` = FAQ row, `sm` =
+  inside a card.
+- **DreamOpportunity.tsx**: `DO_COPY` (verbatim: "Dreamari is created by
+  Dream Opportunity." / "Dream Opportunity works with more than 100 schools
+  across eight countries and partners with the following brands:" / "After
+  12 years of impact, we will scale our reach by providing students of all
+  backgrounds with insights gained from our corporate partnerships and deep
+  industry expertise, empowering them to explore and achieve their dream
+  careers."), `PartnerLogoWall` (full / compact), `DOMark`, and
+  `BuiltByStamp`, the student-site strip between the closing CTA and Footer
+  (15 px heading, 13 px body, compact wall). It is `mkt-snap` with 72 px of
+  phone-only top padding so the phone pager can rest on it with the heading
+  clear of the nav island.
+- **MarketingApp**: renders `BuiltByStamp` in the student main; while the
+  Schools view is showing it sets `html[data-snap-off="1"]` (the pager's
+  existing off switch). Before this, a phone in the Schools view could only
+  rest on the footer, the one remaining snap point. That bug predates this
+  branch (the old SchoolsView had no snap points either).
+- **FinalCTAs**: `SchoolsFinalCTA` and the `secondary` prop removed; the
+  Schools view's closing section is the form.
+- **Assets** (`public/images/marketing/`): eight real app crops as .webp
+  (hero career detail, five stage crops, educators student plan, data career
+  ladder), `partner-logos.webp` (1100x520 crop of the supplied
+  `IMG_8794.png`; the raw phone screenshot it was cut from, `partner-logo-wall.png`, is left on disk untracked and is not shipped),
+  and `dream-opportunity-mark.svg` (the supplied black vector with its
+  full-bleed ground removed and the counters set to white; it always sits on a
+  white tile). `public/images/logos/companies/*` are NOT used: in-app example
+  logos only.
+- Hierarchy audit: the only uppercase/tracked labels in the Schools view are
+  the five STAGE 0n numbers (checked in the DOM). No other eyebrows.
+
+Validation (7 Sept): `npx tsc --noEmit` clean; `npx eslint` clean on all
+seven marketing files; `npm run tokens:check` passes (464 tokens, artifacts
+current). Live, in a detached worktree on :3105, driven by headless Chrome
+and the Browser pane: toggling to Schools flips the theme and swaps the nav;
+all four anchors land their section 96 px under the top (scroll-mt-24); the
+FAQ opens one answer at a time with correct aria state; the demo form,
+filled with test values, produced
+`mailto:hello@dreamopportunity.org?subject=Dreamari demo request: Northside High School&body=Organization: ... Students served: 500 to 2,000 ... Work email: ...`
+(captured from the CDP navigation event) and showed the success state; the
+student landing's nav, hero H1, chapters, CTA and Footer wordmark/copyright
+are unchanged; the stamp renders at 15/13 px with the exact copy; at 390 px
+neither view overflows horizontally, the Schools phone menu lists only the
+three schools links, the Schools view scrolls freely (snap type "none"), and
+the stamp page puts its heading at y=72 under the island.
+
+Unverified: the mailto in a real mail client (headless Chrome only records
+the navigation; the OS handler was not exercised). `DEMO_REQUEST_TO` is a
+placeholder inbox. The Browser pane was hidden for most of the session, so
+screenshots came from headless Chrome rather than the pane.
+
+Recommended next: confirm the demo inbox address (or swap the mailto for a
+form endpoint), decide whether "Educational Institutions" is the wording the
+team wants for the fourth audience, and have Joshua read the FAQ privacy
+answer before it goes public.
+
+
 - Date: 2026-09-02
 
 ### 2026-09-02 (later still) Career Detail: drop inconsistent software logos, organic hero scrim

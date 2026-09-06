@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 
 type NavProps = {
+  view: "student" | "schools";
   onSchoolsClick: () => void;
 };
 
@@ -11,6 +12,15 @@ const LINKS = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Simulations", href: "#play" },
   { label: "Career worlds", href: "#explore" },
+];
+
+// The buying audience gets three links and one CTA, nothing else: no demo
+// quick-links, no "Get started" into the student flow. Anchors match the
+// section ids in SchoolsView.
+const SCHOOLS_LINKS = [
+  { label: "Why Dreamari", href: "#why" },
+  { label: "Student Experience", href: "#student-experience" },
+  { label: "For Your Organization", href: "#organization" },
 ];
 
 // Demo quick-links (v3): jump straight into the interactive prototypes without
@@ -41,7 +51,10 @@ const QUICK_LINKS = [
 // glassy pop, hairline border, soft shadow. `fixed` rather than sticky because the
 // island isn't a bar owning a slice of layout — it hovers; the hero's own top
 // padding clears it.
-export function Nav({ onSchoolsClick }: NavProps) {
+export function Nav({ view, onSchoolsClick }: NavProps) {
+  const schools = view === "schools";
+  const links = schools ? SCHOOLS_LINKS : LINKS;
+  const cta = schools ? { label: "Request a demo", href: "#demo" } : { label: "Get started", href: "/flow" };
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -132,19 +145,21 @@ export function Nav({ onSchoolsClick }: NavProps) {
         {/* Links stay desktop-only (same 900px tier as before — below that there's no
            room without wrapping, and the page is a single scroll anyway). */}
         <nav className="hidden gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]">
               {link.label}
             </Link>
           ))}
-          <button type="button" onClick={onSchoolsClick} className="transition-colors hover:[color:var(--foreground)]">
-            For schools
-          </button>
+          {!schools && (
+            <button type="button" onClick={onSchoolsClick} className="transition-colors hover:[color:var(--foreground)]">
+              For schools
+            </button>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
           <Link
-            href="/flow"
+            href={cta.href}
             className="rounded-full px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
             style={{
               background: "linear-gradient(180deg, #4a82ff, var(--primary))",
@@ -152,7 +167,7 @@ export function Nav({ onSchoolsClick }: NavProps) {
               boxShadow: "0 6px 18px -6px rgba(47,107,242,.65)",
             }}
           >
-            Get started
+            {cta.label}
           </Link>
           {/* Hamburger: phones/tablets only — quick route into the demos
              without hunting for CTAs mid-pitch. */}
@@ -193,33 +208,36 @@ export function Nav({ onSchoolsClick }: NavProps) {
               boxShadow: "0 16px 40px -16px rgba(0,0,0,0.6)",
             }}
           >
-            {QUICK_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-xl px-4 py-2.5 text-[14px] font-bold"
-                style={{ color: "var(--primary-tint)", background: "var(--glass-surface-1)" }}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {LINKS.map((link) => (
+            {!schools &&
+              QUICK_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-xl px-4 py-2.5 text-[14px] font-bold"
+                  style={{ color: "var(--primary-tint)", background: "var(--glass-surface-1)" }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            {links.map((link) => (
               <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-[14px] font-semibold min-[900px]:hidden" style={{ color: "var(--foreground)" }}>
                 {link.label}
               </Link>
             ))}
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onSchoolsClick();
-              }}
-              className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold min-[900px]:hidden"
-              style={{ color: "var(--foreground)" }}
-            >
-              For schools
-            </button>
+            {!schools && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSchoolsClick();
+                }}
+                className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold min-[900px]:hidden"
+                style={{ color: "var(--foreground)" }}
+              >
+                For schools
+              </button>
+            )}
           </div>
         )}
       </div>

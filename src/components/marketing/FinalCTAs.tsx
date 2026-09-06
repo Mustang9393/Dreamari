@@ -7,14 +7,13 @@ type CTABlockProps = {
   eyebrow: string;
   heading: string;
   body: string;
+  // One button only, per direct feedback ("we don't need 'See How It Works'...
+  // one clear CTA"). The Schools view no longer uses this block at all; its
+  // closing section is the demo-request form in SchoolsView.
   primary: { label: string; href: string };
-  // Optional: the Schools view still shows a paired primary/secondary CTA, but the
-  // student "You're ready" block was simplified to a single button per direct
-  // feedback ("we don't need 'See How It Works'... one clear CTA").
-  secondary?: { label: string; href: string };
 };
 
-export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABlockProps) {
+export function CTABlock({ eyebrow, heading, body, primary }: CTABlockProps) {
   const [revealRef, revealed] = useRevealOnScroll<HTMLDivElement>();
 
   return (
@@ -41,11 +40,6 @@ export function CTABlock({ eyebrow, heading, body, primary, secondary }: CTABloc
         <MarketingButton variant="primary" size="xl" href={primary.href}>
           {primary.label}
         </MarketingButton>
-        {secondary && (
-          <MarketingButton variant="ghost" href={secondary.href}>
-            {secondary.label}
-          </MarketingButton>
-        )}
       </div>
     </div>
   );
@@ -59,20 +53,6 @@ export function StudentFinalCTA() {
         heading="You're ready."
         body="Let's build your future."
         primary={{ label: "Start Journey", href: "/flow" }}
-      />
-    </div>
-  );
-}
-
-export function SchoolsFinalCTA() {
-  return (
-    <div className="py-6 sm:py-8">
-      <CTABlock
-        eyebrow="For schools"
-        heading="One platform. Every student's path."
-        body="Discovery, tools, and outcomes you can measure."
-        primary={{ label: "Request a demo", href: "#" }}
-        secondary={{ label: "Talk to our team", href: "#" }}
       />
     </div>
   );
