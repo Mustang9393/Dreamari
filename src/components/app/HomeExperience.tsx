@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { useDreamScore } from "@/lib/dreamScore";
 import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
@@ -427,6 +428,8 @@ function ActivityCard({ activity }: { activity: Activity }) {
 }
 
 export function HomeExperience() {
+  const liveScore = useDreamScore();
+  const homeXp = liveScore > 0 ? liveScore : 15980;
   const router = useRouter();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
@@ -441,8 +444,8 @@ export function HomeExperience() {
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
             <Flame className="h-4 w-4" /> 12
           </span>
-          <span className="flex items-center gap-[6px]" style={{ color: "var(--world-business-money-office)" }}>
-            <Sparkle className="h-4 w-4" /> 15,980 XP
+          <span key={homeXp} className="flex items-center gap-[6px] tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ color: "var(--world-business-money-office)" }}>
+            <Sparkle className="h-4 w-4" /> {homeXp.toLocaleString("en-US")} XP
           </span>
           <QuickLinksMenu />
         </span>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
+import { useDreamScore } from "@/lib/dreamScore";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
@@ -154,6 +155,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  const dreamScore = useDreamScore();
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -392,6 +394,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[15px] font-bold">
+          {/* the Dream Score follows the student here too (live once earned) */}
+          <span key={dreamScore} className="flex items-center gap-[6px] text-[13px] tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${dreamScore > 0 ? dreamScore : 15980} XP`} style={{ color: "var(--foreground)" }}>
+            <Sparkles className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} /> {(dreamScore > 0 ? dreamScore : 15980).toLocaleString("en-US")} XP
+          </span>
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
             <Flame className="h-4 w-4" /> {STUDENT.streakDays}
           </span>

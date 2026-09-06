@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
 import { useGlobalTheme } from "./theme";
+import { useDreamScore } from "@/lib/dreamScore";
 
 // The student's avatar photo doubles as the Profile entry point in both navs.
 const AVATAR_SRC = "/images/avatar-jordan.jpg";
@@ -168,6 +169,8 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
 }
 
 export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
+  const score = useDreamScore();
+  const xp = score > 0 ? score : 15980;
   return (
     <header
       // glass-surface-1 (3% alpha) read as barely-there once real content
@@ -216,10 +219,13 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
             12
           </span>
         </span>
-        <span className="hidden items-center gap-[6px] lg:flex">
+        {/* Dream Score, live: the student's own XP once they have earned any
+           (the design's 15,980 stands in until then). Shown from md so the
+           score follows them from Build and Match into the app. */}
+        <span key={xp} className="hidden items-center gap-[6px] md:flex motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
           <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
-          <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-            15,980 XP
+          <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+            {xp.toLocaleString("en-US")} XP
           </span>
         </span>
         <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
