@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -37,7 +38,6 @@ import {
 } from "@/components/play/sound";
 import {
   glossaryProgressSnapshot,
-  readDreamScore,
   saveLessonComplete,
   serverGlossaryProgressSnapshot,
   subscribeGlossaryProgress,
@@ -74,7 +74,6 @@ type Screen =
   | "complete";
 
 const MASTERY_TARGET = 2;
-const DREAM_SCORE_PER_XP = 100;
 
 // The amber fill (--world-business-money-office) that works well on this
 // game's near-black dark background reads muddy once its own light-mode
@@ -1327,14 +1326,16 @@ function MasteryLoadingScreen({ fact }: { fact: string | null }) {
 function CompleteScreen({
   lesson,
   masteredCount,
-  dreamScore,
   onContinue,
 }: {
   lesson: GlossaryLesson;
   masteredCount: number;
-  dreamScore: number;
   onContinue: () => void;
 }) {
+  // The one Dream Score, the same number the app header carries. The game
+  // used to multiply its XP by 100 into a private "Dream Score" (15,000 and
+  // up), which is where the 15k figures came from (Chandu, 6 Sept 2026).
+  const dreamScore = useDreamScore();
   const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
   const { theme } = useGlobalTheme();
   // The lesson's finish line had a burst and a party Dreamy but no sound at all.
@@ -1407,7 +1408,6 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   const [dismissedReview, setDismissedReview] = useState(false);
 
   const progressStore = useSyncExternalStore(subscribeGlossaryProgress, glossaryProgressSnapshot, serverGlossaryProgressSnapshot);
-  const priorDreamScore = readDreamScore(progressStore, career.careerSlug);
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
@@ -1542,7 +1542,6 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
             lesson={lesson}
             career={career}
             masteredCount={masteredCount}
-            priorDreamScore={priorDreamScore}
             onContinue={exitToCareer}
           />
         )}
@@ -1566,18 +1565,20 @@ function CompleteScreenGate({
   lesson,
   career,
   masteredCount,
-  priorDreamScore,
   onContinue,
 }: {
   lesson: GlossaryLesson;
   career: GlossaryCareer;
   masteredCount: number;
-  priorDreamScore: number;
   onContinue: () => void;
 }) {
-  const gain = lesson.xpReward * DREAM_SCORE_PER_XP;
   // Lazy initializer, not an effect: this must run exactly once, the instant
-  // this screen mounts, not after a render+commit round-trip.
-  useState(() => saveLessonComplete(career.careerSlug, lesson.id, lesson.terms.map((t) => t.id), gain));
-  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} dreamScore={priorDreamScore + gain} onContinue={onContinue} />;
+  // this screen mounts, not after a render+commit round-trip. The lesson's XP
+  // goes into the shared Dream Score once per lesson (the store ignores a
+  // repeat of the same milestone id), so the header chip rises with it.
+  useState(() => {
+    saveLessonComplete(career.careerSlug, lesson.id, lesson.terms.map((t) => t.id), lesson.xpReward);
+    awardDreamScore(`glossary:${career.careerSlug}:${lesson.id}`, lesson.xpReward);
+  });
+  return <CompleteScreen lesson={lesson} masteredCount={masteredCount} onContinue={onContinue} />;
 }

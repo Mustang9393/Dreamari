@@ -6,7 +6,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Image from "next/image";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { type LucideIcon as ResourceIcon } from "lucide-react";
+import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
 import {
   ArrowLeft,
   BookOpen,
@@ -48,6 +48,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/component
 import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
+import { PeopleTab } from "./PeopleTab";
 import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
@@ -117,7 +118,7 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 // warm event accent (handoff 20): the theme-aware gold
 const EVENT_ACCENT = "#f59e0b";
 
-type LandingTab = "communities" | "events" | "notifications";
+type LandingTab = "communities" | "events" | "people" | "notifications";
 type View =
   | { kind: "home"; tab: LandingTab }
   | { kind: "board"; id: string; filter: string }
@@ -158,7 +159,7 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "events" || tab === "notifications" ? tab : "communities" };
+  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" ? tab : "communities" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -1667,7 +1668,21 @@ function HomeView({
         <div className="min-w-0">
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>
-        <TopTabs tab={tab} onTab={onTab} />
+        <div className="flex items-center gap-[var(--space-3)]">
+          <TopTabs tab={tab} onTab={onTab} />
+          {/* Notifications live behind the bell: your questions and what the
+             people you follow did lately */}
+          <button
+            type="button"
+            aria-label="Notifications"
+            aria-pressed={tab === "notifications"}
+            onClick={() => onTab(tab === "notifications" ? "communities" : "notifications")}
+            className="dm-quiet flex h-[48px] w-[48px] flex-none cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: tab === "notifications" ? "var(--primary)" : "var(--glass-surface-1)", borderColor: tab === "notifications" ? "var(--primary)" : "var(--glass-border)", color: tab === "notifications" ? "#FFFFFF" : "var(--muted-foreground)" }}
+          >
+            <Bell className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </div>
       </div>
 
       {tab !== "notifications" && (
@@ -1677,8 +1692,8 @@ function HomeView({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tab === "events" ? "Search events and partners" : "Search communities, topics, companies"}
-            aria-label={tab === "events" ? "Search events" : "Search communities"}
+            placeholder={tab === "events" ? "Search events and partners" : tab === "people" ? "Search professionals, careers, companies" : "Search communities, topics, companies"}
+            aria-label={tab === "events" ? "Search events" : tab === "people" ? "Search professionals" : "Search communities"}
             className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
             style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           />
@@ -1736,6 +1751,10 @@ function HomeView({
          doors, the people are who is behind them. Then what the people you
          already follow did lately, only once you follow someone. */}
       {tab === "communities" && <PeopleToFollow follows={follows} onFollow={onFollow} />}
+
+      {/* People: search companies or careers and find people to follow
+         (Joshua Pierce, Slack, 6 Sept 2026) */}
+      {tab === "people" && <PeopleTab follows={follows} onFollow={onFollow} query={query} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -1840,10 +1859,12 @@ function HomeView({
 
 /** The page-level Community/Events switcher: one glass segmented control
  *  with a sliding thumb, instead of two disconnected chips. */
+// Three tabs (Joshua Pierce, Slack, 6 Sept 2026): Communities, Events,
+// People. Notifications moved to the bell beside them.
 const LANDING_TABS = [
-  { key: "communities", label: "Community", Icon: Users },
+  { key: "communities", label: "Communities", Icon: Users },
   { key: "events", label: "Events", Icon: Calendar },
-  { key: "notifications", label: "Notifications", Icon: Bell },
+  { key: "people", label: "People", Icon: UserRound },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {
   const index = LANDING_TABS.findIndex((t) => t.key === tab);
@@ -1857,7 +1878,7 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
       <span
         aria-hidden
         className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(33.333%-2.667px)] rounded-full transition-transform duration-300 ease-out"
-        style={{ background: "var(--primary)", transform: `translateX(${index * 100}%)`, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+        style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
       />
       {LANDING_TABS.map(({ key, label, Icon }) => (
         <button

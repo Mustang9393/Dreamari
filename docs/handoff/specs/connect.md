@@ -30,3 +30,6 @@ The Volunteer role opens the profile as students see it; "My dashboard" opens th
 
 ## Demo role switcher (6 Sept 2026)
 The five-role switcher (Student, Attendee, Volunteer, Partner, Staff) is hidden behind a small "Demo" button at the top of Connect. A student sees only the button; pressing it reveals the roles. Once a non-student role is showing the roles stay visible so the way back is obvious. Demo only, never a product feature (Joshua Pierce, Slack, 6 Sept 2026).
+
+## People tab (Joshua Pierce, Slack, 6 Sept 2026)
+Connect has three tabs: Communities, Events, People. Notifications (your questions, new from people you follow) moved behind the bell beside the tabs. People: the shared search box (placeholder "Search professionals, careers, companies") plus three filters, careers (field), industries (world), companies (org), all derived from the verified professionals in `data.ts`. With no search or filter, three rows of four cards: Recommended for You (ranked against the student's worlds), Popular This Week (followers), New Professionals (most recent verification). With a search or filter, one grid of matches. Card: portrait, name with the verified mark, role, company, View profile, Follow, "students reached · followers". `src/components/connect/PeopleTab.tsx`. Nothing ranks students. Reference: Joshua's Replit People tab, 6 Sept.
