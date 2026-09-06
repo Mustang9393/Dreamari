@@ -9,6 +9,7 @@ import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime } from "./sound";
+import { awardDreamScore } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
   ENERGY_OPTIONS,
@@ -455,16 +456,34 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
 // next. Its CTA goes straight to the Match deck.
 const CONFETTI_COLORS = ["#2f6bf2", "#7c5cff", "#ff5fa2", "#ffd166", "#33c78c", "#ffffff"];
 
+const BUILD_XP = 100;
+const COUNT_MS = 1100;
+
 export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () => void; onBack: () => void }) {
   const [burstNonce, setBurstNonce] = useState(0);
   const [confetti, setConfetti] = useState(false);
+  // The Dream Score moment (Joshua Pierce, 5 Sept 2026): +XP counts up from
+  // 1 to 100 fast, lands, and THEN the confetti falls and Dreamy parties.
+  const [xp, setXp] = useState(0);
   useEffect(() => {
-    const chime = setTimeout(() => playMilestoneChime(), 200);
-    const kick = setTimeout(() => setBurstNonce(1), 60);
-    const rain = setTimeout(() => setConfetti(true), 120);
-    const stop = setTimeout(() => setConfetti(false), 3600);
+    awardDreamScore("build-complete", BUILD_XP);
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / COUNT_MS);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setXp(Math.max(1, Math.round(eased * BUILD_XP)));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    const land = COUNT_MS + 60;
+    const chime = setTimeout(() => playMilestoneChime(), land);
+    const kick = setTimeout(() => setBurstNonce(1), land);
+    const rain = setTimeout(() => setConfetti(true), land);
+    const stop = setTimeout(() => setConfetti(false), land + 3600);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
     return () => {
+      cancelAnimationFrame(raf);
       clearTimeout(chime);
       clearTimeout(kick);
       clearTimeout(rain);
@@ -472,6 +491,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       clearInterval(interval);
     };
   }, []);
+  const landed = xp >= BUILD_XP;
   return (
     <div className="flex h-full w-full flex-col">
       {/* The HUD stays on the last screen too, at 100 -- it had simply
@@ -495,8 +515,11 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
           </span>
         </div>
         <h1 className={`${bricolage.className} text-[32px] font-extrabold text-[var(--color-night-foreground)] sm:text-[38px]`}><InkText text="Congratulations!" /></h1>
-        <p className="mt-3 text-[18px] leading-[24px] font-bold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_0.5s_both] sm:text-[20px] sm:leading-[26px]">Your matches are ready.</p>
-        <p className="mt-1 text-[15px] leading-[22px] font-medium text-[var(--color-night-muted-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_0.7s_both] sm:text-[16px]">See the careers that fit you.</p>
+        {/* the score: counts 1 to 100, then pops as it lands */}
+        <p aria-live="polite" className={`${bricolage.className} mt-2 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`} style={{ color: "var(--accent-subtle)", textShadow: landed ? "0 0 28px color-mix(in srgb, var(--primary) 55%, transparent)" : "none" }}>
+          <Sparkles className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden /> +{xp} XP
+        </p>
+        <p className="mt-3 text-[16px] leading-[22px] font-semibold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_1.2s_both] sm:text-[18px] sm:leading-[24px]">Your personalized career matches are ready.</p>
       </GlassCard>
       </div>
       </div>
