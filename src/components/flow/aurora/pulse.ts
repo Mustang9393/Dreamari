@@ -10,18 +10,20 @@ export type AuroraPulseDetail = {
    * he's on screen) -- for moments like the milestone screen, where he's front and
    * center and the pulse launching from him is the point, not a one-in-three surprise. */
   forceDreamyOrigin?: boolean;
+  /** Glow only, no traced wavefront ring (the Build completion pulse). */
+  soft?: boolean;
 };
 
 const EVENT_NAME = "aurora:pulse";
 
-export function dispatchAuroraPulse(kind: AuroraPulseKind, origin?: { clientX: number; clientY: number }, options?: { forceDreamyOrigin?: boolean }) {
+export function dispatchAuroraPulse(kind: AuroraPulseKind, origin?: { clientX: number; clientY: number }, options?: { forceDreamyOrigin?: boolean; soft?: boolean; silent?: boolean }) {
   if (typeof window === "undefined") return;
 
   const x = origin?.clientX ?? window.innerWidth / 2;
   const y = origin?.clientY ?? window.innerHeight / 2;
 
-  playFeedback(kind);
-  window.dispatchEvent(new CustomEvent<AuroraPulseDetail>(EVENT_NAME, { detail: { kind, x, y, forceDreamyOrigin: options?.forceDreamyOrigin } }));
+  if (!options?.silent) playFeedback(kind);
+  window.dispatchEvent(new CustomEvent<AuroraPulseDetail>(EVENT_NAME, { detail: { kind, x, y, forceDreamyOrigin: options?.forceDreamyOrigin, soft: options?.soft } }));
 }
 
 export function onAuroraPulse(handler: (detail: AuroraPulseDetail) => void) {

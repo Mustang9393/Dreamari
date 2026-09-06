@@ -457,26 +457,24 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
 // and no yellow (direct feedback, 5 Sept 2026).
 const SPARK_COLORS = ["#ffffff", "#e9d5ff", "#fbcfe8", "#fff4e0", "#f5e9ff", "#ffe4ec"];
 
-/** Particle VFX for the landing: fine glowing dust drifts outward and
- *  upward from the centre, twinkling, with a few thin light streaks among
- *  the dots (the light bloom came off, direct feedback: too much). Everything is seeded from the
- *  index so a wave renders the same every time. */
+/** Particle VFX for the landing: clean round points of light, two sizes
+ *  (fine sparks and a few soft bokeh orbs), drifting outward and upward
+ *  from the centre with a twinkle. Seeded from the index so a wave renders
+ *  the same every time. */
 function MagicSparkles({ count }: { count: number }) {
   const rnd = (i: number, k: number) => ((i * k) % 100) / 100;
   const dots = Array.from({ length: count }, (_, i) => {
     const a = rnd(i, 7919) * Math.PI * 2;
-    const dist = 60 + rnd(i, 104729) * 300;
-    const streak = i % 7 === 0;
+    const dist = 70 + rnd(i, 104729) * 290;
+    const orb = i % 9 === 0;
     return {
       x: Math.cos(a) * dist,
       y: Math.sin(a) * dist * 0.7 - 70 - rnd(i, 331) * 60,
-      size: streak ? 2 : 2 + rnd(i, 1301) * 5,
-      len: streak ? 14 + rnd(i, 977) * 16 : 0,
-      angle: (a * 180) / Math.PI + 90,
+      size: orb ? 7 + rnd(i, 1301) * 6 : 2 + rnd(i, 1301) * 3,
       delay: rnd(i, 613) * 0.6,
       dur: 1.6 + rnd(i, 419) * 1.4,
       color: SPARK_COLORS[i % SPARK_COLORS.length],
-      streak,
+      orb,
     };
   });
   return (
@@ -484,13 +482,12 @@ function MagicSparkles({ count }: { count: number }) {
       {dots.map((d, i) => (
         <span
           key={i}
-          className={`${d.streak ? "magic-streak" : "magic-dust"} absolute`}
+          className={`magic-dust absolute ${d.orb ? "magic-orb" : ""}`}
           style={{
             width: d.size,
-            height: d.streak ? d.len : d.size,
+            height: d.size,
             ["--sx" as string]: `${d.x}px`,
             ["--sy" as string]: `${d.y}px`,
-            ["--rot" as string]: `${d.angle}deg`,
             ["--spark" as string]: d.color,
             animationDelay: `${d.delay}s`,
             animationDuration: `${d.dur}s`,
@@ -538,7 +535,13 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
     };
     raf = requestAnimationFrame(tick);
     const land = COUNT_MS + 60;
-    const chime = setTimeout(() => { landedRef.current = true; playMilestoneChime(); }, land);
+    const chime = setTimeout(() => {
+      landedRef.current = true;
+      playMilestoneChime();
+      // the background pulses out from Dreamy as the score lands (the 50%
+      // screen's pulse), glow only, no traced ring; the chime is the sound
+      dispatchAuroraPulse("cta", undefined, { forceDreamyOrigin: true, soft: true, silent: true });
+    }, land);
     const kick = setTimeout(() => setBurstNonce(1), land);
     const rain = setTimeout(() => setSparkNonce(1), land);
     const stop = setTimeout(() => setSparkNonce(2), land + 900);
@@ -620,7 +623,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
-        <div className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
+        <div data-dreamy-anchor className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
           <span

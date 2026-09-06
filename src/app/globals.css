@@ -1174,14 +1174,14 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   100% { transform: rotate(0deg) scale(1); }
 }
 
-/* Landing VFX: a light bloom, fine glowing dust and thin streaks. Round,
-   soft-edged particles, never cartoon shapes; also the Dream Score trail. */
-.magic-dust, .magic-streak, .xp-trail-spark {
+/* Landing VFX: clean round points of light with a soft glow (also the
+   Dream Score trail). No shapes, no streaks. */
+.magic-dust, .xp-trail-spark {
   display: block;
   pointer-events: none;
-  background: radial-gradient(circle, #ffffff 0%, var(--spark, #fff) 40%, transparent 72%);
+  background: var(--spark, #fff);
   border-radius: 999px;
-  box-shadow: 0 0 6px var(--spark, #fff), 0 0 14px color-mix(in srgb, var(--spark, #fff) 60%, transparent);
+  box-shadow: 0 0 4px var(--spark, #fff), 0 0 12px color-mix(in srgb, var(--spark, #fff) 55%, transparent);
   will-change: transform, opacity;
 }
 .magic-dust {
@@ -1189,12 +1189,10 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   animation-timing-function: cubic-bezier(0.15, 0.6, 0.2, 1);
   animation-fill-mode: both;
 }
-.magic-streak {
-  background: linear-gradient(to bottom, transparent, var(--spark, #fff) 40%, #ffffff 55%, transparent);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--spark, #fff) 70%, transparent);
-  animation-name: magic-streak;
-  animation-timing-function: cubic-bezier(0.1, 0.7, 0.2, 1);
-  animation-fill-mode: both;
+.magic-orb {
+  opacity: 0.55;
+  filter: blur(1.5px);
+  box-shadow: 0 0 10px var(--spark, #fff), 0 0 22px color-mix(in srgb, var(--spark, #fff) 50%, transparent);
 }
 @keyframes magic-dust {
   0% { transform: translate(0, 0) scale(0.2); opacity: 0; }
@@ -1202,11 +1200,6 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   40% { transform: translate(calc(var(--sx) * 0.65), calc(var(--sy) * 0.65)) scale(0.7); opacity: 0.55; }
   56% { transform: translate(calc(var(--sx) * 0.8), calc(var(--sy) * 0.8)) scale(1.1); opacity: 1; }
   100% { transform: translate(var(--sx), calc(var(--sy) - 60px)) scale(0.2); opacity: 0; }
-}
-@keyframes magic-streak {
-  0% { transform: translate(0, 0) rotate(var(--rot)) scaleY(0.2); opacity: 0; }
-  20% { opacity: 1; }
-  100% { transform: translate(var(--sx), var(--sy)) rotate(var(--rot)) scaleY(1); opacity: 0; }
 }
 .xp-trail-spark {
   position: fixed;
@@ -1218,5 +1211,5 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .magic-dust, .magic-streak, .xp-trail-spark { display: none; }
+  .magic-dust, .xp-trail-spark { display: none; }
 }

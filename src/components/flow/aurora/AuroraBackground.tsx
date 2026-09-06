@@ -29,6 +29,8 @@ type Ripple = {
   // drawn as a full circle with no band mask, since it isn't trying to stay anchored to
   // the aurora curtain, and Dreamy visibly sits well above where that mask would apply.
   originKind: "band" | "point";
+  /** glow only, no traced ring at the wavefront */
+  soft?: boolean;
 };
 
 // Dreamy's own sprite in QuestionHeading carries this attribute -- looked up live at pulse
@@ -210,7 +212,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
   }, [visitedAccents]);
 
   useEffect(() => {
-    return onAuroraPulse(({ kind, x, forceDreamyOrigin }) => {
+    return onAuroraPulse(({ kind, x, forceDreamyOrigin, soft }) => {
       // The full-screen ripple used to fire on every single tap throughout Build
       // and Match -- every card pick, every Back, every Next -- which read as
       // "this circle thing... every time... anticlimactic and distracting"
@@ -242,6 +244,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
         maxRadius: isCta ? Math.hypot(window.innerWidth, window.innerHeight) : 190,
         amplitude: isCta ? 22 : 9,
         originKind,
+        soft,
       });
       if (isCta) {
         // A second, gentler wavefront just behind the first — reads as one bigger, richer
@@ -255,6 +258,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
           maxRadius: Math.hypot(window.innerWidth, window.innerHeight),
           amplitude: 13,
           originKind,
+          soft,
         });
       }
       if (ripplesRef.current.length > 10) ripplesRef.current.splice(0, ripplesRef.current.length - 10);
@@ -534,7 +538,7 @@ export function AuroraBackground({ accent, visitedAccents, finale = false, light
             // pulse stays a plain glow. Band-origin ripples only trace their upper half
             // (the lower half is off-canvas anyway, born at the bottom edge); point-origin
             // ones (launched from Dreamy) trace the full circle.
-            if (isCta && glowRadius > 4) {
+            if (isCta && !ripple.soft && glowRadius > 4) {
               const ringAlpha = glowAlpha * (isDark ? 0.62 : 0.48);
               if (ringAlpha > 0.01) {
                 const seed = ripple.start * 0.001;
