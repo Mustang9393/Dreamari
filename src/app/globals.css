@@ -1213,3 +1213,9 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @media (prefers-reduced-motion: reduce) {
   .magic-dust, .xp-trail-spark { display: none; }
 }
+
+/* the one-time Dream Score tooltip leaving */
+@keyframes tip-out {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}

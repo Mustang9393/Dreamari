@@ -640,7 +640,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
         {/* the score: counts 1 to 100, then pops as it lands */}
         {/* the name of the system, said once, where it is first earned: the
            unit students see is XP, the system is the Dream Score */}
-        <p className="mt-3 text-[11px] leading-[15px] font-bold tracking-[0.16em] uppercase motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.2s_both]" style={{ color: "var(--color-night-muted-foreground)" }}>Dream Score</p>
+        <p className="mt-3 text-[11px] leading-[15px] font-bold tracking-[0.16em] uppercase motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.2s_both]" style={{ color: "var(--color-night-muted-foreground)", visibility: flown ? "hidden" : "visible" }}>Dream Score</p>
         {/* the score line keeps its height after the number flies off, so the
            copy under it does not jump */}
         <p
