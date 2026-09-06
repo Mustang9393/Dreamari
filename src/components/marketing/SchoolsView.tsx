@@ -25,12 +25,9 @@ type SchoolsViewProps = {
 // exist yet (the educator dashboard) the caption says so.
 // ---------------------------------------------------------------------------
 
-const AUDIENCES = [
-  { title: "Schools", body: "Structured career planning for every student, not only the ones who ask." },
-  { title: "School Districts", body: "One programme across many buildings, with reporting that rolls up." },
-  { title: "Nonprofits", body: "Deliver career programming and show funders what changed." },
-  { title: "Educational Institutions", body: "Bring career-connected learning to the students you already serve." },
-];
+// Copy is the reference site's, verbatim (dreamari-educator-website.replit.app,
+// named as the copy source, 6 Sept 2026). The tabs carry titles only there.
+const AUDIENCES = ["Schools", "School Districts", "Nonprofits", "Educational Institutions"];
 
 type Stage = {
   n: string;
@@ -49,7 +46,7 @@ const STAGES: Stage[] = [
   {
     n: "01",
     title: "Build",
-    line: "A short interest profile. Students pick the career worlds that sound like them and answer a handful of questions.",
+    line: "Students build their profile through a short academic and personality assessment.",
     detail: [
       "Fifteen career worlds, from Health & Medicine to Driving, Flying & Shipping, chosen with a tap.",
       "Grounded in the Harvard FAS Mignone and O*NET Interest Profiler.",
@@ -63,7 +60,7 @@ const STAGES: Stage[] = [
   {
     n: "02",
     title: "Match",
-    line: "A deck of careers that fit the profile. Students swipe, read the card, and save a Top 3.",
+    line: "Discover college majors, schools, and careers aligned with each student's profile.",
     detail: [
       "Each card carries the employers who hire for it and the median salary.",
       "The back of the card shows the college major and pay, so a swipe is an informed one.",
@@ -77,7 +74,7 @@ const STAGES: Stage[] = [
   {
     n: "03",
     title: "Explore",
-    line: "Real pay, real pathways. Every career has typical degree and pay, pay by state, a career ladder, and the skills it takes.",
+    line: "Expand students' horizons with careers they may never have considered.",
     detail: [
       "Career worlds and poster cards a student actually wants to open.",
       "Pay and growth from the U.S. Bureau of Labor Statistics; tasks and skills from O*NET.",
@@ -91,7 +88,7 @@ const STAGES: Stage[] = [
   {
     n: "04",
     title: "Immerse",
-    line: "A day in the job before choosing it. Students work through a simulation with real decisions and real consequences.",
+    line: "Experience a day on the job while practicing skills for postsecondary education and the workforce.",
     detail: [
       "Investment Banking is the first simulation; more careers follow.",
       "Students start as an intern and earn their way up through levels.",
@@ -105,7 +102,7 @@ const STAGES: Stage[] = [
   {
     n: "05",
     title: "Connect",
-    line: "People who do the work. Industry communities with professionals from partner firms, and events students can attend.",
+    line: "Connect directly with professionals at some of the world's leading companies.",
     detail: [
       "Communities by industry, each with students, professionals and companies.",
       "Verified professionals from firms such as JPMorgan Chase, Goldman Sachs and EY.",
@@ -119,10 +116,10 @@ const STAGES: Stage[] = [
 ];
 
 const EDUCATOR_FEATURES = [
-  { title: "Student progress", body: "Milestones, submissions and completion for each student." },
-  { title: "Counselor dashboard", body: "One view of a caseload across grades and pathways." },
-  { title: "Communication", body: "Announcements and messages to students, in the app they already use." },
-  { title: "Reporting", body: "School, district and nonprofit reports for the people who ask for them." },
+  { title: "Understand their direction", body: "See the careers and pathways students are exploring." },
+  { title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
+  { title: "Keep students moving", body: "Share announcements and communicate about next steps." },
+  { title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
 ];
 
 const OUTCOMES = ["Career readiness", "College readiness", "Student engagement", "Postsecondary planning", "Resume completion", "Career exploration", "Professional networking"];
@@ -286,26 +283,22 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 className="text-[clamp(40px,4.6vw,64px)] leading-[1.02] font-extrabold tracking-[-0.02em]"
                 style={{ color: "var(--foreground)", textWrap: "balance" }}
               >
-                Prepare every student for what&apos;s <span style={{ color: "var(--primary)" }}>next</span>.
+                Help students discover their direction&mdash;and build the skills to pursue it.
               </h1>
               <p className="mt-5 max-w-[540px] text-[clamp(17px,0.7vw+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                Dreamari gives schools, districts and nonprofits one platform for career exploration, college and career readiness,
-                and outcomes you can measure.
+                Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
+                Give educators the insights to guide their next steps.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <MarketingButton variant="primary" size="lg" href="#demo">
                   Request a demo
                 </MarketingButton>
                 <MarketingButton variant="ghost" size="lg" href="#student-experience">
-                  See the student experience
+                  Explore the platform
                 </MarketingButton>
               </div>
               <p className="mt-8 text-[13.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Built by{" "}
-                <Link href="#organization" className="font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
-                  Dream Opportunity
-                </Link>
-                : more than 100 schools, eight countries, 12 years of impact.
+                For schools, districts, nonprofits, and educational institutions.
               </p>
             </div>
             <div className="lg:col-span-6 lg:pl-4">
@@ -317,24 +310,32 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       </section>
 
       {/* ---- Audience strip ------------------------------------------------- */}
-      <section aria-label="Who Dreamari is for" className="px-6">
-        <div className="mx-auto max-w-[1200px] border-y" style={{ borderColor: "var(--border)" }}>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-labelledby="audience-heading" className="px-6 pt-4 sm:pt-8">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <SectionHead id="audience-heading" align="center" title="Built for the students you serve." />
+          </Reveal>
+          <ul className="mx-auto mt-8 grid max-w-[960px] grid-cols-2 border-y sm:mt-10 lg:grid-cols-4" style={{ borderColor: "var(--border)" }}>
             {AUDIENCES.map((a, i) => (
               <li
-                key={a.title}
-                className={`py-6 sm:px-6 sm:py-7 ${i > 0 ? "border-t sm:border-t-0" : ""} ${i % 2 === 1 ? "sm:border-l" : ""} ${i > 0 ? "lg:border-l" : ""} ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} ${i === 0 ? "sm:pl-0" : ""} ${i === 3 ? "sm:pr-0" : ""}`}
-                style={{ borderColor: "var(--border)" }}
+                key={a}
+                className={`py-5 text-center text-[16px] font-bold sm:py-6 sm:text-[17px] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t lg:border-t-0" : ""} ${i === 2 ? "lg:border-l" : ""}`}
+                style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
               >
-                <h3 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>
-                  {a.title}
-                </h3>
-                <p className="mt-1.5 text-[14px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                  {a.body}
-                </p>
+                {a}
               </li>
             ))}
           </ul>
+          <Reveal>
+            <div className="mx-auto mt-10 max-w-[720px] text-center sm:mt-12">
+              <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+                Give every student a clearer path forward.
+              </h3>
+              <p className="mt-3 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                Help students explore their options, connect learning to careers, and plan their next steps&mdash;with visibility for the educators guiding them.
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -342,10 +343,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead
-              title="Five steps toward a clearer future."
-              lede="The student experience is one path, not five tools. Each step feeds the next, and every screen below is the real product."
-            />
+            <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
           <ol className="mt-4 divide-y sm:mt-8" style={{ borderColor: "var(--border)" }}>
             {STAGES.map((s, i) => (
@@ -359,7 +357,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="px-6 py-20 sm:py-28" style={{ background: "var(--hero-mid)" }}>
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead title="Everything counselors need." lede="One view of every student's readiness, from grade 9 to graduation, without stitching together five tools." />
+            <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
           </Reveal>
           <Reveal>
             <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
@@ -407,7 +405,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               <div className="lg:col-span-6">
                 <SectionHead
                   title="Grounded in career research. Connected to industry."
-                  lede="Nothing a student reads in Dreamari is invented. Pay, growth, tasks and skills come from public labour data, and every Career Report lists its sources with the year and the date we last checked them."
+                  lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies."
                 />
                 <ul className="mt-8 max-w-[560px]">
                   {SOURCES.map((s, i) => (
@@ -503,21 +501,42 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       </section>
 
       {/* ---- Demo request --------------------------------------------------- */}
-      {/* credibility lines before the closing CTA (Joshua Pierce, Slack, 6 Sept 2026) */}
+      {/* Credibility lines before the closing CTA, with the partner logo row
+         under them, as asked (Joshua Pierce, Slack, 6 Sept 2026). The row was
+         held until the partner list was confirmed; it is now the real set. */}
       <TrustLine />
+      <div className="px-6 pb-8 sm:pb-10">
+        <Reveal>
+          <PartnerLogoWall size="compact" className="mx-auto mt-6 w-full max-w-[720px]" />
+        </Reveal>
+      </div>
 
       <section id="demo" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
         <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
           <div className="lg:col-span-5">
             <Reveal>
               <SectionHead
-                title="Request a demo."
-                lede="Tell us about your organization and we will set up a walkthrough with our team: the student experience end to end, then what your staff will see."
+                title="A clearer direction. Skills for what comes next."
+                lede="See how Dreamari can support career exploration, skill development, and student guidance in your school or organization."
               />
+              <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                {["Quick setup", "Custom onboarding"].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "var(--primary)" }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           </div>
           <div className="lg:col-span-7">
             <Reveal>
+              <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
+                See Dreamari in action.
+              </h3>
+              <p className="mt-2 mb-6 text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                Tell us a little about your organization so we can tailor your demo.
+              </p>
               <DemoRequestForm />
             </Reveal>
           </div>

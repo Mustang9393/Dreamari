@@ -38,6 +38,55 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 Schools landing on `main`: reference copy restored verbatim; Joshua's credibility lines get their logo row
+
+- Merged `schools-landing` into `main` (merge `df7fd45`, pushed; production
+  redeployed and confirmed live). The one conflict was `SchoolsView.tsx`: the
+  other session had added Joshua's two-line `TrustLine` before the OLD view's
+  closing CTA; the merge keeps the full rebuild and places `<TrustLine />`
+  before the new closing CTA (the `#demo` request section).
+- Where Joshua asked for what (Slack, 6 Sept; recorded in `specs/landing.md`
+  and `TrustLine.tsx`): the two lines "Powered by insights from Dream
+  Opportunity and leading corporate partners." / "Informed by Dream
+  Opportunity's work with 100+ schools." plus a partner-logo row under them,
+  before "Start Journey" on the student landing. Held pending the partner list;
+  per Chandu (6 Sept) the student landing does not carry them, so they sit on
+  the Schools view before its closing CTA. Partner list now confirmed
+  (IMG_8794), so the logo row is added directly under the lines
+  (`PartnerLogoWall size="compact"`, 720px column). Decision on 7 Sept: Schools
+  only; the student page keeps the separate `BuiltByStamp` under its CTA.
+- Copy audit against the named copy source (dreamari-educator-website.replit.app):
+  the rebuild had rewritten nearly every line. Restored verbatim: hero h1
+  ("Help students discover their direction—and build the skills to pursue
+  it."), hero lede, CTAs "Request a demo" / "Explore the platform", the "For
+  schools, districts, nonprofits, and educational institutions." line; the
+  audience section ("Built for the students you serve." + four titles-only
+  tabs + "Give every student a clearer path forward." with its lede); all five
+  stage descriptions; the educators section ("Know where students are. See
+  where to help." + the four Understand / Follow / Keep / Show items); the
+  research lede; the closing ("A clearer direction. Skills for what comes
+  next." + lede + Quick setup / Custom onboarding) and the form intro ("See
+  Dreamari in action." / "Tell us a little about your organization so we can
+  tailor your demo."). Form fields now match the reference: First name, Last
+  name, Work email, Organization name, Your role, Organization type (School /
+  School District / Nonprofit / Educational Organization / Institution),
+  Number of students served.
+- Deliberately NOT from the reference, by instruction: no eyebrows (its
+  "College & career readiness", "For educators", "BUILD. MATCH..." labels are
+  omitted; STAGE 01–05 stays as the one justified label); the Dream
+  Opportunity block uses the user's own contractual copy; FAQ and the
+  testimonials shell are additions; the "Explore our sources" link is dropped
+  because the sources list sits inline under the lede. The "What students do"
+  disclosures keep the app's real product detail for depth.
+- Validation: `npx tsc --noEmit` clean; `npx eslint` clean on SchoolsView and
+  DemoRequestForm; `npm run tokens:check` passes. Live (worktree, :3107): all
+  reference lines present in the rendered Schools view; TrustLine → logo wall →
+  `#demo` in that order; at 390px no horizontal overflow, both walls render
+  (292/308px), First/Last name fields present. Desktop pixel measurements were
+  not captured (the Browser pane was hidden at that instant); DOM order was.
+- Still open: `DEMO_REQUEST_TO` is a placeholder inbox; real iPhone/Safari
+  pass not done.
+
 ### 2026-09-07 Schools landing, visuals pass (branch `schools-landing`): composed product visuals replace every screenshot crop
 
 Rule for this project from today: marketing imagery is never a cropped
