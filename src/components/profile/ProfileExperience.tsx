@@ -393,14 +393,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
       <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Wordmark />
+        {/* no streak or XP up here: the hero card below carries both */}
         <span className="flex items-center gap-[var(--space-4)] text-[15px] font-bold">
-          {/* the Dream Score follows the student here too (live once earned) */}
-          <span key={dreamScore} className="flex items-center gap-[6px] text-[13px] tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${dreamScore > 0 ? dreamScore : 15980} XP`} style={{ color: "var(--foreground)" }}>
-            <Sparkles className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} /> {(dreamScore > 0 ? dreamScore : 15980).toLocaleString("en-US")} XP
-          </span>
-          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
-            <Flame className="h-4 w-4" /> {STUDENT.streakDays}
-          </span>
           <QuickLinksMenu />
         </span>
       </header>
@@ -521,17 +515,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                left, on one row at every width: icon, label, value. On phones
                the type steps down and the streak's extras drop so all three
                still fit side by side (direct feedback, 5 Sept 2026). */}
-            <dl className="flex flex-wrap gap-[6px] sm:gap-[8px]" style={{ textShadow: "none" }}>
+            <dl className="grid grid-cols-2 gap-[6px] sm:flex sm:flex-wrap sm:gap-[8px]" style={{ textShadow: "none" }}>
               {[
-                { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), label: "Grade", verified: false, sub: null as string | null, valueFirst: false },
-                { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, label: "GPA", verified: ACADEMIC_RECORD.verified, sub: null as string | null, valueFirst: false },
-                // "12 day streak · Active 142 of 190 days" (direct feedback, 5 Sept 2026)
-                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
+                // Dream Score leads: the stat that grows (live once earned; the
+                // design's 15,980 stands in until then)
+                { Icon: Sparkles, value: `${(dreamScore > 0 ? dreamScore : 15980).toLocaleString("en-US")} XP`, label: "Dream Score", short: "Score", verified: false, sub: null as string | null, valueFirst: false },
+                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
+                { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), label: "Grade", short: null as string | null, verified: false, sub: null as string | null, valueFirst: false },
+                { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, label: "GPA", short: null as string | null, verified: ACADEMIC_RECORD.verified, sub: null as string | null, valueFirst: false },
               ].map((fact) => (
-                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                <div key={fact.label} className="flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[9px] py-[8px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
                   <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
                   <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "rgba(255,255,255,0.7)" }}>
-                    {fact.label}{fact.sub && <span className="hidden sm:inline"> · {fact.sub}</span>}
+                    {fact.short ? <><span className="sm:hidden">{fact.short}</span><span className="hidden sm:inline">{fact.label}</span></> : fact.label}
+                    {fact.sub && <span className="hidden lg:inline"> · {fact.sub}</span>}
                     {fact.verified && <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>}
                   </dt>
                   {/* the streak reads "12 day streak": its number comes before its words */}

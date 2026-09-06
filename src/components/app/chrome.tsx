@@ -211,23 +211,29 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
       </nav>
 
       <div className="flex items-center gap-[var(--space-5)]">
-        {/* Streak/XP yield below lg so the dead-centered nav pill never
-           collides with them on narrow desktop widths. */}
-        <span className="hidden items-center gap-[6px] lg:flex">
-          <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
-          <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
-            12
-          </span>
-        </span>
-        {/* Dream Score, live: the student's own XP once they have earned any
-           (the design's 15,980 stands in until then). Shown from md so the
-           score follows them from Build and Match into the app. */}
-        <span key={xp} className="hidden items-center gap-[6px] md:flex motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
-          <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
-          <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-            {xp.toLocaleString("en-US")} XP
-          </span>
-        </span>
+        {/* On the Profile page the hero card carries these stats, so the nav
+           drops them (the way Duolingo's profile hides its top counters). */}
+        {active !== "Profile" && (
+          <>
+            {/* Streak/XP yield below lg so the dead-centered nav pill never
+               collides with them on narrow desktop widths. */}
+            <span className="hidden items-center gap-[6px] lg:flex">
+              <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
+              <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
+                12
+              </span>
+            </span>
+            {/* Dream Score, live: the student's own XP once they have earned any
+               (the design's 15,980 stands in until then). Shown from md so the
+               score follows them from Build and Match into the app. */}
+            <span key={xp} className="hidden items-center gap-[6px] md:flex motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
+              <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
+              <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                {xp.toLocaleString("en-US")} XP
+              </span>
+            </span>
+          </>
+        )}
         <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />

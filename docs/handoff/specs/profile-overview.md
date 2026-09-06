@@ -3,7 +3,7 @@
 Status: Overview in review (Do this next pattern open with Joshua); header locked; Resume placeholder.
 
 ## Header
-Cover photo (six options, picker) with name and school over it. Three compact tiles, left-aligned, one line each: "Grade 11", "GPA 3.7", "12 day streak · Active 142 of 190 days" (phone: "12 day streak"). Icons stay. Cover / Saved / Settings controls top right.
+Cover photo (six options, picker) with name and school over it. Four compact tiles, left-aligned, one line each, in this order: "Dream Score 100 XP" (live; phone label "Score"), "12 day streak · Active 142 of 190 days" (subtext from desktop only), "Grade 11", "GPA 3.7". Phones show them as a 2×2 grid. Icons stay. Cover / Saved / Settings controls top right. On this page the top nav hides its streak and XP counters (the hero carries them).
 
 ## Tabs
 Overview · Top Three · My Plan · Report · Resume. Query `?tab=`. Links to `/profile?tab=…` from inside the profile switch tabs.
