@@ -28,8 +28,8 @@ const REPORTS: Report[] = [
   { id: "rp3", kind: "question", reason: "Not about careers or school", excerpt: "does anyone here play valorant", by: "a Freshman", where: "General Professional Development", ago: "3h" },
 ];
 const PENDING: { id: string; proId: string; question: string; ago: string }[] = [
-  { id: "pa1", proId: "pro-gallagher", question: "Is accounting actually boring, or is that just a stereotype?", ago: "25m" },
-  { id: "pa2", proId: "pro-haddad", question: "Can I work in healthcare if I hate blood?", ago: "2h" },
+  { id: "pa1", proId: "pro-gallagher", question: "What do people get wrong about accounting?", ago: "25m" },
+  { id: "pa2", proId: "pro-haddad", question: "Which healthcare careers happen outside the operating room?", ago: "2h" },
 ];
 
 const TIERS = [

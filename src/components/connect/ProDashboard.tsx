@@ -27,19 +27,19 @@ type RoutedState = "open" | "answering" | "answered" | "skipped";
 type Routed = { id: string; handle: string; grade: string; ago: string; title: string; threadId?: string };
 const ROUTED_BY_WORLD: Record<string, Routed[]> = {
   "Business & Money": [
-    { id: "r1", handle: "Diego", grade: "Sophomore", ago: "2h", title: "Is accounting actually boring, or is that just a stereotype?", threadId: "t-fin-accounting" },
-    { id: "r2", handle: "Priya", grade: "Junior", ago: "1d", title: "Is going to a state school a dealbreaker for finance jobs?" },
+    { id: "r1", handle: "Diego", grade: "Sophomore", ago: "2h", title: "What do people get wrong about accounting?", threadId: "t-fin-accounting" },
+    { id: "r2", handle: "Priya", grade: "Junior", ago: "1d", title: "Can I get into finance from a state school?" },
     { id: "r3", handle: "Theo", grade: "Freshman", ago: "2d", title: "What should I major in if I want to work in finance?" },
   ],
   "Tech & Engineering": [
     { id: "r1", handle: "Ethan", grade: "Junior", ago: "3h", title: "Do I need a CS degree to work in tech?", threadId: "t-cs-degree" },
     { id: "r2", handle: "Zoe", grade: "Sophomore", ago: "1d", title: "What should my first coding project be?" },
-    { id: "r3", handle: "Sam", grade: "Senior", ago: "2d", title: "Is it too late to start coding in 12th grade?" },
+    { id: "r3", handle: "Sam", grade: "Senior", ago: "2d", title: "Is 12th grade a good time to start coding?" },
   ],
   "Health & Medicine": [
     { id: "r1", handle: "Zoe", grade: "Sophomore", ago: "5h", title: "How do I shadow a nurse while still in high school?", threadId: "t-nurse-shadow" },
     { id: "r2", handle: "Sana", grade: "Junior", ago: "1d", title: "Is nursing school harder than regular college?" },
-    { id: "r3", handle: "Noah", grade: "Freshman", ago: "2d", title: "Can I work in healthcare if I hate blood?" },
+    { id: "r3", handle: "Noah", grade: "Freshman", ago: "2d", title: "Which healthcare careers happen outside the operating room?" },
   ],
   "Arts, Media & Sport": [
     { id: "r1", handle: "Ruby", grade: "Junior", ago: "4h", title: "Do I need to go to art school to become a designer?", threadId: "t-creative-art-school" },
