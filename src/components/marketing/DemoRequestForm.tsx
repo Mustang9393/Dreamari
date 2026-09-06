@@ -4,11 +4,11 @@ import { Check } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { MarketingButton } from "./Button";
 
-// PLACEHOLDER ADDRESS. There is no backend in this prototype (one client-error
-// endpoint, nothing else), so the form composes a mailto: with the fields and
-// hands off to the visitor's mail client. Swap this for the real inbox (or a
-// form endpoint) before launch.
-export const DEMO_REQUEST_TO = "hello@dreamopportunity.org";
+// Demo requests go to Chandu's inbox (direct instruction, 7 Sept 2026). There
+// is no backend in this prototype (one client-error endpoint, nothing else),
+// so the form composes a mailto: with the fields and hands off to the
+// visitor's mail client.
+export const DEMO_REQUEST_TO = "chandu.mp.14@gmail.com";
 
 // Field set and option labels are the reference site's (dreamari-educator-website.replit.app).
 const ORG_TYPES = ["School", "School District", "Nonprofit", "Educational Organization / Institution"] as const;

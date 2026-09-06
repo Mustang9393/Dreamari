@@ -84,8 +84,9 @@ tokens above, in both modes).
   `#demo` in that order; at 390px no horizontal overflow, both walls render
   (292/308px), First/Last name fields present. Desktop pixel measurements were
   not captured (the Browser pane was hidden at that instant); DOM order was.
-- Still open: `DEMO_REQUEST_TO` is a placeholder inbox; real iPhone/Safari
-  pass not done.
+- `DEMO_REQUEST_TO` is now chandu.mp.14@gmail.com (direct instruction, 7 Sept;
+  the earlier hello@ address was an invented placeholder). Still open: real
+  iPhone/Safari pass not done.
 
 ### 2026-09-07 Schools landing, visuals pass (branch `schools-landing`): composed product visuals replace every screenshot crop
 
