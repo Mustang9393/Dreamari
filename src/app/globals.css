@@ -1133,3 +1133,14 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @media (min-width: 901px) {
   .mkt-chapter.mkt-chapter { min-height: calc(100dvh - 96px); }
 }
+
+/* Next-step banner: a light sweeping across, and a soft ring leaving the button */
+@keyframes next-step-sheen {
+  0% { transform: translateX(-140%); opacity: 0; }
+  12% { opacity: 1; }
+  55%, 100% { transform: translateX(340%); opacity: 0; }
+}
+@keyframes next-step-cta-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 10px transparent; }
+}

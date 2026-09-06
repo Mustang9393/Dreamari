@@ -41,6 +41,9 @@ export type PlanTask = {
   href?: string;
   outOfApp?: boolean;
   custom?: boolean; // student-added step
+  /** Already done when the plan first opens (Build is finished before Match
+   *  and Profile exist), so no plan starts at 0%. */
+  doneByDefault?: boolean;
 };
 
 export type PlanHorizon = {
@@ -82,6 +85,7 @@ const o = (id: string, label: string, action: PlanAction, href?: string): PlanTa
 // speaks of "your #1 Career" so it reads right from either.
 const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
   h(`${prefix}-1`, "Next 3 Months", "Foundation", [
+    { ...t(`${prefix}-1-0`, "Build Profile", "Build", "/flow"), doneByDefault: true },
     t(`${prefix}-1-1`, "10 Finance Careers and save your Top 3", "Explore", "/explore?tab=browse"),
     t(`${prefix}-1-2`, "3 Career Simulations from your Top 3", "Play", "/play"),
     t(`${prefix}-1-3`, "Ask 2 Finance Professionals one career question each", "Connect", "/connect"),

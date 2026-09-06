@@ -186,7 +186,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     });
   const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? base).ids, focus: id }));
   const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
-  const [done, setDone] = useState<Record<string, string[]>>({});
+  // Build is already behind the student when the plan first opens, so the
+  // steps marked doneByDefault start checked and no plan opens at 0%.
+  const [done, setDone] = useState<Record<string, string[]>>(() =>
+    Object.fromEntries(ALL_PROFILE_CAREERS.map((c) => [c.id, c.plan.flatMap((h) => h.tasks.filter((task) => task.doneByDefault).map((task) => task.id))])),
+  );
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -513,19 +517,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                still fit side by side (direct feedback, 5 Sept 2026). */}
             <dl className="flex flex-wrap gap-[6px] sm:gap-[8px]" style={{ textShadow: "none" }}>
               {[
-                { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), note: null as string | null, label: "Grade", verified: false, sub: null as string | null },
-                { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, note: null as string | null, label: "GPA", verified: ACADEMIC_RECORD.verified, sub: null as string | null },
-                { Icon: Flame, value: `${STUDENT.streakDays}`, note: "days" as string | null, label: "Streak", verified: false, sub: "142/190" as string | null },
+                { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), label: "Grade", verified: false, sub: null as string | null, valueFirst: false },
+                { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, label: "GPA", verified: ACADEMIC_RECORD.verified, sub: null as string | null, valueFirst: false },
+                // "12 day streak · Active 142 of 190 days" (direct feedback, 5 Sept 2026)
+                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
               ].map((fact) => (
-                <div key={fact.label} className="flex min-w-0 flex-1 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
                   <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
-                  <dt className="flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px]" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "rgba(255,255,255,0.7)" }}>
                     {fact.label}{fact.sub && <span className="hidden sm:inline"> · {fact.sub}</span>}
                     {fact.verified && <span className="sr-only">verified by {ACADEMIC_RECORD.source}, {ACADEMIC_RECORD.updated}</span>}
                   </dt>
-                  <dd className="ml-auto flex flex-none items-baseline gap-[3px] text-[14px] leading-[18px] font-extrabold tabular-nums sm:text-[18px] sm:leading-[22px]" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                  {/* the streak reads "12 day streak": its number comes before its words */}
+                  <dd className={`flex flex-none items-baseline text-[14px] leading-[18px] font-extrabold tabular-nums sm:text-[18px] sm:leading-[22px] ${fact.valueFirst ? "order-2 -mr-[1px]" : "ml-auto"}`} style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
                     {fact.value}
-                    {fact.note && <span className="hidden text-[11.5px] font-semibold sm:inline" style={{ color: "rgba(255,255,255,0.7)" }}>{fact.note}</span>}
                   </dd>
                 </div>
               ))}
@@ -1619,6 +1624,17 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </section>
 
+      {/* the same next step as Top Three, so the answer to "what now" is the
+         same on both tabs (Joshua Pierce, Slack, 5 Sept 2026) */}
+      <NextStepBanner
+        eyebrow="Next step"
+        text="Play your #1 Career Simulation to see if it’s really your #1."
+        ctaLabel="Play"
+        href="/play/investment-banking"
+        Icon={Gamepad2}
+        storageKey="dreamari:top3-next-step-dismissed"
+      />
+
       {focus.plan.map((horizon, index) => {
         const unlocked = horizonUnlocked(focus, index);
         const stats = horizonProgress(focus, index);
@@ -2128,28 +2144,13 @@ function SettingsView({ onClose }: { onClose: () => void }) {
 }
 
 function ResumeView() {
+  // Just the name and the state until the feature is real (direct feedback,
+  // 5 Sept 2026): no explanation, no steps, no disabled button.
   return (
     <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={INSET}>
       <div className="flex flex-wrap items-center gap-[var(--space-3)]">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
-        {/* Said plainly (CEO, 4 Sept): a partner was told this exists, opened
-           it, and found nothing that said it was still being built. */}
         <span className="rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[12px] leading-[16px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>Coming soon</span>
-      </div>
-      <p className="max-w-[56ch] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>The resume builder is being designed now. When it opens, it will build a first draft from your plan and your saved careers, then tailor it to a job and get volunteer feedback.</p>
-      {/* rows on hairlines, not cards stacked on the card (CEO, 4 Sept) */}
-      <ol className="flex flex-col">
-        {["Build it", "Tailor it to a job", "Get volunteer feedback"].map((step, index) => (
-          <li key={step} className="flex items-center gap-[var(--space-3)] border-t py-[11px]" style={{ borderColor: "var(--inset-border)" }}>
-            <span className="flex size-7 flex-none items-center justify-center rounded-full text-[13px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>{index + 1}</span>
-            <span className="text-[15px] leading-[22px]">{step}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="flex items-center gap-[var(--space-3)]">
-        <button type="button" disabled className="w-fit rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-3)] text-[15px] font-bold opacity-50" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
-          Opens soon
-        </button>
       </div>
     </section>
   );
