@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -9,6 +8,7 @@ import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
 import { DO_COPY, DOMark, PartnerLogoWall } from "./DreamOpportunity";
+import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 
 type SchoolsViewProps = {
@@ -17,20 +17,12 @@ type SchoolsViewProps = {
 };
 
 // ---------------------------------------------------------------------------
-// Content. Every visual below is a real screen captured from the deployed app
-// (dreamari.vercel.app, 6 Sept 2026), cropped to one legible component. No
-// mock chrome, no illustrative previews. Where a screen does not exist yet
-// (the educator dashboard) the caption says so.
+// Content. Every visual below is a composition of the product's own pieces
+// (SchoolsVisuals.tsx): whole components set in a frame with deliberate
+// padding, never a cropped screenshot (rule since 7 Sept 2026). The copy in
+// each composition is the app's real copy and data. Where a screen does not
+// exist yet (the educator dashboard) the caption says so.
 // ---------------------------------------------------------------------------
-
-type Shot = { src: string; width: number; height: number; alt: string; fit?: "cover" | "contain"; position?: string };
-
-const SHOT_HERO: Shot = {
-  src: "/images/marketing/schools-hero-career-detail.webp",
-  width: 1952,
-  height: 1068,
-  alt: "Career Detail for Investment Banking in Dreamari: title, a one-line description, Play Game and Glossary Game buttons, and Typical degree and Typical pay facts",
-};
 
 const AUDIENCES = [
   { title: "Schools", body: "Structured career planning for every student, not only the ones who ask." },
@@ -46,7 +38,10 @@ type Stage = {
   detail: string[];
   href: string;
   linkLabel: string;
-  shot: Shot;
+  // The stage's colour (a world token), used only as the faint wash behind
+  // its composition, and the composition itself.
+  accent: string;
+  graphic: ReactNode;
 };
 
 const STAGES: Stage[] = [
@@ -61,13 +56,8 @@ const STAGES: Stage[] = [
     ],
     href: "/flow",
     linkLabel: "See Build in the app",
-    shot: {
-      src: "/images/marketing/schools-stage-build.webp",
-      width: 1560,
-      height: 1024,
-      alt: "Build step: 'What sounds interesting? Choose up to 2' above a grid of fifteen career worlds",
-      position: "center top",
-    },
+    accent: "var(--world-tech-engineering-design)",
+    graphic: <BuildScreen />,
   },
   {
     n: "02",
@@ -80,13 +70,8 @@ const STAGES: Stage[] = [
     ],
     href: "/match-lab",
     linkLabel: "See Match in the app",
-    shot: {
-      src: "/images/marketing/schools-stage-match.webp",
-      width: 912,
-      height: 1400,
-      alt: "Match deck: 'Find your Top 3' with three empty slots and an Investment Banker card showing JPMorgan Chase and Goldman Sachs and a $361K median",
-      fit: "contain",
-    },
+    accent: "var(--world-business-money-office)",
+    graphic: <MatchScreen />,
   },
   {
     n: "03",
@@ -99,13 +84,8 @@ const STAGES: Stage[] = [
     ],
     href: "/explore",
     linkLabel: "See Explore in the app",
-    shot: {
-      src: "/images/marketing/schools-stage-explore.webp",
-      width: 2800,
-      height: 720,
-      alt: "Explore row 'Recommended Because You Liked Business & Money' with poster cards for Asset Manager, Private Equity, Quant, Accountant, Management Analyst and Administrative Assistant",
-      fit: "contain",
-    },
+    accent: "var(--world-food-farming-nature)",
+    graphic: <ExploreScreen />,
   },
   {
     n: "04",
@@ -118,12 +98,8 @@ const STAGES: Stage[] = [
     ],
     href: "/play/investment-banking",
     linkLabel: "See the simulation in the app",
-    shot: {
-      src: "/images/marketing/schools-stage-immerse.webp",
-      width: 1840,
-      height: 1080,
-      alt: "Investment Banking simulation: a trading-floor office with the dialogue 'Intern, Week 1. Welcome to Cobalt Capital.' and a Continue button",
-    },
+    accent: "var(--world-driving-flying-shipping)",
+    graphic: <ImmerseScreen />,
   },
   {
     n: "05",
@@ -136,12 +112,8 @@ const STAGES: Stage[] = [
     ],
     href: "/connect",
     linkLabel: "See Connect in the app",
-    shot: {
-      src: "/images/marketing/schools-stage-connect.webp",
-      width: 1302,
-      height: 632,
-      alt: "Connect: the Finance community card with 312 students, 61 professionals and 5 companies, and JPMorgan Chase, Goldman Sachs and EY marks",
-    },
+    accent: "var(--world-science-research)",
+    graphic: <ConnectScreen />,
   },
 ];
 
@@ -224,33 +196,6 @@ function SectionHead({ id, title, lede, align = "left" }: { id?: string; title: 
   );
 }
 
-// A real screenshot in a dark frame. The frame's fill is the theme's ink
-// colour, which in this light theme is the same near-black the app itself is
-// painted in, so a "contain" crop (the portrait Match card, the wide Explore
-// row) reads as the app's own ground rather than as letterboxing.
-function Screen({ shot, className = "", sizes, priority = false }: { shot: Shot; className?: string; sizes: string; priority?: boolean }) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[18px] border sm:rounded-[22px] ${className}`}
-      style={{
-        background: "var(--foreground)",
-        borderColor: "color-mix(in srgb, var(--foreground) 18%, transparent)",
-        boxShadow: "0 32px 80px -36px rgba(5,7,15,0.45), 0 2px 6px -2px rgba(5,7,15,0.2)",
-      }}
-    >
-      <Image
-        src={shot.src}
-        alt={shot.alt}
-        fill
-        priority={priority}
-        sizes={sizes}
-        className={shot.fit === "contain" ? "object-contain" : "object-cover"}
-        style={{ objectPosition: shot.position ?? "center" }}
-      />
-    </div>
-  );
-}
-
 function Caption({ children }: { children: ReactNode }) {
   return (
     <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
@@ -293,7 +238,9 @@ function StageRow({ stage, flip, open, onToggle }: { stage: Stage; flip: boolean
           </div>
         </div>
         <div className={`lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
-          <Screen shot={stage.shot} className="aspect-[16/10]" sizes="(max-width: 1024px) 92vw, 680px" />
+          {/* Same tile, same padding, same 5:4 focal card for all five stages,
+             so the set reads as one. */}
+          <Tile accent={stage.accent}>{stage.graphic}</Tile>
         </div>
       </li>
     </Reveal>
@@ -360,8 +307,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 : more than 100 schools, eight countries, 12 years of impact.
               </p>
             </div>
-            <div className="lg:col-span-6">
-              <Screen shot={SHOT_HERO} className="aspect-[1952/1068]" sizes="(max-width: 1024px) 92vw, 600px" priority />
+            <div className="lg:col-span-6 lg:pl-4">
+              <HeroLaptop />
               <Caption>Career Detail for Investment Banking, as it ships in the app today.</Caption>
             </div>
           </div>
@@ -439,17 +386,9 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </li>
               </ul>
               <div className="lg:col-span-7">
-                <Screen
-                  shot={{
-                    src: "/images/marketing/schools-educators-student-plan.webp",
-                    width: 2092,
-                    height: 624,
-                    alt: "A student's Profile overview: My Top Three (2 of 3 chosen), My Plan (1 of 13 steps), Career Report (5 sections), and a 'Do this next' block",
-                    fit: "contain",
-                  }}
-                  className="aspect-[2092/624]"
-                  sizes="(max-width: 1024px) 92vw, 680px"
-                />
+                <Tile accent="var(--primary)">
+                  <ProgressScreen />
+                </Tile>
                 <Caption>
                   Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
                 </Caption>
@@ -486,16 +425,9 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </p>
               </div>
               <div className="lg:col-span-6">
-                <Screen
-                  shot={{
-                    src: "/images/marketing/schools-data-career-ladder.webp",
-                    width: 1952,
-                    height: 568,
-                    alt: "Career ladder for Investment Banking: Analyst $150K, Associate $225K, Vice President $350K",
-                  }}
-                  className="aspect-[1952/568]"
-                  sizes="(max-width: 1024px) 92vw, 600px"
-                />
+                <Tile accent="var(--world-business-money-office)">
+                  <LadderScreen />
+                </Tile>
                 <Caption>Career ladder from the Investment Banking detail page.</Caption>
               </div>
             </div>

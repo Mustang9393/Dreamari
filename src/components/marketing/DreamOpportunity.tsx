@@ -15,11 +15,12 @@ export const DO_COPY = {
 // The real partner set (JPMorgan Chase, Chase, AT&T, Kellanova, Kellogg's,
 // informa, EY, HSBC, Blackstone, Warner Bros. Discovery, Amazon, Colgate,
 // Pringles, Verizon, Nielsen, Yahoo, Versace, Michael Kors, Nickelodeon, MTV,
-// VH1, BET, DC, TNT and more), cropped from the supplied
-// partner-logo-wall.png to the logo card itself (1100x520). The logos are
+// VH1, BET, DC, TNT and more), cut from the supplied partner-logo-wall.png
+// to the logos' own bounding box (826x455, no baked-in margin), so the even
+// padding around them is the card's, not the picture's. The logos are
 // full-colour on white, so the wall always sits on a white card with a
 // hairline, whichever theme the page is in.
-const WALL = { src: "/images/marketing/partner-logos.webp", width: 1100, height: 520 };
+const WALL = { src: "/images/marketing/partner-logos.webp", width: 826, height: 455 };
 
 // The Dream Opportunity mark, from the supplied vectorised logo. The vector
 // trace bakes its own off-white ground into the letter counters, so the mark
@@ -46,18 +47,18 @@ export function PartnerLogoWall({ size = "full", className = "" }: PartnerLogoWa
   const full = size === "full";
   return (
     <div
-      className={`${full ? "rounded-[20px] p-4 sm:p-7" : "rounded-2xl p-3 sm:p-4"} border ${className}`}
+      className={`${full ? "rounded-[24px] p-6 sm:p-10 lg:p-12" : "rounded-2xl p-4 sm:p-6"} border ${className}`}
       style={{
         background: "#ffffff",
-        borderColor: full ? "var(--border)" : "color-mix(in srgb, var(--foreground) 10%, transparent)",
-        boxShadow: full ? "0 24px 60px -32px rgba(5,7,15,0.35)" : "none",
+        borderColor: full ? "color-mix(in srgb, var(--foreground) 10%, transparent)" : "color-mix(in srgb, var(--foreground) 10%, transparent)",
+        boxShadow: full ? "0 32px 70px -34px rgba(5,7,15,0.35), 0 2px 6px -2px rgba(5,7,15,0.12)" : "none",
       }}
     >
       <Image
         src={WALL.src}
         width={WALL.width}
         height={WALL.height}
-        sizes={full ? "(max-width: 900px) 92vw, 900px" : "(max-width: 700px) 88vw, 620px"}
+        sizes={full ? "(max-width: 900px) 84vw, 830px" : "(max-width: 700px) 80vw, 520px"}
         alt="Dream Opportunity partner brands, including JPMorgan Chase, Chase, AT&T, Kellanova, Kellogg's, informa, EY, HSBC, Blackstone, Warner Bros. Discovery, Amazon, Colgate, Pringles, Verizon, Nielsen, Yahoo, Versace, Michael Kors, Nickelodeon, MTV, VH1, BET, DC and TNT"
         className="h-auto w-full"
       />

@@ -38,6 +38,87 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 Schools landing, visuals pass (branch `schools-landing`): composed product visuals replace every screenshot crop
+
+Rule for this project from today: marketing imagery is never a cropped
+screenshot. Every visual is a composed piece with its own frame, deliberate
+padding and one focal component. The eight `.webp` crops the user rejected
+(hero career detail, five stage crops, educators student plan, data career
+ladder) are deleted; nothing references them.
+
+- **`SchoolsVisuals.tsx`** (new) holds every composition. `Tile` is the light
+  frame (hero-mid fading to the page, a faint wash of the stage's world
+  colour, hairline, `p-6 sm:p-10`). `Screen` is the focal card: a dark
+  product surface that re-enters the app's Semantic.Dark token scope by
+  carrying the `marketing-v2` class (tokens.css defines the dark set on that
+  class; the product is dark, the Schools page is light, and a device screen
+  shows the product). It is a container; `--mu` = width over a design width
+  (`clamp(floor, 100cqw / base, 1.25)`), so type and spacing scale with the
+  card the way the chapter graphics do. No new colours: every value is a
+  token from that scope or the light page's.
+- **Hero**: `HeroLaptop`, a CSS laptop (ink lid, camera dot, wider base with
+  a lighter lip) whose 16:10 screen is a recreation of the Career Detail
+  header for Investment Banking: the poster photo on the right fading into
+  the card (CardProgressiveBlur, the header's own scrims), the title in the
+  Business & Money poster face, world label, summary, Play Game / Glossary
+  Game and the four icon buttons, the scenario line, and the Typical degree /
+  Typical pay facts with the accent-gradient figures.
+- **Five stages**, one 5:4 card each at the same size, same tile, same
+  padding: Build (question 3 of 10 with the flow's aurora glow, Business &
+  Money checked, progress bar), Match (Find your Top 3 slots, the IB poster
+  card sized from the card's height, a peeking card behind, Pass / Like),
+  Explore (world chips, "Recommended because you liked Business & Money",
+  three whole poster cards: Asset Manager, Quant, Accountant; long single
+  words step the title down as PosterCard does), Immerse (the Play console
+  tile at rest: scene, Level 1 chip, Christina's line, the question and three
+  console rows with the cursor on the best), Connect (the Finance community
+  with 312 / 61 / 5, JPMorgan Chase / Goldman Sachs / EY via `CompanyChip`,
+  Maya's question and Marcus's verified answer).
+- **Counselors**: `ProgressScreen`, the Profile overview (name row with
+  `MatchRing`, the My Top Three / My Plan / Career Report bento with the plan
+  bar, Do this next with the Explore and Play verbs). Aspect 4:3 on phones,
+  16:10 from `sm`. The "educator dashboard is in development" caption stays.
+- **Data credibility**: `LadderScreen`, the Investment Banking career ladder
+  from `career/data.ts` (`CAREER_EXTRAS`, the four rungs with a figure) and
+  the profile's source sentence. No chart.
+- **Logo wall**: `partner-logos.webp` re-cut from `partner-logo-wall.png` to
+  the logos' bounding box (826x455, was 1100x520 with 135 px of baked-in side
+  margin), so the white card's own padding (`p-6 sm:p-10 lg:p-12` full,
+  `p-4 sm:p-6` compact) is the frame. Same file for the student `BuiltByStamp`.
+- `SchoolsView.tsx`: `Shot`/`Screen`/`next/image` gone; each stage carries
+  `accent` and `graphic`; copy, order, nav, form and mailto untouched.
+  Another session's `TrustLine` import/usage in this file was left in place
+  and not staged here.
+- Chrome note: backdrop-filter layers inside a rounded, overflow-hidden card
+  escape the corner (a square photo corner shows at the header's bottom
+  right; the app's own Career Detail header has the same artifact). The
+  composition cards clip with `clip-path: inset(0 round var(--radius-lg))`,
+  which Chrome honours; `isolation` / `translateZ(0)` did not help. Worth
+  applying to `CareerDetailExperience`'s header too.
+
+Validation (7 Sept): `npx tsc --noEmit` clean; `npx eslint` clean on
+SchoolsVisuals, SchoolsView, DreamOpportunity; `npm run tokens:check`
+passes (464 tokens, artifacts current). Locked landing files byte-identical
+to `main` (Hero, HowItWorks, ChapterShell, Footer, chapters/). Live in a
+detached worktree on :3106 driven by headless Chrome (Playwright) at 1440
+and 390: no horizontal overflow at either width; every composition sits
+inside its tile with 41 px (desktop) / 25 px (phone) of padding on all
+sides; the five stage cards measure 420x336 each on desktop; no `role="img"`
+element scrolls its own content; the logo wall image sits 49 px (desktop) /
+25 px (phone) inside its card; no console errors; the student landing's hero
+and stamp render as before. Screenshots of every tile were inspected at both
+widths.
+
+Unverified: the compositions on a real phone (touch, Safari); the Browser
+pane was not used. The corner-clipping fix was checked at 1440 in headless
+Chrome only.
+
+Recommended next: have the user look at the hero laptop and the five stage
+tiles at their own screen size; consider whether the Match card wants its
+JPMorgan Chase / Goldman Sachs employer marks back (the app card carries
+them; the composition shows the median only).
+
+
 ### 2026-09-07 Schools landing (branch `schools-landing`): audience-aware nav, real-screenshot Schools view, demo form, Dream Opportunity stamp
 
 Resumed from an uncommitted working tree (the previous run was cut off by a
