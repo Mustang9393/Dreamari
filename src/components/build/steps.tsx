@@ -457,9 +457,9 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
 // and no yellow (direct feedback, 5 Sept 2026).
 const SPARK_COLORS = ["#ffffff", "#e9d5ff", "#fbcfe8", "#fff4e0", "#f5e9ff", "#ffe4ec"];
 
-/** Particle VFX for the landing: a bloom of light swells and fades at the
- *  centre while fine glowing dust drifts outward and upward, twinkling, with
- *  a few thin light streaks among the dots. Everything is seeded from the
+/** Particle VFX for the landing: fine glowing dust drifts outward and
+ *  upward from the centre, twinkling, with a few thin light streaks among
+ *  the dots (the light bloom came off, direct feedback: too much). Everything is seeded from the
  *  index so a wave renders the same every time. */
 function MagicSparkles({ count }: { count: number }) {
   const rnd = (i: number, k: number) => ((i * k) % 100) / 100;
@@ -481,7 +481,6 @@ function MagicSparkles({ count }: { count: number }) {
   });
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
-      <span className="magic-bloom absolute" />
       {dots.map((d, i) => (
         <span
           key={i}
