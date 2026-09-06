@@ -23,3 +23,39 @@ export function playMilestoneChime() {
     bellTone(running, 783.99, now + 0.18, 0.32, 0.17);
   });
 }
+
+
+// The Dream Score count-up (direct feedback, 5 Sept 2026): a Game Boy style
+// square wave that starts low and heavy and climbs only a little as the
+// number rises, never sharp. Two squares an octave apart, soft lowpass.
+export function playXpRise(durationMs: number) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  whenRunning(ctx, (running) => {
+    const now = running.currentTime;
+    const dur = Math.max(0.3, durationMs / 1000);
+    const filter = running.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.value = 1.2;
+    filter.frequency.setValueAtTime(700, now);
+    filter.frequency.linearRampToValueAtTime(1400, now + dur);
+    const gain = running.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.07, now + 0.08);
+    gain.gain.setValueAtTime(0.07, now + dur * 0.9);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur + 0.18);
+    filter.connect(gain).connect(running.destination);
+    // low-heavy start, a modest climb: about an octave and a half in total
+    const curve = new Float32Array([62, 66, 74, 88, 108, 132, 160, 185]);
+    for (const [ratio, level] of [[1, 1], [2, 0.35]] as const) {
+      const osc = running.createOscillator();
+      osc.type = "square";
+      osc.frequency.setValueCurveAtTime(curve.map((f) => f * ratio), now, dur);
+      const g = running.createGain();
+      g.gain.value = level;
+      osc.connect(g).connect(filter);
+      osc.start(now);
+      osc.stop(now + dur + 0.2);
+    }
+  });
+}

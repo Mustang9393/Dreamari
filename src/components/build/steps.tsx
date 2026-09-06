@@ -1,14 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { Confetti } from "@/components/flow/aurora/Confetti";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
-import { playMilestoneChime } from "./sound";
+import { playMilestoneChime, playXpRise } from "./sound";
 import { awardDreamScore } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
@@ -454,19 +453,73 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
 // climactic moment. Screen-wide confetti falls for the first seconds, Dreamy
 // parties with local bursts, the chime plays, and the copy says what comes
 // next. Its CTA goes straight to the Match deck.
-const CONFETTI_COLORS = ["#2f6bf2", "#7c5cff", "#ff5fa2", "#ffd166", "#33c78c", "#ffffff"];
+const SPARK_COLORS = ["#ffffff", "#ffd166", "#c4b5fd", "var(--accent-subtle)", "#fbcfe8"];
+
+/** A bloom of four-point stars from the middle of the screen: each one pops
+ *  in, drifts outward and upward, twinkles and fades. Sizes, angles, delays
+ *  and colours are seeded from the index so a wave is the same each render. */
+function MagicSparkles({ count }: { count: number }) {
+  const stars = Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2 + ((i * 7919) % 100) / 100;
+    const dist = 110 + ((i * 104729) % 100) * 2.4;
+    const size = 12 + ((i * 1301) % 100) / 100 * 26;
+    return {
+      x: Math.cos(a) * dist,
+      y: Math.sin(a) * dist * 0.72 - 90,
+      size,
+      delay: ((i * 613) % 100) / 100 * 0.5,
+      dur: 1.7 + ((i * 419) % 100) / 100 * 1.1,
+      color: SPARK_COLORS[i % SPARK_COLORS.length],
+    };
+  });
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
+      {stars.map((st, i) => (
+        <span
+          key={i}
+          className="magic-spark absolute"
+          style={{
+            width: st.size,
+            height: st.size,
+            ["--sx" as string]: `${st.x}px`,
+            ["--sy" as string]: `${st.y}px`,
+            ["--spark" as string]: st.color,
+            animationDelay: `${st.delay}s`,
+            animationDuration: `${st.dur}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 const BUILD_XP = 100;
 const COUNT_MS = 1100;
+const HOLD_MS = 900;
+const FLY_MS = 950;
 
 export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () => void; onBack: () => void }) {
   const [burstNonce, setBurstNonce] = useState(0);
-  const [confetti, setConfetti] = useState(false);
+  // sparkle waves over the card as the score lands (in place of confetti)
+  const [sparkNonce, setSparkNonce] = useState(0);
   // The Dream Score moment (Joshua Pierce, 5 Sept 2026): +XP counts up from
-  // 1 to 100 fast, lands, and THEN the confetti falls and Dreamy parties.
+  // 1 to 100 fast with a rising sweep, lands with confetti, Dreamy and the
+  // chime, then lifts, floats and shrinks into its slot beside the menu,
+  // where the header chip pops in. The points are banked as it arrives (or
+  // on the way out, if the student taps Reveal before it gets there).
   const [xp, setXp] = useState(0);
+  const [flown, setFlown] = useState(false);
+  const xpRef = useRef<HTMLParagraphElement | null>(null);
+  const awarded = useRef(false);
+  const landedRef = useRef(false);
   useEffect(() => {
-    awardDreamScore("build-complete", BUILD_XP);
+    const bank = () => {
+      if (awarded.current) return;
+      awarded.current = true;
+      awardDreamScore("build-complete", BUILD_XP);
+    };
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    playXpRise(COUNT_MS);
     const start = performance.now();
     let raf = 0;
     const tick = (now: number) => {
@@ -477,18 +530,76 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
     };
     raf = requestAnimationFrame(tick);
     const land = COUNT_MS + 60;
-    const chime = setTimeout(() => playMilestoneChime(), land);
+    const chime = setTimeout(() => { landedRef.current = true; playMilestoneChime(); }, land);
     const kick = setTimeout(() => setBurstNonce(1), land);
-    const rain = setTimeout(() => setConfetti(true), land);
-    const stop = setTimeout(() => setConfetti(false), land + 3600);
+    const rain = setTimeout(() => setSparkNonce(1), land);
+    const stop = setTimeout(() => setSparkNonce(2), land + 900);
     const interval = setInterval(() => setBurstNonce((n) => (n < 4 ? n + 1 : n)), 1300);
+    let flight: Animation | null = null;
+    let clone: HTMLElement | null = null;
+    let trail: ReturnType<typeof setInterval> | null = null;
+    const fly = setTimeout(() => {
+      const el = xpRef.current;
+      if (!el || reduce) { setFlown(true); bank(); return; }
+      const from = el.getBoundingClientRect();
+      // where the header chip will sit: just left of the menu button
+      const menu = document.querySelector("header button") as HTMLElement | null;
+      const m = menu?.getBoundingClientRect();
+      const targetCx = m ? m.left - 10 - 42 : window.innerWidth - 120;
+      const targetCy = m ? m.top + m.height / 2 : 38;
+      clone = el.cloneNode(true) as HTMLElement;
+      Object.assign(clone.style, { position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, margin: "0", zIndex: "70", pointerEvents: "none", animation: "none", visibility: "visible", willChange: "transform, opacity", filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" });
+      // inside the flow's theme scope (the body has none of its colour
+      // variables, so a body-level copy rendered as transparent text)
+      (el.closest(".marketing-v2") ?? document.body).appendChild(clone);
+      setFlown(true);
+      const dx = targetCx - (from.left + from.width / 2);
+      const dy = targetCy - (from.top + from.height / 2);
+      flight = clone.animate(
+        [
+          { transform: "translate(0, 0) scale(1)", opacity: 1, offset: 0 },
+          { transform: `translate(${dx * 0.08}px, -56px) scale(1.08)`, opacity: 1, offset: 0.3 },
+          { transform: `translate(${dx * 0.55}px, ${dy * 0.35 - 40}px) scale(0.7)`, opacity: 1, offset: 0.62 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.28)`, opacity: 0.85, offset: 1 },
+        ],
+        { duration: FLY_MS, easing: "cubic-bezier(0.3, 0.6, 0.15, 1)", fill: "forwards" },
+      );
+      // a trail of sparks peeling off the score as it travels
+      const host = clone.parentElement ?? document.body;
+      trail = setInterval(() => {
+        if (!clone) return;
+        const r = clone.getBoundingClientRect();
+        const spark = document.createElement("span");
+        spark.className = "xp-trail-spark";
+        const size = 6 + Math.random() * 8;
+        Object.assign(spark.style, {
+          left: `${r.left + r.width * (0.35 + Math.random() * 0.3)}px`,
+          top: `${r.top + r.height * (0.3 + Math.random() * 0.4)}px`,
+          width: `${size}px`,
+          height: `${size}px`,
+          ["--tx" as string]: `${(Math.random() - 0.5) * 70}px`,
+          ["--ty" as string]: `${20 + Math.random() * 60}px`,
+          ["--spark" as string]: ["#ffffff", "#ffd166", "#c4b5fd", "var(--accent-subtle)"][Math.floor(Math.random() * 4)],
+        });
+        host.appendChild(spark);
+        setTimeout(() => spark.remove(), 900);
+      }, 38);
+      flight.onfinish = () => { clone?.remove(); clone = null; if (trail) clearInterval(trail); trail = null; bank(); };
+    }, land + HOLD_MS);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(chime);
       clearTimeout(kick);
       clearTimeout(rain);
       clearTimeout(stop);
+      clearTimeout(fly);
       clearInterval(interval);
+      flight?.cancel();
+      clone?.remove();
+      if (trail) clearInterval(trail);
+      // leaving after the count landed (Reveal tapped mid-flight) still banks
+      // the points; an unmount before that (dev double-invoke) does not
+      if (landedRef.current) bank();
     };
   }, []);
   const landed = xp >= BUILD_XP;
@@ -516,20 +627,23 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
         </div>
         <h1 className={`${bricolage.className} text-[32px] font-extrabold text-[var(--color-night-foreground)] sm:text-[38px]`}><InkText text="Congratulations!" /></h1>
         {/* the score: counts 1 to 100, then pops as it lands */}
-        <p aria-live="polite" className={`${bricolage.className} mt-2 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`} style={{ color: "var(--accent-subtle)", textShadow: landed ? "0 0 28px color-mix(in srgb, var(--primary) 55%, transparent)" : "none" }}>
-          <Sparkles className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden /> +{xp} XP
+        {/* the score line keeps its height after the number flies off, so the
+           copy under it does not jump */}
+        <p
+          ref={xpRef}
+          aria-live="polite"
+          className={`${bricolage.className} xp-shimmer-text mt-2 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`}
+          style={{ visibility: flown ? "hidden" : "visible", filter: landed ? "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" : "none" }}
+        >
+          <Sparkles className="h-7 w-7 flex-none sm:h-8 sm:w-8" aria-hidden style={{ color: "var(--accent-subtle)" }} /> <span className="xp-shimmer-ink">+{xp} XP</span>
         </p>
         <p className="mt-3 text-[16px] leading-[22px] font-semibold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_1.2s_both] sm:text-[18px] sm:leading-[24px]">Your personalized career matches are ready.</p>
       </GlassCard>
       </div>
       </div>
-      {/* a stacking context of its own, so the canvas (which paints at z -10
-         inside it) lands above the page instead of behind the background */}
-      {confetti && (
-        <div aria-hidden className="pointer-events-none fixed inset-0 z-[60]">
-          <Confetti colors={CONFETTI_COLORS} active />
-        </div>
-      )}
+      {/* the success is sparkles, not confetti (direct feedback, 5 Sept 2026):
+         two waves of stars bloom out from the centre and drift up */}
+      {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 46 : 28} />}
       <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
