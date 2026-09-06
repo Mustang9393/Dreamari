@@ -9,7 +9,7 @@ Framing for students: competitors (Duolingo, Khan Academy, Codecademy) award XP 
 
 ## Implemented
 - Build completion awards 100 XP once (`build-complete`), with the count-up moment described in build.md.
-- The score shows as a small chip beside the menu on Build and Match (`FlowChrome`) as "<n> XP" with a sparkle; it bounces in with a ring flash when it changes. The app header (`DesktopNavigation`, from md), the Profile phone bar and Home show the same live figure; until any XP is earned they show the design placeholder 15,980.
+- The score shows as a small chip beside the menu on Build and Match (`FlowChrome`) as "<n> XP" with a sparkle; it bounces in with a ring flash when it changes. The app header (`DesktopNavigation`, from md, on every page including Profile) and Home show the same live figure (0 XP before Build). The Profile hero does not carry a Dream Score tile (Joshua Pierce, Slack, 6 Sept 2026).
 - Store: `src/lib/dreamScore.ts` (`readDreamScore`, `awardDreamScore(milestone, points)`, `useDreamScore`). Prototype keeps it in `localStorage`; production stores it server-side and awards once per milestone id.
 
 ## Not yet specified

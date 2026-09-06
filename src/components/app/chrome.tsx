@@ -212,9 +212,10 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
       </nav>
 
       <div className="flex items-center gap-[var(--space-5)]">
-        {/* On the Profile page the hero card carries these stats, so the nav
-           drops them (the way Duolingo's profile hides its top counters). */}
-        {active !== "Profile" && (
+        {/* Streak and Dream Score on every page, Profile included: the score
+           stays at the top of the app the way it lands there after Build
+           (Joshua Pierce, Slack, 6 Sept 2026). */}
+        {(
           <>
             {/* Streak/XP yield below lg so the dead-centered nav pill never
                collides with them on narrow desktop widths. */}

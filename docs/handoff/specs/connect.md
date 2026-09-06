@@ -27,3 +27,6 @@ The Volunteer role opens the profile as students see it; "My dashboard" opens th
 
 ## Files
 `src/components/connect/ConnectExperience.tsx`, `ProProfile.tsx`, `ProDashboard.tsx`, `CommunityCard.tsx`, `primitives.tsx`, `data.ts`.
+
+## Demo role switcher (6 Sept 2026)
+The five-role switcher (Student, Attendee, Volunteer, Partner, Staff) is hidden behind a small "Demo" button at the top of Connect. A student sees only the button; pressing it reveals the roles. Once a non-student role is showing the roles stay visible so the way back is obvious. Demo only, never a product feature (Joshua Pierce, Slack, 6 Sept 2026).

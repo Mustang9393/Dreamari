@@ -183,6 +183,12 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
   );
 }
 
+// Daily Drop is hidden for the school focus group (Joshua Pierce, Slack,
+// 6 Sept 2026): the essential features get understood first, the Drop comes
+// back halfway through. Flip to true to restore panel 1 and its takeover.
+const SHOW_DAILY_DROP = false;
+const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
+
 function HeroBanner() {
   const router = useRouter();
   const [panel, setPanel] = useState(0);
@@ -198,11 +204,11 @@ function HeroBanner() {
     // auto-advancing billboards, long enough to read, short enough that
     // the third panel is seen. The timing segment and the photo push run on
     // the same clock (home-hero-seg, home-hero-push).
-    const timer = setInterval(() => setPanel((current) => (current + 1) % 3), 7000);
+    const timer = setInterval(() => setPanel((current) => (current + 1) % PANEL_COUNT), 7000);
     return () => clearInterval(timer);
   }, [paused, dropOpen]);
 
-  const step = (delta: number) => setPanel((current) => (current + delta + 3) % 3);
+  const step = (delta: number) => setPanel((current) => (current + delta + PANEL_COUNT) % PANEL_COUNT);
 
   return (
     <section
@@ -226,7 +232,7 @@ function HeroBanner() {
          floating over an office photo, unrelated to that panel's theme.
          Only render them while Panel 1 is actually showing; light mode
          drops them regardless, same as before. */}
-      {panel === 0 && (
+      {SHOW_DAILY_DROP && panel === 0 && (
         <div aria-hidden data-space-backdrop className="pointer-events-none absolute inset-0 z-[1] motion-safe:animate-[fade-slide-up_0.4s_ease]">
           {SPACE_ACCENTS.map((dot, index) => (
             <span key={index} className="absolute rounded-full" style={{ left: dot.left, top: dot.top, width: dot.size, height: dot.size, background: "var(--foreground)" }} />
@@ -237,7 +243,7 @@ function HeroBanner() {
       <div className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ transform: `translateX(-${panel * 100}%)` }}>
         {/* Panel 1 — Daily Drop: Dreamy's flight is the art, on the dark
            base with one soft violet glow behind him. */}
-        <HeroPanel
+        {SHOW_DAILY_DROP && <HeroPanel
           active={panel === 0}
           eyebrow="DAILY DROP"
           eyebrowColor="var(--chart-3)"
@@ -260,13 +266,13 @@ function HeroBanner() {
           <HeroAction onClick={() => setDropOpen(true)}>
             <Sparkle className="h-4 w-4" aria-hidden /> Catch the Drop
           </HeroAction>
-        </HeroPanel>
+        </HeroPanel>}
 
         {/* Panel 2 — New game launched. Investment Banker already lives in
            the Continue rail below, so the feature slot announces the next
            game instead (direct feedback, 4 Sept 2026). */}
         <HeroPanel
-          active={panel === 1}
+          active={panel === (SHOW_DAILY_DROP ? 1 : 0)}
           photo={REGISTERED_NURSE.cover}
           focus="50% 30%"
           eyebrow="NEW GAME LAUNCHED"
@@ -289,7 +295,7 @@ function HeroBanner() {
            covers, and a poster whose subject stands on the right where the
            photo is clear. */}
         <HeroPanel
-          active={panel === 2}
+          active={panel === (SHOW_DAILY_DROP ? 2 : 1)}
           photo="/images/app/poster-drone-pilot.png"
           focus="50% 20%"
           eyebrow="TRENDING NOW"
@@ -331,7 +337,7 @@ function HeroBanner() {
         {/* story-style segments: the live one fills over the 7s the panel
            holds, so the timing is visible instead of a guess */}
         <div className="flex items-center gap-[5px]">
-          {[0, 1, 2].map((index) => (
+          {Array.from({ length: PANEL_COUNT }, (_, index) => index).map((index) => (
             <button
               key={index}
               type="button"
@@ -366,7 +372,7 @@ function HeroBanner() {
           )}
         </button>
       </div>
-      <DailyDropTakeover open={dropOpen} onClose={() => setDropOpen(false)} />
+      {SHOW_DAILY_DROP && <DailyDropTakeover open={dropOpen} onClose={() => setDropOpen(false)} />}
     </section>
   );
 }

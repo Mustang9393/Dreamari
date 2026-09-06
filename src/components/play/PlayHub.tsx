@@ -70,18 +70,6 @@ export function PlayHub() {
 
         <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} />
 
-        {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
-           Play is for experiencing careers, Explore for discovering them.
-           Same banner as Profile's Top Three next step. */}
-        <NextStepBanner
-          eyebrow="Looking for another career to play?"
-          text="Explore more careers and find another simulation to play."
-          ctaLabel="Explore"
-          href="/explore"
-          Icon={ArrowRight}
-          storageKey="dreamari:play-explore-bridge-dismissed"
-        />
-
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
            so it gets a real playable card; anything added here before its
@@ -106,6 +94,19 @@ export function PlayHub() {
             </ul>
           </section>
         )}
+        {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
+           Play is for experiencing careers, Explore for discovering them.
+           Sits after the Glossary Games so it closes the page instead of
+           interrupting it (direct feedback, 6 Sept 2026). */}
+        <NextStepBanner
+          eyebrow="Looking for another career to play?"
+          text="Explore more careers and find another simulation to play."
+          ctaLabel="Explore"
+          href="/explore"
+          Icon={ArrowRight}
+          storageKey="dreamari:play-explore-bridge-dismissed"
+        />
+
         <SoonSection label="In the works">
           {soon.map((game) => (
             <SoonCard key={game.careerId} title={game.title} cover={game.cover} />

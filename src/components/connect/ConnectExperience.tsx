@@ -1311,10 +1311,25 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
  *  the way the ?cards= lane switcher worked, so a demo flips between the
  *  four journeys in one tap. Rides the URL as ?as=. */
 function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
+  // The five roles stay hidden until Demo is pressed (Joshua Pierce, Slack,
+  // 6 Sept 2026): a student sees a plain Connect page, a demo opens the
+  // switcher. Once a non-student role is showing, the switcher stays open so
+  // the way back is visible.
+  const [open, setOpen] = useState(false);
+  const showTabs = open || role !== "student";
   return (
     <div className="flex items-center gap-[10px]">
-      <span className="hidden flex-none rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase sm:inline" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Demo</span>
-      <div role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        aria-expanded={showTabs}
+        aria-controls="connect-demo-roles"
+        onClick={() => setOpen((value) => !value)}
+        className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+        style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+      >
+        Demo
+      </button>
+      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1331,7 +1346,7 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
             </button>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

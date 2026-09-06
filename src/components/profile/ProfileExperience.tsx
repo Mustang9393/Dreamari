@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
-import { useDreamScore } from "@/lib/dreamScore";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
@@ -155,7 +154,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
-  const dreamScore = useDreamScore();
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -515,16 +513,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                left, on one row at every width: icon, label, value. On phones
                the type steps down and the streak's extras drop so all three
                still fit side by side (direct feedback, 5 Sept 2026). */}
-            <dl className="grid grid-cols-2 gap-[6px] sm:flex sm:flex-wrap sm:gap-[8px]" style={{ textShadow: "none" }}>
+            {/* Three tiles, as before the Dream Score tile (Joshua Pierce,
+               Slack, 6 Sept 2026: "have the profile header look like it did
+               before"); the score lives in the app header instead. */}
+            <dl className="flex flex-wrap gap-[6px] sm:gap-[8px]" style={{ textShadow: "none" }}>
               {[
-                // Dream Score leads: the stat that grows (live once earned; the
-                // design's 15,980 stands in until then)
-                { Icon: Sparkles, value: `${(dreamScore > 0 ? dreamScore : 15980).toLocaleString("en-US")} XP`, label: "Dream Score", short: "Score", verified: false, sub: null as string | null, valueFirst: false },
-                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
                 { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), label: "Grade", short: null as string | null, verified: false, sub: null as string | null, valueFirst: false },
                 { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, label: "GPA", short: null as string | null, verified: ACADEMIC_RECORD.verified, sub: null as string | null, valueFirst: false },
+                // "12 day streak · Active 142 of 190 days" (direct feedback, 5 Sept 2026)
+                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
               ].map((fact) => (
-                <div key={fact.label} className="flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[9px] py-[8px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
                   <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
                   <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "rgba(255,255,255,0.7)" }}>
                     {fact.short ? <><span className="sm:hidden">{fact.short}</span><span className="hidden sm:inline">{fact.label}</span></> : fact.label}
@@ -1057,7 +1056,8 @@ function Top3Tab({
          simulation for now; the dynamic #1 routing is a later step. */}
       {top3.length > 0 && (
         <NextStepBanner
-          eyebrow="Next step"
+          emphasis="priority"
+          eyebrow="Your next step"
           text="Play your #1 Career Simulation to see if it’s really your #1."
           ctaLabel="Play"
           href="/play/investment-banking"
@@ -1627,17 +1627,6 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </section>
 
-      {/* the same next step as Top Three, so the answer to "what now" is the
-         same on both tabs (Joshua Pierce, Slack, 5 Sept 2026) */}
-      <NextStepBanner
-        eyebrow="Next step"
-        text="Play your #1 Career Simulation to see if it’s really your #1."
-        ctaLabel="Play"
-        href="/play/investment-banking"
-        Icon={Gamepad2}
-        storageKey="dreamari:top3-next-step-dismissed"
-      />
-
       {focus.plan.map((horizon, index) => {
         const unlocked = horizonUnlocked(focus, index);
         const stats = horizonProgress(focus, index);
@@ -1739,6 +1728,19 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
           </section>
         );
       })}
+
+      {/* the same next step as Top Three, at the foot of the plan under the
+         last level so it does not interrupt the plan's order (Joshua Pierce,
+         Slack, 5 and 6 Sept 2026) */}
+      <NextStepBanner
+        emphasis="priority"
+        eyebrow="Your next step"
+        text="Play your #1 Career Simulation to see if it’s really your #1."
+        ctaLabel="Play"
+        href="/play/investment-banking"
+        Icon={Gamepad2}
+        storageKey="dreamari:top3-next-step-dismissed"
+      />
     </div>
   );
 }

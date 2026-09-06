@@ -1144,6 +1144,15 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
   70%, 100% { box-shadow: 0 0 0 10px transparent; }
 }
+/* the priority banner's white button and its eyebrow dot */
+@keyframes next-step-cta-pulse-light {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.55); }
+  70%, 100% { box-shadow: 0 0 0 10px transparent; }
+}
+@keyframes next-step-dot {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
 
 /* Dream Score count-up: gradient ink with a light travelling through it */
 .xp-shimmer-ink {
