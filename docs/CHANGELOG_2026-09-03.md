@@ -342,3 +342,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Profile header back to the three tiles (Grade, GPA, 12 day streak · Active 142 of 190 days); the Dream Score stays in the app header on every page including Profile.
 - Next step banner: a priority treatment (solid brand surface, white type, pulsing eyebrow dot, glow and light sweep, white pulsing button), same size as before, with the X kept. On My Plan it now sits at the foot of the plan under Level 3.
 - Play: the "Looking for another career to play?" bridge moved after the Glossary Games.
+- Dream Score chip (Build, Match and the app header): hovering or focusing it shows a compact tooltip, "Earn Dream Score by exploring careers, playing games, and building your profile. The higher your score, the more you unlock."

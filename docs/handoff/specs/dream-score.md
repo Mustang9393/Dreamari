@@ -12,6 +12,9 @@ Framing for students: competitors (Duolingo, Khan Academy, Codecademy) award XP 
 - The score shows as a small chip beside the menu on Build and Match (`FlowChrome`) as "<n> XP" with a sparkle; it bounces in with a ring flash when it changes. The app header (`DesktopNavigation`, from md, on every page including Profile) and Home show the same live figure (0 XP before Build). The Profile hero does not carry a Dream Score tile (Joshua Pierce, Slack, 6 Sept 2026).
 - Store: `src/lib/dreamScore.ts` (`readDreamScore`, `awardDreamScore(milestone, points)`, `useDreamScore`). Prototype keeps it in `localStorage`; production stores it server-side and awards once per milestone id.
 
+## Hover tooltip (Joshua Pierce, Slack, 6 Sept 2026)
+Hovering or focusing the score chip (Build and Match chip beside the menu, and the app header score) shows a compact tooltip under it: "Earn Dream Score by exploring careers, playing games, and building your profile. The higher your score, the more you unlock." 240px wide, two lines, closes on leave, blur or Escape. `DreamScoreTip` in `src/components/app/DreamScoreTip.tsx`. The one-time intro tooltip after Build is unchanged.
+
 ## Not yet specified
 Points for Match, Top 3 saved, first simulation, roadmap steps. The 15,980 placeholder is gone; a student who has earned nothing sees 0 XP.
 
