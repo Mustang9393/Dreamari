@@ -11,3 +11,7 @@ Before editing, read `docs/AI_HANDOFF.md` and inspect `git status` plus recent c
 Importing into the production app (dreamonna): read `docs/DESIGN_SYSTEM_ALIGNMENT.md` first. Take layout, copy and behaviour from `src/`; take token names from the certified Figma export; never import `design-tokens/`.
 
 The W3C DTCG collections and generated artifacts under `design-tokens/` and `src/app/design-tokens.generated.css` are the visual source of truth. New UI must use existing semantic tokens and shared components whenever an appropriate token or component exists; do not introduce page-local color palettes or duplicate design constants. Run `npm run tokens:check` before every release.
+
+## Engineering handoff
+
+Read `docs/HANDOFF_INDEX.md` first: it lists the locked feature specs in `docs/handoff/specs/`, the source-of-truth data files, the demo-only scaffolding not to build, and the current demo tag. `docs/AI_HANDOFF.md` is a session log; specs win over it.

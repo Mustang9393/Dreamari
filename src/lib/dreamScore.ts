@@ -4,7 +4,8 @@ import { useSyncExternalStore } from "react";
 
 // Dream Score (XP), introduced early and often (Joshua Pierce, 5 Sept 2026):
 // complete a milestone, earn points, see the number rise, want the next one.
-// Kept in the browser for the prototype; the real store is server-side.
+// DEMO ONLY storage: kept in the browser for the prototype; production stores
+// the score server-side and awards once per milestone id.
 const KEY = "dreamari:dream-score";
 const AWARDS_KEY = "dreamari:dream-score:awards";
 const EVENT = "dreamari:dream-score-change";

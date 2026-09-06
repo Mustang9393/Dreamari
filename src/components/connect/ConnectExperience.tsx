@@ -1277,7 +1277,8 @@ export function ConnectExperience() {
   );
 }
 
-// ——— demo role switcher (for showing the journeys separately, not a product feature) ———
+// ——— DEMO ONLY: role switcher and volunteer picker. Not a product feature;
+// production has one role per signed-in user. See docs/HANDOFF_INDEX.md. ———
 
 type DemoRole = "student" | "attendee" | "pro" | "partner" | "admin";
 
