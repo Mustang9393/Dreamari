@@ -170,7 +170,8 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
 
 export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
   const score = useDreamScore();
-  const xp = score > 0 ? score : 15980;
+  // one number everywhere: the live Dream Score (100 after Build), never a placeholder
+  const xp = score;
   return (
     <header
       // glass-surface-1 (3% alpha) read as barely-there once real content
@@ -224,7 +225,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
               </span>
             </span>
             {/* Dream Score, live: the student's own XP once they have earned any
-               (the design's 15,980 stands in until then). Shown from md so the
+               the same figure Build and Match show. Shown from md so the
                score follows them from Build and Match into the app. */}
             <span key={xp} className="hidden items-center gap-[6px] md:flex motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
               <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />

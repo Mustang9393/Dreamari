@@ -429,7 +429,8 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
 export function HomeExperience() {
   const liveScore = useDreamScore();
-  const homeXp = liveScore > 0 ? liveScore : 15980;
+  // one number everywhere: the live Dream Score (100 after Build), never a placeholder
+  const homeXp = liveScore;
   const router = useRouter();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
