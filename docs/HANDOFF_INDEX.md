@@ -46,6 +46,7 @@ Last updated: 6 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 | Explore | specs/explore.md | Locked |
 | Connect (student, events, professional profile, volunteer dashboard) | specs/connect.md | Locked |
 | Dream Score (XP) | specs/dream-score.md | Locked for Build; later milestones unspecified |
+| Progression system (Dreams, Your Sky, Altitude, badges) | specs/progression-system.md | Proposal, not locked; do not build until Joshua signs off |
 
 ## Demo-only scaffolding (do not build)
 

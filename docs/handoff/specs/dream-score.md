@@ -13,4 +13,6 @@ Framing for students: competitors (Duolingo, Khan Academy, Codecademy) award XP 
 - Store: `src/lib/dreamScore.ts` (`readDreamScore`, `awardDreamScore(milestone, points)`, `useDreamScore`). Prototype keeps it in `localStorage`; production stores it server-side and awards once per milestone id.
 
 ## Not yet specified
-Points for Match, Top 3 saved, first simulation, roadmap steps; what replaces the 15,980 placeholder for a student who has not earned anything yet (0 XP, or hide).
+Points for Match, Top 3 saved, first simulation, roadmap steps. The 15,980 placeholder is gone; a student who has earned nothing sees 0 XP.
+
+A full proposal for everything after Build (Dreams, Your Sky, Altitude levels, milestone badges, six badge families, editions, secrets, XP table) is in progression-system.md. It is a proposal for Joshua's review, not a locked spec.
