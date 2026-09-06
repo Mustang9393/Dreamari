@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { SchoolsFinalCTA } from "./FinalCTAs";
+import { TrustLine } from "./TrustLine";
 
 type SchoolsViewProps = {
   view: "student" | "schools";
@@ -279,6 +280,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
         </div>
       </section>
 
+      {/* credibility lines before the closing CTA (Joshua Pierce, Slack, 6 Sept 2026) */}
+      <TrustLine />
       <SchoolsFinalCTA />
     </div>
   );
