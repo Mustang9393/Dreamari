@@ -37,10 +37,7 @@ import {
   subscribeMuted,
 } from "@/components/play/sound";
 import {
-  glossaryProgressSnapshot,
   saveLessonComplete,
-  serverGlossaryProgressSnapshot,
-  subscribeGlossaryProgress,
 } from "./progress";
 import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -1406,8 +1403,6 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
   const [dismissedReview, setDismissedReview] = useState(false);
-
-  const progressStore = useSyncExternalStore(subscribeGlossaryProgress, glossaryProgressSnapshot, serverGlossaryProgressSnapshot);
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
