@@ -638,19 +638,22 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
         </div>
         <h1 className={`${bricolage.className} text-[32px] font-extrabold text-[var(--color-night-foreground)] sm:text-[38px]`}><InkText text="Congratulations!" /></h1>
         {/* the score: counts 1 to 100, then pops as it lands */}
-        {/* the name of the system, said once, where it is first earned: the
-           unit students see is XP, the system is the Dream Score */}
-        <p className="mt-3 text-[11px] leading-[15px] font-bold tracking-[0.16em] uppercase motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.2s_both]" style={{ color: "var(--color-night-muted-foreground)", visibility: flown ? "hidden" : "visible" }}>Dream Score</p>
-        {/* the score line keeps its height after the number flies off, so the
-           copy under it does not jump */}
-        <p
-          ref={xpRef}
-          aria-live="polite"
-          className={`${bricolage.className} xp-shimmer-text mt-1 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`}
-          style={{ visibility: flown ? "hidden" : "visible", filter: landed ? "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" : "none" }}
-        >
-          <Sparkles className="h-7 w-7 flex-none sm:h-8 sm:w-8" aria-hidden style={{ color: "var(--accent-subtle)" }} /> <span className="xp-shimmer-ink">+{xp} XP</span>
-        </p>
+        {/* the label and the number share one block that collapses once the
+           number has flown, so the copy below rises to sit under the title
+           instead of leaving a hole (direct feedback, 5 Sept 2026) */}
+        <div className="overflow-hidden transition-[max-height,opacity] duration-500 ease-out" style={{ maxHeight: flown ? 0 : 140, opacity: flown ? 0 : 1 }}>
+          {/* the name of the system, said once, where it is first earned: the
+             unit students see is XP, the system is the Dream Score */}
+          <p className="mt-3 text-[11px] leading-[15px] font-bold tracking-[0.16em] uppercase motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.2s_both]" style={{ color: "var(--color-night-muted-foreground)" }}>Dream Score</p>
+          <p
+            ref={xpRef}
+            aria-live="polite"
+            className={`${bricolage.className} xp-shimmer-text mt-1 flex items-center justify-center gap-[8px] text-[40px] leading-[44px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px] ${landed ? "motion-safe:animate-[dreamy-pop_0.6s_cubic-bezier(0.16,1,0.3,1)_both]" : ""}`}
+            style={{ filter: landed ? "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" : "none" }}
+          >
+            <Sparkles className="h-7 w-7 flex-none sm:h-8 sm:w-8" aria-hidden style={{ color: "var(--accent-subtle)" }} /> <span className="xp-shimmer-ink">+{xp} XP</span>
+          </p>
+        </div>
         <p className="mt-3 text-[16px] leading-[22px] font-semibold text-[var(--color-night-foreground)] motion-safe:animate-[fade-slide-up_0.6s_ease-out_1.2s_both] sm:text-[18px] sm:leading-[24px]">Your personalized career matches are ready.</p>
       </GlassCard>
       </div>

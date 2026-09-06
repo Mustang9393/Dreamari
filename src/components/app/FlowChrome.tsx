@@ -57,7 +57,7 @@ export function FlowChrome() {
           <span role="status" className={`absolute top-[calc(100%+12px)] right-[50px] w-[232px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left ${intro === "in" ? "motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "motion-safe:animate-[tip-out_0.5s_ease-in_both]"}`} style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 40px -20px rgba(0,0,0,0.7), 0 0 30px -12px var(--primary)", fontFamily: "var(--font-body)" }}>
             <span aria-hidden className="absolute -top-[6px] right-[26px] block size-[12px] rotate-45 border-t border-l" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" }} />
             <span className="block text-[12.5px] leading-[17px] font-bold">Your Dream Score</span>
-            <span className="block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Every milestone you finish adds XP.</span>
+            <span className="block text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Earn XP as you complete milestones.</span>
           </span>
         )}
       </span>
