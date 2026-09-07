@@ -76,7 +76,7 @@ import {
   type EventBoard,
   type EventResource,
   type Insight,
-  type Thread, OPPORTUNITIES , type Opportunity } from "./data";
+  type Thread, type ProResponse, OPPORTUNITIES , type Opportunity } from "./data";
 
 // Connect — moderated career Q&A + post-event continuation, built to the
 // implementation handoff (v1.0, 22 Aug 2026). This is the P1 FRONTEND surface
@@ -168,6 +168,19 @@ const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
 
 function proById(id: string) {
   return PROS.find((p) => p.id === id)!;
+}
+
+// The single line that gives a question row real information scent (direct
+// feedback, 8 Sept 2026: a title alone doesn't say whether it's worth a
+// click -- Stack Overflow/Quora both solve this with a snippet of the top
+// answer). Prefers the primary pro answer; falls back to the asker's own
+// elaboration (`context`) when nothing has answered yet, so an unanswered
+// question still previews as something specific rather than a bare title.
+function questionSnippet(thread: Thread): { by?: string; text: string } | undefined {
+  const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
+  if (answer) return { by: proById(answer.proId).name, text: answer.body };
+  if (thread.context) return { text: thread.context };
+  return undefined;
 }
 
 function eventById(id: string) {
@@ -721,6 +734,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
   // Display count for the demo (data.ts `comments`), falling back to the
   // real list; the thread itself may hold fewer. Direct feedback.
   const comments = thread.comments ?? thread.responses.length;
+  const snippet = questionSnippet(thread);
   return (
     // A post in a feed, not a box on a page (direct feedback, 8 Sept 2026:
     // "let's not do the cards for the card view, do it like Reddit does") --
@@ -745,24 +759,38 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
           <Avatar name={thread.handle} size={26} />
           <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
           <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
-          {comments === 0 && (
-            <span className="inline-flex flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
-              Unanswered
-            </span>
-          )}
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
-      <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-      <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+      {/* Plain heading, not a quoted line (direct feedback, 8 Sept 2026: a
+         question is the SUBJECT of the post, not something to read as a
+         quotation -- Reddit and Stack Overflow both just set the title). */}
+      <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h3>
+      {/* Information scent (direct feedback: a title alone doesn't say
+         whether it's worth a click) -- a one-line snippet of the top answer
+         if one exists, or the asker's own elaboration if not, the way Stack
+         Overflow and Quora both preview a question before you open it. */}
+      {snippet && (
+        <p className="mt-[4px] line-clamp-1 pr-[22px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+          {snippet.by && <span className="font-bold" style={{ color: "var(--foreground)" }}>{snippet.by}: </span>}
+          {snippet.text}
+        </p>
+      )}
+      <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-4)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        {/* The real answered/waiting state (direct feedback: make this the
+           obvious, always-visible signal, not a small pill that only ever
+           shows for the zero-comments case) -- leftmost, since it's the one
+           fact that actually decides whether this question needs you. */}
+        <StatusChip state={thread.state} />
         <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
         </button>
-        {/* Save rides next to comments at a smaller size (direct feedback):
-           one cluster to read, not three corners. */}
-        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[6px] text-[11.5px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-          <Bookmark className="h-3 w-3" aria-hidden /> {saved ? "Saved" : "Save"}
+        {/* Icon-only, pushed to the far edge: Save is a secondary action and
+           doesn't need to compete in text with the status/helpful/comments
+           cluster that actually explains the post (direct feedback). */}
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+          <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
         </button>
       </div>
     </div>
@@ -796,13 +824,16 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
-          <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-4)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
             <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{insight.replies.length} comments</span>
+              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length}
             </button>
-            <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-              <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+            {/* Icon-only, same reasoning as QuestionCard's Save (direct
+               feedback): a secondary action, not something to compete in
+               text with the counts that actually explain the post. */}
+            <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+              <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
         </div>
@@ -869,7 +900,7 @@ function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: 
 // boxes does. No vote arrows (this feed's engagement signal is a helpful
 // count, not a score to up/down-vote), but the same left-anchored-number
 // idea: the thumbs-up count sits first, in the position a vote count would.
-function CompactRow({ onOpen, avatarName, title, meta, unanswered, helpful, comments }: { onOpen: () => void; avatarName: string; title: string; meta: string; unanswered?: boolean; helpful: number; comments: number }) {
+function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments }: { onOpen: () => void; avatarName: string; title: string; meta: string; state?: Thread["state"]; helpful: number; comments: number }) {
   return (
     <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] border-b py-[10px] text-left" style={{ borderColor: RULE }}>
       {/* Visually the same pill HelpfulPill renders in Card view -- just not
@@ -877,16 +908,14 @@ function CompactRow({ onOpen, avatarName, title, meta, unanswered, helpful, comm
       <span aria-hidden className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[4px] text-[11px] leading-[13px] font-bold tabular-nums" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
         <ThumbsUp className="h-3 w-3" /> {helpful}
       </span>
+      {/* The real answered/waiting state as a plain colored dot -- the full
+         StatusChip's text ("Waiting for an answer") doesn't fit a one-line
+         row, but the fact still needs to be visible without opening the
+         thread (direct feedback, 8 Sept 2026). */}
+      {state && <span aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
       <Avatar name={avatarName} size={24} />
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-[6px]">
-          <span className="min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
-          {unanswered && (
-            <span className="inline-flex flex-none rounded-[var(--radius-sm)] border px-[6px] py-[1px] text-[9.5px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
-              Unanswered
-            </span>
-          )}
-        </span>
+        <span className="block min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
         <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>
       </span>
       <span className="flex flex-none items-center gap-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -903,9 +932,9 @@ function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () =>
     <CompactRow
       onOpen={onOpen}
       avatarName={thread.handle}
-      title={`"${thread.title}"`}
+      title={thread.title}
       meta={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
-      unanswered={comments === 0}
+      state={thread.state}
       helpful={thread.helpful}
       comments={comments}
     />
