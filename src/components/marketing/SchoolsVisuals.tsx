@@ -66,20 +66,28 @@ export const PHOTOS = {
 // Frame, Wash, Product
 // ---------------------------------------------------------------------------
 
-/** The light stage a composition sits in: hero-mid fading to the page, a
- *  hairline, and nothing else. Children position themselves absolutely and
- *  are clipped by the rounded edge, which is the point. */
-export function Frame({ accent, className = "", style, children }: { accent?: string; className?: string; style?: CSSProperties; children: ReactNode }) {
+/** The stage a composition sits in: nothing but a clip and a shadow.
+ *  The product itself IS the frame's background (SpaceGround, the same dark
+ *  canvas every art piece already paints on) -- not a light card behind it.
+ *  This used to be a pale gradient panel with a hairline, so any art piece
+ *  whose product surface didn't run to the full edge (Build/Match/Explore/
+ *  the data section) showed a light "window mat" around a dark screen, and
+ *  every atmospheric glow blur painted against that pale ground read as a
+ *  muddy, confusing smear instead of light spilling off a dark screen (the
+ *  effect it was designed for). Children position themselves absolutely and
+ *  are clipped by the rounded edge, which is the point; a stray gap now
+ *  reads as more of the same dark stage, never a separate box. */
+export function Frame({ className = "", style, children }: { className?: string; style?: CSSProperties; children: ReactNode }) {
   return (
+    // marketing-v2 re-enters the app's dark token scope (tokens.css defines
+    // Semantic.Dark on that class) the same way Product does below -- without
+    // it, var(--background) here resolves to the Schools page's OWN light
+    // background (#f4f7ff), which is the exact light "window" this replaced.
     <div
-      className={`relative isolate overflow-hidden rounded-[28px] border ${className}`}
-      style={{
-        background: "linear-gradient(180deg, var(--hero-mid) 0%, color-mix(in srgb, var(--hero-mid) 45%, var(--background)) 100%)",
-        borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)",
-        ...style,
-      }}
+      className={`marketing-v2 relative isolate overflow-hidden rounded-[28px] ${className}`}
+      style={{ background: "var(--background)", color: "var(--foreground)", boxShadow: SHADOW, ...style }}
     >
-      {accent && <Wash accent={accent} />}
+      <SpaceGround />
       {children}
     </div>
   );
@@ -478,9 +486,9 @@ export function DataArt() {
   const typical = profile?.facts.find((f) => f.label === "Typical pay")?.value ?? "$361,000/year";
   const rows = [...(profile?.payByState.yourStates ?? []), ...(profile?.payByState.best ?? [])];
   return (
-    <Frame accent={accent} className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5]">
+    <Frame className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5]">
+      <Wash accent={accent} />
       <Product live label="Investment Banking data from the career page: pay by state across the United States, and the career ladder" base={660} floor={0.6} ceiling={1} className="top-[7%] right-[-6%] bottom-[-8%] left-[7%]">
-        <SpaceGround />
         <div className="relative" style={{ padding: mu(18) }}>
           <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
             <Section title={profile?.payByState.title ?? "Pay by state"} action={<span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Typical pay <Figure accent={accent}>{typical}</Figure></span>}>

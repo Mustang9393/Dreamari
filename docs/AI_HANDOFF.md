@@ -38,6 +38,51 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later) Schools view: the five-stage frame and the data-credibility frame were light windows, not the product's own stage
+
+Direct report: "why are there inside their own windows... use the graphics
+themselves without outer frames... some things are overlapping transparently
+and causing confusion." Root cause, confirmed in the DOM (computed
+background-color): `Frame` in `SchoolsVisuals.tsx` painted a pale
+`var(--hero-mid)`-based gradient card with a hairline border behind every
+composition. Build/Match/Explore's own `Product` surface (and `DataArt`'s)
+only covers part of that card by design (`top/right/bottom/left` percentage
+insets, meant to let the surface run off an edge) -- so the gap showed as a
+light mat visible around a dark screen, and every atmospheric glow blur in
+those three (aurora colour, meant to read as light spilling off a dark
+screen) sat against that pale ground instead, reading as a muddy smear.
+Connect/Immerse were unaffected (they already fill their frame edge to
+edge), which is why only some stages showed the problem.
+
+Fix: `Frame` no longer paints a card. It renders `SpaceGround` (the same
+dark, textured backdrop every art piece already sits on) as its own base and
+nothing else -- `marketing-v2 relative isolate overflow-hidden rounded-[28px]`,
+`background: var(--background)` (now correctly dark, see below), one shadow
+for lift. Any gap around a surface now reads as more of the same dark stage,
+never a separate box. `DataArt` moved its `<Wash>` from the old `accent` prop
+on `Frame` (removed) to calling `<Wash accent={accent} />` itself, matching
+how Build/Match/Explore already do it.
+
+One real bug caught in the fix itself, worth flagging for the next person
+touching this file: `Frame` sits in the Schools page's OWN light
+`theme-light` scope, so `var(--background)` inside it resolved to the page's
+`#f4f7ff`, not the app's dark `#05070f` -- the exact light-window symptom,
+from a different cause than the one just fixed. `Product` already re-enters
+dark scope via a `marketing-v2` class; `Frame` needed the same class, and now
+has it. Verified via computed style: the visible desktop stage frame's
+`background-color` reads `rgb(5, 7, 15)` after the fix (was `rgb(244, 247,
+255)` before).
+
+Verification: `npx tsc --noEmit`, `eslint` on SchoolsVisuals.tsx,
+`npm run tokens:check` all clean. Confirmed via computed styles in a live
+worktree (localhost:3109) that every stage frame and the data-credibility
+frame now resolve to the dark background, at both the mobile-stacked and
+desktop-sticky breakpoints. Not confirmed with an actual screenshot this
+round -- the Browser pane was hidden/its screenshot capture returned stale
+black frames for the whole session, a known tooling issue flagged by the
+previous pass too, not a rendering problem in the app. Worth one visual
+screenshot pass next time the pane is available.
+
 ### 2026-09-07 Schools landing, visual QA pass finished and landed (branch `schools-visual-qa`, picked up from an interrupted session): full-bleed real-component compositions, real photography, reconciled with the concurrent partner-ticker work
 
 Picked up uncommitted work sitting in a worktree from a session interrupted
