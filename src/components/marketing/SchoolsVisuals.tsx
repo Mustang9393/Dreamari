@@ -100,15 +100,24 @@ export function Wash({ accent }: { accent: string }) {
 
 /** A dark product surface. Absolutely positioned by the caller (so it can run
  *  off the frame), a container for `--mu`, inert unless `live`. `flow` lets
- *  the content set the height instead of filling a given box. */
-function Product({ label, base = 420, floor = 0.55, ceiling = 1.15, live = false, flow = false, className = "", style, children }: { label: string; base?: number; floor?: number; ceiling?: number; live?: boolean; flow?: boolean; className?: string; style?: CSSProperties; children: ReactNode }) {
+ *  the content set the height instead of filling a given box.
+ *
+ *  `bare` drops the surface's own border/shadow/rounded corner and background
+ *  -- use it whenever this Product already sits inside a `Frame`, which draws
+ *  that exact chrome one level out. Without `bare`, a Product inside a Frame
+ *  painted a second bordered, shadowed, rounded dark box just inside the
+ *  first (direct feedback, 7 Sept 2026: "frame inside frame inside frame").
+ *  `ProgressArt` and `HeroVisual` are the one legitimate case for the default
+ *  (non-bare) chrome: there the Product floats over a plain photo with no
+ *  enclosing Frame, so it needs to draw its own device-screen edge. */
+function Product({ label, base = 420, floor = 0.55, ceiling = 1.15, live = false, flow = false, bare = false, className = "", style, children }: { label: string; base?: number; floor?: number; ceiling?: number; live?: boolean; flow?: boolean; bare?: boolean; className?: string; style?: CSSProperties; children: ReactNode }) {
   const scale = { ["--mu" as string]: `clamp(${floor}, calc(100cqw / ${base}px), ${ceiling})` };
   return (
     <div
       role={live ? "group" : "img"}
       aria-label={label}
-      className={`marketing-v2 absolute overflow-hidden rounded-[22px] border ${className}`}
-      style={{ containerType: "inline-size", borderColor: "rgba(255,255,255,0.1)", background: "var(--background)", color: "var(--foreground)", boxShadow: SHADOW, ...style }}
+      className={`marketing-v2 absolute overflow-hidden ${bare ? "" : "rounded-[22px] border"} ${className}`}
+      style={{ containerType: "inline-size", color: "var(--foreground)", ...(bare ? {} : { borderColor: "rgba(255,255,255,0.1)", background: "var(--background)", boxShadow: SHADOW }), ...style }}
     >
       {live ? (
         <div className={flow ? "relative" : "absolute inset-0 flex flex-col"} style={scale}>{children}</div>
@@ -223,19 +232,25 @@ const WORLD_ACCENTS: Record<string, string> = Object.fromEntries(INTEREST_WORLDS
 // Build: the real first question. CardHud, QuestionHeading with Dreamy asking,
 // the ChipGrid with two worlds picked, the citation. The screen runs off the
 // bottom of the frame; the aurora glow sits behind it like the flow's own.
+// A minimized snapshot of the real question, not the full fifteen-world grid:
+// the same "6 visible, more below" preview the app itself shows on phones
+// (build/ui.tsx's ChipGrid, PREVIEW=6), applied here so the composed screen
+// reads as a quick glimpse instead of a scrollable list rendered end to end
+// (direct feedback, 7 Sept 2026: "such a tall graphic", "everything visible
+// at once"). Both of the two selected worlds stay in the six shown.
+const BUILD_PREVIEW_WORLDS = ["Business & Money", "Tech & Engineering", "Health & Medicine", "Arts, Media & Sport", "Science & Research", "Law, Safety & Justice"];
+
 export function BuildArt() {
   return (
     <>
       <Wash accent="var(--world-tech-engineering-design)" />
       <span aria-hidden className="pointer-events-none absolute top-[-18%] left-1/2 h-[55%] w-[110%] -translate-x-1/2 rounded-full blur-[48px]" style={{ background: "radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--world-tech-engineering-design) 32%, transparent), color-mix(in srgb, var(--hero-accent-purple) 70%, transparent) 50%, transparent 78%)" }} />
-      <Product label="Build, the first question: What sounds interesting? Choose up to 2. Business and Money and Tech and Engineering are chosen from the fifteen career worlds. Harvard FAS Mignone and O*NET Interest Profiler." base={460} floor={0.6} ceiling={1.05} className="top-[8%] right-[7%] bottom-[-10%] left-[7%]">
-        <SpaceGround />
-        <span aria-hidden className="pointer-events-none absolute top-[-30%] left-1/2 h-[60%] w-[120%] -translate-x-1/2 rounded-full blur-[40px]" style={{ background: "radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--world-tech-engineering-design) 40%, transparent), color-mix(in srgb, var(--hero-accent-purple) 75%, transparent) 45%, transparent 75%)" }} />
-        <div className="relative" style={{ padding: `${mu(22)} ${mu(22)} 0` }}>
+      <Product bare label="Build, the first question: What sounds interesting? Choose up to 2. Business and Money and Tech and Engineering are chosen, from the fifteen career worlds. Harvard FAS Mignone and O*NET Interest Profiler." base={460} floor={0.6} ceiling={1.05} className="top-[10%] right-[9%] bottom-[8%] left-[9%]">
+        <div className="relative" style={{ padding: mu(4) }}>
           <div style={{ zoom: "var(--mu)" }}>
             <CardHud percent={13} />
             <QuestionHeading title="What sounds interesting?" subtitle="Choose up to 2" sprite="/images/dreamy/v2/dreamy-curious.png" />
-            <ChipGrid options={INTEREST_WORLDS.map((world) => world.label)} selected={["Business & Money", "Tech & Engineering"]} max={2} onChange={noop} accents={WORLD_ACCENTS} columns="grid-cols-2" />
+            <ChipGrid options={BUILD_PREVIEW_WORLDS} selected={["Business & Money", "Tech & Engineering"]} max={2} onChange={noop} accents={WORLD_ACCENTS} columns="grid-cols-2" />
             <Citation>Harvard FAS Mignone + O*NET Interest Profiler</Citation>
           </div>
         </div>
@@ -254,8 +269,7 @@ export function MatchArt() {
   return (
     <>
       <Wash accent="var(--world-business-money-office)" />
-      <Product label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={420} floor={0.6} ceiling={1.15} flow className="top-[6%] right-[11%] left-[11%]">
-        <SpaceGround />
+      <Product bare label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={420} floor={0.6} ceiling={1.15} flow className="top-[8%] right-[11%] left-[11%]">
         <div className="relative flex flex-col items-center" style={{ padding: `${mu(16)} ${mu(18)} ${mu(18)}`, gap: mu(14) }}>
           <div className="flex w-full items-center justify-between">
             <p className="font-bold" style={{ fontFamily: "var(--font-display)", fontSize: mu(14), color: "var(--foreground)" }}>Find your Top 3</p>
@@ -294,8 +308,7 @@ export function ExploreArt() {
   return (
     <>
       <Wash accent="var(--world-food-farming-nature)" />
-      <Product label={`Explore: the rail 'Recommended Because You Liked Business and Money' with poster cards for ${BROWSE_BECAUSE_LIKED.slice(0, 4).map((c) => c.title).join(", ")} and more.`} base={560} floor={0.55} ceiling={1.2} className="top-[8%] right-[-18%] bottom-[-10%] left-[6%]">
-        <SpaceGround />
+      <Product bare label={`Explore: the rail 'Recommended Because You Liked Business and Money' with poster cards for ${BROWSE_BECAUSE_LIKED.slice(0, 4).map((c) => c.title).join(", ")} and more.`} base={560} floor={0.55} ceiling={1.2} className="top-[10%] right-[-18%] bottom-[-10%] left-[6%]">
         <div className="relative" style={{ padding: mu(24) }}>
           <div className="flex flex-col gap-[var(--space-5)]" style={{ zoom: "var(--mu)" }}>
             <div className="flex gap-[8px]">
@@ -384,24 +397,25 @@ export function ConnectArt() {
     <div role="img" aria-label={`Connect: the ${community.name} community with ${community.students} students, ${community.activePros} professionals and companies including ${community.professionalsFrom.slice(0, 3).join(", ")}. ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`} className="marketing-v2 absolute inset-0" style={{ background: "var(--background)", color: "var(--foreground)", containerType: "inline-size" }}>
       <SpaceGround opacity={0.8} />
       <Wash accent={accent} />
-      {/* Two cards, genuinely stacked (flex-col + gap), not two independent
-         `absolute` boxes eyeballed to just miss each other -- the old
-         left/top + right/bottom pair overlapped by ~34% of the frame's width
-         (reported directly, with a screenshot: the "Open" button sat on top
-         of the question text). A flex column can't overlap by construction,
-         whatever the community card's or the thread's real content height
-         turns out to be. */}
-      {/* Same horizontal alignment on both cards (direct feedback, 7 Sept
-         2026: self-start/self-end put them at opposite edges of the frame,
-         a diagonal void between two unrelated-looking boxes). Centered,
-         same width, so the thread reads as sitting inside the community
-         it belongs to. */}
-      <div aria-hidden inert className="absolute inset-0 flex flex-col items-center justify-center gap-[22px] px-[7%] pt-[6%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
-        <div style={{ width: "68%", minWidth: 260, height: 320 }}>
+      {/* Two cards, deliberately overlapped (direct feedback, 7 Sept 2026:
+         liked the overlap, wanted it done cleanly) -- the thread card sits
+         a fixed amount over the community card's lower edge via a negative
+         margin, not independent `absolute` boxes eyeballed to "just miss"
+         (the old version overlapped by ~34% of the frame's width and put
+         the Open button on top of the question text). Card is the app's own
+         frosted-glass surface (backdrop-blur, ~90% opacity) -- true where it
+         sits over a plain background, but stacked over ANOTHER card that
+         blur reveals and blends the card underneath's text into it. The
+         backing plate below is a fully opaque rect the exact shape of Card,
+         sitting behind it and in front of the community card, so the blur
+         terminates on solid colour and nothing shows through or mixes. */}
+      <div aria-hidden inert className="absolute inset-0 flex flex-col items-center justify-center px-[7%] pt-[6%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
+        <div className="relative" style={{ width: "68%", minWidth: 260, height: 320, zIndex: 0 }}>
           <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
         </div>
-        <div style={{ width: "68%", minWidth: 260, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
-          <Card accent={accent}>
+        <div className="relative" style={{ width: "68%", minWidth: 260, marginTop: -54, zIndex: 1, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
+          <span aria-hidden className="absolute inset-0 rounded-[var(--radius-lg)]" style={{ background: "var(--background)" }} />
+          <Card accent={accent} className="relative">
             <div className="flex items-center justify-between gap-[var(--space-3)]">
               <span className="flex min-w-0 items-center gap-[8px]">
                 <Avatar name={thread.handle} size={26} />
@@ -498,7 +512,7 @@ export function DataArt() {
   return (
     <Frame className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5]">
       <Wash accent={accent} />
-      <Product live label="Investment Banking data from the career page: pay by state across the United States, and the career ladder" base={660} floor={0.6} ceiling={1} className="top-[7%] right-[-6%] bottom-[-8%] left-[7%]">
+      <Product bare live label="Investment Banking data from the career page: pay by state across the United States, and the career ladder" base={660} floor={0.6} ceiling={1} className="top-[7%] right-[-6%] bottom-[-8%] left-[7%]">
         <div className="relative" style={{ padding: mu(18) }}>
           <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
             <Section title={profile?.payByState.title ?? "Pay by state"} action={<span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Typical pay <Figure accent={accent}>{typical}</Figure></span>}>

@@ -38,6 +38,65 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later still) Schools view: de-nested the stage frames, minimized Build's questionnaire, fixed the copy/frame misalignment, made the Connect overlap real
+
+Four rounds of direct feedback, same session, on the five-stage "Five steps
+toward a clearer future" section and its composed visuals:
+
+1. "Frame inside frame inside frame" on Build/Match/Explore/the data section.
+   Root cause: `SchoolsVisuals.tsx`'s `Product` component painted its own
+   bordered, shadowed, rounded-corner dark box, nested inside the outer
+   `Frame` that already draws that exact chrome one level out -- two visible
+   boxes where one was intended. `ProgressArt` and `HeroVisual` never had
+   this problem because their `Product` floats over a plain photo with no
+   enclosing `Frame`. Fix: `Product` takes a new `bare` prop that drops its
+   border/shadow/rounded-corner/background, used everywhere a `Product`
+   already sits inside a `Frame` (Build, Match, Explore, the data section);
+   `ProgressArt`/`HeroVisual` keep the default chrome, unchanged.
+2. Build's card was "such a tall graphic," "everything visible at once":
+   `BuildArt` passed all 15 `INTEREST_WORLDS` to the real `ChipGrid`, an
+   8-row grid at near-full design scale. Fixed by showing a 6-option preview
+   (both of the two "selected" worlds included) -- the same "6 visible, more
+   below" convention the app's own `ChipGrid` already uses for phones
+   (build/ui.tsx, PREVIEW=6), just applied here so the composed snapshot
+   reads as a glimpse, not a rendered-out list.
+3. "Alignments are off, badly designed": the section heading sat right above
+   the sticky frame's top edge, but each stage's copy was vertically
+   *centered* inside a 76vh-tall block (`lg:justify-center`), so "01 BUILD"
+   rendered roughly 38vh (well over 300px on a typical laptop) below the
+   heading while the frame started right under it -- two starting points a
+   half-screen apart. Changed to `lg:justify-start` with a short top pad and
+   a shorter 62vh block, so each stage's copy anchors near the top of its
+   slot, close to the sticky frame at every stage, not just visually
+   accidental for whichever one happened to scroll into the "active" band.
+4. Connect's two cards: earlier this session they went from overlapping-and-
+   illegible (bug, fixed to a flex-column with a real gap) to fully
+   separated with no overlap at all. Direct feedback: the overlap itself was
+   wanted back -- "liked the overlapping components... just don't make them
+   so transparent that they overlap and get mixed." `Card` is the app's real
+   frosted-glass surface (backdrop-blur, ~90% opacity) -- correct where it
+   sits over a plain background, but stacked over ANOTHER card that blur
+   reveals and blends the card underneath into it. Fixed by reintroducing a
+   real overlap (negative margin, not independent absolute boxes) with an
+   opaque backing plate the exact shape of `Card` sitting behind it and in
+   front of the community card, so the blur terminates on solid colour and
+   nothing shows through.
+
+Verified live (own dev server, port 3112, this checkout's dev server was
+already running another session's session so a separate port was used):
+screenshots of all five stages at 1456px and 390px confirm a single frame
+per stage, the minimized Build grid, "01 BUILD" sitting directly under the
+section heading at the same height as the frame's top edge, and the Connect
+overlap now genuinely covering the community card's stat row with no text
+bleed-through. `npx tsc --noEmit`, `eslint` on both changed files, and
+`npm run tokens:check` all clean.
+
+Not done, flagged directly to the user rather than guessed at: whether the
+outer `Frame` (the dark "device screen" bezel) should be removed entirely in
+favor of a real-photo backdrop for every stage, the way `ProgressArt`
+already does. That needs new photography for Build/Match/Explore/Connect
+that does not exist in this repo yet -- a content decision, not a CSS one.
+
 ### 2026-09-07 (later still) Schools view: Connect stage's two cards were overlapping
 
 Direct report with a screenshot: the community-stats card ("312 Students / 61

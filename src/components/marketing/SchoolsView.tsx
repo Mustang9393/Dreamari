@@ -265,7 +265,14 @@ function StageStory({ stages, openStages, onToggle }: { stages: Stage[]; openSta
               blocks.current[i] = el;
             }}
             data-index={i}
-            className="py-10 sm:py-12 lg:flex lg:min-h-[76vh] lg:flex-col lg:justify-center lg:py-0"
+            // justify-start + a short min-height, not justify-center in a
+            // 76vh block: centering put "01 BUILD" ~38vh below the section
+            // heading while the sticky frame started right under it -- two
+            // starting points a whole half-screen apart (direct feedback, 7
+            // Sept 2026: "badly designed", "alignments are off"). Anchoring
+            // each stage's copy near the top of its slot keeps it close to
+            // where the frame starts, at every stage, not just the first.
+            className="py-10 sm:py-12 lg:flex lg:min-h-[62vh] lg:flex-col lg:justify-start lg:py-0 lg:pt-3"
           >
             <Reveal>
               <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => onToggle(stage.n)} />
