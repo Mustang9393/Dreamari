@@ -29,8 +29,11 @@ function breakableTitle(title: string): string {
 // The card answers a pointer (Joshua Pierce, Slack, 7 Sept 2026: a tester
 // hovered and got nothing, so never clicked): on hover it lifts, the photo
 // eases in and a small open-arrow chip appears in the corner. No copy, no
-// button. On touch, the first card can carry `hint`: one light sweep, twice,
-// the first time the page is seen.
+// button. Hover-only, deliberately: touch already reads a poster tile as
+// tappable (Netflix/Spotify/App Store convention) without a taught cue, and
+// a mobile-only sweep animation was removed as unjustified noise (Chandu,
+// 7 Sept 2026 -- the original finding was specific to desktop's lack of a
+// hover-equivalent affordance signal, not evidenced on touch).
 function OpenCue() {
   // a solid white round button, top right, the way a streaming card offers
   // its one action (Chandu, 7 Sept 2026)
@@ -41,13 +44,13 @@ function OpenCue() {
   );
 }
 
-export function PosterCard({ career, className = "", onClick, hint = false }: { career: CatalogCareer; className?: string; onClick?: () => void; hint?: boolean }) {
+export function PosterCard({ career, className = "", onClick }: { career: CatalogCareer; className?: string; onClick?: () => void }) {
   const titleSize = posterTitleSize(career.title);
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-tap poster-card relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${hint ? "poster-hint" : ""} ${className}`}
+      className={`dm-tap poster-card relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
       <Image src={career.photo} alt="" fill sizes="210px" className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />

@@ -368,3 +368,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Schools page: the five stage labels are one all-caps line ("01 BUILD", "02 MATCH", ...) at equal weight, replacing the small STAGE eyebrow over a separate title.
 - Landing, Get Hired: the Next button in the four-stage demo now carries the shimmer+pulse hint too.
 - Schools landing, Connect stage: the community and thread cards no longer sit at opposite corners of the frame (a self-start/self-end mixup); both are centered at the same width.
+- Explore: removed the one-time mobile touch-hint sweep on the first poster card (unjustified -- the original usability finding was desktop-specific; touch already reads a poster tile as tappable). Hover lift/scale/open-arrow stays, desktop-only.
