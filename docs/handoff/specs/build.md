@@ -12,6 +12,9 @@ Moment, in order: count-up with a low square-wave rising tone; on landing the nu
 
 Removed by instruction: the loading beat with the hard-hat Dreamy, the second "matches are ready" screen, confetti.
 
+## Flight target fix (Chandu, 7 Sept 2026)
+The "+100 XP" flight's landing spot used to assume the header chip is always 84px wide (a hardcoded half-width of 42px next to the menu button) -- exactly right only for a fresh score's first-ever "100 XP", off-center for any other total, and on a narrow viewport a wide total could push the assumed landing spot toward the edge (direct feedback: "doesn't perfectly slot into the chip properly... goes off screen"). It now measures the REAL chip width before the flight: an invisible probe carrying the chip's own classes and the exact total the milestone will bank to (`peekDreamScoreAfter` in `dreamScore.ts`, a read-only preview of what `awardDreamScore` would return) sits offscreen just long enough to read its rendered width, then is removed. Verified with a 3-digit ("100 XP") and a comma'd 4-digit ("3,950 XP") total: the clone lands exactly centered on the real chip both times.
+
 ## Other rules
 - Skip link (no underline) → `/match-lab`.
 - Full-screen aurora ripple only at the 50% milestone and the completion; every other tap is Dreamy-local.

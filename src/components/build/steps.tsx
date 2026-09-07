@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
-import { awardDreamScore } from "@/lib/dreamScore";
+import { awardDreamScore, peekDreamScoreAfter } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
   ENERGY_OPTIONS,
@@ -534,10 +534,29 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       const el = xpRef.current;
       if (!el || reduce) { setFlown(true); bank(); return; }
       const from = el.getBoundingClientRect();
-      // where the header chip will sit: just left of the menu button
+      // Where the header chip will sit: just left of the menu button, at
+      // the chip's own width -- a hardcoded half-width guess (42px, "100 XP"
+      // sized) only ever slotted in cleanly for a first-ever 3-digit score;
+      // any other total sat off-center, and a wide one on a narrow viewport
+      // could push the guess past the screen edge entirely (direct
+      // feedback, 7 Sept 2026). An invisible probe with the chip's own
+      // classes and the score it will actually show measures the real width.
       const menu = document.querySelector("header button") as HTMLElement | null;
       const m = menu?.getBoundingClientRect();
-      const targetCx = m ? m.left - 10 - 42 : window.innerWidth - 120;
+      let chipHalfWidth = 42;
+      if (m) {
+        const finalScore = peekDreamScoreAfter("build-complete", BUILD_XP);
+        const probe = document.createElement("span");
+        probe.setAttribute("aria-hidden", "true");
+        probe.className = "flex h-9 items-center gap-[5px] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums";
+        probe.style.cssText = "position:fixed; left:-9999px; top:-9999px; visibility:hidden; white-space:nowrap;";
+        probe.style.fontFamily = "var(--font-body)";
+        probe.innerHTML = `<span style="display:inline-block;width:14px;height:14px;flex:none"></span>${finalScore.toLocaleString("en-US")} XP`;
+        (el.closest(".marketing-v2") ?? document.body).appendChild(probe);
+        chipHalfWidth = probe.getBoundingClientRect().width / 2;
+        probe.remove();
+      }
+      const targetCx = m ? m.left - 10 - chipHalfWidth : window.innerWidth - 120;
       const targetCy = m ? m.top + m.height / 2 : 38;
       clone = el.cloneNode(true) as HTMLElement;
       Object.assign(clone.style, { position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, margin: "0", zIndex: "70", pointerEvents: "none", animation: "none", visibility: "visible", willChange: "transform, opacity", filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" });

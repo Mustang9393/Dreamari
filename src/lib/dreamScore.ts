@@ -34,6 +34,20 @@ export function awardDreamScore(milestone: string, points: number): { total: num
   }
 }
 
+/** What `awardDreamScore(milestone, points)` would return, without writing --
+ *  the exact total the header chip will show once this milestone banks
+ *  (unchanged if it already has). Lets an in-flight animation measure the
+ *  REAL final chip width instead of guessing at one. */
+export function peekDreamScoreAfter(milestone: string, points: number): number {
+  try {
+    const awards = new Set<string>(JSON.parse(window.localStorage.getItem(AWARDS_KEY) ?? "[]"));
+    const current = readDreamScore();
+    return awards.has(milestone) ? current : current + points;
+  } catch {
+    return readDreamScore();
+  }
+}
+
 function subscribe(cb: () => void) {
   window.addEventListener(EVENT, cb);
   window.addEventListener("storage", cb);
