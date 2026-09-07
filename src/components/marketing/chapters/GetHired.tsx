@@ -259,7 +259,9 @@ export function GetHiredChapter() {
             <button
               type="button"
               onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}
-              className="cursor-pointer rounded-full px-5 py-2 text-[12px] font-bold"
+              // the quiet hint (Joshua Pierce / Chandu, 7 Sept 2026): Next
+              // pulses so the four-stage demo reads as something to click through
+              className="mkt-pulse cursor-pointer rounded-full px-5 py-2 text-[12px] font-bold"
               style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               Next

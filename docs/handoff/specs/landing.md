@@ -57,3 +57,6 @@ The student page's stamp uses the Schools section's scale: the mark at 64 to 80p
 
 ## Schools stage labels (Chandu, 7 Sept 2026)
 The five stages ("01 Build" through "05 Connect") render as one all-caps line, number and name at equal weight, instead of a small "STAGE 1" eyebrow above a separate large title. Number in the accent colour. `StageCopy` in `SchoolsView.tsx`.
+
+## Get Hired Next button (7 Sept 2026)
+The Next button in the four-stage mini demo carries the same shimmer+pulse hint as the other landing nudges.

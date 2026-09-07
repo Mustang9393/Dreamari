@@ -366,3 +366,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Landing: the "created by Dream Opportunity" stamp on the student page now matches the Schools section's scale (large mark, real heading, full-width ticker).
 - Landing: the student Dream Opportunity stamp ends on the partner ticker; the closing paragraph stays on the Schools section only.
 - Schools page: the five stage labels are one all-caps line ("01 BUILD", "02 MATCH", ...) at equal weight, replacing the small STAGE eyebrow over a separate title.
+- Landing, Get Hired: the Next button in the four-stage demo now carries the shimmer+pulse hint too.
