@@ -38,6 +38,27 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later still) Schools view: reverted "drop the dark device frame entirely"
+
+Direct feedback right after that round shipped: "what ever you did now is a
+hundred times worse. Please fix and revert." Reverted commit 5c92a1a
+(`git revert`, clean, no conflicts) rather than trying to patch forward
+blind with no screenshot of what specifically broke. This restores the
+prior, already-verified state: one de-nested frame per stage (the dark
+"device screen" bezel from `Frame`, no second box from `Product` nested
+inside it) -- NOT the fully frame-less, card-floats-on-white-page version.
+
+Lesson for whoever picks this up next: the user's own instruction ("drop
+the frame entirely, no photo backdrop, unless cropping needs it") was
+implemented literally and verified clean in isolation (tsc/eslint/tokens,
+screenshots at two widths), but reads badly in the full page context this
+session did not check closely enough before shipping -- likely the plain
+real components (built for a dark in-app surface) sitting directly on the
+light marketing page loses cohesion across five back-to-back stages, even
+though any single one looked fine alone. Before trying this direction
+again: get a live screenshot of the FULL section (not one stage at a time)
+and a specific description of what reads badly, rather than re-guessing.
+
 ### 2026-09-07 (later still) Schools view: de-nested the stage frames, minimized Build's questionnaire, fixed the copy/frame misalignment, made the Connect overlap real
 
 Four rounds of direct feedback, same session, on the five-stage "Five steps
