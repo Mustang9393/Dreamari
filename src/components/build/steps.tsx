@@ -342,7 +342,10 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
 // full name?" on a form where the answer is obvious, and four questions in a
 // row was the flow's densest block of reading.
 export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
-  const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
+  // Name and email come from sign-up, so they are not asked again here
+  // (Joshua Pierce and Usman, Slack, 6 Sept 2026). Zip code stays (cleared;
+  // a street address never is).
+  const valid = state.grade !== "" && state.gpa !== "";
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
@@ -350,28 +353,6 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
-          <input
-            className={UNDERLINE_INPUT}
-            style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-            placeholder="Full Name"
-            aria-label="Full name"
-            value={state.fullName}
-            onChange={(e) => patch({ fullName: e.target.value })}
-            autoComplete="name"
-          />
-          <div>
-            <input
-              type="email"
-              className={UNDERLINE_INPUT}
-              style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-              placeholder="School Email"
-              aria-label="School email"
-              value={state.email}
-              onChange={(e) => patch({ email: e.target.value })}
-              autoComplete="email"
-            />
-            <p className="mt-1 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">Use your school one if you have it.</p>
-          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
             <SelectField label="GPA" options={GPA_OPTIONS} value={state.gpa} placeholder="Select" onChange={(gpa) => { react(); patch({ gpa }); }} />

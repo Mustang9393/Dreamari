@@ -9,7 +9,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
-import { CommunityCard } from "./CommunityCard";
+import { communityAccent } from "./CommunityCard";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
@@ -140,6 +140,25 @@ export function Panel({ id, title, aside, children, className = "" }: { id: stri
     <section aria-labelledby={id} className={`flex w-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)] ${className}`} style={PANEL}>
       <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: RULE }}>
         <SectionHead id={id}>{title}</SectionHead>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** One dimension of a professional's profile, inside the single profile
+ *  surface: a ruled band with a small eyebrow naming the dimension, the
+ *  section title, an optional aside, then the content. Same padding as a
+ *  Panel, but no box of its own, so four of them read as one page. */
+export function ProfileSection({ id, eyebrow, title, aside, first = false, children }: { id: string; eyebrow: string; title: string; aside?: React.ReactNode; first?: boolean; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={id} className={`flex w-full flex-col gap-[var(--space-4)] p-[var(--space-5)] sm:p-[var(--space-6)] ${first ? "" : "border-t"}`} style={{ borderColor: RULE }}>
+      <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+        <span className="flex flex-col gap-[3px]">
+          <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: PRO_ACCENT }}>{eyebrow}</span>
+          <SectionHead id={id}>{title}</SectionHead>
+        </span>
         {aside}
       </div>
       {children}
@@ -438,106 +457,132 @@ export function ProProfileView({
         </div>
       </section>
 
-      {/* Ask Me (not "anything": careers, school and work). The composer
-         first, then the questions already asked and answered right under it,
-         one card (direct feedback, 5 Sept 2026). No private messages exist. */}
-      <Panel
-        id="ask-title"
-        title="Ask Me"
-        aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{askedCount}</strong> questions asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered}</strong> answered</span>}
-      >
-        <InlineAsk
-          joined
-          accent="var(--primary)"
-          placeholder={`Ask ${firstName(pro.name)} about their career…`}
-          onPost={(text) => {
-            setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
-            onAsked?.(text);
-          }}
-        />
-        {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-        {answers.length > 0 && (
-          <ul className="flex flex-col border-t" style={{ borderColor: RULE }}>
-            {(allAnswers ? answers : answers.slice(0, 3)).map((thread) => {
-              const s = signals(thread.views, thread.helpful, undefined);
-              return (
-                <PanelRow key={thread.id} onClick={() => nav?.openThread(thread.id)}>
-                  <span className="flex flex-wrap items-center justify-between gap-x-[10px] gap-y-[4px]">
-                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</span>
-                    <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: PRO_ACCENT }}>Answered <ChevronRight className="h-3 w-3" aria-hidden /></span>
-                  </span>
-                  <SignalRow {...s} accent={PRO_ACCENT} />
-                </PanelRow>
-              );
-            })}
-          </ul>
+      {/* ONE surface under the header (Joshua Pierce, Slack, 6 Sept 2026: one
+         connected profile, not five floating modules). The four dimensions
+         sit inside it as ruled sections in a fixed order, each with the same
+         eyebrow, title and aside, so the eye moves down one page: How you can
+         engage, What I share, Where I participate, My background. */}
+      <div className="-mt-[var(--space-3)] flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
+        {/* Ask Me (not "anything": careers, school and work). The composer
+           first, then the questions already asked and answered right under it
+           (direct feedback, 5 Sept 2026). No private messages exist. */}
+        <ProfileSection
+          id="ask-title"
+          eyebrow="How you can engage"
+          title="Ask Me"
+          first
+          aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{askedCount}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered}</strong> answered</span>}
+        >
+          <InlineAsk
+            joined
+            accent="var(--primary)"
+            placeholder={`Ask ${firstName(pro.name)} about their career…`}
+            onPost={(text) => {
+              setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
+              onAsked?.(text);
+            }}
+          />
+          {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+          {answers.length > 0 && (
+            <ul className="flex flex-col border-t" style={{ borderColor: RULE }}>
+              {(allAnswers ? answers : answers.slice(0, 3)).map((thread) => {
+                const s = signals(thread.views, thread.helpful, undefined);
+                return (
+                  <PanelRow key={thread.id} onClick={() => nav?.openThread(thread.id)}>
+                    <span className="flex flex-wrap items-center justify-between gap-x-[10px] gap-y-[4px]">
+                      <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</span>
+                      <span className="flex flex-none items-center gap-[4px] text-[11.5px] leading-[15px] font-bold" style={{ color: PRO_ACCENT }}>Answered <ChevronRight className="h-3 w-3" aria-hidden /></span>
+                    </span>
+                    <SignalRow {...s} accent={PRO_ACCENT} />
+                  </PanelRow>
+                );
+              })}
+            </ul>
+          )}
+          {answers.length > 3 && (
+            <div className="-mt-[var(--space-2)] flex justify-end">
+              <MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />
+            </div>
+          )}
+        </ProfileSection>
+
+        {/* My Posts: career lessons or wider life at work, so the title is
+           theirs, not "career posts" */}
+        {posts.length > 0 && (
+          <ProfileSection id="posts-title" eyebrow="What I share" title="My Posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
+            <ul className="-mt-[var(--space-2)] flex flex-col">
+              {(allPosts ? posts : posts.slice(0, 3)).map((insight) => {
+                const s = signals(insight.views, insight.helpful, insight.saves);
+                return (
+                  <PanelRow key={insight.id} onClick={() => nav?.openInsight(insight.id)}>
+                    <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: PRO_ACCENT }}>Pro tip</span>
+                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
+                    <SignalRow {...s} accent={PRO_ACCENT} />
+                  </PanelRow>
+                );
+              })}
+            </ul>
+          </ProfileSection>
         )}
-        {answers.length > 3 && (
-          <div className="-mt-[var(--space-2)] flex justify-end">
-            <MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />
-          </div>
+
+        {/* The boards this person answers in, as rows of the same surface
+           (a photo card here made this section a separate product): the
+           community's accent as a mark, its name, the two counts, and the
+           way in. */}
+        {communities.length > 0 && (
+          <ProfileSection id="communities-title" eyebrow="Where I participate" title="Communities" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{communities.length} boards</span>}>
+            <ul className="-mt-[var(--space-2)] flex flex-col">
+              {communities.map((c) => {
+                const accent = communityAccent(c);
+                return (
+                  <PanelRow key={c.id} onClick={() => nav?.openBoard(c.id)} label={`Open ${c.name}`}>
+                    <span className="flex w-full items-center gap-[var(--space-3)]">
+                      <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 22%, transparent)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 55%, transparent)` }}>
+                        <span className="size-[12px] rounded-full" style={{ background: accent }} />
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                        <span className="truncate text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{c.name}</span>
+                        <span className="text-[12.5px] leading-[17px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{shortCount(c.students)} students · {c.professionalsFrom.length} companies</span>
+                      </span>
+                      <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                    </span>
+                  </PanelRow>
+                );
+              })}
+            </ul>
+          </ProfileSection>
         )}
-      </Panel>
 
-      {/* My Posts: career lessons or wider life at work (leave, balance,
-         leadership, switching), so the title is theirs, not "career posts" */}
-      {posts.length > 0 && (
-        <Panel id="posts-title" title="My Posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
-          <ul className="-mt-[var(--space-2)] flex flex-col">
-            {(allPosts ? posts : posts.slice(0, 3)).map((insight) => {
-              const s = signals(insight.views, insight.helpful, insight.saves);
-              return (
-                <PanelRow key={insight.id} onClick={() => nav?.openInsight(insight.id)}>
-                  <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: PRO_ACCENT }}>Pro tip</span>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
-                  <SignalRow {...s} accent={PRO_ACCENT} />
-                </PanelRow>
-              );
-            })}
-          </ul>
-        </Panel>
-      )}
-
-      {/* The boards this person answers in, the same community cards as the
-         Connect home (one component), laid out the way the home lays them
-         out: heading, then the cards on the page column itself, never inside
-         a panel (a card inside a panel is a different, narrower card). */}
-      {communities.length > 0 && (
-        <section aria-labelledby="communities-title" className="flex flex-col gap-[var(--space-3)]">
-          <SectionHead id="communities-title">Communities</SectionHead>
-          <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
-            {communities.map((c) => (
-              <li key={c.id} className="min-w-0">
-                <CommunityCard community={c} joined onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* About Me: only what the header has not already said */}
-      {(pro.education || pro.topics) && (
-        <Panel id="about-title" title="About Me">
-          <dl className="-mt-[var(--space-2)] flex flex-col">
-            {pro.education && (
-              <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
-                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</dt>
-                <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.education}</dd>
-              </div>
-            )}
-            {pro.topics && (
-              <div className="flex flex-col gap-[8px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
-                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Can help with</dt>
-                <dd className="flex flex-wrap gap-[6px]">
-                  {pro.topics.map((t) => (
-                    <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${PRO_ACCENT} 45%, var(--glass-border))`, color: PRO_ACCENT, background: `color-mix(in srgb, ${PRO_ACCENT} 12%, transparent)` }}>{t}</span>
-                  ))}
-                </dd>
-              </div>
-            )}
-          </dl>
-        </Panel>
-      )}
+        {/* About Me: only what the header has not already said */}
+        {(pro.education || pro.topics) && (
+          <ProfileSection id="about-title" eyebrow="My background" title="About Me">
+            <dl className="-mt-[var(--space-2)] flex flex-col">
+              {pro.education && (
+                <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
+                  <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</dt>
+                  <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.education}</dd>
+                </div>
+              )}
+              {pro.journey && (
+                <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
+                  <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>How I got here</dt>
+                  <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.journey}</dd>
+                </div>
+              )}
+              {pro.topics && (
+                <div className="flex flex-col gap-[8px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
+                  <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Can help with</dt>
+                  <dd className="flex flex-wrap gap-[6px]">
+                    {pro.topics.map((t) => (
+                      <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[3px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${PRO_ACCENT} 45%, var(--glass-border))`, color: PRO_ACCENT, background: `color-mix(in srgb, ${PRO_ACCENT} 12%, transparent)` }}>{t}</span>
+                    ))}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </ProfileSection>
+        )}
+      </div>
     </>
   );
 }

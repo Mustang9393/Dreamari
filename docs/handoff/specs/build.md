@@ -19,3 +19,6 @@ Removed by instruction: the loading beat with the hard-hat Dreamy, the second "m
 
 ## Files
 `src/components/build/BuildFlowExperience.tsx`, `steps.tsx`, `ui.tsx`, `sound.ts`, `src/lib/dreamScore.ts`, `src/components/app/FlowChrome.tsx`.
+
+## Profile Basics (Joshua Pierce and Usman, Slack, 6 Sept 2026)
+Full Name and School Email are not asked; they come from sign-up. The step asks Grade, GPA, Zip Code (cleared for FERPA and COPPA; a street address is never asked) and how far the student would go for school. Finish needs Grade and GPA.

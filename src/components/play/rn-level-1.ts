@@ -47,7 +47,9 @@ export const RN_LEVEL_1: Level = {
       id: "RN1-01",
       speaker: "Narrator",
       setup: "New Grad RN • Year 1",
-      title: "Welcome to Riverbend Medical Center.",
+      // Same arrival moment as Cobalt Capital (direct feedback, 6 Sept 2026)
+      title: "Welcome to Riverbend Medical Center. Your first shift starts now.",
+      celebrate: true,
       cta: "Continue",
     },
     {
@@ -121,7 +123,8 @@ export const RN_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Rosa",
       setup: "Rosa • Staff Nurse",
-      title: "She started here as a nursing assistant, helping patients wash and eat, while she was still at school.",
+      // Useful about her role, mirroring Christina's card (direct feedback, 6 Sept 2026)
+      title: "Rosa is a Staff Nurse, the nurse you work beside all year, and she’ll be giving you direction on every shift.",
       cta: "Continue",
     },
     {
@@ -260,8 +263,8 @@ export const RN_LEVEL_1: Level = {
       timer: 45,
       speaker: "Rosa",
       setup: '"Quick one. Every nurse needs these habits cold."',
-      question: "Four quick questions on one shared timer.",
-      prompt: "Four questions, one timer. Tap fast.",
+      question: "",
+      prompt: "",
       items: [
         {
           question: "Before you give a patient their medicine, what do you check first?",

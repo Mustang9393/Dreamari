@@ -1138,14 +1138,18 @@ function BeatStage({
           }`}
         >
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
             <DialogueBox
               speaker={speaker}
               portrait={portrait}
-              setup={beat.setup}
+              // The general rule (Joshua Pierce, Slack, 6 Sept 2026): once a
+              // character has said the line in the scene, the activity screen
+              // does not repeat it. Cards keep their eyebrow; a staged beat
+              // drops its spoken line the moment the interaction is revealed.
+              setup={stageable && revealed ? undefined : beat.setup}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
               held={!revealed}

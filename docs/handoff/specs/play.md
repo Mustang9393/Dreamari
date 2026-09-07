@@ -13,3 +13,6 @@ Eyebrow "Looking for another career to play?"; "Explore more careers and find an
 
 ## Files
 `src/components/play/PlayHub.tsx`, `games.ts`, `SimulationPlayer.tsx`, `src/components/glossary/*`.
+
+## Level 1 scripts, no-repeat rule (Joshua Pierce, Slack, 6 Sept 2026)
+General rule, built into the player: once a character has said a line in the scene, the activity screen that follows does not repeat it. A staged beat shows its spoken line first; the moment the interaction is revealed the line leaves and the screen holds only the question and its controls. Cards keep their eyebrow. Script changes: Investment Banking L1-01 "Welcome to Cobalt Capital. Your first day starts now." with a burst and the sweep sound (`celebrate: true`, plain ink, no gradient); L1-05 "Christina is an Associate, two levels above you, and she’ll be giving you direction throughout your internship."; L1-08 has no setup line (the reception scene already happened), the question opens directly; L1-13 opens on Question 1 of 4 with no restatement and no "Tap fast". Nursing mirrors it: RN1-01 "Welcome to Riverbend Medical Center. Your first shift starts now."; RN1-06 "Rosa is a Staff Nurse, the nurse you work beside all year, and she’ll be giving you direction on every shift."; RN1-14 opens on Question 1 of 4. Both modes (Full and Express) share the scripts.
