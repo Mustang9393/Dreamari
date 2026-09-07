@@ -359,3 +359,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Connect, professional profile: no "Ask Amara about their career." lede, one question at rest under Ask Me with View all, "My Posts", shorter community cards, and a lighter blue-tinted surface.
 - Explore: career cards lift, zoom and show an open-arrow chip on hover, and the first card sweeps once on touch devices the first time, so the cards read as clickable without adding copy or buttons.
 - Landing, Connect chapter: the community board card carries the app's Business & Money cover photo.
+- Explore (and every poster row): cards now lift off and grow 9% on hover the way a streaming shelf does, with an intent delay, above their neighbours, and a solid white open-arrow button at the top right; the salary chip moved to the top left.

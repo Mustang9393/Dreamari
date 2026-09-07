@@ -93,7 +93,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
 
             {/* The three cards, side by side. On a phone the row scrolls, with
                each card snapping into place. */}
-            <div role="radiogroup" aria-label="Your Top 3" className="-mx-5 flex w-[calc(100%+40px)] snap-x snap-mandatory gap-[var(--space-4)] overflow-x-auto px-5 pt-3 pb-4 [scrollbar-width:none] sm:mx-0 sm:w-auto sm:justify-center sm:overflow-visible sm:px-0">
+            <div role="radiogroup" aria-label="Your Top 3" className="-mx-5 flex w-[calc(100%+40px)] poster-row snap-x snap-mandatory gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:mx-0 sm:w-auto sm:justify-center sm:overflow-visible sm:px-0">
               {careers.map((career, index) => {
                 const selected = career.id === chosen;
                 const ring = WORLD_COLORS[career.world] ?? "var(--primary)";

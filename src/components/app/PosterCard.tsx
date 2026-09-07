@@ -32,9 +32,11 @@ function breakableTitle(title: string): string {
 // button. On touch, the first card can carry `hint`: one light sweep, twice,
 // the first time the page is seen.
 function OpenCue() {
+  // a solid white round button, top right, the way a streaming card offers
+  // its one action (Chandu, 7 Sept 2026)
   return (
-    <span aria-hidden className="poster-cue absolute top-2 left-2 z-[1] flex size-8 items-center justify-center rounded-full border backdrop-blur-[10px]" style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}>
-      <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} />
+    <span aria-hidden className="poster-cue absolute top-2 right-2 z-[2] flex size-9 items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.94)", color: "#0b0f1f", boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }}>
+      <ArrowUpRight className="h-[18px] w-[18px]" strokeWidth={2.75} />
     </span>
   );
 }
@@ -54,7 +56,7 @@ export function PosterCard({ career, className = "", onClick, hint = false }: { 
         /* dark glass chip (approved) + large gradient figure — legible on
            any photo at a glance */
         <span
-          className="absolute top-2 right-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
+          className="absolute top-2 left-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
           style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
         >
           <span

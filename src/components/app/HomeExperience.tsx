@@ -502,7 +502,7 @@ export function HomeExperience() {
               </a>
             </div>
           </div>
-          <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+          <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {BROWSE_BECAUSE_LIKED.map((career) => (
               <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
             ))}

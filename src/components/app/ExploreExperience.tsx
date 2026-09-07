@@ -79,7 +79,7 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
           </p>
         )}
       </div>
-      <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -113,7 +113,7 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
       <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         Top 5 Trending Careers Among Gen Z
       </h2>
-      <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+      <div className="poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
         {trending.map((career, index) => (
           <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
         ))}
