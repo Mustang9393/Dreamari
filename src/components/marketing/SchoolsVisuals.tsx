@@ -384,13 +384,18 @@ export function ConnectArt() {
     <div role="img" aria-label={`Connect: the ${community.name} community with ${community.students} students, ${community.activePros} professionals and companies including ${community.professionalsFrom.slice(0, 3).join(", ")}. ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`} className="marketing-v2 absolute inset-0" style={{ background: "var(--background)", color: "var(--foreground)", containerType: "inline-size" }}>
       <SpaceGround opacity={0.8} />
       <Wash accent={accent} />
-      <div aria-hidden inert className="absolute inset-0" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)" }}>
-        <div className="absolute" style={{ left: "6%", top: "7%", width: "64%", zoom: "var(--mu)" }}>
-          <div style={{ height: 320 }}>
-            <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
-          </div>
+      {/* Two cards, genuinely stacked (flex-col + gap), not two independent
+         `absolute` boxes eyeballed to just miss each other -- the old
+         left/top + right/bottom pair overlapped by ~34% of the frame's width
+         (reported directly, with a screenshot: the "Open" button sat on top
+         of the question text). A flex column can't overlap by construction,
+         whatever the community card's or the thread's real content height
+         turns out to be. */}
+      <div aria-hidden inert className="absolute inset-0 flex flex-col justify-center gap-[26px] px-[7%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
+        <div className="self-start" style={{ width: "62%", minWidth: 240, height: 320 }}>
+          <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
         </div>
-        <div className="absolute" style={{ right: "-2%", bottom: "-4%", width: "66%", zoom: "var(--mu)", filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
+        <div className="self-end" style={{ width: "64%", minWidth: 240, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
           <Card accent={accent}>
             <div className="flex items-center justify-between gap-[var(--space-3)]">
               <span className="flex min-w-0 items-center gap-[8px]">

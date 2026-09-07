@@ -38,6 +38,35 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later still) Schools view: Connect stage's two cards were overlapping
+
+Direct report with a screenshot: the community-stats card ("312 Students / 61
+Pros / 5 Companies") and the thread card sat on top of each other -- the
+"Open" button landed directly on the question text. Root cause:
+`ConnectArt` positioned both cards independently with `absolute` +
+percentage `left/top` and `right/bottom` insets, eyeballed to just miss each
+other -- left card spanned x:[6%,70%], right card spanned x:[36%,102%], a
+34%-wide overlap zone regardless of either card's real content height.
+
+Fixed by replacing the two independent `absolute` boxes with one `flex
+flex-col` wrapper (`self-start` / `self-end` for the diagonal stagger,
+`gap-[26px]` between them) -- a flex column cannot overlap by construction,
+whatever either card's real rendered height turns out to be.
+
+Verified by geometry, not a screenshot (the Browser pane's capture was
+unreliable again this session -- stale/black frames, third time this has
+been flagged): confirmed via `getBoundingClientRect()` on the two real card
+elements that they no longer intersect, at both a 1440px and a 390px
+viewport, with `document.documentElement.scrollWidth <= innerWidth` (no
+horizontal overflow) at 390px. `npx tsc --noEmit`, `eslint`, and
+`npm run tokens:check` all clean.
+
+Not yet done: the user separately flagged that the stage-story's two-column
+layout (copy left, sticky graphic right) reads as too far apart at very wide
+desktop widths, and asked for a full responsive QA + polish pass across the
+whole Enterprise view -- that is a larger, separate pass, not part of this
+fix.
+
 ### 2026-09-07 (later) Schools view: the five-stage frame and the data-credibility frame were light windows, not the product's own stage
 
 Direct report: "why are there inside their own windows... use the graphics
