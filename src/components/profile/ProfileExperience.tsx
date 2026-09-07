@@ -1113,7 +1113,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // Deliberately thin. Its job is orientation in about five seconds, then it
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
-function OverviewTab({
+export function OverviewTab({
   focus, planProgress, top3Count,
   onGoTop3, onGoPlan, onGoReport, onGoLocker,
 }: {

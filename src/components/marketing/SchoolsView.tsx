@@ -1,17 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { ArrowUpRight, Quote } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
-import { DO_COPY, DOMark } from "./DreamOpportunity";
-import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
+import { DO_COPY } from "./DreamOpportunity";
+import { PartnerTicker } from "./PartnerTicker";
+import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, HeroVisual, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
-import { PartnerTicker } from "./PartnerTicker";
 
 type SchoolsViewProps = {
   view: "student" | "schools";
@@ -19,11 +19,11 @@ type SchoolsViewProps = {
 };
 
 // ---------------------------------------------------------------------------
-// Content. Every visual below is a composition of the product's own pieces
-// (SchoolsVisuals.tsx): whole components set in a frame with deliberate
-// padding, never a cropped screenshot (rule since 7 Sept 2026). The copy in
-// each composition is the app's real copy and data. Where a screen does not
-// exist yet (the educator dashboard) the caption says so.
+// Content. Every visual below is a composition of the product's own
+// components (SchoolsVisuals.tsx) filling its frame, never a cropped
+// screenshot (rule since 7 Sept 2026). The copy in each composition is the
+// app's real copy and data. Where a screen does not exist yet (the educator
+// dashboard) the caption says so.
 // ---------------------------------------------------------------------------
 
 // Copy is the reference site's, verbatim (dreamari-educator-website.replit.app,
@@ -37,10 +37,8 @@ type Stage = {
   detail: string[];
   href: string;
   linkLabel: string;
-  // The stage's colour (a world token), used only as the faint wash behind
-  // its composition, and the composition itself.
-  accent: string;
-  graphic: ReactNode;
+  // The stage's composition: a full-frame piece with its own colour wash.
+  art: ReactNode;
 };
 
 const STAGES: Stage[] = [
@@ -55,8 +53,7 @@ const STAGES: Stage[] = [
     ],
     href: "/flow",
     linkLabel: "See Build in the app",
-    accent: "var(--world-tech-engineering-design)",
-    graphic: <BuildScreen />,
+    art: <BuildArt />,
   },
   {
     n: "02",
@@ -69,8 +66,7 @@ const STAGES: Stage[] = [
     ],
     href: "/match-lab",
     linkLabel: "See Match in the app",
-    accent: "var(--world-business-money-office)",
-    graphic: <MatchScreen />,
+    art: <MatchArt />,
   },
   {
     n: "03",
@@ -83,8 +79,7 @@ const STAGES: Stage[] = [
     ],
     href: "/explore",
     linkLabel: "See Explore in the app",
-    accent: "var(--world-food-farming-nature)",
-    graphic: <ExploreScreen />,
+    art: <ExploreArt />,
   },
   {
     n: "04",
@@ -97,8 +92,7 @@ const STAGES: Stage[] = [
     ],
     href: "/play/investment-banking",
     linkLabel: "See the simulation in the app",
-    accent: "var(--world-driving-flying-shipping)",
-    graphic: <ImmerseScreen />,
+    art: <ImmerseArt />,
   },
   {
     n: "05",
@@ -111,8 +105,7 @@ const STAGES: Stage[] = [
     ],
     href: "/connect",
     linkLabel: "See Connect in the app",
-    accent: "var(--world-science-research)",
-    graphic: <ConnectScreen />,
+    art: <ConnectArt />,
   },
 ];
 
@@ -203,46 +196,117 @@ function Caption({ children }: { children: ReactNode }) {
   );
 }
 
-function StageRow({ stage, flip, open, onToggle }: { stage: Stage; flip: boolean; open: boolean; onToggle: () => void }) {
+function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
   return (
-    <Reveal>
-      <li className="grid grid-cols-1 items-center gap-8 py-10 sm:py-12 lg:grid-cols-12 lg:gap-14 lg:py-14">
-        <div className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
-          {/* The one eyebrow on the page. Sequence is information here: the
-             five stages happen in this order, and the number says so. */}
-          <div className="text-[12px] font-bold tracking-[0.16em] tabular-nums" style={{ color: "var(--primary)" }}>
-            STAGE {stage.n}
-          </div>
-          <h3 className="mt-2 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
-            {stage.title}
-          </h3>
-          <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-            {stage.line}
-          </p>
-          <div className="mt-5 max-w-[520px]">
-            <Disclosure id={`stage-${stage.n}`} title="What students do" size="sm" open={open} onToggle={onToggle}>
-              <ul className="flex flex-col gap-2.5">
-                {stage.detail.map((d) => (
-                  <li key={d} className="flex gap-3 text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
-                    <span aria-hidden className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={stage.href} className="mt-4 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
-                {stage.linkLabel}
-                <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-              </Link>
-            </Disclosure>
-          </div>
-        </div>
-        <div className={`lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
-          {/* Same tile, same padding, same 5:4 focal card for all five stages,
-             so the set reads as one. */}
-          <Tile accent={stage.accent}>{stage.graphic}</Tile>
-        </div>
-      </li>
-    </Reveal>
+    <div>
+      {/* The one eyebrow on the page. Sequence is information here: the
+         five stages happen in this order, and the number says so. */}
+      <div className="text-[12px] font-bold tracking-[0.16em] tabular-nums" style={{ color: "var(--primary)" }}>
+        STAGE {stage.n}
+      </div>
+      <h3 className="mt-2 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
+        {stage.title}
+      </h3>
+      <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+        {stage.line}
+      </p>
+      <div className="mt-5 max-w-[520px]">
+        <Disclosure id={`stage-${stage.n}`} title="What students do" size="sm" open={open} onToggle={onToggle}>
+          <ul className="flex flex-col gap-2.5">
+            {stage.detail.map((d) => (
+              <li key={d} className="flex gap-3 text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                <span>{d}</span>
+              </li>
+            ))}
+          </ul>
+          <Link href={stage.href} className="mt-4 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
+            {stage.linkLabel}
+            <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+          </Link>
+        </Disclosure>
+      </div>
+    </div>
+  );
+}
+
+// The five stages as one continuous story. Desktop: the copy for each stage
+// scrolls down the left while one frame on the right stays put and its
+// composition crossfades to the stage being read (the pattern Linear and
+// Stripe use for a feature walk). Phones and tablets: each stage's copy sits
+// over its own frame. Same five stages, same order, same copy either way.
+function StageStory({ stages, openStages, onToggle }: { stages: Stage[]; openStages: Set<string>; onToggle: (n: string) => void }) {
+  const [active, setActive] = useState(0);
+  const blocks = useRef<(HTMLLIElement | null)[]>([]);
+
+  useEffect(() => {
+    const els = blocks.current.filter((el): el is HTMLLIElement => el !== null);
+    if (els.length === 0) return;
+    // A stage is "read" when its copy block crosses the middle band of the
+    // viewport; the band is narrow so exactly one stage owns the frame.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(Number((entry.target as HTMLElement).dataset.index ?? 0));
+        }
+      },
+      { rootMargin: "-42% 0px -42% 0px", threshold: 0 },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-14">
+      <ol className="divide-y lg:col-span-5 lg:divide-y-0" style={{ borderColor: "var(--border)" }}>
+        {stages.map((stage, i) => (
+          <li
+            key={stage.n}
+            ref={(el) => {
+              blocks.current[i] = el;
+            }}
+            data-index={i}
+            className="py-10 sm:py-12 lg:flex lg:min-h-[76vh] lg:flex-col lg:justify-center lg:py-0"
+          >
+            <Reveal>
+              <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => onToggle(stage.n)} />
+              {/* Under lg the frame follows its copy. The composition is the
+                 same one the sticky frame shows on desktop. */}
+              <div className="mt-8 lg:hidden">
+                <Frame className="aspect-[4/5] sm:aspect-[5/4]">{stage.art}</Frame>
+              </div>
+            </Reveal>
+          </li>
+        ))}
+      </ol>
+      <div className="hidden lg:col-span-7 lg:block lg:sticky lg:top-[92px] lg:h-[calc(100vh-132px)] lg:max-h-[860px]">
+        <Frame className="h-full">
+          {stages.map((stage, i) => {
+            const isActive = i === active;
+            return (
+              <div
+                key={stage.n}
+                aria-hidden={!isActive}
+                className="absolute inset-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive ? "none" : i < active ? "translateY(-28px) scale(0.985)" : "translateY(28px) scale(0.985)",
+                  pointerEvents: isActive ? "auto" : "none",
+                }}
+              >
+                {stage.art}
+              </div>
+            );
+          })}
+          {/* where you are in the five, for the eye; the STAGE labels carry it for the reader */}
+          <ol aria-hidden className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2.5 py-2" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
+            {stages.map((stage, i) => (
+              <li key={stage.n} className="h-1.5 rounded-full transition-[width,background-color] duration-500" style={{ width: i === active ? 18 : 6, background: i === active ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
+            ))}
+          </ol>
+        </Frame>
+      </div>
+    </div>
   );
 }
 
@@ -278,7 +342,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <div className="mb-10 flex justify-center sm:mb-14">
             <AudienceToggle view={view} onChange={onChangeView} />
           </div>
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-6">
               <h1
                 className="text-[clamp(40px,4.6vw,64px)] leading-[1.02] font-extrabold tracking-[-0.02em]"
@@ -302,8 +366,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 For schools, districts, nonprofits, and educational institutions.
               </p>
             </div>
-            <div className="lg:col-span-6 lg:pl-4">
-              <HeroLaptop />
+            <div className="lg:col-span-6 lg:pl-8">
+              <HeroVisual />
               <Caption>Career Detail for Investment Banking, as it ships in the app today.</Caption>
             </div>
           </div>
@@ -341,16 +405,14 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       </section>
 
       {/* ---- Five stages ---------------------------------------------------- */}
-      <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28">
+      <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28 lg:pb-16">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
             <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
-          <ol className="mt-4 divide-y sm:mt-8" style={{ borderColor: "var(--border)" }}>
-            {STAGES.map((s, i) => (
-              <StageRow key={s.n} stage={s} flip={i % 2 === 1} open={openStages.has(s.n)} onToggle={() => toggleStage(s.n)} />
-            ))}
-          </ol>
+          <div className="mt-4 sm:mt-8 lg:mt-4">
+            <StageStory stages={STAGES} openStages={openStages} onToggle={toggleStage} />
+          </div>
         </div>
       </section>
 
@@ -361,7 +423,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
           </Reveal>
           <Reveal>
-            <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
               <ul className="lg:col-span-5">
                 {EDUCATOR_FEATURES.map((f, i) => (
                   <li key={f.title} className={`py-5 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "color-mix(in srgb, var(--foreground) 14%, transparent)" }}>
@@ -386,9 +448,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </li>
               </ul>
               <div className="lg:col-span-7">
-                <Tile accent="var(--primary)">
-                  <ProgressScreen />
-                </Tile>
+                <ProgressArt />
                 <Caption>
                   Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
                 </Caption>
@@ -402,7 +462,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="px-6 py-20 sm:py-28">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
               <div className="lg:col-span-6">
                 <SectionHead
                   title="Grounded in career research. Connected to industry."
@@ -425,9 +485,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </p>
               </div>
               <div className="lg:col-span-6">
-                <Tile accent="var(--world-business-money-office)">
-                  <LadderScreen />
-                </Tile>
+                <DataArt />
                 <Caption>Career ladder from the Investment Banking detail page.</Caption>
               </div>
             </div>
@@ -439,10 +497,10 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section id="organization" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <div className="mb-6 flex justify-center sm:mb-8">
-              <DOMark className="h-16 w-16 sm:h-20 sm:w-20" />
+            <OrganizationBand />
+            <div className="mt-8 sm:mt-10">
+              <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
             </div>
-            <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
           </Reveal>
           <Reveal>
             <PartnerTicker tone="light" className="mx-auto mt-10 max-w-[1100px] sm:mt-12" />
@@ -487,15 +545,20 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           </Reveal>
           <Reveal>
             <div
-              className="mt-10 flex flex-col items-start gap-2 rounded-2xl border border-dashed p-8 sm:p-10"
-              style={{ borderColor: "var(--border)", background: "var(--glass-surface-1)" }}
+              className="mt-10 flex flex-col items-start gap-5 rounded-[24px] border p-8 sm:flex-row sm:items-center sm:gap-8 sm:p-10"
+              style={{ borderColor: "var(--border)", background: "#ffffff", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}
             >
-              <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>
-                Case studies coming soon.
-              </h3>
-              <p className="max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Ask for references when you request a demo.
-              </p>
+              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--primary)" }}>
+                <Quote className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+              </span>
+              <div>
+                <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>
+                  Case studies coming soon.
+                </h3>
+                <p className="mt-1 max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                  Ask for references when you request a demo.
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>

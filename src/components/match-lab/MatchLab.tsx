@@ -785,7 +785,7 @@ export function MatchLab() {
 
 // ---------------------------------------------------------------- pieces ----
 
-function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dragX: number }) {
+export function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dragX: number }) {
   return (
     <div className="relative h-full w-full">
       {/* stamps live at card level, above the scroll */}
