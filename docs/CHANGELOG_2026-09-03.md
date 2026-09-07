@@ -367,3 +367,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Landing: the student Dream Opportunity stamp ends on the partner ticker; the closing paragraph stays on the Schools section only.
 - Schools page: the five stage labels are one all-caps line ("01 BUILD", "02 MATCH", ...) at equal weight, replacing the small STAGE eyebrow over a separate title.
 - Landing, Get Hired: the Next button in the four-stage demo now carries the shimmer+pulse hint too.
+- Schools landing, Connect stage: the community and thread cards no longer sit at opposite corners of the frame (a self-start/self-end mixup); both are centered at the same width.

@@ -391,11 +391,16 @@ export function ConnectArt() {
          of the question text). A flex column can't overlap by construction,
          whatever the community card's or the thread's real content height
          turns out to be. */}
-      <div aria-hidden inert className="absolute inset-0 flex flex-col justify-center gap-[26px] px-[7%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
-        <div className="self-start" style={{ width: "62%", minWidth: 240, height: 320 }}>
+      {/* Same horizontal alignment on both cards (direct feedback, 7 Sept
+         2026: self-start/self-end put them at opposite edges of the frame,
+         a diagonal void between two unrelated-looking boxes). Centered,
+         same width, so the thread reads as sitting inside the community
+         it belongs to. */}
+      <div aria-hidden inert className="absolute inset-0 flex flex-col items-center justify-center gap-[22px] px-[7%] pt-[6%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
+        <div style={{ width: "68%", minWidth: 260, height: 320 }}>
           <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
         </div>
-        <div className="self-end" style={{ width: "64%", minWidth: 240, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
+        <div style={{ width: "68%", minWidth: 260, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
           <Card accent={accent}>
             <div className="flex items-center justify-between gap-[var(--space-3)]">
               <span className="flex min-w-0 items-center gap-[8px]">

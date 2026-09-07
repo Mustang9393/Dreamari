@@ -60,3 +60,6 @@ The five stages ("01 Build" through "05 Connect") render as one all-caps line, n
 
 ## Get Hired Next button (7 Sept 2026)
 The Next button in the four-stage mini demo carries the same shimmer+pulse hint as the other landing nudges.
+
+## Connect stage, two cards (Chandu, 7 Sept 2026, follow-up)
+The community card and thread card previously used `self-start`/`self-end` inside a flex column, which is a cross-axis (horizontal) property: it pinned one card to the left edge and the other to the right, leaving a diagonal void between two seemingly unrelated boxes. Both now share the same centered alignment and width (68%), reading as one connected flow.
