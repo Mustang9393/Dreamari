@@ -1123,6 +1123,14 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   50% { opacity: 1; }
 }
 
+/* Priority next-step banner: same dark surface as the quiet banner (no more
+   off-palette gradient fill) -- attention comes from a shorter, more
+   insistent border-glow flash instead (direct feedback, 7 Sept 2026). */
+@keyframes next-step-priority-flash {
+  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent), 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 95%, transparent), 0 0 36px 2px color-mix(in srgb, var(--primary) 55%, transparent); }
+}
+
 /* Desktop: every chapter, compact ones included, is exactly the visible
    height under the nav (a chapter lands 96px down via scroll-mt-24), with
    its row centred in that space. One size for all six sections, so each
@@ -1142,11 +1150,6 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 }
 @keyframes next-step-cta-pulse {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
-  70%, 100% { box-shadow: 0 0 0 10px transparent; }
-}
-/* the priority banner's white button and its eyebrow dot */
-@keyframes next-step-cta-pulse-light {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.55); }
   70%, 100% { box-shadow: 0 0 0 10px transparent; }
 }
 @keyframes next-step-dot {

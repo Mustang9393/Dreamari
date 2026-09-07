@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PlayHub } from "@/components/play/PlayHub";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
@@ -13,7 +14,11 @@ export default function PlayPage() {
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <PlayHub />
+      {/* PlayHub reads ?focus= via useSearchParams -- Next requires that
+         inside a Suspense boundary or the production build fails. */}
+      <Suspense>
+        <PlayHub />
+      </Suspense>
     </>
   );
 }

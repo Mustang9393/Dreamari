@@ -1060,7 +1060,7 @@ function Top3Tab({
           eyebrow="Your next step"
           text="Play your #1 Career Simulation to see if it’s really your #1."
           ctaLabel="Play"
-          href="/play/investment-banking"
+          href="/play?focus=investment-banking"
           Icon={Gamepad2}
           storageKey="dreamari:top3-next-step-dismissed"
         />

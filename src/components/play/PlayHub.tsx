@@ -6,6 +6,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
@@ -23,6 +24,12 @@ import type { Simulation } from "./types";
 
 export function PlayHub() {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  // A deep link from elsewhere in the app (Profile's "Play your #1 Career
+  // Simulation") lands here, not straight into the game -- Prime Video/Apple
+  // TV pattern, the content page before playback (Joshua Pierce, Slack,
+  // 7 Sept 2026). `?focus=investment-banking` pre-selects that card as the
+  // hero instead of whatever the student's own Top 3 would otherwise show.
+  const focusId = useSearchParams().get("focus") ?? undefined;
 
   // Games for careers they chose, in their order, then everything else.
   const { mine, rest } = useMemo(() => {
@@ -68,7 +75,7 @@ export function PlayHub() {
           Play
         </h1>
 
-        <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} />
+        <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} />
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
@@ -163,7 +170,7 @@ function breakable(title: string): string {
  *  level ladder / CTA / "Coming soon" state for whichever card is
  *  currently selected, the way Netflix's own info panel sits below its row
  *  rather than being baked into one oversized card. */
-function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; soonCareers: SoonCareer[] }) {
+function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simulation[]; soonCareers: SoonCareer[]; focusId?: string }) {
   const candidates: FeaturedCandidate[] = useMemo(
     () => [
       ...simulations.map((sim): FeaturedCandidate => ({ kind: "sim", id: sim.id, sim })),
@@ -171,7 +178,9 @@ function FeaturedRow({ simulations, soonCareers }: { simulations: Simulation[]; 
     ],
     [simulations, soonCareers],
   );
-  const [featuredId, setFeaturedId] = useState<string | undefined>(candidates[0]?.id);
+  const [featuredId, setFeaturedId] = useState<string | undefined>(
+    (focusId && candidates.some((c) => c.id === focusId) ? focusId : undefined) ?? candidates[0]?.id,
+  );
   // The cinematic trailer, opened ONLY from its own chip on the featured
   // card -- deliberately separate from starting the game, per direct
   // feedback (the handoff doc auto-plays it once on first open instead).
