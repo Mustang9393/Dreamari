@@ -199,12 +199,11 @@ function Caption({ children }: { children: ReactNode }) {
 function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
   return (
     <div>
-      {/* The one eyebrow on the page. Sequence is information here: the
-         five stages happen in this order, and the number says so. */}
-      <div className="text-[12px] font-bold tracking-[0.16em] tabular-nums" style={{ color: "var(--primary)" }}>
-        STAGE {stage.n}
-      </div>
-      <h3 className="mt-2 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
+      {/* The number and the name carry equal weight, one line, both caps
+         (direct feedback, 7 Sept 2026): sequence is information, so it reads
+         as part of the name, not a small label above it. */}
+      <h3 className="flex items-baseline gap-3 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em] uppercase" style={{ color: "var(--foreground)" }}>
+        <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
         {stage.title}
       </h3>
       <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>

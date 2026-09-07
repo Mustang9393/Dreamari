@@ -54,3 +54,6 @@ Every poster row (`poster-row`) carries 44px of headroom above and 80px below, p
 
 ## Created by Dream Opportunity stamp, scale (7 Sept 2026)
 The student page's stamp uses the Schools section's scale: the mark at 64 to 80px, the heading at clamp(1.75rem, 4vw, 3rem), the lede at 16 to 18px in a 720px column, the ticker at 1100px, section padding 80 to 112px. Dark ground, white marks. The 12-years closing paragraph appears on the Schools section only (Chandu, 7 Sept 2026).
+
+## Schools stage labels (Chandu, 7 Sept 2026)
+The five stages ("01 Build" through "05 Connect") render as one all-caps line, number and name at equal weight, instead of a small "STAGE 1" eyebrow above a separate large title. Number in the accent colour. `StageCopy` in `SchoolsView.tsx`.
