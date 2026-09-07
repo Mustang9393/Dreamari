@@ -38,6 +38,123 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 Schools landing, visual QA pass finished and landed (branch `schools-visual-qa`, picked up from an interrupted session): full-bleed real-component compositions, real photography, reconciled with the concurrent partner-ticker work
+
+Picked up uncommitted work sitting in a worktree from a session interrupted
+twice (once by the user mid-QA, once by an API rate limit). Nothing from that
+session was discarded; this entry finishes the QA pass it was mid-way
+through and lands it. Brief being answered: "I don't like how the images are
+inside containers that have more blank space etc. Also use real components...
+Do a full Visual QA, use placeholder stock images or photos wherever you feel
+we can. Make it sexy and engaging and informative."
+
+- **Every composition now fills its frame** (no padded object floating in a
+  box): `SchoolsVisuals.tsx` was rewritten so each of the five stage tiles,
+  the hero, the educator panel, the data-credibility panel and the Dream
+  Opportunity band bleed to their tile's edge, with layered depth (a card
+  peeking behind the Match card, the Career Detail header hanging off the
+  hero photo's corner) instead of a screenshot centered in whitespace.
+- **Real product components, minimalised, not recreated**: `PosterCard` /
+  `RankedPosterCard` (Explore), MatchLab's `CardBody` (Match — now exported,
+  no behavior change to the real Match Lab), the Build flow's `CardHud` /
+  `QuestionHeading` / `ChipGrid` / `Citation` (Build), Connect's
+  `CommunityCard` + `Card` + `Avatar` + `CompanyChip` (Connect), the career
+  page's `PayMap` / `Figure` / `Section` (data credibility), and Profile's
+  `OverviewTab` (educators — now exported, no behavior change to the real
+  Profile page). The Play stage (`ImmerseArt`) and the Career Detail header
+  inside the hero remain faithful recreations since their real components
+  live inside routed pages, not ones you can drop into a marketing frame.
+- **Real photography**, Unsplash License (free commercial use), colour-graded
+  only by the existing card scrims — no new colours:
+  `students-laptop.webp` (hero, Vitaly Gariev), `counselor-guidance.webp`
+  ("Know where students are" panel, Monica Melton), `students-audience.webp`
+  (Dream Opportunity band, Sam Balye). Full attribution in
+  `public/images/marketing/ATTRIBUTION.md`. All three re-encoded to 1800px
+  wide; checked against their rendered width at both 1440 and 390 — none
+  renders past native resolution at either width, so nothing is an upscaled
+  raster (the Dream Opportunity band's `object-cover` crop on very wide
+  desktop screens sits closest to the ceiling; still native, not upscaled,
+  at 1440).
+- **Five stages**: replaced the old alternating-row layout with a
+  Linear/Stripe-style scrollytelling rail (`StageStory`) — desktop: the copy
+  for each stage scrolls down the left while one sticky frame on the right
+  crossfades its composition as an `IntersectionObserver` reports which
+  stage is being read; phones/tablets: each stage's copy sits directly over
+  its own frame, same order, same copy. Verified the static layout and the
+  first stage's composition at both widths; the live crossfade for stages 2-5
+  is verified by code read (the same `IntersectionObserver`/`rootMargin`
+  pattern, `active` index driving `opacity`/`transform` on absolutely
+  stacked panels) but NOT re-confirmed by watching a real scroll gesture in
+  this session — see the tooling note below for why.
+- **Reconciling with the concurrent partner-ticker work**: `origin/main` had
+  moved on since this branch's base (`aa80647` → `89c1e85`, three sessions'
+  worth of commits) including "landing: one partner ticker per page inside
+  the Dream Opportunity section" (`PartnerTicker.tsx`, new), which touches
+  the exact section this pass was rebuilding. Read the full diff before
+  touching anything. Rebased `schools-visual-qa` onto `origin/main`; git
+  auto-merged everything except the `SchoolsView.tsx` import line (both
+  sides edited it). Resolved by hand, taking `origin/main`'s side on the
+  partner display specifically (it is the more recent, confirmed decision —
+  "one partner ticker per page") while keeping this branch's own
+  `OrganizationBand` composition and every other section as rebuilt here:
+  the "Built by Dream Opportunity" section now shows `<OrganizationBand />`
+  (this branch's photo + DO mark composition) followed by
+  `<PartnerTicker tone="light" .../>` (`origin/main`'s ticker, swapped in for
+  the old `PartnerLogoWall size="full"`), and the second, duplicate
+  `PartnerLogoWall size="compact"` block that used to sit under `TrustLine`
+  is gone (matching `origin/main`'s "one ticker per page" decision) rather
+  than left as a second, now-inconsistent wall. Verified live, isolated by
+  temporarily hiding the sections around it (see tooling note): one ticker,
+  legible marks, even padding, at both widths; nothing else duplicated.
+- **Verification observed**: `npx tsc --noEmit` clean before AND after the
+  rebase; `npx eslint` clean on every touched file
+  (`SchoolsView.tsx`, `SchoolsVisuals.tsx`, `MatchLab.tsx`,
+  `ProfileExperience.tsx`, `PartnerTicker.tsx`, `DreamOpportunity.tsx`,
+  `TrustLine.tsx`); `npm run tokens:check` passes (464 tokens, artifacts
+  current) both before and after. Student landing
+  (`Hero.tsx`, `HowItWorks.tsx`, `chapters/`, `ChapterShell.tsx`,
+  `Footer.tsx`) confirmed byte-identical to `origin/main` post-rebase via
+  `git diff --quiet`. `SchoolsView.tsx` copy diffed against the reference
+  site (dreamari-educator-website.replit.app): no heading, lede, stage line,
+  form label/option, FAQ, or Dream Opportunity copy changed; section order
+  unchanged; FAQ, testimonials shell, TrustLine + one partner display, and
+  the Dream Opportunity block all still present before the closing CTA.
+  Live in the worktree on :3108 (dev server killed at the end of the
+  session): every section inspected at both 1440 and 390 — no horizontal
+  overflow at either width (`document.documentElement.scrollWidth ===
+  window.innerWidth` at 390), no clipped content, Nav/AudienceToggle/anchors
+  intact, no console errors beyond the dev-mode HMR websocket noise every
+  page in this dev server shows.
+- **Tooling note for whoever picks this up next**: the Browser pane's
+  screenshot capture was unreliable specifically at a nonzero scroll
+  position in this session — a scrolled screenshot came back solid black
+  while `getComputedStyle`/`elementFromPoint` at the same instant confirmed
+  correct, fully-painted light content underneath (reproduced identically
+  across mouse-wheel scroll, `window.scrollTo`, and a post-scroll resize, so
+  it is the capture path, not the app). Screenshots at `scrollY === 0`
+  always rendered correctly regardless of viewport height. Worked around it
+  by never scrolling: either grew the viewport tall enough to bring a
+  section into the top-anchored view, or (for sections deep in the
+  document) temporarily set `display: none` on the preceding sibling
+  `<section>`s via `javascript_exec` so the target section landed at
+  `scrollY === 0`, screenshotted, then moved on — nothing was ever exported
+  as a diff or committed from that hack, it only drove screenshots. Side
+  effect: hiding/restoring siblings churns layout enough that the
+  `StageStory` `IntersectionObserver` occasionally locked onto the wrong
+  stage's frame as "active" mid-hack; a real, un-hacked scroll (confirmed at
+  full page height with no sections hidden) showed stage 1 correctly. If a
+  future session needs to see the live crossfade for stages 2-5, that
+  needs an environment where the Browser pane is actually being watched (a
+  real scroll gesture), not a background/unattended one like this.
+- Recommended next: an iPhone/Safari touch pass (not done, same as the prior
+  visuals-pass entry below); the Dream Opportunity band photo could use a
+  touch more headroom above the DO mark on ultra-wide desktop (1920px+,
+  not checked this session).
+
+Commits: `4e6dfa6` → rebased to `c422a39` on `schools-visual-qa`; pushed;
+rebased onto `origin/main`, merged to `main`, pushed. See `git log` for the
+merge commit hash.
+
 ### 2026-09-07 Schools landing on `main`: reference copy restored verbatim; Joshua's credibility lines get their logo row
 
 - Merged `schools-landing` into `main` (merge `df7fd45`, pushed; production
