@@ -5,7 +5,6 @@ import { useState } from "react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 import { CompanyChip } from "@/components/connect/primitives";
-import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
 
 // Reads as a real social post + comment thread (Facebook/Twitter shape: post, engagement
 // row, linear comments) done in this site's own glassmorphic surfaces — not a pinned
@@ -113,7 +112,7 @@ const COMMUNITY_STATS = [
 // Shared card recipe (glass-surface-3 + blur + a soft var(--c)-tinted glow) both
 // screens use, so they read as the same family of surface rather than two different
 // card styles bolted together.
-function CardShell({ children }: { children: React.ReactNode }) {
+function CardShell({ children, accentBorder = false }: { children: React.ReactNode; accentBorder?: boolean }) {
   return (
     <div
       className="relative flex w-full flex-col overflow-hidden rounded-2xl border"
@@ -122,7 +121,7 @@ function CardShell({ children }: { children: React.ReactNode }) {
         background: "var(--glass-surface-3)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderColor: "var(--glass-border)",
+        borderColor: accentBorder ? "color-mix(in srgb, var(--c) 45%, transparent)" : "var(--glass-border)",
         boxShadow: "0 0 0 1px color-mix(in srgb, var(--c) 18%, transparent), 0 30px 70px -20px color-mix(in srgb, var(--c) 40%, transparent), 0 12px 28px -12px rgba(0,0,0,0.55)",
       }}
     >
@@ -143,31 +142,26 @@ function CardShell({ children }: { children: React.ReactNode }) {
 // reader choose.
 function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
   return (
-    <CardShell>
-      {/* The community's own cover photo, the same strip the app's community
-         card wears (direct feedback, 7 Sept 2026: use the new community
-         images on the landing page too), dimmed under the title. */}
-      <div className="relative overflow-hidden" style={{ height: "calc(var(--mu) * 120px)" }}>
-        <Image src={PHOTO_COVER["business-money"]} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS["business-money"], filter: "brightness(0.7) saturate(0.9)" }} />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--glass-surface-3) 0%, color-mix(in srgb, var(--glass-surface-3) 55%, transparent) 45%, transparent 100%)" }} />
-        <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: "var(--c)" }} />
-        <div className="absolute inset-x-0 bottom-0 text-center" style={{ padding: "0 calc(var(--mu) * 20px) calc(var(--mu) * 6px)" }}>
+    <CardShell accentBorder>
+      {/* Text header on the coloured surface, no photo and no accent line (direct
+         feedback, 7 Sept 2026); the card borrows the app's community card
+         language instead: the accent-tinted border and frosted stat tiles. */}
+      <div style={{ padding: "calc(var(--mu) * 24px) calc(var(--mu) * 20px)" }}>
+        <div className="text-center">
           <p className="uppercase" style={{ fontFamily: "var(--font-body)", fontSize: "calc(var(--mu) * 10px)", letterSpacing: "0.1em", color: "var(--c)", fontWeight: 600 }}>
             Community Board
           </p>
-          <p className="mt-1 font-extrabold" style={{ fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.25, color: "var(--foreground)", textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}>
+          <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.25, color: "var(--foreground)" }}>
             Students Interested in Business &amp; Money
           </p>
         </div>
-      </div>
-      <div style={{ padding: "calc(var(--mu) * 14px) calc(var(--mu) * 20px) calc(var(--mu) * 24px)" }}>
 
-        <div className="flex items-stretch justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
+        <div className="mt-5 flex items-stretch justify-center" style={{ gap: "calc(var(--mu) * 10px)" }}>
           {COMMUNITY_STATS.map((stat) => (
             <div
               key={stat.label}
-              className="flex flex-1 flex-col items-center rounded-xl"
-              style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 6px)", background: "var(--glass-surface-2)" }}
+              className="flex flex-1 flex-col items-center rounded-[var(--radius-sm)]"
+              style={{ padding: "calc(var(--mu) * 12px) calc(var(--mu) * 6px)", background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)" }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--c)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 16px)", height: "calc(var(--mu) * 16px)" }}>
                 {stat.icon}

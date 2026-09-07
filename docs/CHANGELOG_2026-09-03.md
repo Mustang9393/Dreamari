@@ -362,3 +362,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Explore (and every poster row): cards now lift off and grow 9% on hover the way a streaming shelf does, with an intent delay, above their neighbours, and a solid white open-arrow button at the top right; the salary chip moved to the top left.
 - Landing demo hints made unmistakable: a brighter ring and a real light sweep on the Build Business & Money row (which had never pulsed), Match X then thumbs-up, Play's right answer and Enter Community.
 - Poster rows carry enough headroom that the grown card and its shadow are never clipped, on every screen with a poster rail.
+- Landing, Connect chapter: the community board card is back on its coloured surface, no photo and no accent line, with the app community card's accent border and frosted stat tiles.
