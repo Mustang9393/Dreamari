@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
+import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -29,7 +30,6 @@ import {
   GraduationCap,
   MoreVertical,
   Plane,
-  Pencil,
   Plus,
   Printer,
   Settings,
@@ -251,7 +251,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
-  const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
+  const avatarStyle = useAvatarStyle();
   // Covers are curated backgrounds only (CEO, 4 Sept): no career-poster
   // switch, no uploads (inappropriate-content risk). The real app should
   // carry about 40 strong options; the prototype ships six.
@@ -495,13 +495,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </span>
             </div>
             <div className="flex items-end gap-[var(--space-4)]">
-              <label className="group relative size-[72px] flex-none cursor-pointer" aria-label="Change profile photo">
-                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-[72px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
-                <span className="absolute right-0 bottom-0 flex size-[22px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "#0e0c20", color: "var(--foreground)", textShadow: "none" }}>
-                  <Pencil className="h-[11px] w-[11px]" />
-                </span>
-                <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
-              </label>
+              {/* Generated, not photographed (direct feedback, 8 Sept 2026:
+                 no student photo is ever stored, and the avatar system
+                 should reach every place a student's own picture shows up,
+                 not just Connect) -- same seed, same face as everywhere
+                 else the student appears; no upload control, since there is
+                 no photo to upload anymore. */}
+              <span
+                className="size-[72px] flex-none overflow-hidden rounded-full border-2"
+                style={{ borderColor: "rgba(255,255,255,0.9)" }}
+                // eslint-disable-next-line react/no-danger -- locally generated SVG, never user input
+                dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(STUDENT.name.split(" ")[0] || STUDENT.name, avatarStyle) }}
+              />
               <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
                 <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
                 <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>
@@ -2131,8 +2136,8 @@ function SettingsView({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex max-w-[560px] flex-col gap-[var(--space-2)]">
         <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-          <span className="text-[15px] font-bold">Profile photo</span>
-          <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Tap your avatar to change it</span>
+          <span className="text-[15px] font-bold">Profile avatar</span>
+          <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated for privacy, never a photo</span>
         </div>
         {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
           <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>

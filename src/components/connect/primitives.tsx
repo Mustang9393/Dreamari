@@ -9,6 +9,7 @@ import Image from "next/image";
 import { createContext, useContext, useState } from "react";
 import { ArrowRight, CheckCircle2, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
 
 /** In-page navigation for anything rendered inside Connect: lets a pro's
@@ -61,9 +62,20 @@ export const STATE_COLOR: Record<Thread["state"], string> = {
 };
 
 // Avatar photos are PARKED for the pitch (direct feedback: mixed cartoons
-// and photos read as random) -- every avatar renders as initials until
-// USE_PHOTO_AVATARS flips back on. The portrait set and mapping stay.
+// and photos read as random) -- pros keep their verified portrait, and
+// students fall through to a generated avatar until USE_PHOTO_AVATARS flips
+// back on. The portrait set and mapping stay. Students staying generated
+// rather than photographed is deliberate now (direct feedback, 8 Sept 2026:
+// a safety/privacy decision -- no student photo is ever stored) and reads as
+// the intended contrast, not the "mixed cartoons and photos" problem this
+// comment originally warned about: a generated avatar signals "this
+// identity is protected," a photo signals "this is a verified real person,"
+// and a feed with both is teaching the difference on purpose.
 const USE_PHOTO_AVATARS = false;
+
+// Generated avatars now live in src/lib/avatar.ts, shared app-wide (direct
+// feedback, 8 Sept 2026: "should trickle down into everything... wherever a
+// student's avatar is used") -- not just this one component.
 
 // Photo avatars (behind the flag above), initials only as the fallback
 // for a name with no portrait. The pool is a committed set of demo portraits
@@ -129,23 +141,19 @@ export function Avatar({ name, size = 34, verified }: { name: string; size?: num
   // Professionals always wear their portrait; students stay behind the flag.
   const isPro = PROS.some((p) => p.name === name);
   const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
-  const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  // The seed is the FIRST word only, so "Jordan Rivera" (a full name, shown
+  // on the student's own profile) and "Jordan" (the community handle, per
+  // the app's first-name-only identity rule) generate the identical
+  // avatar -- one consistent face per person, not one per string variant.
+  const seed = name.split(" ")[0] || name;
+  const avatarStyle = useAvatarStyle();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
       {photo ? (
         <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       ) : (
-        <span
-          className="flex h-full w-full items-center justify-center rounded-full font-bold"
-          style={{
-            background: verified ? "var(--primary)" : "var(--secondary)",
-            color: verified ? "#FFFFFF" : "var(--foreground)",
-            fontSize: Math.max(11, size * 0.4),
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {initials}
-        </span>
+        // eslint-disable-next-line react/no-danger -- locally generated SVG, never user input
+        <span className="block h-full w-full overflow-hidden rounded-full" style={{ background: "var(--secondary)" }} dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(seed, avatarStyle) }} />
       )}
       {verified && (
         <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>

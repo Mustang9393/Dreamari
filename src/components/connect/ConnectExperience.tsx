@@ -851,14 +851,27 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
 // crossposts etc. are out of scope -- just how the post LIST itself reads. ———
 
 export type FeedSort = "best" | "recent";
-export type FeedView = "card" | "compact";
+// "card" is the original shipped row; "aligned" and "rail" are the two
+// hierarchy options from the mockup review (direct feedback, 8 Sept 2026:
+// "let's go with option 2 [rail] on the live site... return to option 1
+// [aligned] if needed" -- then, a toggle for all of them at once so they're
+// comparable live rather than one-at-a-time). "compact" is the existing
+// dense single-line view, unrelated to which of the other three is active.
+export type FeedView = "card" | "aligned" | "rail" | "compact";
+const FEED_VIEWS: { key: FeedView; label: string }[] = [
+  { key: "card", label: "Current" },
+  { key: "aligned", label: "Columns" },
+  { key: "rail", label: "Rail" },
+  { key: "compact", label: "Compact" },
+];
 const FEED_VIEW_KEY = "dreamari:connect-feed-view";
 
 function readFeedView(): FeedView {
   try {
-    return window.localStorage.getItem(FEED_VIEW_KEY) === "compact" ? "compact" : "card";
+    const saved = window.localStorage.getItem(FEED_VIEW_KEY);
+    return (FEED_VIEWS.find((v) => v.key === saved)?.key) ?? "rail";
   } catch {
-    return "card";
+    return "rail";
   }
 }
 
@@ -882,13 +895,20 @@ function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: 
           </span>
         ))}
       </div>
-      <div role="group" aria-label="Feed view" className="flex flex-none items-center gap-[8px]">
-        <button type="button" aria-pressed={view === "card"} aria-label="Card view" onClick={() => onView("card")} className="dm-quiet flex cursor-pointer items-center" style={{ color: view === "card" ? "var(--foreground)" : "var(--muted-foreground)" }}>
-          <LayoutGrid className="h-[15px] w-[15px]" aria-hidden />
-        </button>
-        <button type="button" aria-pressed={view === "compact"} aria-label="Compact view" onClick={() => onView("compact")} className="dm-quiet flex cursor-pointer items-center" style={{ color: view === "compact" ? "var(--foreground)" : "var(--muted-foreground)" }}>
-          <Rows3 className="h-[15px] w-[15px]" aria-hidden />
-        </button>
+      {/* Four ways to lay out a post, comparable live on the real feed
+         (direct feedback, 8 Sept 2026 -- a toggle to switch and judge which
+         wins, not a screenshot mockup). Quiet text, same treatment as sort,
+         so this doesn't fight the Questions/Insights/Updates/About tabs the
+         way the first pass's solid-pill view toggle did. */}
+      <div role="group" aria-label="Feed layout" className="flex flex-none items-center gap-[10px]">
+        {FEED_VIEWS.map((v, i) => (
+          <span key={v.key} className="flex items-center gap-[10px]">
+            {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
+            <button type="button" aria-pressed={view === v.key} onClick={() => onView(v.key)} className="dm-quiet cursor-pointer" style={{ color: view === v.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {v.label}
+            </button>
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -944,6 +964,171 @@ function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () =>
 function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
   const pro = proById(insight.proId);
   return <CompactRow onOpen={onOpen} avatarName={pro.name} title={insight.title} meta={`${pro.name} · ${pro.role} · ${insight.postedAgo}`} helpful={insight.helpful} comments={insight.replies.length} />;
+}
+
+// ——— Option 1: aligned stat column (Discourse) ———
+// A fixed-width, right-aligned, tabular-numeral column for the one number
+// that actually decides whether a question needs attention -- the reply
+// count -- so it scans down the page the way a spreadsheet's own numbers
+// do. Helpful and Save stay inline under the snippet, same actions as the
+// shipped row, just no longer repeating the reply count a second time.
+function AlignedRow({ onOpen, avatarName, head, title, snippet, count, countLabel, countTone, time, children }: {
+  onOpen: () => void; avatarName: string; head: string; title: string; snippet?: { by?: string; text: string };
+  count: number; countLabel: string; countTone: string; time: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative grid items-center gap-[14px] border-b py-[15px]" style={{ borderColor: RULE, gridTemplateColumns: "40px 1fr 72px" }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open: {title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <Avatar name={avatarName} size={40} />
+      <div className="relative z-20 min-w-0">
+        <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{head}</p>
+        <p className="mt-[3px] truncate text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</p>
+        {snippet && (
+          <p className="mt-[3px] truncate text-[12.5px]" style={{ color: "color-mix(in srgb, var(--muted-foreground) 88%, transparent)" }}>
+            {snippet.by && <b style={{ color: "var(--muted-foreground)" }}>{snippet.by}: </b>}
+            {snippet.text}
+          </p>
+        )}
+        <div className="mt-[8px] flex items-center gap-[12px]">{children}</div>
+      </div>
+      <div className="relative z-20 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+        <p className="text-[18px] leading-[20px] font-extrabold" style={{ color: countTone }}>{count}</p>
+        <p className="mt-[2px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{countLabel}</p>
+        <p className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{time}</p>
+      </div>
+    </div>
+  );
+}
+
+function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  const answered = thread.state === "answered" || thread.state === "resolved";
+  return (
+    <AlignedRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      head={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""}`}
+      title={thread.title}
+      snippet={questionSnippet(thread)}
+      count={comments}
+      countLabel="replies"
+      countTone={answered ? "var(--world-food-farming-nature)" : "var(--muted-foreground)"}
+      time={thread.postedAgo}
+    >
+      <StatusChip state={thread.state} />
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </AlignedRow>
+  );
+}
+
+function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const pro = proById(insight.proId);
+  return (
+    <AlignedRow
+      onOpen={onOpen}
+      avatarName={pro.name}
+      head={`${pro.name} · ${pro.role}`}
+      title={insight.title}
+      snippet={{ text: insight.body }}
+      count={insight.replies.length}
+      countLabel="replies"
+      countTone="var(--muted-foreground)"
+      time={insight.postedAgo}
+    >
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </AlignedRow>
+  );
+}
+
+// ——— Option 2: accent rail + sharper type scale ———
+// A slim bar at the row's left edge and a bigger, bolder title with
+// metadata pushed down in size and color -- the contrast alone says "this
+// is the important thing" without a box (direct feedback, 8 Sept 2026:
+// "let's go with option 2 on the live site"). The rail is a constant brand
+// color, not the question's answered/waiting state -- an early pass colored
+// it per-state (Discourse colors its own category dot the same way), but
+// green-for-answered read as over-signaling on every single row rather than
+// a real status cue (direct feedback: "I like rail without the green rail,
+// let's get rid of that"). The StatusChip inside the row already says
+// answered/waiting in words; the rail doesn't need to repeat it in color.
+function RailRow({ onOpen, avatarName, head, title, snippet, railColor, children }: {
+  onOpen: () => void; avatarName: string; head: string; title: string; snippet?: { by?: string; text: string }; railColor: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative flex gap-[12px] border-b py-[16px] pl-[16px]" style={{ borderColor: RULE }}>
+      <span aria-hidden className="absolute top-[14px] bottom-[14px] left-0 w-[3px] rounded-full" style={{ background: railColor }} />
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open: {title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <Avatar name={avatarName} size={34} />
+      <div className="relative z-20 min-w-0 flex-1">
+        <p className="truncate text-[10.5px] font-bold tracking-[0.05em] uppercase" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{head}</p>
+        <h3 className="mt-[5px] text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
+        {snippet && (
+          <p className="mt-[4px] truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>
+            {snippet.by && <b style={{ color: "var(--foreground)" }}>{snippet.by}: </b>}
+            {snippet.text}
+          </p>
+        )}
+        <div className="mt-[10px] flex items-center gap-[12px]">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  return (
+    <RailRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      head={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
+      title={thread.title}
+      snippet={questionSnippet(thread)}
+      railColor="var(--primary)"
+    >
+      <StatusChip state={thread.state} />
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
+      <span className="flex items-center gap-[5px] text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
+      </span>
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </RailRow>
+  );
+}
+
+function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const pro = proById(insight.proId);
+  return (
+    <RailRow
+      onOpen={onOpen}
+      avatarName={pro.name}
+      head={`${pro.name} · ${pro.role} · ${insight.postedAgo}`}
+      title={insight.title}
+      snippet={{ text: insight.body }}
+      railColor="var(--primary)"
+    >
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+      <span className="flex items-center gap-[5px] text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length}
+      </span>
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </RailRow>
+  );
 }
 
 // ——— filter row (mobile: horizontal scroll with edge cue, never clipped) ———
@@ -2048,7 +2233,7 @@ function BoardView({
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const [sort, setSort] = useState<FeedSort>("best");
-  const [view, setView] = useState<FeedView>("card");
+  const [view, setView] = useState<FeedView>("rail");
   useEffect(() => setView(readFeedView()), []);
   useEffect(() => {
     try { window.localStorage.setItem(FEED_VIEW_KEY, view); } catch {}
@@ -2179,6 +2364,10 @@ function BoardView({
           {threads.map((t) =>
             view === "compact" ? (
               <CompactQuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} />
+            ) : view === "aligned" ? (
+              <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
+            ) : view === "rail" ? (
+              <RailQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
             ) : (
               <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
             ),
@@ -2201,6 +2390,10 @@ function BoardView({
           {insights.map((i) =>
             view === "compact" ? (
               <CompactInsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} />
+            ) : view === "aligned" ? (
+              <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
+            ) : view === "rail" ? (
+              <RailInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
             ) : (
               <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
             ),
