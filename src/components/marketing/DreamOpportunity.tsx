@@ -79,7 +79,7 @@ export function PartnerLogoWall({ size = "full", className = "" }: PartnerLogoWa
 export function BuiltByStamp() {
   // Same scale as the Schools view's Built by Dream Opportunity section
   // (Chandu, 7 Sept 2026): the mark, a real heading, the lede, the ticker at
-  // full width, then the closing line, with the same breathing room.
+  // full width, with the same breathing room. No closing paragraph here.
   return (
     <section aria-labelledby="built-by-heading" className="mkt-snap relative px-6 py-20 pt-[104px] sm:py-28 md:pt-28">
       <div className="mx-auto flex max-w-[1200px] flex-col items-center text-center">
@@ -90,10 +90,9 @@ export function BuiltByStamp() {
         <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {DO_COPY.lead}
         </p>
+        {/* the closing paragraph stays on the Schools section only; the student
+           stamp ends on the partners (Chandu, 7 Sept 2026) */}
         <PartnerTicker className="mx-auto mt-10 w-full max-w-[1100px] sm:mt-12" />
-        <p className="mx-auto mt-10 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>
-          {DO_COPY.close}
-        </p>
       </div>
     </section>
   );

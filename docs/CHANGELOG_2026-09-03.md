@@ -364,3 +364,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Poster rows carry enough headroom that the grown card and its shadow are never clipped, on every screen with a poster rail.
 - Landing, Connect chapter: the community board card is back on its coloured surface, no photo and no accent line, with the app community card's accent border and frosted stat tiles.
 - Landing: the "created by Dream Opportunity" stamp on the student page now matches the Schools section's scale (large mark, real heading, full-width ticker).
+- Landing: the student Dream Opportunity stamp ends on the partner ticker; the closing paragraph stays on the Schools section only.
