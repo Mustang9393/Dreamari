@@ -42,6 +42,8 @@ import {
   Bell,
   Search,
   QrCode,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -280,6 +282,37 @@ function LocalQuestionCard({ title }: { title: string }) {
 }
 
 // ——— tiny shared pieces ———
+
+// "Most Recent" needs an actual order, and the seed data only carries a
+// display string ("6h ago", "2d ago") -- minutes-ago from the unit lets the
+// two feeds (Reddit's Best/New, borrowed per direct feedback, 8 Sept 2026)
+// sort on something real instead of authoring order.
+const AGO_UNIT_MINUTES: Record<string, number> = { m: 1, h: 60, d: 1440, w: 10080 };
+function agoMinutes(postedAgo: string): number {
+  const match = /^(\d+)([mhdw])/.exec(postedAgo);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  return Number(match[1]) * (AGO_UNIT_MINUTES[match[2]] ?? 1);
+}
+
+// The one element Reddit renders as a rounded pill in both Card and Compact
+// (its vote widget) -- everything else in its action row (comments, share,
+// save...) is plain text/icon, not its own button-shaped chip (direct
+// feedback, 8 Sept 2026: don't clone the whole row, just the one real signal
+// that "this is a live control"). This feed has no downvote, so the pill
+// carries just the thumbs-up and its count.
+function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
+      style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
+    >
+      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count}
+    </button>
+  );
+}
 
 function StatusChip({ state }: { state: Thread["state"] }) {
   return (
@@ -684,21 +717,25 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // has come back yet, the quoted bold question as the card's heading, a chip
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
-function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
+function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   // Display count for the demo (data.ts `comments`), falling back to the
   // real list; the thread itself may hold fewer. Direct feedback.
   const comments = thread.comments ?? thread.responses.length;
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer">
-      {/* The WHOLE card opens the thread (direct feedback: "make it
-         obviously easily clickable") -- an overlay target under the
-         like/save controls, a hover ring, and a chevron that says "this
-         goes somewhere" before you ever hover. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+    // A post in a feed, not a box on a page (direct feedback, 8 Sept 2026:
+    // "let's not do the cards for the card view, do it like Reddit does") --
+    // Reddit's own posts sit straight in the feed, divided by a hairline,
+    // never a bordered/shadowed card. The whole row still opens the thread
+    // (earlier direct feedback: "make it obviously easily clickable") -- an
+    // overlay target under the like/save controls, a hover tint standing in
+    // for the old hover ring, and a chevron that says "this goes somewhere"
+    // before you ever hover.
+    <div className="group relative border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open question: {thread.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
-      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       {/* A living row starts with a person: the asker's avatar and handle
          lead, the time sits at the far edge -- the same anatomy as every
@@ -718,9 +755,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
       </div>
       <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
       <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
-        </button>
+        <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
           <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
         </button>
@@ -730,7 +765,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
           <Bookmark className="h-3 w-3" aria-hidden /> {saved ? "Saved" : "Save"}
         </button>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -738,18 +773,18 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 // and their company chip, the insight's title line, then likes and comments
 // -- and the whole row OPENS: title and comment count both land on the
 // insight's own thread, where the conversation lives.
-function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
+function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   const nav = useContext(ConnectNav);
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer">
-      {/* The WHOLE card opens the insight's thread -- overlay target under
-         the like/save controls, hover ring, and an always-visible chevron. */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+    // Same flat-feed-row treatment as QuestionCard (direct feedback, 8 Sept
+    // 2026) -- no bordered/shadowed box, a hairline divider instead.
+    <div className="group relative border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open insight: {insight.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
-      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
         <ProAvatar proId={pro.id} name={pro.name} size={36} />
@@ -762,9 +797,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
           <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-              <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
-            </button>
+            <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
             <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
               <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{insight.replies.length} comments</span>
             </button>
@@ -775,10 +808,114 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accen
         </div>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
       </div>
-    </Card>
+    </div>
   );
 }
 
+// ——— feed controls: sort + view, learned from Reddit's community feed
+// (direct feedback, 8 Sept 2026), kept to the two moves worth borrowing:
+// a sort (Best/Most Recent, standing in for Reddit's Best/New -- no
+// "Rising"/"Controversial", this feed doesn't have the volume to need them)
+// and a view toggle (Card/Compact). Reddit's own left/right rails, awards,
+// crossposts etc. are out of scope -- just how the post LIST itself reads. ———
+
+export type FeedSort = "best" | "recent";
+export type FeedView = "card" | "compact";
+const FEED_VIEW_KEY = "dreamari:connect-feed-view";
+
+function readFeedView(): FeedView {
+  try {
+    return window.localStorage.getItem(FEED_VIEW_KEY) === "compact" ? "compact" : "card";
+  } catch {
+    return "card";
+  }
+}
+
+// Reddit's own version of this row is quiet plain text ("Best ⌄", a small
+// icon+chevron for view) -- never a second solid chip bar directly under the
+// real tabs. The first pass used the same Segmented pill as Questions/
+// Insights/Updates/About and it fought with them for the eye (direct
+// feedback, 8 Sept 2026). Plain text links now, muted except the active one;
+// the view toggle is two small icons, no bordered box.
+function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: (s: FeedSort) => void; view: FeedView; onView: (v: FeedView) => void }) {
+  const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)] text-[12.5px] leading-[17px] font-semibold">
+      <div className="flex items-center gap-[10px]">
+        {SORTS.map((s, i) => (
+          <span key={s.key} className="flex items-center gap-[10px]">
+            {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
+            <button type="button" aria-pressed={sort === s.key} onClick={() => onSort(s.key)} className="dm-quiet cursor-pointer" style={{ color: sort === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {s.label}
+            </button>
+          </span>
+        ))}
+      </div>
+      <div role="group" aria-label="Feed view" className="flex flex-none items-center gap-[8px]">
+        <button type="button" aria-pressed={view === "card"} aria-label="Card view" onClick={() => onView("card")} className="dm-quiet flex cursor-pointer items-center" style={{ color: view === "card" ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <LayoutGrid className="h-[15px] w-[15px]" aria-hidden />
+        </button>
+        <button type="button" aria-pressed={view === "compact"} aria-label="Compact view" onClick={() => onView("compact")} className="dm-quiet flex cursor-pointer items-center" style={{ color: view === "compact" ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <Rows3 className="h-[15px] w-[15px]" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// One dense row, single hairline divider, no card box -- Reddit's compact
+// view swaps a floating card for a plain list because a list of thin rows
+// reads as "posts, scan and pick one" more plainly than a stack of separated
+// boxes does. No vote arrows (this feed's engagement signal is a helpful
+// count, not a score to up/down-vote), but the same left-anchored-number
+// idea: the thumbs-up count sits first, in the position a vote count would.
+function CompactRow({ onOpen, avatarName, title, meta, unanswered, helpful, comments }: { onOpen: () => void; avatarName: string; title: string; meta: string; unanswered?: boolean; helpful: number; comments: number }) {
+  return (
+    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] border-b py-[10px] text-left" style={{ borderColor: RULE }}>
+      {/* Visually the same pill HelpfulPill renders in Card view -- just not
+         its own nested button here, since the whole row already is one. */}
+      <span aria-hidden className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[4px] text-[11px] leading-[13px] font-bold tabular-nums" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
+        <ThumbsUp className="h-3 w-3" /> {helpful}
+      </span>
+      <Avatar name={avatarName} size={24} />
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-[6px]">
+          <span className="min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
+          {unanswered && (
+            <span className="inline-flex flex-none rounded-[var(--radius-sm)] border px-[6px] py-[1px] text-[9.5px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
+              Unanswered
+            </span>
+          )}
+        </span>
+        <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>
+      </span>
+      <span className="flex flex-none items-center gap-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
+      </span>
+      <ChevronRight aria-hidden className="h-4 w-4 flex-none transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+    </button>
+  );
+}
+
+function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  return (
+    <CompactRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      title={`"${thread.title}"`}
+      meta={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
+      unanswered={comments === 0}
+      helpful={thread.helpful}
+      comments={comments}
+    />
+  );
+}
+
+function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
+  const pro = proById(insight.proId);
+  return <CompactRow onOpen={onOpen} avatarName={pro.name} title={insight.title} meta={`${pro.name} · ${pro.role} · ${insight.postedAgo}`} helpful={insight.helpful} comments={insight.replies.length} />;
+}
 
 // ——— filter row (mobile: horizontal scroll with edge cue, never clipped) ———
 
@@ -1881,8 +2018,19 @@ function BoardView({
   onOpenInsight: (id: string) => void;
   cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
-  const threads = THREADS.filter((t) => t.boardId === community.id);
-  const insights = INSIGHTS.filter((i) => i.boardId === community.id);
+  const [sort, setSort] = useState<FeedSort>("best");
+  const [view, setView] = useState<FeedView>("card");
+  useEffect(() => setView(readFeedView()), []);
+  useEffect(() => {
+    try { window.localStorage.setItem(FEED_VIEW_KEY, view); } catch {}
+  }, [view]);
+  const sortFeed = useCallback(
+    <T extends { helpful: number; postedAgo: string }>(items: T[]): T[] =>
+      [...items].sort((a, b) => (sort === "best" ? b.helpful - a.helpful : agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo))),
+    [sort],
+  );
+  const threads = sortFeed(THREADS.filter((t) => t.boardId === community.id));
+  const insights = sortFeed(INSIGHTS.filter((i) => i.boardId === community.id));
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
@@ -1997,8 +2145,15 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
+          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} view={view} onView={setView} />}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
+          {threads.map((t) =>
+            view === "compact" ? (
+              <CompactQuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} />
+            ) : (
+              <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
+            ),
+          )}
           {threads.length === 0 && (
             <Card>
               <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
@@ -2013,7 +2168,14 @@ function BoardView({
       )}
       {tab === "insights" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
+          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} view={view} onView={setView} />}
+          {insights.map((i) =>
+            view === "compact" ? (
+              <CompactInsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} />
+            ) : (
+              <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
+            ),
+          )}
           {insights.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
           )}
@@ -2189,7 +2351,7 @@ function EventView({
             onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
           />
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={EVENT_ACCENT} {...cardProps(t.id)} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
           {threads.length === 0 && postedQs.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
           )}
