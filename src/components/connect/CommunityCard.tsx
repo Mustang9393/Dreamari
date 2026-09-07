@@ -120,8 +120,6 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         />
         <span className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
       </span>
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
-
       {/* the whole card is the tap target (direct feedback) */}
       <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>

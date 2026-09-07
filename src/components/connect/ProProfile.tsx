@@ -10,7 +10,7 @@ import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
 import { CommunityCard } from "./CommunityCard";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -108,12 +108,12 @@ export type Follows = Record<string, boolean>;
 /** The one Follow control, in both of its states. Same label family
  *  everywhere (Follow -> Following), a check when done, the tick as it flips.
  *  aria-pressed drives the shared data-connect lift rule. */
-export function FollowButton({ following, onToggle, compact = false, className = "", tone }: { following: boolean; onToggle: () => void; compact?: boolean; className?: string; /** the company's colours on a branded card, instead of the app's blue */ tone?: { background: string; color: string; border?: string } }) {
+export function FollowButton({ following, onToggle, compact = false, dense = false, className = "", tone }: { following: boolean; onToggle: () => void; compact?: boolean; /** smaller still, for a Follow button sharing a line with a name and other badges */ dense?: boolean; className?: string; /** the company's colours on a branded card, instead of the app's blue */ tone?: { background: string; color: string; border?: string } }) {
   const press = () => {
     dispatchAuroraPulse(following ? "select" : "cta");
     onToggle();
   };
-  const size = compact ? "sm" : "md";
+  const size = dense ? "xs" : compact ? "sm" : "md";
   if (following) {
     return (
       <QuietCta onClick={press} done size={size} className={className}>
@@ -285,8 +285,8 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
         {items.slice(0, limit).map((item) => (
           <PanelRow key={item.key} onClick={item.open}>
             <span className="flex items-center gap-[8px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <Avatar name={item.pro.name} verified size={24} />
-              <strong className="font-bold" style={{ color: "var(--foreground)" }}>{item.pro.name}</strong> {item.verb}
+              <Avatar name={item.pro.name} size={24} />
+              <strong className="flex items-center gap-[4px] font-bold" style={{ color: "var(--foreground)" }}>{item.pro.name} <VerifiedBadge size={13} /></strong> {item.verb}
             </span>
             <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{item.verb === "answered" ? `“${item.title}”` : item.title}</span>
           </PanelRow>
@@ -433,10 +433,13 @@ export function ProProfileView({
         )}
         <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[72px] sm:p-[var(--space-6)] sm:pt-[88px]">
           <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-5)]">
-            <Avatar name={pro.name} verified size={96} />
+            <Avatar name={pro.name} size={96} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
-                <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+                <span className="flex items-center gap-[6px]">
+                  <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+                  <VerifiedBadge size={18} />
+                </span>
                 {tier && (
                   <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "rgba(255,255,255,0.12)", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
                     <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: PRO_ACCENT }} /> {tier.name} volunteer
@@ -680,9 +683,9 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
           {people.map((pro) => (
             <PanelRow key={pro.id} onClick={() => nav?.openPro(pro.id)}>
               <span className="flex w-full items-center gap-[10px]">
-                <Avatar name={pro.name} verified size={36} />
+                <Avatar name={pro.name} size={36} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span>
+                  <span className="flex items-center gap-[4px] truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></span>
                   <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
                 </span>
                 <span className="flex-none text-right text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>

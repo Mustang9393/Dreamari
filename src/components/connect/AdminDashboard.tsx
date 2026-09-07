@@ -5,7 +5,7 @@ import { ArrowLeft, Building2, CheckCircle2, Flag, GraduationCap, MessagesSquare
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, PROS, THREADS } from "./data";
-import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, QuietCta, formatCount } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, QuietCta, VerifiedBadge, formatCount } from "./primitives";
 import { Panel, PanelRow, RULE } from "./ProProfile";
 import { AreaChart, Meter, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
@@ -261,10 +261,10 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
                 return (
                   <PanelRow key={p.id} onClick={() => nav?.openPro(p.id)}>
                     <span className="flex w-full items-center gap-[10px]">
-                      <Avatar name={p.name} verified size={36} />
+                      <Avatar name={p.name} size={36} />
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
-                          <span className="truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.name}</span>
+                          <span className="flex items-center gap-[4px] truncate text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.name} <VerifiedBadge size={13} /></span>
                           <CompanyChip name={p.org} tone="surface" size="sm" />
                         </span>
                         <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{p.role} · {p.questionsAnswered} answered · {formatCount(p.studentsReached)} reached</span>

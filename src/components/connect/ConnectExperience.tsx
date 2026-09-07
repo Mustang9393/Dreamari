@@ -4,7 +4,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 
 import Image from "next/image";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
 import {
@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, VerifiedBadge } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab } from "./PeopleTab";
@@ -64,6 +64,7 @@ const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: 
   folder: { Icon: FolderOpen, label: "Folder" },
 };
 import { AdminDashboardView } from "./AdminDashboard";
+import { AVATAR_STYLES, setAvatarStyle, useAvatarStyle } from "@/lib/avatar";
 import {
   COMMUNITIES,
   EVENTS,
@@ -744,11 +745,11 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
     // overlay target under the like/save controls, a hover tint standing in
     // for the old hover ring, and a chevron that says "this goes somewhere"
     // before you ever hover.
-    <div className="group relative border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+    <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open question: {thread.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       {/* A living row starts with a person: the asker's avatar and handle
@@ -807,19 +808,18 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
   return (
     // Same flat-feed-row treatment as QuestionCard (direct feedback, 8 Sept
     // 2026) -- no bordered/shadowed box, a hairline divider instead.
-    <div className="group relative border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+    <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open insight: {insight.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
         <ProAvatar proId={pro.id} name={pro.name} size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-            <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Pro</span>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
             <span className="flex min-w-0 items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> <CompanyChip name={pro.org} tone="surface" size="sm" /></span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
@@ -881,6 +881,31 @@ function readFeedView(): FeedView {
 // Insights/Updates/About and it fought with them for the eye (direct
 // feedback, 8 Sept 2026). Plain text links now, muted except the active one;
 // the view toggle is two small icons, no bordered box.
+// A visible switch for the three avatar styles (direct feedback, 8 Sept
+// 2026: "where do I switch between the different avatar styles... I need
+// to be able to see different styles so we can see what's scalable for
+// later gamification and customisation unlocks"). The style itself is a
+// global setting (src/lib/avatar.ts, localStorage-backed) -- this is just
+// the first visible control for it, placed here since this is where it's
+// being judged. Every avatar on screen, anywhere in the app, updates the
+// moment it's pressed.
+function AvatarStyleControl() {
+  const style = useAvatarStyle();
+  return (
+    <div role="group" aria-label="Avatar style" className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
+      <span style={{ color: "var(--muted-foreground)" }}>Avatar style:</span>
+      {AVATAR_STYLES.map((s, i) => (
+        <span key={s.key} className="flex items-center gap-[10px]">
+          {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
+          <button type="button" aria-pressed={style === s.key} onClick={() => setAvatarStyle(s.key)} className="dm-quiet cursor-pointer" style={{ color: style === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            {s.label}
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: (s: FeedSort) => void; view: FeedView; onView: (v: FeedView) => void }) {
   const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
   return (
@@ -922,7 +947,7 @@ function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: 
 // idea: the thumbs-up count sits first, in the position a vote count would.
 function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments }: { onOpen: () => void; avatarName: string; title: string; meta: string; state?: Thread["state"]; helpful: number; comments: number }) {
   return (
-    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] border-b py-[10px] text-left" style={{ borderColor: RULE }}>
+    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-left transition-colors duration-150" style={{ background: "var(--glass-surface-1)" }}>
       {/* Visually the same pill HelpfulPill renders in Card view -- just not
          its own nested button here, since the whole row already is one. */}
       <span aria-hidden className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[4px] text-[11px] leading-[13px] font-bold tabular-nums" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
@@ -972,18 +997,27 @@ function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () 
 // count -- so it scans down the page the way a spreadsheet's own numbers
 // do. Helpful and Save stay inline under the snippet, same actions as the
 // shipped row, just no longer repeating the reply count a second time.
-function AlignedRow({ onOpen, avatarName, head, title, snippet, count, countLabel, countTone, time, children }: {
-  onOpen: () => void; avatarName: string; head: string; title: string; snippet?: { by?: string; text: string };
+function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, countLabel, countTone, time, children }: {
+  onOpen: () => void; avatarName: string; proId?: string; head: string; title: string; snippet?: { by?: string; text: string };
   count: number; countLabel: string; countTone: string; time: string; children: React.ReactNode;
 }) {
   return (
-    <div className="group relative grid items-center gap-[14px] border-b py-[15px]" style={{ borderColor: RULE, gridTemplateColumns: "40px 1fr 72px" }}>
+    <div className="group relative grid items-center gap-[14px] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", gridTemplateColumns: "40px 1fr 72px" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open: {title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <Avatar name={avatarName} size={40} />
-      <div className="relative z-20 min-w-0">
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      {/* A professional's avatar opens THEIR profile, not the post, the way
+         Instagram/Twitter treat an author's avatar vs. the post body
+         (direct feedback) -- ProAvatar is already its own higher-stacked,
+         stopPropagation'd button that overrides the row's own overlay. */}
+      {proId ? <ProAvatar proId={proId} name={avatarName} size={40} /> : <Avatar name={avatarName} size={40} />}
+      {/* Plain (no z-index) -- text with no handler of its own must stay
+         BELOW the overlay button, or it silently swallows the click
+         instead of letting it fall through (direct feedback: "only
+         registers at a specific unobvious point" -- this was why). Only
+         `children` (real buttons) need to sit above the overlay. */}
+      <div className="min-w-0">
         <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{head}</p>
         <p className="mt-[3px] truncate text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</p>
         {snippet && (
@@ -992,9 +1026,9 @@ function AlignedRow({ onOpen, avatarName, head, title, snippet, count, countLabe
             {snippet.text}
           </p>
         )}
-        <div className="mt-[8px] flex items-center gap-[12px]">{children}</div>
+        <div className="relative z-20 mt-[8px] flex items-center gap-[12px]">{children}</div>
       </div>
-      <div className="relative z-20 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+      <div className="text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
         <p className="text-[18px] leading-[20px] font-extrabold" style={{ color: countTone }}>{count}</p>
         <p className="mt-[2px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{countLabel}</p>
         <p className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{time}</p>
@@ -1033,6 +1067,7 @@ function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful 
     <AlignedRow
       onOpen={onOpen}
       avatarName={pro.name}
+      proId={pro.id}
       head={`${pro.name} · ${pro.role}`}
       title={insight.title}
       snippet={{ text: insight.body }}
@@ -1060,18 +1095,31 @@ function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful 
 // a real status cue (direct feedback: "I like rail without the green rail,
 // let's get rid of that"). The StatusChip inside the row already says
 // answered/waiting in words; the rail doesn't need to repeat it in color.
-function RailRow({ onOpen, avatarName, head, title, snippet, railColor, children }: {
-  onOpen: () => void; avatarName: string; head: string; title: string; snippet?: { by?: string; text: string }; railColor: string; children: React.ReactNode;
+// The rail bar itself is gone (direct feedback, 8 Sept 2026: "remove the
+// rail from the rail variant, I don't want that line thing") -- what's left
+// is the part of the option that actually mattered, the sharper type scale
+// (bigger bolder title, metadata pushed down), plus two things this pass
+// adds: a chevron so the row reads as "opens somewhere" before you ever
+// hover (same device QuestionCard/InsightCard already use), and pill-chip
+// actions so Helpful/comments/Save read as distinct pressable things
+// instead of quiet inline text (direct feedback: "likes and comments and
+// save should be on chips so it's more prominent").
+function RailRow({ onOpen, avatarName, proId, head, title, snippet, children }: {
+  onOpen: () => void; avatarName: string; proId?: string; head: string; title: string; snippet?: { by?: string; text: string }; children: React.ReactNode;
 }) {
   return (
-    <div className="group relative flex gap-[12px] border-b py-[16px] pl-[16px]" style={{ borderColor: RULE }}>
-      <span aria-hidden className="absolute top-[14px] bottom-[14px] left-0 w-[3px] rounded-full" style={{ background: railColor }} />
+    <div className="group relative flex gap-[12px] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open: {title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
-      <Avatar name={avatarName} size={34} />
-      <div className="relative z-20 min-w-0 flex-1">
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      {/* A professional's avatar opens THEIR profile, not the post (direct
+         feedback) -- same override as AlignedRow. */}
+      {proId ? <ProAvatar proId={proId} name={avatarName} size={34} /> : <Avatar name={avatarName} size={34} />}
+      {/* Plain (no z-index) -- same fix as AlignedRow: text with no click
+         handler of its own must stay below the overlay button, or it
+         swallows the click instead of letting it reach the overlay. */}
+      <div className="min-w-0 flex-1 pr-[22px]">
         <p className="truncate text-[10.5px] font-bold tracking-[0.05em] uppercase" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{head}</p>
         <h3 className="mt-[5px] text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
         {snippet && (
@@ -1080,9 +1128,28 @@ function RailRow({ onOpen, avatarName, head, title, snippet, railColor, children
             {snippet.text}
           </p>
         )}
-        <div className="mt-[10px] flex items-center gap-[12px]">{children}</div>
+        <div className="relative z-20 mt-[10px] flex items-center gap-[8px]">{children}</div>
       </div>
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] z-20 h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
     </div>
+  );
+}
+
+// The shared pill shape behind comments/Save in Rail (Helpful already has
+// its own via HelpfulPill) -- one consistent chip language for every action
+// in the row, not one style for Helpful and plain text for the rest.
+function ActionChip({ children, onClick, pressed, label }: { children: React.ReactNode; onClick?: () => void; pressed?: boolean; label?: string }) {
+  const style = pressed
+    ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }
+    : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" };
+  return onClick ? (
+    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={style}>
+      {children}
+    </button>
+  ) : (
+    <span className="flex min-h-[30px] items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={style}>
+      {children}
+    </span>
   );
 }
 
@@ -1095,16 +1162,15 @@ function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: 
       head={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
       title={thread.title}
       snippet={questionSnippet(thread)}
-      railColor="var(--primary)"
     >
       <StatusChip state={thread.state} />
       <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
-      <span className="flex items-center gap-[5px] text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+      <ActionChip>
         <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
-      </span>
-      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
-      </button>
+      </ActionChip>
+      <ActionChip onClick={onSave} pressed={saved} label={saved ? "Saved" : "Save"}>
+        <Bookmark className="h-3.5 w-3.5" aria-hidden fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}
+      </ActionChip>
     </RailRow>
   );
 }
@@ -1115,18 +1181,18 @@ function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: 
     <RailRow
       onOpen={onOpen}
       avatarName={pro.name}
+      proId={pro.id}
       head={`${pro.name} · ${pro.role} · ${insight.postedAgo}`}
       title={insight.title}
       snippet={{ text: insight.body }}
-      railColor="var(--primary)"
     >
       <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
-      <span className="flex items-center gap-[5px] text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+      <ActionChip>
         <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length}
-      </span>
-      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
-      </button>
+      </ActionChip>
+      <ActionChip onClick={onSave} pressed={saved} label={saved ? "Saved" : "Save"}>
+        <Bookmark className="h-3.5 w-3.5" aria-hidden fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}
+      </ActionChip>
     </RailRow>
   );
 }
@@ -1268,9 +1334,13 @@ export function ConnectExperience() {
   };
 
 
-  const cardProps = (id: string) => ({
+  // `what` names the thing being saved for the confirmation toast --
+  // defaults to "insight" (most callers save an insight), question rows
+  // pass "question" explicitly so the toast doesn't lie about what you
+  // just saved (direct feedback: flesh out what Save actually does).
+  const cardProps = (id: string, what = "insight") => ({
     saved: !!saves[id],
-    onSave: () => toggleSave(id),
+    onSave: () => toggleSave(id, what),
     helpful: !!helpfuls[id],
     onHelpful: () => toggleHelpful(id),
   });
@@ -1556,7 +1626,7 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
         const on = p.id === selected;
         return (
           <button key={p.id} type="button" role="tab" aria-selected={on} onClick={() => onPick(p.id)} className="dm-quiet flex w-[72px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[8px]" style={on ? { background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" } : undefined}>
-            <Avatar name={p.name} verified size={40} />
+            <Avatar name={p.name} size={40} />
             <span className="w-full truncate text-center text-[11px] leading-[14px] font-semibold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{p.name.split(" ")[0]}</span>
           </button>
         );
@@ -2230,7 +2300,7 @@ function BoardView({
   onBack: () => void;
   onOpenThread: (id: string) => void;
   onOpenInsight: (id: string) => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const [sort, setSort] = useState<FeedSort>("best");
   const [view, setView] = useState<FeedView>("rail");
@@ -2359,17 +2429,18 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
+          <AvatarStyleControl />
           {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} view={view} onView={setView} />}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
           {threads.map((t) =>
             view === "compact" ? (
               <CompactQuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} />
             ) : view === "aligned" ? (
-              <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
+              <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
             ) : view === "rail" ? (
-              <RailQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
+              <RailQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
             ) : (
-              <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />
+              <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
             ),
           )}
           {threads.length === 0 && (
@@ -2469,7 +2540,7 @@ function EventView({
   onSaveTakeaway: () => void;
   takeawaySaved: boolean;
   onAddToPlan: () => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   // Real professionals, not an invented roster: whoever in PROS works at one
@@ -2573,7 +2644,7 @@ function EventView({
             onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
           />
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id)} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
           {threads.length === 0 && postedQs.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
           )}
@@ -2828,7 +2899,7 @@ function ThreadView({
   thread: Thread;
   onBack: () => void;
   onOpenThread: (id: string) => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
   saves: Record<string, boolean>;
   toggleSave: (id: string, what?: string) => void;
   helpfuls: Record<string, boolean>;
@@ -2838,9 +2909,11 @@ function ThreadView({
   const boardName = eventById(thread.boardId)?.name ?? boardCommunity?.name ?? "Community";
   const boardAccent = boardCommunity ? communityAccent(boardCommunity) : EVENT_ACCENT;
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
-  const p = cardProps(thread.id);
+  const p = cardProps(thread.id, "question");
   const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const toggleCollapsed = (id: string) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
 
   return (
     <>
@@ -2869,62 +2942,66 @@ function ThreadView({
           </button>
         </div>
 
-        {thread.responses.map((r, index) => {
-          if (r.kind === "answer") {
-            const rid = thread.id + "-a" + index;
-            return (
-              <div key={rid} className="rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--glass-surface-2)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
-                <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-                  <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
-                  <span className="flex items-center gap-[8px]">
-                  {nav && <FollowButton compact following={nav.isFollowing(r.proId)} onToggle={() => nav.toggleFollow(r.proId)} />}
-                  {r.primary && (
-                    <span className="flex-none rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
-                      Top answer
-                    </span>
-                  )}
-                  </span>
-                </div>
-                <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-                <p className="mt-[12px] text-[14px] leading-[22px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
-                {r.disclosure && (
-                  <p className="mt-[8px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{r.disclosure}</p>
+        <CommentStream>
+          {(() => {
+            // Every answer is its own top-level branch on the main trunk;
+            // every reply that FOLLOWS an answer (until the next one)
+            // belongs to it -- exactly the read a person gets looking at
+            // the thread (direct feedback: "the bake sale comment and the
+            // one under it seem like replies to the top answer, Andre and
+            // Keiko seem like direct replies to the question" -- that's
+            // literally what the array order already means; it just
+            // wasn't drawn that way). One curved branch per answer serves
+            // every one of its replies, the way Reddit draws one line for
+            // a whole sub-thread, not one curve per reply.
+            type AnswerResponse = Extract<Thread["responses"][number], { kind: "answer" }>;
+            type ReplyResponse = Exclude<Thread["responses"][number], { kind: "answer" }>;
+            type Group = { rid: string; answer: AnswerResponse; children: { index: number; r: ReplyResponse }[] };
+            const groups: Group[] = [];
+            thread.responses.forEach((r, index) => {
+              if (r.kind === "answer") {
+                groups.push({ rid: thread.id + "-a" + index, answer: r, children: [] });
+              } else if (groups.length > 0) {
+                groups[groups.length - 1].children.push({ index, r });
+              }
+            });
+
+            return groups.map((g) => (
+              <div key={g.rid} className="flex flex-col gap-[var(--space-4)]">
+                <AnswerRow
+                  r={g.answer}
+                  rid={g.rid}
+                  threadId={thread.id}
+                  threadTitle={thread.title}
+                  collapsed={!!collapsed[g.rid]}
+                  onToggleCollapse={() => toggleCollapsed(g.rid)}
+                  helpfuls={helpfuls}
+                  toggleHelpful={toggleHelpful}
+                  saves={saves}
+                  toggleSave={toggleSave}
+                />
+                {g.children.length > 0 && (
+                  <FollowupBranch>
+                    <CommentStream>
+                      {g.children.map(({ index, r }) => {
+                        if (r.kind === "followup") {
+                          // A follow-up carries no name of its own -- it's
+                          // the same pro continuing their answer, so it
+                          // borrows that pro's identity for its avatar.
+                          const fid = thread.id + "-f" + index;
+                          const pro = proById(g.answer.proId);
+                          return <CommentRow key={fid} id={fid} name={pro.name} chip="Pro" chipTone="pro" body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!helpfuls[fid]} onLike={toggleHelpful} collapsed={!!collapsed[fid]} onToggleCollapse={() => toggleCollapsed(fid)} />;
+                        }
+                        const pid = thread.id + "-p" + index;
+                        return <CommentRow key={pid} id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} collapsed={!!collapsed[pid]} onToggleCollapse={() => toggleCollapsed(pid)} />;
+                      })}
+                    </CommentStream>
+                  </FollowupBranch>
                 )}
-                <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-                <div className="mt-[12px] flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {answerLikes(rid, r.primary) + (helpfuls[rid] ? 1 : 0)}
-                  </button>
-                  <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
-                  </button>
-                  <button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
-                    <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
-                  </button>
-                  <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
-                    <Flag className="h-3 w-3" aria-hidden /> Report
-                  </button>
-                </div>
               </div>
-            );
-          }
-          if (r.kind === "followup") {
-            return (
-              <div key={thread.id + "-f" + index} className="ml-[var(--space-6)] flex flex-col gap-[3px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-                <span className="flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                  <CornerDownRight className="h-3 w-3" aria-hidden /> Follow-up · {r.postedAgo}
-                </span>
-                <p className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
-              </div>
-            );
-          }
-          const pid = thread.id + "-p" + index;
-          return (
-            <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-              <CommentRow id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
-            </div>
-          );
-        })}
+            ));
+          })()}
+        </CommentStream>
 
         {thread.responses.length === 0 && (
           <Card>
@@ -2933,11 +3010,13 @@ function ThreadView({
           </Card>
         )}
 
-        {posted.map((reply) => (
-          <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-            <CommentRow id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
-          </div>
-        ))}
+        {posted.length > 0 && (
+          <CommentStream>
+            {posted.map((reply) => (
+              <CommentRow key={reply.id} id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} collapsed={!!collapsed[reply.id]} onToggleCollapse={() => toggleCollapsed(reply.id)} />
+            ))}
+          </CommentStream>
+        )}
         <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -2974,6 +3053,95 @@ function answerLikes(rid: string, primary?: boolean): number {
   let h = 2166136261;
   for (let i = 0; i < rid.length; i++) { h ^= rid.charCodeAt(i); h = Math.imul(h, 16777619); }
   return (primary ? 120 : 24) + ((h >>> 0) % (primary ? 180 : 60));
+}
+
+/** A run of replies under one answer: no card boxes, one continuous
+ *  trunk line down the left like Reddit — the line never breaks between
+ *  replies, only where an answer (a new "message", not a reply) starts. */
+// Reddit's own thread line is drawn from avatar CENTER to avatar center,
+// not from a padded edge -- every row in the stream uses a 32px avatar
+// (space-4, 16px, is exactly half of that), so the trunk sits at x=16px
+// and a nested reply's elbow lands precisely on ITS avatar's center too,
+// instead of a straight line disconnected from anyone's face.
+// OPAQUE, not a transparent tint -- the elbow and the trunk necessarily
+// overlap where a follow-up branches off, and two translucent layers
+// stacked on top of each other compound into a visibly brighter seam
+// right at that overlap (direct feedback: "it looks bad, not properly
+// designed"). Mixing toward the opaque page background instead of
+// "transparent" keeps it a single flat color no matter how many shapes
+// paint over the same pixels -- which is also how Reddit's own lines
+// stay a single flat gray at every junction.
+const THREAD_LINE = "color-mix(in srgb, var(--foreground) 26%, var(--background))";
+const AVATAR_CENTER = 16; // px: half of the 32px avatar every row here uses
+const ROW_GAP = 16; // px: the gap between stacked rows (space-4)
+const INDENT = 44; // px: one avatar (32) + a nesting indent -- one level
+
+/** The trunk, drawn per-row instead of as one span sized to the whole
+ *  container. A single absolutely-positioned line from "container top" to
+ *  "container bottom" only lands on the LAST avatar's center by accident --
+ *  the container's real bottom edge is wherever that row's own body text
+ *  and reactions end, which varies per reply, so the line either fell
+ *  short of or ran past the last avatar (direct feedback: "this line
+ *  should end at Ruby's avatar circle, not extend beyond it and sit
+ *  awkwardly"). Anchoring each segment to ITS OWN row's avatar center --
+ *  and only drawing one for a row that HAS a next sibling -- means the
+ *  trunk is exactly as long as the replies are, never longer. */
+function CommentStream({ children }: { children: React.ReactNode }) {
+  const items = Children.toArray(children);
+  return (
+    <div className="flex flex-col">
+      {items.map((child, i) => {
+        const isLast = i === items.length - 1;
+        return (
+          <div key={i} className="relative">
+            {!isLast && (
+              <span aria-hidden className="pointer-events-none absolute z-[-1] w-[2px]" style={{ top: AVATAR_CENTER, height: `calc(100% - ${AVATAR_CENTER}px + ${ROW_GAP}px + ${AVATAR_CENTER}px)`, left: AVATAR_CENTER - 1, background: THREAD_LINE }} />
+            )}
+            {child}
+            {!isLast && <div style={{ height: ROW_GAP }} aria-hidden />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** A follow-up branching off the trunk: a rounded elbow curves out of the
+ *  vertical line, landing exactly on THIS reply's own avatar CENTER --
+ *  not its edge. The center is what matters: when the branch holds more
+ *  than one reply, CommentStream draws a second, continuing trunk at
+ *  that same avatar-center x -- stopping the curve at the avatar's edge
+ *  instead left that continuing line 16px off from the curve, a visible
+ *  kink (direct feedback: "alignment issues on the main threadline and
+ *  the curved one nested on it"). Landing on the center instead means
+ *  both lines share one x-coordinate, and the curve's last few pixels
+ *  simply disappear behind the (opaque) avatar circle, same as Reddit. */
+function FollowupBranch({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative" style={{ marginLeft: INDENT }}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute rounded-bl-[16px]"
+        style={{
+          // The trunk (CommentStream) is a `background` span centered on
+          // x=AVATAR_CENTER, occupying [AVATAR_CENTER-1, AVATAR_CENTER+1].
+          // A CSS border instead draws OUTWARD from its box edge, so
+          // matching only the box's nominal x (not this -1px offset) left
+          // the two lines 1px apart -- close enough to read as "almost
+          // aligned, but off" (direct feedback: "one is slightly off to
+          // the side"). The -1 here is that same correction, so both
+          // lines occupy the exact same pixels.
+          top: -(AVATAR_CENTER + 8),
+          left: -(INDENT - AVATAR_CENTER) - 1,
+          width: INDENT + 1,
+          height: 2 * AVATAR_CENTER + 8,
+          borderLeft: `2px solid ${THREAD_LINE}`,
+          borderBottom: `2px solid ${THREAD_LINE}`,
+        }}
+      />
+      {children}
+    </div>
+  );
 }
 
 // ——— comments: one shape everywhere ———
@@ -3018,44 +3186,137 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
   );
 }
 
+/** The pro's answer, in the exact same flat shape as every reply below it
+ *  (direct feedback, 8 Sept 2026: "why is Andre's comment a card" -- Reddit
+ *  never gives one reply its own box, only badges say it's the notable
+ *  one). Lives in the SAME CommentStream as the replies underneath it, so
+ *  the thread line runs straight through both without a visual seam. */
+function AnswerRow({ r, rid, threadId, threadTitle, collapsed, onToggleCollapse, helpfuls, toggleHelpful, saves, toggleSave }: {
+  r: Extract<Thread["responses"][number], { kind: "answer" }>;
+  rid: string;
+  threadId: string;
+  threadTitle: string;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+  helpfuls: Record<string, boolean>;
+  toggleHelpful: (id: string) => void;
+  saves: Record<string, boolean>;
+  toggleSave: (id: string, what?: string) => void;
+}) {
+  const pro = proById(r.proId);
+  const nav = useContext(ConnectNav);
+  return (
+    <div className="flex items-start gap-[12px]">
+      {/* ProAvatar is already its own button (opens the profile) -- the
+         collapse toggle lives on the header row instead of double-nesting
+         buttons here. */}
+      <ProAvatar proId={pro.id} name={pro.name} size={32} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-[6px]">
+          <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
+          <CompanyChip name={pro.org} tone="surface" size="sm" />
+          {nav && <FollowButton dense following={nav.isFollowing(pro.id)} onToggle={() => nav.toggleFollow(pro.id)} />}
+          <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} className="dm-link ml-auto flex cursor-pointer items-center gap-[3px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {r.postedAgo}
+            <ChevronDown className={collapsed ? "h-3 w-3 -rotate-90 transition-transform" : "h-3 w-3 transition-transform"} aria-hidden />
+          </button>
+        </div>
+        {collapsed ? (
+          <p className="mt-[3px] text-[12px] leading-[16px] italic" style={{ color: "var(--muted-foreground)" }}>Answer collapsed</p>
+        ) : (
+          <>
+            {/* Top answer moved off the crowded header row (direct
+               feedback: "everyone has so many badges/chips right now") --
+               a small label of its own, right where the answer it's
+               praising actually starts. */}
+            {r.primary && (
+              <span className="mt-[6px] flex items-center gap-[4px] text-[10.5px] leading-[14px] font-extrabold tracking-[0.05em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>
+                <Sparkles className="h-3 w-3" aria-hidden /> Top answer
+              </span>
+            )}
+            <p className="mt-[5px] text-[14px] leading-[21px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
+            {r.disclosure && <p className="mt-[6px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{r.disclosure}</p>}
+            <div className="mt-[8px] flex flex-wrap items-center gap-[var(--space-4)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
+                <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {answerLikes(rid, r.primary) + (helpfuls[rid] ? 1 : 0)}
+              </button>
+              <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
+                <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
+              </button>
+              <button type="button" onClick={() => nav?.share(`?thread=${threadId}`, threadTitle)} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px]">
+                <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
+              </button>
+              <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+                <Flag className="h-3 w-3" aria-hidden /> Report
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
+function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
   // a professional's face and name open their profile; students have none
   const pro = chipTone === "pro" ? PROS.find((p) => p.name === name) : undefined;
   return (
     <div className="flex items-start gap-[12px]">
-      {pro ? <ProAvatar proId={pro.id} name={name} size={32} /> : <Avatar name={name} size={32} />}
+      {/* ProAvatar is already its own button (opens the profile) -- only a
+         student's plain (non-button) avatar can also serve as the collapse
+         toggle without nesting a button inside a button. */}
+      {pro ? (
+        <ProAvatar proId={pro.id} name={name} size={32} />
+      ) : (
+        <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} aria-label={collapsed ? `Expand ${name}'s comment` : `Collapse ${name}'s comment`} className="dm-quiet flex-none cursor-pointer rounded-full">
+          <Avatar name={name} size={32} />
+        </button>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-[6px]">
           {pro ? (
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</button>
+            <>
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name} <VerifiedBadge size={13} /></button>
+            </>
           ) : (
-            <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+            <>
+              <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+              <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
+            </>
           )}
-          <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
           {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
-          <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
+          <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} className="dm-link ml-auto flex cursor-pointer items-center gap-[3px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {postedAgo}
+            <ChevronDown className={collapsed ? "h-3 w-3 -rotate-90 transition-transform" : "h-3 w-3 transition-transform"} aria-hidden />
+          </button>
         </div>
-        <p className="mt-[5px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{body}</p>
-        {/* Reaction GIFs between pros and students are deliberate (the doc
-           shows them; it's a pitch beat about speaking Gen Z) -- rendered
-           unoptimized so the animation actually plays. */}
-        {image && (
-          <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[var(--radius-lg)] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
+        {collapsed ? (
+          <p className="mt-[3px] text-[12px] leading-[16px] italic" style={{ color: "var(--muted-foreground)" }}>Comment collapsed</p>
+        ) : (
+          <>
+            <p className="mt-[5px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{body}</p>
+            {/* Reaction GIFs between pros and students are deliberate (the doc
+               shows them; it's a pitch beat about speaking Gen Z) -- rendered
+               unoptimized so the animation actually plays. */}
+            {image && (
+              <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[var(--radius-lg)] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
+            )}
+            <div className="flex flex-wrap items-center gap-[10px]">
+              <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
+              <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
+              </button>
+              <button type="button" onClick={() => nav?.report(id)} aria-label="Report this comment" className="dm-link mt-[6px] ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] leading-[15px] font-semibold opacity-55 hover:opacity-100" style={{ color: "var(--muted-foreground)" }}>
+                <Flag className="h-3 w-3" aria-hidden /> Report
+              </button>
+            </div>
+          </>
         )}
-        <div className="flex flex-wrap items-center gap-[10px]">
-          <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
-          <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
-          </button>
-          <button type="button" onClick={() => nav?.report(id)} aria-label="Report this comment" className="dm-link mt-[6px] ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] leading-[15px] font-semibold opacity-55 hover:opacity-100" style={{ color: "var(--muted-foreground)" }}>
-            <Flag className="h-3 w-3" aria-hidden /> Report
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@
 
 import Image from "next/image";
 import { createContext, useContext, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Check, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
@@ -135,9 +135,11 @@ const AVATAR_PHOTO: Record<string, string> = {
   Marcus: `${AV}/c-Riley.png`,
 };
 
-// A verified badge overlaps the corner exactly like the app's other verified
-// affordances — a small ShieldCheck on a solid chip, never color alone.
-export function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
+// The verified mark used to overlap the avatar's corner; direct feedback, 8
+// Sept 2026: "just like Instagram and Twitter, not on the pfp but after the
+// name" -- moved to VerifiedBadge below, rendered by each caller next to the
+// person's name text instead. Avatar itself no longer knows about verification.
+export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
   // Professionals always wear their portrait; students stay behind the flag.
   const isPro = PROS.some((p) => p.name === name);
   const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
@@ -155,11 +157,17 @@ export function Avatar({ name, size = 34, verified }: { name: string; size?: num
         // eslint-disable-next-line react/no-danger -- locally generated SVG, never user input
         <span className="block h-full w-full overflow-hidden rounded-full" style={{ background: "var(--secondary)" }} dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(seed, avatarStyle) }} />
       )}
-      {verified && (
-        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
-          <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
-        </span>
-      )}
+    </span>
+  );
+}
+
+/** The Instagram/Twitter-style mark: a solid colored circle with a white
+ *  checkmark, sitting right after a verified person's name -- never on
+ *  their avatar. One shape, reused everywhere a pro's name renders. */
+export function VerifiedBadge({ size = 15 }: { size?: number }) {
+  return (
+    <span role="img" aria-label="Verified" className="relative inline-flex flex-none items-center justify-center rounded-full" style={{ width: size, height: size, background: "var(--primary)" }}>
+      <Check aria-hidden style={{ width: size * 0.62, height: size * 0.62, color: "#FFFFFF" }} strokeWidth={3.2} />
     </span>
   );
 }
@@ -189,7 +197,7 @@ export function ProAvatar({ proId, name, size = 34, className = "" }: { proId: s
       className={`dm-quiet relative z-20 flex-none cursor-pointer rounded-full ${className}`}
       aria-label={`Open ${name}'s profile`}
     >
-      <Avatar name={name} verified size={size} />
+      <Avatar name={name} size={size} />
     </button>
   );
 }
@@ -322,6 +330,9 @@ export function Card({ children, className = "", accent }: { children: React.Rea
 const CTA_SIZE = {
   md: "min-h-[44px] px-[var(--space-5)] text-[15px] leading-[20px] rounded-[var(--radius-md)]",
   sm: "min-h-[32px] px-[14px] text-[13px] leading-[18px] rounded-[var(--radius-sm)]",
+  // A crowded row of chips/badges next to a name (direct feedback: "the
+  // follow buttons can be smaller") -- FollowButton's own `dense` prop.
+  xs: "min-h-[26px] px-[10px] text-[11.5px] leading-[15px] rounded-[var(--radius-sm)]",
 } as const;
 export type CtaSize = keyof typeof CTA_SIZE;
 

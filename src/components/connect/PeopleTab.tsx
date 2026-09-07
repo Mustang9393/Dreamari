@@ -1,13 +1,89 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BadgeCheck, ChevronRight, Sparkles, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, MessagesSquare, Sparkles, Zap, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { PROS, type Pro } from "./data";
-import { Avatar, ConnectNav, SectionHead } from "./primitives";
-import { FollowButton, NewFromFollowing, answersBy, rankPros, shortCount, useStudentWorlds, type Follows } from "./ProProfile";
+import { Avatar, ConnectNav, ProAvatar, SectionHead, VerifiedBadge } from "./primitives";
+import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, type Follows } from "./ProProfile";
+
+/** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
+ *  ranking already scores on, read out loud (the Replit reference's own
+ *  copy: a status pill on every follow card, not a number). */
+function activityLabel(daysAgo: number): string {
+  if (daysAgo <= 1) return "Active daily";
+  if (daysAgo <= 7) return "Active weekly";
+  if (daysAgo <= 21) return "Active bi-weekly";
+  return "Active monthly";
+}
+
+/** One card in the People-to-follow carousel: portrait, name + verified
+ *  mark, role, company, how often they show up, then View profile and
+ *  Follow -- the reference's own anatomy, just flatter (no border/shadow)
+ *  and without the reference's per-card page-position badge, which
+ *  doesn't carry information here. */
+function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean; onFollow: () => void }) {
+  const nav = useContext(ConnectNav);
+  return (
+    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+      <div className="flex items-center gap-[var(--space-3)]">
+        <ProAvatar proId={pro.id} name={pro.name} size={52} />
+        <div className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-x-[4px] gap-y-[1px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-left">{pro.name}</button>
+            <VerifiedBadge size={13} />
+          </span>
+          <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
+          <p className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org}</p>
+        </div>
+      </div>
+      <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[4px] text-[11px] leading-[15px] font-bold tracking-[0.02em]" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
+        <Zap className="h-3 w-3" aria-hidden fill="currentColor" /> {activityLabel(pro.activeDaysAgo)}
+      </span>
+      <div className="mt-auto flex items-center justify-between gap-[var(--space-3)]">
+        <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</button>
+        <FollowButton compact following={following} onToggle={onFollow} />
+      </div>
+    </li>
+  );
+}
+
+const FOLLOW_PAGE_SIZE = 3;
+
+/** Three cards a page (the reference's own layout), Prev/Next plus a dot
+ *  per page -- so the rest of the ranked list stays reachable without
+ *  turning the section into an endless scroll. */
+function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFollow: (id: string) => void }) {
+  const [page, setPage] = useState(0);
+  const shown = pros.slice(0, FOLLOW_PAGE_SIZE * 4); // four pages is plenty of choice without ranking the whole roster
+  const pageCount = Math.max(1, Math.ceil(shown.length / FOLLOW_PAGE_SIZE));
+  const clamped = Math.min(page, pageCount - 1);
+  const visible = shown.slice(clamped * FOLLOW_PAGE_SIZE, clamped * FOLLOW_PAGE_SIZE + FOLLOW_PAGE_SIZE);
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+        {visible.map((pro) => <FollowCard key={pro.id} pro={pro} following={!!follows[pro.id]} onFollow={() => onFollow(pro.id)} />)}
+      </ul>
+      {pageCount > 1 && (
+        <div className="flex items-center justify-center gap-[12px]">
+          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={clamped === 0} aria-label="Previous professionals" className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <span className="flex items-center gap-[6px]" role="tablist" aria-label="Page">
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <button key={i} type="button" role="tab" aria-selected={i === clamped} aria-label={`Page ${i + 1}`} onClick={() => setPage(i)} className="dm-quiet size-[6px] cursor-pointer rounded-full" style={{ background: i === clamped ? "var(--primary)" : "var(--glass-border)" }} />
+            ))}
+          </span>
+          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={clamped === pageCount - 1} aria-label="More professionals" className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // The People tab, built from Joshua's reference (Slack, 6 and 7 Sept 2026):
 // two views, For you and Browse industries. For you: Find a professional
@@ -74,7 +150,7 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
   const accent = WORLD_COLORS[world] ?? "var(--primary)";
   return (
     <li>
-      <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))`, borderColor: "var(--glass-border)" }}>
+      <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
         <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: accent, color: "#05070f" }}>
           <Icon className="h-[18px] w-[18px]" />
         </span>
@@ -93,7 +169,7 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
 function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; following: boolean; onFollow: () => void; badge?: string; quote?: string }) {
   const nav = useContext(ConnectNav);
   return (
-    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       {badge && (
         <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
           <Sparkles className="h-3 w-3" aria-hidden /> {badge}
@@ -112,8 +188,15 @@ function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; foll
           <span className="truncate text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.org}</span>
         </div>
       </div>
+      {/* This is the QUESTION they answered, not something they said --
+         direct feedback: quotation marks alone read as a thing the person
+         said, which confused Joshua. "Answered" makes the reference
+         unambiguous while still using their own words for the title. */}
       {quote && (
-        <p className="rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[13.5px] leading-[19px] font-semibold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>&ldquo;{quote}&rdquo;</p>
+        <p className="flex items-start gap-[6px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[13px] leading-[18px]" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+          <MessagesSquare className="mt-[2px] h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+          <span>Answered <span className="font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{quote}&rdquo;</span></span>
+        </p>
       )}
       <div className="flex items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</button>
@@ -136,8 +219,6 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
   );
 }
 
-const ordinal = (n: number) => `#${n}`;
-
 export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFollow: (id: string) => void; query: string }) {
   const worlds = useStudentWorlds();
   const careers = useStudentCareers();
@@ -148,19 +229,6 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
   const matches = useMemo(() => PROS.filter((p) => !q || [p.name, p.role, p.org, p.field, p.world, ...(p.topics ?? [])].some((v) => v.toLowerCase().includes(q))), [q]);
   const countIn = (world: string) => PROS.filter((p) => p.world === world).length;
   const pathsIn = (world: string) => new Set(DECK.filter((c) => c.world === world).map((c) => c.title)).size || new Set(PROS.filter((p) => p.world === world).map((p) => p.field)).size;
-
-  // For you today: the top-ranked professional in each of the Top 3 worlds,
-  // no repeats, filled from the overall ranking when a world has nobody yet
-  const today = useMemo(() => {
-    const ranked = rankPros(PROS, worlds);
-    const picked: { pro: Pro; badge: string }[] = [];
-    careers.slice(0, 3).forEach((career, index) => {
-      const pro = ranked.find((p) => p.world === career.world && !picked.some((x) => x.pro.id === p.id));
-      if (pro) picked.push({ pro, badge: `Matches your ${ordinal(index + 1)} career` });
-    });
-    for (const pro of ranked) { if (picked.length >= 3) break; if (!picked.some((x) => x.pro.id === pro.id)) picked.push({ pro, badge: "Recommended for you" }); }
-    return picked;
-  }, [worlds, careers]);
 
   // a search from the shared box wins over every view
   if (q) {
@@ -196,43 +264,42 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
       {view === "for-you" && (
         <>
           {/* Find a professional: the student's own careers as the first
-             filters, and the way into every industry */}
-          <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }} aria-label="Find a professional">
-            <SectionHead>Find a professional</SectionHead>
-            {careers.length === 0 && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Save your Top 3 in Match and the people who do those jobs appear here.</p>}
-            <div className="flex flex-wrap items-center gap-[8px]">
-              {careers.length > 0 && <span className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your careers</span>}
-              {careers.slice(0, 3).map((career) => (
-                <button key={career.title} type="button" onClick={() => setIndustry(career.world)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" }}>{career.title}</button>
-              ))}
-              <button type="button" onClick={() => setView("browse")} className="dm-link flex min-h-[28px] cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-            </div>
-          </section>
+             filters, and the way into every industry -- a quick-filter
+             strip, not real content, so it doesn't need its own box
+             (direct feedback: too much of the tab was cards and chrome). */}
+          <div className="flex flex-wrap items-center gap-[8px]" aria-label="Find a professional">
+            {careers.length === 0 ? (
+              <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Save your Top 3 in Match and the people who do those jobs appear here.</p>
+            ) : (
+              <>
+                <span className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your careers</span>
+                {careers.slice(0, 3).map((career) => (
+                  <button key={career.title} type="button" onClick={() => setIndustry(career.world)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" }}>{career.title}</button>
+                ))}
+              </>
+            )}
+            <button type="button" onClick={() => setView("browse")} className="dm-link ml-auto flex min-h-[28px] cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+          </div>
 
-          <section className="flex flex-col gap-[var(--space-3)]" aria-label="For you today">
+          {/* People to follow: one ranked, paginated carousel instead of a
+             rail AND a separate "for you today" grid that showed mostly
+             the same people twice (direct feedback: match the Replit
+             reference's structure -- Find a professional, People to
+             follow, Browse by industry, New from people you follow, in
+             that order, one section per idea). */}
+          <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
             <div className="flex flex-col gap-[2px]">
-              <SectionHead>For you today</SectionHead>
-              <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{today.length} people selected for your career interests.</span>
+              <SectionHead>People to follow</SectionHead>
+              <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
             </div>
-            <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
-              {(() => {
-                // each card quotes a different question, even when two people
-                // answered the same thread
-                const used = new Set<string>();
-                return today.map(({ pro, badge }) => {
-                  const quote = answersBy(pro.id).map((t) => t.title).find((t) => !used.has(t));
-                  if (quote) used.add(quote);
-                  return <PersonCard key={pro.id} pro={pro} badge={badge} quote={quote} following={!!follows[pro.id]} onFollow={() => onFollow(pro.id)} />;
-                });
-              })()}
-            </ul>
+            <FollowCarousel pros={rankPros(PROS, worlds)} follows={follows} onFollow={onFollow} />
           </section>
 
           <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
             <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
               <div className="flex flex-col gap-[2px]">
                 <SectionHead>Browse by industry</SectionHead>
-                <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Find people who actually do the work.</span>
+                <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
               </div>
               <button type="button" onClick={() => setView("browse")} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
             </div>

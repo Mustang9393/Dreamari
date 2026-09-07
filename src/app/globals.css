@@ -1258,34 +1258,36 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 /* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): the one control
    each chapter wants tapped next carries a soft ring pulse and, every few
    seconds, one light sweep across it (the Next step banner's shimmer), so the
-   interactive pieces stop reading as static pictures. Never scales. */
-.mkt-pulse { position: relative; animation: mkt-pulse 2.4s ease-out infinite; }
+   interactive pieces stop reading as static pictures. Never scales.
+   Toned down (direct feedback, 8 Sept 2026: "the flash updates across
+   everything demand way too much attention, it's hard to read/concentrate")
+   -- the original ran BOTH effects continuously with no rest, competing with
+   the copy right next to it for the whole time someone was reading. Same
+   idea, quieter execution: one brief, gentle pulse, then a long calm hold
+   before the next one, instead of nonstop motion. */
+.mkt-pulse { position: relative; animation: mkt-pulse 5s ease-out infinite; }
 .mkt-pulse::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  /* the sweep is the cue people actually notice (direct feedback, 7 Sept
-     2026: the ring alone and a faint band were missed), so it is a bright,
-     wide band on a quick cadence */
-  /* a narrow band (about a third of the control) so it crosses as a highlight
-     instead of washing the whole face */
-  background: linear-gradient(110deg, transparent 43%, rgba(255,255,255,0.62) 50%, transparent 57%);
+  background: linear-gradient(110deg, transparent 44%, rgba(255,255,255,0.4) 50%, transparent 56%);
   background-size: 240% 100%;
   background-repeat: no-repeat;
-  animation: mkt-hint-sweep 2.4s ease-in-out infinite;
+  animation: mkt-hint-sweep 5s ease-in-out infinite;
 }
 @keyframes mkt-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.8); }
-  60%, 100% { box-shadow: 0 0 0 14px transparent; }
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
+  16%, 100% { box-shadow: 0 0 0 8px transparent; }
 }
 /* with a 240% image, position 110% parks the band just off the left edge and
-   -10% just off the right, so the highlight is on the control for the whole
-   travel instead of spending most of the cycle out of frame */
+   -10% just off the right; the travel itself is quick (a brief highlight),
+   then it sits parked off-frame for the rest of the (now much longer)
+   cycle instead of sweeping back and forth continuously. */
 @keyframes mkt-hint-sweep {
-  0%, 10% { background-position: 110% 0; }
-  65%, 100% { background-position: -10% 0; }
+  0%, 6% { background-position: 110% 0; }
+  22%, 100% { background-position: -10% 0; }
 }
 @media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } .mkt-pulse::after { display: none; } }
 

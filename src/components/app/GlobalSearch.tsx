@@ -39,7 +39,7 @@ function search(q: string) {
   if (!words.length) return null;
   const careers: Hit[] = ALL_CATALOG_CAREERS.filter((c) => hit(`${c.title} ${c.world}`, words)).map((c) => ({ key: c.title, href: `/career/${careerSlug(c.title)}`, title: c.title, sub: c.world }));
   const colleges: Hit[] = COLLEGES.filter((c) => hit(`${c.name} ${c.city} ${c.stateName} ${c.state}`, words)).map((c) => ({ key: c.slug, href: `/colleges/${c.slug}`, title: c.name, sub: `${c.city}, ${c.stateName}${c.netPrice !== null ? ` · about ${money(Math.round(c.netPrice / 100) * 100)} a year` : ""}` }));
-  const people: Hit[] = PROS.filter((p) => hit(`${p.name} ${p.role} ${p.org} ${p.field} ${(p.topics ?? []).join(" ")}`, words)).map((p) => ({ key: p.id, href: `/connect?pro=${p.id}`, title: p.name, sub: `${p.role} · ${p.org}`, media: <Avatar name={p.name} verified size={36} /> }));
+  const people: Hit[] = PROS.filter((p) => hit(`${p.name} ${p.role} ${p.org} ${p.field} ${(p.topics ?? []).join(" ")}`, words)).map((p) => ({ key: p.id, href: `/connect?pro=${p.id}`, title: p.name, sub: `${p.role} · ${p.org}`, media: <Avatar name={p.name} size={36} /> }));
   const companyNames = [...new Set(PROS.map((p) => p.org))].filter((o) => hit(o, words));
   const companies: Hit[] = companyNames.map((o) => {
     const pros = PROS.filter((p) => p.org === o);

@@ -7,9 +7,17 @@ import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun,
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
+import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
+import { STUDENT } from "@/components/profile/data";
 
-// The student's avatar photo doubles as the Profile entry point in both navs.
-const AVATAR_SRC = "/images/avatar-jordan.jpg";
+// The student's generated avatar doubles as the Profile entry point in both
+// navs (direct feedback, 8 Sept 2026: "the avatar in the top navbar is still
+// wrong" -- this file had its own hardcoded photo constant, a third place
+// carrying the old real-photo path that the Connect/Profile pass missed).
+// Same seed (first name only) as everywhere else the student appears, so
+// the nav avatar is never a different face than the one on their own
+// profile or their own posts.
+const AVATAR_SEED = STUDENT.name.split(" ")[0] || STUDENT.name;
 
 // Brand wordmark (Figma "Logo Identity": 21x12 mark + DREAMARI in
 // UI/Dreamari Logo). The mark renders via CSS mask so it follows
@@ -173,6 +181,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
   const score = useDreamScore();
   // one number everywhere: the live Dream Score (100 after Build), never a placeholder
   const xp = score;
+  const avatarStyle = useAvatarStyle();
   return (
     <header
       // glass-surface-1 (3% alpha) read as barely-there once real content
@@ -240,8 +249,12 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
           </>
         )}
         <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+          {/* eslint-disable-next-line react/no-danger -- locally generated SVG, never user input */}
+          <span
+            className="block h-8 w-8 overflow-hidden rounded-[var(--radius-lg)] border-[1.5px]"
+            style={{ borderColor: "var(--accent)" }}
+            dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(AVATAR_SEED, avatarStyle) }}
+          />
         </Link>
         <QuickLinksMenu />
       </div>
@@ -257,6 +270,7 @@ const MOBILE_ITEMS = [
 ] as const;
 
 export function MobileNav({ active }: { active: string }) {
+  const avatarStyle = useAvatarStyle();
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t backdrop-blur-[10px] md:hidden"
@@ -283,12 +297,11 @@ export function MobileNav({ active }: { active: string }) {
         aria-current={active === "Profile" ? "page" : undefined}
         className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={AVATAR_SRC}
-          alt=""
-          className="size-7 rounded-full border-[1.5px] object-cover"
+        {/* eslint-disable-next-line react/no-danger -- locally generated SVG, never user input */}
+        <span
+          className="block size-7 overflow-hidden rounded-full border-[1.5px]"
           style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
+          dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(AVATAR_SEED, avatarStyle) }}
         />
       </Link>
     </nav>

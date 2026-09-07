@@ -4,7 +4,7 @@ import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { PANEL, Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
 import { CommunityCard } from "./CommunityCard";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
@@ -165,9 +165,9 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
       {/* who this is, then the two jobs as tabs (the Replit's My Profile / My Impact) */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
         <div className="flex items-center gap-[12px]">
-          <Avatar name={pro.name} verified size={52} />
+          <Avatar name={pro.name} size={52} />
           <div className="min-w-0">
-            <h1 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name}</h1>
+            <h1 className="flex items-center gap-[6px] text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={16} /></h1>
             <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><RoleLine pro={pro} /></p>
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link mt-[4px] flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
@@ -471,9 +471,9 @@ function ImpactCard({ pro, accent, numbers }: { pro: Pro; accent: string; number
       </dl>
       <div className="relative mt-[var(--space-5)] flex items-center justify-between gap-[var(--space-3)]" style={{ fontFamily: "var(--font-body)" }}>
         <span className="flex min-w-0 items-center gap-[10px]">
-          <Avatar name={pro.name} verified size={36} />
+          <Avatar name={pro.name} size={36} />
           <span className="min-w-0">
-            <span className="block truncate text-[14px] leading-[18px] font-bold">{pro.name}</span>
+            <span className="flex items-center gap-[4px] truncate text-[14px] leading-[18px] font-bold">{pro.name} <VerifiedBadge size={13} /></span>
             <span className="block truncate text-[12px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{pro.role}</span>
           </span>
         </span>

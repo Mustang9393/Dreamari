@@ -437,7 +437,7 @@ export function ConnectArt() {
           </div>
           <div className="mt-[14px] border-t pt-[14px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
             <div className="flex items-center gap-[8px]">
-              <Avatar name={pro.name} size={30} verified />
+              <Avatar name={pro.name} size={30} />
               <span className="flex min-w-0 flex-col">
                 <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   <span className="truncate">{pro.name}</span>
