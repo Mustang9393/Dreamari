@@ -147,18 +147,15 @@ export function Panel({ id, title, aside, children, className = "" }: { id: stri
   );
 }
 
-/** One dimension of a professional's profile, inside the single profile
- *  surface: a ruled band with a small eyebrow naming the dimension, the
- *  section title, an optional aside, then the content. Same padding as a
- *  Panel, but no box of its own, so four of them read as one page. */
-export function ProfileSection({ id, eyebrow, title, aside, first = false, children }: { id: string; eyebrow: string; title: string; aside?: React.ReactNode; first?: boolean; children: React.ReactNode }) {
+/** One section of a professional's profile, inside the single profile
+ *  surface: a ruled band with the section title, an optional aside, then the
+ *  content. Same padding as a Panel, but no box of its own, so four of them
+ *  read as one page. */
+export function ProfileSection({ id, title, aside, first = false, children }: { id: string; title: string; aside?: React.ReactNode; first?: boolean; children: React.ReactNode }) {
   return (
     <section aria-labelledby={id} className={`flex w-full flex-col gap-[var(--space-4)] p-[var(--space-5)] sm:p-[var(--space-6)] ${first ? "" : "border-t"}`} style={{ borderColor: RULE }}>
-      <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-        <span className="flex flex-col gap-[3px]">
-          <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: PRO_ACCENT }}>{eyebrow}</span>
-          <SectionHead id={id}>{title}</SectionHead>
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <SectionHead id={id}>{title}</SectionHead>
         {aside}
       </div>
       {children}
@@ -459,16 +456,15 @@ export function ProProfileView({
 
       {/* ONE surface under the header (Joshua Pierce, Slack, 6 Sept 2026: one
          connected profile, not five floating modules). The four dimensions
-         sit inside it as ruled sections in a fixed order, each with the same
-         eyebrow, title and aside, so the eye moves down one page: How you can
-         engage, What I share, Where I participate, My background. */}
+         sit inside it as ruled sections in a fixed order (Ask Me, My Posts,
+         Communities, About Me), same title row and padding, so the eye moves
+         down one page. */}
       <div className="-mt-[var(--space-3)] flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
         {/* Ask Me (not "anything": careers, school and work). The composer
            first, then the questions already asked and answered right under it
            (direct feedback, 5 Sept 2026). No private messages exist. */}
         <ProfileSection
           id="ask-title"
-          eyebrow="How you can engage"
           title="Ask Me"
           first
           aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{askedCount}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered}</strong> answered</span>}
@@ -509,7 +505,7 @@ export function ProProfileView({
         {/* My Posts: career lessons or wider life at work, so the title is
            theirs, not "career posts" */}
         {posts.length > 0 && (
-          <ProfileSection id="posts-title" eyebrow="What I share" title="My Posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
+          <ProfileSection id="posts-title" title="My Posts" aside={<MoreToggle total={posts.length} open={allPosts} onToggle={() => setAllPosts((v) => !v)} />}>
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {(allPosts ? posts : posts.slice(0, 3)).map((insight) => {
                 const s = signals(insight.views, insight.helpful, insight.saves);
@@ -530,7 +526,7 @@ export function ProProfileView({
            community's accent as a mark, its name, the two counts, and the
            way in. */}
         {communities.length > 0 && (
-          <ProfileSection id="communities-title" eyebrow="Where I participate" title="Communities" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{communities.length} boards</span>}>
+          <ProfileSection id="communities-title" title="Communities">
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {communities.map((c) => {
                 const accent = communityAccent(c);
@@ -555,18 +551,12 @@ export function ProProfileView({
 
         {/* About Me: only what the header has not already said */}
         {(pro.education || pro.topics) && (
-          <ProfileSection id="about-title" eyebrow="My background" title="About Me">
+          <ProfileSection id="about-title" title="About Me">
             <dl className="-mt-[var(--space-2)] flex flex-col">
               {pro.education && (
                 <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
                   <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</dt>
                   <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.education}</dd>
-                </div>
-              )}
-              {pro.journey && (
-                <div className="flex flex-col gap-[2px] border-t py-[var(--space-3)] first:border-t-0" style={{ borderColor: RULE }}>
-                  <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>How I got here</dt>
-                  <dd className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.journey}</dd>
                 </div>
               )}
               {pro.topics && (
