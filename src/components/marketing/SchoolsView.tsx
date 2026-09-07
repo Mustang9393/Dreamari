@@ -284,7 +284,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 className="text-[clamp(40px,4.6vw,64px)] leading-[1.02] font-extrabold tracking-[-0.02em]"
                 style={{ color: "var(--foreground)", textWrap: "balance" }}
               >
-                Help students discover their direction&mdash;and build the skills to pursue it.
+                Help students discover their direction, and build the skills to pursue it.
               </h1>
               <p className="mt-5 max-w-[540px] text-[clamp(17px,0.7vw+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
                 Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
@@ -333,7 +333,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 Give every student a clearer path forward.
               </h3>
               <p className="mt-3 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                Help students explore their options, connect learning to careers, and plan their next steps&mdash;with visibility for the educators guiding them.
+                Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
               </p>
             </div>
           </Reveal>
