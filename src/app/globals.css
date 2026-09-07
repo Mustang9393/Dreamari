@@ -1228,3 +1228,36 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   0% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-6px); }
 }
+
+/* Partner ticker: one slow marquee of partner marks under the credibility
+   lines (landing and Schools). Two copies of the row slide by half their
+   width for a seamless loop; edges fade; hover pauses. */
+.mkt-ticker {
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.mkt-ticker-track {
+  animation: mkt-ticker 48s linear infinite;
+  will-change: transform;
+}
+.mkt-ticker:hover .mkt-ticker-track { animation-play-state: paused; }
+@keyframes mkt-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mkt-ticker { mask-image: none; -webkit-mask-image: none; }
+  .mkt-ticker-track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .mkt-ticker-track .mkt-ticker-row[aria-hidden="true"] { display: none; }
+  .mkt-ticker-track .mkt-ticker-row { flex-wrap: wrap; justify-content: center; row-gap: 20px; padding-right: 0; }
+}
+
+/* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): a very quiet ring
+   pulse on the one control each chapter wants tapped next, so the interactive
+   pieces stop reading as static pictures. Never scales the element. */
+.mkt-pulse { animation: mkt-pulse 2.6s ease-out infinite; }
+@keyframes mkt-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 38%, transparent); }
+  60%, 100% { box-shadow: 0 0 0 9px transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } }

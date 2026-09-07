@@ -1,6 +1,8 @@
 "use client";
 
 import { MarketingButton } from "./Button";
+import { PartnerTicker } from "./PartnerTicker";
+import { TrustLine } from "./TrustLine";
 import { useRevealOnScroll } from "./scrollHooks";
 
 type CTABlockProps = {
@@ -48,6 +50,11 @@ export function CTABlock({ eyebrow, heading, body, primary }: CTABlockProps) {
 export function StudentFinalCTA() {
   return (
     <div className="mkt-snap py-6 sm:py-8">
+      {/* Dream Opportunity credibility lines and the partner ticker before the
+         last CTA (Joshua Pierce, Slack, 6 Sept 2026; both pages, 7 Sept). The
+         top padding clears the fixed nav when the section snaps to the top. */}
+      <TrustLine className="pt-[104px] sm:pt-[120px]" />
+      <PartnerTicker className="mx-auto mb-10 max-w-[1100px] sm:mb-12" />
       <CTABlock
         eyebrow="Build. Match. Explore. Play. Connect."
         heading="You're ready."

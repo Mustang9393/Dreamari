@@ -189,7 +189,8 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
           onClick={onEnter}
           /* dark label: white on this teal measured 2.04:1 (needs 3:1) —
              near-black clears 10:1 */
-          className="mt-6 flex w-full items-center justify-center rounded-full font-bold"
+          // the quiet hint (Joshua Pierce, 7 Sept 2026): Enter Community pulses
+          className="mkt-pulse mt-6 flex w-full items-center justify-center rounded-full font-bold"
           style={{
             color: "#05070f",
             gap: "calc(var(--mu) * 8px)",

@@ -11,6 +11,7 @@ import { DO_COPY, DOMark, PartnerLogoWall } from "./DreamOpportunity";
 import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
+import { PartnerTicker } from "./PartnerTicker";
 
 type SchoolsViewProps = {
   view: "student" | "schools";
@@ -507,7 +508,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <TrustLine />
       <div className="px-6 pb-8 sm:pb-10">
         <Reveal>
-          <PartnerLogoWall size="compact" className="mx-auto mt-6 w-full max-w-[720px]" />
+          <PartnerTicker tone="light" className="mx-auto mt-6 w-full max-w-[1100px]" />
         </Reveal>
       </div>
 
