@@ -39,6 +39,14 @@ export const RN_LEVEL_1: Level = {
     Tyler: `${ART}/face-tyler.jpg`,
     Yvonne: `${ART}/face-yvonne.jpg`,
   },
+  // Express mode (Chandu, 7 Sept 2026: same structure as IB Level 1's own
+  // Express cut). The six teaching screens go -- how-nursing-works + its
+  // example page, the drag check on it, the skill-chips intro, the score
+  // spotlight, and the typed 85-threshold check. All ten scored beats
+  // survive; both story cards, every character card and the vocabulary
+  // flips card stay. The cut teaching becomes tappable in the player
+  // (score panel, term meanings, character cards).
+  expressCut: ["RN1-04", "RN1-04b", "RN1-05", "RN1-08", "RN1-10", "RN1-11"],
   beats: [
     // ---- arrival: one idea per screen ----
     {

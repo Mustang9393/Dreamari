@@ -369,3 +369,4 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Landing, Get Hired: the Next button in the four-stage demo now carries the shimmer+pulse hint too.
 - Schools landing, Connect stage: the community and thread cards no longer sit at opposite corners of the frame (a self-start/self-end mixup); both are centered at the same width.
 - Explore: removed the one-time mobile touch-hint sweep on the first poster card (unjustified -- the original usability finding was desktop-specific; touch already reads a poster tile as tappable). Hover lift/scale/open-arrow stays, desktop-only.
+- Registered Nurse Level 1: added expressCut (RN1-04, RN1-04b, RN1-05, RN1-08, RN1-10, RN1-11), mirroring Investment Banking's Express structure exactly. Nursing had no Express mode before this -- mode=express silently served Full.
