@@ -38,51 +38,6 @@ tokens above, in both modes).
 
 ## Current session
 
-### 2026-09-07 (later still) Schools view: dropped the dark device frame entirely
-
-Direct instruction, after the frame-in-frame cleanup: "the dark device frame
-should be dropped entirely... NO photo backdrops either. Unless the backdrop
-is needed in cropped versions." The previous round had already removed the
-NESTED box (`Product` inside `Frame`), but there was still one outer dark
-"device screen" bezel per stage (`Frame`: a rounded dark box with a cosmic
-SpaceGround backdrop, a shadow, a border). That is gone now, page-wide:
-
-- `Frame` is a plain positioning shell -- no background, no shadow, no
-  border, no backdrop image. It only gives the StageStory sticky column a
-  sized box to center a real card in.
-- Build, Match, Explore, Connect, and the data-credibility section
-  (DataArt) each now render ONE plain real card (the app's own dark
-  token surface plus the page's existing `SHADOW`) sized to its own
-  content, floating directly on the light page -- no scaling (`--mu`/zoom)
-  needed, since these are the same real components rendered at roughly
-  their own real app size, not stretched to fill an invented screen.
-- Explore's rail keeps a crop (`overflow-hidden` on its own card, not the
-  removed outer Frame): running a rail off the card's right edge is the
-  rail's real behaviour, the one legitimate exception named directly by
-  the user ("unless the backdrop is needed in cropped versions").
-- Connect's two cards (overlap fixed for legibility in the previous round)
-  now float directly too, no SpaceGround/solid fill behind them -- just
-  the two real cards.
-- Immerse is untouched: its "backdrop" is a real photo of the simulation's
-  own location, i.e. real product content, not decoration standing in for
-  a missing frame, so it was never part of the complaint.
-- `HeroVisual` and `ProgressArt` are untouched: they are the *other*
-  legitimate pattern (a real Dream Opportunity photo with a real app card
-  overlapping it), explicitly praised earlier in this same session ("I like
-  the graphic used for know where students are") and unrelated to the
-  device-frame bezel that got removed here.
-- StageStory's mobile column no longer forces each stage's card into an
-  `aspect-[4/5]` box via `Frame`; the card just renders at its own natural
-  height, centered. The desktop sticky crossfade slot gained
-  `flex items-center justify-center` so a naturally-sized card centers in
-  the tall sticky column instead of being stretched to fill it.
-
-Verified live (own dev server, port 3113): screenshots of all five stages
-plus the data section at 1456px and 390px -- each is a single real card
-with its own shadow, no bezel, no overflow, Connect's overlap still clean
-with no text bleed-through. `npx tsc --noEmit`, `eslint --max-warnings 0`
-on both changed files, and `npm run tokens:check` all clean.
-
 ### 2026-09-07 (later still) Schools view: de-nested the stage frames, minimized Build's questionnaire, fixed the copy/frame misalignment, made the Connect overlap real
 
 Four rounds of direct feedback, same session, on the five-stage "Five steps
