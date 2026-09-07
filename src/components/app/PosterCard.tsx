@@ -28,19 +28,31 @@ function breakableTitle(title: string): string {
 
 // The card answers a pointer (Joshua Pierce, Slack, 7 Sept 2026: a tester
 // hovered and got nothing, so never clicked): on hover it lifts, the photo
-// eases in and a small open-arrow chip appears in the corner. No copy, no
-// button. Hover-only, deliberately: touch already reads a poster tile as
-// tappable (Netflix/Spotify/App Store convention) without a taught cue, and
-// a mobile-only sweep animation was removed as unjustified noise (Chandu,
-// 7 Sept 2026 -- the original finding was specific to desktop's lack of a
-// hover-equivalent affordance signal, not evidenced on touch).
+// eases in and dims, and one bold cue lands dead center. No copy, no button.
+// A small corner arrow chip (first attempt) still read as ambiguous --
+// tucked in the corner it competed with the salary chip and never sat where
+// the eye already was (direct feedback, 7 Sept 2026: "the arrow doesn't
+// really make sense... make it obvious"). Centered and this much bigger, it
+// borrows the exact language a video thumbnail's own play button uses
+// everywhere (YouTube, Spotify, this app's own Play hub hero card) -- the
+// single most over-taught "this is clickable" signal there is, with no
+// caption needed. Hover-only, deliberately: touch already reads a poster
+// tile as tappable (Netflix/Spotify/App Store convention) without a taught
+// cue, and a mobile-only sweep animation was removed as unjustified noise
+// (Chandu, 7 Sept 2026 -- the original finding was specific to desktop's
+// lack of a hover-equivalent affordance signal, not evidenced on touch).
 function OpenCue() {
-  // a solid white round button, top right, the way a streaming card offers
-  // its one action (Chandu, 7 Sept 2026)
   return (
-    <span aria-hidden className="poster-cue absolute top-2 right-2 z-[2] flex size-9 items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.94)", color: "#0b0f1f", boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }}>
-      <ArrowUpRight className="h-[18px] w-[18px]" strokeWidth={2.75} />
-    </span>
+    <>
+      <span aria-hidden className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.32)" }} />
+      <span
+        aria-hidden
+        className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex size-[52px] items-center justify-center rounded-full border backdrop-blur-[6px]"
+        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)" }}
+      >
+        <ArrowUpRight className="h-[24px] w-[24px]" strokeWidth={2.5} style={{ color: "#FFFFFF" }} />
+      </span>
+    </>
   );
 }
 

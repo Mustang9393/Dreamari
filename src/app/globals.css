@@ -1306,12 +1306,16 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 .poster-row.poster-row { padding-top: 44px; padding-bottom: 80px; margin-top: -24px; margin-bottom: -60px; }
 .poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; will-change: transform; }
 .poster-card .poster-photo { transition: transform 0.6s ease; }
-.poster-cue { opacity: 0; transform: translateY(-6px) scale(0.9); transition: opacity 0.2s ease 0s, transform 0.2s ease 0s; }
+/* Dead center, always -- the pop-in only ever animates opacity/scale, never
+   position, so the icon can't drift off its anchor (Chandu, 7 Sept 2026). */
+.poster-dim { opacity: 0; transition: opacity 0.22s ease 0s; }
+.poster-cue { opacity: 0; transform: translate(-50%, -50%) scale(0.6); transition: opacity 0.2s ease 0s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0s; }
 @media (hover: hover) {
   /* doubled class: outranks the shared dm-tap hover lift (a 1px translate)
      that otherwise wins the transform on pages that load it */
   .poster-card.poster-card:hover, .poster-card.poster-card:focus-visible { transform: translateY(-10px) scale(1.09); z-index: 5; transition-delay: 0.12s; box-shadow: 0 22px 40px -16px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 70%, transparent); }
   .poster-card:hover .poster-photo { transform: scale(1.06); }
-  .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: none; transition-delay: 0.16s; }
+  .poster-card:hover .poster-dim, .poster-card:focus-visible .poster-dim { opacity: 1; transition-delay: 0.1s; }
+  .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
 }
-@media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue, .poster-dim { transition: none; } }
