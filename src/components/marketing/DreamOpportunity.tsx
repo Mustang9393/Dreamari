@@ -77,21 +77,21 @@ export function PartnerLogoWall({ size = "full", className = "" }: PartnerLogoWa
 // never come to rest in view; the phone-only top padding is ChapterShell's
 // 72px, so the heading lands under the nav island's zone, not behind it.
 export function BuiltByStamp() {
+  // Same scale as the Schools view's Built by Dream Opportunity section
+  // (Chandu, 7 Sept 2026): the mark, a real heading, the lede, the ticker at
+  // full width, then the closing line, with the same breathing room.
   return (
-    <section aria-labelledby="built-by-heading" className="mkt-snap relative mt-6 px-6 pt-[72px] sm:mt-10 md:pt-0">
-      <div className="mx-auto flex max-w-[640px] flex-col items-center text-center">
-        {/* the Dream Opportunity mark leads, as on the Schools section (Chandu, 7 Sept 2026) */}
-        <DOMark className="mb-4 h-14 w-14" />
-        <h2 id="built-by-heading" className="text-[15px] font-bold tracking-tight" style={{ color: "var(--foreground)" }}>
+    <section aria-labelledby="built-by-heading" className="mkt-snap relative px-6 py-20 pt-[104px] sm:py-28 md:pt-28">
+      <div className="mx-auto flex max-w-[1200px] flex-col items-center text-center">
+        <DOMark className="mb-6 h-16 w-16 sm:mb-8 sm:h-20 sm:w-20" />
+        <h2 id="built-by-heading" className="max-w-[760px] text-[clamp(1.75rem,4vw,3rem)] leading-[1.08] font-extrabold text-balance" style={{ color: "var(--foreground)" }}>
           {DO_COPY.heading}
         </h2>
-        <p className="mt-2 max-w-[520px] text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+        <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {DO_COPY.lead}
         </p>
-        {/* the partners as the ticker (Chandu, 7 Sept 2026): one partner display
-           per page, and it lives here with the Dream Opportunity copy */}
-        <PartnerTicker className="mt-6 w-full max-w-[720px]" />
-        <p className="mt-5 max-w-[560px] text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+        <PartnerTicker className="mx-auto mt-10 w-full max-w-[1100px] sm:mt-12" />
+        <p className="mx-auto mt-10 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>
           {DO_COPY.close}
         </p>
       </div>

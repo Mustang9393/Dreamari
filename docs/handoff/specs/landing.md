@@ -51,3 +51,6 @@ The hints were too faint to notice. `mkt-pulse` now runs a brighter, wider ring 
 
 ## Poster rows (7 Sept 2026)
 Every poster row (`poster-row`) carries 44px of headroom above and 80px below, pulled back with negative margins so the layout does not move, so the grown card and its shadow (about 46px below) are never clipped by the scrolling row. Verified on Explore, Home and the career page.
+
+## Created by Dream Opportunity stamp, scale (7 Sept 2026)
+The student page's stamp uses the Schools section's scale: the mark at 64 to 80px, the heading at clamp(1.75rem, 4vw, 3rem), the lede and closing line at 16 to 18px in a 720px column, the ticker at 1100px, section padding 80 to 112px. Dark ground, white marks.
