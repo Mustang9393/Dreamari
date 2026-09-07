@@ -7,7 +7,7 @@ import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
-import { DO_COPY, DOMark, PartnerLogoWall } from "./DreamOpportunity";
+import { DO_COPY, DOMark } from "./DreamOpportunity";
 import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
@@ -445,7 +445,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
           </Reveal>
           <Reveal>
-            <PartnerLogoWall size="full" className="mx-auto mt-10 max-w-[960px] sm:mt-12" />
+            <PartnerTicker tone="light" className="mx-auto mt-10 max-w-[1100px] sm:mt-12" />
           </Reveal>
           <Reveal>
             <p className="mx-auto mt-10 max-w-[720px] text-center text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>
@@ -507,9 +507,6 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
          held until the partner list was confirmed; it is now the real set. */}
       <TrustLine />
       <div className="px-6 pb-8 sm:pb-10">
-        <Reveal>
-          <PartnerTicker tone="light" className="mx-auto mt-6 w-full max-w-[1100px]" />
-        </Reveal>
       </div>
 
       <section id="demo" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>

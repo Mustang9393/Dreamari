@@ -31,8 +31,14 @@ Hero → How it works chapters in this order: Build, Match, Play, Explore, Conne
 ## Get Hired, My Top 3 stack (7 Sept 2026)
 The two side cards stay inside the panel (offset min(118px, 24vw)) and scale from their top edge, so all three tops line up and the cards behind end higher.
 
-## Credibility lines and partner ticker (Joshua Pierce, 6 Sept; both pages, 7 Sept 2026)
-"Powered by insights from Dream Opportunity and leading corporate partners." and "Informed by Dream Opportunity's work with 100+ schools." sit before the closing CTA on the student page (Start Journey) and on the Schools view. Under them runs one slow marquee of the real partner set (22 marks, `public/images/marketing/partners`, sources in its ATTRIBUTION.md): white silhouettes on the dark student page, ink silhouettes on the light Schools view, edges fading, pausing on hover, a static wrapped row under reduced motion. Every mark is trimmed to its ink and sized by pixels for equal visual mass (constant ink area, height 16 to 30px, width up to 150px), never by its file frame. `PartnerTicker.tsx`. Pringles has no vector source yet; MTV's is a filled block and is left out.
+## Credibility lines and partner ticker (Joshua Pierce, 6 Sept; Chandu, 7 Sept 2026)
+One partner display per page, inside the "Dreamari is created by Dream Opportunity" section (the Dream Opportunity mark, the contractual copy, the ticker, the closing line). Student page: the stamp above the footer, dark ground, every mark one-colour white (each brand's reversed one-colour logo; emblems with painted white counters such as HSBC and Warner Bros. are inverted by luminance so they never flatten into blocks). Schools page: the Built by Dream Opportunity section, light ground, every mark in full brand colour (EY's yellow beam included; light-grey originals such as Blackstone, AT&T and Goldman Sachs are darkened to read). The two credibility lines ("Powered by insights…", "Informed by…") sit before the Schools closing CTA only; nothing sits before the student Start Journey CTA. Order: JPMorgan Chase, Amazon, EY, Goldman Sachs, Chase, HSBC, Blackstone, AT&T, then the rest of the wall (22 marks; Nickelodeon, MTV and Pringles out). Each mark is trimmed to its ink and sized by pixels for equal visual mass; images load eagerly because a lazy image on a moving track never triggers. `PartnerTicker.tsx`, marks in `public/images/marketing/partners` with ATTRIBUTION.md.
 
 ## Demo hints (Joshua Pierce, 7 Sept 2026)
 A very quiet ring pulse (`mkt-pulse`, 2.6s, no scaling, off under reduced motion) on the one control each chapter wants tapped next: Match's X while Management Analyst is on top, then the thumbs-up when Investment Banking is on top; Play's "Ask for your role and deadline" row; Connect's Enter Community button. Play's "Level 1 · Intern" line moved off the art to sit under "Day in the Life: Investment Banker".
+
+## Get Hired chapter alignment (7 Sept 2026)
+The centered chapter centres its copy block and its graphic as one group, and the graphic frame hugs its card instead of taking the viewport-based frame height, so the title, oneliner and the My Top 3 panel sit centred and close together at every width.
+
+## Connect chapter headshots (Joshua Pierce, 7 Sept 2026)
+Marcus and Priya use Joshua's supplied headshots (`public/images/marketing/avatar-marcus.jpg`, `avatar-priya.jpg`).

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PartnerTicker } from "./PartnerTicker";
 
 // The one place the Dream Opportunity credibility copy lives. The Schools view
 // renders it as a full section ("Built by Dream Opportunity"); the student
@@ -79,13 +80,17 @@ export function BuiltByStamp() {
   return (
     <section aria-labelledby="built-by-heading" className="mkt-snap relative mt-6 px-6 pt-[72px] sm:mt-10 md:pt-0">
       <div className="mx-auto flex max-w-[640px] flex-col items-center text-center">
+        {/* the Dream Opportunity mark leads, as on the Schools section (Chandu, 7 Sept 2026) */}
+        <DOMark className="mb-4 h-14 w-14" />
         <h2 id="built-by-heading" className="text-[15px] font-bold tracking-tight" style={{ color: "var(--foreground)" }}>
           {DO_COPY.heading}
         </h2>
         <p className="mt-2 max-w-[520px] text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
           {DO_COPY.lead}
         </p>
-        <PartnerLogoWall size="compact" className="mt-5 w-full max-w-[560px] opacity-90" />
+        {/* the partners as the ticker (Chandu, 7 Sept 2026): one partner display
+           per page, and it lives here with the Dream Opportunity copy */}
+        <PartnerTicker className="mt-6 w-full max-w-[720px]" />
         <p className="mt-5 max-w-[560px] text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
           {DO_COPY.close}
         </p>

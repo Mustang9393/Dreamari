@@ -16,7 +16,8 @@ const ASKER = { photo: "/images/avatar-maya-howard.jpg", color: "#6366f1", name:
 
 const REPLIES = [
   {
-    photo: "/images/avatar-marcus.jpg",
+    // Joshua's supplied headshot (Slack, 7 Sept 2026)
+    photo: "/images/marketing/avatar-marcus.jpg",
     color: "#1fc76e",
     name: "Marcus",
     tag: "Goldman Sachs · Analyst",
@@ -39,10 +40,8 @@ const REPLIES = [
     verified: false,
   },
   {
-    // Reuses career-neurosurgeon.jpg as a face crop — no dedicated fourth avatar shot
-    // on hand, and it's now otherwise unused since Explore's Food Scientist card moved
-    // to a real supplied photo.
-    photo: "/images/career-neurosurgeon.jpg",
+    // Joshua's supplied headshot (Slack, 7 Sept 2026)
+    photo: "/images/marketing/avatar-priya.jpg",
     color: "#6366f1",
     name: "Priya",
     tag: "Pace University · Sophomore",

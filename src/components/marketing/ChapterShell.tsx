@@ -113,14 +113,14 @@ export function ChapterShell({
           // titles mid-screen with a void above them (reported 5 Sept 2026).
           // 901px and up keep the desktop grid.
           className={`mx-auto w-full max-w-[1200px] flex-1 items-center px-6 pt-2 pb-0 max-[900px]:grid max-[900px]:grid-cols-1 max-[900px]:grid-rows-[minmax(min-content,1fr)_auto_minmax(0,1fr)] max-[900px]:gap-0 min-[901px]:pt-10 min-[901px]:pb-10 lg:pt-14 lg:pb-14 ${
-          centered ? "flex flex-col gap-8" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
+          centered ? "flex flex-col items-center justify-center gap-6" : "grid grid-cols-1 gap-6 min-[901px]:grid-cols-[minmax(0,480px)_minmax(0,480px)] min-[901px]:justify-between min-[901px]:gap-10"
         }`}
         style={{ ["--c" as string]: color }}
       >
         <div
           ref={copyRef}
           className={`text-center transition-all duration-700 ease-out max-[900px]:self-end max-[900px]:pb-7 ${
-            centered ? "max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
+            centered ? "mx-auto w-full max-w-[560px]" : `min-[901px]:w-full min-[901px]:text-left ${flip ? "min-[901px]:order-2" : ""}`
           }`}
           style={{
             opacity: copyRevealed ? 1 : 0,
@@ -161,8 +161,8 @@ export function ChapterShell({
         <div
           ref={graphicRef}
           data-playing={playing}
-          className={`mkt-graphic relative flex min-h-0 min-w-0 w-full items-center justify-center min-[901px]:min-h-[clamp(240px,40cqw,440px)] transition-all delay-[120ms] duration-700 ease-out ${
-            centered ? "" : flip ? "min-[901px]:order-1" : ""
+          className={`mkt-graphic relative flex min-h-0 min-w-0 w-full items-center justify-center transition-all delay-[120ms] duration-700 ease-out ${
+            centered ? "flex-none" : `min-[901px]:min-h-[clamp(240px,40cqw,440px)] ${flip ? "min-[901px]:order-1" : ""}`
           }`}
           style={{
             opacity: graphicRevealed ? 1 : 0,
@@ -233,7 +233,10 @@ export function ChapterShell({
             className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_250px),680px)] min-[901px]:[--frame-max:min(calc(100dvh_-_290px),620px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
-              height: compact ? "auto" : "var(--frame-h)",
+              // a centered chapter's frame hugs its content: the fixed
+              // viewport-based height centred Get Hired's card inside a taller
+              // box and opened a gap under the copy (direct feedback, 7 Sept 2026)
+              height: compact || centered ? "auto" : "var(--frame-h)",
               maxHeight: compact ? "var(--frame-max)" : undefined,
             }}
           >

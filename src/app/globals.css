@@ -1252,12 +1252,28 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .mkt-ticker-track .mkt-ticker-row { flex-wrap: wrap; justify-content: center; row-gap: 20px; padding-right: 0; }
 }
 
-/* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): a very quiet ring
-   pulse on the one control each chapter wants tapped next, so the interactive
-   pieces stop reading as static pictures. Never scales the element. */
-.mkt-pulse { animation: mkt-pulse 2.6s ease-out infinite; }
-@keyframes mkt-pulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 38%, transparent); }
-  60%, 100% { box-shadow: 0 0 0 9px transparent; }
+/* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): the one control
+   each chapter wants tapped next carries a soft ring pulse and, every few
+   seconds, one light sweep across it (the Next step banner's shimmer), so the
+   interactive pieces stop reading as static pictures. Never scales. */
+.mkt-pulse { position: relative; animation: mkt-pulse 3s ease-out infinite; }
+.mkt-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,0.32) 50%, transparent 68%);
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  animation: mkt-hint-sweep 3s ease-in-out infinite;
 }
-@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } }
+@keyframes mkt-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.45); }
+  55%, 100% { box-shadow: 0 0 0 10px transparent; }
+}
+@keyframes mkt-hint-sweep {
+  0%, 20% { background-position: 160% 0; }
+  70%, 100% { background-position: -160% 0; }
+}
+@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } .mkt-pulse::after { display: none; } }

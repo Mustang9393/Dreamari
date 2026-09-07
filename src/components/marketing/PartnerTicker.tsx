@@ -12,30 +12,41 @@
 const INK_AREA = 27 * 27 * 2.6;
 const MIN_H = 16, MAX_H = 30, MAX_W = 150;
 
-type Mark = { name: string; file: string; ratio: number };
+type Mark = {
+  name: string;
+  file: string;
+  ratio: number;
+  /** a mark with painted white counters (HSBC's hexagon, the Warner Bros. shield): on the dark page it is inverted by luminance, never flattened */
+  emblem?: boolean;
+  /** a light-grey original that vanishes on the light page: darkened there */
+  faint?: boolean;
+};
+// Order (Chandu, 7 Sept 2026): the finance and consulting names students
+// recognise first, then the rest of the wall. Nickelodeon and MTV are out:
+// a splat or a filled block with text inside does not survive a silhouette.
 const MARKS: Mark[] = [
   { name: "JPMorgan Chase", file: "jpmorgan-chase.svg", ratio: 7.051 },
-  { name: "Chase", file: "chase.svg", ratio: 5.363 },
-  { name: "AT&T", file: "att.png", ratio: 2.432 },
+  { name: "Amazon", file: "amazon.svg", ratio: 3.309 },
+  { name: "EY", file: "ey.svg", ratio: 0.987 },
+  { name: "Goldman Sachs", file: "goldman-sachs.svg", ratio: 2.386, faint: true },
+  { name: "Chase", file: "chase.svg", ratio: 5.363, emblem: true },
+  { name: "HSBC", file: "hsbc.svg", ratio: 3.716, emblem: true },
+  { name: "Blackstone", file: "blackstone.svg", ratio: 6.29, faint: true },
+  { name: "AT&T", file: "att.png", ratio: 2.432, faint: true },
+  { name: "Verizon", file: "verizon.svg", ratio: 4.461 },
   { name: "Kellanova", file: "kellanova.svg", ratio: 3.954 },
   { name: "Kellogg's", file: "kelloggs.svg", ratio: 2.858 },
   { name: "Informa", file: "informa.svg", ratio: 4.898 },
-  { name: "EY", file: "ey.svg", ratio: 0.987 },
-  { name: "HSBC", file: "hsbc.svg", ratio: 3.716 },
-  { name: "Blackstone", file: "blackstone.svg", ratio: 6.29 },
-  { name: "Warner Bros. Discovery", file: "wbd.svg", ratio: 4.916 },
-  { name: "Amazon", file: "amazon.svg", ratio: 3.309 },
-  { name: "Colgate", file: "colgate.svg", ratio: 4.857 },
-  { name: "Verizon", file: "verizon.svg", ratio: 4.461 },
+  { name: "Warner Bros. Discovery", file: "wbd.svg", ratio: 4.916, emblem: true },
+  { name: "Colgate", file: "colgate.svg", ratio: 4.857, emblem: true },
   { name: "Nielsen", file: "nielsen.svg", ratio: 2.836 },
   { name: "Yahoo", file: "yahoo.svg", ratio: 3.606 },
   { name: "Versace", file: "versace.svg", ratio: 4.515 },
   { name: "Michael Kors", file: "michael-kors.svg", ratio: 10.517 },
-  { name: "Nickelodeon", file: "nickelodeon.svg", ratio: 1.313 },
   { name: "VH1", file: "vh1.svg", ratio: 2.558 },
-  { name: "BET", file: "bet.svg", ratio: 3.169 },
-  { name: "DC", file: "dc.svg", ratio: 1 },
-  { name: "TNT", file: "tnt.svg", ratio: 1 },
+  { name: "BET", file: "bet.svg", ratio: 3.169, emblem: true },
+  { name: "DC", file: "dc.svg", ratio: 1, emblem: true },
+  { name: "TNT", file: "tnt.svg", ratio: 1, emblem: true },
 ];
 
 function sizeFor(ratio: number) {
@@ -49,17 +60,29 @@ function sizeFor(ratio: number) {
 // tone: the Schools view is light, so its marks are ink silhouettes; the
 // student landing is dark, so they are white ones.
 export function PartnerTicker({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
-  const ink = tone === "light" ? { filter: "brightness(0)", opacity: 0.62 } : { filter: "brightness(0) invert(1)", opacity: 0.75 };
+  // One rule per ground (Chandu, 7 Sept 2026: all or nothing). The light
+  // Schools page shows every mark in its own brand colours, EY's yellow beam
+  // included. The dark student page shows every mark in one-colour white,
+  // each brand's reversed one-colour logo: flat white for wordmarks, and
+  // inverted by luminance for emblems whose white counters are painted
+  // (HSBC's hexagon, the Warner Bros. shield), so they never turn into blocks.
+  const white = { filter: "brightness(0) invert(1)", opacity: 0.8 };
+  const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
+  const colour = { opacity: 0.92 };
+  const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
   // two copies of the row, translated by half: a seamless loop
   const row = (copy: number) => (
     <ul aria-hidden={copy === 1} className="mkt-ticker-row flex flex-none items-center gap-x-12 pr-12 sm:gap-x-14 sm:pr-14">
       {MARKS.map((mark) => {
         const size = sizeFor(mark.ratio);
+        const file = mark.file;
+        const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
         return (
           <li key={mark.file} className="flex flex-none items-center" style={{ height: MAX_H }}>
-            {/* one ink for every mark: silhouettes in the page's ink */}
+            {/* eager, never lazy: marks sliding in from outside the viewport on a
+               transformed track never trigger a lazy load and left holes in the row */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/images/marketing/partners/${mark.file}`} alt={copy === 0 ? mark.name : ""} width={size.width} height={size.height} loading="lazy" decoding="async" style={{ width: size.width, height: size.height, ...ink, objectFit: "contain" }} />
+            <img src={`/images/marketing/partners/${file}`} alt={copy === 0 ? mark.name : ""} width={size.width} height={size.height} decoding="async" style={{ width: size.width, height: size.height, ...ink, objectFit: "contain" }} />
           </li>
         );
       })}
