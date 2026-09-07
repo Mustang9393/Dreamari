@@ -1511,6 +1511,11 @@ const VOICE_PITCH: Record<string, number> = {
   Marcus: 360,
   Lamisa: 560,
   "Cobalt HR": 600,
+  // Nursing cast (Chandu, 7 Sept 2026: parity fix -- these three spoke through
+  // the shared 500 fallback, so every RN voice sounded identical).
+  Rosa: 615,
+  Denise: 395,
+  Tyler: 505,
 };
 
 // One tappable meaning, in Express mode: an industry term's plain meaning, or
