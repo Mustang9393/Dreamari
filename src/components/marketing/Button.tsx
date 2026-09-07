@@ -36,7 +36,9 @@ type MarketingButtonProps = {
 } & ComponentPropsWithoutRef<"button">;
 
 export function MarketingButton({ variant, size = "md", href, className = "", children, ...props }: MarketingButtonProps) {
-  const classes = `inline-flex items-center justify-center gap-2 rounded-full font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${SIZE_CLASSES[size]} ${className}`;
+  // Not a pill (direct feedback, 7 Sept 2026: no rounded-full CTAs anywhere,
+  // including the student landing page this button also renders on).
+  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
     return (

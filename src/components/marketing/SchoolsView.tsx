@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Quote } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
@@ -37,8 +37,12 @@ type Stage = {
   detail: string[];
   href: string;
   linkLabel: string;
-  // The stage's composition: a full-frame piece with its own colour wash.
+  // The stage's composition: a full-frame piece with its own colour wash,
+  // unless `bare` -- Connect's is its own self-sized photo-plus-card, like
+  // HeroVisual/ProgressArt, and wrapping it in the dark Frame bezel again
+  // would recreate the exact "frame around the photo" nesting this avoids.
   art: ReactNode;
+  bare?: boolean;
 };
 
 const STAGES: Stage[] = [
@@ -106,6 +110,7 @@ const STAGES: Stage[] = [
     href: "/connect",
     linkLabel: "See Connect in the app",
     art: <ConnectArt />,
+    bare: true,
   },
 ];
 
@@ -229,90 +234,28 @@ function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onT
   );
 }
 
-// The five stages as one continuous story. Desktop: the copy for each stage
-// scrolls down the left while one frame on the right stays put and its
-// composition crossfades to the stage being read (the pattern Linear and
-// Stripe use for a feature walk). Phones and tablets: each stage's copy sits
-// over its own frame. Same five stages, same order, same copy either way.
-function StageStory({ stages, openStages, onToggle }: { stages: Stage[]; openStages: Set<string>; onToggle: (n: string) => void }) {
-  const [active, setActive] = useState(0);
-  const blocks = useRef<(HTMLLIElement | null)[]>([]);
-
-  useEffect(() => {
-    const els = blocks.current.filter((el): el is HTMLLIElement => el !== null);
-    if (els.length === 0) return;
-    // A stage is "read" when its copy block crosses the middle band of the
-    // viewport; the band is narrow so exactly one stage owns the frame.
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(Number((entry.target as HTMLElement).dataset.index ?? 0));
-        }
-      },
-      { rootMargin: "-42% 0px -42% 0px", threshold: 0 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-
+// One stage, one normal-flow row: copy on one side, its real card on the
+// other, alternating down the page. This replaces a sticky column whose
+// graphic crossfaded on an IntersectionObserver timer (direct feedback, 7
+// Sept 2026: "doesn't work properly when scrolling" -- a stage's copy could
+// sit two screens away from the frame showing a DIFFERENT stage, and a tall
+// min-height block left large dead gaps between consecutive stage headers).
+// A plain alternating row can't desync from its own scroll position: the
+// card sits right next to its own copy, in document flow, always in sync,
+// the same pattern most feature-walk pages on the web use for exactly this
+// reason. Every stage gets the same treatment -- including Build, previously
+// the only one not centered -- because there is no more "active" stage to
+// treat specially.
+function StageRow({ stage, flip, open, onToggle }: { stage: Stage; flip: boolean; open: boolean; onToggle: () => void }) {
   return (
-    <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-14">
-      <ol className="divide-y lg:col-span-5 lg:divide-y-0" style={{ borderColor: "var(--border)" }}>
-        {stages.map((stage, i) => (
-          <li
-            key={stage.n}
-            ref={(el) => {
-              blocks.current[i] = el;
-            }}
-            data-index={i}
-            // justify-start + a short min-height, not justify-center in a
-            // 76vh block: centering put "01 BUILD" ~38vh below the section
-            // heading while the sticky frame started right under it -- two
-            // starting points a whole half-screen apart (direct feedback, 7
-            // Sept 2026: "badly designed", "alignments are off"). Anchoring
-            // each stage's copy near the top of its slot keeps it close to
-            // where the frame starts, at every stage, not just the first.
-            className="py-10 sm:py-12 lg:flex lg:min-h-[62vh] lg:flex-col lg:justify-start lg:py-0 lg:pt-3"
-          >
-            <Reveal>
-              <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => onToggle(stage.n)} />
-              {/* Under lg the frame follows its copy. The composition is the
-                 same one the sticky frame shows on desktop. */}
-              <div className="mt-8 lg:hidden">
-                <Frame className="aspect-[4/5] sm:aspect-[5/4]">{stage.art}</Frame>
-              </div>
-            </Reveal>
-          </li>
-        ))}
-      </ol>
-      <div className="hidden lg:col-span-7 lg:block lg:sticky lg:top-[92px] lg:h-[calc(100vh-132px)] lg:max-h-[860px]">
-        <Frame className="h-full">
-          {stages.map((stage, i) => {
-            const isActive = i === active;
-            return (
-              <div
-                key={stage.n}
-                aria-hidden={!isActive}
-                className="absolute inset-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{
-                  opacity: isActive ? 1 : 0,
-                  transform: isActive ? "none" : i < active ? "translateY(-28px) scale(0.985)" : "translateY(28px) scale(0.985)",
-                  pointerEvents: isActive ? "auto" : "none",
-                }}
-              >
-                {stage.art}
-              </div>
-            );
-          })}
-          {/* where you are in the five, for the eye; the STAGE labels carry it for the reader */}
-          <ol aria-hidden className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2.5 py-2" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-            {stages.map((stage, i) => (
-              <li key={stage.n} className="h-1.5 rounded-full transition-[width,background-color] duration-500" style={{ width: i === active ? 18 : 6, background: i === active ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
-            ))}
-          </ol>
-        </Frame>
-      </div>
-    </div>
+    <li className="grid grid-cols-1 items-center gap-8 py-10 sm:py-12 lg:grid-cols-12 lg:gap-14 lg:py-16">
+      <Reveal className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
+        <StageCopy stage={stage} open={open} onToggle={onToggle} />
+      </Reveal>
+      <Reveal className={`flex justify-center lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
+        {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4] lg:aspect-[4/5] lg:max-w-[460px]">{stage.art}</Frame>}
+      </Reveal>
+    </li>
   );
 }
 
@@ -416,9 +359,11 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <Reveal>
             <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
-          <div className="mt-4 sm:mt-8 lg:mt-4">
-            <StageStory stages={STAGES} openStages={openStages} onToggle={toggleStage} />
-          </div>
+          <ol className="mt-4 divide-y sm:mt-8 lg:mt-4" style={{ borderColor: "var(--border)" }}>
+            {STAGES.map((stage, i) => (
+              <StageRow key={stage.n} stage={stage} flip={i % 2 === 1} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
+            ))}
+          </ol>
         </div>
       </section>
 

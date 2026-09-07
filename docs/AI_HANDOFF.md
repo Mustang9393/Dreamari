@@ -38,6 +38,72 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later still) Schools view: replaced the sticky stage story with plain rows, rebuilt Connect, dropped pill CTAs
+
+Several rounds of direct feedback in quick succession:
+
+1. "Doesn't work properly when scrolling" -- the five-stage section used a
+   sticky right column whose composition crossfaded on an IntersectionObserver
+   timer while the copy scrolled past on the left. A stage's copy could sit
+   far from the frame showing a DIFFERENT stage, and each copy block's tall
+   min-height left large dead gaps between consecutive stage headers.
+   Replaced with plain, non-sticky alternating rows (`StageRow`): each
+   stage's copy and its own card sit side by side in normal document flow,
+   so they can never desync -- removed the IntersectionObserver, the
+   `active` state, and the sticky column entirely. (Introduced and fixed a
+   bug in the same edit: `Reveal`, a `<div>`, was wrapping each `<li>`
+   instead of sitting inside it, producing invalid `ol > div > li` markup
+   that also broke `divide-y` and any `ol > li` query -- moved `Reveal`
+   inside `<li>`, one per column, verified `ol > li` count is 5 again.)
+
+2. Connect's card: rebuilt as a photo-plus-solid-modal composition (like
+   HeroVisual/ProgressArt) per direct instruction, dropping the `Frame`/
+   `Product`/`zoom` machinery entirely for this one -- `CommunityCard` is a
+   real `@container`-responsive component that sizes itself, not a fixed-px
+   screen needing a scaling hack. Three follow-on bugs from that rebuild,
+   each reported immediately and fixed in turn: (a) proportions were off --
+   capped at max-w-300px while every other stage's card rendered near
+   500px, made them match; (b) the backing plate behind the overlapping
+   thread card was missing the `marketing-v2` class, so `var(--background)`
+   resolved to the LIGHT page's background instead of dark -- white text on
+   a white plate, unreadable (the same scoping bug fixed once already this
+   session in `Frame`, recurred in a new spot; fixed the same way); (c)
+   confirmed live that dropping `zoom` also fixed `CommunityCard`'s stat
+   tiles, which were rendering as flat solid boxes instead of blurred glass
+   -- `backdrop-filter` and `zoom` do not reliably compose, and removing the
+   now-unnecessary scaling fixed it as a side effect.
+
+3. "No pill-shaped CTAs... even on the landing page" -- `MarketingButton`
+   (Button.tsx), Nav's CTA link, and `AudienceToggle`'s toggle track/buttons
+   were all `rounded-full`. These are shared with the student-facing landing
+   page, which `docs/handoff/specs/landing.md` locks -- asked the user
+   directly rather than guessing; told to change the shared components (so
+   both audiences get the new radius), NOT to fork a schools-only variant.
+   Changed to `rounded-xl`/`rounded-lg`. Confirmed `git diff --quiet
+   origin/main` is still clean for every locked file (Hero.tsx,
+   HowItWorks.tsx, chapters/*, ChapterShell.tsx, Footer.tsx) -- only
+   Button.tsx, Nav.tsx and AudienceToggle.tsx changed, none of them locked.
+   Circular icon buttons and avatar/dot marks were left alone -- the
+   complaint was about elongated pill CTAs and inputs, not circles.
+
+Verified live via a dev server (port 3115) using DOM geometry and computed
+style rather than screenshots -- the Browser pane's screenshot capture was
+unreliable again this session (documented earlier too): confirmed 5 real
+`<li>` direct children, no horizontal overflow, Connect's card width now
+within ~5% of the other stages', the backing plate's computed
+`background-color` is `rgb(5,7,15)` (dark, correct) with card text at
+`rgb(244,247,255)` (light, correct, readable), and the stat tiles' computed
+`backdrop-filter` is `blur(14px)` (real blur, not a flat box). `npx tsc
+--noEmit`, `eslint --max-warnings 0` on every changed file, and
+`npm run tokens:check` all clean.
+
+Not done: the user separately felt the new alternating-row layout "just
+copied the student version" (the student site's chapters use a similar
+side-by-side alternating grid). Flagged back honestly rather than guessed
+at a fix -- a concrete differentiator (rail styling, numbering treatment,
+spacing rhythm) needs the user's steer on what specifically should feel
+distinct, now that the underlying scroll bug is gone.
+
 ### 2026-09-07 (later still) Schools view: reverted "drop the dark device frame entirely"
 
 Direct feedback right after that round shipped: "what ever you did now is a

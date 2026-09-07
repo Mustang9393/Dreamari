@@ -269,7 +269,7 @@ export function MatchArt() {
   return (
     <>
       <Wash accent="var(--world-business-money-office)" />
-      <Product bare label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={420} floor={0.6} ceiling={1.15} flow className="top-[8%] right-[11%] left-[11%]">
+      <Product bare label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={420} floor={0.6} ceiling={1.15} flow className="top-[14%] right-[11%] left-[11%]">
         <div className="relative flex flex-col items-center" style={{ padding: `${mu(16)} ${mu(18)} ${mu(18)}`, gap: mu(14) }}>
           <div className="flex w-full items-center justify-between">
             <p className="font-bold" style={{ fontFamily: "var(--font-display)", fontSize: mu(14), color: "var(--foreground)" }}>Find your Top 3</p>
@@ -387,6 +387,18 @@ export function ImmerseArt() {
 
 // Connect: the real Finance Careers community card, and a question from its
 // board answered by a verified JPMorgan Chase analyst. Two cards, layered.
+// Connect: the same photo-plus-modal shape as HeroVisual and ProgressArt --
+// the one pattern that has held up across every round of feedback -- instead
+// of two cards floating in an invented dark stage. The community card IS the
+// "photo" layer here (it already carries its own real cover photo, stats and
+// company marks; it needs no separate backdrop), and the thread sits as one
+// solid, opaque card hanging off its bottom-right corner, the way the Career
+// Detail header hangs off HeroVisual's photo and the profile card hangs off
+// ProgressArt's. Both cards render at their own real, unscaled size --
+// CommunityCard is a `@container`-responsive component built to size itself,
+// not a fixed-px screen that needs a `zoom` hack, and the zoom wrapper this
+// used to have was very likely why its stat tiles' `backdrop-filter` was
+// rendering as flat colour instead of a blur (direct feedback, 7 Sept 2026).
 export function ConnectArt() {
   const community = COMMUNITIES.find((c) => c.id === "business-money") ?? COMMUNITIES[1];
   const thread = THREADS.find((t) => t.id === "t-ib-hours") ?? THREADS[0];
@@ -394,59 +406,52 @@ export function ConnectArt() {
   const pro = PROS.find((p) => answer?.kind === "answer" && p.id === answer.proId) ?? PROS[2];
   const accent = WORLD_COLORS[community.world];
   return (
-    <div role="img" aria-label={`Connect: the ${community.name} community with ${community.students} students, ${community.activePros} professionals and companies including ${community.professionalsFrom.slice(0, 3).join(", ")}. ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`} className="marketing-v2 absolute inset-0" style={{ background: "var(--background)", color: "var(--foreground)", containerType: "inline-size" }}>
-      <SpaceGround opacity={0.8} />
-      <Wash accent={accent} />
-      {/* Two cards, deliberately overlapped (direct feedback, 7 Sept 2026:
-         liked the overlap, wanted it done cleanly) -- the thread card sits
-         a fixed amount over the community card's lower edge via a negative
-         margin, not independent `absolute` boxes eyeballed to "just miss"
-         (the old version overlapped by ~34% of the frame's width and put
-         the Open button on top of the question text). Card is the app's own
-         frosted-glass surface (backdrop-blur, ~90% opacity) -- true where it
-         sits over a plain background, but stacked over ANOTHER card that
-         blur reveals and blends the card underneath's text into it. The
-         backing plate below is a fully opaque rect the exact shape of Card,
-         sitting behind it and in front of the community card, so the blur
-         terminates on solid colour and nothing shows through or mixes. */}
-      <div aria-hidden inert className="absolute inset-0 flex flex-col items-center justify-center px-[7%] pt-[6%]" style={{ ["--mu" as string]: "clamp(0.6, calc(100cqw / 560px), 1.05)", zoom: "var(--mu)" }}>
-        <div className="relative" style={{ width: "68%", minWidth: 260, height: 320, zIndex: 0 }}>
-          <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
-        </div>
-        <div className="relative" style={{ width: "68%", minWidth: 260, marginTop: -54, zIndex: 1, filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
-          <span aria-hidden className="absolute inset-0 rounded-[var(--radius-lg)]" style={{ background: "var(--background)" }} />
-          <Card accent={accent} className="relative">
-            <div className="flex items-center justify-between gap-[var(--space-3)]">
-              <span className="flex min-w-0 items-center gap-[8px]">
-                <Avatar name={thread.handle} size={26} />
-                <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-                <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
-              </span>
-              <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
-            </div>
-            <h3 className="mt-[12px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-            <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="flex items-center gap-[5px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful}</span>
-              <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {thread.comments ?? thread.responses.length} comments</span>
-            </div>
-            <div className="mt-[14px] border-t pt-[14px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-              <div className="flex items-center gap-[8px]">
-                <Avatar name={pro.name} size={30} verified />
-                <span className="flex min-w-0 flex-col">
-                  <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                    <span className="truncate">{pro.name}</span>
-                    <BadgeCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-                  </span>
-                  <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-                    <span className="truncate">{pro.role}</span>
-                    <CompanyChip name={pro.org} tone="surface" size="sm" />
-                  </span>
+    <div
+      className="relative mx-auto w-full max-w-[440px] pb-[26%]"
+      role="img"
+      aria-label={`Connect: the ${community.name} community with ${community.students} students, ${community.activePros} professionals and companies including ${community.professionalsFrom.slice(0, 3).join(", ")}. ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`}
+    >
+      <div aria-hidden inert className="marketing-v2 relative">
+        <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
+      </div>
+      <div aria-hidden inert className="marketing-v2 absolute right-[-8%] bottom-0 w-[72%]" style={{ filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
+        {/* A fully opaque backing behind Card -- the app's own frosted-glass
+           surface, correct where it sits over a plain background, but this
+           card sits over ANOTHER card, and the blur revealed and blended the
+           community card's text into it. The backing terminates the blur on
+           solid colour so nothing shows through. */}
+        <span aria-hidden className="absolute inset-0 rounded-[var(--radius-lg)]" style={{ background: "var(--background)" }} />
+        <Card accent={accent} className="marketing-v2 relative">
+          <div className="flex items-center justify-between gap-[var(--space-3)]">
+            <span className="flex min-w-0 items-center gap-[8px]">
+              <Avatar name={thread.handle} size={26} />
+              <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+              <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
+            </span>
+            <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
+          </div>
+          <h3 className="mt-[12px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
+          <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span className="flex items-center gap-[5px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful}</span>
+            <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {thread.comments ?? thread.responses.length} comments</span>
+          </div>
+          <div className="mt-[14px] border-t pt-[14px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+            <div className="flex items-center gap-[8px]">
+              <Avatar name={pro.name} size={30} verified />
+              <span className="flex min-w-0 flex-col">
+                <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                  <span className="truncate">{pro.name}</span>
+                  <BadgeCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
                 </span>
-              </div>
-              <p className="mt-[8px] line-clamp-3 text-[13.5px] leading-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>{answer?.kind === "answer" ? answer.body : ""}</p>
+                <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+                  <span className="truncate">{pro.role}</span>
+                  <CompanyChip name={pro.org} tone="surface" size="sm" />
+                </span>
+              </span>
             </div>
-          </Card>
-        </div>
+            <p className="mt-[8px] line-clamp-3 text-[13.5px] leading-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>{answer?.kind === "answer" ? answer.body : ""}</p>
+          </div>
+        </Card>
       </div>
     </div>
   );
