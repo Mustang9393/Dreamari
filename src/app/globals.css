@@ -1256,40 +1256,42 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 }
 
 /* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): the one control
-   each chapter wants tapped next carries a soft ring pulse and, every few
-   seconds, one light sweep across it (the Next step banner's shimmer), so the
-   interactive pieces stop reading as static pictures. Never scales.
-   Toned down (direct feedback, 8 Sept 2026: "the flash updates across
-   everything demand way too much attention, it's hard to read/concentrate")
-   -- the original ran BOTH effects continuously with no rest, competing with
-   the copy right next to it for the whole time someone was reading. Same
-   idea, quieter execution: one brief, gentle pulse, then a long calm hold
-   before the next one, instead of nonstop motion. */
-.mkt-pulse { position: relative; animation: mkt-pulse 5s ease-out infinite; }
-.mkt-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(110deg, transparent 44%, rgba(255,255,255,0.4) 50%, transparent 56%);
-  background-size: 240% 100%;
-  background-repeat: no-repeat;
-  animation: mkt-hint-sweep 5s ease-in-out infinite;
+   each chapter wants tapped next carries a hint so the interactive pieces
+   stop reading as static pictures. Never scales.
+   Rebuilt three times now (direct feedback, 8 Sept 2026):
+   1. "the flash updates demand way too much attention" -- the original
+      ring+shimmer ran continuously at full strength, no rest.
+   2. "drop the shimmer, use a thin pulse, better color, no fake-looking
+      sparks" -- a generic white gradient band reads as a stock SaaS
+      "shine" effect; the two drifting dots added motion without meaning
+      ("they don't tell me to click anything, just visual fluff").
+   3. "a subtle PERSISTENT pulse instead" -- a rare pulse with a long
+      silent gap (previous pass: once every 5s) means a reader who spends
+      a few seconds on the copy above the graphic can arrive right after
+      it fired and read the card as static for a while. A continuous,
+      gentle breathing glow -- smoothly growing and fading, never fully at
+      rest -- stays truthfully "alive" no matter when someone looks,
+      without ever spiking to something that shouts. Colored per chapter
+      (--c from ChapterShell; --glow on Match's cards) instead of plain
+      white, so it reads as this product's own hint. */
+.mkt-pulse {
+  position: relative;
+  animation: mkt-pulse-ring 2.6s ease-in-out infinite;
+  --mkt-hint-color: var(--c, var(--glow, var(--primary)));
 }
-@keyframes mkt-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
-  16%, 100% { box-shadow: 0 0 0 8px transparent; }
+/* A ring that grows FROM the element's own edge (spread starting at 0)
+   visually fuses with a solidly-colored button in that same hue -- no gap
+   to read as a separate ring (direct feedback: "Enter Community is the
+   weakest nudge" -- it's a solid-color button, so the ring blended into
+   the fill). Starting the spread at 3px instead of 0 keeps a constant
+   thin gap of page background between the button and the ring at every
+   point in the cycle, so it reads as a ring around the control, not a
+   glow bleeding out of it -- on any button, any color. */
+@keyframes mkt-pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--mkt-hint-color) 65%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--mkt-hint-color) 0%, transparent); }
 }
-/* with a 240% image, position 110% parks the band just off the left edge and
-   -10% just off the right; the travel itself is quick (a brief highlight),
-   then it sits parked off-frame for the rest of the (now much longer)
-   cycle instead of sweeping back and forth continuously. */
-@keyframes mkt-hint-sweep {
-  0%, 6% { background-position: 110% 0; }
-  22%, 100% { background-position: -10% 0; }
-}
-@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } .mkt-pulse::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } }
 
 /* Explore poster cards answer the pointer (Joshua Pierce, Slack, 7 Sept 2026;
    streaming-style per Chandu): on hover the card lifts off and grows, above

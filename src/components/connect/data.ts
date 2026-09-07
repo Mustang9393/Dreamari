@@ -1373,72 +1373,6 @@ export const EVENTS: EventBoard[] = [
       photosLabel: "Event photos",
     },
   },
-  // The two partnership boards the Replit prototype carried, which the CEO
-  // of JA Singapore singled out (Slack, Sep 2), with the Replit's own
-  // figures. Morgan Stanley is already joined; Junior Achievement unlocks
-  // with its code.
-  {
-    id: "event-do-morgan-stanley-nyc",
-    name: "Dream Opportunity & Morgan Stanley",
-    resources: [
-      { kind: "slides", title: "Trading floor tour deck", description: "The slides from the morning session on how a trading floor works.", sourceLabel: "dreamari.co/resources", meta: "14 slides" },
-      { kind: "folder", title: "Markets 101 handouts", description: "The three handouts from the small-group tables.", sourceLabel: "dreamari.co/resources", meta: "3 files", items: ["What a Markets Analyst does.pdf", "Reading a stock chart.pdf", "Glossary of trading terms.pdf"] },
-      { kind: "link", title: "Morgan Stanley early insights programs", description: "The programs the recruiters mentioned for high school and first-year students.", sourceLabel: "morganstanley.com", meta: "Website" },
-    ],
-    photos: { count: 31, images: EVENT_FRAMES.finance },
-    host: "Morgan Stanley",
-    lead: "Dream Opportunity",
-    partner: "Morgan Stanley",
-    date: "March 12, 2026",
-    location: "New York, NY",
-    lifecycle: "Active follow-up",
-    closesOn: "September 30, 2026",
-    students: 312,
-    pros: 87,
-    postCount: 203,
-    orgs: ["Dream Opportunity", "Morgan Stanley", "Dreamari"],
-    topics: ["Finance", "Investing", "Networking"],
-    entitled: true,
-  },
-  {
-    id: "event-ja-goldman-sachs-nyc",
-    name: "Junior Achievement & Goldman Sachs",
-    resources: [
-      { kind: "pdf", title: "Personal finance workbook", description: "The workbook from the Junior Achievement session, with the answer key.", sourceLabel: "Junior Achievement", meta: "PDF · 12 pages" },
-      { kind: "reading", title: "Recommended reading on investing", description: "Four short pieces the volunteers pointed to for a first look at investing.", sourceLabel: "dreamari.co/resources", meta: "4 links" },
-    ],
-    photos: { count: 19, images: EVENT_FRAMES.finance },
-    host: "Junior Achievement",
-    lead: "Junior Achievement",
-    partner: "Goldman Sachs",
-    date: "April 16, 2026",
-    location: "New York, NY",
-    lifecycle: "Active follow-up",
-    closesOn: "October 15, 2026",
-    students: 236,
-    pros: 52,
-    postCount: 98,
-    orgs: ["Junior Achievement", "Goldman Sachs", "Dreamari"],
-    topics: ["Finance", "Banking", "Networking"],
-    entitled: false,
-    code: "JA-GS-2026",
-  },
-  // Asked for by the CEO (4 Sept). No company partner, date or figures have
-  // been given yet, so none are invented: the board exists, and opens after
-  // its first event.
-  {
-    id: "event-seo-scholars-nyc",
-    name: "Dream Opportunity & SEO Scholars",
-    host: "SEO Scholars",
-    lead: "Dream Opportunity",
-    partner: "SEO Scholars",
-    date: "First event to be announced",
-    location: "New York, NY",
-    lifecycle: "Upcoming",
-    orgs: ["SEO Scholars", "Dream Opportunity", "Dreamari"],
-    topics: ["College", "Careers", "Networking"],
-    entitled: false,
-  },
   // The real fall event within this student's reach (Slack, Sep 1):
   // Brooklyn with JPMorgan Chase on Oct 23. Its board opens after the
   // event, same lifecycle rule as always. No invented stats.
@@ -1453,6 +1387,71 @@ export const EVENTS: EventBoard[] = [
     lifecycle: "Upcoming",
     orgs: ["Dream Opportunity", "JPMorgan Chase", "Dreamari"],
     topics: ["Finance", "Networking"],
+    entitled: false,
+  },
+  // Asked for by the CEO (4 Sept). No company partner, date or figures have
+  // been given yet, so none are invented: the board exists, and opens after
+  // its first event.
+  {
+    id: "event-do-blackstone",
+    name: "Dream Opportunity & Blackstone",
+    host: "Blackstone",
+    lead: "Dream Opportunity",
+    partner: "Blackstone",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["Dream Opportunity", "Blackstone", "Dreamari"],
+    topics: ["Finance", "Investing", "Networking"],
+    entitled: false,
+  },
+  // The six-board list agreed on Slack (Joshua Pierce + Chandu, 8 Sept
+  // 2026): Junior Achievement's board now follows Amazon, not the earlier
+  // Goldman Sachs pairing -- no stats invented for the swap, since the
+  // Goldman Sachs board's numbers belonged to that event, not this one.
+  {
+    id: "event-ja-amazon-nyc",
+    name: "Junior Achievement & Amazon",
+    host: "Junior Achievement",
+    lead: "Junior Achievement",
+    partner: "Amazon",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["Junior Achievement", "Amazon", "Dreamari"],
+    topics: ["Business", "Operations", "Networking"],
+    entitled: false,
+  },
+  // Renamed from "Dream Opportunity & SEO Scholars" (Joshua Pierce, Slack,
+  // 8 Sept 2026: "he still has DO & SEO Scholars" -- the board's own
+  // partner is Google, not Dream Opportunity, per the agreed naming.
+  {
+    id: "event-seo-scholars-nyc",
+    name: "SEO Scholars & Google",
+    host: "SEO Scholars",
+    lead: "SEO Scholars",
+    partner: "Google",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["SEO Scholars", "Google", "Dreamari"],
+    topics: ["Technology", "College", "Networking"],
+    entitled: false,
+  },
+  // New nonprofit partner, no precedent board to follow -- JAG (Jobs for
+  // America's Graduates) organizes, same shape as every other
+  // first-event-pending board.
+  {
+    id: "event-jag-informa",
+    name: "JAG & Informa Markets",
+    host: "JAG",
+    lead: "JAG",
+    partner: "Informa Markets",
+    date: "First event to be announced",
+    location: "Secaucus, NJ",
+    lifecycle: "Upcoming",
+    orgs: ["JAG", "Informa Markets", "Dreamari"],
+    topics: ["Business", "Networking"],
     entitled: false,
   },
 ];
