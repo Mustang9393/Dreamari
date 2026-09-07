@@ -148,7 +148,9 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured }: {
           <StatTile value={community.professionalsFrom.length} label="Companies" />
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
-        <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+        {/* wraps when the column is narrow (two columns on a 768px tablet), so
+           the company chips never run under the Open button */}
+        <div className="pointer-events-auto mt-[10px] flex min-w-0 flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[8px]" style={{ textShadow: "none" }}>
           {/* two marks always (phones included), a third once the card is
              460px wide. The count chip says how many are missing; on hover it
              previews them, on tap it opens a small sheet with the rest that

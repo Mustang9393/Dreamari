@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab } from "./PeopleTab";
@@ -290,103 +290,9 @@ function StatusChip({ state }: { state: Thread["state"] }) {
   );
 }
 
-// Avatar photos are PARKED for the pitch (direct feedback: mixed cartoons
-// and photos read as random) -- every avatar renders as initials until
-// USE_PHOTO_AVATARS flips back on. The portrait set and mapping stay.
-const USE_PHOTO_AVATARS = false;
-
-// Photo avatars (behind the flag above), initials only as the fallback
-// for a name with no portrait. The pool is a committed set of demo portraits
-// (public/images/connect/avatars); each named person maps to ONE photo, and
-// no two people who share a screen share a face. Jordan (the signed-in
-// student) wears their real profile photo.
-const AV = "/images/connect/avatars";
-const AVATAR_PHOTO: Record<string, string> = {
-  "Jordan Rivera": "/images/avatar-jordan.jpg",
-  Jordan: "/images/avatar-jordan.jpg",
-  // Verified professionals
-  "David Chen": `${AV}/m36.jpg`,
-  "Elena Martinez": `${AV}/w22.jpg`,
-  "Amara Okafor": `${AV}/w45.jpg`,
-  "Marcus Reyes": `${AV}/m47.jpg`,
-  "Jasmine Cole": `${AV}/w31.jpg`,
-  "Nadia Osei": `${AV}/w28.jpg`,
-  "Wei Zhang": `${AV}/m29.jpg`,
-  "Tom Gallagher": `${AV}/m11.jpg`,
-  "Sofia Grant": `${AV}/w5.jpg`,
-  "Andre Whitfield": `${AV}/m55.jpg`,
-  "Keiko Tanaka": `${AV}/w63.jpg`,
-  "Danielle Brooks": `${AV}/w41.jpg`,
-  "Leo Fontaine": `${AV}/m77.jpg`,
-  "Omar Haddad": `${AV}/m68.jpg`,
-  "Camille Vega": `${AV}/w52.jpg`,
-  // second voices per company (Unsplash, free licence, 4 Sept 2026); keep in
-  // step with the same map in primitives.tsx
-  "Samuel Adler": `${AV}/p1.jpg`,
-  "Isabella Rossi": `${AV}/p2.jpg`,
-  "Arjun Nair": `${AV}/p3.jpg`,
-  "Marisol Ortega": `${AV}/p4.jpg`,
-  "Erik Lindqvist": `${AV}/p5.jpg`,
-  "Simone Bell": `${AV}/p6.jpg`,
-  "Hannah Weiss": `${AV}/p7.jpg`,
-  "Daniel Kim": `${AV}/p8.jpg`,
-  "Lena Novak": `${AV}/p9.jpg`,
-  // Students wear friendly illustrated avatars (micah, generated per
-  // handle), never real photos -- on-brand for a teen product and no real
-  // minor's face is ever implied. Professionals keep realistic portraits:
-  // credibility is their whole job here.
-  Ethan: `${AV}/c-Ethan.png`,
-  Priya: `${AV}/c-Priya.png`,
-  Maya: `${AV}/c-Maya.png`,
-  Zoe: `${AV}/c-Zoe.png`,
-  Sam: `${AV}/c-Sam.png`,
-  Lena: `${AV}/c-Lena.png`,
-  Ava: `${AV}/c-Ava.png`,
-  Diego: `${AV}/c-Diego.png`,
-  Sana: `${AV}/c-Sana.png`,
-  Ruby: `${AV}/c-Ruby.png`,
-  Theo: `${AV}/c-Theo.png`,
-  Jo: `${AV}/c-Jo.png`,
-  Amir: `${AV}/c-Amir.png`,
-  Devon: `${AV}/c-Devon.png`,
-  Riley: `${AV}/c-Riley.png`,
-  Noah: `${AV}/c-Noah.png`,
-  Marcus: `${AV}/c-Riley.png`,
-};
-
-// A verified badge overlaps the corner exactly like the app's other verified
-// affordances — a small ShieldCheck on a solid chip, never color alone.
-function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  // Professionals always wear their portrait (direct feedback: a face for
-  // Elena Martinez); students stay behind the flag.
-  const isPro = PROS.some((p) => p.name === name);
-  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
-  const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  return (
-    <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
-      {photo ? (
-        <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
-      ) : (
-        <span
-          className="flex h-full w-full items-center justify-center rounded-full font-bold"
-          style={{
-            background: verified ? "var(--primary)" : "var(--secondary)",
-            color: verified ? "#FFFFFF" : "var(--foreground)",
-            fontSize: Math.max(11, size * 0.4),
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {initials}
-        </span>
-      )}
-      {verified && (
-        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
-          <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
-        </span>
-      )}
-    </span>
-  );
-}
+// Avatars come from primitives.tsx, the one portrait map (the copy that lived
+// here still pointed at the old photo set, so the volunteer picker showed
+// empty circles: direct feedback, 7 Sept 2026).
 
 
 // Student identity: handle + avatar + class year — Twitter-shaped, like the

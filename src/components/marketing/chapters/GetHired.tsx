@@ -104,10 +104,15 @@ export function GetHiredChapter() {
                 /* side offset is min(160px, 30vw): full spread on desktop
                    (edges just past the panel), scaled down on phones so the
                    peeking cards stay on-screen */
+                /* the side cards stay inside the panel (they used to spill
+                   past its rounded edges) and scale from their top edge, so
+                   all three tops line up and the two behind simply end
+                   higher, the way cards tucked behind one would (direct
+                   feedback, 7 Sept 2026) */
                 const pose = [
                   { x: "0px", scale: 1, z: 3, o: 1 },
-                  { x: "calc(-1 * min(160px, 30vw))", scale: 0.82, z: 1, o: 0.55 },
-                  { x: "min(160px, 30vw)", scale: 0.82, z: 2, o: 0.55 },
+                  { x: "calc(-1 * min(118px, 24vw))", scale: 0.82, z: 1, o: 0.55 },
+                  { x: "min(118px, 24vw)", scale: 0.82, z: 2, o: 0.55 },
                 ][index];
                 return (
                   <div
@@ -121,6 +126,7 @@ export function GetHiredChapter() {
                          fully occludes the cards tucked behind it */
                       background: "linear-gradient(var(--glass-surface-1), var(--glass-surface-1)), var(--background)",
                       transform: `translateX(${pose.x}) scale(${pose.scale})`,
+                      transformOrigin: "top center",
                       zIndex: pose.z,
                       opacity: pose.o,
                     }}
