@@ -1256,25 +1256,33 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
    each chapter wants tapped next carries a soft ring pulse and, every few
    seconds, one light sweep across it (the Next step banner's shimmer), so the
    interactive pieces stop reading as static pictures. Never scales. */
-.mkt-pulse { position: relative; animation: mkt-pulse 3s ease-out infinite; }
+.mkt-pulse { position: relative; animation: mkt-pulse 2.4s ease-out infinite; }
 .mkt-pulse::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,0.32) 50%, transparent 68%);
-  background-size: 260% 100%;
+  /* the sweep is the cue people actually notice (direct feedback, 7 Sept
+     2026: the ring alone and a faint band were missed), so it is a bright,
+     wide band on a quick cadence */
+  /* a narrow band (about a third of the control) so it crosses as a highlight
+     instead of washing the whole face */
+  background: linear-gradient(110deg, transparent 43%, rgba(255,255,255,0.62) 50%, transparent 57%);
+  background-size: 240% 100%;
   background-repeat: no-repeat;
-  animation: mkt-hint-sweep 3s ease-in-out infinite;
+  animation: mkt-hint-sweep 2.4s ease-in-out infinite;
 }
 @keyframes mkt-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.45); }
-  55%, 100% { box-shadow: 0 0 0 10px transparent; }
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.8); }
+  60%, 100% { box-shadow: 0 0 0 14px transparent; }
 }
+/* with a 240% image, position 110% parks the band just off the left edge and
+   -10% just off the right, so the highlight is on the control for the whole
+   travel instead of spending most of the cycle out of frame */
 @keyframes mkt-hint-sweep {
-  0%, 20% { background-position: 160% 0; }
-  70%, 100% { background-position: -160% 0; }
+  0%, 10% { background-position: 110% 0; }
+  65%, 100% { background-position: -10% 0; }
 }
 @media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } .mkt-pulse::after { display: none; } }
 
@@ -1285,14 +1293,18 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
    open-arrow button appears at the top right. Touch devices get one light
    sweep across the first card the first time, then never again. Rows carry
    vertical padding so the grown card is not clipped by the scroller. */
-.poster-row { overflow-y: visible; }
+/* A scrolling row clips on both axes, so the grown card (9% of 297px plus the
+   10px lift is about 24px) AND its shadow (about 46px below) need real headroom. Doubled class to outrank the
+   row's own padding utilities; the negative margins give the room back so the
+   layout does not move (direct feedback, 7 Sept 2026: cards clipped at the top). */
+.poster-row.poster-row { padding-top: 44px; padding-bottom: 80px; margin-top: -24px; margin-bottom: -60px; }
 .poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; will-change: transform; }
 .poster-card .poster-photo { transition: transform 0.6s ease; }
 .poster-cue { opacity: 0; transform: translateY(-6px) scale(0.9); transition: opacity 0.2s ease 0s, transform 0.2s ease 0s; }
 @media (hover: hover) {
   /* doubled class: outranks the shared dm-tap hover lift (a 1px translate)
      that otherwise wins the transform on pages that load it */
-  .poster-card.poster-card:hover, .poster-card.poster-card:focus-visible { transform: translateY(-10px) scale(1.09); z-index: 5; transition-delay: 0.12s; box-shadow: 0 30px 56px -18px rgba(0,0,0,0.8), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 70%, transparent); }
+  .poster-card.poster-card:hover, .poster-card.poster-card:focus-visible { transform: translateY(-10px) scale(1.09); z-index: 5; transition-delay: 0.12s; box-shadow: 0 22px 40px -16px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 70%, transparent); }
   .poster-card:hover .poster-photo { transform: scale(1.06); }
   .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: none; transition-delay: 0.16s; }
 }

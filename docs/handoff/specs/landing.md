@@ -45,3 +45,9 @@ Marcus and Priya use Joshua's supplied headshots (`public/images/marketing/avata
 
 ## Connect chapter community card (7 Sept 2026)
 The community board card wears the app's own Business & Money community cover photo as its header band (`PHOTO_COVER["business-money"]`, dimmed, with the accent line on top), the same image the real community card shows, so the landing page and the app match.
+
+## Demo hints, second pass (7 Sept 2026)
+The hints were too faint to notice. `mkt-pulse` now runs a brighter, wider ring (to 14px, 0.8 alpha) on a 2.4s cadence and a narrow light band (about a third of the control) that crosses the control for most of the cycle. Applied to the Build chapter's Business & Money row (its old `mkt-nudge-pulse` class had no styles behind it), Match's X then thumbs-up, Play's "Ask for your role and deadline" and Connect's Enter Community. Off under reduced motion.
+
+## Poster rows (7 Sept 2026)
+Every poster row (`poster-row`) carries 44px of headroom above and 80px below, pulled back with negative margins so the layout does not move, so the grown card and its shadow (about 46px below) are never clipped by the scrolling row. Verified on Explore, Home and the career page.

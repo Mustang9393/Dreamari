@@ -6,7 +6,8 @@ import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
 // Real question from the assessment (question 3 of 10): "Choose Your
 // Interests." Business & Money is the demo's example path, since that's this whole
-// storyboard's fixed destination (Investment Banking) — nudged to invite the tap, not
+// storyboard's fixed destination (Investment Banking) — nudged to invite the tap (the
+// shared mkt-pulse ring and light sweep, 7 Sept 2026), not
 // pre-selected, so nothing reads as "already chosen" before the reader acts. Per direct
 // feedback, Tech and Health are shown but not actually pickable (hover only) — only
 // Business & Money is clickable, so the rest of the storyboard's fixed path still
@@ -134,7 +135,7 @@ function BuildDemo() {
                 onMouseEnter={() => setHovered(interest)}
                 onMouseLeave={() => setHovered((h) => (h === interest ? null : h))}
                 aria-disabled={!isClickable}
-                className={`flex w-full items-center justify-between rounded-[var(--radius-md-alt)] border transition-all duration-200 ${isNudge ? "mkt-nudge-pulse" : ""} ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+                className={`flex w-full items-center justify-between rounded-[var(--radius-md-alt)] border transition-all duration-200 ${isNudge ? "mkt-pulse" : ""} ${isClickable ? "cursor-pointer" : "cursor-default"}`}
                 style={{
                   padding: "calc(var(--mu) * 16px) calc(var(--mu) * 20px)",
                   fontSize: "calc(var(--mu) * 14px)",
