@@ -356,3 +356,6 @@ Plain-English summary for the team. Everything below is live on main and demo. C
 - Connect People tab rebuilt to Joshua's reference: For you (Find a professional, For you today, Browse by industry, New from people you follow) and Browse industries, with industry pages of professionals.
 - Landing: one partner display per page, the ticker inside the "created by Dream Opportunity" section (white marks on the dark student page, full brand colour on the light Schools page, EY beam yellow there); the lines and ticker before Start Journey are gone; the student stamp gets the Dream Opportunity mark. Ticker images load eagerly (no holes), JPMorgan, Amazon, EY and Goldman lead, Nickelodeon dropped.
 - Landing: Get Hired chapter centred as one group with no gap under the copy; demo hints now pulse and sweep; Marcus and Priya wear Joshua's new headshots in the Connect chapter.
+- Connect, professional profile: no "Ask Amara about their career." lede, one question at rest under Ask Me with View all, "My Posts", shorter community cards, and a lighter blue-tinted surface.
+- Explore: career cards lift, zoom and show an open-arrow chip on hover, and the first card sweeps once on touch devices the first time, so the cards read as clickable without adding copy or buttons.
+- Landing, Connect chapter: the community board card carries the app's Business & Money cover photo.

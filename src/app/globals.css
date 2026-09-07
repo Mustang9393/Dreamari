@@ -1277,3 +1277,25 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   70%, 100% { background-position: -160% 0; }
 }
 @media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } .mkt-pulse::after { display: none; } }
+
+/* Explore poster cards answer the pointer (Joshua Pierce, Slack, 7 Sept 2026):
+   lift, the photo eases in, an open-arrow chip appears. Touch devices get one
+   light sweep across the first card the first time, then never again. */
+.poster-card { transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease; }
+.poster-card .poster-photo { transition: transform 0.6s ease; }
+.poster-cue { opacity: 0; transform: translateY(-4px); transition: opacity 0.2s ease, transform 0.2s ease; }
+@media (hover: hover) {
+  .poster-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 24px 44px -18px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 65%, transparent); }
+  .poster-card:hover .poster-photo { transform: scale(1.05); }
+  .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: none; }
+}
+@media (hover: none) {
+  .poster-hint::after {
+    content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,0.28) 50%, transparent 68%);
+    background-size: 260% 100%; background-repeat: no-repeat;
+    animation: mkt-hint-sweep 2.4s ease-in-out 0.8s 2 both;
+  }
+  .poster-hint .poster-cue { opacity: 1; transform: none; animation: mkt-pulse 3s ease-out 0.8s 2; }
+}
+@media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo { transition: none; } .poster-hint::after { display: none; } }

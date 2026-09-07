@@ -95,13 +95,15 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
   );
 }
 
-export function CommunityCard({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean }) {
+/** `compact`: the shorter card a professional profile shows, so the boards
+ *  read as secondary to the person (direct feedback, 7 Sept 2026). */
+export function CommunityCard({ community, joined, onOpen, onJoin, featured, compact = false }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean; compact?: boolean }) {
   // which "+N" chip is open (2 or 3, by how many marks precede it); 0 = none
   const [moreOpen, setMoreOpen] = useState(0);
   const accent = communityAccent(community);
   return (
     <div
-      className="dm-tap group @container relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      className={`dm-tap group @container relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] ${compact ? "min-h-[228px]" : "min-h-[312px]"}`}
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
       {/* Our full-bleed photo, but dimmed and frosted so type wins: the photo

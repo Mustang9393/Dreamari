@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import type { CatalogCareer } from "./catalog";
 import { posterTitleFont, WORLD_COLORS } from "./worlds";
 
@@ -25,16 +26,30 @@ function breakableTitle(title: string): string {
   return title.replace(/-/g, "-\u200B");
 }
 
-export function PosterCard({ career, className = "", onClick }: { career: CatalogCareer; className?: string; onClick?: () => void }) {
+// The card answers a pointer (Joshua Pierce, Slack, 7 Sept 2026: a tester
+// hovered and got nothing, so never clicked): on hover it lifts, the photo
+// eases in and a small open-arrow chip appears in the corner. No copy, no
+// button. On touch, the first card can carry `hint`: one light sweep, twice,
+// the first time the page is seen.
+function OpenCue() {
+  return (
+    <span aria-hidden className="poster-cue absolute top-2 left-2 z-[1] flex size-8 items-center justify-center rounded-full border backdrop-blur-[10px]" style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.18)", color: "#FFFFFF" }}>
+      <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} />
+    </span>
+  );
+}
+
+export function PosterCard({ career, className = "", onClick, hint = false }: { career: CatalogCareer; className?: string; onClick?: () => void; hint?: boolean }) {
   const titleSize = posterTitleSize(career.title);
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-tap relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
+      className={`dm-tap poster-card relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${hint ? "poster-hint" : ""} ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
-      <Image src={career.photo} alt="" fill sizes="210px" className="rounded-[var(--radius-lg)] object-cover" draggable={false} />
+      <Image src={career.photo} alt="" fill sizes="210px" className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
+      <OpenCue />
       {career.salary && (
         /* dark glass chip (approved) + large gradient figure — legible on
            any photo at a glance */
@@ -111,9 +126,10 @@ export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCar
       <button
         type="button"
         onClick={onClick}
-        className="dm-tap absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase"
+        className="dm-tap poster-card absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase"
       >
-        <Image src={career.photo} alt="" fill sizes="175px" className="rounded-[var(--radius-lg)] object-cover" draggable={false} />
+        <Image src={career.photo} alt="" fill sizes="175px" className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
+        <OpenCue />
         <span
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
           style={{ backgroundImage: "var(--poster-scrim)" }}

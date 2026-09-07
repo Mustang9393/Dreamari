@@ -42,3 +42,6 @@ The centered chapter centres its copy block and its graphic as one group, and th
 
 ## Connect chapter headshots (Joshua Pierce, 7 Sept 2026)
 Marcus and Priya use Joshua's supplied headshots (`public/images/marketing/avatar-marcus.jpg`, `avatar-priya.jpg`).
+
+## Connect chapter community card (7 Sept 2026)
+The community board card wears the app's own Business & Money community cover photo as its header band (`PHOTO_COVER["business-money"]`, dimmed, with the accent line on top), the same image the real community card shows, so the landing page and the app match.

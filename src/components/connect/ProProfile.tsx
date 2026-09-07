@@ -61,9 +61,6 @@ export function rankPros(pros: Pro[], worlds: string[]): Pro[] {
   return [...pros].sort((a, b) => score(b) - score(a));
 }
 
-function firstName(name: string) {
-  return name.split(" ")[0];
-}
 
 export function answersBy(proId: string): Thread[] {
   return [...THREADS, ...EVENT_THREADS].filter((t) => t.responses.some((r) => r.kind === "answer" && r.proId === proId));
@@ -155,7 +152,9 @@ export function Panel({ id, title, aside, children, className = "" }: { id: stri
 // darker than the shared panel but still glass: a translucent night tint
 // over the page wash, blurred, so the surface recedes without going solid
 // (direct feedback, 7 Sept 2026)
-const CARD = { ...PANEL, background: "rgba(8, 10, 24, 0.5)" } as const;
+// lifted a step from the near-black glass (direct feedback, 7 Sept 2026:
+// less moody): the shared panel glass with a touch of the brand blue in it
+const CARD = { ...PANEL, background: "color-mix(in srgb, var(--primary) 7%, var(--glass-surface-2))" } as const;
 export function ProfileCard({ id, title, lede, side, aside, first = false, children }: { id: string; title: string; lede?: string; side?: React.ReactNode; aside?: React.ReactNode; first?: boolean; children: React.ReactNode }) {
   // one section of the single profile surface: ruled off from the one above,
   // no box of its own (direct feedback, 7 Sept 2026: no card after card)
@@ -260,15 +259,6 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
   );
 }
 
-/** Three rows, then the rest on request: "View all 7" / "Show less". */
-function MoreToggle({ total, open, onToggle }: { total: number; open: boolean; onToggle: () => void }) {
-  if (total <= 3) return <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{total}</span>;
-  return (
-    <button type="button" onClick={onToggle} aria-expanded={open} className="dm-link flex min-h-[32px] cursor-pointer items-center text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-      {open ? "Show less" : `View all ${total}`}
-    </button>
-  );
-}
 
 // ——— New from people you follow ———
 
@@ -482,7 +472,8 @@ export function ProProfileView({
       {/* Ask Me: title and one line on the left, the composer on the right,
          then the questions already answered as inset rows */}
       <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
-      <ProfileCard id="ask-title" title="Ask Me" first lede={`Ask ${firstName(pro.name)} about their career.`} side={
+      {/* no lede: "Ask Me" and the composer already say it (Chandu, 7 Sept 2026) */}
+      <ProfileCard id="ask-title" title="Ask Me" first side={
         <InlineAsk
           joined
           accent="var(--primary)"
@@ -496,7 +487,8 @@ export function ProProfileView({
         {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
         {answers.length > 0 && (
           <ul className="flex flex-col gap-[var(--space-3)]">
-            {(allAnswers ? answers : answers.slice(0, 2)).map((thread) => {
+            {/* one question at rest, the rest behind View all: shorter section */}
+            {(allAnswers ? answers : answers.slice(0, 1)).map((thread) => {
               const s = signals(thread.views, thread.helpful, undefined);
               return (
                 <InsetRow key={thread.id} onClick={() => nav?.openThread(thread.id)} label={thread.title}>
@@ -510,15 +502,15 @@ export function ProProfileView({
             })}
           </ul>
         )}
-        {answers.length > 2 && (
+        {answers.length > 1 && (
           <div className="flex justify-end">
-            <MoreToggle total={answers.length} open={allAnswers} onToggle={() => setAllAnswers((v) => !v)} />
+            <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
         )}
       </ProfileCard>
 
       {posts.length > 0 && (
-        <ProfileCard id="posts-title" title="Latest Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
+        <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
           <ul className="flex flex-col gap-[var(--space-3)]">
             {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
               const s = signals(insight.views, insight.helpful, insight.saves);
@@ -538,7 +530,7 @@ export function ProProfileView({
           <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
             {communities.map((c) => (
               <li key={c.id} className="min-w-0">
-                <CommunityCard community={c} joined onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
+                <CommunityCard community={c} joined compact onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
               </li>
             ))}
           </ul>

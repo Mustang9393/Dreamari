@@ -12,3 +12,6 @@ For You (reel of matched careers) and Browse All (poster grid by world, search, 
 
 ## Files
 `src/components/app/ExploreExperience.tsx`, `catalog.ts`, `CompanyVideoCards.tsx`, `companyVideos.ts`, `PosterCard.tsx`.
+
+## Cards answer the pointer (Joshua Pierce, Slack, 7 Sept 2026)
+A tester hovered the career cards and never clicked. The fix is feedback, not copy: no instruction line, no button. On hover a poster card lifts 6px and grows 2%, the photo eases in 5%, a ring in the accent appears, and a small open-arrow chip fades in at the top-left; keyboard focus shows the same chip. On touch devices the first card carries a one-time light sweep (twice) and the chip pulses, remembered in `dreamari:explore-card-hint-seen`. `PosterCard` and `RankedPosterCard`, styles under `.poster-card` in globals.css. If the next round of testing still misses it, the next step is a first-visit hint, not permanent copy.

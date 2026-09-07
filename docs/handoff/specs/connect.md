@@ -42,3 +42,6 @@ Connect's own copy of the avatar map pointed at the old photo set, so the demo v
 
 ## Community cards on tablets (7 Sept 2026)
 The company chips row wraps under the Open button when the column is narrow (two columns at 768px), instead of running into it.
+
+## Professional profile, second pass (Joshua Pierce, 7 Sept 2026)
+No lede under Ask Me (the title and the composer already say it). Ask Me shows one answered question at rest with "View all N"; My Posts (not Latest Posts) shows two with View all. Communities uses the compact community card (228px minimum instead of 312px) so the boards read as secondary to the person. The profile surface is a step lighter than before: the shared panel glass with 7% brand blue mixed in, instead of the near-black tint.

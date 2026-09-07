@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
+
+const HINT_KEY = "dreamari:explore-card-hint-seen";
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   BROWSE_BECAUSE_LIKED,
@@ -83,11 +85,22 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
 }
 
 function PosterRail({ careers }: { careers: CatalogCareer[] }) {
+  // The one-time touch hint on the first card: a light sweep the first time
+  // Explore is seen on a device without hover (Joshua Pierce, 7 Sept 2026).
+  const [hintFresh, setHintFresh] = useState(false);
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(HINT_KEY) === "1") return;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHintFresh(true);
+      window.localStorage.setItem(HINT_KEY, "1");
+    } catch {}
+  }, []);
   const router = useRouter();
   return (
     <>
       {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+        <PosterCard key={`${career.title}-${index}`} career={career} hint={index === 0 && hintFresh} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
       ))}
     </>
   );
