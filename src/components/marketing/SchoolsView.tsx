@@ -276,11 +276,10 @@ function StageStory({ stages, openStages, onToggle }: { stages: Stage[]; openSta
           >
             <Reveal>
               <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => onToggle(stage.n)} />
-              {/* Under lg the frame follows its copy. The composition is the
-                 same one the sticky frame shows on desktop. */}
-              <div className="mt-8 lg:hidden">
-                <Frame className="aspect-[4/5] sm:aspect-[5/4]">{stage.art}</Frame>
-              </div>
+              {/* Under lg the card follows its copy, at its own natural size
+                 -- the same card the sticky column shows on desktop, no
+                 frame forcing it into a fixed aspect ratio. */}
+              <div className="mt-8 flex justify-center lg:hidden">{stage.art}</div>
             </Reveal>
           </li>
         ))}
@@ -293,7 +292,7 @@ function StageStory({ stages, openStages, onToggle }: { stages: Stage[]; openSta
               <div
                 key={stage.n}
                 aria-hidden={!isActive}
-                className="absolute inset-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="absolute inset-0 flex items-center justify-center transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{
                   opacity: isActive ? 1 : 0,
                   transform: isActive ? "none" : i < active ? "translateY(-28px) scale(0.985)" : "translateY(28px) scale(0.985)",
