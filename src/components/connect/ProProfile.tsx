@@ -363,21 +363,20 @@ export function shortCount(n: number): string {
 // the way LinkedIn's profile chrome never changes with the job.
 const PRO_ACCENT = "var(--accent-subtle)";
 
-// Education tile: a school's own seal/wordmark (schoolMarks.ts) sized by its
-// own ink ratio, in the same 44px-tall tile the generic GraduationCap icon
-// already used. Height stays fixed so every row in a multi-school list
-// (Marcus Reyes: "A.D.N. Austin Community College; B.S.N. Texas State
-// University") lines up; width follows the mark's own shape, a square seal
-// filling the same 44x44 the icon did, a wordmark (Wharton, NYU Stern)
-// widening the tile rather than distorting the mark to fit a square.
-const EDU_TILE_H = 44;
-const EDU_TILE_PAD = 7;
+// Education badge: a school's own seal/wordmark (schoolMarks.ts) on a
+// fixed-diameter white circle (direct feedback, 8 Sept 2026: white
+// background, circle frames -- the same badge shape everywhere regardless
+// of whether the source is a round seal or a wide wordmark), replacing the
+// variable-width rounded-square tile. A wordmark (Wharton, NYU Stern) reads
+// smaller inside the circle than a round seal does -- correct and expected
+// for a uniform badge (the same tradeoff LinkedIn's circular company badges
+// make), not a bug to fix per mark.
+const EDU_BADGE_D = 44;
+const EDU_BADGE_INK = Math.round(EDU_BADGE_D * 0.62); // the inscribed-square-safe fraction: fills the circle without corners clipping into it
 function eduMarkSize(ratio: number) {
-  const MAX_H = EDU_TILE_H - EDU_TILE_PAD * 2; // 30
-  const MAX_W = 96;
-  let h = MAX_H;
-  let w = h * ratio;
-  if (w > MAX_W) { w = MAX_W; h = MAX_W / ratio; }
+  let w = EDU_BADGE_INK;
+  let h = w / ratio;
+  if (h > EDU_BADGE_INK) { h = EDU_BADGE_INK; w = h * ratio; }
   return { width: Math.round(w), height: Math.round(h) };
 }
 
@@ -621,14 +620,19 @@ export function ProProfileView({
                 return (
                   <span key={`${segment}-${school?.name ?? j}`} className="flex items-center gap-[var(--space-3)]">
                     {school && size ? (
-                      // White tile, not the dark glass surface (direct
-                      // finding, 8 Sept 2026): a seal is ink drawn for a
-                      // light background -- most colored crests survive on
-                      // dark glass, but a single dark-ink seal (Mayo
-                      // Clinic's) nearly vanished on it. White is the one
-                      // background every school mark reads on.
-                      <span aria-hidden className="relative flex flex-none items-center justify-center rounded-[var(--radius-sm)] border" style={{ width: size.width + EDU_TILE_PAD * 2, height: EDU_TILE_H, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
-                        <Image src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
+                      // White circle, not the dark glass tile (direct
+                      // feedback, 8 Sept 2026: "white background, circle
+                      // frames, some are not visible"): a seal is ink drawn
+                      // for a light background -- most colored crests
+                      // survive on dark glass, but a single dark-ink seal
+                      // (Mayo Clinic's) nearly vanished on it, and Next's
+                      // <Image> was upscaling a couple of the smaller
+                      // sourced SVGs enough to look washed out. Raw <img> at
+                      // the file's own resolution on a fixed white circle
+                      // fixes both.
+                      <span aria-hidden className="relative flex flex-none items-center justify-center rounded-full border" style={{ width: EDU_BADGE_D, height: EDU_BADGE_D, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
                       </span>
                     ) : (
                       <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
