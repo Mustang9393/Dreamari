@@ -118,50 +118,44 @@ function sizeFor(ratio: number) {
  *  Schools page. Same ink-area sizing as the ticker, so the grid and the
  *  ticker never disagree about how big a mark should read. */
 export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
-  const [revealRef, revealed] = useRevealOnScroll<HTMLDivElement>();
+  const [revealRef, revealed] = useRevealOnScroll<HTMLUListElement>();
   const white = { filter: "brightness(0) invert(1)", opacity: 0.8 };
   const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
   const colour = { opacity: 0.92 };
   const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
-  // Rendered as MARK_ROWS' own explicit rows, not one flowing list left to
-  // wrap on its own (direct feedback, 8 Sept 2026: match the reference
-  // exactly, row for row -- flex-wrap/grid both pick row breaks by
-  // container width and item count, which can't guarantee any SPECIFIC
-  // grouping). Each row distributes only its own marks across the full
-  // width (justify-between), so a 3-mark row and an 8-mark row both read as
-  // a full, intentional row rather than one looking sparse next to another.
-  let markIndex = 0;
+  // A real CSS grid with a FIXED column count and EQUAL-SIZE cells (direct
+  // feedback, 8 Sept 2026: "always form a symmetric shape... a perfect
+  // rectangle... some need to be scaled up or scaled down to fit"). Row
+  // arrays sized to each row's own natural ink (the previous two attempts)
+  // could never form one, because a wordmark and an icon-plus-wordmark mark
+  // are never the same width -- so every row either stretched into huge
+  // gaps (justify-between) or packed to a different natural width than its
+  // neighbours (justify-start), and the grid read as uneven either way. This
+  // scales every mark to fit the SAME fixed cell size (object-fit: contain),
+  // so every row has identical cell widths and genuinely lines up into
+  // columns, the way the reference wall's own grid does. One column count
+  // for every viewport (not responsive breakpoints swapping it out) so the
+  // rectangle's shape itself never changes, only each cell's absolute size.
+  const COLS = 7;
   return (
-    <div ref={revealRef} className={`flex flex-col gap-y-7 ${className}`} aria-label="Corporate partners" role="group">
-      {/* flex-wrap on a longer row (6-8 marks) re-created the same "orphaned
-         last item" symptom, just localized to one row once that row's own
-         marks stopped fitting one line -- flex-nowrap plus overflow-x-auto
-         guarantees a row can NEVER wrap into an uneven second line; the
-         fallback on a narrow viewport is a horizontal swipe on that one
-         row, the same pattern this codebase already uses for poster rails,
-         not a broken layout. */}
-      {MARK_ROWS.map((row, rowIndex) => (
-        <ul key={rowIndex} className="flex flex-nowrap items-center justify-between gap-x-8 gap-y-4 overflow-x-auto sm:gap-x-10 [scrollbar-width:none]">
-          {row.map((mark) => {
-            const size = sizeFor(mark.ratio);
-            const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
-            // A subtle staggered fade+rise, not a big reveal moment (this is
-            // a credibility footnote, not the hero) -- capped so a mark deep
-            // into the wall doesn't wait almost a second to appear.
-            const delay = Math.min(markIndex++ * 22, 340);
-            return (
-              <li
-                key={mark.file}
-                className="flex flex-none items-center justify-center"
-                style={{ height: MAX_H, opacity: revealed ? 1 : 0, transform: revealed ? "none" : "translateY(6px)", transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms` }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/images/marketing/partners/${mark.file}`} alt={mark.name} width={size.width} height={size.height} loading="lazy" decoding="async" style={{ width: size.width, height: size.height, ...ink, objectFit: "contain" }} />
-              </li>
-            );
-          })}
-        </ul>
-      ))}
-    </div>
+    <ul ref={revealRef} className={`grid gap-3 sm:gap-4 ${className}`} style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }} aria-label="Corporate partners" role="group">
+      {MARKS.map((mark, index) => {
+        const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
+        // A subtle staggered fade+rise, not a big reveal moment (this is a
+        // credibility footnote, not the hero) -- capped so a mark deep into
+        // the wall doesn't wait almost a second to appear.
+        const delay = Math.min(index * 22, 340);
+        return (
+          <li
+            key={mark.file}
+            className="flex aspect-[3/2] items-center justify-center rounded-[var(--radius-sm)] p-2"
+            style={{ opacity: revealed ? 1 : 0, transform: revealed ? "none" : "translateY(6px)", transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/images/marketing/partners/${mark.file}`} alt={mark.name} loading="lazy" decoding="async" className="h-full w-full" style={{ ...ink, objectFit: "contain" }} />
+          </li>
+        );
+      })}
+    </ul>
   );
 }
