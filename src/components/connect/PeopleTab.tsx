@@ -6,7 +6,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, VerifiedBadge } from "./primitives";
-import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, type Follows } from "./ProProfile";
+import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
  *  ranking already scores on, read out loud (the Replit reference's own
@@ -240,7 +240,7 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
           <SectionHead>People to follow</SectionHead>
           <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
         </div>
-        <FollowCarousel pros={rankPros(PROS, worlds)} follows={follows} onFollow={onFollow} />
+        <FollowCarousel pros={withNewProsFirst(PROS, worlds)} follows={follows} onFollow={onFollow} />
       </section>
 
       <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">

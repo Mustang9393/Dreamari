@@ -112,6 +112,17 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Hannah Weiss": `${AV}/pro-weiss.jpg`,
   "Daniel Kim": `${AV}/pro-kim.jpg`,
   "Lena Novak": `${AV}/pro-novak.jpg`,
+  // Nine new volunteers (9 Sept 2026), each with their own real portrait --
+  // .png since these came in as png, unlike the rest of this jpg set.
+  "Xavier Brennan": `${AV}/pro-brennan.png`,
+  "Kevin Park": `${AV}/pro-park.png`,
+  "Daniela Cruz": `${AV}/pro-cruz.png`,
+  "Catherine Walsh": `${AV}/pro-walsh.png`,
+  "Anika Desai": `${AV}/pro-desai.png`,
+  "Richard Hartley": `${AV}/pro-hartley.png`,
+  "Trevor Johnson": `${AV}/pro-johnson.png`,
+  "Meera Iyer": `${AV}/pro-iyer.png`,
+  "Jack Sullivan": `${AV}/pro-sullivan.png`,
   // Students wear friendly illustrated avatars (micah, generated per
   // handle), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:

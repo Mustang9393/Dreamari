@@ -61,6 +61,22 @@ export function rankPros(pros: Pro[], worlds: string[]): Pro[] {
   return [...pros].sort((a, b) => score(b) - score(a));
 }
 
+// The 9 newest volunteers (9 Sept 2026) lead every "people to follow" list
+// in this exact order (direct feedback: a requested grid order), ahead of
+// the engagement-ranked rest -- a brand-new pro has no answers/likes yet to
+// rank on, so the ordinary quality score would bury them past page one.
+// Shared by the People tab's carousel and the community board's own
+// Professionals to Follow strip (direct feedback: "this section in
+// communities need to update too" -- same fix, same place, once).
+const NEW_PRO_ORDER = ["pro-johnson", "pro-desai", "pro-freeman", "pro-park", "pro-walsh", "pro-brennan", "pro-hartley", "pro-cruz", "pro-sullivan", "pro-iyer"];
+
+export function withNewProsFirst(pros: Pro[], worlds: string[]): Pro[] {
+  const byId = new Map(pros.map((p) => [p.id, p]));
+  const newOnes = NEW_PRO_ORDER.map((id) => byId.get(id)).filter((p): p is Pro => !!p);
+  const newIds = new Set(newOnes.map((p) => p.id));
+  return [...newOnes, ...rankPros(pros.filter((p) => !newIds.has(p.id)), worlds)];
+}
+
 
 export function answersBy(proId: string): Thread[] {
   return [...THREADS, ...EVENT_THREADS].filter((t) => t.responses.some((r) => r.kind === "answer" && r.proId === proId));
@@ -208,7 +224,7 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
 export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Follows; onFollow: (id: string) => void; limit?: number }) {
   const nav = useContext(ConnectNav);
   const worlds = useStudentWorlds();
-  const ranked = useMemo(() => rankPros(PROS, worlds).slice(0, limit), [worlds, limit]);
+  const ranked = useMemo(() => withNewProsFirst(PROS, worlds).slice(0, limit), [worlds, limit]);
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="Professionals to Follow">
       <SectionHead>Professionals to Follow</SectionHead>
