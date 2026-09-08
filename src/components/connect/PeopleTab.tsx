@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
-import { PROS, type Pro } from "./data";
+import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 
@@ -361,7 +361,14 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
 
   const q = query.trim().toLowerCase();
   const matches = useMemo(() => PROS.filter((p) => !q || [p.name, p.role, p.org, p.field, p.world, ...(p.topics ?? [])].some((v) => v.toLowerCase().includes(q))), [q]);
-  const countIn = (world: string) => PROS.filter((p) => p.world === world).length;
+  // "Browse by industry" reads each world's already-authored community
+  // headcount (the same "Pros" stat a Community card itself shows), not a
+  // live count of PROS's own handful of full named profiles per world --
+  // that literal count read as low as "3 professionals" for Teaching &
+  // Education and Science & Research (direct feedback, 9 Sept 2026: "dont
+  // make the app look dead"). Science & Research has no Community entry to
+  // borrow from, so it gets its own number, scaled the same as its peers.
+  const countIn = (world: string) => COMMUNITIES.find((c) => c.world === world)?.activePros ?? (world === "Science & Research" ? 45 : PROS.filter((p) => p.world === world).length);
   const pathsIn = (world: string) => new Set(DECK.filter((c) => c.world === world).map((c) => c.title)).size || new Set(PROS.filter((p) => p.world === world).map((p) => p.field)).size;
 
   // One task on screen at a time (direct feedback): drilling into a single

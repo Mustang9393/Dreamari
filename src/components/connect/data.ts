@@ -315,9 +315,9 @@ export const THREADS: Thread[] = [
         postedAgo: "6h ago",
         body: "Tutorials are a fine start, just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
-      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
-      { kind: "peer", handle: "Ruby", grade: "Freshman", body: "screenshotting the README part, I always thought the code alone had to speak for itself", postedAgo: "1h ago", likes: 6 },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 98 },
+      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 146, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { kind: "peer", handle: "Ruby", grade: "Freshman", body: "screenshotting the README part, I always thought the code alone had to speak for itself", postedAgo: "1h ago", likes: 83 },
       {
         kind: "answer",
         proId: "pro-osei",
@@ -391,7 +391,7 @@ export const THREADS: Thread[] = [
     unreadAnswer: true,
     saved: true,
     responses: [
-      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
       {
         kind: "answer",
         proId: "pro-okafor",
@@ -400,10 +400,10 @@ export const THREADS: Thread[] = [
         body: "The first two years are the steepest learning curve of your career: live deals, real clients, and a team that teaches you fast. The rhythm follows the deal cycle, so busy stretches come and go, and time off is protected in between. What nobody tells you: you leave year two with skills most people take a decade to build.",
         disclosure: "Based on my experience as an analyst at one large bank.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 7 },
-      { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 10, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 8 },
-      { kind: "peer", handle: "Ava", grade: "Sophomore", body: "reading this from my 8am class already planning my first internship", postedAgo: "20h ago", likes: 14, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 74 },
+      { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 110, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 86 },
+      { kind: "peer", handle: "Ava", grade: "Sophomore", body: "reading this from my 8am class already planning my first internship", postedAgo: "20h ago", likes: 137, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
       {
         kind: "answer",
         proId: "pro-gallagher",
@@ -442,8 +442,8 @@ export const THREADS: Thread[] = [
         postedAgo: "2d ago",
         body: "Most hospitals require you to be 16+ and go through a volunteer office rather than asking a nurse directly. Search '[your city] hospital volunteer program', that's the front door. Community clinics and long-term care facilities say yes more often than big hospitals. One practical example: our facility takes two high-school volunteers every semester through a school counselor referral, so ask your counselor first, it's the fastest route.",
       },
-      { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 9 },
-      { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
+      { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 98 },
+      { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
       {
         kind: "answer",
         proId: "pro-brooks",
@@ -483,9 +483,9 @@ export const THREADS: Thread[] = [
         postedAgo: "2h ago",
         body: "You have more than you think. School projects, clubs, sports, a job helping a family business, each one is a bullet if you say what you did and what changed. 'Organized a bake sale that raised $400' beats 'hard worker' every time.",
       },
-      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 11, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
-      { kind: "peer", handle: "Ethan", grade: "Freshman", body: "wait I've been putting 'hard worker' on mine this whole time. rewriting tonight", postedAgo: "1h ago", likes: 9 },
-      { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 5 },
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 122, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
+      { kind: "peer", handle: "Ethan", grade: "Freshman", body: "wait I've been putting 'hard worker' on mine this whole time. rewriting tonight", postedAgo: "1h ago", likes: 98 },
+      { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 71 },
       {
         kind: "answer",
         proId: "pro-whitfield",
@@ -563,8 +563,8 @@ export const THREADS: Thread[] = [
         body: "Nerves usually mean you care, not that you're unprepared. Practice your first sixty seconds out loud until it's boring to you, the opening is where nerves live, and once it's automatic the rest is a conversation.",
         disclosure: "Personal approach, different interviewers look for different things.",
       },
-      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 7 },
-      { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
+      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 74 },
+      { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 134, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
       {
         kind: "answer",
         proId: "pro-whitfield",
@@ -603,7 +603,7 @@ export const THREADS: Thread[] = [
         postedAgo: "5h ago",
         body: "I never taught a classroom of my own, I tutored, then went straight into a curriculum design master's. What you actually need is time watching how real students get stuck on real material, classroom teaching is the most common way to get that, not the only one.",
       },
-      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "this is such a relief, I want the design side without the classroom management part", postedAgo: "2h ago", likes: 7 },
+      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "this is such a relief, I want the design side without the classroom management part", postedAgo: "2h ago", likes: 74 },
     ],
   },
   {
@@ -668,7 +668,7 @@ export const THREADS: Thread[] = [
         postedAgo: "6h ago",
         body: "Nobody in my family worked in finance either. I cold-messaged alumni from my school on LinkedIn, one reply at a time. Ask for fifteen minutes of advice, never a job, and follow up with a thank-you that mentions something specific they said.",
       },
-      { kind: "peer", handle: "Devon", grade: "Sophomore", body: "sent 12 messages this week using this exact framing, got 3 replies already", postedAgo: "3h ago", likes: 8 },
+      { kind: "peer", handle: "Devon", grade: "Sophomore", body: "sent 12 messages this week using this exact framing, got 3 replies already", postedAgo: "3h ago", likes: 86 },
     ],
   },
   {
@@ -695,8 +695,8 @@ export const THREADS: Thread[] = [
         postedAgo: "16h ago",
         body: "A nurse practitioner is a registered nurse who went back for a graduate degree. NPs can diagnose and prescribe in most states; RNs carry out the care plan and are with the patient far more of the day. Same ladder, different rungs, most NPs I know worked as RNs first.",
       },
-      { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 7 },
-      { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 5 },
+      { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 74 },
+      { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 71 },
       {
         kind: "answer",
         proId: "pro-brooks",
@@ -735,7 +735,7 @@ export const THREADS: Thread[] = [
         postedAgo: "3h ago",
         body: "Easier isn't the word I'd use, it's a different kind of hard. DPT programs still want strong science grades and real shadowing hours, they're just three years instead of four-plus-residency. Shadow both before deciding; the day-to-day is what should actually pick for you.",
       },
-      { kind: "peer", handle: "Noah", grade: "Junior", body: "shadowed a PT clinic last month after reading this thread, definitely feels different from the ER shadowing I did", postedAgo: "1h ago", likes: 6 },
+      { kind: "peer", handle: "Noah", grade: "Junior", body: "shadowed a PT clinic last month after reading this thread, definitely feels different from the ER shadowing I did", postedAgo: "1h ago", likes: 83 },
     ],
   },
   {
@@ -763,8 +763,8 @@ export const THREADS: Thread[] = [
         body: "No, a portfolio beats a diploma in this field. Art school buys you time, critique and connections, which are real, but every hiring conversation I've been in starts and ends with the work. Ten finished pieces you're proud of is the actual requirement.",
         disclosure: "My experience hiring at one company, agencies and studios vary.",
       },
-      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 8, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
-      { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 6 },
+      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 86, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
+      { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 83 },
       {
         kind: "answer",
         proId: "pro-fontaine",
@@ -831,14 +831,14 @@ export const INSIGHTS: Insight[] = [
     helpful: 153,
     saved: true,
     replies: [
-      { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 14 },
-      { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 6 },
-      { proId: "pro-chen", body: "Good question, a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
-      { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
-      { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
-      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
-      { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 3 },
-      { handle: "Lena", grade: "Junior", body: "communication skills being the plot twist of every single career on this app", postedAgo: "18h ago", likes: 9 },
+      { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 137 },
+      { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 83 },
+      { proId: "pro-chen", body: "Good question, a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 200 },
+      { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 98 },
+      { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 122 },
+      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 161, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
+      { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 47 },
+      { handle: "Lena", grade: "Junior", body: "communication skills being the plot twist of every single career on this app", postedAgo: "18h ago", likes: 98 },
     ],
   },
   {
@@ -851,11 +851,11 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 250,
     replies: [
-      { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 12 },
-      { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 5 },
-      { proId: "pro-okafor", body: "Plenty, I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 18 },
-      { handle: "Ethan", grade: "Junior", body: "writing everything down saved me in group projects too. it scales.", postedAgo: "2d ago", likes: 6 },
-      { handle: "Maya", grade: "Junior", body: "me visualizing myself being the reliable one", postedAgo: "2d ago", likes: 8, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 134 },
+      { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 71 },
+      { proId: "pro-okafor", body: "Plenty, I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 185 },
+      { handle: "Ethan", grade: "Junior", body: "writing everything down saved me in group projects too. it scales.", postedAgo: "2d ago", likes: 83 },
+      { handle: "Maya", grade: "Junior", body: "me visualizing myself being the reliable one", postedAgo: "2d ago", likes: 86, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
     ],
   },
   {
@@ -868,12 +868,12 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 116,
     replies: [
-      { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 16 },
-      { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 4 },
-      { proId: "pro-martinez", body: "You do, it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
-      { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 7 },
-      { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 5 },
-      { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
+      { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 161 },
+      { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 59 },
+      { proId: "pro-martinez", body: "You do, it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 197 },
+      { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 74 },
+      { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 71 },
+      { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 134, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
     ],
   },
   {
@@ -886,13 +886,13 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "4d ago",
     helpful: 213,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Three shifts a week and four days for everything else. Sign me up.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
-      { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
-      { proId: "pro-reyes", body: "The opposite, the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
-      { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
-      { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds meaningful.", postedAgo: "1d ago", likes: 5 },
-      { handle: "Amir", grade: "Junior", body: "a schedule with room in it is the part nobody told me about nursing", postedAgo: "1d ago", likes: 6 },
-      { handle: "Ethan", grade: "Junior", body: "me hearing 'three shifts a week' and immediately planning the other four days", postedAgo: "1d ago", likes: 14, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { handle: "Sana", grade: "Junior", body: "Three shifts a week and four days for everything else. Sign me up.", postedAgo: "3d ago", likes: 146, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
+      { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 59 },
+      { proId: "pro-reyes", body: "The opposite, the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 212 },
+      { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 86 },
+      { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds meaningful.", postedAgo: "1d ago", likes: 71 },
+      { handle: "Amir", grade: "Junior", body: "a schedule with room in it is the part nobody told me about nursing", postedAgo: "1d ago", likes: 83 },
+      { handle: "Ethan", grade: "Junior", body: "me hearing 'three shifts a week' and immediately planning the other four days", postedAgo: "1d ago", likes: 137, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
     ],
   },
   {
@@ -905,9 +905,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 79,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
-      { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
-      { handle: "Sana", grade: "Junior", body: "defending my choices out loud, starting with my group project tomorrow", postedAgo: "12h ago", likes: 7, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
+      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 110, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
+      { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 83 },
+      { handle: "Sana", grade: "Junior", body: "defending my choices out loud, starting with my group project tomorrow", postedAgo: "12h ago", likes: 74, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
     ],
   },
   {
@@ -920,10 +920,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 176,
     replies: [
-      { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 5 },
-      { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 7, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
-      { proId: "pro-osei", body: "School projects count if you can explain your own contribution. 'We built' is fine; follow it with 'my part was…'", postedAgo: "16h ago", likes: 12 },
-      { handle: "Priya", grade: "Sophomore", body: "adding a feature nobody asked for is genuinely my specialty", postedAgo: "10h ago", likes: 9, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
+      { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 71 },
+      { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 74, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
+      { proId: "pro-osei", body: "School projects count if you can explain your own contribution. 'We built' is fine; follow it with 'my part was…'", postedAgo: "16h ago", likes: 134 },
+      { handle: "Priya", grade: "Sophomore", body: "adding a feature nobody asked for is genuinely my specialty", postedAgo: "10h ago", likes: 98, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
     ],
   },
   {
@@ -936,9 +936,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "6d ago",
     helpful: 273,
     replies: [
-      { handle: "Priya", grade: "Sophomore", body: "Writing down what you ruled out is such a good idea for math homework too honestly.", postedAgo: "5d ago", likes: 8 },
-      { handle: "Sam", grade: "Senior", body: "Three days for one character. I feel better about my week now.", postedAgo: "5d ago", likes: 15 },
-      { handle: "Noah", grade: "Sophomore", body: "me on day two of the same bug", postedAgo: "4d ago", likes: 11, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
+      { handle: "Priya", grade: "Sophomore", body: "Writing down what you ruled out is such a good idea for math homework too honestly.", postedAgo: "5d ago", likes: 86 },
+      { handle: "Sam", grade: "Senior", body: "Three days for one character. I feel better about my week now.", postedAgo: "5d ago", likes: 149 },
+      { handle: "Noah", grade: "Sophomore", body: "me on day two of the same bug", postedAgo: "4d ago", likes: 122, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
     ],
   },
   {
@@ -951,10 +951,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 139,
     replies: [
-      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 9 },
-      { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 4 },
-      { proId: "pro-gallagher", body: "Early. But honestly the wake-up matters less than the habit: same checklist, every morning, no exceptions.", postedAgo: "22h ago", likes: 11 },
-      { handle: "Riley", grade: "Sophomore", body: "'the person who noticed first' being the whole job is lowkey every job", postedAgo: "20h ago", likes: 6 },
+      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 98 },
+      { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 59 },
+      { proId: "pro-gallagher", body: "Early. But honestly the wake-up matters less than the habit: same checklist, every morning, no exceptions.", postedAgo: "22h ago", likes: 122 },
+      { handle: "Riley", grade: "Sophomore", body: "'the person who noticed first' being the whole job is lowkey every job", postedAgo: "20h ago", likes: 83 },
     ],
   },
   {
@@ -967,9 +967,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1w ago",
     helpful: 236,
     replies: [
-      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 13 },
-      { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 7 },
-      { handle: "Theo", grade: "Sophomore", body: "me preparing to be careful and reliable", postedAgo: "5d ago", likes: 5, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
+      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 146 },
+      { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 74 },
+      { handle: "Theo", grade: "Sophomore", body: "me preparing to be careful and reliable", postedAgo: "5d ago", likes: 71, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
     ],
   },
   {
@@ -982,10 +982,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "3d ago",
     helpful: 102,
     replies: [
-      { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 10 },
-      { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 7 },
-      { handle: "Marcus", grade: "Freshman", body: "everyone at the next career fair when I pull up with actual questions", postedAgo: "1d ago", likes: 9, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
-      { handle: "Jo", grade: "Senior", body: "asking real questions >> collecting contacts", postedAgo: "1d ago", likes: 8 },
+      { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 110 },
+      { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 74 },
+      { handle: "Marcus", grade: "Freshman", body: "everyone at the next career fair when I pull up with actual questions", postedAgo: "1d ago", likes: 98, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
+      { handle: "Jo", grade: "Senior", body: "asking real questions >> collecting contacts", postedAgo: "1d ago", likes: 86 },
     ],
   },
   {
@@ -998,9 +998,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 199,
     replies: [
-      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
-      { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 6 },
-      { handle: "Devon", grade: "Senior", body: "'here is how I would find out' is the cheat code", postedAgo: "6h ago", likes: 10, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
+      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 137, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
+      { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 83 },
+      { handle: "Devon", grade: "Senior", body: "'here is how I would find out' is the cheat code", postedAgo: "6h ago", likes: 110, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
     ],
   },
   {
@@ -1013,9 +1013,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 296,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 3 },
-      { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 9 },
-      { handle: "Lena", grade: "Junior", body: "'a rhythm you grow into' is such a good way to put it", postedAgo: "16h ago", likes: 5 },
+      { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 47 },
+      { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 98 },
+      { handle: "Lena", grade: "Junior", body: "'a rhythm you grow into' is such a good way to put it", postedAgo: "16h ago", likes: 71 },
     ],
   },
   {
@@ -1028,8 +1028,8 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "6d ago",
     helpful: 162,
     replies: [
-      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 17, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
-      { handle: "Noah", grade: "Sophomore", body: "seventeen and rethinking everything right now", postedAgo: "4d ago", likes: 8 },
+      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 173, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
+      { handle: "Noah", grade: "Sophomore", body: "seventeen and rethinking everything right now", postedAgo: "4d ago", likes: 86 },
     ],
   },
   {
@@ -1042,10 +1042,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "3d ago",
     helpful: 259,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "Posting my process pages instead of hiding them from now on.", postedAgo: "2d ago", likes: 8 },
-      { handle: "Theo", grade: "Sophomore", body: "Does this apply to video edits too? I have so many drafts.", postedAgo: "2d ago", likes: 4 },
-      { proId: "pro-fontaine", body: "Especially video. A before/after cut with one sentence on what you changed is a portfolio piece.", postedAgo: "1d ago", likes: 10 },
-      { handle: "Ava", grade: "Sophomore", body: "me realizing my messy sketchbook was the portfolio all along", postedAgo: "1d ago", likes: 9, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { handle: "Ruby", grade: "Junior", body: "Posting my process pages instead of hiding them from now on.", postedAgo: "2d ago", likes: 86 },
+      { handle: "Theo", grade: "Sophomore", body: "Does this apply to video edits too? I have so many drafts.", postedAgo: "2d ago", likes: 59 },
+      { proId: "pro-fontaine", body: "Especially video. A before/after cut with one sentence on what you changed is a portfolio piece.", postedAgo: "1d ago", likes: 110 },
+      { handle: "Ava", grade: "Sophomore", body: "me realizing my messy sketchbook was the portfolio all along", postedAgo: "1d ago", likes: 98, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
     ],
   },
   {
@@ -1058,9 +1058,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1w ago",
     helpful: 125,
     replies: [
-      { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 12 },
-      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 10 },
-      { handle: "Devon", grade: "Senior", body: "rooms where good ideas could die. respect for the honesty.", postedAgo: "5d ago", likes: 6 },
+      { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 134 },
+      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 110 },
+      { handle: "Devon", grade: "Senior", body: "rooms where good ideas could die. respect for the honesty.", postedAgo: "5d ago", likes: 83 },
     ],
   },
   {
@@ -1074,7 +1074,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 107,
     views: 2367,
     saves: 32,
-    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 6 }, { handle: "Ethan", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 4 }, { proId: "pro-chen", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 10 }],
+    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 83 }, { handle: "Ethan", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 59 }, { proId: "pro-chen", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 110 }],
   },
   {
     id: "i-martinez-2",
@@ -1087,7 +1087,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 144,
     views: 3144,
     saves: 43,
-    replies: [{ handle: "Maya", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 7 }, { handle: "Sam", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 5 }, { proId: "pro-martinez", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 11 }],
+    replies: [{ handle: "Maya", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 74 }, { handle: "Sam", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 71 }, { proId: "pro-martinez", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 122 }],
   },
   {
     id: "i-okafor-2",
@@ -1100,7 +1100,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 181,
     views: 3921,
     saves: 54,
-    replies: [{ handle: "Diego", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 8 }, { handle: "Noah", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 6 }, { proId: "pro-okafor", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 12 }],
+    replies: [{ handle: "Diego", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 86 }, { handle: "Noah", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 83 }, { proId: "pro-okafor", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 134 }],
   },
   {
     id: "i-osei-2",
@@ -1113,7 +1113,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 218,
     views: 4698,
     saves: 65,
-    replies: [{ handle: "Ethan", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 9 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 7 }, { proId: "pro-osei", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 13 }],
+    replies: [{ handle: "Ethan", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 98 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 74 }, { proId: "pro-osei", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 146 }],
   },
   {
     id: "i-zhang-2",
@@ -1126,7 +1126,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 255,
     views: 5475,
     saves: 76,
-    replies: [{ handle: "Theo", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 10 }, { handle: "Sam", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 8 }, { proId: "pro-zhang", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 14 }],
+    replies: [{ handle: "Theo", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 110 }, { handle: "Sam", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 86 }, { proId: "pro-zhang", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 137 }],
   },
   {
     id: "i-gallagher-2",
@@ -1139,7 +1139,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 292,
     views: 6252,
     saves: 88,
-    replies: [{ handle: "Diego", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 11 }, { handle: "Ava", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 9 }, { proId: "pro-gallagher", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 15 }],
+    replies: [{ handle: "Diego", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 122 }, { handle: "Ava", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 98 }, { proId: "pro-gallagher", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 149 }],
   },
   {
     id: "i-grant-2",
@@ -1152,7 +1152,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 99,
     views: 2199,
     saves: 30,
-    replies: [{ handle: "Maya", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 12 }, { handle: "Lena", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 3 }, { proId: "pro-grant", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 16 }],
+    replies: [{ handle: "Maya", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 134 }, { handle: "Lena", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 47 }, { proId: "pro-grant", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 161 }],
   },
   {
     id: "i-whitfield-2",
@@ -1165,7 +1165,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 136,
     views: 2976,
     saves: 41,
-    replies: [{ handle: "Lena", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 13 }, { handle: "Marcus", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 4 }, { proId: "pro-whitfield", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 17 }],
+    replies: [{ handle: "Lena", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 146 }, { handle: "Marcus", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 59 }, { proId: "pro-whitfield", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 173 }],
   },
   {
     id: "i-tanaka-2",
@@ -1178,7 +1178,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 173,
     views: 3753,
     saves: 52,
-    replies: [{ handle: "Ava", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 5 }, { handle: "Riley", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 5 }, { proId: "pro-tanaka", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 18 }],
+    replies: [{ handle: "Ava", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 71 }, { handle: "Riley", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 71 }, { proId: "pro-tanaka", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 185 }],
   },
   {
     id: "i-brooks-2",
@@ -1191,7 +1191,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 210,
     views: 4530,
     saves: 63,
-    replies: [{ handle: "Zoe", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 6 }, { handle: "Sana", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 6 }, { proId: "pro-brooks", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 19 }],
+    replies: [{ handle: "Zoe", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 83 }, { handle: "Sana", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 83 }, { proId: "pro-brooks", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 197 }],
   },
   {
     id: "i-fontaine-2",
@@ -1204,7 +1204,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 247,
     views: 5307,
     saves: 74,
-    replies: [{ handle: "Ruby", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 7 }, { handle: "Theo", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 7 }, { proId: "pro-fontaine", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 20 }],
+    replies: [{ handle: "Ruby", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 74 }, { handle: "Theo", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 74 }, { proId: "pro-fontaine", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 209 }],
   },
   {
     id: "i-haddad-2",
@@ -1217,7 +1217,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 284,
     views: 6084,
     saves: 85,
-    replies: [{ handle: "Sana", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 8 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 8 }, { proId: "pro-haddad", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 9 }],
+    replies: [{ handle: "Sana", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 86 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 86 }, { proId: "pro-haddad", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 98 }],
   },
   {
     id: "i-haddad-3",
@@ -1230,7 +1230,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 91,
     views: 2031,
     saves: 27,
-    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 9 }, { handle: "Noah", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 9 }, { proId: "pro-haddad", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 10 }],
+    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 98 }, { handle: "Noah", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 98 }, { proId: "pro-haddad", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 110 }],
   },
   {
     id: "i-vega-2",
@@ -1243,7 +1243,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 128,
     views: 2808,
     saves: 38,
-    replies: [{ handle: "Ruby", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 10 }, { handle: "Lena", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 3 }, { proId: "pro-vega", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 11 }],
+    replies: [{ handle: "Ruby", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 110 }, { handle: "Lena", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 47 }, { proId: "pro-vega", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 122 }],
   },
   {
     id: "i-vega-3",
@@ -1256,7 +1256,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 165,
     views: 3585,
     saves: 50,
-    replies: [{ handle: "Theo", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 11 }, { handle: "Ava", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 4 }, { proId: "pro-vega", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 12 }],
+    replies: [{ handle: "Theo", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 122 }, { handle: "Ava", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 59 }, { proId: "pro-vega", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 134 }],
   },
 ];
 
@@ -1582,9 +1582,9 @@ export const EVENT_THREADS: Thread[] = [
     followers: 19,
     comments: 45,
     responses: [
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 11 },
-      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 13, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
-      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 4 },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 122 },
+      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 146, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
+      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 59 },
       {
         kind: "answer",
         proId: "pro-martinez",
@@ -1652,7 +1652,7 @@ export const EVENT_THREADS: Thread[] = [
         body: "Pick one thing and act on it this month. If a panelist named a skill, find the free version of it and spend two hours there. If they named a class, check whether your school offers it next term. Then post what you found back here so the next person gets it too. Notes you act on once beat notes you reread five times.",
         disclosure: "Personal approach, different professionals prefer different styles.",
       },
-      { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 6 },
+      { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 83 },
     ],
   },
 ];
