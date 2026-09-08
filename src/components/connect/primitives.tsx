@@ -7,7 +7,7 @@
 
 import Image from "next/image";
 import { createContext, useContext, useState } from "react";
-import { ArrowRight, Check, CheckCircle2, Clock } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { studentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
@@ -173,14 +173,23 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
   );
 }
 
-/** The Instagram/Twitter-style mark: a solid colored circle with a white
- *  checkmark, sitting right after a verified person's name -- never on
- *  their avatar. One shape, reused everywhere a pro's name renders. */
+/** The Instagram/Twitter-style mark: a scalloped/wavy badge outline, filled
+ *  solid, with a white checkmark inside -- sitting right after a verified
+ *  person's name, never on their avatar. One shape, reused everywhere a
+ *  pro's name renders. Direct feedback, 9 Sept 2026: the earlier version
+ *  was a plain circle (a CSS border-radius, not an actual badge shape);
+ *  this is lucide's own `badge-check` outline (the real scalloped mark),
+ *  hand-split into its two paths so the outline can be filled solid while
+ *  the checkmark stays a separate white stroke on top -- lucide's
+ *  pre-built <BadgeCheck> only exposes one uniform stroke/fill color for
+ *  the whole icon, which can't produce a filled badge with a
+ *  contrasting mark inside it. */
 export function VerifiedBadge({ size = 15 }: { size?: number }) {
   return (
-    <span role="img" aria-label="Verified" className="relative inline-flex flex-none items-center justify-center rounded-full" style={{ width: size, height: size, background: "var(--primary)" }}>
-      <Check aria-hidden style={{ width: size * 0.62, height: size * 0.62, color: "#FFFFFF" }} strokeWidth={3.2} />
-    </span>
+    <svg role="img" aria-label="Verified" viewBox="0 0 24 24" width={size} height={size} className="relative inline-flex flex-none">
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" fill="var(--primary)" />
+      <path d="m9 12 2 2 4-4" stroke="#FFFFFF" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
   );
 }
 

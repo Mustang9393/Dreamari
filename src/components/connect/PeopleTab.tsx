@@ -33,8 +33,14 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
       <div className="flex items-center gap-[var(--space-3)]">
         <ProAvatar proId={pro.id} name={pro.name} size={52} />
         <div className="min-w-0 flex-1">
+          {/* `flex-1` on the name button used to stretch it to the row's
+             full width, so the badge (its next sibling) landed wherever
+             that invisible box ended -- near the card's far edge, not
+             snug against the visible name (direct feedback, 9 Sept
+             2026). `min-w-0` alone lets it shrink-to-truncate without
+             claiming space it doesn't need. */}
           <span className="flex min-w-0 items-center gap-x-[4px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 flex-1 cursor-pointer truncate text-left">{pro.name}</button>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left">{pro.name}</button>
             <VerifiedBadge size={13} />
           </span>
           <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
