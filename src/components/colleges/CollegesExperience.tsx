@@ -131,13 +131,8 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
            the same thing. Mobile keeps its own Back (above, in the mobile
            header) since mobile doesn't render the tab strip. */}
         <div className="flex flex-col gap-[var(--space-2)]">
-          <div className="flex flex-col gap-[var(--space-2)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
-            <ExploreSectionTabs active="colleges" />
-          </div>
-          <p className={SMALL} style={{ color: "var(--muted-foreground)" }} aria-live="polite">
-            {results.length} {results.length === 1 ? "school" : "schools"}{activeCount ? " match" : ""}. New Jersey first. We do not rank schools.
-          </p>
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
+          <ExploreSectionTabs active="colleges" />
         </div>
 
         {/* the search: one box, results change as you type, and the door to

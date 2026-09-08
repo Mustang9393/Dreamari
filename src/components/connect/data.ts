@@ -317,6 +317,7 @@ export const THREADS: Thread[] = [
       },
       { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
       { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { kind: "peer", handle: "Ruby", grade: "Freshman", body: "screenshotting the README part, I always thought the code alone had to speak for itself", postedAgo: "1h ago", likes: 6 },
       {
         kind: "answer",
         proId: "pro-osei",
@@ -483,6 +484,7 @@ export const THREADS: Thread[] = [
         body: "You have more than you think. School projects, clubs, sports, a job helping a family business, each one is a bullet if you say what you did and what changed. 'Organized a bake sale that raised $400' beats 'hard worker' every time.",
       },
       { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 11, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
+      { kind: "peer", handle: "Ethan", grade: "Freshman", body: "wait I've been putting 'hard worker' on mine this whole time. rewriting tonight", postedAgo: "1h ago", likes: 9 },
       { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 5 },
       {
         kind: "answer",
