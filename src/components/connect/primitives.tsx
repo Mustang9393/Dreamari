@@ -112,6 +112,7 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Hannah Weiss": `${AV}/pro-weiss.jpg`,
   "Daniel Kim": `${AV}/pro-kim.jpg`,
   "Lena Novak": `${AV}/pro-novak.jpg`,
+  "Tiana Freeman": `${AV}/pro-freeman.png`,
   // Nine new volunteers (9 Sept 2026), each with their own real portrait --
   // .png since these came in as png, unlike the rest of this jpg set.
   "Xavier Brennan": `${AV}/pro-brennan.png`,

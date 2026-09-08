@@ -299,12 +299,19 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
   const nav = useContext(ConnectNav);
   const ids = Object.keys(follows).filter((id) => follows[id]);
   if (ids.length === 0 || !nav) return null;
+  // One card per followed person, not one per thing they ever posted --
+  // direct feedback: with only a couple of people followed by default, a
+  // prolific pro's whole backlog buried everyone else ("David Chen is
+  // everywhere"). Prefer their most recent answer, else their most recent
+  // post, so the list stays as varied as who the student actually follows.
   const items: FeedItem[] = [];
   for (const id of ids) {
     const pro = PROS.find((p) => p.id === id);
     if (!pro) continue;
-    for (const post of postsBy(id)) items.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), open: () => nav.openInsight(post.id) });
-    for (const thread of answersBy(id)) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), open: () => nav.openThread(thread.id) });
+    const thread = answersBy(id)[0];
+    const post = postsBy(id)[0];
+    if (thread) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), open: () => nav.openThread(thread.id) });
+    else if (post) items.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), open: () => nav.openInsight(post.id) });
   }
   if (items.length === 0) return null;
   return (
