@@ -464,7 +464,7 @@ export const THREADS: Thread[] = [
     boardId: "teaching-education",
     type: "question",
     title: "How do I write a resume with no work experience?",
-    handle: "Lena",
+    handle: "Sana",
     grade: "Junior",
     postedAgo: "4h ago",
     views: 2841,
