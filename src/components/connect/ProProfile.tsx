@@ -69,7 +69,7 @@ export function rankPros(pros: Pro[], worlds: string[]): Pro[] {
 // Shared by the People tab's carousel and the community board's own
 // Professionals to Follow strip (direct feedback: "this section in
 // communities need to update too" -- same fix, same place, once).
-const NEW_PRO_ORDER = ["pro-johnson", "pro-desai", "pro-freeman", "pro-park", "pro-walsh", "pro-brennan", "pro-hartley", "pro-cruz", "pro-sullivan", "pro-iyer"];
+const NEW_PRO_ORDER = ["pro-johnson", "pro-desai", "pro-freeman", "pro-park", "pro-walsh", "pro-brennan", "pro-hartley", "pro-cruz", "pro-sullivan"];
 
 export function withNewProsFirst(pros: Pro[], worlds: string[]): Pro[] {
   const byId = new Map(pros.map((p) => [p.id, p]));

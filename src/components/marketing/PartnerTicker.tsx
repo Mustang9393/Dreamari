@@ -23,38 +23,54 @@ type Mark = {
   /** a light-grey original that vanishes on the light page: darkened there */
   faint?: boolean;
 };
-// Order (Chandu, 7 Sept 2026): the finance and consulting names students
-// recognise first, then the rest of the wall. Nickelodeon and MTV are out:
-// a splat or a filled block with text inside does not survive a silhouette.
+// Order matches the reference partner wall (dreamari.com), row by row, left
+// to right (direct feedback, 8 Sept 2026: "the order of the logos matter").
+// Nickelodeon and MTV are out: a splat or a filled block with text inside
+// does not survive a silhouette. Four marks on the reference wall are still
+// not included -- see ATTRIBUTION.md for exactly why each one is missing
+// (MAGIC and Taylor & Francis' current mark: fetch blocked/not on Commons;
+// NCSolutions: folded into Circana, no standalone mark left to source;
+// "McDermott Will & Schulte" and the plain "[A|B]" bracket icon: neither
+// could be confidently identified to a real, correctly-spelled trademark).
 const MARKS: Mark[] = [
   { name: "JPMorgan Chase", file: "jpmorgan-chase.svg", ratio: 7.051 },
-  { name: "Amazon", file: "amazon.svg", ratio: 3.309 },
-  { name: "EY", file: "ey.svg", ratio: 0.987 },
-  { name: "Kroll", file: "kroll.svg", ratio: 4.312 },
-  { name: "Goldman Sachs", file: "goldman-sachs.svg", ratio: 2.386, faint: true },
   { name: "Chase", file: "chase.svg", ratio: 5.363, emblem: true },
-  { name: "HSBC", file: "hsbc.svg", ratio: 3.716, emblem: true },
-  { name: "Blackstone", file: "blackstone.svg", ratio: 6.29, faint: true },
-  { name: "Brookfield", file: "brookfield.svg", ratio: 6.679 },
   { name: "AT&T", file: "att.png", ratio: 2.432, faint: true },
-  { name: "Akamai", file: "akamai.svg", ratio: 2.455 },
-  { name: "Verizon", file: "verizon.svg", ratio: 4.461 },
   { name: "Kellanova", file: "kellanova.svg", ratio: 3.954 },
-  { name: "Pop-Tarts", file: "pop-tarts.png", ratio: 1.536, emblem: true },
   { name: "Kellogg's", file: "kelloggs.svg", ratio: 2.858 },
   { name: "Informa", file: "informa.svg", ratio: 4.898 },
-  { name: "Paramount", file: "paramount.svg", ratio: 1.255 },
+  { name: "BioProcess International", file: "bioprocess-international.png", ratio: 3.593 },
+  { name: "Brookfield", file: "brookfield.svg", ratio: 6.679 },
+  { name: "Blackstone", file: "blackstone.svg", ratio: 6.29, faint: true },
+  { name: "SupplySide Global", file: "supplyside-global.png", ratio: 2.599 },
+  { name: "EY", file: "ey.svg", ratio: 0.987 },
+  { name: "MRO", file: "mro.png", ratio: 2.2 },
+  { name: "Natural Products Expo West", file: "expo-west.png", ratio: 2.381 },
+  { name: "Brand Licensing Europe", file: "brand-licensing-europe.png", ratio: 1.979 },
+  { name: "Pop-Tarts", file: "pop-tarts.png", ratio: 1.536, emblem: true },
+  { name: "IWCE", file: "iwce.png", ratio: 3.3 },
+  { name: "GDC", file: "gdc.svg", ratio: 2.883 },
+  { name: "Pringles", file: "pringles.svg", ratio: 0.804, emblem: true },
+  { name: "MD&M", file: "mdm.png", ratio: 2.975 },
+  { name: "HSBC", file: "hsbc.svg", ratio: 3.716, emblem: true },
   { name: "Warner Bros. Discovery", file: "wbd.svg", ratio: 4.916, emblem: true },
-  { name: "WildBrain", file: "wildbrain.svg", ratio: 7.814 },
+  { name: "Amazon", file: "amazon.svg", ratio: 3.309 },
   { name: "Colgate", file: "colgate.svg", ratio: 4.857, emblem: true },
+  { name: "Enterprise Connect", file: "enterprise-connect.png", ratio: 6.466 },
+  { name: "Akamai", file: "akamai.svg", ratio: 2.455 },
+  { name: "The AI Summit London", file: "ai-summit-london.png", ratio: 3.579 },
+  { name: "WildBrain", file: "wildbrain.svg", ratio: 7.814 },
   { name: "Nielsen", file: "nielsen.svg", ratio: 2.836 },
+  { name: "Kroll", file: "kroll.svg", ratio: 4.312 },
   { name: "Yahoo", file: "yahoo.svg", ratio: 3.606 },
-  { name: "Bleacher Report", file: "bleacher-report.svg", ratio: 3.273, emblem: true },
-  { name: "Versace", file: "versace.svg", ratio: 4.515 },
-  { name: "Jimmy Choo", file: "jimmy-choo.svg", ratio: 7.203 },
-  { name: "Michael Kors", file: "michael-kors.svg", ratio: 10.517 },
   { name: "VH1", file: "vh1.svg", ratio: 2.558 },
+  { name: "Verizon", file: "verizon.svg", ratio: 4.461 },
+  { name: "Peloton", file: "peloton.svg", ratio: 3.407 },
+  { name: "Jimmy Choo", file: "jimmy-choo.svg", ratio: 7.203 },
+  { name: "Versace", file: "versace.svg", ratio: 4.515 },
   { name: "BET", file: "bet.svg", ratio: 3.169, emblem: true },
+  { name: "Bleacher Report", file: "bleacher-report.svg", ratio: 3.273, emblem: true },
+  { name: "Michael Kors", file: "michael-kors.svg", ratio: 10.517 },
   { name: "Cartoon Network", file: "cartoon-network.svg", ratio: 1.671, emblem: true },
   { name: "DC", file: "dc.svg", ratio: 1, emblem: true },
   { name: "TNT", file: "tnt.svg", ratio: 1, emblem: true },
@@ -82,8 +98,15 @@ export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?:
   const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
   const colour = { opacity: 0.92 };
   const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
+  // justify-center left a lone trailing mark (an odd total, or a row that
+  // doesn't divide evenly at a given width) floating dead-center on its own
+  // final row -- direct feedback, 8 Sept 2026: "TNT is sitting alone on a
+  // row now, this should never happen." justify-start can't produce that: a
+  // short last row just ends at the left edge, reading as the natural end
+  // of the list rather than a special standalone item, at any width or
+  // item count.
   return (
-    <ul ref={revealRef} className={`flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:gap-x-10 sm:gap-y-7 ${className}`} aria-label="Corporate partners" role="group">
+    <ul ref={revealRef} className={`flex flex-wrap items-center justify-start gap-x-8 gap-y-6 sm:gap-x-10 sm:gap-y-7 ${className}`} aria-label="Corporate partners" role="group">
       {MARKS.map((mark, index) => {
         const size = sizeFor(mark.ratio);
         const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;

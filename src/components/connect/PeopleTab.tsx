@@ -121,9 +121,44 @@ const WORLD_ICON: Record<string, LucideIcon> = {
 };
 const WORLDS = Object.keys(WORLD_COLORS);
 
+// Connect-only tile accent, deliberately NOT the shared WORLD_COLORS a world
+// wears everywhere else (Explore's poster cards, etc.) -- direct feedback,
+// 8 Sept 2026 (Slack): each Browse-by-industry card read as visually
+// separate/arbitrary, when the grid should read as one controlled cool
+// spectrum (violet -> blue -> green) that stays consistent down a column and
+// progresses smoothly across it. A student browsing Connect in isolation
+// was never going to notice these differ from Explore's own world colors,
+// per the same feedback, so this is scoped to this one grid rather than
+// touched at the token level. Same 15-world order as WORLD_COLORS (grid
+// position order), so a tile's column/row neighbours are always adjacent
+// steps in the spectrum.
+// Second pass (direct feedback, 8 Sept 2026): the first attempt spanned
+// violet all the way to green and read as "too many colours" -- pulled back
+// to one analogous family (indigo through blue), shifting gently in both
+// hue and tone rather than jumping hue every tile. Subtle but still
+// orderable at a glance, following the same 15-world grid-position order as
+// WORLD_COLORS.
+const BROWSE_TILE_ACCENT: Record<string, string> = {
+  "Business & Money": "#7349d4",
+  "Tech & Engineering": "#6d4ed5",
+  "Health & Medicine": "#6752d5",
+  "Arts, Media & Sport": "#6256d5",
+  "Science & Research": "#5e5bd5",
+  "Teaching & Education": "#5f64d6",
+  "Building & Construction": "#6370d6",
+  "Law, Safety & Justice": "#677cd6",
+  "Food & Cooking": "#6b87d7",
+  "Farming, Animals & Nature": "#7091d7",
+  "Counseling & Social Work": "#749bd8",
+  "Driving, Flying & Shipping": "#78a4d8",
+  "Factories & Making Things": "#7cadd9",
+  "Fixing Machines & Engines": "#80b5d9",
+  "Personal Care & Community Services": "#84bdda",
+};
+
 function WorldTile({ world, count, unit, onOpen }: { world: string; count: number; unit: string; onOpen: () => void }) {
   const Icon = WORLD_ICON[world] ?? Sparkles;
-  const accent = WORLD_COLORS[world] ?? "var(--primary)";
+  const accent = BROWSE_TILE_ACCENT[world] ?? WORLD_COLORS[world] ?? "var(--primary)";
   return (
     <li>
       <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
@@ -221,8 +256,13 @@ function PeopleWelcome() {
   const [step, setStep] = useState<0 | 1 | 2>(1);
   if (step === 0) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 55%, transparent)" }}>
-      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 72%, transparent)" }}>
+      {/* A near-black surface on a near-black page background used to read
+         as the same slab (direct feedback, 8 Sept 2026: "blends into the
+         background") -- the glass-surface-3 token plus a blurred backdrop
+         and a primary-tinted border gives it real edges and depth, and the
+         darker backdrop scrim (55% -> 72%) pushes the page further back. */}
+      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border backdrop-blur-xl sm:rounded-[var(--radius-lg)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
         {/* The cloud mascot leads every welcome moment app-wide -- a soft
            glow behind it instead of a flat icon-on-white so the header
            reads as a moment, not a form field. */}
@@ -363,9 +403,9 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
          can tell where "People to follow" ends and "Browse by industry"
          begins without leaning on a heavier boxed style everywhere. */}
       <SectionSurface className="flex flex-col gap-[var(--space-3)]" >
-        <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Active people to follow">
           <div className="flex flex-col gap-[2px]">
-            <SectionHead>People to follow</SectionHead>
+            <SectionHead>Active people to follow</SectionHead>
             <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
           </div>
           <FollowCarousel pros={withNewProsFirst(PROS, worlds)} follows={follows} onFollow={onFollow} />

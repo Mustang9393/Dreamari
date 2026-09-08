@@ -122,34 +122,29 @@ const AVATAR_PHOTO: Record<string, string> = {
   // .png since these came in as png, unlike the rest of this jpg set.
   "Xavier Brennan": `${AV}/pro-brennan.png`,
   "Kevin Park": `${AV}/pro-park.png`,
-  "Daniela Cruz": `${AV}/pro-cruz.png`,
+  "Daniela Cruz": `${AV}/pro-cruz-3.png`,
   "Catherine Walsh": `${AV}/pro-walsh.png`,
   "Anika Desai": `${AV}/pro-desai.png`,
   "Richard Hartley": `${AV}/pro-hartley.png`,
   "Trevor Johnson": `${AV}/pro-johnson.png`,
-  "Meera Iyer": `${AV}/pro-iyer.png`,
   "Jack Sullivan": `${AV}/pro-sullivan.png`,
-  // Students wear friendly illustrated avatars (micah, generated per
-  // handle), never real photos -- on-brand for a teen product and no real
+  "Elijah Turner": `${AV}/pro-turner.png`,
+  "Ananya Sharma": `${AV}/pro-sharma.png`,
+  "Nathaniel Reid": `${AV}/pro-new-01.png`,
+  "Naomi Wong": `${AV}/pro-wong.png`,
+  "Gregory Ashford": `${AV}/pro-ashford.png`,
+  "Ryan Koval": `${AV}/pro-koval.png`,
+  "Camila Torres": `${AV}/pro-torres.png`,
+  // Students wear friendly illustrated avatars (studentAvatarSrc, src/lib/
+  // avatar.ts), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:
-  // credibility is their whole job here.
-  Ethan: `${AV}/c-Ethan.png`,
-  Priya: `${AV}/c-Priya.png`,
-  Maya: `${AV}/c-Maya.png`,
-  Zoe: `${AV}/c-Zoe.png`,
-  Sam: `${AV}/c-Sam.png`,
-  Lena: `${AV}/c-Lena.png`,
-  Ava: `${AV}/c-Ava.png`,
-  Diego: `${AV}/c-Diego.png`,
-  Sana: `${AV}/c-Sana.png`,
-  Ruby: `${AV}/c-Ruby.png`,
-  Theo: `${AV}/c-Theo.png`,
-  Jo: `${AV}/c-Jo.png`,
-  Amir: `${AV}/c-Amir.png`,
-  Devon: `${AV}/c-Devon.png`,
-  Riley: `${AV}/c-Riley.png`,
-  Noah: `${AV}/c-Noah.png`,
-  Marcus: `${AV}/c-Riley.png`,
+  // credibility is their whole job here. A dead legacy map of "c-Name.png"
+  // real-photo entries for students used to live here (Ethan/Priya/Maya/etc.,
+  // Marcus of all people pointed at Riley's photo) -- USE_PHOTO_AVATARS has
+  // been false the whole time so it never actually rendered, but it flatly
+  // contradicted the policy stated in this very comment and was a landmine
+  // waiting for that flag to flip. Removed 8 Sept 2026; the files themselves
+  // are left on disk untouched in case anything else references them.
 };
 
 // The verified mark used to overlap the avatar's corner; direct feedback, 8
@@ -196,12 +191,17 @@ export function VerifiedBadge({ size = 15 }: { size?: number }) {
  *  whatever card it sits on. */
 /** How recently a professional has helped, in the tiers the admin dashboard
  *  already reports (daily, weekly, monthly). Earned, not given: a pro who has
- *  gone quiet has no tier, so not everyone wears gold. */
+ *  gone quiet has no tier, so not everyone wears gold. One colour for all
+ *  three (direct feedback, 8 Sept 2026): Gold's badge used to read literal
+ *  gold/yellow, Silver literal grey -- coding the badge itself by tier drew
+ *  attention the tier name doesn't need; the reference keeps every badge the
+ *  same blue and lets the label do the talking. */
 export type VolunteerTier = { name: "Diamond" | "Gold" | "Silver"; color: string; note: string };
+const TIER_COLOR = "#7dd3fc";
 export function volunteerTier(pro: { activeDaysAgo: number }): VolunteerTier | null {
-  if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: "#7dd3fc", note: "Helps every day" };
-  if (pro.activeDaysAgo <= 7) return { name: "Gold", color: "#f5c04e", note: "Helps every week" };
-  if (pro.activeDaysAgo <= 30) return { name: "Silver", color: "#c0c4cc", note: "Helps every month" };
+  if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: TIER_COLOR, note: "Helps every day" };
+  if (pro.activeDaysAgo <= 7) return { name: "Gold", color: TIER_COLOR, note: "Helps every week" };
+  if (pro.activeDaysAgo <= 30) return { name: "Silver", color: TIER_COLOR, note: "Helps every month" };
   return null;
 }
 

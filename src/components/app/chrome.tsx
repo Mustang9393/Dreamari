@@ -33,34 +33,24 @@ export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var
 // separate routes/pages (each with its own search and filters), so
 // switching sections is a real navigation, not a client-side tab -- this
 // sits in both ExploreExperience's and CollegesExperience's headers, next to
-// the page title. Deliberately quiet (breadcrumb-weight text, no pill) --
-// direct feedback, 8 Sept 2026: sitting it as a second full segmented
-// control next to Explore's own For You/Browse All pill read as two
-// equally-loud toggles fighting for attention, when really they answer two
-// different questions (which section vs. what's shown within it). A plain
-// "Careers / Colleges" pair reads as page-level, not content-level, so it
-// doesn't compete with the pill for weight.
+// the page title. A single chip labeled with the DESTINATION, not the
+// current page (direct feedback, 8 Sept 2026: the earlier "Careers / Colleges"
+// breadcrumb read as awkward slash-separated text) -- on Explore it reads
+// "Colleges" and jumps there; on the Colleges page the same chip reads
+// "Careers" and jumps back. One small action, not a second toggle competing
+// with Explore's own For You/Browse All pill for visual weight.
 export function ExploreSectionToggle({ active }: { active: "careers" | "colleges" }) {
   const router = useRouter();
-  const ITEMS = [
-    { key: "careers", label: "Careers", href: "/explore" },
-    { key: "colleges", label: "Colleges", href: "/colleges" },
-  ] as const;
+  const target = active === "careers" ? { label: "Colleges", href: "/colleges" } : { label: "Careers", href: "/explore" };
   return (
-    <div className="flex items-center gap-[8px] text-[13px] leading-[18px] font-bold uppercase" style={{ fontFamily: "var(--font-body)" }}>
-      {ITEMS.map((item, i) => (
-        <span key={item.key} className="flex items-center gap-[8px]">
-          {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>/</span>}
-          {active === item.key ? (
-            <span style={{ color: "var(--foreground)" }}>{item.label}</span>
-          ) : (
-            <button type="button" onClick={() => router.push(item.href)} className="dm-link cursor-pointer" style={{ color: "var(--muted-foreground)" }}>
-              {item.label}
-            </button>
-          )}
-        </span>
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={() => router.push(target.href)}
+      className="dm-quiet cursor-pointer rounded-full border px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+      style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+    >
+      {target.label}
+    </button>
   );
 }
 
