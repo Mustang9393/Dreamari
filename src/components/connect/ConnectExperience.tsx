@@ -3593,7 +3593,13 @@ function InsightThreadView({
             <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Comments ({insight.replies.length + posted.length})
             </h2>
-            <div className="flex flex-col gap-[var(--space-4)]">
+            {/* Same CommentStream every reply list uses (direct feedback, 9
+               Sept 2026: "the insights is missing the thread rails and the
+               curved lines etc, do that exactly like the questions, follow
+               exact alignments too") -- the trunk line, avatar-center math
+               and row spacing all come from the shared component, not a
+               plain flex column. */}
+            <CommentStream>
               {insight.replies.map((reply, index) => {
                 const rid = `${insight.id}-r${index}`;
                 const isPro = !!reply.proId;
@@ -3629,7 +3635,7 @@ function InsightThreadView({
                   onLike={toggleHelpful}
                 />
               ))}
-            </div>
+            </CommentStream>
             <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
           </div>
         </div>
