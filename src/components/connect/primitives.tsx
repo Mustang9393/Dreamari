@@ -86,11 +86,11 @@ const USE_PHOTO_AVATARS = false;
 // student) wears their real profile photo.
 const AV = "/images/connect/avatars";
 const AVATAR_PHOTO: Record<string, string> = {
-  // Jordan is the signed-in demo student -- a deliberately chosen portrait,
-  // not the hash-picked one every other (anonymized) student gets (direct
-  // feedback, 8 Sept 2026). Still the same illustrated style, no real photo.
-  "Jordan Rivera": "/images/avatar-jordan.png",
-  Jordan: "/images/avatar-jordan.png",
+  // Jordan is pinned in studentAvatarSrc (src/lib/avatar.ts) now, the one
+  // function every avatar call site funnels through -- not here, which is
+  // how this drifted out of sync with chrome.tsx's and ProfileExperience's
+  // own avatar calls the first time (direct feedback, 8 Sept 2026: "did we
+  // update Jordan's photo everywhere").
   // Verified professionals: the new volunteer headshots (Joshua Pierce, 5
   // Sept 2026), one per person, the previous photo set removed entirely.
   "David Chen": `${AV}/pro-chen.jpg`,
@@ -157,12 +157,11 @@ const AVATAR_PHOTO: Record<string, string> = {
 // name" -- moved to VerifiedBadge below, rendered by each caller next to the
 // person's name text instead. Avatar itself no longer knows about verification.
 export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
-  // Professionals always wear their portrait; students stay behind the flag.
+  // Professionals always wear their portrait; students stay behind the flag
+  // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
+  // below, not here).
   const isPro = PROS.some((p) => p.name === name);
-  // Jordan (the signed-in demo student) is pinned to their own chosen
-  // portrait rather than the hash every other, anonymized student gets.
-  const isJordan = name === "Jordan Rivera" || name === "Jordan";
-  const photo = USE_PHOTO_AVATARS || isPro || isJordan ? AVATAR_PHOTO[name] : undefined;
+  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
   // The seed is the FIRST word only, so "Jordan Rivera" (a full name, shown
   // on the student's own profile) and "Jordan" (the community handle, per
   // the app's first-name-only identity rule) generate the identical
