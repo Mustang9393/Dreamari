@@ -25,21 +25,21 @@ type Mark = {
 };
 // Order matches the reference partner wall (dreamari.com) EXACTLY, row by
 // row, left to right (direct feedback, 8 Sept 2026: "it can't match the
-// reference order closely, it should match it exactly") -- grouped into the
-// same row breaks as the reference itself, not left to any automatic
-// wrapping algorithm to (possibly) reproduce by coincidence. See MARK_ROWS
-// below, which is the actual row structure rendered; this flat MARKS array
-// (reference order, ungrouped) only feeds the scrolling ticker, which has
-// no rows to match. Nickelodeon and MTV are out: a splat or a filled block
-// with text inside does not survive a silhouette. Five marks on the
-// reference wall are still not included -- see ATTRIBUTION.md for exactly
-// why each one is missing (MAGIC and Taylor & Francis' current mark: fetch
-// blocked/not on Commons; NCSolutions: folded into Circana, no standalone
-// mark left to source; "McDermott Will & Schulte" and the plain "[A|B]"
-// bracket icon: neither could be confidently identified to a real,
-// correctly-spelled trademark; a fifth mark transcribed as "Amazon Ben"
-// could not be matched to any real brand after a direct search -- flagged
-// rather than guessed, pending Mika's reference folder).
+// reference order closely, it should match it exactly"). Rendered as one
+// flat, uniform grid now (see PartnerLogoGrid below) rather than these exact
+// row breaks -- see ATTRIBUTION.md for why (a fixed rectangle with equal
+// cells reads as symmetric regardless of each row's item count, where
+// matching the reference's own irregular row lengths didn't). This grouping
+// is kept only because it's still the easiest way to review the order
+// against the reference image row by row. Nickelodeon and MTV are out: a
+// splat or a filled block with text inside does not survive the dark
+// student page's flat-white silhouette treatment (the light Schools page
+// keeps real colour, so this is a dark-mode-only limitation, not fixed
+// here). Mars, McDermott Will & Schulte, NCSolutions and an Amazon+BEN
+// composite were added in a later pass -- see ATTRIBUTION.md. Still not
+// included: MAGIC and Taylor & Francis' current mark (their sites 403 every
+// fetch attempt) and the plain "[A|B]" bracket icon (can't identify to any
+// real trademark from the image alone).
 const MARK_ROWS: Mark[][] = [
   [
     { name: "JPMorgan Chase", file: "jpmorgan-chase.svg", ratio: 7.051 },
@@ -47,6 +47,7 @@ const MARK_ROWS: Mark[][] = [
     { name: "AT&T", file: "att.png", ratio: 2.432, faint: true },
   ],
   [
+    { name: "Mars", file: "mars.svg", ratio: 3.396 },
     { name: "Kellanova", file: "kellanova.svg", ratio: 3.954 },
     { name: "Kellogg's", file: "kelloggs.svg", ratio: 2.858 },
     { name: "Informa", file: "informa.svg", ratio: 4.898 },
@@ -64,6 +65,7 @@ const MARK_ROWS: Mark[][] = [
     { name: "Brand Licensing Europe", file: "brand-licensing-europe.png", ratio: 1.979 },
     { name: "Pop-Tarts", file: "pop-tarts.png", ratio: 1.536, emblem: true },
     { name: "IWCE", file: "iwce.png", ratio: 3.3 },
+    { name: "MAGIC", file: "magic.png", ratio: 2.599 },
     { name: "GDC", file: "gdc.svg", ratio: 2.883 },
     { name: "Pringles", file: "pringles.svg", ratio: 0.804, emblem: true },
   ],
@@ -71,17 +73,21 @@ const MARK_ROWS: Mark[][] = [
     { name: "MD&M", file: "mdm.png", ratio: 2.975 },
     { name: "HSBC", file: "hsbc.svg", ratio: 3.716, emblem: true },
     { name: "Warner Bros. Discovery", file: "wbd.svg", ratio: 4.916, emblem: true },
-    { name: "Amazon", file: "amazon.svg", ratio: 3.309 },
+    { name: "Amazon (Black Employee Network)", file: "amazon-ben.svg", ratio: 2.362 },
     { name: "Colgate", file: "colgate.svg", ratio: 4.857, emblem: true },
   ],
   [
     { name: "Enterprise Connect", file: "enterprise-connect.png", ratio: 6.466 },
     { name: "Akamai", file: "akamai.svg", ratio: 2.455 },
+    { name: "Paramount", file: "paramount.svg", ratio: 1.255 },
     { name: "The AI Summit London", file: "ai-summit-london.png", ratio: 3.579 },
     { name: "WildBrain", file: "wildbrain.svg", ratio: 7.814 },
+    { name: "Taylor & Francis", file: "taylor-francis.svg", ratio: 4.179 },
     { name: "Nielsen", file: "nielsen.svg", ratio: 2.836 },
   ],
   [
+    { name: "McDermott Will & Schulte", file: "mcdermott.png", ratio: 3.495 },
+    { name: "NCSolutions", file: "ncsolutions.png", ratio: 5.951 },
     { name: "Kroll", file: "kroll.svg", ratio: 4.312 },
     { name: "Yahoo", file: "yahoo.svg", ratio: 3.606 },
     { name: "VH1", file: "vh1.svg", ratio: 2.558 },
