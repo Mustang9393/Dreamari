@@ -24,23 +24,24 @@ export function communityAccent(community: Pick<Community, "world">): string {
 export const POSTER_GRAIN = "/images/connect/covers/grain.png";
 
 // The CEO's own reference photography (people-free), cropped for the cards.
+// 9 Sept 2026: swapped for a newer set, same treatment.
 export const PHOTO_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/photo4-teaching-education.webp",
-  "business-money": "/images/connect/covers/photo4-business-money.webp",
-  "tech-engineering": "/images/connect/covers/photo4-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/photo4-health-medicine.webp",
-  "arts-media": "/images/connect/covers/photo4-arts-media.webp",
+  "teaching-education": "/images/connect/covers/photo5-teaching-education.png",
+  "business-money": "/images/connect/covers/photo5-business-money.png",
+  "tech-engineering": "/images/connect/covers/photo5-tech-engineering.png",
+  "health-medicine": "/images/connect/covers/photo5-health-medicine.png",
+  "arts-media": "/images/connect/covers/photo5-arts-media.png",
 };
 
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
 // the towers, the monitors, the stethoscope, the studio desk), never an
 // empty stretch of room.
 export const PHOTO_FOCUS: Record<string, string> = {
-  "teaching-education": "58% 42%",
-  "business-money": "68% 42%",
-  "tech-engineering": "50% 48%",
-  "health-medicine": "48% 38%",
-  "arts-media": "48% 45%",
+  "teaching-education": "50% 60%",
+  "business-money": "58% 55%",
+  "tech-engineering": "50% 45%",
+  "health-medicine": "55% 55%",
+  "arts-media": "50% 55%",
 };
 
 function StatTile({ value, label }: { value: number | string; label: string }) {
