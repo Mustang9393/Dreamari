@@ -2009,7 +2009,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
           <span className="min-w-0 truncate">Next: {route.nextStep}</span>
           {/program|college|school|transfer/i.test(route.nextStep) && (
             <Link href="/colleges" className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              College lookup <ChevronRight className="h-3 w-3" />
+              School lookup <ChevronRight className="h-3 w-3" />
             </Link>
           )}
         </div>

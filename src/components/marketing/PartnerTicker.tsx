@@ -29,80 +29,86 @@ type Mark = {
 // flat, uniform grid now (see PartnerLogoGrid below) rather than these exact
 // row breaks -- see ATTRIBUTION.md for why (a fixed rectangle with equal
 // cells reads as symmetric regardless of each row's item count, where
-// matching the reference's own irregular row lengths didn't). This grouping
-// is kept only because it's still the easiest way to review the order
-// against the reference image row by row. Nickelodeon and MTV are out: a
-// splat or a filled block with text inside does not survive the dark
-// student page's flat-white silhouette treatment (the light Schools page
-// keeps real colour, so this is a dark-mode-only limitation, not fixed
-// here). Mars, McDermott Will & Schulte, NCSolutions and an Amazon+BEN
-// composite were added in a later pass -- see ATTRIBUTION.md. Still not
-// included: MAGIC and Taylor & Francis' current mark (their sites 403 every
-// fetch attempt) and the plain "[A|B]" bracket icon (can't identify to any
-// real trademark from the image alone).
+// matching the reference's own irregular row lengths didn't).
+//
+// 9 Sept 2026 pass: replaced with the user's own curated, numbered set of
+// logo files ("Logos Page (Landscape)"), which is both higher-quality and
+// more complete than everything sourced by hand in earlier passes -- see
+// ATTRIBUTION.md. This also finally adds MTV, Nickelodeon and the "[A/B]"
+// bracket mark (identified as AllianceBernstein), and fixes Taylor & Francis
+// (the earlier hand-recolored asset had no real cutout for the ship, so it
+// flattened to a blank disc; the real asset's ship/water detail is a true
+// alpha cutout and needs no special treatment). `emblem: true` now covers
+// every mark whose ink is a solid card/background with a light cutout on
+// top (Blackstone, AllianceBernstein, MAGIC, IWCE, Paramount's circle, MTV's
+// M-block-plus-script) -- flattening those to flat white would merge the
+// card and its cutout into one blank shape, so they're inverted by
+// luminance instead, same as HSBC and Warner Bros. Discovery already were.
 const MARK_ROWS: Mark[][] = [
   [
-    { name: "JPMorgan Chase", file: "jpmorgan-chase.svg", ratio: 7.051 },
-    { name: "Chase", file: "chase.svg", ratio: 5.363, emblem: true },
-    { name: "AT&T", file: "att.png", ratio: 2.432, faint: true },
+    { name: "JPMorgan Chase", file: "jpmorgan-chase.png", ratio: 6.941 },
+    { name: "Chase", file: "chase.png", ratio: 5.374, emblem: true },
+    { name: "AT&T", file: "att.png", ratio: 2.44, faint: true },
   ],
   [
-    { name: "Mars", file: "mars.svg", ratio: 3.396 },
-    { name: "Kellanova", file: "kellanova.svg", ratio: 3.954 },
-    { name: "Kellogg's", file: "kelloggs.svg", ratio: 2.858 },
-    { name: "Informa", file: "informa.svg", ratio: 4.898 },
+    { name: "Mars", file: "mars.png", ratio: 3.429 },
+    { name: "Kellanova", file: "kellanova.png", ratio: 3.92 },
+    { name: "Informa", file: "informa.png", ratio: 3.066 },
+    { name: "EY", file: "ey.png", ratio: 0.992 },
   ],
   [
-    { name: "BioProcess International", file: "bioprocess-international.png", ratio: 3.593 },
-    { name: "Brookfield", file: "brookfield.svg", ratio: 6.679 },
-    { name: "Blackstone", file: "blackstone.svg", ratio: 6.29, faint: true },
-    { name: "SupplySide Global", file: "supplyside-global.png", ratio: 2.599 },
-    { name: "EY", file: "ey.svg", ratio: 0.987 },
-    { name: "MRO", file: "mro.png", ratio: 2.2 },
+    { name: "BioProcess International", file: "bioprocess-international.png", ratio: 3.99 },
+    { name: "Brookfield", file: "brookfield.png", ratio: 6.799 },
+    { name: "Blackstone", file: "blackstone.png", ratio: 2.553, emblem: true },
+    { name: "SupplySide Global", file: "supplyside-global.png", ratio: 3.178 },
+    { name: "MRO", file: "mro.png", ratio: 2.149 },
   ],
   [
-    { name: "Natural Products Expo West", file: "expo-west.png", ratio: 2.381 },
-    { name: "Brand Licensing Europe", file: "brand-licensing-europe.png", ratio: 1.979 },
-    { name: "Pop-Tarts", file: "pop-tarts.png", ratio: 1.536, emblem: true },
-    { name: "IWCE", file: "iwce.png", ratio: 3.3 },
-    { name: "MAGIC", file: "magic.png", ratio: 2.599 },
-    { name: "GDC", file: "gdc.svg", ratio: 2.883 },
-    { name: "Pringles", file: "pringles.svg", ratio: 0.804, emblem: true },
+    { name: "Natural Products Expo West", file: "expo-west.png", ratio: 1.01, emblem: true },
+    { name: "Brand Licensing Europe", file: "brand-licensing-europe.png", ratio: 1.779 },
+    { name: "Pop-Tarts", file: "pop-tarts.png", ratio: 1.532, emblem: true },
+    { name: "IWCE", file: "iwce.png", ratio: 1.004, emblem: true },
+    { name: "MAGIC", file: "magic.png", ratio: 1.006, emblem: true },
+    { name: "GDC", file: "gdc.png", ratio: 2.58, emblem: true },
+    { name: "AllianceBernstein", file: "alliancebernstein.png", ratio: 1.006, emblem: true },
+    { name: "Pringles", file: "pringles.png", ratio: 0.782, emblem: true },
   ],
   [
-    { name: "MD&M", file: "mdm.png", ratio: 2.975 },
-    { name: "HSBC", file: "hsbc.svg", ratio: 3.716, emblem: true },
-    { name: "Warner Bros. Discovery", file: "wbd.svg", ratio: 4.916, emblem: true },
-    { name: "Amazon (Black Employee Network)", file: "amazon-ben.svg", ratio: 2.362 },
-    { name: "Colgate", file: "colgate.svg", ratio: 4.857, emblem: true },
+    { name: "MD&M", file: "mdm.png", ratio: 3.952 },
+    { name: "HSBC", file: "hsbc.png", ratio: 3.716, emblem: true },
+    { name: "Warner Bros. Discovery", file: "wbd.png", ratio: 4.406, emblem: true },
+    { name: "Amazon (Black Employee Network)", file: "amazon-ben.png", ratio: 2.398 },
+    { name: "Colgate", file: "colgate.png", ratio: 1.277, emblem: true },
   ],
   [
-    { name: "Enterprise Connect", file: "enterprise-connect.png", ratio: 6.466 },
-    { name: "Akamai", file: "akamai.svg", ratio: 2.455 },
-    { name: "Paramount", file: "paramount.svg", ratio: 1.255 },
-    { name: "The AI Summit London", file: "ai-summit-london.png", ratio: 3.579 },
-    { name: "WildBrain", file: "wildbrain.svg", ratio: 7.814 },
-    { name: "Taylor & Francis", file: "taylor-francis.svg", ratio: 4.179 },
-    { name: "Nielsen", file: "nielsen.svg", ratio: 2.836 },
+    { name: "Enterprise Connect", file: "enterprise-connect.png", ratio: 3.86 },
+    { name: "Akamai", file: "akamai.png", ratio: 2.425 },
+    { name: "Paramount", file: "paramount.png", ratio: 1.313, emblem: true },
+    { name: "MTV", file: "mtv.png", ratio: 1.292, emblem: true },
+    { name: "The AI Summit London", file: "ai-summit-london.png", ratio: 1.462 },
+    { name: "WildBrain", file: "wildbrain.png", ratio: 1.252, emblem: true },
+    { name: "Taylor & Francis", file: "taylor-francis.png", ratio: 4.2 },
+    { name: "Nielsen", file: "nielsen.png", ratio: 2.807 },
   ],
   [
-    { name: "McDermott Will & Schulte", file: "mcdermott.png", ratio: 3.495 },
-    { name: "NCSolutions", file: "ncsolutions.png", ratio: 5.951 },
-    { name: "Kroll", file: "kroll.svg", ratio: 4.312 },
-    { name: "Yahoo", file: "yahoo.svg", ratio: 3.606 },
-    { name: "VH1", file: "vh1.svg", ratio: 2.558 },
-    { name: "Verizon", file: "verizon.svg", ratio: 4.461 },
-    { name: "Peloton", file: "peloton.svg", ratio: 3.407 },
+    { name: "McDermott Will & Schulte", file: "mcdermott.png", ratio: 3.464 },
+    { name: "NCSolutions", file: "ncsolutions.png", ratio: 5.524 },
+    { name: "Kroll", file: "kroll.png", ratio: 4.241 },
+    { name: "Yahoo", file: "yahoo.png", ratio: 3.576 },
+    { name: "VH1", file: "vh1.png", ratio: 2.669 },
+    { name: "Verizon", file: "verizon.png", ratio: 4.405 },
+    { name: "Peloton", file: "peloton.png", ratio: 3.313 },
   ],
   [
-    { name: "Jimmy Choo", file: "jimmy-choo.svg", ratio: 7.203 },
-    { name: "Versace", file: "versace.svg", ratio: 4.515 },
-    { name: "BET", file: "bet.svg", ratio: 3.169, emblem: true },
-    { name: "Bleacher Report", file: "bleacher-report.svg", ratio: 3.273, emblem: true },
-    { name: "Michael Kors", file: "michael-kors.svg", ratio: 10.517 },
-    { name: "Cartoon Network", file: "cartoon-network.svg", ratio: 1.671, emblem: true },
-    { name: "DC", file: "dc.svg", ratio: 1, emblem: true },
-    { name: "TNT", file: "tnt.svg", ratio: 1, emblem: true },
+    { name: "Jimmy Choo", file: "jimmy-choo.png", ratio: 6.905 },
+    { name: "Nickelodeon", file: "nickelodeon.png", ratio: 6.678 },
+    { name: "Versace", file: "versace.png", ratio: 4.916 },
+    { name: "BET", file: "bet.png", ratio: 3.277, emblem: true },
+    { name: "Bleacher Report", file: "bleacher-report.png", ratio: 3.043, emblem: true },
+    { name: "Michael Kors", file: "michael-kors.png", ratio: 10.086 },
+    { name: "Cartoon Network", file: "cartoon-network.png", ratio: 1.463, emblem: true },
+    { name: "DC", file: "dc.png", ratio: 1.003, emblem: true },
+    { name: "TNT", file: "tnt.png", ratio: 0.973, emblem: true },
   ],
 ];
 const MARKS: Mark[] = MARK_ROWS.flat();

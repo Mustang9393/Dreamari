@@ -4,8 +4,8 @@ import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
 export const metadata: Metadata = {
-  title: "Find a college · Dreamari",
-  description: "Real colleges, what students really pay, and who finishes. No rankings.",
+  title: "Find a school · Dreamari",
+  description: "Real colleges and trade schools, what students really pay, and who finishes. No rankings.",
 };
 
 // College lookup. Reached from a career page's "Where you would study it",

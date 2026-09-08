@@ -41,7 +41,7 @@ function breakableTitle(title: string): string {
 // cue, and a mobile-only sweep animation was removed as unjustified noise
 // (Chandu, 7 Sept 2026 -- the original finding was specific to desktop's
 // lack of a hover-equivalent affordance signal, not evidenced on touch).
-function OpenCue() {
+export function OpenCue() {
   return (
     <>
       <span aria-hidden className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.32)" }} />

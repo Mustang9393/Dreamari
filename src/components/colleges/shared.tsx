@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 import { Bookmark, GraduationCap, Landmark } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, money, type College } from "./data";
 
@@ -104,11 +105,17 @@ export function MarkBadge({ c, size = 44 }: { c: College; size?: number }) {
 export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
   const img = collegeImage(c);
   return (
+    // `poster-card`/`poster-photo` are the exact same hover classes Explore's
+    // PosterCard uses (globals.css) -- direct feedback, 9 Sept 2026: college
+    // results should lift and pop the same way career posters do, not the
+    // much quieter image-only zoom this had before. Reusing the shared
+    // classes (rather than a second hand-tuned hover) keeps the two card
+    // families feeling like one interaction language.
     <article
-      className="dm-tap group relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      className="dm-tap poster-card relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
-      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+      <span aria-hidden className="poster-photo absolute inset-0">
         {img ? (
           <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" />
         ) : (
@@ -120,6 +127,14 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.84) 26%, rgba(12,16,35,0.4) 52%, rgba(12,16,35,0.08) 72%, transparent 100%)" }} />
         <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
       </span>
+      {/* Same centered "this opens" cue PosterCard uses, at OpenCue's own
+         (low) z-index -- below the text content's z-20, not above it,
+         so the dim and the icon only ever show over the photo, never
+         additionally darkening the always-visible name/stats text (direct
+         feedback, 9 Sept 2026). The icon still reads fine: it lands in the
+         card's own vertical gap between the profile row and the stats
+         paragraph, where that content layer has nothing opaque painted. */}
+      <OpenCue />
       <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
 

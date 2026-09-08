@@ -34,7 +34,7 @@ export const REPORT_SECTIONS = [
   { id: "courses", n: 2, label: "High School Classes" },
   { id: "majors", n: 3, label: "College Majors" },
   { id: "education", n: 4, label: "College Pathways" },
-  { id: "colleges", n: 5, label: "Colleges" },
+  { id: "colleges", n: 5, label: "Schools" },
 ] as const;
 
 
@@ -356,21 +356,21 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 05 — Colleges */}
+        {/* 05 — Schools */}
         <ReportSection
           id={`${idPrefix}colleges`}
           n={5}
-          title="Colleges"
+          title="Schools"
           icon={Building2}
           action={
             <Link
               href="/colleges"
               data-print-hide
-              aria-label="College Lookup"
+              aria-label="School Lookup"
               className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[9px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em] sm:px-[11px]"
               style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
             >
-              <Search className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">College Lookup</span>
+              <Search className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">School Lookup</span>
             </Link>
           }
         >

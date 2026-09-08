@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionToggle, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
@@ -36,10 +36,13 @@ import "./app.css";
 
 // This pill answers one question -- what's shown within Careers -- so
 // Colleges (a different section entirely) doesn't live here; it sits as its
-// own quiet control next to the page title instead (ExploreSectionToggle,
+// own text-tab strip under the page title instead (ExploreSectionTabs,
 // chrome.tsx). Was folded into this pill as a third stop briefly (8 Sept
 // 2026), then split back out: two full-weight controls side by side read as
-// clutter, but so did stacking three unrelated questions into one pill.
+// clutter, but so did stacking three unrelated questions into one pill. Kept
+// as a pill deliberately (9 Sept 2026) once Careers/Schools became a text
+// tab strip of its own -- reserving the pill shape for this local, same-page
+// toggle keeps it visually distinct from that page-level section switch.
 function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
   return (
     <div
@@ -755,11 +758,11 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
-            <div className="flex items-center gap-[var(--space-5)]">
+            <div className="flex flex-col gap-[var(--space-2)]">
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
                 Explore
               </h1>
-              <ExploreSectionToggle active="careers" />
+              <ExploreSectionTabs active="careers" />
             </div>
             <div className="flex min-w-0 items-center gap-[var(--space-6)]">
               {/* Search grows from icon to input; the toggle folds away while

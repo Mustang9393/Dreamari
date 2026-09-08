@@ -29,28 +29,60 @@ const AVATAR_SEED = STUDENT.name.split(" ")[0] || STUDENT.name;
 export const PAGE_TITLE_CLASS = "text-[32px] leading-[1.05] font-extrabold uppercase sm:text-[44px]";
 export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var(--foreground)" } as const;
 
-// Careers and Colleges both live conceptually inside Explore but are
-// separate routes/pages (each with its own search and filters), so
-// switching sections is a real navigation, not a client-side tab -- this
-// sits in both ExploreExperience's and CollegesExperience's headers, next to
-// the page title. A single chip labeled with the DESTINATION, not the
-// current page (direct feedback, 8 Sept 2026: the earlier "Careers / Colleges"
-// breadcrumb read as awkward slash-separated text) -- on Explore it reads
-// "Colleges" and jumps there; on the Colleges page the same chip reads
-// "Careers" and jumps back. One small action, not a second toggle competing
-// with Explore's own For You/Browse All pill for visual weight.
-export function ExploreSectionToggle({ active }: { active: "careers" | "colleges" }) {
+// Careers and Schools (colleges + trade schools) both live conceptually
+// inside Explore but are separate routes/pages (each with its own search and
+// filters), so switching sections is a real navigation, not a client-side
+// tab -- this sits in both ExploreExperience's and CollegesExperience's
+// headers, under the page title. Direct feedback, 8 Sept 2026: the earlier
+// "Careers / Colleges" breadcrumb read as awkward slash-separated text, so
+// it became a single chip labeled with the destination -- but that chip sat
+// RIGHT NEXT TO the page's own H1 ("Explore" + a chip reading "Schools"),
+// which read as one phrase describing the current page ("Explore Schools")
+// instead of a link elsewhere. Fixed 9 Sept 2026 by making it a real
+// two-option tab strip (both names always visible, the active one
+// underlined) placed on its OWN line under the H1, never beside it -- a
+// pill-shaped control here would also compete for the same visual language
+// as Explore's own For You/Browse All toggle, so these render as plain text
+// tabs instead, reserving the pill shape for that local, same-page control.
+// Labeled "Schools", not "Colleges" (direct feedback, 8 Sept 2026: the page
+// covers trade schools too, and "Colleges" as the visible label makes
+// clients ask whether trade schools are supported) -- the route/internal
+// key stays "colleges", only the copy changed.
+const EXPLORE_SECTIONS = [
+  { key: "careers" as const, label: "Careers", href: "/explore" },
+  { key: "colleges" as const, label: "Schools", href: "/colleges" },
+];
+export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" }) {
   const router = useRouter();
-  const target = active === "careers" ? { label: "Colleges", href: "/colleges" } : { label: "Careers", href: "/explore" };
   return (
-    <button
-      type="button"
-      onClick={() => router.push(target.href)}
-      className="dm-quiet cursor-pointer rounded-full border px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
-      style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      {target.label}
-    </button>
+    <div role="tablist" aria-label="Explore section" className="flex items-center gap-[var(--space-4)]">
+      {EXPLORE_SECTIONS.map((section, i) => {
+        const isActive = section.key === active;
+        return (
+          <span key={section.key} className="flex items-center gap-[var(--space-4)]">
+            {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>/</span>}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => { if (!isActive) router.push(section.href); }}
+              className={`-mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"}`}
+              style={{
+                fontFamily: "var(--font-body)",
+                color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
+                textDecoration: isActive ? "underline" : "none",
+                textUnderlineOffset: "5px",
+                textDecorationThickness: "2px",
+                textDecorationColor: "var(--accent)",
+              }}
+            >
+              {section.label}
+            </button>
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -97,7 +129,7 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-lab" },
   { label: "Play", href: "/play" },
   { label: "My Profile", href: "/profile" },
-  { label: "Find a college", href: "/colleges" },
+  { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
   { label: "Sign Up", href: "/signup" },
 ] as const;

@@ -5,15 +5,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionToggle, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 
-// Find a college. One search box, six quick picks, everything else in a
-// tray over the results (NN/g mobile facets), applied filters as removable
-// chips (Baymard). Results update as you type; nothing is submitted.
-// Design notes: docs/COLLEGE_LOOKUP_AUDIT.md.
+// Find a school -- colleges and trade schools both live here, so the page
+// (and its nav chip) says "Schools," never "Colleges" (direct feedback,
+// 8 Sept 2026: "Colleges" as the visible label makes clients ask whether
+// trade schools are supported). One search box, six quick picks, everything
+// else in a tray over the results (NN/g mobile facets), applied filters as
+// removable chips (Baymard). Results update as you type; nothing is
+// submitted. Design notes: docs/COLLEGE_LOOKUP_AUDIT.md.
 
 const HOME_STATE = "NJ"; // Jordan's build answers (Westfield High School, NJ)
 
@@ -122,15 +125,18 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        <div className="hidden md:block"><BackButton fallback="/explore" /></div>
-
+        {/* Desktop back button removed 9 Sept 2026: the Careers/Schools tab
+           strip right under the H1 below already gets you back to Explore,
+           so a separate Back control here was a redundant second way to do
+           the same thing. Mobile keeps its own Back (above, in the mobile
+           header) since mobile doesn't render the tab strip. */}
         <div className="flex flex-col gap-[var(--space-2)]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a college</h1>
-            <ExploreSectionToggle active="colleges" />
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
+            <ExploreSectionTabs active="colleges" />
           </div>
           <p className={SMALL} style={{ color: "var(--muted-foreground)" }} aria-live="polite">
-            {results.length} {results.length === 1 ? "college" : "colleges"}{activeCount ? " match" : ""}. New Jersey first. We do not rank colleges.
+            {results.length} {results.length === 1 ? "school" : "schools"}{activeCount ? " match" : ""}. New Jersey first. We do not rank schools.
           </p>
         </div>
 
