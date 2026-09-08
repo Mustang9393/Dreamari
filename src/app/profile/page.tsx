@@ -5,8 +5,8 @@ import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
 export const metadata: Metadata = {
-  title: "My Profile — Dreamari",
-  description: "Your Top 3, your routes after high school, your plan — and a career report you can export.",
+  title: "My Profile · Dreamari",
+  description: "Your Top 3, your routes after high school, your plan, and a career report you can export.",
 };
 
 // My Profile prototype (v4 branch) — informed by the Replit v2-my-profile

@@ -424,7 +424,7 @@ function ReportDocument({
           <ul className="flex list-none flex-col gap-[5px] p-0 text-[13px] leading-[19px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
-                {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
+                {source.label}, {source.org}, {source.year}. Checked {source.verified}.{" "}
                 <SourceLink url={source.url}>Open</SourceLink>
               </li>
             ))}

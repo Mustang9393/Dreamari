@@ -1164,14 +1164,14 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
     >
       {complete && <LocalBurst nonce={1} />}
       <h2 className={`${bricolage.className} text-[22px] font-extrabold text-[var(--color-night-foreground)]`}>
-        {likedCount === MAX_SLOTS ? "Your Top 3 is set!" : likedCount > 0 ? `You've seen the stack — ${likedCount} saved` : "Nothing clicked — and that's okay"}
+        {likedCount === MAX_SLOTS ? "Your Top 3 is set!" : likedCount > 0 ? `You've seen the stack: ${likedCount} saved` : "Nothing clicked, and that's okay"}
       </h2>
       <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
           ? "Save them to your profile."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
-            : "Knowing what's NOT for you is real progress. Wander through Explore — hundreds of paths, no pressure — and come back when one sparks."}
+            : "Knowing what's NOT for you is real progress. Wander through Explore, hundreds of paths, no pressure, and come back when one sparks."}
       </p>
       {likedCount > 0 && <MiniRanking liked={liked} />}
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">

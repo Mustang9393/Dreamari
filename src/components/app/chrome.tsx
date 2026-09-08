@@ -29,6 +29,42 @@ const AVATAR_SEED = STUDENT.name.split(" ")[0] || STUDENT.name;
 export const PAGE_TITLE_CLASS = "text-[32px] leading-[1.05] font-extrabold uppercase sm:text-[44px]";
 export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var(--foreground)" } as const;
 
+// Careers and Colleges both live conceptually inside Explore but are
+// separate routes/pages (each with its own search and filters), so
+// switching sections is a real navigation, not a client-side tab -- this
+// toggle sits in both ExploreExperience's and CollegesExperience's headers.
+export function ExploreSectionToggle({ active }: { active: "careers" | "colleges" }) {
+  const router = useRouter();
+  return (
+    <div
+      className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+    >
+      {(
+        [
+          { key: "careers", label: "Careers", href: "/explore" },
+          { key: "colleges", label: "Colleges", href: "/colleges" },
+        ] as const
+      ).map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          aria-pressed={active === item.key}
+          onClick={() => active !== item.key && router.push(item.href)}
+          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+          style={{
+            fontFamily: "var(--font-body)",
+            background: active === item.key ? "var(--primary)" : "transparent",
+            color: active === item.key ? "var(--primary-foreground)" : "var(--foreground)",
+          }}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
     <Link href={href} aria-label="Dreamari" className="dm-link flex items-center gap-[var(--space-1)]" style={{ color: "var(--foreground)" }}>

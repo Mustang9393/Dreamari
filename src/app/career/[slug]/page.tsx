@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const career = resolveCareer(slug);
   return {
-    title: career ? `${career.title} — Dreamari` : "Career — Dreamari",
+    title: career ? `${career.title} · Dreamari` : "Career · Dreamari",
     description: career?.description || "Explore what this career actually looks like.",
   };
 }

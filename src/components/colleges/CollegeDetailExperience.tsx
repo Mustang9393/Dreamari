@@ -98,7 +98,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[960px] flex-col gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[140px] md:pt-[96px]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[960px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:pt-[var(--space-10)]">
         <div className="hidden md:block"><BackButton fallback="/colleges" /></div>
 
         {/* header: the photo runs behind the whole card on phones; from md it

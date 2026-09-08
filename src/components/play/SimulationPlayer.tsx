@@ -1819,7 +1819,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
   const [open, setOpen] = useState(false);
   const OUTCOMES = [
     { label: "Promoted", range: "85+", active: reputation >= 85 },
-    { label: "No return offer, start over", range: "40–84", active: reputation >= 40 && reputation < 85 },
+    { label: "No return offer, start over", range: "40-84", active: reputation >= 40 && reputation < 85 },
     { label: "The run ends", range: "Under 40", active: reputation < 40 },
   ];
   return (

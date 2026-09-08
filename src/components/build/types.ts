@@ -78,7 +78,7 @@ export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
 export const EDUCATION_OPTIONS: { title: string }[] = [
   { title: "Work after high school" },
-  { title: "1–2 years" },
+  { title: "1-2 years" },
   { title: "4 years" },
   { title: "5 years+" },
   { title: "Not sure yet" },

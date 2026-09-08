@@ -3,7 +3,7 @@ import { ConnectExperience } from "@/components/connect/ConnectExperience";
 import "@/components/marketing/tokens.css";
 
 export const metadata: Metadata = {
-  title: "Connect — Dreamari",
+  title: "Connect · Dreamari",
   description: "Ask real people about careers you are exploring.",
 };
 

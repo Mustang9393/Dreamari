@@ -6,8 +6,8 @@ import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionToggle, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
@@ -110,7 +110,7 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
   );
 }
 
-const SORT_OPTIONS = ["Recommended", "A – Z", "Salary"] as const;
+const SORT_OPTIONS = ["Recommended", "A-Z", "Salary"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
 function FilterPill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
@@ -227,7 +227,7 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
     const q = query.trim().toLowerCase();
     list = list.filter((career) => career.title.toLowerCase().includes(q) || career.world.toLowerCase().includes(q));
   }
-  if (sort === "A – Z") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+  if (sort === "A-Z") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
   if (sort === "Salary") {
     const value = (career: CatalogCareer) => (career.salary ? parseInt(career.salary.replace(/\D/g, ""), 10) : -1);
     list = [...list].sort((a, b) => value(b) - value(a));
@@ -689,7 +689,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       <DesktopNavigation active="Explore" />
 
       {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[120px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
+      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
         <button
           type="button"
           onClick={() => switchTab("foryou")}
@@ -709,9 +709,18 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Hamburger anchored top-right, same corner as every other page's
            mobile header -- it used to sit at the LEFT edge here, the one
            page out of step with the rest of the app. Search (Browse tab
-           only) sits just to its left instead of competing for the same
-           corner. */}
+           only) and the Colleges pill sit just to its left instead of
+           competing with For You/Browse All for the same row. */}
         <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-[10px]">
+          <button
+            type="button"
+            aria-label="Find a college"
+            onClick={() => router.push("/colleges")}
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <GraduationCap className="h-4 w-4" />
+          </button>
           {tab === "browse" && (
             <button
               type="button"
@@ -740,9 +749,12 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
-              Explore
-            </h1>
+            <div className="flex items-center gap-[var(--space-6)]">
+              <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+                Explore
+              </h1>
+              <ExploreSectionToggle active="careers" />
+            </div>
             <div className="flex min-w-0 items-center gap-[var(--space-6)]">
               {/* Search grows from icon to input; the toggle folds away while
                  it is open. */}

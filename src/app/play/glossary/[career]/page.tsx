@@ -6,7 +6,7 @@ import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
 export const metadata: Metadata = {
-  title: "Glossary Game — Dreamari",
+  title: "Glossary Game · Dreamari",
   description: "Learn the words behind a career, one term at a time.",
 };
 

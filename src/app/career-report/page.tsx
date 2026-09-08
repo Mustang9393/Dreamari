@@ -5,7 +5,7 @@ import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
 export const metadata: Metadata = {
-  title: "Your Career Reports — Dreamari",
+  title: "Your Career Reports · Dreamari",
   description: "Your Top 3 as full career reports. Choose the one to build your pathway and plan around.",
 };
 

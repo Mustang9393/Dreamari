@@ -407,7 +407,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
           <Image src="/images/dreamy/v2/dreamy-happy.png" alt="Dreamy waving hello" fill sizes="128px" className="object-contain" />
         </div>
         <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="Let’s find your dream career. ✨" /></h1>
-        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">A few quick questions about what excites you. About 2 minutes — there are no wrong answers.</p>
+        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">A few quick questions about what excites you. About 2 minutes, and there are no wrong answers.</p>
       </GlassCard>
       </div>
       </div>

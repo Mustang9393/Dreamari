@@ -7,7 +7,7 @@ import "@/components/app/app.css";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const c = collegeBySlug(slug);
-  return { title: c ? `${c.name} — Dreamari` : "College — Dreamari", description: c ? `${c.name}, ${c.city}, ${c.stateName}. What students really pay, who gets in, who finishes.` : "College lookup." };
+  return { title: c ? `${c.name} · Dreamari` : "College · Dreamari", description: c ? `${c.name}, ${c.city}, ${c.stateName}. What students really pay, who gets in, who finishes.` : "College lookup." };
 }
 
 export default async function CollegePage({ params }: { params: Promise<{ slug: string }> }) {
