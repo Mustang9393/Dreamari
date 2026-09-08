@@ -4,8 +4,8 @@ import { useRevealOnScroll } from "./scrollHooks";
 
 // Two credibility lines before the closing CTA on both landing pages (Joshua
 // Pierce, Slack, 6 Sept 2026; both pages per Chandu, 7 Sept): the corporate
-// network and the school work. The partner marks run as a ticker under the
-// lines (PartnerTicker).
+// network and the school work. The partner marks run as an all-at-once grid
+// under the lines (PartnerLogoGrid, PartnerTicker.tsx).
 export function TrustLine({ className = "pt-16 sm:pt-20" }: { className?: string }) {
   const [revealRef, revealed] = useRevealOnScroll<HTMLDivElement>();
   return (

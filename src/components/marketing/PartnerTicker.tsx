@@ -68,47 +68,6 @@ function sizeFor(ratio: number) {
   return { width: Math.round(w), height: Math.round(h) };
 }
 
-// tone: the Schools view is light, so its marks are ink silhouettes; the
-// student landing is dark, so they are white ones.
-export function PartnerTicker({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
-  // One rule per ground (Chandu, 7 Sept 2026: all or nothing). The light
-  // Schools page shows every mark in its own brand colours, EY's yellow beam
-  // included. The dark student page shows every mark in one-colour white,
-  // each brand's reversed one-colour logo: flat white for wordmarks, and
-  // inverted by luminance for emblems whose white counters are painted
-  // (HSBC's hexagon, the Warner Bros. shield), so they never turn into blocks.
-  const white = { filter: "brightness(0) invert(1)", opacity: 0.8 };
-  const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
-  const colour = { opacity: 0.92 };
-  const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
-  // two copies of the row, translated by half: a seamless loop
-  const row = (copy: number) => (
-    <ul aria-hidden={copy === 1} className="mkt-ticker-row flex flex-none items-center gap-x-12 pr-12 sm:gap-x-14 sm:pr-14">
-      {MARKS.map((mark) => {
-        const size = sizeFor(mark.ratio);
-        const file = mark.file;
-        const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
-        return (
-          <li key={mark.file} className="flex flex-none items-center" style={{ height: MAX_H }}>
-            {/* eager, never lazy: marks sliding in from outside the viewport on a
-               transformed track never trigger a lazy load and left holes in the row */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/images/marketing/partners/${file}`} alt={copy === 0 ? mark.name : ""} width={size.width} height={size.height} decoding="async" style={{ width: size.width, height: size.height, ...ink, objectFit: "contain" }} />
-          </li>
-        );
-      })}
-    </ul>
-  );
-  return (
-    <div className={`mkt-ticker relative w-full overflow-hidden ${className}`} aria-label="Corporate partners" role="group">
-      <div className="mkt-ticker-track flex w-max">
-        {row(0)}
-        {row(1)}
-      </div>
-    </div>
-  );
-}
-
 /** All the marks at once, wrapped into a dense grid instead of a scrolling
  *  row (direct feedback, 8 Sept 2026: "all at once... way more bombastic
  *  and impressive," dreamopportunity.org's own reference) -- but built from

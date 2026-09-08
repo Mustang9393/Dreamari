@@ -17,6 +17,13 @@
 // portrait works) and bump ILLUSTRATED_COUNT to bring them into rotation.
 const ILLUSTRATED_COUNT = 32;
 
+// student-13.png is byte-for-byte the same file as avatar-jordan.png (confirmed
+// via md5, 8 Sept 2026: direct feedback -- "Jordan and Marcus have the same
+// picture," Marcus's handle happens to hash to this index). Jordan's photo is
+// meant to be the one face nobody else wears, so this index is excluded from
+// the pool below rather than left to collide with whoever else hashes onto it.
+const JORDAN_DUPLICATE_INDEX = 12; // student-13.png, 0-based
+
 function hash(seed: string): number {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -40,6 +47,7 @@ function hash(seed: string): number {
  *  Avatar component. Still the same illustrated style, no real photo. */
 export function studentAvatarSrc(seed: string): string {
   if (seed === "Jordan" || seed === "Jordan Rivera") return "/images/avatar-jordan.png";
-  const index = hash(seed) % ILLUSTRATED_COUNT;
+  let index = hash(seed) % ILLUSTRATED_COUNT;
+  if (index === JORDAN_DUPLICATE_INDEX) index = (index + 1) % ILLUSTRATED_COUNT;
   return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
 }

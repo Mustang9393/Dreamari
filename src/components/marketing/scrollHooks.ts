@@ -86,6 +86,49 @@ export function useRevealOnScroll<T extends HTMLElement>() {
   return [ref, revealed] as const;
 }
 
+// Which of N rows is "active" for a sticky-column scrollytelling section (the
+// Schools page's five stages): a row becomes active the moment it crosses a
+// thin band centered in the viewport, tracked by one IntersectionObserver
+// shared across all N rows. This replaces an earlier version that crossfaded
+// the sticky graphic on its own timer, decoupled from the copy's actual
+// scroll position -- direct feedback, 7 Sept 2026, "doesn't work properly
+// when scrolling": the copy could sit screens away from the graphic it no
+// longer matched. Deriving "active" straight from each row's real bounding
+// box on every crossing means there is no independent clock to fall out of
+// step with -- the graphic can only ever reflect where the reader actually is.
+export function useScrollActiveStage(count: number) {
+  const elsRef = useRef<(HTMLElement | null)[]>([]);
+  const [active, setActive] = useState(0);
+  const setRef = (i: number) => (el: HTMLElement | null) => {
+    elsRef.current[i] = el;
+  };
+  useEffect(() => {
+    const els = elsRef.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        // Several rows can report simultaneously (a short one fully inside
+        // the band while a tall neighbour still straddles it) -- prefer
+        // whichever is intersecting AND closest to dead center, so a short
+        // stage doesn't lose the active state to a merely-adjacent tall one.
+        let best: { i: number; dist: number } | null = null;
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const i = els.indexOf(entry.target as HTMLElement);
+          if (i === -1) continue;
+          const center = entry.boundingClientRect.top + entry.boundingClientRect.height / 2;
+          const dist = Math.abs(center - window.innerHeight / 2);
+          if (!best || dist < best.dist) best = { i, dist };
+        }
+        if (best) setActive(best.i);
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+    els.forEach((el) => el && io.observe(el));
+    return () => io.disconnect();
+  }, [count]);
+  return [setRef, active] as const;
+}
+
 /** Scroll to a chapter from code (a finished interaction, the side rail).
  *  On phones the document snaps y-mandatory; a smooth scroll fights that and
  *  gets pulled back to the chapter it started in (seen on an iPhone). So the

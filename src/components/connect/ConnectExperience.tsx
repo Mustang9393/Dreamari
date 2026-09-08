@@ -235,8 +235,8 @@ function ResponderStack({ thread, size = 20, max = 3 }: { thread: Thread; size?:
  *  is a door you have to decide to open. Where the question goes is chosen in
  *  the sheet that opens, so this reads the same on every tab. */
 // The doc's composer, one for one: a "What do you want to ask?" field with
-// AI Ideas / Polish / Post actions along its bottom edge. All three open the
-// same Ask flow -- drafting, AI suggestions and posting live in the sheet.
+// Cancel/Post actions along its bottom edge. (AI Ideas/Polish removed 8 Sept
+// 2026 -- no AI integration for now.)
 /** Posting happens in place, not in a modal: a collapsed invitation that
  *  expands into a real composer right at the top of the feed. Reading is
  *  free; the first attempt to post in an un-joined community routes
@@ -302,12 +302,6 @@ function InlineAsk({
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
-        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
-          <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
-        </button>
-        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          Polish
-        </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel

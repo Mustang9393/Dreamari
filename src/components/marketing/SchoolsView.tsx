@@ -10,7 +10,7 @@ import { Disclosure } from "./Disclosure";
 import { DO_COPY } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
 import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, HeroVisual, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
-import { useRevealOnScroll } from "./scrollHooks";
+import { useRevealOnScroll, useScrollActiveStage } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
 type SchoolsViewProps = {
@@ -234,28 +234,59 @@ function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onT
   );
 }
 
-// One stage, one normal-flow row: copy on one side, its real card on the
-// other, alternating down the page. This replaces a sticky column whose
-// graphic crossfaded on an IntersectionObserver timer (direct feedback, 7
-// Sept 2026: "doesn't work properly when scrolling" -- a stage's copy could
-// sit two screens away from the frame showing a DIFFERENT stage, and a tall
-// min-height block left large dead gaps between consecutive stage headers).
-// A plain alternating row can't desync from its own scroll position: the
-// card sits right next to its own copy, in document flow, always in sync,
-// the same pattern most feature-walk pages on the web use for exactly this
-// reason. Every stage gets the same treatment -- including Build, previously
-// the only one not centered -- because there is no more "active" stage to
-// treat specially.
-function StageRow({ stage, flip, open, onToggle }: { stage: Stage; flip: boolean; open: boolean; onToggle: () => void }) {
+// Mobile/tablet: one stage, one normal-flow row, copy stacked above its own
+// card. Below lg the sticky column (StickyStages, below) isn't shown at all --
+// a pinned side-by-side layout needs the width to read as two columns, and
+// forcing it onto a narrow screen is exactly the kind of "ugly" a zig-zag
+// was trying (and failing) to avoid. A plain stack can't desync from itself
+// either way, so it stays the simple, safe fallback.
+function StageRowMobile({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
   return (
-    <li className="grid grid-cols-1 items-center gap-8 py-10 sm:py-12 lg:grid-cols-12 lg:gap-14 lg:py-16">
-      <Reveal className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
+    <li className="flex flex-col items-center gap-8 py-10 sm:py-12">
+      <Reveal className="w-full">
         <StageCopy stage={stage} open={open} onToggle={onToggle} />
       </Reveal>
-      <Reveal className={`flex justify-center lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
-        {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4] lg:aspect-[4/5] lg:max-w-[460px]">{stage.art}</Frame>}
+      <Reveal className="flex w-full justify-center">
+        {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4]">{stage.art}</Frame>}
       </Reveal>
     </li>
+  );
+}
+
+// Desktop: the sticky column back, done right this time. A single
+// IntersectionObserver-driven "active" index (useScrollActiveStage) tracks
+// which stage's copy is centered in the viewport as the reader scrolls --
+// not a timer, so the graphic literally cannot show a stage the reader isn't
+// reading (the bug that got this pattern pulled on 7 Sept 2026). The right
+// column stacks all five cards in one sticky box and crossfades opacity
+// between them; the left column is plain document flow, one generous row per
+// stage so each graphic gets a real dwell instead of flashing past.
+function StickyStages({ openStages, toggleStage }: { openStages: Set<string>; toggleStage: (n: string) => void }) {
+  const [setRef, active] = useScrollActiveStage(STAGES.length);
+  return (
+    <div className="hidden lg:grid lg:grid-cols-12 lg:gap-14">
+      <ol className="lg:col-span-5">
+        {STAGES.map((stage, i) => (
+          <li key={stage.n} ref={setRef(i)} className="flex min-h-[62vh] flex-col justify-center py-12">
+            <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
+          </li>
+        ))}
+      </ol>
+      <div className="lg:col-span-7">
+        <div className="sticky top-24 flex h-[min(560px,70vh)] items-center justify-center">
+          {STAGES.map((stage, i) => (
+            <div
+              key={stage.n}
+              aria-hidden={active !== i}
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out"
+              style={{ opacity: active === i ? 1 : 0, pointerEvents: active === i ? "auto" : "none" }}
+            >
+              {stage.bare ? stage.art : <Frame className="aspect-[4/5] h-full sm:aspect-[5/4] lg:aspect-[4/5]">{stage.art}</Frame>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -359,11 +390,14 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <Reveal>
             <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
-          <ol className="mt-4 divide-y sm:mt-8 lg:mt-4" style={{ borderColor: "var(--border)" }}>
-            {STAGES.map((stage, i) => (
-              <StageRow key={stage.n} stage={stage} flip={i % 2 === 1} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
+          <ol className="mt-4 divide-y sm:mt-8 lg:hidden" style={{ borderColor: "var(--border)" }}>
+            {STAGES.map((stage) => (
+              <StageRowMobile key={stage.n} stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
             ))}
           </ol>
+          <div className="mt-4">
+            <StickyStages openStages={openStages} toggleStage={toggleStage} />
+          </div>
         </div>
       </section>
 
@@ -437,7 +471,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               </div>
               <div className="lg:col-span-6">
                 <DataArt />
-                <Caption>Career ladder from the Investment Banking detail page.</Caption>
+                <Caption>Pay by state and career ladder, from the Investment Banking detail page.</Caption>
               </div>
             </div>
           </Reveal>

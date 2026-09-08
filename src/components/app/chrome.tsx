@@ -32,34 +32,33 @@ export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var
 // Careers and Colleges both live conceptually inside Explore but are
 // separate routes/pages (each with its own search and filters), so
 // switching sections is a real navigation, not a client-side tab -- this
-// toggle sits in both ExploreExperience's and CollegesExperience's headers.
+// sits in both ExploreExperience's and CollegesExperience's headers, next to
+// the page title. Deliberately quiet (breadcrumb-weight text, no pill) --
+// direct feedback, 8 Sept 2026: sitting it as a second full segmented
+// control next to Explore's own For You/Browse All pill read as two
+// equally-loud toggles fighting for attention, when really they answer two
+// different questions (which section vs. what's shown within it). A plain
+// "Careers / Colleges" pair reads as page-level, not content-level, so it
+// doesn't compete with the pill for weight.
 export function ExploreSectionToggle({ active }: { active: "careers" | "colleges" }) {
   const router = useRouter();
+  const ITEMS = [
+    { key: "careers", label: "Careers", href: "/explore" },
+    { key: "colleges", label: "Colleges", href: "/colleges" },
+  ] as const;
   return (
-    <div
-      className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-    >
-      {(
-        [
-          { key: "careers", label: "Careers", href: "/explore" },
-          { key: "colleges", label: "Colleges", href: "/colleges" },
-        ] as const
-      ).map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          aria-pressed={active === item.key}
-          onClick={() => active !== item.key && router.push(item.href)}
-          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
-          style={{
-            fontFamily: "var(--font-body)",
-            background: active === item.key ? "var(--primary)" : "transparent",
-            color: active === item.key ? "var(--primary-foreground)" : "var(--foreground)",
-          }}
-        >
-          {item.label}
-        </button>
+    <div className="flex items-center gap-[8px] text-[13px] leading-[18px] font-bold uppercase" style={{ fontFamily: "var(--font-body)" }}>
+      {ITEMS.map((item, i) => (
+        <span key={item.key} className="flex items-center gap-[8px]">
+          {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>/</span>}
+          {active === item.key ? (
+            <span style={{ color: "var(--foreground)" }}>{item.label}</span>
+          ) : (
+            <button type="button" onClick={() => router.push(item.href)} className="dm-link cursor-pointer" style={{ color: "var(--muted-foreground)" }}>
+              {item.label}
+            </button>
+          )}
+        </span>
       ))}
     </div>
   );
