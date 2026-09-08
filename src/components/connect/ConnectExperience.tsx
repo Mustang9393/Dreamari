@@ -3556,73 +3556,83 @@ function InsightThreadView({
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">
-        <div className="rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+        {/* Plain on the page's own colored backdrop, same as ThreadView's
+           header -- no bordered/tinted card box (direct feedback, 9 Sept
+           2026: "the professional insight opened page should also follow
+           the question page ... on top with the colored backdrop"). */}
+        <div>
           <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
           <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
           <p className="mt-[10px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{pro.verifiedBy}</p>
-          <div className="mt-[14px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-            <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-                <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
-              </button>
-              <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-                <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
-              </button>
-              <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
-                <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
-              </button>
-              <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
-                <Flag className="h-3 w-3" aria-hidden /> Report
-              </button>
-            </div>
-          </div>
         </div>
 
-        <section aria-label="Comments" className="flex flex-col gap-[var(--space-4)]">
-          <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            Comments ({insight.replies.length + posted.length})
-          </h2>
-          <div className="flex flex-col gap-[var(--space-4)]">
-            {insight.replies.map((reply, index) => {
-              const rid = `${insight.id}-r${index}`;
-              const isPro = !!reply.proId;
-              return (
+        <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
+          </button>
+          <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+            <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+          </button>
+          <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
+            <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
+          </button>
+          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+            <Flag className="h-3 w-3" aria-hidden /> Report
+          </button>
+        </div>
+
+        {/* A solid, edge-to-edge surface for the whole comment stream --
+           the exact same full-bleed panel ThreadView uses for its answers
+           (direct feedback, 9 Sept 2026), so the insight itself reads as
+           its own thing above a clearly separate "comments" zone instead
+           of one continuous wash. */}
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+            <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              Comments ({insight.replies.length + posted.length})
+            </h2>
+            <div className="flex flex-col gap-[var(--space-4)]">
+              {insight.replies.map((reply, index) => {
+                const rid = `${insight.id}-r${index}`;
+                const isPro = !!reply.proId;
+                return (
+                  <CommentRow
+                    key={rid}
+                    id={rid}
+                    name={isPro ? proById(reply.proId!).name : reply.handle!}
+                    chip={isPro ? "Professional" : "Student"}
+                    meta={isPro ? undefined : reply.grade}
+                    chipTone={isPro ? "pro" : "student"}
+                    body={reply.body}
+                    postedAgo={reply.postedAgo}
+                    likes={reply.likes}
+                    liked={!!helpfuls[rid]}
+                    onLike={toggleHelpful}
+                    image={reply.image}
+                    imageAlt={reply.imageAlt}
+                  />
+                );
+              })}
+              {posted.map((reply) => (
                 <CommentRow
-                  key={rid}
-                  id={rid}
-                  name={isPro ? proById(reply.proId!).name : reply.handle!}
-                  chip={isPro ? "Professional" : "Student"}
-                  meta={isPro ? undefined : reply.grade}
-                  chipTone={isPro ? "pro" : "student"}
+                  key={reply.id}
+                  id={reply.id}
+                  name="Jordan"
+                  chip="Junior"
+                  chipTone="student"
                   body={reply.body}
-                  postedAgo={reply.postedAgo}
-                  likes={reply.likes}
-                  liked={!!helpfuls[rid]}
+                  postedAgo="Just now"
+                  likes={0}
+                  liked={!!helpfuls[reply.id]}
                   onLike={toggleHelpful}
-                  image={reply.image}
-                  imageAlt={reply.imageAlt}
                 />
-              );
-            })}
-            {posted.map((reply) => (
-              <CommentRow
-                key={reply.id}
-                id={reply.id}
-                name="Jordan"
-                chip="Junior"
-                chipTone="student"
-                body={reply.body}
-                postedAgo="Just now"
-                likes={0}
-                liked={!!helpfuls[reply.id]}
-                onLike={toggleHelpful}
-              />
-            ))}
+              ))}
+            </div>
+            <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
           </div>
-          <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
-        </section>
+        </div>
       </article>
     </>
   );
