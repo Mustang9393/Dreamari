@@ -44,7 +44,14 @@ const DEMO_ALWAYS_SHOW_GUIDE = false;
 const GUIDE_ORDER = ["up", "right", "left"] as const;
 type GestureKind = (typeof GUIDE_ORDER)[number];
 const GUIDE_LABEL: Record<GestureKind, string> = {
-  up: "Scroll up for details",
+  // Label says "down" (direct feedback: "i think its scroll down not up") --
+  // universal scroll convention: "scroll down" means reveal more content
+  // BELOW, which is what this does. "up" here (GUIDE_ORDER, the icon's own
+  // upward-drifting motion) still correctly names the ON-SCREEN CONTENT's
+  // travel direction -- content moves up as you scroll down, same as
+  // scrolling any page -- so only the user-facing word changes, not the
+  // internal direction value everything else keys off of.
+  up: "Scroll down for details",
   right: "Swipe right to save",
   left: "Swipe left to pass",
 };
@@ -362,22 +369,27 @@ export function MatchLab() {
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated]);
   // While it's up, walk scroll-up -> swipe right -> swipe left, one
-  // GestureHint cycle's dwell on each, for two full loops -- then stop on
-  // its own. A real gesture ends it early at any point (markDemonstratedRef
-  // above). Only the direction/label change on the ONE persistent overlay,
-  // so the dark scrim never drops and re-raises between gestures -- that
-  // mount/unmount flicker was the complaint with the earlier per-gesture
-  // instances.
+  // GestureHint cycle's dwell on each -- except scroll-up, which keeps
+  // recycling itself instead of moving on after one dwell (direct
+  // feedback, 8 Sept 2026: "have the scroll nudge reappear and be
+  // persistent until they scroll for real, in case they don't see it
+  // the first time" -- it's the least familiar of the three gestures,
+  // so a single 2.6s window is the one most likely to be missed). Swipe
+  // right/left still cap at two loops apiece and then stop on their own.
+  // A real gesture ends the whole thing early at any point
+  // (markDemonstratedRef above) -- that's still the only true exit for
+  // scroll-up. Only the direction/label change on the ONE persistent
+  // overlay, so the dark scrim never drops and re-raises between
+  // gestures -- that mount/unmount flicker was the complaint with the
+  // earlier per-gesture instances.
   useEffect(() => {
     if (guideGesture === null) return;
     const timer = window.setTimeout(() => {
-      guideStepRef.current += 1;
-      if (guideStepRef.current >= GUIDE_ORDER.length * 2) {
-        setGuideGesture(null);
-        return;
-      }
       setGuideGesture((current) => {
         if (current === null) return null;
+        if (current === "up") return "up"; // recycles until a real scroll ends it
+        guideStepRef.current += 1;
+        if (guideStepRef.current >= (GUIDE_ORDER.length - 1) * 2) return null;
         const index = GUIDE_ORDER.indexOf(current);
         return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
       });
@@ -578,7 +590,7 @@ export function MatchLab() {
                           ? "guide-preview-right motion-safe:animate-[guide-nudge-right_2.6s_ease-in-out_infinite]"
                           : guideGesture === "left"
                             ? "guide-preview-left motion-safe:animate-[guide-nudge-left_2.6s_ease-in-out_infinite]"
-                            : "motion-safe:animate-[guide-nudge-up_2.6s_ease-in-out_infinite]"
+                            : ""
                     }`}
                     style={{
                       background: "var(--color-night-card)",
@@ -605,7 +617,7 @@ export function MatchLab() {
                     onPointerCancel={isTop ? onPointerUp : undefined}
                     aria-hidden={!isTop}
                   >
-                    <CardBody career={career} isTop={isTop} dragX={isTop ? dragX : 0} />
+                    <CardBody career={career} isTop={isTop} dragX={isTop ? dragX : 0} previewScrollUp={nudging && guideGesture === "up"} />
                   </div>
                 );
               })
@@ -785,7 +797,7 @@ export function MatchLab() {
 
 // ---------------------------------------------------------------- pieces ----
 
-export function CardBody({ career, isTop, dragX }: { career: Career; isTop: boolean; dragX: number }) {
+export function CardBody({ career, isTop, dragX, previewScrollUp = false }: { career: Career; isTop: boolean; dragX: number; /** Preview what scrolling actually does (the inner content peeks up, card frame fixed) instead of the whole card lifting like a drag (direct feedback: "show what actually happens when you scroll"). */ previewScrollUp?: boolean }) {
   return (
     <div className="relative h-full w-full">
       {/* stamps live at card level, above the scroll */}
@@ -801,7 +813,34 @@ export function CardBody({ career, isTop, dragX }: { career: Career; isTop: bool
       )}
 
       {/* the dating-app profile scroll: full-height poster first, sections below */}
-      <div data-card-scroller className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]" style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}>
+      <div
+        data-card-scroller
+        className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]"
+        style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}
+      >
+        {/* The animation lives on THIS wrapper (all of the scroller's own
+           content), not the scroller frame itself -- a transform on the
+           frame just slides the whole (still scrolled-to-top) box behind
+           the same clip and reveals empty background, not the sections
+           below (direct feedback: "I don't see the content that is
+           naturally present when you scroll... why is that?"). Moving the
+           CONTENT up inside a frame that stays put is what actually
+           previews a scroll.
+           h-full (not min-h-full) is load-bearing: the HERO right below
+           sizes itself to `height: 100%`, which per spec only resolves
+           against an ancestor with an explicit `height`, never a
+           `min-height` floor -- min-h-full still left the wrapper's own
+           height as "auto" for this purpose, so the hero's 100% fell back
+           to its intrinsic (image) size instead of filling the card, and
+           the sections below sat exposed at rest with no scrolling
+           needed at all (direct feedback: "why is it showing the copy
+           before I scroll... it should show the copy ONLY ON SCROLL").
+           An explicit height still lets the sections below overflow past
+           it -- they're normal-flow content past the end of a box with a
+           SET height, not a max-height that clips them -- so the scroller
+           still measures the true (taller) scrollHeight and stays
+           scrollable exactly as before. */}
+        <div className={`h-full ${previewScrollUp ? "motion-safe:animate-[guide-nudge-up_2.6s_ease-in-out_infinite]" : ""}`}>
         {/* ---- HERO: the Browse Card face, exactly — poster art, DS text
            scrim, title in the world's own face, world label beneath.
            Employers + salary sit as matched quiet chips in the top corners. ---- */}
@@ -882,6 +921,7 @@ export function CardBody({ career, isTop, dragX }: { career: Career; isTop: bool
               {career.tradeoff}
             </p>
           </BreakdownSection>
+        </div>
         </div>
       </div>
     </div>

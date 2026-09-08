@@ -320,15 +320,30 @@ body {
     transform: translateX(0) rotate(0deg);
   }
 }
+/* Applied to the card's own INNER scroller (data-card-scroller), not the
+   outer card -- direct feedback: "don't make the card lift up when the
+   nudge is showing, show what actually happens when you scroll." Scrolling
+   this card doesn't move the card; it reveals more of the content inside
+   it. The outer card keeps overflow-hidden, so this peek clips exactly the
+   way a real scroll would -- the frame stays put, the content moves.
+   Travels far enough to bring the NEXT section's own heading into view
+   and holds there for a beat -- a peek that proves scrolling reveals more
+   (direct feedback: "scroll up until the following content is visible,
+   otherwise nobody sees the scroll doing anything meaningful"), not the
+   whole section's body copy dumped at once (direct feedback right after:
+   "don't show the entire copy, just a peek"). */
 @keyframes guide-nudge-up {
   0%,
   9% {
     transform: translateY(0);
   }
-  32% {
-    transform: translateY(-14px);
+  30% {
+    transform: translateY(-52px);
   }
-  46%,
+  46% {
+    transform: translateY(-52px);
+  }
+  62%,
   100% {
     transform: translateY(0);
   }
@@ -352,6 +367,31 @@ body {
   }
   46%,
   100% {
+    opacity: 0;
+  }
+}
+
+/* The "up" direction's own motion: a mouse scroll-wheel notch sliding down
+   inside a mouse-body outline, not a dot traveling a path -- direct
+   feedback: "make the nudge look more like a mouse scroll than a grab and
+   drag" (the traveling-dot metaphor reads as a finger press-and-drag,
+   which is the wrong gesture to teach for a wheel-scroll). Same phase
+   timing as gesture-hint-move so both stay on the shared 2.6s cycle. */
+@keyframes gesture-hint-wheel {
+  0%,
+  6% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  9% {
+    opacity: 0.95;
+  }
+  32% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
     opacity: 0;
   }
 }

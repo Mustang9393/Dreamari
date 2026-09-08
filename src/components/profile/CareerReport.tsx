@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, ListChecks, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -295,9 +295,9 @@ function ReportDocument({
           }
         >
           <dl className="grid gap-[14px] sm:grid-cols-2" data-keep-together>
-            <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
-            <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
-            <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
+            <Fact label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
+            <Fact label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
+            <Fact label="U.S. Median Salary" value={`${report.salary.median.replace(/^\$/, "")} a year`} />
           </dl>
         </ReportSection>
 

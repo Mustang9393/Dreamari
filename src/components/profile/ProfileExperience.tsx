@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
-import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -251,7 +251,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
-  const avatarStyle = useAvatarStyle();
   // Covers are curated backgrounds only (CEO, 4 Sept): no career-poster
   // switch, no uploads (inappropriate-content risk). The real app should
   // carry about 40 strong options; the prototype ships six.
@@ -501,11 +500,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  not just Connect) -- same seed, same face as everywhere
                  else the student appears; no upload control, since there is
                  no photo to upload anymore. */}
-              <span
-                className="size-[72px] flex-none overflow-hidden rounded-full border-2"
+              <Image
+                src={studentAvatarSrc(STUDENT.name.split(" ")[0] || STUDENT.name)}
+                alt=""
+                width={144}
+                height={144}
+                className="size-[72px] flex-none rounded-full border-2 object-cover"
                 style={{ borderColor: "rgba(255,255,255,0.9)" }}
-                // eslint-disable-next-line react/no-danger -- locally generated SVG, never user input
-                dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(STUDENT.name.split(" ")[0] || STUDENT.name, avatarStyle) }}
               />
               <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
                 <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>

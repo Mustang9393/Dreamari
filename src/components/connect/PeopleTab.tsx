@@ -1,12 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, MessagesSquare, Sparkles, Zap, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
-import { readPicks } from "@/lib/picks";
 import { PROS, type Pro } from "./data";
-import { Avatar, ConnectNav, ProAvatar, SectionHead, VerifiedBadge } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, VerifiedBadge } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, type Follows } from "./ProProfile";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
@@ -36,7 +35,7 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
             <VerifiedBadge size={13} />
           </span>
           <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
-          <p className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org}</p>
+          <div className="mt-[2px]"><CompanyChip name={pro.org} tone="surface" size="sm" /></div>
         </div>
       </div>
       <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[4px] text-[11px] leading-[15px] font-bold tracking-[0.02em]" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
@@ -85,15 +84,13 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
   );
 }
 
-// The People tab, built from Joshua's reference (Slack, 6 and 7 Sept 2026):
-// two views, For you and Browse industries. For you: Find a professional
-// (the student's own careers as chips, a way into every industry), For you
-// today (one verified professional per Top 3 career, each with a question
-// they answered), Browse by industry (every world with its professional
-// count; tap one to browse its profiles), then New from people you follow.
-// Browse industries: choose an industry to meet people who actually do the
-// work. Everything is drawn from Connect's own verified professionals; nothing
-// here ranks students.
+// The People tab, matched to Joshua's reference (Slack, 6-8 Sept 2026): one
+// continuous page, no segmented "For you / Browse industries" tab switch --
+// Find a professional, People to follow, Browse by industry (every world
+// with its professional count; tap one to browse its profiles, "Explore all
+// industries" expands the same grid to every world instead of switching to
+// a separate screen), then New from people you follow. Everything is drawn
+// from Connect's own verified professionals; nothing here ranks students.
 
 const WORLD_ICON: Record<string, LucideIcon> = {
   "Business & Money": Landmark,
@@ -113,37 +110,6 @@ const WORLD_ICON: Record<string, LucideIcon> = {
   "Personal Care & Community Services": Scissors,
 };
 const WORLDS = Object.keys(WORLD_COLORS);
-
-type View = "for-you" | "browse";
-
-/** The student's Top 3 career titles, in order, from their saved picks. */
-function useStudentCareers(): { title: string; world: string }[] {
-  const [careers, setCareers] = useState<{ title: string; world: string }[]>([]);
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const ids = readPicks().ids;
-      setCareers(ids.map((id) => DECK.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => Boolean(c)).map((c) => ({ title: c.title, world: c.world })));
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-  return careers;
-}
-
-function Segmented({ view, onView }: { view: View; onView: (view: View) => void }) {
-  const items: { key: View; label: string }[] = [{ key: "for-you", label: "For you" }, { key: "browse", label: "Browse industries" }];
-  return (
-    <div role="tablist" aria-label="People views" className="flex w-fit gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      {items.map((item) => {
-        const on = item.key === view;
-        return (
-          <button key={item.key} type="button" role="tab" aria-selected={on} onClick={() => onView(item.key)} className="dm-quiet flex min-h-[34px] cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[12.5px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "var(--muted-foreground)" }}>
-            {item.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 function WorldTile({ world, count, unit, onOpen }: { world: string; count: number; unit: string; onOpen: () => void }) {
   const Icon = WORLD_ICON[world] ?? Sparkles;
@@ -221,9 +187,8 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
 
 export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFollow: (id: string) => void; query: string }) {
   const worlds = useStudentWorlds();
-  const careers = useStudentCareers();
-  const [view, setView] = useState<View>("for-you");
   const [industry, setIndustry] = useState<string | null>(null);
+  const [showAllIndustries, setShowAllIndustries] = useState(false);
 
   const q = query.trim().toLowerCase();
   const matches = useMemo(() => PROS.filter((p) => !q || [p.name, p.role, p.org, p.field, p.world, ...(p.topics ?? [])].some((v) => v.toLowerCase().includes(q))), [q]);
@@ -257,72 +222,43 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
     );
   }
 
+  const shownWorlds = showAllIndustries ? WORLDS : WORLDS.filter((w) => countIn(w) > 0);
+
   return (
     <>
-      <Segmented view={view} onView={setView} />
+      {/* "Find a professional" itself heads the shared search box one
+         level up (ConnectExperience's HomeView), not here -- no second
+         row of career chips repeating it either (direct feedback, Joshua
+         Pierce, 8 Sept 2026: "does not match yet -- still has ... your
+         careers - investment banker etc"). One page, in the reference's
+         own order: Find a professional, People to follow, Browse by
+         industry, New from people you follow -- no segmented "For you /
+         Browse industries" tab switching between them (direct feedback:
+         "still has browse industries toggle"). */}
+      <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
+        <div className="flex flex-col gap-[2px]">
+          <SectionHead>People to follow</SectionHead>
+          <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
+        </div>
+        <FollowCarousel pros={rankPros(PROS, worlds)} follows={follows} onFollow={onFollow} />
+      </section>
 
-      {view === "for-you" && (
-        <>
-          {/* Find a professional: the student's own careers as the first
-             filters, and the way into every industry -- a quick-filter
-             strip, not real content, so it doesn't need its own box
-             (direct feedback: too much of the tab was cards and chrome). */}
-          <div className="flex flex-wrap items-center gap-[8px]" aria-label="Find a professional">
-            {careers.length === 0 ? (
-              <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Save your Top 3 in Match and the people who do those jobs appear here.</p>
-            ) : (
-              <>
-                <span className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your careers</span>
-                {careers.slice(0, 3).map((career) => (
-                  <button key={career.title} type="button" onClick={() => setIndustry(career.world)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" }}>{career.title}</button>
-                ))}
-              </>
-            )}
-            <button type="button" onClick={() => setView("browse")} className="dm-link ml-auto flex min-h-[28px] cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+      <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
+        <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+          <div className="flex flex-col gap-[2px]">
+            <SectionHead>Browse by industry</SectionHead>
+            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
           </div>
+          {!showAllIndustries && shownWorlds.length < WORLDS.length && (
+            <button type="button" onClick={() => setShowAllIndustries(true)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+          )}
+        </div>
+        <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
+          {shownWorlds.map((world) => <WorldTile key={world} world={world} count={showAllIndustries ? pathsIn(world) : countIn(world)} unit={showAllIndustries ? "career path" : "professional"} onOpen={() => setIndustry(world)} />)}
+        </ul>
+      </section>
 
-          {/* People to follow: one ranked, paginated carousel instead of a
-             rail AND a separate "for you today" grid that showed mostly
-             the same people twice (direct feedback: match the Replit
-             reference's structure -- Find a professional, People to
-             follow, Browse by industry, New from people you follow, in
-             that order, one section per idea). */}
-          <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
-            <div className="flex flex-col gap-[2px]">
-              <SectionHead>People to follow</SectionHead>
-              <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
-            </div>
-            <FollowCarousel pros={rankPros(PROS, worlds)} follows={follows} onFollow={onFollow} />
-          </section>
-
-          <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
-            <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-              <div className="flex flex-col gap-[2px]">
-                <SectionHead>Browse by industry</SectionHead>
-                <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
-              </div>
-              <button type="button" onClick={() => setView("browse")} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-            </div>
-            <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
-              {WORLDS.filter((w) => countIn(w) > 0).map((world) => <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} />)}
-            </ul>
-          </section>
-
-          <NewFromFollowing follows={follows} />
-        </>
-      )}
-
-      {view === "browse" && (
-        <section className="flex flex-col gap-[var(--space-4)]" aria-label="Browse industries">
-          <div className="flex flex-col gap-[4px]">
-            <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--accent-subtle)" }}>Browse by industry</span>
-            <h2 className="max-w-[640px] text-[24px] leading-[29px] font-extrabold text-balance sm:text-[28px] sm:leading-[33px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Choose an industry to meet people who actually do the work.</h2>
-          </div>
-          <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
-            {WORLDS.map((world) => <WorldTile key={world} world={world} count={pathsIn(world)} unit="career path" onOpen={() => setIndustry(world)} />)}
-          </ul>
-        </section>
-      )}
+      <NewFromFollowing follows={follows} />
     </>
   );
 }

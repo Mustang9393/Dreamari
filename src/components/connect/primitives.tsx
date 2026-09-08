@@ -9,7 +9,7 @@ import Image from "next/image";
 import { createContext, useContext, useState } from "react";
 import { ArrowRight, Check, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { generatedAvatarSvg, useAvatarStyle } from "@/lib/avatar";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
 
 /** In-page navigation for anything rendered inside Connect: lets a pro's
@@ -95,7 +95,7 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Jasmine Cole": `${AV}/pro-cole.jpg`,
   "Nadia Osei": `${AV}/pro-osei.jpg`,
   "Wei Zhang": `${AV}/pro-zhang.jpg`,
-  "Tom Gallagher": `${AV}/pro-gallagher.jpg`,
+  "Ryan Kessler": `${AV}/pro-gallagher.jpg`,
   "Sofia Grant": `${AV}/pro-grant.jpg`,
   "Andre Whitfield": `${AV}/pro-whitfield.jpg`,
   "Keiko Tanaka": `${AV}/pro-tanaka.jpg`,
@@ -148,14 +148,12 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
   // the app's first-name-only identity rule) generate the identical
   // avatar -- one consistent face per person, not one per string variant.
   const seed = name.split(" ")[0] || name;
-  const avatarStyle = useAvatarStyle();
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
       {photo ? (
         <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       ) : (
-        // eslint-disable-next-line react/no-danger -- locally generated SVG, never user input
-        <span className="block h-full w-full overflow-hidden rounded-full" style={{ background: "var(--secondary)" }} dangerouslySetInnerHTML={{ __html: generatedAvatarSvg(seed, avatarStyle) }} />
+        <Image src={studentAvatarSrc(seed)} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       )}
     </span>
   );
@@ -612,7 +610,21 @@ export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   Adobe: { bg: "#FA0F00", ink: "#FFFFFF" },
   "Goldman Sachs": { bg: "#7399C6", ink: "#FFFFFF" },
   "Junior Achievement": { bg: "#1aa7b5", ink: "#FFFFFF" },
-  Blackstone: { bg: "#000000", ink: "#FFFFFF" },
+  // Blackstone's own mark is black-on-white, which is exactly the case
+  // partnerAccent() rejects (a literal #000000 reads as "no color" against
+  // this app's dark surfaces, not as Blackstone's brand) -- this is their
+  // own deep-navy secondary tone from investor materials, dark enough to
+  // stay dignified but distinct from flat black.
+  Blackstone: { bg: "#14213D", ink: "#FFFFFF" },
+  // Same red already recorded for its own logo mark's accent glyph below
+  // (COMPANY_MARKS["SEO Scholars"].accent) -- not a new guess, just reused
+  // here so partnerAccent() can find it too.
+  "SEO Scholars": { bg: "#EA0029", ink: "#FFFFFF" },
+  // Best-effort, not verified against JAG's official brand guidelines --
+  // their public materials lean red/maroon, distinct from every other
+  // accent already registered here. Worth swapping if you have the real
+  // hex on hand.
+  JAG: { bg: "#8B1E2F", ink: "#FFFFFF" },
 };
 
 /** A mark sized by its LETTERS: the container is exactly `letterHeight` tall,

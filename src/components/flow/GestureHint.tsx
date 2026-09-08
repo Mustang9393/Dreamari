@@ -56,6 +56,34 @@ export function GestureHint({
   const restTop = direction === "up" ? h - size : (h - size) / 2;
   const style = { "--hint-dx": `${dx}px`, "--hint-dy": `${dy}px` } as CSSProperties;
 
+  // "Up" means scroll, not swipe -- a mouse's own scroll wheel (a notch
+  // sliding inside the mouse body), not a dot traveling a path the way
+  // left/right's finger-drag does (direct feedback: "make the nudge look
+  // more like a mouse scroll than a grab and drag"). No ripple either --
+  // a wheel-scroll has no touch-down point to spotlight.
+  if (direction === "up") {
+    const mouseW = size * 0.62;
+    const mouseH = size * 1.05;
+    return (
+      <span aria-hidden className={`relative inline-flex flex-none items-start justify-center ${className}`} style={{ width: mouseW, height: mouseH }}>
+        <span style={{ position: "absolute", inset: 0, borderRadius: 999, border: `2px solid ${color}`, boxSizing: "border-box" }} />
+        <span
+          className="motion-safe:animate-[gesture-hint-wheel_2.6s_ease-in-out_infinite]"
+          style={{
+            position: "absolute",
+            top: mouseH * 0.2,
+            left: "50%",
+            width: Math.max(2, size * 0.1),
+            height: mouseH * 0.24,
+            marginLeft: -Math.max(1, size * 0.05),
+            borderRadius: 999,
+            background: color,
+          }}
+        />
+      </span>
+    );
+  }
+
   return (
     <span aria-hidden className={`relative inline-block flex-none ${className}`} style={{ width: w, height: h }}>
       {/* Touch-down ripple at the rest point. */}

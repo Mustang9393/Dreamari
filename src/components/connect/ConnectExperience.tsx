@@ -64,7 +64,6 @@ const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: 
   folder: { Icon: FolderOpen, label: "Folder" },
 };
 import { AdminDashboardView } from "./AdminDashboard";
-import { AVATAR_STYLES, setAvatarStyle, useAvatarStyle } from "@/lib/avatar";
 import {
   COMMUNITIES,
   EVENTS,
@@ -186,6 +185,47 @@ function questionSnippet(thread: Thread): { by?: string; text: string } | undefi
 
 function eventById(id: string) {
   return EVENTS.find((e) => e.id === id);
+}
+
+/** Every distinct person who's replied, in the order they first appear --
+ *  a follow-up borrows its answer's own pro (same rule ThreadView uses),
+ *  so it never double-counts as a second, nameless "responder". */
+function responderIdentities(thread: Thread): { name: string; pro?: boolean }[] {
+  const seen = new Set<string>();
+  const people: { name: string; pro?: boolean }[] = [];
+  let lastProId: string | undefined;
+  for (const r of thread.responses) {
+    if (r.kind === "answer") {
+      lastProId = r.proId;
+      if (!seen.has(r.proId)) { seen.add(r.proId); people.push({ name: proById(r.proId).name, pro: true }); }
+    } else if (r.kind === "peer") {
+      if (!seen.has(r.handle)) { seen.add(r.handle); people.push({ name: r.handle }); }
+    } else if (r.kind === "followup" && lastProId && !seen.has(lastProId)) {
+      seen.add(lastProId);
+      people.push({ name: proById(lastProId).name, pro: true });
+    }
+  }
+  return people;
+}
+
+/** Who's in this conversation, at a glance -- a small overlapping stack of
+ *  faces (Slack thread avatars, a GitHub PR's reviewer stack), tried as an
+ *  experiment (direct feedback: "is that a good idea? let's experiment if
+ *  yes") alongside the reply count it doesn't replace. A visible ring in
+ *  the row's own resting surface color is what makes the overlap read as
+ *  a stack instead of avatars just crowded together. */
+function ResponderStack({ thread, size = 20, max = 3 }: { thread: Thread; size?: number; max?: number }) {
+  const people = responderIdentities(thread).slice(0, max);
+  if (people.length === 0) return null;
+  return (
+    <span className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
+      {people.map((p, i) => (
+        <span key={p.name + i} className="rounded-full" style={{ marginLeft: i === 0 ? 0 : -Math.round(size * 0.38), zIndex: people.length - i, boxShadow: "0 0 0 2px var(--glass-surface-1)" }}>
+          <Avatar name={p.name} size={size} />
+        </span>
+      ))}
+    </span>
+  );
 }
 
 /** The one ask affordance. A box you can type into is an invitation; a button
@@ -759,7 +799,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         <span className="flex min-w-0 items-center gap-[8px]">
           <Avatar name={thread.handle} size={26} />
           <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
+          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}</span>
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
@@ -787,6 +827,11 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
           <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
         </button>
+        {/* Experiment (direct feedback: "is that a good idea? let's
+           experiment if yes") -- who's actually in this conversation, at a
+           glance. Additive: the reply count above still says how many,
+           this says who. */}
+        <ResponderStack thread={thread} />
         {/* Icon-only, pushed to the far edge: Save is a secondary action and
            doesn't need to compete in text with the status/helpful/comments
            cluster that actually explains the post (direct feedback). */}
@@ -858,83 +903,30 @@ export type FeedSort = "best" | "recent";
 // comparable live rather than one-at-a-time). "compact" is the existing
 // dense single-line view, unrelated to which of the other three is active.
 export type FeedView = "card" | "aligned" | "rail" | "compact";
-const FEED_VIEWS: { key: FeedView; label: string }[] = [
-  { key: "card", label: "Current" },
-  { key: "aligned", label: "Columns" },
-  { key: "rail", label: "Rail" },
-  { key: "compact", label: "Compact" },
-];
-const FEED_VIEW_KEY = "dreamari:connect-feed-view";
-
-function readFeedView(): FeedView {
-  try {
-    const saved = window.localStorage.getItem(FEED_VIEW_KEY);
-    return (FEED_VIEWS.find((v) => v.key === saved)?.key) ?? "rail";
-  } catch {
-    return "rail";
-  }
-}
 
 // Reddit's own version of this row is quiet plain text ("Best ⌄", a small
 // icon+chevron for view) -- never a second solid chip bar directly under the
 // real tabs. The first pass used the same Segmented pill as Questions/
 // Insights/Updates/About and it fought with them for the eye (direct
-// feedback, 8 Sept 2026). Plain text links now, muted except the active one;
-// the view toggle is two small icons, no bordered box.
-// A visible switch for the three avatar styles (direct feedback, 8 Sept
-// 2026: "where do I switch between the different avatar styles... I need
-// to be able to see different styles so we can see what's scalable for
-// later gamification and customisation unlocks"). The style itself is a
-// global setting (src/lib/avatar.ts, localStorage-backed) -- this is just
-// the first visible control for it, placed here since this is where it's
-// being judged. Every avatar on screen, anywhere in the app, updates the
-// moment it's pressed.
-function AvatarStyleControl() {
-  const style = useAvatarStyle();
+// feedback, 8 Sept 2026). Plain text links now, muted except the active one.
+// The avatar-style switch and the four-way feed-view toggle that used to
+// live here were both demo-comparison scaffolding, removed once the real
+// choices were made (direct feedback, 8 Sept 2026: "remove the avatar
+// style toggles, we will be using custom generated ones", "remove the
+// question style toggles too, we will use a custom version of the columns
+// version" -- see the `view` constant in BoardView, fixed to "aligned").
+function FeedControls({ sort, onSort }: { sort: FeedSort; onSort: (s: FeedSort) => void }) {
+  const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
   return (
-    <div role="group" aria-label="Avatar style" className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
-      <span style={{ color: "var(--muted-foreground)" }}>Avatar style:</span>
-      {AVATAR_STYLES.map((s, i) => (
+    <div className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
+      {SORTS.map((s, i) => (
         <span key={s.key} className="flex items-center gap-[10px]">
           {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
-          <button type="button" aria-pressed={style === s.key} onClick={() => setAvatarStyle(s.key)} className="dm-quiet cursor-pointer" style={{ color: style === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          <button type="button" aria-pressed={sort === s.key} onClick={() => onSort(s.key)} className="dm-quiet cursor-pointer" style={{ color: sort === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
             {s.label}
           </button>
         </span>
       ))}
-    </div>
-  );
-}
-
-function FeedControls({ sort, onSort, view, onView }: { sort: FeedSort; onSort: (s: FeedSort) => void; view: FeedView; onView: (v: FeedView) => void }) {
-  const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)] text-[12.5px] leading-[17px] font-semibold">
-      <div className="flex items-center gap-[10px]">
-        {SORTS.map((s, i) => (
-          <span key={s.key} className="flex items-center gap-[10px]">
-            {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
-            <button type="button" aria-pressed={sort === s.key} onClick={() => onSort(s.key)} className="dm-quiet cursor-pointer" style={{ color: sort === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
-              {s.label}
-            </button>
-          </span>
-        ))}
-      </div>
-      {/* Four ways to lay out a post, comparable live on the real feed
-         (direct feedback, 8 Sept 2026 -- a toggle to switch and judge which
-         wins, not a screenshot mockup). Quiet text, same treatment as sort,
-         so this doesn't fight the Questions/Insights/Updates/About tabs the
-         way the first pass's solid-pill view toggle did. */}
-      <div role="group" aria-label="Feed layout" className="flex flex-none items-center gap-[10px]">
-        {FEED_VIEWS.map((v, i) => (
-          <span key={v.key} className="flex items-center gap-[10px]">
-            {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
-            <button type="button" aria-pressed={view === v.key} onClick={() => onView(v.key)} className="dm-quiet cursor-pointer" style={{ color: view === v.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
-              {v.label}
-            </button>
-          </span>
-        ))}
-      </div>
     </div>
   );
 }
@@ -978,7 +970,7 @@ function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () =>
       onOpen={onOpen}
       avatarName={thread.handle}
       title={thread.title}
-      meta={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
+      meta={`${thread.handle} · ${thread.grade} · ${thread.postedAgo}`}
       state={thread.state}
       helpful={thread.helpful}
       comments={comments}
@@ -1044,7 +1036,7 @@ function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful 
     <AlignedRow
       onOpen={onOpen}
       avatarName={thread.handle}
-      head={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""}`}
+      head={`${thread.handle} · ${thread.grade}`}
       title={thread.title}
       snippet={questionSnippet(thread)}
       count={comments}
@@ -1159,7 +1151,7 @@ function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: 
     <RailRow
       onOpen={onOpen}
       avatarName={thread.handle}
-      head={`${thread.handle} · ${thread.grade}${thread.location ? ` · ${thread.location}` : ""} · ${thread.postedAgo}`}
+      head={`${thread.handle} · ${thread.grade} · ${thread.postedAgo}`}
       title={thread.title}
       snippet={questionSnippet(thread)}
     >
@@ -1243,8 +1235,15 @@ export function ConnectExperience() {
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
   const [announce, setAnnounce] = useState("");
-  // Connect 2.0: who the student follows (local for the prototype).
-  const [follows, setFollows] = useState<Follows>({});
+  // Connect 2.0: who the student follows (local for the prototype). Seeded
+  // with two real pros who already have posts/answers in the data, so
+  // "New from people you follow" has something to show out of the box
+  // (direct feedback: "where is the new from people you follow thing?" --
+  // it was correctly empty for a fresh student who's followed no one,
+  // same principle as every other "no invented stats" empty state this
+  // session, but the review needs to see the finished section, the way
+  // the reference always shows it with its own sample people).
+  const [follows, setFollows] = useState<Follows>({ "pro-chen": true, "pro-martinez": true });
   const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
   // Connect 2.0: every question the student posts this session, from any
   // composer, so "Your questions" on the landing can show it waiting.
@@ -2012,6 +2011,13 @@ function HomeView({
         </div>
       </div>
 
+      {/* "Find a professional" heads the shared search box on People, the
+         way the reference has it -- the heading has to come from here,
+         not from PeopleTab, since the search box itself is this shared
+         one line above every tab's own content (direct feedback: "the
+         search bar is above its title Find a professional... match the
+         Replit"). */}
+      {tab === "people" && <SectionHead>Find a professional</SectionHead>}
       {tab !== "notifications" && (
         <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
@@ -2303,11 +2309,12 @@ function BoardView({
   cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const [sort, setSort] = useState<FeedSort>("best");
-  const [view, setView] = useState<FeedView>("rail");
-  useEffect(() => setView(readFeedView()), []);
-  useEffect(() => {
-    try { window.localStorage.setItem(FEED_VIEW_KEY, view); } catch {}
-  }, [view]);
+  // Fixed to Columns, no toggle (direct feedback, 8 Sept 2026: "remove the
+  // question style toggles too, we will use a custom version of the
+  // columns version" -- Rail/Compact/Current stay defined below should a
+  // custom Columns build want to borrow a piece of one, just no longer
+  // switchable at runtime).
+  const view: FeedView = "aligned";
   const sortFeed = useCallback(
     <T extends { helpful: number; postedAgo: string }>(items: T[]): T[] =>
       [...items].sort((a, b) => (sort === "best" ? b.helpful - a.helpful : agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo))),
@@ -2429,20 +2436,9 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
-          <AvatarStyleControl />
-          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} view={view} onView={setView} />}
+          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) =>
-            view === "compact" ? (
-              <CompactQuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} />
-            ) : view === "aligned" ? (
-              <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
-            ) : view === "rail" ? (
-              <RailQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
-            ) : (
-              <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />
-            ),
-          )}
+          {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
           {threads.length === 0 && (
             <Card>
               <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
@@ -2457,18 +2453,8 @@ function BoardView({
       )}
       {tab === "insights" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} view={view} onView={setView} />}
-          {insights.map((i) =>
-            view === "compact" ? (
-              <CompactInsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} />
-            ) : view === "aligned" ? (
-              <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
-            ) : view === "rail" ? (
-              <RailInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
-            ) : (
-              <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />
-            ),
-          )}
+          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+          {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
           {insights.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
           )}
@@ -2933,7 +2919,7 @@ function ThreadView({
           <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] border-b pb-[12px] text-[12px] leading-[16px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
           <StatusChip state={thread.state} />
           {/* the question's likes live up here with the question, not at the
              bottom of the answer (direct feedback) */}
@@ -2942,6 +2928,19 @@ function ThreadView({
           </button>
         </div>
 
+        {/* A solid, edge-to-edge surface for the whole reply stream --
+           answers, comments, the composer, Save/Share -- so the question
+           itself reads as its own thing above a clearly separate "replies"
+           zone, not one continuous gradient wash (direct feedback: "the
+           area under the question... should be a solid black or dark blue
+           color instead of having the background with the gradients...
+           the div line... can run edge to edge"). Breaks out of <main>'s
+           own side padding (-mx matching its px-5/sm:px-14 exactly) so the
+           dark surface and its top rule both truly run edge to edge, then
+           re-applies that same padding inside so the content still lines
+           up with the title and everything above it. */}
+        <div className="-mx-5 border-t sm:-mx-[var(--space-14)]" style={{ background: "var(--background)", borderColor: "var(--glass-border)" }}>
+          <div className="flex flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
         <CommentStream>
           {(() => {
             // Every answer is its own top-level branch on the main trunk;
@@ -3030,6 +3029,8 @@ function ThreadView({
             <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
         </div>
+          </div>
+        </div>
 
         {related.length > 0 && (
           <section className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }} aria-label="Related answered questions">
@@ -3093,7 +3094,19 @@ function CommentStream({ children }: { children: React.ReactNode }) {
       {items.map((child, i) => {
         const isLast = i === items.length - 1;
         return (
-          <div key={i} className="relative">
+          <div key={i} className="relative isolate">
+            {/* `isolate` (not just `relative`) is load-bearing: a negative
+               z-index only paints behind THIS row's own background if this
+               row actually forms its own stacking context. `relative`
+               alone doesn't -- without a z-index of its own, it has none,
+               so the trunk escaped upward looking for the nearest one that
+               did, which used to be harmless when there was nothing opaque
+               in between. Once the reply stream sat on its own solid
+               background (direct feedback: "a solid black or dark blue
+               color instead of the gradients"), that escape put the trunk
+               BEHIND the new opaque surface -- invisible, while the
+               elbow (a plain border, no z-index trick) kept showing fine
+               (direct feedback: "only the curved lines are visible"). */}
             {!isLast && (
               <span aria-hidden className="pointer-events-none absolute z-[-1] w-[2px]" style={{ top: AVATAR_CENTER, height: `calc(100% - ${AVATAR_CENTER}px + ${ROW_GAP}px + ${AVATAR_CENTER}px)`, left: AVATAR_CENTER - 1, background: THREAD_LINE }} />
             )}

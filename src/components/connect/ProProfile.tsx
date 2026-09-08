@@ -262,11 +262,23 @@ export function PeopleToFollow({ follows, onFollow, limit = 6 }: { follows: Foll
 
 // ——— New from people you follow ———
 
-type FeedItem = { key: string; pro: Pro; verb: "answered" | "posted"; title: string; open: () => void };
+type FeedItem = { key: string; pro: Pro; verb: "answered" | "posted"; topic: string; open: () => void };
 
-/** What the people the student follows did lately: their newest posts and
- *  answers as plain rows. Renders nothing until they follow someone; the
- *  People to Follow rail above is the invitation. */
+/** A plain-language topic, not the literal question/post title -- the
+ *  reference's own copy is "Answered a question about healthcare", never
+ *  a quoted title (direct feedback: "do not add copy that is not there on
+ *  the Replit screenshot"). */
+function topicFor(boardId: string): string {
+  const world = COMMUNITIES.find((c) => c.id === boardId)?.world;
+  return (world ?? "their field").toLowerCase();
+}
+
+/** What the people the student follows did lately: a grid of flat cards,
+ *  each with a "Read answer"/"Read post" link -- the reference's own shape
+ *  (direct feedback: "stick to the Replit's structure, the new from people
+ *  you follow are cards with read answer etc"), not a bordered ruled-row
+ *  panel. Renders nothing until they follow someone; the People to Follow
+ *  section above is the invitation. */
 export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; limit?: number }) {
   const nav = useContext(ConnectNav);
   const ids = Object.keys(follows).filter((id) => follows[id]);
@@ -275,24 +287,30 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
   for (const id of ids) {
     const pro = PROS.find((p) => p.id === id);
     if (!pro) continue;
-    for (const post of postsBy(id)) items.push({ key: `p-${post.id}`, pro, verb: "posted", title: post.title, open: () => nav.openInsight(post.id) });
-    for (const thread of answersBy(id)) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", title: thread.title, open: () => nav.openThread(thread.id) });
+    for (const post of postsBy(id)) items.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), open: () => nav.openInsight(post.id) });
+    for (const thread of answersBy(id)) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), open: () => nav.openThread(thread.id) });
   }
   if (items.length === 0) return null;
   return (
-    <Panel id="following-title" title="New from people you follow">
-      <ul className="-mt-[var(--space-2)] flex flex-col">
+    <section className="flex flex-col gap-[var(--space-3)]" aria-label="New from people you follow">
+      <SectionHead>New from people you follow</SectionHead>
+      <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
         {items.slice(0, limit).map((item) => (
-          <PanelRow key={item.key} onClick={item.open}>
-            <span className="flex items-center gap-[8px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <Avatar name={item.pro.name} size={24} />
-              <strong className="flex items-center gap-[4px] font-bold" style={{ color: "var(--foreground)" }}>{item.pro.name} <VerifiedBadge size={13} /></strong> {item.verb}
+          <li key={item.key} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="flex min-w-0 items-center gap-[10px]">
+              <Avatar name={item.pro.name} size={36} />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                  <span className="truncate">{item.pro.name}</span> <VerifiedBadge size={13} />
+                </span>
+                <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{item.verb === "answered" ? `Answered a question about ${item.topic}` : `Posted about ${item.topic}`}</span>
+              </span>
             </span>
-            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{item.verb === "answered" ? `“${item.title}”` : item.title}</span>
-          </PanelRow>
+            <button type="button" onClick={item.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{item.verb === "answered" ? "Read answer" : "Read post"}</button>
+          </li>
         ))}
       </ul>
-    </Panel>
+    </section>
   );
 }
 
