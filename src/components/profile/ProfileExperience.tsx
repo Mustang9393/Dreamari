@@ -666,8 +666,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
         {tab === "resume" && (
-          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
+          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
             <ResumeView />
+            {/* Same bridge-between-features banner as Top Three -> Play
+               (direct feedback, 8 Sept 2026): a resume is a dead end on its
+               own, so the obvious next step points at Connect. */}
+            <NextStepBanner
+              eyebrow="Your next step"
+              text="Ask a question or follow a Dream Volunteer on CONNECT to grow your knowledge and network."
+              ctaLabel="Connect"
+              href="/connect?tab=people"
+              Icon={Users}
+              storageKey="dreamari:resume-connect-next-step-dismissed"
+            />
           </div>
         )}
           </div>

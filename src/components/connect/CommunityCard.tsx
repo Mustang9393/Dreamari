@@ -95,15 +95,40 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
   );
 }
 
-/** `compact`: the shorter card a professional profile shows, so the boards
- *  read as secondary to the person (direct feedback, 7 Sept 2026). */
+/** `compact`: the flat reference row a professional profile shows (direct
+ *  feedback, 8 Sept 2026: shrinking the same hero card's min-height still
+ *  read as loud -- the full-bleed photo, 24px title and three stat tiles
+ *  demanded the same attention regardless of the box it sat in). No photo
+ *  hero, no stat tiles, no company row: a thumbnail, the name, the topic
+ *  line, Open -- the board reads as a fact about the person, not a second
+ *  headline competing with them. Same component everywhere a community is
+ *  shown (direct feedback, 5 Sept 2026), just a genuinely quieter mode. */
+function CompactCommunityRow({ community, onOpen }: { community: Community; onOpen: () => void }) {
+  const accent = communityAccent(community);
+  return (
+    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)" }}>
+      <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, transparent)` }}>
+        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name.replace(/ Careers$/, "")}</span>
+        <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</span>
+      </span>
+      <span className="flex flex-none items-center gap-[3px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+        Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
+      </span>
+    </button>
+  );
+}
+
 export function CommunityCard({ community, joined, onOpen, onJoin, featured, compact = false }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean; compact?: boolean }) {
   // which "+N" chip is open (2 or 3, by how many marks precede it); 0 = none
   const [moreOpen, setMoreOpen] = useState(0);
   const accent = communityAccent(community);
+  if (compact) return <CompactCommunityRow community={community} onOpen={joined ? onOpen : onJoin} />;
   return (
     <div
-      className={`dm-tap group @container relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] ${compact ? "min-h-[228px]" : "min-h-[312px]"}`}
+      className="dm-tap group @container relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${accent} 45%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
       {/* Our full-bleed photo, but dimmed and frosted so type wins: the photo

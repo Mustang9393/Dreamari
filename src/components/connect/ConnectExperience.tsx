@@ -2197,12 +2197,13 @@ function HomeView({
 
 /** The page-level Community/Events switcher: one glass segmented control
  *  with a sliding thumb, instead of two disconnected chips. */
-// Three tabs (Joshua Pierce, Slack, 6 Sept 2026): Communities, Events,
-// People. Notifications moved to the bell beside them.
+// Communities, People, Events (direct feedback, 8 Sept 2026): People moved
+// to the middle slot -- more valuable and scalable than Events, so it reads
+// second, not last. Notifications moved to the bell beside them.
 const LANDING_TABS = [
   { key: "communities", label: "Communities", Icon: Users },
-  { key: "events", label: "Events", Icon: Calendar },
   { key: "people", label: "People", Icon: UserRound },
+  { key: "events", label: "Events", Icon: Calendar },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {
   const index = LANDING_TABS.findIndex((t) => t.key === tab);

@@ -1316,7 +1316,9 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
       white, so it reads as this product's own hint. */
 .mkt-pulse {
   position: relative;
-  animation: mkt-pulse-ring 2.6s ease-in-out infinite;
+  /* 2.6s read as distracting at normal reading pace (direct feedback, 8
+     Sept 2026) -- slowed to a calmer breathing rate. */
+  animation: mkt-pulse-ring 4.2s ease-in-out infinite;
   --mkt-hint-color: var(--c, var(--glow, var(--primary)));
 }
 /* A ring that grows FROM the element's own edge (spread starting at 0)

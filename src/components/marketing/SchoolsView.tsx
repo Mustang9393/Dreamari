@@ -8,7 +8,7 @@ import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
 import { DO_COPY } from "./DreamOpportunity";
-import { PartnerTicker } from "./PartnerTicker";
+import { PartnerLogoGrid } from "./PartnerTicker";
 import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, HeroVisual, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
@@ -454,7 +454,14 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             </div>
           </Reveal>
           <Reveal>
-            <PartnerTicker tone="light" className="mx-auto mt-10 max-w-[1100px] sm:mt-12" />
+            {/* All the marks at once, wrapped into a grid instead of
+               scrolling (direct feedback, 8 Sept 2026: "all at once... way
+               more bombastic and impressive" -- dreamopportunity.org's own
+               reference), built from our own individual marks in full
+               brand colour, on a white card the way the reference has it. */}
+            <div className="mx-auto mt-10 max-w-[1100px] rounded-[24px] border bg-white p-6 sm:mt-12 sm:p-10 lg:p-12" style={{ borderColor: "color-mix(in srgb, var(--foreground) 10%, transparent)", boxShadow: "0 32px 70px -34px rgba(5,7,15,0.35), 0 2px 6px -2px rgba(5,7,15,0.12)" }}>
+              <PartnerLogoGrid tone="light" />
+            </div>
           </Reveal>
           <Reveal>
             <p className="mx-auto mt-10 max-w-[720px] text-center text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>

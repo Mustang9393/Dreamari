@@ -1,5 +1,7 @@
 "use client";
 
+import { useRevealOnScroll } from "./scrollHooks";
+
 // The corporate partners as one slow marquee under the Dream Opportunity
 // credibility lines (Joshua Pierce, Slack, 6 Sept 2026; ticker per Chandu,
 // 7 Sept 2026). The set is the real partner wall's brands, as vector marks we
@@ -95,5 +97,43 @@ export function PartnerTicker({ className = "", tone = "dark" }: { className?: s
         {row(1)}
       </div>
     </div>
+  );
+}
+
+/** All the marks at once, wrapped into a dense grid instead of a scrolling
+ *  row (direct feedback, 8 Sept 2026: "all at once... way more bombastic
+ *  and impressive," dreamopportunity.org's own reference) -- but built from
+ *  our own individually-hosted vector marks, not the supplied flattened
+ *  wall image, so it still carries the ticker's own rule: one colour
+ *  (white) on the dark student site, real brand colour on the light
+ *  Schools page. Same ink-area sizing as the ticker, so the grid and the
+ *  ticker never disagree about how big a mark should read. */
+export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
+  const [revealRef, revealed] = useRevealOnScroll<HTMLUListElement>();
+  const white = { filter: "brightness(0) invert(1)", opacity: 0.8 };
+  const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
+  const colour = { opacity: 0.92 };
+  const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
+  return (
+    <ul ref={revealRef} className={`flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:gap-x-10 sm:gap-y-7 ${className}`} aria-label="Corporate partners" role="group">
+      {MARKS.map((mark, index) => {
+        const size = sizeFor(mark.ratio);
+        const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
+        // A subtle staggered fade+rise, not a big reveal moment (this is a
+        // credibility footnote, not the hero) -- capped so mark 22 doesn't
+        // wait almost a second to appear.
+        const delay = Math.min(index * 22, 340);
+        return (
+          <li
+            key={mark.file}
+            className="flex flex-none items-center justify-center"
+            style={{ height: MAX_H, opacity: revealed ? 1 : 0, transform: revealed ? "none" : "translateY(6px)", transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/images/marketing/partners/${mark.file}`} alt={mark.name} width={size.width} height={size.height} loading="lazy" decoding="async" style={{ width: size.width, height: size.height, ...ink, objectFit: "contain" }} />
+          </li>
+        );
+      })}
+    </ul>
   );
 }
