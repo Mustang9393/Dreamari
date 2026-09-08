@@ -285,7 +285,7 @@ type FeedItem = { key: string; pro: Pro; verb: "answered" | "posted"; topic: str
  *  reference's own copy is "Answered a question about healthcare", never
  *  a quoted title (direct feedback: "do not add copy that is not there on
  *  the Replit screenshot"). */
-function topicFor(boardId: string): string {
+export function topicFor(boardId: string): string {
   const world = COMMUNITIES.find((c) => c.id === boardId)?.world;
   return (world ?? "their field").toLowerCase();
 }
@@ -317,18 +317,27 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
   if (items.length === 0) return null;
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="New from people you follow">
-      <SectionHead>New from people you follow</SectionHead>
+      <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+        <SectionHead>New from people you follow</SectionHead>
+        {/* Same "View all" pattern as Browse by industry's own link (direct
+           feedback, 8 Sept 2026): the capped preview above is a taste, not
+           the only place to catch up on everyone followed or get back to
+           their profiles. */}
+        <button type="button" onClick={() => nav?.openFollowingFeed()} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+      </div>
       <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
         {items.slice(0, limit).map((item) => (
           <li key={item.key} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="flex min-w-0 items-center gap-[10px]">
-              <Avatar name={item.pro.name} size={36} />
-              <span className="min-w-0 flex-1">
+              <button type="button" onClick={() => nav.openPro(item.pro.id)} aria-label={`Open ${item.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
+                <Avatar name={item.pro.name} size={36} />
+              </button>
+              <button type="button" onClick={() => nav.openPro(item.pro.id)} className="min-w-0 flex-1 cursor-pointer text-left">
                 <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
                   <span className="truncate">{item.pro.name}</span> <VerifiedBadge size={13} />
                 </span>
                 <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{item.verb === "answered" ? `Answered a question about ${item.topic}` : `Posted about ${item.topic}`}</span>
-              </span>
+              </button>
             </span>
             <button type="button" onClick={item.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{item.verb === "answered" ? "Read answer" : "Read post"}</button>
           </li>

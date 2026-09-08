@@ -33,8 +33,8 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
       <div className="flex items-center gap-[var(--space-3)]">
         <ProAvatar proId={pro.id} name={pro.name} size={52} />
         <div className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-x-[4px] gap-y-[1px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-left">{pro.name}</button>
+          <span className="flex min-w-0 items-center gap-x-[4px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 flex-1 cursor-pointer truncate text-left">{pro.name}</button>
             <VerifiedBadge size={13} />
           </span>
           <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
@@ -72,7 +72,7 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
   const visible = shown.slice(clamped * FOLLOW_PAGE_SIZE, clamped * FOLLOW_PAGE_SIZE + FOLLOW_PAGE_SIZE);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((pro) => <FollowCard key={pro.id} pro={pro} following={!!follows[pro.id]} onFollow={() => onFollow(pro.id)} />)}
       </ul>
       {pageCount > 1 && (
@@ -127,7 +127,7 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
   return (
     <li>
       <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
-        <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: accent, color: "#05070f" }}>
+        <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
           <Icon className="h-[18px] w-[18px]" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[2px]">

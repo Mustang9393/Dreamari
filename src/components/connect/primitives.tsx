@@ -21,6 +21,8 @@ export const ConnectNav = createContext<{
   openInsight: (id: string) => void;
   openBoard: (id: string) => void;
   openSaved: () => void;
+  /** every post/answer from everyone the student follows, newest first */
+  openFollowingFeed: () => void;
   /** a question was posted from any composer: lands in "Your questions" */
   noteAsked: (title: string, boardId: string) => void;
   /** opens the report sheet for a thread, answer, post or comment id */

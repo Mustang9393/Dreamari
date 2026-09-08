@@ -51,7 +51,7 @@ import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab } from "./PeopleTab";
-import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
+import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 
@@ -76,7 +76,7 @@ import {
   type EventBoard,
   type EventResource,
   type Insight,
-  type Thread, type ProResponse, OPPORTUNITIES , type Opportunity } from "./data";
+  type Thread, type ProResponse, OPPORTUNITIES , type Opportunity, type Pro } from "./data";
 
 // Connect — moderated career Q&A + post-event continuation, built to the
 // implementation handoff (v1.0, 22 Aug 2026). This is the P1 FRONTEND surface
@@ -130,12 +130,14 @@ type View =
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string }
   | { kind: "saved" }
+  | { kind: "followingFeed" }
   | { kind: "activity" }
   | { kind: "admin" }
   | { kind: "partner"; org: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "saved") return "?saved=1";
+  if (view.kind === "followingFeed") return "?following=1";
   if (view.kind === "activity") return "?activity=1";
   if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
@@ -151,6 +153,7 @@ function viewToQuery(view: View): string {
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
+  if (q.get("following")) return { kind: "followingFeed" };
   if (q.get("activity")) return { kind: "activity" };
   if (q.get("admin")) return { kind: "admin" };
   if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
@@ -1296,6 +1299,7 @@ export function ConnectExperience() {
       openInsight: (id: string) => setView({ kind: "insight", id }),
       openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
       openSaved: () => setView({ kind: "saved" }),
+      openFollowingFeed: () => setView({ kind: "followingFeed" }),
       noteAsked: (title: string, boardId: string) => setAsked((current) => [{ id: `asked-${Date.now()}`, title, boardId }, ...current]),
       report: (id: string) => setReportFor(id),
       isFollowing: (id: string) => !!follows[id],
@@ -1449,6 +1453,7 @@ export function ConnectExperience() {
           />
         )}
         {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={() => setView({ kind: "home", tab: "people" })} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1890,6 +1895,55 @@ function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { s
                 <button type="button" onClick={() => onUnsave(row.key)} aria-label="Remove from Saved" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--accent-subtle)" }}>
                   <Bookmark className="h-4 w-4" aria-hidden fill="currentColor" />
                 </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+    </>
+  );
+}
+
+/** Every post and answer from everyone the student follows, newest first --
+ *  not the capped one-per-person preview "New from people you follow"
+ *  shows. Direct feedback, 8 Sept 2026: "we know to follow people but
+ *  there is no real place to catch up on where those people's posts are or
+ *  how to get back to all of their profiles" -- reached via the same kind
+ *  of "View all" link Browse by industry already uses. Each row's name and
+ *  avatar open that pro's profile directly, answering the second half of
+ *  the note. */
+function FollowingFeedView({ follows, onBack }: { follows: Follows; onBack: () => void }) {
+  const nav = useContext(ConnectNav);
+  const ids = Object.keys(follows).filter((id) => follows[id]);
+  const rows: { key: string; pro: Pro; verb: "answered" | "posted"; topic: string; postedAgo: string; open: () => void }[] = [];
+  for (const id of ids) {
+    const pro = proById(id);
+    for (const thread of answersBy(id)) rows.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), postedAgo: thread.postedAgo, open: () => nav?.openThread(thread.id) });
+    for (const post of postsBy(id)) rows.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), postedAgo: post.postedAgo, open: () => nav?.openInsight(post.id) });
+  }
+  rows.sort((a, b) => agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo));
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+      </button>
+      <Panel id="following-feed-title" title="New from people you follow" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} {rows.length === 1 ? "update" : "updates"}</span>}>
+        {rows.length === 0 ? (
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Follow a professional to see their posts and answers here.</p>
+        ) : (
+          <ul className="-mt-[var(--space-2)] flex flex-col">
+            {rows.map((row) => (
+              <li key={row.key} className="flex items-center gap-[var(--space-3)] border-t first:border-t-0" style={{ borderColor: RULE }}>
+                <button type="button" onClick={() => nav?.openPro(row.pro.id)} aria-label={`Open ${row.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
+                  <Avatar name={row.pro.name} size={40} />
+                </button>
+                <button type="button" onClick={() => nav?.openPro(row.pro.id)} className="dm-quiet -mx-[8px] flex min-w-0 flex-1 cursor-pointer flex-col gap-[2px] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-3)] text-left">
+                  <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span className="truncate">{row.pro.name}</span> <VerifiedBadge size={13} />
+                  </span>
+                  <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{row.verb === "answered" ? `Answered a question about ${row.topic}` : `Posted about ${row.topic}`} · {row.postedAgo}</span>
+                </button>
+                <button type="button" onClick={row.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{row.verb === "answered" ? "Read answer" : "Read post"}</button>
               </li>
             ))}
           </ul>
