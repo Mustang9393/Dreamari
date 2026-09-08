@@ -10,6 +10,7 @@ import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
 import { CommunityCard } from "./CommunityCard";
+import { schoolsIn } from "./schoolMarks";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
@@ -362,6 +363,24 @@ export function shortCount(n: number): string {
 // the way LinkedIn's profile chrome never changes with the job.
 const PRO_ACCENT = "var(--accent-subtle)";
 
+// Education tile: a school's own seal/wordmark (schoolMarks.ts) sized by its
+// own ink ratio, in the same 44px-tall tile the generic GraduationCap icon
+// already used. Height stays fixed so every row in a multi-school list
+// (Marcus Reyes: "A.D.N. Austin Community College; B.S.N. Texas State
+// University") lines up; width follows the mark's own shape, a square seal
+// filling the same 44x44 the icon did, a wordmark (Wharton, NYU Stern)
+// widening the tile rather than distorting the mark to fit a square.
+const EDU_TILE_H = 44;
+const EDU_TILE_PAD = 7;
+function eduMarkSize(ratio: number) {
+  const MAX_H = EDU_TILE_H - EDU_TILE_PAD * 2; // 30
+  const MAX_W = 96;
+  let h = MAX_H;
+  let w = h * ratio;
+  if (w > MAX_W) { w = MAX_W; h = MAX_W / ratio; }
+  return { width: Math.round(w), height: Math.round(h) };
+}
+
 export function ProProfileView({
   pro,
   follows,
@@ -584,14 +603,46 @@ export function ProProfileView({
       <ProfileCard id="about-title" title="About">
         <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.story}</p>
         {pro.education && (
-          <div className="flex items-center gap-[var(--space-3)]">
-            <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-              <GraduationCap className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
-            </span>
-            <span className="flex min-w-0 flex-col gap-[1px]">
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</span>
-              <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.education}</span>
-            </span>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            {/* Each "; "-separated clause is its own row (Danielle Brooks:
+               "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner"),
+               so a second school never gets squeezed into the first row's
+               single line. A clause with a sourced school shows that
+               school's own mark; one without (no school in the clause, or a
+               school we couldn't source -- School of Motion, Art Center
+               College of Design, schoolMarks.ts) keeps the plain
+               GraduationCap tile so nothing goes visually blank. */}
+            {pro.education.split("; ").flatMap((segment, i) => {
+              const matches = schoolsIn(segment);
+              const rows = matches.length > 0 ? matches : [null];
+              return rows.map((school, j) => {
+                const first = i === 0 && j === 0;
+                const size = school ? eduMarkSize(school.ratio) : null;
+                return (
+                  <span key={`${segment}-${school?.name ?? j}`} className="flex items-center gap-[var(--space-3)]">
+                    {school && size ? (
+                      // White tile, not the dark glass surface (direct
+                      // finding, 8 Sept 2026): a seal is ink drawn for a
+                      // light background -- most colored crests survive on
+                      // dark glass, but a single dark-ink seal (Mayo
+                      // Clinic's) nearly vanished on it. White is the one
+                      // background every school mark reads on.
+                      <span aria-hidden className="relative flex flex-none items-center justify-center rounded-[var(--radius-sm)] border" style={{ width: size.width + EDU_TILE_PAD * 2, height: EDU_TILE_H, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
+                        <Image src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
+                      </span>
+                    ) : (
+                      <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
+                        <GraduationCap className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
+                      </span>
+                    )}
+                    <span className="flex min-w-0 flex-col gap-[1px]">
+                      {first && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</span>}
+                      <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{segment}</span>
+                    </span>
+                  </span>
+                );
+              });
+            })}
           </div>
         )}
         {pro.topics && (
