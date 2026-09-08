@@ -2934,13 +2934,15 @@ function ThreadView({
            zone, not one continuous gradient wash (direct feedback: "the
            area under the question... should be a solid black or dark blue
            color instead of having the background with the gradients...
-           the div line... can run edge to edge"). Breaks out of <main>'s
-           own side padding (-mx matching its px-5/sm:px-14 exactly) so the
-           dark surface and its top rule both truly run edge to edge, then
-           re-applies that same padding inside so the content still lines
-           up with the title and everything above it. */}
-        <div className="-mx-5 border-t sm:-mx-[var(--space-14)]" style={{ background: "var(--background)", borderColor: "var(--glass-border)" }}>
-          <div className="flex flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+           the div line... can run edge to edge"). True viewport-edge
+           bleed at every width (direct feedback: "no need to limit its
+           width on larger screens") -- relative+left/right 50% with a
+           matching negative margin breaks out of the page's own centered
+           max-w container regardless of how deep it's nested, not just
+           out of <main>'s side padding. Re-applies that padding inside so
+           the content still lines up with the title above it. */}
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
         <CommentStream>
           {(() => {
             // Every answer is its own top-level branch on the main trunk;
