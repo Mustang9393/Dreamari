@@ -25,7 +25,7 @@ const REPLIES = [
     verified: true,
   },
   {
-    photo: "/images/avatar-jordan.jpg",
+    photo: "/images/avatar-jordan.png",
     // both students wear Maya's purple (direct feedback: three colours read
     // as noise during a pitch); only the verified pro keeps his own
     color: "#6366f1",

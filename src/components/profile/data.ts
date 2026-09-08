@@ -471,8 +471,12 @@ export const ALL_PROFILE_CAREERS: ProfileCareer[] = [...PROFILE_CAREERS, ...LOCK
 // Student identity + readiness (prototype figures). Readiness follows the
 // doc's student-facing status labels (section 22), never a vanity total.
 export const STUDENT = {
+  // No `avatar` field here on purpose -- every caller gets Jordan's face via
+  // studentAvatarSrc(STUDENT.name.split(" ")[0]) (src/lib/avatar.ts), never a
+  // stored path, so the nav, the profile header, and every marketing visual
+  // can't drift out of sync the way a hardcoded field once let one of them
+  // (SchoolsVisuals.tsx, 9 Sept 2026) point at an old real photo instead.
   name: "Jordan Rivera",
-  avatar: "/images/avatar-jordan.jpg",
   grade: "Grade 11",
   gpa: "GPA 3.7",
   school: "Westfield High School",

@@ -22,6 +22,7 @@ import { CardBody as MatchCardBody } from "@/components/match-lab/MatchLab";
 import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
 import { OptionButton, Question } from "@/components/play/interactions";
 import { PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { OverviewTab } from "@/components/profile/ProfileExperience";
 import { DOMark } from "./DreamOpportunity";
 
@@ -486,7 +487,7 @@ export function ProgressArt() {
           <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
             <div className="flex items-center justify-between gap-[var(--space-3)]">
               <div className="flex items-center gap-[12px]">
-                <Image src={STUDENT.avatar} alt="" width={96} height={96} className="size-[48px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
+                <Image src={studentAvatarSrc(STUDENT.name.split(" ")[0])} alt="" width={96} height={96} className="size-[48px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
                 <span className="flex flex-col">
                   <span className="text-[20px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
                   <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school} · {STUDENT.grade} · #1 {focus.title}</span>

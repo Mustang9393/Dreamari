@@ -406,8 +406,8 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
         <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1),cloud-float_4s_ease-in-out_0.5s_infinite] sm:h-32 sm:w-32">
           <Image src="/images/dreamy/v2/dreamy-happy.png" alt="Dreamy waving hello" fill sizes="128px" className="object-contain" />
         </div>
-        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="Let’s find your dream career. ✨" /></h1>
-        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">A few quick questions about what excites you. About 2 minutes, and there are no wrong answers.</p>
+        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="Welcome to BUILD" /></h1>
+        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">Tell us about you, so we can personalize your experience and help you find your dream career.</p>
       </GlassCard>
       </div>
       </div>
