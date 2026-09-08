@@ -6,24 +6,36 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  Activity,
   ArrowLeft,
   ArrowRight,
+  ArrowUpCircle,
+  Bug,
   Building2,
   Check,
   CircleDollarSign,
+  Database,
   Flame,
+  HeartPulse,
+  Mountain,
   Paintbrush,
+  Plug,
+  Siren,
   Sparkles,
+  Stethoscope,
   UserRound,
   Trophy,
   Volume2,
   VolumeX,
+  Wind,
+  Workflow,
   X,
   Zap,
   RotateCw,
 } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { QuickLinksMenu } from "@/components/app/chrome";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
@@ -45,11 +57,15 @@ import { SparkBar } from "@/components/flow/SparkBar";
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
 // Dreamari's own tokens rather than the reference's teal/violet palette:
-// the main game uses var(--world-business-money-office)/var(--amber-400) --
-// the DTCG token that's already annotated "(Glossary Challenge)" -- and Power
-// Play uses var(--hero-accent-purple), the same violet Play's own hub
-// background already blends in, so the bonus round's color shift matches a
-// palette this app already owns instead of inventing a new one.
+// the main game uses var(--glossary-accent) -- set once, on this file's root
+// wrapper, to the playing career's own world color (WORLD_COLORS), so
+// Finance keeps the amber (--world-business-money-office, the DTCG token
+// already annotated "(Glossary Challenge)") it launched with while Aviation,
+// Healthcare and Tech each get their own world's accent instead of
+// inheriting Finance's amber. Power Play still uses var(--hero-accent-purple),
+// the same violet Play's own hub background already blends in, so the bonus
+// round's color shift matches a palette this app already owns instead of
+// inventing a new one.
 //
 // Dreamy reuses the exact mascot already in the sprite library
 // (public/images/dreamy/v2/dreamy-*.png, the same flat pose-swap the Build
@@ -72,8 +88,8 @@ type Screen =
 
 const MASTERY_TARGET = 2;
 
-// The amber fill (--world-business-money-office) that works well on this
-// game's near-black dark background reads muddy once its own light-mode
+// The accent fill (--glossary-accent) that works well on this game's
+// near-black dark background reads muddy once a world token's own light-mode
 // value (darkened for text contrast, not fill contrast) gets used as a
 // full-width button. Rather than lean on that token for buttons in light
 // mode, swap to the marketing-v2 scope's own foreground/background pair,
@@ -82,7 +98,7 @@ const MASTERY_TARGET = 2;
 function primaryCtaColors(theme: GlobalTheme) {
   return theme === "light"
     ? { background: "var(--foreground)", color: "var(--background)" }
-    : { background: "var(--world-business-money-office)", color: "#05070f" };
+    : { background: "var(--glossary-accent)", color: "#05070f" };
 }
 
 // Term icons are a semantic slug from the content template (its Icon column
@@ -117,6 +133,21 @@ const TERM_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>>
   palette: Paintbrush,
   "shopping-bag": UserRound,
   "money-bag": CircleDollarSign,
+  // Aviation (Airline Pilot)
+  thrust: Flame,
+  lift: ArrowUpCircle,
+  drag: Wind,
+  altitude: Mountain,
+  // Healthcare (Registered Nurse)
+  stethoscope: Stethoscope,
+  "heart-pulse": HeartPulse,
+  pulse: Activity,
+  siren: Siren,
+  // Tech (Software Engineer)
+  plug: Plug,
+  database: Database,
+  bug: Bug,
+  workflow: Workflow,
 };
 
 function TermIcon({ icon, className }: { icon: string; className?: string }) {
@@ -260,15 +291,15 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
       </h1>
 
       <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))" }}>
-          <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--world-business-money-office)" }}>
+        <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))" }}>
+          <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--glossary-accent)" }}>
             ${lesson.companyValue.toLocaleString()}
           </span>
           {/* Floored (min) so the bar never opens on a literal empty track --
              a future lesson's own companyValue/nextCompanyValue numbers
              could otherwise round to 0%, which reads as "no progress
              possible here" rather than "the start of a journey." */}
-          <SparkBar percent={pct} min={4} height={6} track="var(--glass-surface-2)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" />
+          <SparkBar percent={pct} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             Next: ${lesson.nextCompanyValue.toLocaleString()} · {lesson.nextMilestone}
           </span>
@@ -309,7 +340,7 @@ function SketchFace({ term, icon, style }: { term: string; icon: string; style?:
       className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden]"
       style={{
         background:
-          "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--world-business-money-office) 4%, var(--card))",
+          "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--glossary-accent) 4%, var(--card))",
         borderColor: "var(--glass-border)",
         boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)",
         ...style,
@@ -326,7 +357,7 @@ function SketchFace({ term, icon, style }: { term: string; icon: string; style?:
       <span className="relative -rotate-2" style={{ filter: "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
         <TermIcon icon={icon} className="h-[clamp(72px,16dvh,120px)] w-[clamp(72px,16dvh,120px)]" />
         {/* Radiating sketch dashes, the doodle around the drawing. */}
-        <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--world-business-money-office)" }}>
+        <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--glossary-accent)" }}>
           {[30, 90, 150, 210, 270, 330].map((deg) => (
             <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
           ))}
@@ -337,7 +368,7 @@ function SketchFace({ term, icon, style }: { term: string; icon: string; style?:
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
-        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--world-business-money-office)", filter: "url(#glossary-sketch)" }}>
+        <svg viewBox="0 0 120 8" aria-hidden className="h-[8px] w-[110px]" style={{ color: "var(--glossary-accent)", filter: "url(#glossary-sketch)" }}>
           <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
         </svg>
       </span>
@@ -472,7 +503,7 @@ function UnlockScreen({
                   <span className="block h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
 
                   <span className="flex flex-col gap-[6px]">
-                    <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--world-business-money-office)" }}>
+                    <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                       {lesson.exampleCompany} Example
                     </span>
                     <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
@@ -519,16 +550,16 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
       <LocalBurst nonce={1} />
       <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t) => (
-          <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--world-business-money-office)", color: "#05070f" }}>
+          <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--glossary-accent)", color: "#05070f" }}>
             <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--world-business-money-office)", borderColor: "var(--background)" }}>
+            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--glossary-accent)", borderColor: "var(--background)" }}>
               <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
             </span>
           </span>
         ))}
       </div>
       <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <Trophy className="h-8 w-8" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
+        <Trophy className="h-8 w-8" style={{ color: "var(--glossary-accent)" }} aria-hidden />
         <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           All {lesson.terms.length} terms unlocked!
         </p>
@@ -657,7 +688,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
               disabled={checked !== null}
               onClick={() => setValue(word)}
               className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ borderColor: value === word ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)", background: value === word ? "color-mix(in srgb, var(--world-business-money-office) 16%, var(--card))" : "transparent" }}
+              style={{ borderColor: value === word ? "var(--glossary-accent)" : "var(--glass-border)", color: "var(--foreground)", background: value === word ? "color-mix(in srgb, var(--glossary-accent) 16%, var(--card))" : "transparent" }}
             >
               {word}
             </button>
@@ -795,7 +826,7 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
                 className="dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
                 style={{
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
-                  borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--world-business-money-office)" : "var(--glass-border)",
+                  borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--glossary-accent)" : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
                 }}
               >
@@ -902,7 +933,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
       )}
       {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap an item, then tap its bucket</p>}
       {allPlaced && !checked && (
-        <p className="flex items-center justify-center gap-[6px] text-center text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>
+        <p className="flex items-center justify-center gap-[6px] text-center text-[13px] font-bold" style={{ color: "var(--glossary-accent)" }}>
           <Check className="h-4 w-4" aria-hidden /> All placed
         </p>
       )}
@@ -946,7 +977,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
           type="button"
           onClick={check}
           className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
-          style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
+          style={{ background: "var(--glossary-accent)", color: "#05070f" }}
         >
           Check My Sorting
         </button>
@@ -970,7 +1001,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
 
   return (
     <div className="flex w-full flex-col gap-[var(--space-4)]">
-      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] font-semibold" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 12%, var(--card))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] font-semibold" style={{ background: "color-mix(in srgb, var(--glossary-accent) 12%, var(--card))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
         {question.scenario}
       </p>
       {question.steps.map((step, i) => {
@@ -1011,7 +1042,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
           disabled={!allFilled}
           onClick={check}
           className="dm-solid flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-          style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
+          style={{ background: "var(--glossary-accent)", color: "#05070f" }}
         >
           Check My Math
         </button>
@@ -1349,8 +1380,8 @@ function CompleteScreen({
         Lesson Complete!
       </h2>
 
-      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 14%, var(--card))", borderColor: "var(--world-business-money-office)" }}>
-        <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--world-business-money-office)" }}>
+      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
+        <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--glossary-accent)" }}>
           <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
         </span>
         <span className="text-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
@@ -1363,7 +1394,7 @@ function CompleteScreen({
           <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
             XP Earned
           </span>
-          <span className="text-[18px] font-extrabold" style={{ color: "var(--world-business-money-office)" }}>
+          <span className="text-[18px] font-extrabold" style={{ color: "var(--glossary-accent)" }}>
             +{lesson.xpReward} XP
           </span>
         </div>
@@ -1459,14 +1490,21 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
     setScreen("powerPlayIntro");
   }
 
+  // Every color in this file reads var(--glossary-accent) rather than a
+  // hardcoded world token, so setting it once here (to the playing career's
+  // own world color) is what makes Aviation/Healthcare/Tech pick up their
+  // own accent instead of Finance's amber.
+  const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+
   return (
     <div
       className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
       style={{
-        background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--world-business-money-office) 16%, transparent), transparent 65%), var(--background)",
+        "--glossary-accent": accent,
+        background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
-      }}
+      } as React.CSSProperties}
     >
       <TopBar onBack={() => router.back()} />
 
@@ -1479,7 +1517,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
             </span>
           </div>
           {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
-          <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--world-business-money-office)" glow="var(--world-business-money-office)" />
+          <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
           {/* Mastery reads as filled skill dots, one per term (Duolingo's own
              mastery visualization), not just a fraction in text -- seeing
              which specific term is still open is more useful than a count. */}
@@ -1492,7 +1530,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
                     key={t.id}
                     title={t.term}
                     className="flex size-5 items-center justify-center rounded-full"
-                    style={{ background: done ? "var(--world-business-money-office)" : "var(--glass-surface-2)", color: "#05070f" }}
+                    style={{ background: done ? "var(--glossary-accent)" : "var(--glass-surface-2)", color: "#05070f" }}
                   >
                     {done && <Check className="h-[11px] w-[11px]" aria-hidden />}
                   </span>

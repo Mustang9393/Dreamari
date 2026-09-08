@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { PROS, type Pro } from "./data";
@@ -28,8 +28,21 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
   const nav = useContext(ConnectNav);
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
+  // The whole card opens the profile now, not just the avatar/name/"View
+  // profile" text (direct feedback, 9 Sept 2026) -- role="button" + a key
+  // handler since a clickable <li> isn't natively keyboard-operable the
+  // way a real <button> is. Follow stays its own action: stopPropagation
+  // on its wrapper keeps a follow tap from also opening the profile.
   return (
-    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", border: "1px solid var(--glass-border)" }}>
+    <li
+      onClick={() => nav?.openPro(pro.id)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${pro.name}'s profile`}
+      className="dm-tap flex cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
+      style={{ background: "var(--glass-surface-1)", border: "1px solid var(--glass-border)" }}
+    >
       <div className="flex items-center gap-[var(--space-3)]">
         <ProAvatar proId={pro.id} name={pro.name} size={52} />
         <div className="min-w-0 flex-1">
@@ -40,7 +53,7 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
              2026). `min-w-0` alone lets it shrink-to-truncate without
              claiming space it doesn't need. */}
           <span className="flex min-w-0 items-center gap-x-[4px] text-[14.5px] leading-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left">{pro.name}</button>
+            <span className="min-w-0 truncate">{pro.name}</span>
             <VerifiedBadge size={13} />
           </span>
           <p className="truncate text-[13px] leading-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{pro.role}</p>
@@ -58,14 +71,19 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
         </span>
       </div>
       <div className="mt-auto flex items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</button>
-        <FollowButton compact following={following} onToggle={onFollow} />
+        <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</span>
+        <span onClick={(e) => e.stopPropagation()}><FollowButton compact following={following} onToggle={onFollow} /></span>
       </div>
     </li>
   );
 }
 
-const FOLLOW_PAGE_SIZE = 3;
+// 6, not 3 (direct feedback, 9 Sept 2026: "why are active people to
+// follow 3 per screen... it leaves empty space") -- the grid below is
+// sm:grid-cols-2 lg:grid-cols-3, and 3 cards fills the 3-column layout
+// exactly but leaves a lone card + a blank slot on the 2-column one. 6 is
+// the smallest count that fills a complete set of rows at both.
+const FOLLOW_PAGE_SIZE = 6;
 
 /** Three cards a page (the reference's own layout), Prev/Next plus a dot
  *  per page -- so the rest of the ranked list stays reachable without
@@ -185,21 +203,30 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
  *  View profile and Follow, the two public numbers. */
 function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; following: boolean; onFollow: () => void; badge?: string; quote?: string }) {
   const nav = useContext(ConnectNav);
+  // Whole card opens the profile now, not just the avatar/name/"View
+  // profile" text (direct feedback, 9 Sept 2026) -- see FollowCard above
+  // for the same treatment and why Follow gets its own stopPropagation.
   return (
-    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+    <li
+      onClick={() => nav?.openPro(pro.id)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${pro.name}'s profile`}
+      className="dm-tap flex cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
+      style={{ background: "var(--glass-surface-1)" }}
+    >
       {badge && (
         <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[11px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
           <Sparkles className="h-3 w-3" aria-hidden /> {badge}
         </span>
       )}
       <div className="flex items-start gap-[var(--space-3)]">
-        <button type="button" onClick={() => nav?.openPro(pro.id)} aria-label={`Open ${pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
-          <Avatar name={pro.name} size={52} />
-        </button>
+        <span className="flex-none rounded-full leading-none"><Avatar name={pro.name} size={52} /></span>
         <div className="flex min-w-0 flex-1 flex-col gap-[1px]">
           <span className="flex items-center gap-[5px] text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             <span className="truncate">{pro.name}</span>
-            <BadgeCheck className="h-[15px] w-[15px] flex-none" aria-label="Verified professional" style={{ color: "var(--accent-subtle)" }} />
+            <VerifiedBadge size={15} />
           </span>
           <span className="truncate text-[13px] leading-[17px]" title={pro.role} style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>{pro.role}</span>
           <span className="truncate text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.org}</span>
@@ -216,8 +243,8 @@ function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; foll
         </p>
       )}
       <div className="flex items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</button>
-        <FollowButton compact following={following} onToggle={onFollow} />
+        <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</span>
+        <span onClick={(e) => e.stopPropagation()}><FollowButton compact following={following} onToggle={onFollow} /></span>
       </div>
       {!quote && (
         <span className="text-[12px] leading-[16px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>
@@ -236,12 +263,17 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
   );
 }
 
-/** Two-step welcome, every time someone opens Connect > People (direct
- *  feedback, corporate-partner review: this needs to be immediate and
- *  automatic, not a one-time first-visit thing, so a volunteer landing
- *  here always sees the ground rules before anything else). Resets on
- *  every mount because PeopleTab itself only exists while this tab is
- *  active -- no dismissed-once flag to track. */
+/** Two-step welcome, immediate and automatic (direct feedback,
+ *  corporate-partner review) the first time someone opens Connect >
+ *  People from OUTSIDE Connect -- but only once per Connect visit, not
+ *  every time PeopleTab remounts from in-app back navigation (direct
+ *  feedback, 9 Sept 2026: "doesn't need to come up again when I click
+ *  back from a people profile to the people tab"). The "seen it already"
+ *  flag has to live in the parent (ConnectExperience), one level above
+ *  where PeopleTab itself mounts and unmounts as the student moves
+ *  between views -- tracked there, it survives exactly as long as Connect
+ *  itself stays mounted, and resets naturally the next time they arrive
+ *  fresh from somewhere else. */
 /** The two rules on step one, each its own row with an icon so the
  *  "students can / volunteers can't" contrast reads at a glance instead
  *  of as one dense paragraph (direct feedback: "don't make the popups so
@@ -258,9 +290,9 @@ function WelcomeRule({ icon: Icon, tone, children }: { icon: LucideIcon; tone: "
   );
 }
 
-function PeopleWelcome() {
+export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShown: () => void }) {
   const [step, setStep] = useState<0 | 1 | 2>(1);
-  if (step === 0) return null;
+  if (hasShown || step === 0) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 72%, transparent)" }}>
       {/* A near-black surface on a near-black page background used to read
@@ -301,7 +333,19 @@ function PeopleWelcome() {
             <span className="h-[6px] rounded-full transition-[width]" style={{ width: step === 2 ? 18 : 6, background: step === 2 ? "var(--primary)" : "var(--glass-border)" }} />
           </div>
 
-          <PrimaryCta className="w-full" size="md" onClick={() => setStep(step === 1 ? 2 : 0)}>
+          <PrimaryCta
+            className="w-full"
+            size="md"
+            onClick={() => {
+              // Mark "seen" only when the student actually finishes it
+              // (step 2 -> 0), not on mount -- calling onShown() eagerly
+              // flipped the parent's flag before the modal ever painted,
+              // so it hid itself instantly (direct feedback, 9 Sept 2026:
+              // "now the popup doesn't pop up at all").
+              if (step === 2) onShown();
+              setStep(step === 1 ? 2 : 0);
+            }}
+          >
             {step === 1 ? "Continue" : "Start Connecting!"}
           </PrimaryCta>
         </div>
@@ -327,17 +371,14 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   const focused = industry !== null || showAllIndustries;
   useEffect(() => onFocusChange?.(focused), [focused, onFocusChange]);
 
-  // The welcome modal's own step lives inside PeopleWelcome and must
-  // survive switching between the branches below (search / one industry /
-  // the full list / home) -- it renders first in every branch's fragment,
-  // same position each time, so React keeps that one instance mounted
-  // instead of remounting (and re-popping) it on every internal navigation.
+  // The welcome modal itself lives one level up in ConnectExperience's
+  // HomeView now (direct feedback, 9 Sept 2026: it needs to show for any
+  // Connect tab, not just People), so it's not rendered here anymore.
 
   // a search from the shared box wins over every view
   if (q) {
     return (
       <>
-        <PeopleWelcome />
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Search results">
           <SectionHead>{matches.length} {matches.length === 1 ? "professional" : "professionals"}</SectionHead>
           {matches.length > 0 ? <Grid pros={matches} follows={follows} onFollow={onFollow} /> : <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No professional matches that yet. Try a career, a company or a name.</p>}
@@ -351,7 +392,6 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
     const people = rankPros(PROS.filter((p) => p.world === industry), worlds);
     return (
       <>
-        <PeopleWelcome />
         <SectionSurface className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setIndustry(null)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <ArrowLeft className="h-4 w-4" aria-hidden /> All industries
@@ -373,7 +413,6 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   if (showAllIndustries) {
     return (
       <>
-        <PeopleWelcome />
         <SectionSurface className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setShowAllIndustries(false)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back
@@ -394,7 +433,6 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
 
   return (
     <>
-      <PeopleWelcome />
       {/* "Find a professional" itself heads the shared search box one
          level up (ConnectExperience's HomeView), not here -- no second
          row of career chips repeating it either (direct feedback, Joshua

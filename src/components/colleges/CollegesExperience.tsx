@@ -120,7 +120,14 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
       </div>
       <DesktopNavigation active="Explore" />
       <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-        <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/explore" /><Wordmark /></span>
+        {/* Reachable from many places (nav, quick links, Profile, Career
+           Report, global search) with no single correct parent, so this is
+           an honest "nowhere to go" default (direct feedback, 9 Sept 2026:
+           back should never guess a wrong parent) -- router.back() above it
+           in BackButton already returns to the real previous page whenever
+           real navigation history exists, which is true for every one of
+           those entries; this only fires with none at all. */}
+        <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/home" /><Wordmark /></span>
         <QuickLinksMenu />
       </header>
 

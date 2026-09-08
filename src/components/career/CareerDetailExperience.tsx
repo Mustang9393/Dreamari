@@ -431,7 +431,14 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            // No fallback before (direct feedback, 9 Sept 2026: a back
+            // control needs a real destination, not a bare history call
+            // that's a no-op with nothing to go back to) -- this page is
+            // reachable via a direct/shared link, so history can be empty.
+            if (window.history.length > 1) router.back();
+            else router.push("/explore");
+          }}
           className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
           style={{ color: "var(--muted-foreground)" }}
         >

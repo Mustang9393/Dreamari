@@ -49,7 +49,6 @@ export function PlayHub() {
 
   const featuredRowSoon = useMemo(() => SOON.filter((game) => FEATURED_ROW_SOON_IDS.includes(game.careerId)), []);
 
-  const glossaryPlayable = GLOSSARY_GAMES.filter((game) => hasGlossary(game.careerSlug));
 
   return (
     <div
@@ -79,23 +78,27 @@ export function PlayHub() {
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
-           so it gets a real playable card; anything added here before its
-           content exists still gets the same locked "Soon" treatment as the
-           career-simulation placeholders below, same as Home's own
-           "Finance Essentials"/"Deal Team Kickoff" activity cards did before
-           either had a page to open. */}
-        {glossaryPlayable.length > 0 && (
+           so it gets a real playable card; the rest are dummy "Coming soon"
+           cards that fill out the row rather than link anywhere (direct
+           feedback, 9 Sept 2026: "they dont have to work or lead anywhere,
+           theyre just dummy cards to fill the row"), same idiom as the
+           career-simulation placeholders below. */}
+        {GLOSSARY_GAMES.length > 0 && (
           <section className="flex flex-col gap-[var(--space-3)]">
             <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
               Glossary Games
             </h2>
             {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
                than the hero row above -- the billboard dominates, the
-               shelves below it stay uniform and quiet, Netflix-style. */}
-            <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pt-1 pb-3">
-              {glossaryPlayable.map((game) => (
+               shelves below it stay uniform and quiet, Netflix-style. Same
+               full-bleed rail as FeaturedRow above (negative margins run it
+               to the viewport edge so the next card visibly peeks instead of
+               clipping at the content column, direct feedback, 9 Sept 2026)
+               rather than stopping dead at main's own padding. */}
+            <ul className="-mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+              {GLOSSARY_GAMES.map((game) => (
                 <li key={game.careerSlug} className="flex-none">
-                  <GlossaryGameCard game={game} />
+                  <GlossaryGameCard game={game} playable={hasGlossary(game.careerSlug)} />
                 </li>
               ))}
             </ul>
@@ -145,6 +148,10 @@ const FEATURED_W = "w-[calc(100vw-40px)] sm:w-[533px] md:w-[676px] lg:w-[764px]"
 const SIDE_W = "w-[150px] sm:w-[212px] md:w-[269px] lg:w-[304px]";
 // Rows BELOW the hero: uniform smaller shelves, Netflix-style.
 const SHELF_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";
+// "In the works" cards read too small at SHELF_HEIGHT (direct feedback, 9
+// Sept 2026) -- closer to PosterCard's own real 210x297 poster size, scaled
+// down slightly to still sit in a shelf row rather than the full browse grid.
+const SOON_HEIGHT = "h-[210px] sm:h-[230px] md:h-[260px]";
 // Netflix's row headers are bold, bright and readable -- not micro-labels.
 const ROW_HEADER = "text-[15px] font-extrabold tracking-[0.06em] uppercase sm:text-[17px]";
 
@@ -427,25 +434,31 @@ function SoonSection({ label, children }: { label: string; children: React.React
       <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
         {label}
       </h2>
-      <ul className="flex list-none gap-[var(--space-3)] overflow-x-auto p-0 pt-1 pb-3">{children}</ul>
+      {/* Full-bleed rail, same idiom as FeaturedRow/Glossary Games above
+         (direct feedback, 9 Sept 2026: "dont have them cut off like this,
+         let them overflow till the edge of the screen ... so its obvious
+         its scrollable but the cards still peak"). */}
+      <ul className="-mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">{children}</ul>
     </section>
   );
 }
 
-/** One locked card: either a photo cover (dimmed/grayscale, same idiom as a
- *  career poster) or a flat icon tile when there's no cover art yet (the
+/** One locked card: either a full-color photo cover (kept colorful, not
+ *  dimmed/grayscale -- direct feedback, 9 Sept 2026: "dont greyscale the
+ *  coming soon thumbnails, let them be colorful") or a flat icon tile when
+ *  there's no cover art yet (the
  *  Glossary Game type has no image asset at all, same as Home's own
  *  "TODAY'S GLOSSARY CHALLENGE" banner uses an icon rather than a photo). */
 function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?: React.ReactNode }) {
   return (
     <li className="flex-none">
       <span
-        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[10px] ${SHELF_HEIGHT}`}
+        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[10px] ${SOON_HEIGHT}`}
         style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
       >
         {cover ? (
           <>
-            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover opacity-40 grayscale" />
+            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover" />
             <span
               aria-hidden
               className="absolute inset-0"
@@ -472,35 +485,43 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
 /** A Glossary Game shelf card: title and sub live INSIDE the artwork's own
  *  bottom scrim, same as every other Play card (a Netflix thumbnail, not
  *  an image-plus-caption block that ends up taller than the hero row), with
- *  a small centered play badge echoing the featured card's. */
-function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string; sub: string; cover?: string } }) {
-  return (
-    <Link
-      href={`/play/glossary/${game.careerSlug}`}
-      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
-    >
+ *  a small centered play badge echoing the featured card's. The row header
+ *  already says "Glossary Games", so the card itself carries no type chip
+ *  (direct feedback, 9 Sept 2026). A career with no authored content yet
+ *  (!playable) renders as a dim, non-linking "Coming soon" dummy -- same
+ *  idiom as SoonCard below -- rather than a real link into an empty game. */
+function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean }) {
+  const art = (
+    <>
       {game.cover ? (
         <Image src={game.cover} alt="" fill sizes="(min-width: 768px) 347px, 60vw" className="object-cover" />
       ) : (
-        <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--world-business-money-office) 20%, var(--card))" }}>
-          <BookOpen className="h-10 w-10" style={{ color: "var(--world-business-money-office)" }} aria-hidden />
+        <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--glossary-accent, var(--world-business-money-office)) 20%, var(--card))" }}>
+          <BookOpen className="h-10 w-10" style={{ color: "var(--glossary-accent, var(--world-business-money-office))" }} aria-hidden />
         </span>
       )}
-      <span
-        className="absolute top-[10px] left-[10px] rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[10px] font-extrabold tracking-[0.1em] uppercase"
-        style={{ background: "var(--world-business-money-office)", color: "var(--background)" }}
-      >
-        Glossary Game
-      </span>
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 flex size-[40px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110 sm:size-[46px]"
-        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-      >
-        <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
-      </span>
+      {playable ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 left-1/2 flex size-[40px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110 sm:size-[46px]"
+          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+        >
+          <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
+        />
+      )}
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[1px] px-[12px] pt-[26px] pb-[10px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        {!playable && (
+          <span className="flex items-center gap-[5px] pb-[2px] text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+            <Lock className="h-[12px] w-[12px]" aria-hidden />
+            Coming soon
+          </span>
+        )}
         <span className="text-[14px] leading-[18px] font-extrabold sm:text-[16px] sm:leading-[20px]" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>
           {game.title}
         </span>
@@ -508,6 +529,28 @@ function GlossaryGameCard({ game }: { game: { careerSlug: string; title: string;
           {game.sub}
         </span>
       </span>
+    </>
+  );
+
+  if (!playable) {
+    return (
+      <span
+        aria-label={`${game.title} — coming soon`}
+        className={`group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
+      >
+        {art}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      href={`/play/glossary/${game.careerSlug}`}
+      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
+      style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
+    >
+      {art}
     </Link>
   );
 }

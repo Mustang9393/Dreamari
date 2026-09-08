@@ -23,14 +23,15 @@ export function communityAccent(community: Pick<Community, "world">): string {
 // mode at low opacity.
 export const POSTER_GRAIN = "/images/connect/covers/grain.png";
 
-// The CEO's own reference photography (people-free), cropped for the cards.
-// 9 Sept 2026: swapped for a newer set, same treatment.
+// The CEO's own reference photography, cropped for the cards. 9 Sept 2026:
+// swapped for a newer set with people visible in the scene (direct
+// feedback: "there are people in the images ... lets try and use those").
 export const PHOTO_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/photo5-teaching-education.png",
-  "business-money": "/images/connect/covers/photo5-business-money.png",
-  "tech-engineering": "/images/connect/covers/photo5-tech-engineering.png",
-  "health-medicine": "/images/connect/covers/photo5-health-medicine.png",
-  "arts-media": "/images/connect/covers/photo5-arts-media.png",
+  "teaching-education": "/images/connect/covers/photo6-teaching-education.png",
+  "business-money": "/images/connect/covers/photo6-business-money.png",
+  "tech-engineering": "/images/connect/covers/photo6-tech-engineering.png",
+  "health-medicine": "/images/connect/covers/photo6-health-medicine.png",
+  "arts-media": "/images/connect/covers/photo6-arts-media.png",
 };
 
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,

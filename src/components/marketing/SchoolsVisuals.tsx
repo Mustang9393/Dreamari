@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
-import { BadgeCheck, BookOpen, Bookmark, Gamepad2, Heart, MessagesSquare, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { BookOpen, Bookmark, Gamepad2, Heart, MessagesSquare, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BROWSE_BECAUSE_LIKED, BROWSE_TRENDING } from "@/components/app/catalog";
 import { MatchRing } from "@/components/app/MatchRing";
@@ -16,7 +16,7 @@ import { PayMap } from "@/components/career/PayMap";
 import { careerProfile } from "@/components/career/profiles";
 import { CommunityCard } from "@/components/connect/CommunityCard";
 import { COMMUNITIES, PROS, THREADS } from "@/components/connect/data";
-import { Avatar, Card, CompanyChip } from "@/components/connect/primitives";
+import { Avatar, Card, CompanyChip, VerifiedBadge } from "@/components/connect/primitives";
 import { DECK } from "@/components/match-lab/data";
 import { CardBody as MatchCardBody } from "@/components/match-lab/MatchLab";
 import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
@@ -442,7 +442,7 @@ export function ConnectArt() {
               <span className="flex min-w-0 flex-col">
                 <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   <span className="truncate">{pro.name}</span>
-                  <BadgeCheck className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+                  <VerifiedBadge size={14} />
                 </span>
                 <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
                   <span className="truncate">{pro.role}</span>

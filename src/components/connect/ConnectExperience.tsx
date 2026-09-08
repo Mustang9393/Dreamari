@@ -50,7 +50,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/component
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
-import { PeopleTab } from "./PeopleTab";
+import { PeopleTab, PeopleWelcome } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
@@ -1224,6 +1224,24 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
 
 export function ConnectExperience() {
   const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
+  // Every view Connect has been on this session, oldest first -- real back
+  // navigation, not a hardcoded parent per view kind. Direct feedback, 9
+  // Sept 2026: "these screens go to the community home when I click back...
+  // all the back navigation from any screen, no matter what they say,
+  // should go to the last screen, the very previous step." Connect's own
+  // "view" state was never real browser history to begin with (setView
+  // below calls history.replaceState, not pushState, so the URL tracks the
+  // CURRENT view for reload/share but never accumulates entries a real
+  // back button could walk) -- so every onBack handler had to hardcode
+  // where it assumed the user came from (a pro's profile always "back" to
+  // Communities home, a thread always "back" to its own board), which is
+  // wrong the moment someone arrives from anywhere else (Saved, Following,
+  // a board's insights tab, another thread). This stack is that missing
+  // history: pushed once per setView call, popped by goBack below.
+  const [viewStack, setViewStack] = useState<View[]>([]);
+  // People tab's welcome modal: shown once per Connect visit, not once per
+  // PeopleTab mount (see PeopleWelcome in PeopleTab.tsx for why).
+  const [peopleWelcomeShown, setPeopleWelcomeShown] = useState(false);
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   /** Community awaiting join confirmation in the JoinSheet. */
   const [joinFor, setJoinFor] = useState<string | null>(null);
@@ -1274,12 +1292,40 @@ export function ConnectExperience() {
     else if (params.get("partner")) setRole("partner");
   }, []);
   const setView = useCallback((next: View, as?: DemoRole) => {
+    setViewStack((stack) => [...stack, view]);
     setViewState(next);
     const base = viewToQuery(next);
     const keep = as ?? new URLSearchParams(window.location.search).get("as");
     window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
     window.scrollTo(0, 0);
-  }, []);
+  }, [view]);
+
+  /** Real "back": pop the last view off the stack and restore it exactly,
+   *  rather than jumping to a hardcoded parent. Every onBack handler below
+   *  calls this instead of setView({kind: "..."}); the stack only runs dry
+   *  on a fresh page load with nothing to pop, so home is a landing, not a
+   *  fallback pretending to be a real previous step. */
+  const goBack = useCallback(() => {
+    // The side effects (setViewState, history, scroll) used to live inside
+    // the setViewStack updater itself -- React runs that updater during a
+    // render-like phase, so calling other setters and window.history from
+    // in there triggered "Cannot update a component (Router) while
+    // rendering a different component" (console, 9 Sept 2026). Read the
+    // stack directly and keep the updater to a pure pop.
+    if (viewStack.length === 0) {
+      setViewState({ kind: "home", tab: "communities" });
+      window.history.replaceState(null, "", "/connect");
+      window.scrollTo(0, 0);
+      return;
+    }
+    const prev = viewStack[viewStack.length - 1];
+    setViewStack((stack) => stack.slice(0, -1));
+    setViewState(prev);
+    const base = viewToQuery(prev);
+    const keep = new URLSearchParams(window.location.search).get("as");
+    window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
+    window.scrollTo(0, 0);
+  }, [viewStack]);
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -1423,6 +1469,8 @@ export function ConnectExperience() {
             onOpenAll={() => setView({ kind: "activity" })}
             savedCount={Object.values(saves).filter(Boolean).length}
             onDeleteAsked={(id) => setAsked((current) => current.filter((q) => q.id !== id))}
+            peopleWelcomeShown={peopleWelcomeShown}
+            onPeopleWelcomeShown={() => setPeopleWelcomeShown(true)}
           />
         )}
 
@@ -1437,23 +1485,23 @@ export function ConnectExperience() {
             // showing whichever cover the FIRST one you viewed that session
             // had -- read as "they're all the same" / "no real cover" from
             // Connect and People (direct feedback, 8 Sept 2026).
-            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
+            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
           })()}
-        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={() => setView({ kind: "pro", id: view.id }, "pro")} />}
-        {view.kind === "admin" && <AdminDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
-        {view.kind === "partner" && <PartnerView org={view.org} onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={goBack} />}
+        {view.kind === "admin" && <AdminDashboardView onBack={goBack} />}
+        {view.kind === "partner" && <PartnerView org={view.org} onBack={goBack} />}
         {view.kind === "activity" && (
           <ActivityView
             asked={asked}
             follows={follows}
             savedCount={Object.values(saves).filter(Boolean).length}
-            onBack={() => setView({ kind: "home", tab: "communities" })}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
           />
         )}
-        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
-        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={() => setView({ kind: "home", tab: "people" })} />}
+        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={goBack} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1466,7 +1514,7 @@ export function ConnectExperience() {
             joined={!!joined[view.id]}
             onJoin={() => setJoinFor(view.id)}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
-            onBack={() => setView({ kind: "home", tab: "communities" })}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenInsight={(id) => setView({ kind: "insight", id })}
             cardProps={cardProps}
@@ -1482,7 +1530,7 @@ export function ConnectExperience() {
             return (
               <InsightThreadView
                 insight={insight}
-                onBack={() => setView({ kind: "board", id: insight.boardId, filter: "insights" })}
+                onBack={goBack}
                 saved={p.saved}
                 onSave={p.onSave}
                 helpful={p.helpful}
@@ -1503,7 +1551,7 @@ export function ConnectExperience() {
                   event={event}
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
-                  onBack={() => setView({ kind: "home", tab: "events" })}
+                  onBack={goBack}
                   onOpenCommunity={(id) => setView({ kind: "board", id, filter: "questions" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
@@ -1538,9 +1586,7 @@ export function ConnectExperience() {
             return (
           <ThreadView
             thread={thread}
-            onBack={() => {
-              setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "questions" } : { kind: "board", id: thread.boardId, filter: "questions" });
-            }}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
             saves={saves}
@@ -2007,6 +2053,8 @@ function HomeView({
   onOpenAll,
   savedCount,
   onDeleteAsked,
+  peopleWelcomeShown,
+  onPeopleWelcomeShown,
 }: {
   tab: LandingTab;
   onTab: (tab: LandingTab) => void;
@@ -2025,6 +2073,8 @@ function HomeView({
   onOpenAll: () => void;
   savedCount: number;
   onDeleteAsked: (id: string) => void;
+  peopleWelcomeShown: boolean;
+  onPeopleWelcomeShown: () => void;
 }) {
   const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
@@ -2045,6 +2095,15 @@ function HomeView({
 
   return (
     <>
+      {/* Shows for every tab, not just People (direct feedback, 9 Sept 2026:
+         "nobody lands on people tab from other places in the site directly
+         without landing on connect") -- one instance here, at the top of
+         the whole Connect landing, so it pops on arrival from anywhere else
+         on the site regardless of which tab is active, and stays mounted
+         (not re-triggered) while switching tabs or drilling into People's
+         own sub-views. */}
+      <PeopleWelcome hasShown={peopleWelcomeShown} onShown={onPeopleWelcomeShown} />
+
       {/* Title and the Community/Events toggle share one row on wider
          screens (same pattern as Explore's header: title left, controls
          right, one row instead of three stacked blocks) and wrap onto

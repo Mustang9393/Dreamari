@@ -20,12 +20,13 @@ export type CompanyVideo = {
 // covers supplied 5 Sept 2026 ("Thumbnails/Updated IG Reel Covers"), each
 // carrying its own title card; each clip's own `title` below is kept in sync
 // with the words baked into its cover. Mars's cover is a real title-card
-// frame from its own clip; WildBrain's is composited from a clean frame of
+// frame from its own clip, swapped for an updated version 9 Sept 2026
+// ("Thumbnails/Mars.png"); WildBrain's is composited from a clean frame of
 // its own office wall logo plus matching "Office Tour" type, since no cover
 // was supplied for either.
 export const COMPANY_VIDEOS: CompanyVideo[] = [
   // Kellanova was acquired by Mars, so the clip carries the Mars mark.
-  { company: "Mars", title: "Meet a Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4", poster: "/images/videos/reel-kellanova-talent-director-v2.jpg" },
+  { company: "Mars", title: "Meet a Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4", poster: "/images/videos/reel-kellanova-talent-director-v3.png" },
   { company: "JPMorgan Chase", title: "London Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4", poster: "/images/videos/reel-jpmc-london-office-tour-cover.jpg" },
   { company: "EY", title: "Inside Cybersecurity Consulting", video: "/videos/app/reel-ey-cyber-consultant-1.mp4", poster: "/images/videos/reel-ey-cyber-consultant-1-cover.jpg" },
   { company: "AT&T", title: "Headquarters Office Tour", video: "/videos/app/reel-att-office-tour.mp4", poster: "/images/videos/reel-att-office-tour-cover.jpg" },
