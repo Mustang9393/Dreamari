@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, VerifiedBadge } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab } from "./PeopleTab";
@@ -2389,6 +2389,17 @@ function BoardView({
          Professional Insights, Industry Updates. The board header, the tabs
          row and the card designs stay exactly as they were (direct
          instruction); only what each feed carries changed. */}
+      {/* Everything below the identity banner -- the tab row, the composer,
+         the feed -- now sits on one solid --card floor instead of loose on
+         the page's own gradient wash (direct feedback: this audience spans
+         students to corporate volunteers to older teacher/staff moderators,
+         closer to LinkedIn/Facebook's comfort zone than a young social
+         app's; too much reliance on gradients and transparency made the
+         page slower to parse). Individual rows keep their own lighter
+         glass-surface-1 tint, one visible step up from this floor, so the
+         two-level hierarchy (section, then item) reads the same way it now
+         does on Connect > People. */}
+      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "about", label: "About" }]} />
 
       {about && (
@@ -2480,6 +2491,7 @@ function BoardView({
           )}
         </div>
       )}
+      </SectionSurface>
     </>
   );
 }
