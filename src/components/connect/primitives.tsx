@@ -391,6 +391,23 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
   );
 }
 
+/** A grounded container for a whole section (direct feedback: too much of
+ *  Connect read as components floating on the page background with no
+ *  surface telling the eye where one section ends and the next begins --
+ *  this audience spans students to volunteers to older teacher/moderator
+ *  staff, closer to LinkedIn/Facebook's comfort zone than a young social
+ *  app's). `--card` is a real opaque surface, not another translucent
+ *  layer, so it reads as solid ground; items inside it (a follow card, a
+ *  world tile) keep using glass-surface-1/2, which now sits one visible
+ *  step lighter than this floor instead of floating on the page itself. */
+export function SectionSurface({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)] ${className}`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      {children}
+    </div>
+  );
+}
+
 // CEO's photography in the band, with the poster card's legibility stack
 // (progressive blur, vignette, top scrim, grain) so the title always reads.
 // Real company marks for the "Professionals from" chips (Wikimedia Commons,

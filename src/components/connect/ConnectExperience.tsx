@@ -1974,6 +1974,11 @@ function HomeView({
 }) {
   const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
+  // People's own drill-in views (one industry, or the full industry list)
+  // hide this shared "Find a professional" heading and search box (direct
+  // feedback: one task on screen at a time instead of carrying the whole
+  // People page along into a focused sub-view).
+  const [peopleFocused, setPeopleFocused] = useState(false);
   void onAsk; void onOpenAll;
   // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
   // to find the right room, and asking lives inside each room. Typing
@@ -2017,8 +2022,8 @@ function HomeView({
          one line above every tab's own content (direct feedback: "the
          search bar is above its title Find a professional... match the
          Replit"). */}
-      {tab === "people" && <SectionHead>Find a professional</SectionHead>}
-      {tab !== "notifications" && (
+      {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
+      {tab !== "notifications" && !(tab === "people" && peopleFocused) && (
         <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           <input
@@ -2087,7 +2092,7 @@ function HomeView({
 
       {/* People: search companies or careers and find people to follow
          (Joshua Pierce, Slack, 6 Sept 2026) */}
-      {tab === "people" && <PeopleTab follows={follows} onFollow={onFollow} query={query} />}
+      {tab === "people" && <PeopleTab follows={follows} onFollow={onFollow} query={query} onFocusChange={setPeopleFocused} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">

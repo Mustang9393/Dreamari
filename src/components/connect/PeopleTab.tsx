@@ -1,11 +1,12 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
-import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, MessagesSquare, Sparkles, Zap, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { ArrowLeft, BadgeCheck, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { PROS, type Pro } from "./data";
-import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, VerifiedBadge } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
@@ -19,14 +20,16 @@ function activityLabel(daysAgo: number): string {
 }
 
 /** One card in the People-to-follow carousel: portrait, name + verified
- *  mark, role, company, how often they show up, then View profile and
- *  Follow -- the reference's own anatomy, just flatter (no border/shadow)
- *  and without the reference's per-card page-position badge, which
- *  doesn't carry information here. */
+ *  mark, role, company, a combined tier + activity badge, a reach count,
+ *  then View profile and Follow. Tier and reach are both worth keeping
+ *  (direct feedback: "all of that info I think is valuable") but sized to
+ *  this component's own rhythm rather than the reference's own buttons. */
 function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean; onFollow: () => void }) {
   const nav = useContext(ConnectNav);
+  const tier = volunteerTier(pro);
+  const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
   return (
-    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+    <li className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", border: "1px solid var(--glass-border)" }}>
       <div className="flex items-center gap-[var(--space-3)]">
         <ProAvatar proId={pro.id} name={pro.name} size={52} />
         <div className="min-w-0 flex-1">
@@ -38,9 +41,16 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
           <div className="mt-[2px]"><CompanyChip name={pro.org} tone="surface" size="sm" /></div>
         </div>
       </div>
-      <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[4px] text-[11px] leading-[15px] font-bold tracking-[0.02em]" style={{ background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
-        <Zap className="h-3 w-3" aria-hidden fill="currentColor" /> {activityLabel(pro.activeDaysAgo)}
-      </span>
+      <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
+        {tier && (
+          <span className="flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[4px] text-[11px] leading-[15px] font-bold tracking-[0.02em]" style={{ background: "var(--glass-surface-2)", color: tier.color }}>
+            <TierIcon className="h-3 w-3" aria-hidden /> {tier.name}: {activityLabel(pro.activeDaysAgo)}
+          </span>
+        )}
+        <span className="flex items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+          <Eye className="h-3 w-3" aria-hidden /> {shortCount(pro.studentsReached)} views
+        </span>
+      </div>
       <div className="mt-auto flex items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</button>
         <FollowButton compact following={following} onToggle={onFollow} />
@@ -185,7 +195,76 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
   );
 }
 
-export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFollow: (id: string) => void; query: string }) {
+/** Two-step welcome, every time someone opens Connect > People (direct
+ *  feedback, corporate-partner review: this needs to be immediate and
+ *  automatic, not a one-time first-visit thing, so a volunteer landing
+ *  here always sees the ground rules before anything else). Resets on
+ *  every mount because PeopleTab itself only exists while this tab is
+ *  active -- no dismissed-once flag to track. */
+/** The two rules on step one, each its own row with an icon so the
+ *  "students can / volunteers can't" contrast reads at a glance instead
+ *  of as one dense paragraph (direct feedback: "don't make the popups so
+ *  boring and text only"). */
+function WelcomeRule({ icon: Icon, tone, children }: { icon: LucideIcon; tone: "yes" | "no"; children: React.ReactNode }) {
+  const color = tone === "yes" ? "var(--accent-subtle)" : "var(--muted-foreground)";
+  return (
+    <li className="flex items-start gap-[10px] rounded-[var(--radius-md)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+      <span className="mt-[1px] flex size-[26px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, " + color + " 18%, transparent)", color }}>
+        <Icon className="h-[14px] w-[14px]" aria-hidden />
+      </span>
+      <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>{children}</span>
+    </li>
+  );
+}
+
+function PeopleWelcome() {
+  const [step, setStep] = useState<0 | 1 | 2>(1);
+  if (step === 0) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 55%, transparent)" }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        {/* The cloud mascot leads every welcome moment app-wide -- a soft
+           glow behind it instead of a flat icon-on-white so the header
+           reads as a moment, not a form field. */}
+        <div className="relative flex flex-col items-center gap-[var(--space-3)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)] text-center">
+          <span aria-hidden className="pointer-events-none absolute top-[-40px] size-[180px] rounded-full blur-[40px]" style={{ background: "color-mix(in srgb, var(--primary) 35%, transparent)" }} />
+          <span className="relative flex size-[104px] flex-none items-center justify-center">
+            <Image src="/images/dreamy-welcome-mascot.png" alt="" width={208} height={208} className="h-full w-full object-contain" priority />
+          </span>
+          <h2 id="people-welcome-title" className="relative text-[21px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+            {step === 1 ? "Welcome to Connect!" : "A moderated space"}
+          </h2>
+        </div>
+
+        <div className="flex flex-col gap-[var(--space-4)] px-[var(--space-6)] pb-[var(--space-6)]">
+          {step === 1 ? (
+            <ul className="flex flex-col gap-[8px]">
+              <WelcomeRule icon={UserPlus} tone="yes">Students can <strong>follow</strong> Dream Volunteers.</WelcomeRule>
+              <WelcomeRule icon={MessageCircleQuestion} tone="yes">Students can <strong>ask questions publicly</strong>.</WelcomeRule>
+              <WelcomeRule icon={EyeOff} tone="no">Volunteers <strong>can&rsquo;t follow or privately message</strong> students.</WelcomeRule>
+            </ul>
+          ) : (
+            <div className="flex items-start gap-[10px] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+              <ShieldCheck className="mt-[1px] h-5 w-5 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+              <p className="text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>All interactions are moderated by Dreamari staff and school faculty.</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-[6px]" aria-hidden>
+            <span className="h-[6px] rounded-full transition-[width]" style={{ width: step === 1 ? 18 : 6, background: step === 1 ? "var(--primary)" : "var(--glass-border)" }} />
+            <span className="h-[6px] rounded-full transition-[width]" style={{ width: step === 2 ? 18 : 6, background: step === 2 ? "var(--primary)" : "var(--glass-border)" }} />
+          </div>
+
+          <PrimaryCta className="w-full" size="md" onClick={() => setStep(step === 1 ? 2 : 0)}>
+            {step === 1 ? "Continue" : "Start Connecting!"}
+          </PrimaryCta>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows: Follows; onFollow: (id: string) => void; query: string; onFocusChange?: (focused: boolean) => void }) {
   const worlds = useStudentWorlds();
   const [industry, setIndustry] = useState<string | null>(null);
   const [showAllIndustries, setShowAllIndustries] = useState(false);
@@ -195,13 +274,29 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
   const countIn = (world: string) => PROS.filter((p) => p.world === world).length;
   const pathsIn = (world: string) => new Set(DECK.filter((c) => c.world === world).map((c) => c.title)).size || new Set(PROS.filter((p) => p.world === world).map((p) => p.field)).size;
 
+  // One task on screen at a time (direct feedback): drilling into a single
+  // industry or opening the full industry list narrows the page down to
+  // just that, so the shared search heading above doesn't sit over a page
+  // that no longer has "find a professional" as its job.
+  const focused = industry !== null || showAllIndustries;
+  useEffect(() => onFocusChange?.(focused), [focused, onFocusChange]);
+
+  // The welcome modal's own step lives inside PeopleWelcome and must
+  // survive switching between the branches below (search / one industry /
+  // the full list / home) -- it renders first in every branch's fragment,
+  // same position each time, so React keeps that one instance mounted
+  // instead of remounting (and re-popping) it on every internal navigation.
+
   // a search from the shared box wins over every view
   if (q) {
     return (
-      <section className="flex flex-col gap-[var(--space-3)]" aria-label="Search results">
-        <SectionHead>{matches.length} {matches.length === 1 ? "professional" : "professionals"}</SectionHead>
-        {matches.length > 0 ? <Grid pros={matches} follows={follows} onFollow={onFollow} /> : <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No professional matches that yet. Try a career, a company or a name.</p>}
-      </section>
+      <>
+        <PeopleWelcome />
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Search results">
+          <SectionHead>{matches.length} {matches.length === 1 ? "professional" : "professionals"}</SectionHead>
+          {matches.length > 0 ? <Grid pros={matches} follows={follows} onFollow={onFollow} /> : <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No professional matches that yet. Try a career, a company or a name.</p>}
+        </section>
+      </>
     );
   }
 
@@ -209,23 +304,51 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
   if (industry) {
     const people = rankPros(PROS.filter((p) => p.world === industry), worlds);
     return (
-      <section className="flex flex-col gap-[var(--space-4)]" aria-label={industry}>
-        <button type="button" onClick={() => setIndustry(null)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> All industries
-        </button>
-        <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
-          <SectionHead>{industry}</SectionHead>
-          <span className="text-[13px] leading-[18px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{people.length} {people.length === 1 ? "professional" : "professionals"}</span>
-        </div>
-        {people.length > 0 ? <Grid pros={people} follows={follows} onFollow={onFollow} /> : <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No verified professionals in this world yet. Follow a community to hear when one joins.</p>}
-      </section>
+      <>
+        <PeopleWelcome />
+        <SectionSurface className="flex flex-col gap-[var(--space-4)]">
+          <button type="button" onClick={() => setIndustry(null)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+            <ArrowLeft className="h-4 w-4" aria-hidden /> All industries
+          </button>
+          <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
+            <SectionHead>{industry}</SectionHead>
+            <span className="text-[13px] leading-[18px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{people.length} {people.length === 1 ? "professional" : "professionals"}</span>
+          </div>
+          {people.length > 0 ? <Grid pros={people} follows={follows} onFollow={onFollow} /> : <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No verified professionals in this world yet. Follow a community to hear when one joins.</p>}
+        </SectionSurface>
+      </>
     );
   }
 
-  const shownWorlds = showAllIndustries ? WORLDS : WORLDS.filter((w) => countIn(w) > 0);
+  // the full industry list, its own dedicated screen (direct feedback: it
+  // used to expand this same grid in place, still surrounded by People to
+  // follow and New from people you follow -- one task at a time reads
+  // clearer than carrying the whole People page along).
+  if (showAllIndustries) {
+    return (
+      <>
+        <PeopleWelcome />
+        <SectionSurface className="flex flex-col gap-[var(--space-4)]">
+          <button type="button" onClick={() => setShowAllIndustries(false)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+          </button>
+          <div className="flex flex-col gap-[2px]">
+            <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em]" style={{ color: "var(--accent-subtle)" }}>BROWSE BY INDUSTRY</span>
+            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Every world Dreamari covers, whether it has professionals yet or not.</span>
+          </div>
+          <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+            {WORLDS.map((world) => <WorldTile key={world} world={world} count={pathsIn(world)} unit="career path" onOpen={() => setIndustry(world)} />)}
+          </ul>
+        </SectionSurface>
+      </>
+    );
+  }
+
+  const shownWorlds = WORLDS.filter((w) => countIn(w) > 0);
 
   return (
     <>
+      <PeopleWelcome />
       {/* "Find a professional" itself heads the shared search box one
          level up (ConnectExperience's HomeView), not here -- no second
          row of career chips repeating it either (direct feedback, Joshua
@@ -234,29 +357,35 @@ export function PeopleTab({ follows, onFollow, query }: { follows: Follows; onFo
          own order: Find a professional, People to follow, Browse by
          industry, New from people you follow -- no segmented "For you /
          Browse industries" tab switching between them (direct feedback:
-         "still has browse industries toggle"). */}
-      <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
-        <div className="flex flex-col gap-[2px]">
-          <SectionHead>People to follow</SectionHead>
-          <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
-        </div>
-        <FollowCarousel pros={withNewProsFirst(PROS, worlds)} follows={follows} onFollow={onFollow} />
-      </section>
-
-      <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
-        <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+         "still has browse industries toggle"). Each section now sits in
+         its own grounded surface (direct feedback: too much of Connect
+         read as components floating on the page background) so the eye
+         can tell where "People to follow" ends and "Browse by industry"
+         begins without leaning on a heavier boxed style everywhere. */}
+      <SectionSurface className="flex flex-col gap-[var(--space-3)]" >
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="People to follow">
           <div className="flex flex-col gap-[2px]">
-            <SectionHead>Browse by industry</SectionHead>
-            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
+            <SectionHead>People to follow</SectionHead>
+            <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Professionals based on your career interests.</span>
           </div>
-          {!showAllIndustries && shownWorlds.length < WORLDS.length && (
+          <FollowCarousel pros={withNewProsFirst(PROS, worlds)} follows={follows} onFollow={onFollow} />
+        </section>
+      </SectionSurface>
+
+      <SectionSurface>
+        <section className="flex flex-col gap-[var(--space-3)]" aria-label="Browse by industry">
+          <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+            <div className="flex flex-col gap-[2px]">
+              <SectionHead>Browse by industry</SectionHead>
+              <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Explore professionals in fields that interest you.</span>
+            </div>
             <button type="button" onClick={() => setShowAllIndustries(true)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-          )}
-        </div>
-        <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
-          {shownWorlds.map((world) => <WorldTile key={world} world={world} count={showAllIndustries ? pathsIn(world) : countIn(world)} unit={showAllIndustries ? "career path" : "professional"} onOpen={() => setIndustry(world)} />)}
-        </ul>
-      </section>
+          </div>
+          <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
+            {shownWorlds.map((world) => <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} />)}
+          </ul>
+        </section>
+      </SectionSurface>
 
       <NewFromFollowing follows={follows} />
     </>
