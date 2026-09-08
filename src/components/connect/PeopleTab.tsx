@@ -228,8 +228,8 @@ function PeopleWelcome() {
            reads as a moment, not a form field. */}
         <div className="relative flex flex-col items-center gap-[var(--space-3)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)] text-center">
           <span aria-hidden className="pointer-events-none absolute top-[-40px] size-[180px] rounded-full blur-[40px]" style={{ background: "color-mix(in srgb, var(--primary) 35%, transparent)" }} />
-          <span className="relative flex size-[104px] flex-none items-center justify-center">
-            <Image src="/images/dreamy-welcome-mascot.png" alt="" width={208} height={208} className="h-full w-full object-contain" priority />
+          <span className="relative flex size-[136px] flex-none items-center justify-center">
+            <Image src="/images/dreamy/v2/dreamy-puzzle.png" alt="" width={272} height={272} className="h-full w-full object-contain" priority />
           </span>
           <h2 id="people-welcome-title" className="relative text-[21px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
             {step === 1 ? "Welcome to Connect!" : "A moderated space"}
