@@ -11,7 +11,7 @@ import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
-import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
+import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WelcomeScreen, WorkVibeStep, type StepProps } from "./steps";
 import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildState, type StageId } from "./types";
 
 // The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).
@@ -80,7 +80,8 @@ export function BuildFlowExperience() {
   const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite, onSkip: skipToMatch };
 
   let content: ReactNode = null;
-  if (stageId === "interests") content = <InterestsStep {...stepProps} />;
+  if (stageId === "welcome") content = <WelcomeScreen onNext={next} onSkip={skipToMatch} />;
+  else if (stageId === "interests") content = <InterestsStep {...stepProps} />;
   else if (stageId === "subjects") content = <SubjectsStep {...stepProps} onBack={back} />;
   else if (stageId === "workVibe") content = <WorkVibeStep {...stepProps} onBack={back} />;
   else if (stageId === "milestone") content = <MilestoneScreen onNext={next} onBack={back} percent={stage.percent} />;
