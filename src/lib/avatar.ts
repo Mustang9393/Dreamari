@@ -42,7 +42,7 @@ const ILLUSTRATED_COUNT = 80;
 // itself reads as a real cross-section, not "18 portraits of the same
 // race." Jordan and Marcus are untouched -- Jordan is the student whose
 // face anchors the marketing screenshots and the profile header everywhere
-// (its own dedicated file, avatar-jordan.png, below), and Marcus's exact
+// (its own dedicated file, avatar-jordan.webp, below), and Marcus's exact
 // portrait was a direct pick from a supplied photo (8 Sept 2026) -- neither
 // should move for a diversity pass that has nothing to do with either of
 // them specifically. Both are Black, which sets the floor for that
@@ -63,7 +63,7 @@ const ILLUSTRATED_COUNT = 80;
 // real-world ethnicity a viewer would notice being "under-represented."
 const PINNED_INDEX: Record<string, number> = {
   // 0-based indices -- student-NN.png is PINNED_INDEX[name] + 1.
-  Jordan: 3, // dead path in practice (see studentAvatarSrc's early return to avatar-jordan.png) but kept excluded defensively
+  Jordan: 3, // dead path in practice (see studentAvatarSrc's early return to avatar-jordan.webp) but kept excluded defensively
   Marcus: 1, // the exact dreadlocks/black-polo portrait supplied directly, 8 Sept 2026 -- untouched
   // White (3)
   Ethan: 32, // student-33: White masculine
@@ -127,7 +127,7 @@ function hash(seed: string): number {
  *  same illustrated style, no real photo. */
 export function studentAvatarSrc(seed: string): string {
   if (seed === "Jordan Rivera") seed = "Jordan"; // full name on the student's own profile, same person as the "Jordan" handle
-  if (seed === "Jordan") return "/images/avatar-jordan.png";
+  if (seed === "Jordan") return "/images/avatar-jordan.webp";
   if (seed in PINNED_INDEX) return `/images/avatars/students/student-${String(PINNED_INDEX[seed] + 1).padStart(2, "0")}.png`;
   let index = hash(seed) % ILLUSTRATED_COUNT;
   while (EXCLUDED_INDICES.has(index)) index = (index + 1) % ILLUSTRATED_COUNT;
