@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionToggle, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
@@ -34,7 +34,12 @@ import "./app.css";
 //  - "Browse All" (Explore-Browse, 3185:17011): search, world filter pills,
 //    Sort by, and six career rails ported section by section.
 
-function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
+// One pill, three stops: For You and Browse All switch the in-page tab;
+// Colleges is a real route change. Was a second full toggle sitting next to
+// this one (direct feedback, 8 Sept 2026: "two too many toggles") -- folding
+// it in here instead of running Careers/Colleges as its own control keeps
+// Explore's header down to one switcher, not two.
+function ForYouBrowseToggle({ tab, onTab, onColleges }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void; onColleges: () => void }) {
   return (
     <div
       className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
@@ -61,6 +66,15 @@ function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (
           {item.label}
         </button>
       ))}
+      <span aria-hidden className="mx-[2px] h-[18px] w-px flex-none" style={{ background: "var(--glass-border)" }} />
+      <button
+        type="button"
+        onClick={onColleges}
+        className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+        style={{ fontFamily: "var(--font-body)", background: "transparent", color: "var(--foreground)" }}
+      >
+        Colleges
+      </button>
     </div>
   );
 }
@@ -749,12 +763,9 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
-            <div className="flex items-center gap-[var(--space-6)]">
-              <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
-                Explore
-              </h1>
-              <ExploreSectionToggle active="careers" />
-            </div>
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+              Explore
+            </h1>
             <div className="flex min-w-0 items-center gap-[var(--space-6)]">
               {/* Search grows from icon to input; the toggle folds away while
                  it is open. */}
@@ -796,7 +807,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                 className="overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
               >
-                <ForYouBrowseToggle tab={tab} onTab={switchTab} />
+                <ForYouBrowseToggle tab={tab} onTab={switchTab} onColleges={() => router.push("/colleges")} />
               </div>
             </div>
           </div>
