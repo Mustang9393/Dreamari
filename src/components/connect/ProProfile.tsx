@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Briefcase, ChevronRight, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring } from "./viz";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
@@ -327,19 +328,23 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
       </div>
       <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
         {items.slice(0, limit).map((item) => (
-          <li key={item.key} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
-            <span className="flex min-w-0 items-center gap-[10px]">
-              <button type="button" onClick={() => nav.openPro(item.pro.id)} aria-label={`Open ${item.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
-                <Avatar name={item.pro.name} size={36} />
-              </button>
-              <button type="button" onClick={() => nav.openPro(item.pro.id)} className="min-w-0 flex-1 cursor-pointer text-left">
-                <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                  <span className="truncate">{item.pro.name}</span> <VerifiedBadge size={13} />
-                </span>
-                <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{item.verb === "answered" ? `Answered a question about ${item.topic}` : `Posted about ${item.topic}`}</span>
-              </button>
-            </span>
-            <button type="button" onClick={item.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{item.verb === "answered" ? "Read answer" : "Read post"}</button>
+          <li key={item.key} className="h-full">
+          <HoverBeam strength={0.8} className="h-full">
+            <div className="flex h-full items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+              <span className="flex min-w-0 items-center gap-[10px]">
+                <button type="button" onClick={() => nav.openPro(item.pro.id)} aria-label={`Open ${item.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
+                  <Avatar name={item.pro.name} size={36} />
+                </button>
+                <button type="button" onClick={() => nav.openPro(item.pro.id)} className="min-w-0 flex-1 cursor-pointer text-left">
+                  <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span className="truncate">{item.pro.name}</span> <VerifiedBadge size={13} />
+                  </span>
+                  <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{item.verb === "answered" ? `Answered a question about ${item.topic}` : `Posted about ${item.topic}`}</span>
+                </button>
+              </span>
+              <button type="button" onClick={item.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{item.verb === "answered" ? "Read answer" : "Read post"}</button>
+            </div>
+          </HoverBeam>
           </li>
         ))}
       </ul>

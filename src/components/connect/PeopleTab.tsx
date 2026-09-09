@@ -195,8 +195,9 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
   const Icon = WORLD_ICON[world] ?? Sparkles;
   const accent = BROWSE_TILE_ACCENT[world] ?? WORLD_COLORS[world] ?? "var(--primary)";
   return (
-    <li>
-      <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
+    <li className="h-full">
+    <HoverBeam strength={0.8} className="h-full">
+      <button type="button" onClick={onOpen} className="dm-quiet flex h-full w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
         <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
           <Icon className="h-[18px] w-[18px]" />
         </span>
@@ -206,6 +207,7 @@ function WorldTile({ world, count, unit, onOpen }: { world: string; count: numbe
         </span>
         <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
       </button>
+    </HoverBeam>
     </li>
   );
 }
