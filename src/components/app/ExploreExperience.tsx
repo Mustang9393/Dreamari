@@ -3,6 +3,7 @@
  
 
 import Image from "next/image";
+import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -770,6 +771,12 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                  rounded-lg read as a rounded square, not a circle -- direct
                  feedback, 8 Sept 2026); once it grows into a text field it
                  needs the normal rounded-rect shape back. */}
+              {/* active is tied to searchOpen, not hover -- this box morphs shape
+                 (circle collapsed, rounded-rect open), so borderRadius is pinned
+                 explicitly rather than left to BorderBeam's own auto-detect (which
+                 only reads the child's radius once, at mount, and would otherwise
+                 keep whatever shape this box happened to be in on first paint). */}
+              <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={searchOpen} borderRadius={16}>
               <div
                 className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{
@@ -789,7 +796,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                   placeholder="Search careers, skills, worlds..."
                   aria-hidden={!searchOpen}
                   tabIndex={searchOpen ? 0 : -1}
-                  className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
+                  className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
                   style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
                 />
                 {searchOpen && (
@@ -804,6 +811,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                   </button>
                 )}
               </div>
+              </BorderBeam>
               {/* Toggle collapses while search is open. */}
               <div
                 className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -817,8 +825,9 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
 
         {/* Mobile search input (the desktop header is hidden below md) */}
         {tab === "browse" && searchOpen && (
+          <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} borderRadius={16} className="md:hidden">
           <div
-            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px] md:hidden"
+            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px]"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
           >
             <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
@@ -826,7 +835,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search careers, skills, worlds..."
-              className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+              className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
               style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
             />
             <button
@@ -839,6 +848,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               <X className="h-3 w-3" />
             </button>
           </div>
+          </BorderBeam>
         )}
 
         {tab === "browse" ? <BrowseFace query={query} filtersOpen={searchOpen} /> : <ForYouFace />}

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
@@ -145,6 +146,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}
         <div className="flex items-stretch gap-[var(--space-3)]">
+        <HoverBeam strength={0.85} className="min-w-0 flex-1">
         <label className="flex min-h-[56px] min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: q ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
           <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? SOFT : "var(--muted-foreground)" }} />
           <span className="sr-only">Search colleges by name, city or state</span>
@@ -156,7 +158,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             placeholder="College, city or state"
             autoComplete="off"
             enterKeyHint="search"
-            className="min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] font-semibold outline-none placeholder:font-medium"
+            className="dm-beam-input min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] font-semibold outline-none placeholder:font-medium"
             style={{ color: "var(--foreground)" }}
           />
           {q && (
@@ -165,6 +167,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             </button>
           )}
         </label>
+        </HoverBeam>
         <button type="button" onClick={() => setTrayOpen(true)} aria-haspopup="dialog" aria-expanded={trayOpen} aria-label={`Filters${applied.length ? `, ${applied.length} on` : ""}`} className="dm-quiet flex min-h-[56px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-4)] text-[15px] leading-[20px] font-semibold" style={{ ...PANEL, borderColor: applied.length ? ACCENT : PANEL.borderColor, color: "var(--foreground)" }}>
           <SlidersHorizontal className="h-5 w-5" aria-hidden />
           <span className="hidden sm:inline">Filters</span>

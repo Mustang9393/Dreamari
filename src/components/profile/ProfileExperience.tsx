@@ -1783,13 +1783,21 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                   }}
                 >
                   <Plus className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                  {/* Gave the bare input its own small pill container -- a bare
+                     transparent input on a hairline row has no box for the ring
+                     to hug, so the beam would otherwise render as a hard, bg-less
+                     rectangle floating mid-row. */}
+                  <HoverBeam strength={0.85} className="min-w-0 flex-1">
+                  <div className="flex min-w-0 flex-1 items-center rounded-[var(--radius-sm)] px-[10px] py-[6px]" style={{ background: "var(--glass-surface-1)" }}>
                   <input
                     value={draftTask}
                     onChange={(event) => setDraftTask(event.target.value)}
                     placeholder="Add your own step"
-                    className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+                    className="dm-beam-input min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]"
                     style={{ color: "var(--foreground)" }}
                   />
+                  </div>
+                  </HoverBeam>
                   <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex h-[32px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] text-[13px] font-bold disabled:opacity-35" style={{ color: "var(--accent-subtle)" }}>
                     Add
                   </button>

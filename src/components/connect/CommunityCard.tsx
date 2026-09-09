@@ -200,14 +200,22 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
           {/* a button that reads as one (direct feedback), without the blue:
              the solid dark fill the stat boxes used to have, so it is the one
              solid object on the card now that everything else is blur */}
+          {/* Reacts to the WHOLE card's hover (plain group-hover:, the outer
+             card's .group), not just its own group/cta -- the whole card is
+             already the tap target, so the CTA should read as "also hovered"
+             the instant the pointer lands anywhere on the card (direct
+             feedback, 9 Sept 2026), not only once it's directly over this
+             12px button. brightness (not a background/shadow rewrite) is the
+             one filter that can react to an ancestor's hover via a plain
+             Tailwind class when the actual fill is a color-mix inline style. */}
           <button
             type="button"
             onClick={onOpen}
             aria-label={`Open ${community.name}`}
-            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[11px] text-[13px] leading-[18px] font-bold whitespace-nowrap @[400px]:gap-[7px] @[400px]:px-[14px]"
+            className="dm-quiet group/cta flex min-h-[36px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[11px] text-[13px] leading-[18px] font-bold whitespace-nowrap transition-[filter] duration-200 group-hover:brightness-125 @[400px]:gap-[7px] @[400px]:px-[14px]"
             style={{ background: `color-mix(in srgb, ${accent} 26%, rgba(12,16,35,0.78))`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.18))`, color: "#FFFFFF" }}
           >
-            Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover/cta:translate-x-[2px] group-hover/cta:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
+            Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px] group-hover/cta:translate-x-[2px] group-hover/cta:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
           </button>
         </div>
       </div>

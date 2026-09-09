@@ -3,6 +3,7 @@
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { BorderBeam } from "border-beam";
 
 import Image from "next/image";
 import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -281,6 +282,11 @@ function InlineAsk({
     );
   }
   return (
+    // Same beam recipe as primitives.tsx's InlineAsk (this file has its own
+    // separate, un-migrated copy of the component — same shape, different
+    // module) so every "ask a question" composer in the app reads as one
+    // consistent language, not two.
+    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
     <div className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
       <div className="flex items-start gap-[12px]">
         <Avatar name="Jordan Rivera" size={30} />
@@ -294,7 +300,7 @@ function InlineAsk({
             onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(); } }}
             placeholder={placeholder}
             rows={3}
-            className="w-full resize-none bg-transparent text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)]"
+            className="dm-beam-input w-full resize-none bg-transparent text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)]"
             style={{ color: "var(--foreground)" }}
           />
         </label>
@@ -312,6 +318,7 @@ function InlineAsk({
         </button>
       </div>
     </div>
+    </BorderBeam>
   );
 }
 

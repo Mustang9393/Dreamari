@@ -2,6 +2,7 @@
 
 import { useContext, useMemo, useState } from "react";
 import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
+import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
@@ -211,6 +212,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                     )}
                     {state === "answering" && (
                       <div className="flex flex-col gap-[8px]">
+                        <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                         <label className="block">
                           <span className="sr-only">Your answer</span>
                           <textarea
@@ -219,10 +221,11 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                             onChange={(event) => setDraft(event.target.value)}
                             rows={3}
                             placeholder="A few honest sentences from your own experience is plenty."
-                            className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+                            className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]"
                             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                           />
                         </label>
+                        </BorderBeam>
                         <label className="flex w-fit cursor-pointer items-center gap-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                           <input type="checkbox" checked={disclose} onChange={(event) => setDisclose(event.target.checked)} className="size-4 accent-[var(--primary)]" /> Add &ldquo;Based on my own experience&rdquo;
                         </label>
@@ -291,14 +294,18 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
                     <button key={p} type="button" onClick={() => setPostDraft(p)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: postDraft === p ? `color-mix(in srgb, ${accent} 60%, var(--glass-border))` : "var(--glass-border)", color: "var(--foreground)", background: postDraft === p ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }}>{p}</button>
                   ))}
                 </div>
+                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <label className="block">
                   <span className="sr-only">Post title</span>
-                  <input value={postDraft} onChange={(event) => setPostDraft(event.target.value)} maxLength={90} placeholder="Title" className="w-full rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+                  <input value={postDraft} onChange={(event) => setPostDraft(event.target.value)} maxLength={90} placeholder="Title" className="dm-beam-input w-full rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] font-semibold outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
                 </label>
+                </BorderBeam>
+                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <label className="block">
                   <span className="sr-only">Post body</span>
-                  <textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} rows={4} maxLength={600} placeholder="Three to five sentences. Plain words, one idea each." className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+                  <textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} rows={4} maxLength={600} placeholder="Three to five sentences. Plain words, one idea each." className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
                 </label>
+                </BorderBeam>
                 <div className="flex flex-wrap items-center gap-[var(--space-2)]">
                   <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() && postBody.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim() || postBody.trim().length < 40) return; dispatchAuroraPulse("cta"); setLocalPosts((l) => [{ title: postDraft.trim(), body: postBody.trim() }, ...l]); setComposing(false); setPostBody(""); }}>Publish</PrimaryCta>
                   <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setComposing(false)}>Cancel</QuietCta>
