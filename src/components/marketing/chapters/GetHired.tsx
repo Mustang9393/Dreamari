@@ -127,8 +127,11 @@ export function GetHiredChapter() {
                    translucent (direct feedback, 9 Sept 2026: "too
                    transparent... should be solid") -- these are real
                    comparison cards, not a background decoration. Scales
-                   from its top edge, so all three tops line up and the two
-                   behind simply end higher (direct feedback, 7 Sept 2026). */
+                   from its own center, so the two behind stay vertically
+                   centered behind the front card instead of hanging from
+                   its top edge (direct feedback, 9 Sept 2026: "the two
+                   cards behind ... aligned to the top, make them centred
+                   so they are symmetrical"). */
                 const pose = [
                   { x: "0px", scale: 1, z: 3, o: 1 },
                   { x: "calc(-1 * min(100px, 20vw))", scale: 0.86, z: 1, o: 1 },
@@ -146,7 +149,7 @@ export function GetHiredChapter() {
                          fully occludes the cards tucked behind it */
                       background: "linear-gradient(var(--glass-surface-1), var(--glass-surface-1)), var(--background)",
                       transform: `translateX(${pose.x}) scale(${pose.scale})`,
-                      transformOrigin: "top center",
+                      transformOrigin: "center",
                       zIndex: pose.z,
                       opacity: pose.o,
                     }}
