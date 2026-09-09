@@ -38,9 +38,8 @@ export const IB_LEVEL_1: Level = {
   // Express mode ("Investment Banker, Level 1, Express mode" doc): the five
   // teaching screens go -- how-IB-works + its example page, the drag check on
   // it, the skill-chips intro, the score spotlight, and the typed 85-threshold
-  // check. All ten scored beats survive; both story cards, every character
-  // card and the vocabulary flips card stay. The cut teaching becomes
-  // tappable in the player (score panel, term meanings, character cards).
+  // check. The cut teaching becomes tappable in the player (score panel, term
+  // meanings, character cards).
   // L1-02 (the nine-weeks/six-interns stakes line) and L1-06 (Christina's
   // "reaches her boss before you do" line plus the ladder graphic) also cut
   // for Express only, per the numbered "IB game sequence" reference and
@@ -50,7 +49,20 @@ export const IB_LEVEL_1: Level = {
   // restored reception setup already puts Jordan on screen by name, so his
   // later formal character card repeats an introduction that already
   // happened.
-  expressCut: ["L1-02", "L1-03", "L1-03b", "L1-04", "L1-06", "L1-07", "L1-09", "L1-10", "L1-20"],
+  // L1-17 through L1-23 also cut for Express only (direct feedback, 9 Sept
+  // 2026: "after the data room question skip to the offer being received at
+  // the end of level 1. Remove everything else for the express mode.") --
+  // Marcus's two character cards, the Maison Laurent document check, the
+  // Jordan credit dispute, the timed intern-quits crisis, and the help-
+  // another-intern beat are all gone; Express now goes straight from the
+  // data room question (L1-13) into the close (L1-24/L1-25) and the ending.
+  // Full mode is unaffected -- it still plays every one of these. This
+  // leaves Express with only three scored beats (L1-08, L1-12, L1-13)
+  // feeding the reputation score that decides the ending band; not
+  // rebalanced against the 85-point Trusted threshold since that's a
+  // scoring-design call, not a beat-order one -- flagging rather than
+  // guessing at a fix.
+  expressCut: ["L1-02", "L1-03", "L1-03b", "L1-04", "L1-06", "L1-07", "L1-09", "L1-10", "L1-17", "L1-18", "L1-19", "L1-20", "L1-21", "L1-22", "L1-23"],
   beats: [
     // ---- arrival: one idea per screen (D52) ----
     {
@@ -276,24 +288,78 @@ export const IB_LEVEL_1: Level = {
       skills: ["Reading Comprehension", "Active Learning"],
     },
     {
-      // Reduced from a 4-question rapid quiz to a single choice (direct
-      // feedback, 9 Sept 2026: "after before client work let me check how
-      // you communicate its answer it should be the data room question") --
-      // Christina's setup line stays, but what follows it is now the data
-      // room question, not an unrelated four-item quiz on email length,
-      // uncertainty, error handling, and EOD. Content matches the old L1-16
-      // exactly (same choices/why text); L1-14 (the Maison Laurent
-      // assignment intro), L1-15 (the thank-you beat), and the old
-      // standalone L1-16 are removed entirely -- none of the three were in
-      // the numbered sequence given for this level.
-      kind: "choice",
-      layout: "blank",
+      // Restored (direct feedback, 9 Sept 2026: "the let me check how you
+      // communicate should have the following 4 questions before the data
+      // room question" -- my prior pass wrongly REPLACED this quiz with the
+      // data room question instead of keeping both, in order): the original
+      // four-item quiz again, unchanged. The data room question now follows
+      // it as its own beat (L1-13b) rather than swapping it out.
+      kind: "rapid",
       id: "L1-13",
-      planLineIfFailed: "you saved client files somewhere they should never have gone",
+      planLineIfFailed: "you got the basics wrong on questions the team expects an intern to know cold",
       progress: 0.3,
+      timer: 45,
       speaker: "Christina",
       castMember: "Christina",
       setup: '"Before client work, let me check how you communicate."',
+      // Christina's line is the whole setup; the quiz opens on Question 1 of 4
+      // with no restatement and no "Tap fast" (direct feedback, 6 Sept 2026)
+      question: "",
+      prompt: "",
+      items: [
+        {
+          question: "How long should an email to a senior banker be?",
+          options: [
+            { label: "Two full pages with every detail", correct: false, why: "Too long. Bankers read on a phone between meetings." },
+            { label: "Four sentences or less", correct: true, why: "Right. Answer first, detail underneath." },
+            { label: "As long as possible to explain everything", correct: false, why: "Long isn't thorough. The skill is what you leave out." },
+          ],
+        },
+        {
+          question: "Christina asks for a number you do not know. What should you say?",
+          options: [
+            { label: '"This estimate is probably correct."', correct: false, why: "Probably is dangerous around numbers. If it's wrong, you said it was fine." },
+            { label: '"Someone else should know that."', correct: false, why: "Maybe true, but it hands the problem back. She asked you." },
+            { label: '"I\'ll confirm and follow up."', correct: true, why: "Right. Honest, quick, and it commits you to closing the gap." },
+          ],
+        },
+        {
+          question: "You spot an error in a client deck. What should you do?",
+          options: [
+            { label: "Wait until after the meeting.", correct: false, why: "By then the client has seen it. Errors are cheapest early." },
+            { label: "Fix it and alert the team.", correct: true, why: "Right. Fixing it quietly leaves the team trusting a wrong version." },
+            { label: "Delete the entire presentation.", correct: false, why: "Destroying work to hide a mistake makes it a serious one." },
+          ],
+        },
+        {
+          question: "What does EOD mean?",
+          options: [
+            { label: "Estimate of debt", correct: false, why: "EOD means end of day." },
+            { label: "End of day", correct: true, why: "Right. And in banking that often means before sunrise." },
+            { label: "Earnings on demand", correct: false, why: "EOD means end of day, not earnings." },
+          ],
+        },
+      ],
+      whenPass: "Right. Three of four means you can be trusted with a client email.",
+      whenFail: "You needed three of four. These habits come up daily.",
+      feedback: "",
+      feedbackCta: "Continue",
+      skills: ["Written Communication", "Decision-Making"],
+    },
+    {
+      // The data room question, now its own beat right after the 4-question
+      // communication check (direct feedback, 9 Sept 2026). Same content as
+      // the old standalone L1-16, copy unchanged. No `progress` of its own
+      // -- same pattern as other lettered sub-beats (e.g. L1-03b) that
+      // extend the beat before them rather than opening a new scored step
+      // on the bar.
+      kind: "choice",
+      layout: "blank",
+      id: "L1-13b",
+      planLineIfFailed: "you saved client files somewhere they should never have gone",
+      speaker: "Christina",
+      castMember: "Christina",
+      setup: '"Before you share anything: client materials stay secure."',
       question: "Client files belong in the secure ___.",
       prompt: "Drag or tap the right word into the space.",
       choices: [

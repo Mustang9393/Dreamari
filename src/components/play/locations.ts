@@ -230,6 +230,7 @@ export const BEAT_LOCATION: Record<string, LocationId> = {
   "L1-11": "cobalt-cafe-lounge-sunset",
   "L1-12": "cobalt-cafe-lounge-sunset",
   "L1-13": "cobalt-cafe-lounge-sunset",
+  "L1-13b": "cobalt-trading-floor-sunset",
   // L1-14 has its own hero art (the laptop POV shot).
   "L1-15": "cobalt-trading-floor-sunset",
   "L1-16": "cobalt-trading-floor-sunset",
