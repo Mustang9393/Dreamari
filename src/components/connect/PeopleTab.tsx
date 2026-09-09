@@ -393,10 +393,11 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   // list (direct feedback, 9 Sept 2026: "this should have the amount of
   // professionals in it, not coming soon... the numbers in the quick
   // view/overview should be consistent with the explore all industries
-  // view"). The six worlds with a Community entry reuse its own "Pros"
-  // stat, so the number matches what that world's Community card already
-  // shows; every other world gets its own number in the same range so no
-  // world reads as empty on either screen.
+  // view" -- and again: "every industry should have professionals"). The
+  // five worlds with a Community entry reuse its own "Pros" stat, so the
+  // number matches what that world's Community card already shows; every
+  // other world gets its own number here so none of the fifteen ever reads
+  // as empty on either screen.
   const WORLD_PRO_COUNT: Record<string, number> = {
     "Building & Construction": 42,
     "Law, Safety & Justice": 48,
@@ -476,7 +477,14 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
     );
   }
 
-  const shownWorlds = WORLDS.filter((w) => countIn(w) > 0);
+  // The inline section is a decluttered preview, not a filter on which
+  // worlds "count" -- every world has a nonzero professional count now (see
+  // countIn above), so a count-based filter here would just show all 15 and
+  // defeat the point of having a separate "Explore all industries" screen
+  // (direct feedback, 9 Sept 2026: "we only show 6 tiles in the connect/
+  // people page as a way to de-clutter... There is no professional count
+  // that dictates this behaviour"). First six worlds, plain and simple.
+  const shownWorlds = WORLDS.slice(0, 6);
 
   return (
     <>
