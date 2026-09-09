@@ -389,6 +389,16 @@ html.light .dm-report {
   outline: 2px solid var(--accent-subtle);
   outline-offset: 2px;
 }
+/* An input/textarea sitting inside a HoverBeam ring (search bars, ask
+   composers) suppresses its own native focus rectangle -- the beam already
+   IS the focus indicator, so a square outline nested inside a rounded,
+   colourful ring read as a clashing double border (direct feedback, 9 Sept
+   2026: "makes it look very weird"). Still fully keyboard-accessible: the
+   surrounding beam is the visible cue, same as any other focus-visible
+   ring, just following the card's own shape instead of the input's. */
+.dm-beam-input:focus-visible {
+  outline: none;
+}
 :where(button, [role="button"], [role="tab"], [role="radio"]):not(:disabled) {
   cursor: pointer;
 }

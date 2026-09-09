@@ -8,6 +8,7 @@
 import Image from "next/image";
 import { createContext, useContext, useState } from "react";
 import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { studentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
@@ -268,40 +269,47 @@ export function InlineAsk({
     );
   }
   return (
-    <div className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
-      <div className="flex items-start gap-[12px]">
-        <Avatar name="Jordan Rivera" size={30} />
-        <label className="min-w-0 flex-1">
-          <span className="sr-only">Your question</span>
-          <textarea
-            autoFocus
-            value={text}
-            maxLength={280}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(); } }}
-            placeholder={placeholder}
-            rows={3}
-            className="w-full resize-none bg-transparent text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)]"
-            style={{ color: "var(--foreground)" }}
-          />
-        </label>
+    // This branch only ever renders while the composer is open, so the
+    // beam is simply always active here -- no separate hover/focus state
+    // to track (direct feedback, 9 Sept 2026: beam every active ask/search
+    // field; same duration as "Do This Next", strength tuned down since
+    // this sits low-density in a feed rather than being a page's one CTA).
+    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+      <div className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}>
+        <div className="flex items-start gap-[12px]">
+          <Avatar name="Jordan Rivera" size={30} />
+          <label className="min-w-0 flex-1">
+            <span className="sr-only">Your question</span>
+            <textarea
+              autoFocus
+              value={text}
+              maxLength={280}
+              onChange={(event) => setText(event.target.value)}
+              onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(); } }}
+              placeholder={placeholder}
+              rows={3}
+              className="dm-beam-input w-full resize-none bg-transparent text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)]"
+              style={{ color: "var(--foreground)" }}
+            />
+          </label>
+        </div>
+        {blocked && (
+          <p role="alert" className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>
+        )}
+        <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            Posting as Jordan · Junior
+          </span>
+          <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
+          <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+            Cancel
+          </button>
+          <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          </button>
+        </div>
       </div>
-      {blocked && (
-        <p role="alert" className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>
-      )}
-      <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-        <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          Posting as Jordan · Junior
-        </span>
-        <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
-        <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          Cancel
-        </button>
-        <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-          Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
-        </button>
-      </div>
-    </div>
+    </BorderBeam>
   );
 }
 

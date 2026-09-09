@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
@@ -1166,32 +1167,42 @@ export function OverviewTab({
       <section aria-labelledby="bento-title" className="grid grid-cols-3 gap-[var(--space-2)] sm:gap-[var(--space-3)]">
         <h3 id="bento-title" className="sr-only">Your top three, plan and report at a glance</h3>
 
-        <button type="button" onClick={onGoTop3} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-          <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Top Three</span><span className="hidden sm:inline">My Top Three</span></span>
-            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-          </span>
-          <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 chosen</span>
-        </button>
+        {/* Bento cards get the same hover beam as everything else (direct
+           feedback, 9 Sept 2026: "hover states of cards everywhere," same
+           3.5s duration as "Do This Next"), tuned to a moderate strength --
+           these are everyday navigation, not a singled-out next action. */}
+        <HoverBeam strength={0.8} className="min-w-0">
+          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
+            <span className="flex items-start justify-between gap-[var(--space-2)]">
+              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Top Three</span><span className="hidden sm:inline">My Top Three</span></span>
+              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </span>
+            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 chosen</span>
+          </button>
+        </HoverBeam>
 
-        <button type="button" onClick={onGoPlan} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-          <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Plan</span><span className="hidden sm:inline">My Plan</span></span>
-            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-          </span>
-          <span className="flex flex-col gap-[6px]">
-            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps</span>
-            <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-          </span>
-        </button>
+        <HoverBeam strength={0.8} className="min-w-0">
+          <button type="button" onClick={onGoPlan} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
+            <span className="flex items-start justify-between gap-[var(--space-2)]">
+              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Plan</span><span className="hidden sm:inline">My Plan</span></span>
+              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </span>
+            <span className="flex flex-col gap-[6px]">
+              <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps</span>
+              <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+            </span>
+          </button>
+        </HoverBeam>
 
-        <button type="button" onClick={onGoReport} className="dm-tap flex min-w-0 cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-          <span className="flex items-start justify-between gap-[var(--space-2)]">
-            <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Report</span><span className="hidden sm:inline">Career Report</span></span>
-            <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-          </span>
-          <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections</span>
-        </button>
+        <HoverBeam strength={0.8} className="min-w-0">
+          <button type="button" onClick={onGoReport} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
+            <span className="flex items-start justify-between gap-[var(--space-2)]">
+              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Report</span><span className="hidden sm:inline">Career Report</span></span>
+              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </span>
+            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections</span>
+          </button>
+        </HoverBeam>
       </section>
 
       {/* Do this next (official copy, 5 Sept 2026): Explore leads (it is
