@@ -1664,6 +1664,11 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
   onGoPath: () => void;
 }) {
   const [draftTask, setDraftTask] = useState("");
+  // The beam should only mean "you're using this" -- a bare hover while
+  // scrolling past isn't that (direct feedback, 9 Sept 2026: "doesnt need a
+  // beam. Only have that happen if activated"), so `active` is pinned to
+  // real focus instead of HoverBeam's own default hover-or-focus tracking.
+  const [stepFieldFocused, setStepFieldFocused] = useState(false);
   // Every level starts closed (CEO, 4 Sept): opening into all the steps at
   // once was overwhelming. The student taps the level they want.
   const [openHorizon, setOpenHorizon] = useState<string | null>(null);
@@ -1787,11 +1792,13 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                      transparent input on a hairline row has no box for the ring
                      to hug, so the beam would otherwise render as a hard, bg-less
                      rectangle floating mid-row. */}
-                  <HoverBeam strength={0.85} className="min-w-0 flex-1">
+                  <HoverBeam strength={0.85} active={stepFieldFocused} className="min-w-0 flex-1">
                   <div className="flex min-w-0 flex-1 items-center rounded-[var(--radius-sm)] px-[10px] py-[6px]" style={{ background: "var(--glass-surface-1)" }}>
                   <input
                     value={draftTask}
                     onChange={(event) => setDraftTask(event.target.value)}
+                    onFocus={() => setStepFieldFocused(true)}
+                    onBlur={() => setStepFieldFocused(false)}
                     placeholder="Add your own step"
                     className="dm-beam-input min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]"
                     style={{ color: "var(--foreground)" }}

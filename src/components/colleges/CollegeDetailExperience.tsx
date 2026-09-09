@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { BorderBeam } from "border-beam";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
@@ -131,9 +133,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               )}
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
                 {c.website && (
-                  <a href={c.website} target="_blank" rel="noreferrer" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+                  // Solid ACCENT fill used to sit flush against the beam ring
+                  // and swallow it -- same fix as GetHired/Connect/Career
+                  // Detail's solid CTAs elsewhere this session.
+                  <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+                  <a href={c.website} target="_blank" rel="noreferrer" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: `color-mix(in srgb, ${ACCENT} 22%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${ACCENT} 45%, transparent)`, color: "#fff" }}>
                     Their website <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
+                  </BorderBeam>
                 )}
                 <SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={44} />
               </div>
@@ -427,6 +434,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
         <Folded id="see" title="See it, then ask someone" open={open.has("see")} onToggle={() => toggle("see")}>
           <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
+            <HoverBeam strength={0.8}>
             <a href={tourUrl} target="_blank" rel="noreferrer" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <PlayCircle className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
@@ -434,6 +442,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students, real campus. Opens outside Dreamari.</span>
               </span>
             </a>
+            </HoverBeam>
+            <HoverBeam strength={0.8}>
             <Link href="/connect" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               <MessagesSquare className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
               <span className="flex flex-col gap-[2px]">
@@ -441,6 +451,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified pros answer questions about where they studied.</span>
               </span>
             </Link>
+            </HoverBeam>
           </div>
         </Folded>
 

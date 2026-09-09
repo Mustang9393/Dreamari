@@ -4,6 +4,7 @@ import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
@@ -545,13 +546,15 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
   }
 
   return (
+    <HoverBeam strength={0.8} className={`flex-none aspect-[16/9] ${SHELF_HEIGHT}`}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
-      className={`dm-tap group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
+      className="dm-tap group relative block h-full w-full overflow-hidden rounded-[var(--radius-lg)] border"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
     >
       {art}
     </Link>
+    </HoverBeam>
   );
 }
 

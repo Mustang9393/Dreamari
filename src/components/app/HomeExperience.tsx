@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
+import { HoverBeam } from "./HoverBeam";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
@@ -402,10 +403,18 @@ const ACTIVITIES: Activity[] = [
   { kind: "sim", sim: REGISTERED_NURSE },
 ];
 
-/** One card, built exactly like the Play tab's poster card: cover, the
- *  poster scrim, the title in the world's poster face, the world label in
- *  its colour, the level and progress line, and a play badge in the middle.
- *  The whole card is the link; there is no separate button. */
+/** Cover, poster scrim, title in the world's poster face, world label in
+ *  its colour, and a play badge in the middle -- the same bones the Play
+ *  tab's own poster card uses, so a saved run is recognisable wherever it
+ *  shows up. Two things distinguish it from a plain poster-rail clone
+ *  (direct feedback, 9 Sept 2026: "the home's activity cards can be
+ *  designed better too"): a real, visible verb chip up top (previously
+ *  sr-only text only -- nothing sighted told you "Continue" from "Play"
+ *  except the presence of a progress bar, easy to miss at a glance), and a
+ *  trimmed bottom stack (the old "Day in the Life" eyebrow duplicated what
+ *  the chip and title already say, so it's gone -- title, world, and one
+ *  combined progress line instead of four). The whole card is the link;
+ *  there is no separate button. */
 function ActivityCard({ activity }: { activity: Activity }) {
   const ib = useSimRun(activity.kind === "sim" ? activity.sim : INVESTMENT_BANKING);
   const title = activity.kind === "sim" ? activity.sim.title : activity.title;
@@ -425,20 +434,30 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // the known-good sm size; if three of those don't fit the row, the
     // section's own overflow-x-auto (unchanged) takes over instead of
     // squeezing them, the same graceful fallback the row already uses below md.
-    <Link href={href} className="dm-tap group relative h-[190px] w-[304px] flex-none overflow-hidden rounded-[var(--radius-lg)] border sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[304px] md:flex-1 md:aspect-[360/212]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+    <HoverBeam strength={0.8} className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[304px] md:flex-1 md:aspect-[360/212]">
+    <Link href={href} className="dm-tap group relative flex h-full w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
       <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
       <span aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
         <Play className="ml-[3px] h-[22px] w-[22px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
       </span>
+      {/* the real, sighted verb -- top-left, off the bottom stack, so the
+         card reads "continue vs. new" in words, not just by whether a
+         progress bar happens to be present */}
+      <span aria-hidden className="pointer-events-none absolute top-[10px] left-[10px] flex items-center gap-[5px] rounded-full px-[10px] py-[5px] text-[11px] font-bold tracking-[0.02em]" style={{ background: "rgba(5,8,20,0.62)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}>
+        <Play className="h-[10px] w-[10px]" fill="currentColor" aria-hidden />
+        {verb}
+      </span>
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[14px] pt-[32px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        {activity.kind === "sim" && <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>}
         <span className="block text-[20px] leading-[1.15] font-extrabold uppercase" style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>{title}</span>
-        <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>{world}</span>
-        <span className="mt-[2px] text-[12px] leading-[15px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.85 }}>{label}</span>
-        {pct > 0 && <span aria-hidden className="block w-full max-w-[220px]"><SparkBar percent={pct} height={5} track="color-mix(in srgb, var(--poster-title) 25%, transparent)" fill="var(--primary)" glow="var(--primary)" /></span>}
+        <span className="flex items-baseline gap-[8px]">
+          <span className="text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[world] }}>{world}</span>
+          <span className="min-w-0 flex-1 truncate text-[11px] leading-[15px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>{label}</span>
+        </span>
+        {pct > 0 && <span aria-hidden className="mt-[2px] block w-full max-w-[220px]"><SparkBar percent={pct} height={5} track="color-mix(in srgb, var(--poster-title) 25%, transparent)" fill="var(--primary)" glow="var(--primary)" /></span>}
       </span>
     </Link>
+    </HoverBeam>
   );
 }
 
@@ -476,9 +495,9 @@ export function HomeExperience() {
             <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Continue Learning & Playing
             </h2>
-            <button type="button" className="dm-link mt-[2px] flex-none cursor-pointer text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+            <Link href="/play" className="dm-link mt-[2px] flex-none text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
               <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
-            </button>
+            </Link>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (

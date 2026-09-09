@@ -61,6 +61,10 @@ function matches(c: College, f: Filters, q: string, saved: Set<string>): boolean
 
 export function CollegesExperience({ initialQuery = "", initialType = "" }: { initialQuery?: string; initialType?: string }) {
   const [query, setQuery] = useState(initialQuery);
+  // Pinned to real focus, not HoverBeam's default hover-or-focus, so a
+  // pointer merely passing over this always-visible box doesn't light it up
+  // (direct feedback, 9 Sept 2026: "only have that happen if activated").
+  const [searchFocused, setSearchFocused] = useState(false);
   const [filters, setFilters] = useState<Filters>(() => {
     const f: Filters = { ...EMPTY, states: new Set(), levels: new Set(), controls: new Set(), sizes: new Set(), settings: new Set(), admissions: new Set(), also: new Set() };
     if (initialType === "trade") f.levels.add("Certificates");
@@ -146,7 +150,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}
         <div className="flex items-stretch gap-[var(--space-3)]">
-        <HoverBeam strength={0.85} className="min-w-0 flex-1">
+        <HoverBeam strength={0.85} active={searchFocused} className="min-w-0 flex-1">
         <label className="flex min-h-[56px] min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: q ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
           <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? SOFT : "var(--muted-foreground)" }} />
           <span className="sr-only">Search colleges by name, city or state</span>
@@ -155,6 +159,8 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             placeholder="College, city or state"
             autoComplete="off"
             enterKeyHint="search"

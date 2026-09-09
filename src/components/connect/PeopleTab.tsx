@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
@@ -33,13 +34,19 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
   // way a real <button> is. Follow stays its own action: stopPropagation
   // on its wrapper keeps a follow tap from also opening the profile.
   return (
-    <li
+    // <li> stays the grid item (a bare beam wrapper div can't sit directly
+    // inside a <ul> without breaking list semantics); the actual card --
+    // role="button", the click handler, the visual surface -- moves one
+    // level in, inside the beam.
+    <li className="h-full">
+    <HoverBeam strength={0.8} className="h-full">
+    <div
       onClick={() => nav?.openPro(pro.id)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
       role="button"
       tabIndex={0}
       aria-label={`Open ${pro.name}'s profile`}
-      className="dm-tap flex cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
+      className="dm-tap flex h-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
       style={{ background: "var(--glass-surface-1)", border: "1px solid var(--glass-border)" }}
     >
       <div className="flex items-center gap-[var(--space-3)]">
@@ -73,6 +80,8 @@ function FollowCard({ pro, following, onFollow }: { pro: Pro; following: boolean
         <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View profile</span>
         <span onClick={(e) => e.stopPropagation()}><FollowButton compact following={following} onToggle={onFollow} /></span>
       </div>
+    </div>
+    </HoverBeam>
     </li>
   );
 }
@@ -206,13 +215,15 @@ function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; foll
   // profile" text (direct feedback, 9 Sept 2026) -- see FollowCard above
   // for the same treatment and why Follow gets its own stopPropagation.
   return (
-    <li
+    <li className="h-full">
+    <HoverBeam strength={0.8} className="h-full">
+    <div
       onClick={() => nav?.openPro(pro.id)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav?.openPro(pro.id); } }}
       role="button"
       tabIndex={0}
       aria-label={`Open ${pro.name}'s profile`}
-      className="dm-tap flex cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
+      className="dm-tap flex h-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]"
       style={{ background: "var(--glass-surface-1)" }}
     >
       {badge && (
@@ -250,6 +261,8 @@ function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; foll
           {shortCount(pro.studentsReached)} students reached · {shortCount(pro.followers)} followers
         </span>
       )}
+    </div>
+    </HoverBeam>
     </li>
   );
 }

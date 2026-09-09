@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -486,16 +487,22 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                  (direct feedback), not floated to the far corner. */}
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
               {hasSimulation && (
+                // Solid var(--primary) fill used to sit flush against the beam
+                // ring and swallow it -- same fix as GetHired/Connect's solid
+                // CTAs earlier this session: a translucent tint instead.
+                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <button
                   type="button"
                   onClick={() => router.push(`/play/${career.slug}`)}
-                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
+                  style={{ background: "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-2))", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)", color: "var(--foreground)" }}
                 >
                   <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
                 </button>
+                </BorderBeam>
               )}
               {hasGlossaryGame && (
+                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <button
                   type="button"
                   onClick={() => router.push(`/play/glossary/${career.slug}`)}
@@ -504,6 +511,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 >
                   <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
                 </button>
+                </BorderBeam>
               )}
               <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>

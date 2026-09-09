@@ -2096,6 +2096,12 @@ function HomeView({
   // to find the right room, and asking lives inside each room. Typing
   // "invest" narrows the communities and boards to finance as you type.
   const [query, setQuery] = useState("");
+  // Pinned to real focus, not HoverBeam's default hover-or-focus, so a
+  // pointer merely passing over this always-visible box doesn't light it up
+  // (direct feedback, 9 Sept 2026: "only have that happen if activated") --
+  // the comment above already claimed "lights up on focus" but the beam
+  // itself was never actually gated to it.
+  const [searchFocused, setSearchFocused] = useState(false);
   const q = query.trim().toLowerCase();
   const hit = (...fields: (string | string[] | undefined)[]) => !q || fields.some((f) => (Array.isArray(f) ? f : [f ?? ""]).some((v) => v.toLowerCase().includes(q)));
   const searched = COMMUNITIES.filter((c) => hit(c.name, c.world, c.purpose, c.topics, c.professionalsFrom));
@@ -2148,13 +2154,15 @@ function HomeView({
         // The shared search field lights up on focus, same beam family as
         // everywhere else (direct feedback, 9 Sept 2026: "any active state
         // of search bars... in connect").
-        <HoverBeam strength={0.85}>
+        <HoverBeam strength={0.85} active={searchFocused}>
         <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             placeholder={tab === "events" ? "Search events and partners" : tab === "people" ? "Search professionals, careers, companies" : "Search communities, topics, companies"}
             aria-label={tab === "events" ? "Search events" : tab === "people" ? "Search professionals" : "Search communities"}
             className="dm-beam-input min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
@@ -3492,6 +3500,12 @@ function focusReplyComposer() {
 function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   const [text, setText] = useState("");
   const blocked = CONTACT_INFO.test(text);
+  // Unlike InlineAsk (only mounted once a reader taps "Ask" -- the tap
+  // itself is the activation), this composer sits at the foot of every
+  // thread ALWAYS visible, so an always-on beam would be exactly the
+  // "default state" the direct feedback (9 Sept 2026) called out. Gated to
+  // real focus instead.
+  const [focused, setFocused] = useState(false);
   const submit = () => {
     if (!text.trim() || blocked) return;
     dispatchAuroraPulse("cta");
@@ -3502,19 +3516,23 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
     <div id="dm-reply-composer" className="flex items-start gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
       <Avatar name="Jordan Rivera" size={32} />
       <div className="min-w-0 flex-1">
+        <HoverBeam strength={0.85} active={focused}>
         <label className="block">
           <span className="sr-only">Add a comment</span>
           <textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(); } }}
             maxLength={280}
             rows={2}
             placeholder="Add a comment…"
-            className="w-full resize-none rounded-[var(--radius-md)] border p-[10px] text-[13px] leading-[19px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+            className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border p-[10px] text-[13px] leading-[19px] outline-none placeholder:text-[color:var(--muted-foreground)]"
             style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
           />
         </label>
+        </HoverBeam>
         {blocked && <p role="alert" className="mt-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
