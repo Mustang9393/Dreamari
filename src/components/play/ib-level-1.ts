@@ -45,7 +45,12 @@ export const IB_LEVEL_1: Level = {
   // "reaches her boss before you do" line plus the ladder graphic) also cut
   // for Express only, per the numbered "IB game sequence" reference and
   // direct feedback, 9 Sept 2026 -- full mode keeps both.
-  expressCut: ["L1-02", "L1-03", "L1-03b", "L1-04", "L1-06", "L1-07", "L1-09", "L1-10"],
+  // L1-20 cut (direct feedback, 9 Sept 2026: "i think theres another intro
+  // screen with jordan, if hes already introduced, remove that"): L1-08's
+  // restored reception setup already puts Jordan on screen by name, so his
+  // later formal character card repeats an introduction that already
+  // happened.
+  expressCut: ["L1-02", "L1-03", "L1-03b", "L1-04", "L1-06", "L1-07", "L1-09", "L1-10", "L1-20"],
   beats: [
     // ---- arrival: one idea per screen (D52) ----
     {
@@ -173,8 +178,20 @@ export const IB_LEVEL_1: Level = {
       progress: 0.1,
       castMembers: ["Christina", "Jordan"],
       speaker: "Narrator",
-      // No setup line: the scene before already put Christina and Jordan at
-      // reception, so the question opens straight away (direct feedback, 6 Sept 2026)
+      // Restored (direct feedback, 9 Sept 2026: "add jordan the intern in
+      // slide 3", "I dont see jordan in the third slide"): main's 6 Sept
+      // fix dropped this setup line on the assumption an earlier scene
+      // already put Christina and Jordan at reception, but nothing earlier
+      // in this sequence does -- L1-05 is Christina's own intro card, no
+      // Jordan in it. Without a setup line this beat is never `stageable`,
+      // so it opens already "revealed" and the two characters only ever
+      // render dimmed in the background, never the clear held moment where
+      // a player actually sees Jordan. The engine's own staticSetup fix
+      // (see DialogueBox) already stops this line from repeating once the
+      // question is up, so restoring it here does not reintroduce the
+      // original "repeated sentence" complaint -- it shows once, held,
+      // with both characters clear, then steps aside for the question.
+      setup: "Christina meets you at reception. Jordan, another Intern, is starting too.",
       question: "Day 1: What should you do first?",
       prompt: "Tap one.",
       choices: [
