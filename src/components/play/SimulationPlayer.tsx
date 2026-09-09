@@ -59,6 +59,12 @@ type Phase = "beat" | "feedback" | "ending";
 
 type Result = { tier: Tier; why: string; delta: number };
 
+// Beat kinds that resolve a Tier through onResolve and so feed reputation --
+// "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
+// comprehension-check beats that never call onResolve with a scored tier
+// (a `check` beat's own doc comment: "NOT SCORED, NOT A STRIKE").
+const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket"]);
+
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
   // Express runs save in their own slot (n + 100): the trimmed beats array
   // indexes differently, so resuming a full-mode save mid-Express (or vice
@@ -87,7 +93,27 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // stays intact (a repair round afterward still just works) while the
   // number on screen jumps to 50 the instant the plan is passed.
   const [reputationBaseline, setReputationBaseline] = useState(START_REPUTATION);
-  const reputation = clamp(reputationBaseline + Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0));
+  // "Ten Best answers take a perfect run from 50 to exactly 100" is the
+  // handoff's scoring contract, but it assumes exactly SCORED_BEATS (10)
+  // scored beats -- true for every level's full mode, but Express modes cut
+  // beats (including scored ones, per direct feedback, 9 Sept 2026: "make
+  // sure in express mode if everything correct the offer is received and
+  // the reputation score scales appropriately") and can end up with fewer.
+  // Flat +5-per-best against a shorter run just falls short of 85 (ADVANCE_AT)
+  // even on a perfect play -- IB Level 1 Express currently has 4 scored
+  // beats left after this session's cuts, so flat scoring would cap a
+  // perfect run at 70. Scaling every tier's point value by
+  // SCORED_BEATS / actualScoredBeats keeps a perfect run landing at exactly
+  // 100 regardless of how many scored beats a given mode ends up with, full
+  // or Express, without changing the underlying TIER_SCORE ratios (a Wrong
+  // still costs the same fraction of a Best) or touching the shared
+  // per-tier point table other simulations rely on.
+  const scoreScale = useMemo(() => {
+    const count = level.beats.filter((b) => SCORED_KINDS.has(b.kind)).length;
+    return count > 0 ? SCORED_BEATS / count : 1;
+  }, [level.beats]);
+  const scoredValue = useCallback((tier: Tier) => Math.round(TIER_SCORE[tier] * scoreScale), [scoreScale]);
+  const reputation = clamp(reputationBaseline + Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0));
   const scored = Object.keys(live.scores).length;
   const misses = Object.entries(live.scores)
     .filter(([, tier]) => tier === "wrong" || tier === "risky")
@@ -257,12 +283,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             return;
           }
         }
-        setResult({ tier: banked, why, delta: TIER_SCORE[banked] });
+        setResult({ tier: banked, why, delta: scoredValue(banked) });
         setPhase("feedback");
       }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locked, repair, beat.id, pipUsed, strikes, index],
+    [locked, repair, beat.id, pipUsed, strikes, index, scoredValue],
   );
 
   const reviewIndex = level.beats.findIndex((entry) => entry.kind === "review");
@@ -579,7 +605,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           plan={(PERFORMANCE_PLANS[simulation.id] ?? PERFORMANCE_PLANS["investment-banking"])[level.n as 1 | 2 | 3]}
           pip={pip}
           onPassed={() => {
-            const earned = Object.values(live.scores).reduce((total, tier) => total + TIER_SCORE[tier], 0);
+            const earned = Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0);
             setReputationBaseline(50 - earned);
             setPip(null);
             setStrikes(0);
