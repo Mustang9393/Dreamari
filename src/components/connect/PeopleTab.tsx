@@ -191,13 +191,23 @@ const BROWSE_TILE_ACCENT: Record<string, string> = {
   "Personal Care & Community Services": "#84bdda",
 };
 
-function WorldTile({ world, count, unit, onOpen }: { world: string; count: number; unit: string; onOpen: () => void }) {
+// `tintStrength`: used only by the 6-tile "Browse by industry" preview,
+// which passes a value that climbs gently from tile to tile (grid order)
+// instead of this constant 14 -- so on top of the accents' own hue
+// progression, the wash itself gets a touch richer tile to tile, reading
+// as one grid the eye can trace a gradual, organic sweep across, rather
+// than six independent same-strength swatches. Direct feedback, 9 Sept
+// 2026: "make it look like the tiles are all part of a gradual gradient
+// grid with organic color transition, but subtle like now not different
+// colors entirely." The full "Explore all industries" grid (15 tiles)
+// keeps the flat, original strength.
+function WorldTile({ world, count, unit, onOpen, tintStrength = 14 }: { world: string; count: number; unit: string; onOpen: () => void; tintStrength?: number }) {
   const Icon = WORLD_ICON[world] ?? Sparkles;
   const accent = BROWSE_TILE_ACCENT[world] ?? WORLD_COLORS[world] ?? "var(--primary)";
   return (
     <li className="h-full">
     <HoverBeam strength={0.8} className="h-full">
-      <button type="button" onClick={onOpen} className="dm-quiet flex h-full w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
+      <button type="button" onClick={onOpen} className="dm-quiet flex h-full w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)] text-left" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} ${tintStrength}%, var(--glass-surface-1)), var(--glass-surface-1))` }}>
         <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
           <Icon className="h-[18px] w-[18px]" />
         </span>
@@ -523,7 +533,9 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
             <button type="button" onClick={() => setShowAllIndustries(true)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore all industries <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
           <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
-            {shownWorlds.map((world) => <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} />)}
+            {shownWorlds.map((world, i) => (
+              <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} tintStrength={8 + (i / (shownWorlds.length - 1)) * 16} />
+            ))}
           </ul>
         </section>
       </SectionSurface>
