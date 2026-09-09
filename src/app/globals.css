@@ -193,6 +193,7 @@ body {
   scroll-behavior: smooth;
   overscroll-behavior-inline: contain;
   touch-action: pan-x pan-y;
+  scrollbar-width: none;
 }
 
 .dreamari-card-rail::-webkit-scrollbar {

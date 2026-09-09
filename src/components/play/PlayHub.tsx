@@ -95,7 +95,7 @@ export function PlayHub() {
                to the viewport edge so the next card visibly peeks instead of
                clipping at the content column, direct feedback, 9 Sept 2026)
                rather than stopping dead at main's own padding. */}
-            <ul className="-mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+            <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
               {GLOSSARY_GAMES.map((game) => (
                 <li key={game.careerSlug} className="flex-none">
                   <GlossaryGameCard game={game} playable={hasGlossary(game.careerSlug)} />
@@ -217,7 +217,7 @@ function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simul
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="-mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+      <div className="dreamari-card-rail -mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -438,7 +438,7 @@ function SoonSection({ label, children }: { label: string; children: React.React
          (direct feedback, 9 Sept 2026: "dont have them cut off like this,
          let them overflow till the edge of the screen ... so its obvious
          its scrollable but the cards still peak"). */}
-      <ul className="-mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">{children}</ul>
+      <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">{children}</ul>
     </section>
   );
 }
