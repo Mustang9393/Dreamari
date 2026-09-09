@@ -1148,7 +1148,9 @@ function BeatStage({
               setup={beat.setup}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
+              gold={beat.kind === "card" && beat.celebrate}
               held={!revealed}
+              staticSetup={!stageable}
               voice={voice}
               annotate={annotate}
               onAdvance={() => setRevealed(true)}
@@ -1557,6 +1559,7 @@ function DialogueBox({
   tone,
   gold,
   held,
+  staticSetup,
   ambient,
   voice = "narrator",
   annotate,
@@ -1573,6 +1576,15 @@ function DialogueBox({
   gold?: boolean;
   /** true while the player is still reading: the question stays hidden. */
   held?: boolean;
+  /** True for beats with no separate reveal step (card, review): the setup
+   *  line is a permanent label, not a cinematic delivery to hide once the
+   *  activity appears. False (the default) hides the setup line once
+   *  revealed -- otherwise a character's line printed once to deliver it,
+   *  then again as a sticky header over the very question it just
+   *  introduced (direct feedback, 9 Sept 2026: "if a character just said
+   *  something in the cinematic scene, we should not repeat the same
+   *  dialogue on the following activity card"). */
+  staticSetup?: boolean;
   /** True when there is no scene behind this box. A speaker WITH a portrait
    *  already reads as someone in the room; the name pill only earns its
    *  place when there is no picture doing that job instead. */
@@ -1688,8 +1700,10 @@ function DialogueBox({
         {/* HIERARCHY: the situation is a bold subheading, ruled off from the
            question and its options below. They were one undifferentiated stack
            of text, so a player could not tell the setup from the thing they had
-           to answer. */}
-        {line && (
+           to answer. Hidden once revealed (staticSetup false): the line
+           already played once as the held cinematic delivery, so keeping it
+           up here too just repeats the same dialogue over the activity. */}
+        {line && (staticSetup || held) && (
           <div className="flex items-start gap-[12px]">
             {portrait && (
               <span
@@ -1756,7 +1770,10 @@ function DialogueBox({
         )}
         {done && !held && (
           <>
-            {line && <span aria-hidden className="-mx-[16px] border-t sm:-mx-[20px]" style={{ borderColor: "var(--color-glass-border-raised)" }} />}
+            {/* Only when the setup line is still visible above (staticSetup):
+               otherwise the line already hid itself, and a rule with nothing
+               above it just reads as a stray line at the top of the box. */}
+            {line && staticSetup && <span aria-hidden className="-mx-[16px] border-t sm:-mx-[20px]" style={{ borderColor: "var(--color-glass-border-raised)" }} />}
             <div className="motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">{children}</div>
           </>
         )}

@@ -39,15 +39,27 @@ export const RN_LEVEL_1: Level = {
     Tyler: `${ART}/face-tyler.jpg`,
     Yvonne: `${ART}/face-yvonne.jpg`,
   },
+  // Express mode, mirroring the Investment Banker level's own cut list
+  // (direct feedback, 9 Sept 2026: "Please repeat this for Nursing"): the
+  // teaching screens go -- what-a-nurse-does + its example, the drag check
+  // on it, the skill-chips reveal, the score spotlight, and the typed
+  // 85-threshold check -- plus the stakes card and Rosa's ladder power
+  // card, same as IB's L1-02/L1-06. All ten scored beats, both story cards,
+  // every character card and the vocabulary flips card survive.
+  expressCut: ["RN1-03", "RN1-04", "RN1-04b", "RN1-05", "RN1-07", "RN1-08", "RN1-10", "RN1-11"],
   beats: [
     // ---- arrival: one idea per screen ----
     {
+      // The very first moment of the whole level -- same treatment as the
+      // Investment Banker opener (direct feedback, 9 Sept 2026): a real
+      // first day, not just another "Continue" screen.
       kind: "card",
       variant: "intro",
       id: "RN1-01",
       speaker: "Narrator",
       setup: "New Grad RN • Year 1",
-      title: "Welcome to Riverbend Medical Center.",
+      title: "Welcome to Riverbend Medical Center. Your first day starts now.",
+      celebrate: true,
       cta: "Continue",
     },
     {
@@ -261,7 +273,10 @@ export const RN_LEVEL_1: Level = {
       speaker: "Rosa",
       setup: '"Quick one. Every nurse needs these habits cold."',
       question: "Four quick questions on one shared timer.",
-      prompt: "Four questions, one timer. Tap fast.",
+      // Blank, not omitted (same reasoning as the IB level): Rosa's setup
+      // line already said this; the default prompt for this beat kind
+      // would just repeat it again.
+      prompt: "",
       items: [
         {
           question: "Before you give a patient their medicine, what do you check first?",

@@ -7,6 +7,7 @@ import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
+import { TrustLine } from "./TrustLine";
 import { DO_COPY, DOMark, PartnerLogoWall } from "./DreamOpportunity";
 import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
@@ -500,6 +501,9 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           </Reveal>
         </div>
       </section>
+
+      {/* credibility lines before the closing CTA (Joshua Pierce, Slack, 6 Sept 2026) */}
+      <TrustLine />
 
       {/* ---- Demo request --------------------------------------------------- */}
       <section id="demo" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>

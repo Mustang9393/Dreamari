@@ -18,14 +18,19 @@ import { usePlayingOnScroll } from "../scrollHooks";
 // than redrawn approximations.
 const WORLD_COLOR = "var(--world-building-construction)";
 
-// Each stage: clear title + one-sentence explanation with a visible
-// outcome (per direct feedback — the story, not just product pieces).
-const STAGES = [
-  { id: "top3", label: "My Top 3", line: "Save your top 3 career paths and compare which one fits you best." },
-  { id: "plan", label: "My Plan", line: "Choose one path and get a step-by-step plan with actions, milestones, and experiences to build toward it." },
-  { id: "resume", label: "Resume Builder", line: "Turn your experiences, skills, and activities into a polished resume you can share with employers." },
+// Each stage: a clear title, and the plain-English outcome sits OUTSIDE the
+// box, right under it, not as a descriptive sentence competing with the
+// mock inside (direct feedback, 9 Sept 2026: "users have to read the full
+// content inside each box to understand what is happening ... the new
+// explanation underneath will communicate the same thing more clearly").
+// Hire-Ready keeps its own inside line -- only Top 3/Plan/Resume had one
+// specified to remove.
+const STAGES: { id: string; label: string; line?: string; outcome?: string }[] = [
+  { id: "top3", label: "My Top 3", outcome: "Choose your Top 3 careers." },
+  { id: "plan", label: "My Plan", outcome: "Follow a month-by-month plan toward your #1 career." },
+  { id: "resume", label: "Resume Builder", outcome: "Build a resume ready for employers." },
   { id: "hired", label: "Hire-Ready", line: "Use your plan and resume to become opportunity-ready for internships, mentors, and future employers." },
-] as const;
+];
 
 // Text-only comparison cards (per direct feedback): no photos, no match
 // scores — the valuable stuff, side by side. Figures are the founder-supplied
@@ -66,7 +71,18 @@ export function GetHiredChapter() {
       playing={playing}
       graphicRevealed={graphicRevealed}
     >
-      <div className="w-full max-w-[480px] rounded-[24px] border p-5 sm:p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      {/* ChapterShell's own frame is `flex items-center justify-center` with
+         no explicit direction, so the card and the outcome line below it
+         were landing as flex ROW siblings -- side by side, not stacked
+         (direct feedback, 9 Sept 2026: "why is choose your top 3 careers
+         sitting on the site"). This wrapper is what actually stacks them. */}
+      <div className="flex w-full flex-col items-center">
+      {/* Widened from 480px (direct feedback, 9 Sept 2026: "the proportions
+         of this are really off, the 2 behind dont need to stick out so
+         much, make the container card surface a little wider so they do
+         not overflow so much") -- more room means a smaller peek offset
+         still clears the card's own edge instead of colliding with it. */}
+      <div className="w-full max-w-[600px] rounded-[24px] border p-5 sm:p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         {/* Stage header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -87,25 +103,32 @@ export function GetHiredChapter() {
           </div>
         </div>
 
-        <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{current.line}</p>
+        {current.line && <p className="mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{current.line}</p>}
 
         {/* The stage window: fixed height, content swaps in place */}
         <div key={current.id} className="mkt-stage mt-4 flex h-[248px] flex-col justify-center sm:mt-5 sm:h-[300px]">
           {stage === 0 && (
             <div className="relative flex h-full items-center justify-center">
+              {/* No clipping here (direct feedback, 9 Sept 2026: "dont make
+                 it crop") -- the smaller peek offset and the now-stacked
+                 layout below give this room without cutting the cards off. */}
               {/* Same stack the photo cards had — focus pick BIG and front,
                  2 and 3 straight behind peeking from the sides (allowed to
                  overflow the panel edges a little) — but the photo area now
                  holds the comparison: University duration / Cost / Median
                  Salary, identical row structure on every card. */}
               {TOP3.map((card, index) => {
-                /* side offset is min(160px, 30vw): full spread on desktop
-                   (edges just past the panel), scaled down on phones so the
-                   peeking cards stay on-screen */
+                /* side offset is min(100px, 20vw): a smaller peek than
+                   before (direct feedback, 9 Sept 2026: "the 2 behind dont
+                   need to stick out so much"), scaled down further on
+                   phones so the peeking cards stay on-screen. Solid, not
+                   translucent (direct feedback: "too transparent... should
+                   be solid") -- these are real comparison cards, not a
+                   background decoration. */
                 const pose = [
                   { x: "0px", scale: 1, z: 3, o: 1 },
-                  { x: "calc(-1 * min(160px, 30vw))", scale: 0.82, z: 1, o: 0.55 },
-                  { x: "min(160px, 30vw)", scale: 0.82, z: 2, o: 0.55 },
+                  { x: "calc(-1 * min(100px, 20vw))", scale: 0.86, z: 1, o: 1 },
+                  { x: "min(100px, 20vw)", scale: 0.86, z: 2, o: 1 },
                 ][index];
                 return (
                   <div
@@ -272,6 +295,15 @@ export function GetHiredChapter() {
             </button>
           )}
         </div>
+      </div>
+      {/* Outside the box, not a caption competing with the mock inside it
+         (direct feedback, 9 Sept 2026): one plain sentence naming what this
+         stage actually does, directly under the card it describes. */}
+      {current.outcome && (
+        <p className="mt-[18px] max-w-[600px] text-center text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>
+          {current.outcome}
+        </p>
+      )}
       </div>
     </ChapterShell>
   );

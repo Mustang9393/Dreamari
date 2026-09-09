@@ -41,16 +41,26 @@ export const IB_LEVEL_1: Level = {
   // check. All ten scored beats survive; both story cards, every character
   // card and the vocabulary flips card stay. The cut teaching becomes
   // tappable in the player (score panel, term meanings, character cards).
-  expressCut: ["L1-03", "L1-03b", "L1-04", "L1-07", "L1-09", "L1-10"],
+  // L1-02 (the nine-weeks/six-interns stakes line) and L1-06 (Christina's
+  // "reaches her boss before you do" line plus the ladder graphic) also cut
+  // for Express only, per the numbered "IB game sequence" reference and
+  // direct feedback, 9 Sept 2026 -- full mode keeps both.
+  expressCut: ["L1-02", "L1-03", "L1-03b", "L1-04", "L1-06", "L1-07", "L1-09", "L1-10"],
   beats: [
     // ---- arrival: one idea per screen (D52) ----
     {
+      // The very first moment of the whole game -- it should feel like
+      // arriving for a real first day, not just another "Continue" screen
+      // (direct feedback, 9 Sept 2026: "make this feel much more exciting,
+      // like the student is genuinely arriving"). `celebrate` borrows the
+      // gold accent otherwise reserved for a boss encounter.
       kind: "card",
       variant: "intro",
       id: "L1-01",
       speaker: "Narrator",
       setup: "Intern • Week 1",
-      title: "Welcome to Cobalt Capital.",
+      title: "Welcome to Cobalt Capital. Your first day starts now.",
+      celebrate: true,
       cta: "Continue",
     },
     {
@@ -114,7 +124,9 @@ export const IB_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Christina",
       setup: "Christina • Associate",
-      title: "She sat where you are sitting five years ago.",
+      // Replaces "She sat where you are sitting five years ago." (direct
+      // feedback, 9 Sept 2026: "something more useful about her role").
+      title: "Christina is an Associate, two levels above you, and she'll be giving you direction throughout your internship.",
       cta: "Continue",
     },
     {
@@ -254,7 +266,12 @@ export const IB_LEVEL_1: Level = {
       castMember: "Christina",
       setup: '"Before client work, let me check how you communicate."',
       question: "Four quick questions on one shared timer.",
-      prompt: "Four questions, one timer. Tap fast.",
+      // Blank, not omitted: omitting it would fall through to this beat
+      // kind's own default prompt ("Quick questions, one timer. Tap fast."),
+      // still a repeat of what Christina's setup line just said (direct
+      // feedback, 9 Sept 2026: "let the screen go directly into Question 1
+      // of 4 and the question").
+      prompt: "",
       items: [
         {
           question: "How long should an email to a senior banker be?",

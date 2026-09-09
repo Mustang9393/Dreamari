@@ -129,6 +129,10 @@ export type CardBeat = BeatBase & {
    *  student can tell the game talking from the job talking (Interaction
    *  Rules, System Card). */
   system?: boolean;
+  /** A milestone moment (first day, promotion) -- the gold accent border
+   *  otherwise reserved for a boss layout, so the card itself reads as a
+   *  bigger deal than a routine "Continue" screen. */
+  celebrate?: boolean;
   cta: string;
 };
 
