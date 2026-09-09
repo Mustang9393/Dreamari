@@ -282,10 +282,18 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end md:items-stretch" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
+    // Bottom padding (mobile only -- desktop's md:items-stretch is a full-
+    // height side panel with no bottom edge to clear) keeps the "Show N
+    // colleges" footer button, which lives outside the tray's own scroll
+    // region, off the fixed MobileNav bar. Its max-h-[86dvh] alone wasn't
+    // enough: the card's BOTTOM edge was still flush with the literal
+    // viewport bottom, so the un-scrollable footer landed right where the
+    // nav bar sits (same bug as the other sheets on this pass, direct
+    // feedback 9 Sept 2026).
+    <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end pb-[calc(76px+env(safe-area-inset-bottom))] md:items-stretch md:pb-0" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the results stay visible behind: dimmed and softened, never black */}
       <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)" }} />
-      <div className="relative z-[1] flex max-h-[86dvh] w-full flex-col rounded-t-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
+      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full flex-col rounded-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: RULE }}>
           <h2 className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>Filters</h2>
           <span className="flex items-center gap-[var(--space-2)]">

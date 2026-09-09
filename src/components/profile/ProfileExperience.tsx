@@ -762,8 +762,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
-        <div className="no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
-          <div className="filters-reveal w-full max-w-[440px] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="no-print fixed inset-0 z-[60] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
+          <div className="filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to Saved.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
@@ -786,8 +786,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
       {/* ---- Remove confirm: destructive actions always confirm ---- */}
       {confirmRemove && (
-        <div className="no-print fixed inset-0 z-[66] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
-          <div className="filters-reveal w-full max-w-[400px] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="no-print fixed inset-0 z-[66] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
+          <div className="filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[400px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to Saved. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
@@ -800,8 +800,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
       {/* ---- Add-from-Locker sheet: pick right here, no tab switch ---- */}
       {addOpen && (
-        <div className="fixed inset-0 z-[65] flex items-end justify-center sm:items-center" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setAddOpen(false); }}>
-          <div className="filters-reveal w-full max-w-[420px] rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="fixed inset-0 z-[65] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setAddOpen(false); }}>
+          <div className="filters-reveal flex max-h-[calc(100dvh-96px)] w-full max-w-[420px] flex-col rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div>
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
@@ -1756,7 +1756,10 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
                         );
                         return (
                           <div key={task.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
-                            <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                            {/* 28px, not the original 22px -- the single most
+                               frequently tapped control in the whole plan
+                               (mobile audit, 9 Sept 2026). */}
+                            <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40 md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
                               {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                             </button>
                             {task.href && !complete ? (

@@ -109,7 +109,10 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
       </ul>
       {pageCount > 1 && (
         <div className="flex items-center justify-center gap-[12px]">
-          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={clamped === 0} aria-label="Previous professionals" className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          {/* 40px, not the original 30px -- a real repeatedly-tapped control
+             well under the ~40-44px comfortable touch-target size (mobile
+             audit, 9 Sept 2026). */}
+          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={clamped === 0} aria-label="Previous professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </button>
           <span className="flex items-center gap-[6px]" role="tablist" aria-label="Page">
@@ -117,7 +120,7 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
               <button key={i} type="button" role="tab" aria-selected={i === clamped} aria-label={`Page ${i + 1}`} onClick={() => setPage(i)} className="dm-quiet size-[6px] cursor-pointer rounded-full" style={{ background: i === clamped ? "var(--primary)" : "var(--glass-border)" }} />
             ))}
           </span>
-          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={clamped === pageCount - 1} aria-label="More professionals" className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={clamped === pageCount - 1} aria-label="More professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </div>

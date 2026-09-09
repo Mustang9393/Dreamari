@@ -313,7 +313,12 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
            lives INSIDE this panel, not after it -- ProgressiveBlur is
            inset-0 to this div, so that reserved strip reads as more blurred
            scrim, not a band of raw, unblurred photo above the nav bar. */}
-        <div className="relative flex flex-col pb-[64px] md:pb-0">
+        {/* +env(safe-area-inset-bottom): 64px alone undershoots MobileNav's
+           true reserved height (56px + its own safe-area padding, ~90px on
+           a notched phone) -- a few px of this panel's bottom content was
+           sitting under the nav bar on those devices (mobile audit, 9 Sept
+           2026). */}
+        <div className="relative flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <ProgressiveBlur />
           <div className="relative z-[1] flex w-full flex-col gap-[var(--space-3)] p-[var(--space-4)]">
             {/* The tap-to-flip Summary <-> Details interaction wraps only the
@@ -503,7 +508,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
       >
         {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
       </button>
-      <div className="relative z-[1] p-[var(--space-4)] pb-[64px] md:pb-[var(--space-4)]">
+      <div className="relative z-[1] p-[var(--space-4)] pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-[var(--space-4)]">
         {/* Same rounded panel language as the Env Card v2 details panel, but
            a SOLID scrim rather than the frosted-glass blur -- blurring part
            of a playing video looks muddy in a way it doesn't over a still

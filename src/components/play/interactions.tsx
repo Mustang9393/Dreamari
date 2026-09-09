@@ -1650,10 +1650,12 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
               </span>
               <span className="min-w-0 flex-1 text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
-                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                {/* 36px, not the original 30px -- a real repeatedly-tapped
+                   control mid-simulation (mobile audit, 9 Sept 2026). */}
+                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
                   <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
                 </button>
-                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
                   <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
                 </button>
               </span>
