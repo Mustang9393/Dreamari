@@ -306,13 +306,22 @@ export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShow
   const [step, setStep] = useState<0 | 1 | 2>(1);
   if (hasShown || step === 0) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 72%, transparent)" }}>
+    // Flush-to-bottom on mobile used to seat the sheet's own CTA right where
+    // the fixed MobileNav bar (56px + its own safe-area padding) sits,
+    // cropping the button under it and making it unreachable (direct
+    // feedback, 9 Sept 2026: "the welcome popup on connect... gets cropped
+    // and i cant hit the cta"). Bottom padding here clears the nav bar; the
+    // max-height + internal scroll on the dialog itself is a safety net so
+    // taller content (a third rule, a longer translation) can never push the
+    // CTA past the bottom of the screen again, on this sheet or short
+    // viewports generally.
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 72%, transparent)" }}>
       {/* A near-black surface on a near-black page background used to read
          as the same slab (direct feedback, 8 Sept 2026: "blends into the
          background") -- the glass-surface-3 token plus a blurred backdrop
          and a primary-tinted border gives it real edges and depth, and the
          darker backdrop scrim (55% -> 72%) pushes the page further back. */}
-      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border backdrop-blur-xl sm:rounded-[var(--radius-lg)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border backdrop-blur-xl sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
         {/* The cloud mascot leads every welcome moment app-wide -- a soft
            glow behind it instead of a flat icon-on-white so the header
            reads as a moment, not a form field. */}
