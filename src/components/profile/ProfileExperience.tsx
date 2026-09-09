@@ -1196,10 +1196,18 @@ export function OverviewTab({
       {/* Do this next (official copy, 5 Sept 2026): two sentences, and the
          button IS the verb of each sentence, so reading the line is
          reading the action. Explore leads (it is where a new student
-         starts); Play is the alternative for someone with a #1 already. */}
-      <section aria-labelledby="next-title" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-        <h3 id="next-title" className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
-        <div className="flex flex-col gap-[10px]">
+         starts); Play is the alternative for someone with a #1 already.
+         Given a little more visual weight (direct feedback, 9 Sept 2026:
+         "feels more static and slightly older" next to the glowing
+         NextStepBanner used on Top 3 / My Plan) -- but deliberately NOT
+         the same treatment, since Overview orients rather than pushing one
+         specific next action. Borrows NextStepBanner's tinted border and
+         soft gradient wash, with no pulse/sheen/flash animation: presence
+         without urgency, motion reserved for the page-specific banners. */}
+      <section aria-labelledby="next-title" className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={{ background: "var(--inset-surface)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent)" }}>
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 8%, transparent) 78%, transparent 100%)" }} />
+        <h3 id="next-title" className="relative text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
+        <div className="relative flex flex-col gap-[10px]">
           {[
             { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
             { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Your #1: Day in the Life of an Investment Banker Simulation" },
