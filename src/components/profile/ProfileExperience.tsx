@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
+import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
@@ -1193,37 +1194,71 @@ export function OverviewTab({
         </button>
       </section>
 
-      {/* Do this next (official copy, 5 Sept 2026): two sentences, and the
-         button IS the verb of each sentence, so reading the line is
-         reading the action. Explore leads (it is where a new student
-         starts); Play is the alternative for someone with a #1 already.
-         Given a little more visual weight (direct feedback, 9 Sept 2026:
-         "feels more static and slightly older" next to the glowing
-         NextStepBanner used on Top 3 / My Plan) -- but deliberately NOT
-         the same treatment, since Overview orients rather than pushing one
-         specific next action. Borrows NextStepBanner's tinted border and
-         soft gradient wash, with no pulse/sheen/flash animation: presence
-         without urgency, motion reserved for the page-specific banners. */}
-      <section aria-labelledby="next-title" className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={{ background: "var(--inset-surface)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent)" }}>
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 8%, transparent) 78%, transparent 100%)" }} />
-        <h3 id="next-title" className="relative text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
-        <div className="relative flex flex-col gap-[10px]">
-          {[
-            { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
-            { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Your #1: Day in the Life of an Investment Banker Simulation" },
-          ].map((line, index) => (
-            <Fragment key={line.verb}>
-              {index > 0 && <span className="pl-[2px] text-[12px] leading-[16px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>or</span>}
-              <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[15px] leading-[22px] font-semibold sm:text-[16px]" style={{ color: "var(--foreground)" }}>
-                <Link href={line.href} className="dm-solid inline-flex min-h-[36px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-                  <line.Icon className="h-4 w-4" aria-hidden /> {line.verb}
-                </Link>
-                <span className="min-w-0">{line.rest}</span>
-              </p>
-            </Fragment>
-          ))}
-        </div>
+      {/* Do this next (official copy, 5 Sept 2026): Explore leads (it is
+         where a new student starts); Play is the alternative for someone
+         with a #1 already. One shared card (not two standalone ones --
+         splitting it read as disintegrated, direct feedback, 9 Sept 2026),
+         holding two full-width list rows instead of a pill button sitting
+         mid-sentence: each row is the whole tap target, with an icon, the
+         verb bolded inline, and a trailing chevron matching the cards
+         above. Hover fills only the row's own rect (dm-quiet, no radius of
+         its own) -- the section's overflow-hidden clips it to the card's
+         rounded corners, so the boundary still reads as one piece. The
+         border itself is BorderBeam (border-beam npm package), the same
+         one used on NextStepBanner -- no literal `border` class here, the
+         beam supplies the whole outline. */}
+      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+      <section aria-labelledby="next-title" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]" style={{ background: INSET.background }}>
+        <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
+        {[
+          { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
+          { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Your #1: Day in the Life of an Investment Banker Simulation" },
+        ].map((line, index, list) => (
+          <Fragment key={line.verb}>
+            {index > 0 && (
+              <div className="flex items-center gap-[10px] px-[var(--space-4)] sm:px-[var(--space-5)]" aria-hidden="true">
+                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
+                <span className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>or</span>
+                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
+              </div>
+            )}
+            <Link
+              href={line.href}
+              className={`dm-quiet group flex items-center justify-between gap-[var(--space-3)] rounded-none px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-5)] ${index === list.length - 1 ? "pb-[var(--space-4)] sm:pb-[var(--space-5)]" : ""}`}
+            >
+              <span className="min-w-0 text-[14px] leading-[19px] font-semibold sm:text-[15px]" style={{ color: "var(--foreground)" }}>
+                {/* Verb wears the same primary-to-violet gradient as the
+                   NextStepBanner CTAs, so it reads as the actionable word
+                   in the line at a glance (direct feedback, 9 Sept 2026:
+                   wanted the rows to read as tappable more obviously). */}
+                <span
+                  className="bg-clip-text font-extrabold text-transparent"
+                  style={{ backgroundImage: "linear-gradient(90deg, #6EA8FF, #C9A4FF)" }}
+                >
+                  {line.verb}
+                </span>{" "}
+                {line.rest}
+              </span>
+              {/* The leading icon moved here (direct feedback, 9 Sept 2026):
+                 on hover it slides out from behind the arrow together with
+                 "Let's go", and the arrow itself rotates from pointing
+                 up-right to pointing straight ahead -- the row visibly
+                 "launches" instead of just nudging 2px. */}
+              <span className="flex flex-none items-center gap-[6px]">
+                <span className="flex max-w-0 items-center gap-[6px] overflow-hidden opacity-0 transition-all duration-300 ease-out group-hover:max-w-[110px] group-hover:opacity-100">
+                  <line.Icon className="h-[15px] w-[15px] flex-none text-[var(--primary)] transition-colors duration-300 group-hover:text-white" aria-hidden />
+                  <span className="whitespace-nowrap text-[12px] font-bold tracking-[0.04em] uppercase text-[var(--primary)] transition-colors duration-300 group-hover:text-white">Let&rsquo;s go</span>
+                </span>
+                <ArrowUpRight
+                  className="h-4 w-4 flex-none text-[var(--primary)] transition-[transform,color] duration-300 ease-out group-hover:rotate-45 group-hover:text-white"
+                  aria-hidden
+                />
+              </span>
+            </Link>
+          </Fragment>
+        ))}
       </section>
+      </BorderBeam>
     </div>
   );
 }

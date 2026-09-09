@@ -1158,18 +1158,27 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   mask-composite: intersect;
 }
 
-/* Top Three next-step banner: a slow breath on the glow, never a flash */
-@keyframes next-step-glow {
-  0%, 100% { opacity: 0.55; }
+/* Beam-complement layer: a slow, quiet colour breathing under
+   NextStepBanner content plus one gentle light sweep, both sized to read as
+   atmosphere behind the BorderBeam ring rather than compete with it --
+   lower opacity, much slower, own independent cycle length so it never
+   syncs with the beam's rotation (direct feedback, 9 Sept 2026: "a subtle
+   background gradient and shimmer like we did before... in a way that
+   complements the border beam not competing with it"). The CTA gets its
+   own quiet ring pulse for the same reason ("the CTA play can also have a
+   sheen or pulse or something too"). See NextStepBanner. */
+@keyframes next-step-wash {
+  0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
-
-/* Priority next-step banner: same dark surface as the quiet banner (no more
-   off-palette gradient fill) -- attention comes from a shorter, more
-   insistent border-glow flash instead (direct feedback, 7 Sept 2026). */
-@keyframes next-step-priority-flash {
-  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent), 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 95%, transparent), 0 0 36px 2px color-mix(in srgb, var(--primary) 55%, transparent); }
+@keyframes next-step-sheen {
+  0% { transform: translateX(-140%); opacity: 0; }
+  15% { opacity: 1; }
+  55%, 100% { transform: translateX(340%); opacity: 0; }
+}
+@keyframes next-step-cta-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 9px transparent; }
 }
 
 /* Desktop: every chapter, compact ones included, is exactly the visible
@@ -1183,16 +1192,8 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .mkt-chapter.mkt-chapter { min-height: calc(100dvh - 96px); }
 }
 
-/* Next-step banner: a light sweeping across, and a soft ring leaving the button */
-@keyframes next-step-sheen {
-  0% { transform: translateX(-140%); opacity: 0; }
-  12% { opacity: 1; }
-  55%, 100% { transform: translateX(340%); opacity: 0; }
-}
-@keyframes next-step-cta-pulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
-  70%, 100% { box-shadow: 0 0 0 10px transparent; }
-}
+/* Priority next-step banner's small live-indicator dot -- unrelated to the
+   border/shimmer language above, so it wasn't part of the beam swap. */
 @keyframes next-step-dot {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(3); opacity: 0; }

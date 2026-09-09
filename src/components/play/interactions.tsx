@@ -1358,7 +1358,7 @@ export function ChainBody({ beat, onResolve }: { beat: ChainBeat; onResolve: Res
           className="rounded-[12px] border px-[12px] py-[10px] text-[14px] leading-[21px]"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
         >
-          {built.join(" ")}
+          {built.join(". ") + "."}
         </p>
       )}
       {current && (

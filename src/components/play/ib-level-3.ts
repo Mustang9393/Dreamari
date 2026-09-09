@@ -244,6 +244,10 @@ export const IB_LEVEL_3: Level = {
       progress: 0.4,
       timer: 60,
       setup: '"Asia revenue grew 18 percent, more than any other market. Title the slide."',
+      // This beat picks the best line, not a mistake -- the layout's default
+      // eyebrow ("Tap the line with the mistake.") doesn't fit (direct
+      // feedback, 9 Sept 2026 QA pass).
+      prompt: "Tap the best line.",
       question: "Pick the clearest headline.",
       choices: [
         { id: "a", label: "Asia Is Driving Maison Laurent's Growth", tier: "best", why: "Right. The headline says what the number means, so the reader gets it instantly." },
