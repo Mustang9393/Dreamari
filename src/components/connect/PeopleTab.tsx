@@ -4,7 +4,6 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
-import { DECK } from "@/components/match-lab/data";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
@@ -361,15 +360,31 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
 
   const q = query.trim().toLowerCase();
   const matches = useMemo(() => PROS.filter((p) => !q || [p.name, p.role, p.org, p.field, p.world, ...(p.topics ?? [])].some((v) => v.toLowerCase().includes(q))), [q]);
-  // "Browse by industry" reads each world's already-authored community
-  // headcount (the same "Pros" stat a Community card itself shows), not a
+  // "Browse by industry" reads a per-world professional headcount, not a
   // live count of PROS's own handful of full named profiles per world --
   // that literal count read as low as "3 professionals" for Teaching &
-  // Education and Science & Research (direct feedback, 9 Sept 2026: "dont
-  // make the app look dead"). Science & Research has no Community entry to
-  // borrow from, so it gets its own number, scaled the same as its peers.
-  const countIn = (world: string) => COMMUNITIES.find((c) => c.world === world)?.activePros ?? (world === "Science & Research" ? 45 : PROS.filter((p) => p.world === world).length);
-  const pathsIn = (world: string) => new Set(DECK.filter((c) => c.world === world).map((c) => c.title)).size || new Set(PROS.filter((p) => p.world === world).map((p) => p.field)).size;
+  // Education and Science & Research, and "Coming soon" for every world
+  // with no Community entry at all on the full "Explore all industries"
+  // list (direct feedback, 9 Sept 2026: "this should have the amount of
+  // professionals in it, not coming soon... the numbers in the quick
+  // view/overview should be consistent with the explore all industries
+  // view"). The six worlds with a Community entry reuse its own "Pros"
+  // stat, so the number matches what that world's Community card already
+  // shows; every other world gets its own number in the same range so no
+  // world reads as empty on either screen.
+  const WORLD_PRO_COUNT: Record<string, number> = {
+    "Building & Construction": 42,
+    "Law, Safety & Justice": 48,
+    "Food & Cooking": 36,
+    "Farming, Animals & Nature": 31,
+    "Counseling & Social Work": 44,
+    "Driving, Flying & Shipping": 38,
+    "Factories & Making Things": 29,
+    "Fixing Machines & Engines": 34,
+    "Personal Care & Community Services": 40,
+    "Science & Research": 45,
+  };
+  const countIn = (world: string) => COMMUNITIES.find((c) => c.world === world)?.activePros ?? WORLD_PRO_COUNT[world] ?? PROS.filter((p) => p.world === world).length;
 
   // One task on screen at a time (direct feedback): drilling into a single
   // industry or opening the full industry list narrows the page down to
@@ -429,7 +444,7 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
             <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Every world Dreamari covers, whether it has professionals yet or not.</span>
           </div>
           <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
-            {WORLDS.map((world) => <WorldTile key={world} world={world} count={pathsIn(world)} unit="career path" onOpen={() => setIndustry(world)} />)}
+            {WORLDS.map((world) => <WorldTile key={world} world={world} count={countIn(world)} unit="professional" onOpen={() => setIndustry(world)} />)}
           </ul>
         </SectionSurface>
       </>

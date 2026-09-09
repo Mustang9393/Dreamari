@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, ChevronRight, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Briefcase, ChevronRight, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -520,7 +520,9 @@ export function ProProfileView({
                 <CompanyMark name={pro.org} ink={ink} height={13} />
               </p>
               {/* the three public numbers as one line with icons and
-                 dividers, the reference's stat row */}
+                 dividers, the reference's stat row -- ABOVE the quote
+                 (direct feedback, 9 Sept 2026: "move the stats up before
+                 the quote in the professional profiles too"). */}
               <dl className="mt-[var(--space-4)] flex flex-wrap items-center gap-y-[var(--space-2)]">
                 {[
                   { value: views, label: "Views" },
@@ -535,6 +537,11 @@ export function ProProfileView({
                   </div>
                 ))}
               </dl>
+              {/* The pull-quote belongs in the header, not buried under Ask
+                 Me/Posts/Communities (direct feedback, 9 Sept 2026: "this
+                 quote was supposed to be in the header, it was moved down,
+                 please move it back up"). */}
+              <p className="mt-[var(--space-4)] text-[15px] leading-[22px] italic" style={{ color: ink }}>&ldquo;{pro.story}&rdquo;</p>
             </div>
           </div>
         </div>
@@ -608,8 +615,18 @@ export function ProProfileView({
         </ProfileCard>
       )}
 
-      <ProfileCard id="about-title" title="About">
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.story}</p>
+      <ProfileCard id="about-title" title="Experience">
+        {pro.priorRole && (
+          <div className="flex items-center gap-[var(--space-3)]">
+            <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
+              <Briefcase className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
+            </span>
+            <span className="flex min-w-0 flex-col gap-[1px]">
+              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Previously</span>
+              <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.priorRole}</span>
+            </span>
+          </div>
+        )}
         {pro.education && (
           <div className="flex flex-col gap-[var(--space-2)]">
             {/* Each "; "-separated clause is its own row (Danielle Brooks:
