@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Star, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { CompanyChip } from "./primitives";
 import type { Community } from "./data";
 
@@ -105,21 +106,29 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
  *  line, Open -- the board reads as a fact about the person, not a second
  *  headline competing with them. Same component everywhere a community is
  *  shown (direct feedback, 5 Sept 2026), just a genuinely quieter mode. */
+// The beam here, not on InsetRow's Ask Me/My Posts rows just above it in a
+// profile -- variety, not every clickable thing wearing the same effect
+// (direct feedback, 9 Sept 2026). Two tiles at a time on a profile, same
+// treatment as the industry tiles they're visually closest to (a thumbnail +
+// title + line, browse-tile shaped), so it reads as consistent rather than
+// arbitrary.
 function CompactCommunityRow({ community, onOpen }: { community: Community; onOpen: () => void }) {
   const accent = communityAccent(community);
   return (
-    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)" }}>
-      <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, transparent)` }}>
-        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name.replace(/ Careers$/, "")}</span>
-        <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</span>
-      </span>
-      <span className="flex flex-none items-center gap-[3px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-        Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
-      </span>
-    </button>
+    <HoverBeam strength={0.8} className="h-full">
+      <button type="button" onClick={onOpen} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)" }}>
+        <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, transparent)` }}>
+          <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name.replace(/ Careers$/, "")}</span>
+          <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</span>
+        </span>
+        <span className="flex flex-none items-center gap-[3px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
+        </span>
+      </button>
+    </HoverBeam>
   );
 }
 

@@ -194,11 +194,17 @@ export function ProfileCard({ id, title, lede, side, aside, first = false, child
 }
 
 /** An inset row inside a profile card: a quieter surface than the card, the
- *  content, a chevron at the end. */
+ *  content, a chevron at the end. Ask Me questions and My Posts entries
+ *  (both bordered boxes, not quiet inline controls) get the same lift+shadow
+ *  as everywhere else clickable, not the beam -- one hover style used
+ *  everywhere would flatten the point of having more than one (direct
+ *  feedback, 9 Sept 2026: "every clickable surface/card should have a hover
+ *  effect, whether that needs to be the beam is up to you, I dont want to
+ *  overdo the beams and make it boring"). */
 export function InsetRow({ onClick, children, label }: { onClick: () => void; children: React.ReactNode; label?: string }) {
   return (
     <li>
-      <button type="button" onClick={onClick} aria-label={label} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <button type="button" onClick={onClick} aria-label={label} className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         <span className="flex min-w-0 flex-1 flex-col gap-[6px]">{children}</span>
         <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
       </button>
@@ -612,7 +618,7 @@ export function ProProfileView({
         <ProfileCard id="communities-title" title="Communities" aside={<button type="button" onClick={() => nav?.openBoard(communities[0].id)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>}>
           <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
             {communities.map((c) => (
-              <li key={c.id} className="min-w-0">
+              <li key={c.id} className="h-full min-w-0">
                 <CommunityCard community={c} joined compact onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
               </li>
             ))}
