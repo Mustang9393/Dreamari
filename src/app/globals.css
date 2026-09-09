@@ -1337,6 +1337,24 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 }
 @media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } }
 
+/* Match's Pass/Like circles are small (52px) -- a colorful beam ring around
+   something that little reads as too subtle on its own (direct feedback, 9
+   Sept 2026: "the x button in match still needs to pulse, but maybe by
+   getting bigger and smaller only not with more flashy things"). A gentle
+   scale breathing on top of the existing beam ring, nothing louder. */
+.mkt-scale-pulse {
+  /* 1.6s / 1.16 read as "too distracting" once actually visible (direct
+     feedback, 9 Sept 2026) -- slowed toward the site's other calm-breathing
+     rate (mkt-pulse-ring's 4.2s) and the swing eased back, while staying
+     bigger than the original 1.08 that read as no pulse at all. */
+  animation: mkt-scale-pulse 3s ease-in-out infinite;
+}
+@keyframes mkt-scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) { .mkt-scale-pulse { animation: none; } }
+
 /* Explore poster cards answer the pointer (Joshua Pierce, Slack, 7 Sept 2026;
    streaming-style per Chandu): on hover the card lifts off and grows, above
    its neighbours, after a short intent delay so a pointer crossing the row

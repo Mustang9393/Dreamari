@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { BorderBeam } from "border-beam";
 import { posterTitleFont } from "@/components/app/worlds";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
@@ -275,16 +276,27 @@ export function GetHiredChapter() {
             Back
           </button>
           {last ? null : (
-            <button
-              type="button"
-              onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}
-              // the quiet hint (Joshua Pierce / Chandu, 7 Sept 2026): Next
-              // pulses so the four-stage demo reads as something to click through
-              className="mkt-pulse cursor-pointer rounded-full px-5 py-2 text-[12px] font-bold"
-              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-            >
-              Next
-            </button>
+            // the quiet hint (Joshua Pierce / Chandu, 7 Sept 2026): Next
+            // pulses so the four-stage demo reads as something to click
+            // through -- now the same beam language as everywhere else,
+            // sized down for a small pill and always-on (not hover-gated)
+            // since it's a nudge toward an action the reader hasn't taken
+            // yet (direct feedback, 9 Sept 2026).
+            <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+              {/* Solid var(--primary) fill used to sit flush against the beam ring and
+                 swallowed it (direct feedback, 9 Sept 2026: "the pulse on the next
+                 button on get hired is a little too subtle to notice"). A translucent
+                 tint (same color-mix recipe Build's selected-state row uses) still reads
+                 as "the primary action" while giving the ring room to show against it. */}
+              <button
+                type="button"
+                onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}
+                className="cursor-pointer rounded-full border px-5 py-2 text-[12px] font-bold"
+                style={{ background: "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-2))", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)", color: "var(--foreground)" }}
+              >
+                Next
+              </button>
+            </BorderBeam>
           )}
         </div>
       </div>

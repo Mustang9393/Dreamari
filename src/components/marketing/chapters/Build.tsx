@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BorderBeam } from "border-beam";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
@@ -128,43 +129,44 @@ function BuildDemo() {
             const isNudge = selected === null && isClickable;
             const isHovered = hovered === interest;
             return (
-              <button
-                key={interest}
-                type="button"
-                onClick={() => pick(interest)}
-                onMouseEnter={() => setHovered(interest)}
-                onMouseLeave={() => setHovered((h) => (h === interest ? null : h))}
-                aria-disabled={!isClickable}
-                className={`flex w-full items-center justify-between rounded-[var(--radius-md-alt)] border transition-all duration-200 ${isNudge ? "mkt-pulse" : ""} ${isClickable ? "cursor-pointer" : "cursor-default"}`}
-                style={{
-                  padding: "calc(var(--mu) * 16px) calc(var(--mu) * 20px)",
-                  fontSize: "calc(var(--mu) * 14px)",
-                  fontWeight: 600,
-                  background: isSelected
-                    ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))"
-                    : isHovered
-                      ? "var(--glass-surface-1)"
-                      : "var(--glass-surface-2)",
-                  borderColor: isSelected ? "#6366f1" : isHovered ? "var(--muted-foreground)" : "var(--border)",
-                  color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
-                  opacity: selected !== null && !isSelected ? 0.6 : 1,
-                }}
-              >
-                {interest}
-                <span
-                  className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+              <BorderBeam key={interest} size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={isNudge} className="w-full">
+                <button
+                  type="button"
+                  onClick={() => pick(interest)}
+                  onMouseEnter={() => setHovered(interest)}
+                  onMouseLeave={() => setHovered((h) => (h === interest ? null : h))}
+                  aria-disabled={!isClickable}
+                  className={`flex w-full items-center justify-between rounded-[var(--radius-md-alt)] border transition-all duration-200 ${isClickable ? "cursor-pointer" : "cursor-default"}`}
                   style={{
-                    width: "calc(var(--mu) * 22px)",
-                    height: "calc(var(--mu) * 22px)",
-                    padding: "calc(var(--mu) * 5px)",
-                    background: "#6366f1",
-                    opacity: isSelected ? 1 : 0,
-                    transform: isSelected ? "scale(1)" : "scale(0.4)",
+                    padding: "calc(var(--mu) * 16px) calc(var(--mu) * 20px)",
+                    fontSize: "calc(var(--mu) * 14px)",
+                    fontWeight: 600,
+                    background: isSelected
+                      ? "color-mix(in srgb, #6366f1 16%, var(--glass-surface-2))"
+                      : isHovered
+                        ? "var(--glass-surface-1)"
+                        : "var(--glass-surface-2)",
+                    borderColor: isSelected ? "#6366f1" : isHovered ? "var(--muted-foreground)" : "var(--border)",
+                    color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
+                    opacity: selected !== null && !isSelected ? 0.6 : 1,
                   }}
                 >
-                  {CHECK}
-                </span>
-              </button>
+                  {interest}
+                  <span
+                    className="flex flex-none items-center justify-center rounded-full text-white transition-all duration-200"
+                    style={{
+                      width: "calc(var(--mu) * 22px)",
+                      height: "calc(var(--mu) * 22px)",
+                      padding: "calc(var(--mu) * 5px)",
+                      background: "#6366f1",
+                      opacity: isSelected ? 1 : 0,
+                      transform: isSelected ? "scale(1)" : "scale(0.4)",
+                    }}
+                  >
+                    {CHECK}
+                  </span>
+                </button>
+              </BorderBeam>
             );
           })}
         </div>

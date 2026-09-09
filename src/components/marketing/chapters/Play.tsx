@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { BorderBeam } from "border-beam";
 import { ChapterShell } from "../ChapterShell";
 import { advanceTo, usePlayingOnScroll } from "../scrollHooks";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
@@ -273,11 +274,17 @@ function ConsoleOption({ label, index, best, answered, onConfirm }: { label: str
   const done = best && answered;
   const paint = "var(--color-feedback-success)";
   const Tag = best ? "button" : "div";
+  const nudge = best && !answered;
   return (
+    // The right answer used to only carry the old mkt-pulse ring — never migrated
+    // to the real beam when the rest of the site switched over, so it was the
+    // last mkt-pulse instance left standing (direct feedback, 9 Sept 2026: "the
+    // border beam is missing on the answer highlight in Play graphic").
+    <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={nudge} className="w-full">
     <Tag
       {...(best ? { type: "button" as const, onClick: onConfirm, disabled: answered, "aria-label": `Answer: ${label}` } : {})}
       className={`group relative flex w-full items-center gap-[10px] rounded-[8px] px-[12px] py-[8px] text-left text-[14px] leading-snug font-semibold transition-[background,opacity,transform] duration-200 motion-safe:animate-[fade-slide-up_0.36s_cubic-bezier(0.16,1,0.3,1)_both] ${
-        best && !answered ? "mkt-pulse cursor-pointer hover:bg-[rgba(255,255,255,0.08)]" : ""
+        nudge ? "cursor-pointer hover:bg-[rgba(255,255,255,0.08)]" : ""
       } ${done ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
       style={{
         animationDelay: `${index * 70}ms`,
@@ -308,5 +315,6 @@ function ConsoleOption({ label, index, best, answered, onConfirm }: { label: str
         </span>
       )}
     </Tag>
+    </BorderBeam>
   );
 }

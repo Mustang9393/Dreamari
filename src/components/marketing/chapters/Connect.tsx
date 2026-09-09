@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { BorderBeam } from "border-beam";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
 import { CompanyChip } from "@/components/connect/primitives";
@@ -186,27 +187,35 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
           <span className="text-[11px] font-semibold uppercase" style={{ letterSpacing: "0.06em", color: "var(--muted-foreground)" }}>+ more</span>
         </div>
 
-        <button
-          type="button"
-          onClick={onEnter}
-          /* dark label: white on this teal measured 2.04:1 (needs 3:1) —
-             near-black clears 10:1 */
-          // the quiet hint (Joshua Pierce, 7 Sept 2026): Enter Community pulses
-          className="mkt-pulse mt-6 flex w-full items-center justify-center rounded-full font-bold"
-          style={{
-            color: "#05070f",
-            gap: "calc(var(--mu) * 8px)",
-            padding: "calc(var(--mu) * 13px) calc(var(--mu) * 20px)",
-            fontSize: "calc(var(--mu) * 13px)",
-            background: "var(--c)",
-          }}
-        >
-          Enter Community
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
-            <path d="M5 12h14" />
-            <path d="m13 6 6 6-6 6" />
-          </svg>
-        </button>
+        {/* the quiet hint (Joshua Pierce, 7 Sept 2026): Enter Community
+           pulsed -- now the shared beam language, always-on since this is
+           a nudge toward the one action on this card, not hover-gated
+           (direct feedback, 9 Sept 2026). */}
+        {/* Solid var(--c) fill used to sit flush against the beam ring and swallowed
+           it (direct feedback, 9 Sept 2026: "I cant see anything happening on
+           connect either"). A translucent tint (same recipe as GetHired's Next)
+           keeps the teal identity but lets the ring actually show against it. */}
+        <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} className="mt-6 flex w-full">
+          <button
+            type="button"
+            onClick={onEnter}
+            className="flex w-full items-center justify-center rounded-full border font-bold"
+            style={{
+              color: "var(--c)",
+              gap: "calc(var(--mu) * 8px)",
+              padding: "calc(var(--mu) * 13px) calc(var(--mu) * 20px)",
+              fontSize: "calc(var(--mu) * 13px)",
+              background: "color-mix(in srgb, var(--c) 20%, var(--glass-surface-2))",
+              borderColor: "color-mix(in srgb, var(--c) 45%, transparent)",
+            }}
+          >
+            Enter Community
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 15px)", height: "calc(var(--mu) * 15px)" }}>
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
+            </svg>
+          </button>
+        </BorderBeam>
       </div>
     </CardShell>
   );

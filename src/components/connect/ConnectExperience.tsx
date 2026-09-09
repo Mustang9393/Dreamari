@@ -2,6 +2,7 @@
 
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { HoverBeam } from "@/components/app/HoverBeam";
 
 import Image from "next/image";
 import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -2137,6 +2138,10 @@ function HomeView({
          Replit"). */}
       {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
       {tab !== "notifications" && !(tab === "people" && peopleFocused) && (
+        // The shared search field lights up on focus, same beam family as
+        // everywhere else (direct feedback, 9 Sept 2026: "any active state
+        // of search bars... in connect").
+        <HoverBeam strength={0.85}>
         <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           <input
@@ -2145,7 +2150,7 @@ function HomeView({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={tab === "events" ? "Search events and partners" : tab === "people" ? "Search professionals, careers, companies" : "Search communities, topics, companies"}
             aria-label={tab === "events" ? "Search events" : tab === "people" ? "Search professionals" : "Search communities"}
-            className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
+            className="dm-beam-input min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
             style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           />
           {query && (
@@ -2154,6 +2159,7 @@ function HomeView({
             </button>
           )}
         </label>
+        </HoverBeam>
       )}
 
       {/* Ask and "your questions" moved off the landing (direct feedback):

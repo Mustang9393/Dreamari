@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { BorderBeam } from "border-beam";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
@@ -474,38 +475,58 @@ function MatchDemo() {
            no-op on Investment Banking, Like is a no-op on Operations. */}
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
-            <button
-              type="button"
-              aria-label="Pass"
-              onClick={() => {
-                if (top?.key !== "iba") act("pass");
-              }}
-              // the quiet hint: the X pulses while Management Analyst is on top
-              className={`flex items-center justify-center rounded-full border ${top?.key === "ops" ? "mkt-pulse" : ""}`}
-              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Like"
-              onClick={() => {
-                if (top?.key !== "ops") act("like");
-              }}
-              // then the thumbs-up pulses once Investment Banking is on top
-              className={`flex items-center justify-center rounded-full border ${top?.key === "iba" ? "mkt-pulse" : ""}`}
-              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
-            >
-              {/* Thumbs-up, not a heart — per direct feedback the heart read as too
-                 Tinder-like for a career-interest signal. */}
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
-                <path d="M7 10v12H4a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z" />
-                <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H9a2 2 0 0 1-2-2V11.24a2 2 0 0 1 .59-1.42l4.17-4.17a1 1 0 0 1 1.63.24Z" />
-              </svg>
-            </button>
+            {/* the quiet hints used mkt-pulse; now the same beam language,
+               active only while its own condition is true, not hover-gated
+               (direct feedback, 9 Sept 2026). Plus a gentle scale breathing
+               on an OUTER wrapper (direct feedback, 9 Sept 2026: "needs to
+               pulse... by getting bigger and smaller only") — the beam ring
+               alone reads as too subtle at this 52px size. The pulse class
+               can't live on BorderBeam's own wrapper: its injected stylesheet
+               sets `animation` on that exact element for the spin/fade-in,
+               and (same specificity, later in the DOM) silently wins over a
+               plain class doing the same. */}
+            <div className={top?.key === "ops" ? "mkt-scale-pulse" : undefined}>
+              <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={top?.key === "ops"}>
+                <button
+                  type="button"
+                  aria-label="Pass"
+                  onClick={() => {
+                    if (top?.key !== "iba") act("pass");
+                  }}
+                  className="flex items-center justify-center rounded-full border"
+                  style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </BorderBeam>
+            </div>
+            {/* Solid WORLD_COLOR fill used to sit flush against the beam ring and
+               swallowed it, same issue as GetHired/Connect's solid CTAs (direct
+               feedback, 9 Sept 2026). Translucent tint + colored icon (matching
+               Pass's already-translucent treatment) lets the ring show. */}
+            <div className={top?.key === "iba" ? "mkt-scale-pulse" : undefined}>
+              <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={top?.key === "iba"}>
+                <button
+                  type="button"
+                  aria-label="Like"
+                  onClick={() => {
+                    if (top?.key !== "ops") act("like");
+                  }}
+                  className="flex items-center justify-center rounded-full border"
+                  style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "color-mix(in srgb, " + WORLD_COLOR + " 22%, var(--glass-surface-2))", borderColor: "color-mix(in srgb, " + WORLD_COLOR + " 45%, transparent)", color: WORLD_COLOR }}
+                >
+                {/* Thumbs-up, not a heart — per direct feedback the heart read as too
+                   Tinder-like for a career-interest signal. */}
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
+                  <path d="M7 10v12H4a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z" />
+                  <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H9a2 2 0 0 1-2-2V11.24a2 2 0 0 1 .59-1.42l4.17-4.17a1 1 0 0 1 1.63.24Z" />
+                </svg>
+                </button>
+              </BorderBeam>
+            </div>
           </div>
         )}
       </div>
